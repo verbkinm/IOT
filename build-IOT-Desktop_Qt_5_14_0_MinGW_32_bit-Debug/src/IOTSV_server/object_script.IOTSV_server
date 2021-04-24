@@ -1,0 +1,17 @@
+channel.o
+channelmanager.o
+read_channel.o
+write_channel.o
+base_conn_type.o
+com_conn_type.o
+ethernet_conn_type.o
+iot_server.o
+main.o
+IOT_Host.o
+protocol_class.o
+moc_channelmanager.o
+moc_base_conn_type.o
+moc_com_conn_type.o
+moc_ethernet_conn_type.o
+moc_IOT_Host.o
+moc_iot_server.o

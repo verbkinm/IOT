@@ -1,0 +1,32 @@
+24.04.2021 19:27:33 - Start program IOTV_Srver 0.1
+24.04.2021 19:27:33 - METEO_O: connected to 127.0.0.1.2021
+24.04.2021 19:27:33 - METEO_O: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 19:27:33 - METEO_O: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 19:27:33 - METEO_O: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 19:27:33 - METEO_O: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 19:27:33 - METEO_O: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00:16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 19:27:56 - Setting file changed!
+24.04.2021 19:27:56 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 19:27:56 - METEO_O: disconnected from 127.0.0.1.2021
+24.04.2021 19:27:56 - METEO_O: connected to 127.0.0.1.2021
+24.04.2021 19:27:56 - METEO_O: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 19:27:56 - Setting file changed!
+24.04.2021 19:27:56 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 19:27:56 - METEO_O: disconnected from 127.0.0.1.2021
+24.04.2021 19:27:56 - METEO_O: connected to 127.0.0.1.2021
+24.04.2021 19:27:56 - METEO_O: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 19:27:56 - METEO_O: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 19:27:56 - METEO_O: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 19:27:56 - METEO_O: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 19:27:56 - METEO_O: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00:16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 19:28:20 - Setting file changed!
+24.04.2021 19:28:20 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 19:28:20 - METEO_O: disconnected from 127.0.0.1.2021
+24.04.2021 19:28:20 - Setting file changed!
+24.04.2021 19:28:20 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 19:28:20 - METEO_O: connected to 127.0.0.1.2021
+24.04.2021 19:28:20 - METEO_O: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 19:28:20 - METEO_O: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 19:28:20 - METEO_O: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 19:28:20 - METEO_O: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 19:28:20 - METEO_O: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00:16:00:08:ff:00:00:00:00:00:00:00

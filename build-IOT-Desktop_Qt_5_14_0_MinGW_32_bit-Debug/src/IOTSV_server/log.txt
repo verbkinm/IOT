@@ -1,0 +1,1776 @@
+11.04.2021 17:48:30 - sensor: The connection was refused by the peer (or timed out).
+17.04.2021 17:40:23 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:03:37 - New name: 
+17.04.2021 18:04:05 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:04:29 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:04:35 - New name: data riceved from 127.0.0.1.2021 <- 01
+17.04.2021 18:07:20 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:07:33 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:07:33 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:09:25 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 18:09:25 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 18:09:39 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:09:49 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:09:59 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:12:49 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:12:59 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:13:04 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 18:18:48 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:19:03 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:19:23 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:19:26 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:19:27 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 18:20:43 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:20:45 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:20:45 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 18:21:52 - New name: connected to 127.0.0.1.2021
+17.04.2021 18:21:52 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 18:21:52 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 18:22:05 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 18:22:05 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 18:22:19 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 18:22:29 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:20:46 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:20:46 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:21:09 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:21:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:21:43 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 21:21:43 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 21:21:57 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:22:07 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:22:17 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:22:27 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:22:40 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:22:40 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:23:05 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:23:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:23:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:24:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:25:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:01:01
+17.04.2021 21:26:45 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 21:26:45 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 21:26:59 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:09 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:19 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:29 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:39 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:49 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:27:59 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:28:09 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:28:19 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:28:29 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:28:39 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:31:05 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:31:05 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:31:05 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:31:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:05 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:05 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:06 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:06 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:07 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:07 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:08 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:08 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:09 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:09 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:10 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:10 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:11 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:11 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:12 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:12 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:13 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:13 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:14 - New name: data riceved from 127.0.0.1.2021 <- 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:14 - New name WARRNING: received data UNKNOW: 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:31:15 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 21:31:15 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 21:31:29 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:31:39 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:31:49 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:31:59 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:35:37 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:35:37 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:35:50 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:35:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:35:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:36:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:37:09 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 21:37:10 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 21:37:19 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:37:19 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:38:01 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:38:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:38:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:39:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:40:18 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 21:40:18 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 21:40:32 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:40:42 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:40:52 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:41:02 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:41:12 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:41:22 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:41:32 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:41:42 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 21:42:09 - New name: connected to 127.0.0.1.2021
+17.04.2021 21:42:09 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 21:42:20 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 21:42:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:42:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:43:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 21:44:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+17.04.2021 23:41:46 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 23:41:46 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 23:42:00 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:42:10 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:42:20 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:43:14 - New name: connected to 127.0.0.1.2021
+17.04.2021 23:43:14 - New name: data transmit to 127.0.0.1.2021 -> 01
+17.04.2021 23:43:23 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+17.04.2021 23:43:23 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:24 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:25 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:26 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:27 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:28 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:29 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:30 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:31 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:32 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:33 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:34 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:35 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:36 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:37 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:38 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:39 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:40 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:41 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:42 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:43 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:44 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:45 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:46 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:47 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:48 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:49 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:50 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:51 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:52 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:53 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:54 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:55 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:56 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:57 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:58 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:59 - New name: data transmit to 127.0.0.1.2021 -> 02
+17.04.2021 23:43:59 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+17.04.2021 23:43:59 - New name: disconnected from 127.0.0.1.2021
+17.04.2021 23:44:13 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:44:23 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:44:33 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:44:43 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:44:53 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:03 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:13 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:23 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:33 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:43 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:45:53 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:03 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:13 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:23 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:33 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:43 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:46:53 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:03 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:13 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:23 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:33 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:43 - New name: The connection was refused by the peer (or timed out).
+17.04.2021 23:47:53 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:09:03 - New name: connected to 127.0.0.1.2021
+18.04.2021 00:09:03 - New name: data transmit to 127.0.0.1.2021 -> 01
+18.04.2021 00:10:58 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+18.04.2021 00:10:58 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:10:59 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:00 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:01 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:02 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:03 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:04 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:05 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:06 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:07 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:08 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:09 - New name: data transmit to 127.0.0.1.2021 -> 02
+18.04.2021 00:11:09 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+18.04.2021 00:11:09 - New name: disconnected from 127.0.0.1.2021
+18.04.2021 00:11:23 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:11:33 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:11:43 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:11:53 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:03 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:13 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:23 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:33 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:43 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:12:53 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:13:03 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:13:13 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:13:23 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:13:33 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:13:56 - New name: connected to 127.0.0.1.2021
+18.04.2021 00:13:56 - New name: data transmit to 127.0.0.1.2021 -> 01
+18.04.2021 00:15:11 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+18.04.2021 00:15:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:16 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:17 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:18 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:19 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:20 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:21 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:22 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:23 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:24 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:25 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:26 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:27 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:28 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:29 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:30 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:31 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:32 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:33 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:34 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:35 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:36 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:37 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:38 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:39 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:40 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:41 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:42 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:43 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:44 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:45 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:46 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:47 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:48 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:49 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:50 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:51 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:52 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:53 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:54 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:55 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:56 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:57 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:58 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:15:59 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:01 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:02 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:03 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:04 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:05 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:06 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:07 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:08 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:09 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:10 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:11 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:12 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:13 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:14 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:15 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:16:16 - New name: data riceved from 127.0.0.1.2021 <- 04:04
+18.04.2021 00:16:17 - New name: data riceved from 127.0.0.1.2021 <- 04
+18.04.2021 00:16:21 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+18.04.2021 00:16:21 - New name: disconnected from 127.0.0.1.2021
+18.04.2021 00:16:35 - New name: The connection was refused by the peer (or timed out).
+18.04.2021 00:17:00 - New name: connected to 127.0.0.1.2021
+18.04.2021 00:17:00 - New name: data transmit to 127.0.0.1.2021 -> 01
+18.04.2021 00:17:00 - New name: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+18.04.2021 00:17:00 - New name: data transmit to 127.0.0.1.2021 -> 00:00:08:01:00:00:00:00:00:00:00
+18.04.2021 00:17:00 - New name: data riceved from 127.0.0.1.2021 <- 04
+18.04.2021 00:18:06 - New name: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+18.04.2021 00:18:06 - New name: disconnected from 127.0.0.1.2021
+23.04.2021 11:16:53 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:16:53 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:16:53 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:16:53 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:17:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:17:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:17:29 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:18:22 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:18:23 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:18:23 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:18:23 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:18:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:18:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:18:33 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:20:34 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:20:39 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:20:39 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:20:39 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:20:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:20:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:20:45 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:22:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:22:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:22:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:22:38 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:25:40 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:25:41 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:25:41 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:25:41 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:25:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:25:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:25:51 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:26:25 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:26:29 - METEO: The connection was refused by the peer (or timed out).
+23.04.2021 11:26:49 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:26:50 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:26:50 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:26:50 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:26:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:26:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:26:59 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:28:34 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:28:35 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:28:35 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:28:35 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:28:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:28:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:28:45 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:29:55 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:29:55 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:29:55 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:29:55 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:30:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:30:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:30:00 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:31:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:31:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:31:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:31:43 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:32:17 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:32:18 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:32:18 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:32:18 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:32:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:32:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:32:23 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:39:05 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:39:09 - METEO: The connection was refused by the peer (or timed out).
+23.04.2021 11:39:19 - METEO: The connection was refused by the peer (or timed out).
+23.04.2021 11:39:29 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:39:33 - METEO: The connection was refused by the peer (or timed out).
+23.04.2021 11:39:39 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:39:39 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:39:39 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:39:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:39:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:44 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:39:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:45 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:39:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:39:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:49 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:39:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:50 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:39:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:39:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:54 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:39:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:55 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:39:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:39:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:39:59 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:40:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:40:00 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:40:04 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:40:04 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:40:04 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:40:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:40:05 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:40:14 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:40:15 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:40:15 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:40:15 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:40:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:40:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:40:20 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:40:57 - virtual void COM_conn_type::connectToHost() in development
+23.04.2021 11:41:00 - METEO: connected to 127.0.0.1.2021
+23.04.2021 11:41:00 - METEO: data transmit to 127.0.0.1.2021 -> 01
+23.04.2021 11:41:00 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+23.04.2021 11:41:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:02 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:03 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:03 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:07 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:08 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:12 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:13 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:13 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:17 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:18 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:22 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:23 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:27 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:28 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:28 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+23.04.2021 11:41:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+23.04.2021 11:41:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:32 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+23.04.2021 11:41:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+23.04.2021 11:41:33 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 14:00:56 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:01:42 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:02:01 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:02:56 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:03:00 - METEO: The connection was refused by the peer (or timed out).
+24.04.2021 14:03:06 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:03:06 - METEO: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 14:03:06 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 14:03:11 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:03:11 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:11 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+24.04.2021 14:03:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:12 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 14:03:16 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:03:16 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:16 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+24.04.2021 14:03:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:17 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 14:03:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:03:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:23 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+24.04.2021 14:03:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:03:23 - METEO: data riceved from 127.0.0.1.2021 <- 16:00:08:ff:00:00:00:00:00:00:00
+24.04.2021 14:03:24 - METEO: The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
+24.04.2021 14:03:24 - METEO: disconnected from 127.0.0.1.2021
+24.04.2021 14:09:09 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:09:13 - METEO: The connection was refused by the peer (or timed out).
+24.04.2021 14:09:23 - METEO: The connection was refused by the peer (or timed out).
+24.04.2021 14:09:33 - METEO: The connection was refused by the peer (or timed out).
+24.04.2021 14:09:43 - METEO: The connection was refused by the peer (or timed out).
+24.04.2021 14:09:49 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:09:49 - METEO: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 14:09:49 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 14:10:03 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:10:06 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:10:06 - METEO: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 14:10:06 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 14:10:08 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:10:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:10:08 - METEO: data riceved from 127.0.0.1.2021 <- 06:00:08:14:00:00:00:00:00:00:00
+24.04.2021 14:10:56 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:10:56 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:10:56 - METEO: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 14:10:56 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 14:54:03 - virtual void COM_conn_type::connectToHost() in development
+24.04.2021 14:54:03 - METEO: connected to 127.0.0.1.2021
+24.04.2021 14:54:03 - METEO: data transmit to 127.0.0.1.2021 -> 01
+24.04.2021 14:55:27 - METEO: data riceved from 127.0.0.1.2021 <- 05:00:00:13:21:66:61:63:74:6f:72:79:20:64:65:73:63:72:69:70:74:69:6f:6e:01:05:02
+24.04.2021 14:55:28 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:28 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:34 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:34 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:36 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:36 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:39 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:39 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:41 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:41 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:47 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:47 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:52 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:52 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:52 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:52 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:58 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:58 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:58 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:58 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:55:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:55:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:01 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:01 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:03 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:03 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:04 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:04 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:05 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:05 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:06 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:06 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:08 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:09 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:09 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:09 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:09 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:10 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:10 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:11 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:11 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:13 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:13 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:14 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:14 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:14 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:14 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:15 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:15 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:16 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:16 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:16 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:16 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:19 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:19 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:21 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:21 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:21 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:21 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:24 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:24 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:25 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:25 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:25 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:25 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:26 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:26 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:28 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:28 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:34 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:34 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:34 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:34 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:36 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:36 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:39 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:39 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:41 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:41 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:47 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:47 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:52 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:52 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:58 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:58 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:56:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:56:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:01 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:01 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:01 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:01 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:03 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:03 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:03 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:03 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:04 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:04 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:05 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:05 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:06 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:06 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:08 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:08 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:09 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:09 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:10 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:10 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:10 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:10 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:11 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:11 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:13 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:13 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:14 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:14 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:14 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:14 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:15 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:15 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:16 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:16 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:19 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:19 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:21 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:21 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:24 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:24 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:25 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:25 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:25 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:25 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:26 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:26 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:28 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:28 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:34 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:34 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:36 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:36 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:39 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:39 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:39 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:39 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:41 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:41 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:47 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:47 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:52 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:52 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:58 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:58 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:58 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:58 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:57:59 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:57:59 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:00 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:00 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:01 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:01 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:02 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:02 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:03 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:03 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:04 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:04 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:04 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:04 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:05 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:05 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:06 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:06 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:06 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:06 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:07 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:07 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:08 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:08 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:09 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:09 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:09 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:09 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:10 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:10 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:11 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:11 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:11 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:11 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:12 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:12 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:13 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:13 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:13 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:13 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:14 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:14 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:15 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:15 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:15 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:15 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:16 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:16 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:17 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:17 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:18 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:18 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:19 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:19 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:20 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:20 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:21 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:21 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:22 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:22 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:23 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:23 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:24 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:24 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:24 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:24 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:25 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:25 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:26 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:26 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:26 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:26 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:27 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:27 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:28 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:28 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:29 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:29 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:30 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:30 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:31 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:31 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:32 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:32 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:33 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:33 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:34 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:34 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:35 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:35 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:36 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:36 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:37 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:37 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:38 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:38 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:39 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:39 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:40 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:40 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:41 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:41 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:42 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:42 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:43 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:43 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:44 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:44 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:45 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:45 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:46 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:46 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:47 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:47 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:47 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:47 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:48 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:48 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:49 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:49 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:50 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:50 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:51 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:51 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:52 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:52 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:53 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:53 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:54 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:54 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:55 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:55 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:56 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:56 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
+24.04.2021 14:58:57 - METEO: data transmit to 127.0.0.1.2021 -> 02
+24.04.2021 14:58:57 - METEO: data transmit to 127.0.0.1.2021 -> 12
