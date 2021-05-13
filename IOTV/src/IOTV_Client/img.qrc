@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="trash">img/trash.png</file>
+        <file alias="edit">img/edit.png</file>
+        <file alias="list">img/list.png</file>
+        <file alias="connect">img/connect.png</file>
+        <file alias="disconnect">img/disconnect.png</file>
+    </qresource>
+</RCC>

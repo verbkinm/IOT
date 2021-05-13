@@ -1,7 +1,7 @@
 #ifndef COM_CONN_TYPE_H
 #define COM_CONN_TYPE_H
 
-#include "connection_type.h"
+#include "base_conn_type.h"
 #include "../lib/Log/log.h"
 
 class COM_conn_type : public Base_conn_type

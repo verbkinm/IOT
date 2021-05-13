@@ -52,11 +52,11 @@ public:
     };
 
     static DATA_TYPE toDataType(uint8_t type);
+    static uint8_t toUInt8(DATA_TYPE dataType);
     static std::string toString(DATA_TYPE dataType);
     static std::string toString(DATA_TYPE dataType, Raw::RAW data);
-    static uint8_t toUInt8(DATA_TYPE dataType);
 
-    static const uint8_t size = 8;
+//    static const uint8_t size = 8;
 };
 
 #endif // RAW_H

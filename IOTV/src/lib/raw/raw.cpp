@@ -87,11 +87,7 @@ std::string Raw::toString(Raw::DATA_TYPE dataType)
 std::string Raw::toString(Raw::DATA_TYPE dataType, Raw::RAW data)
 {
     if(dataType == DATA_TYPE::INTEGER_8)
-    {
-        int8_t i = data.i8;
-        std::string s = std::to_string(i);
-        return s;
-    }
+        return  std::to_string(data.i8);
     else if(dataType == DATA_TYPE::INTEGER_16)
         return std::to_string(data.i16);
     else if(dataType == DATA_TYPE::INTEGER_32)
@@ -116,7 +112,6 @@ std::string Raw::toString(Raw::DATA_TYPE dataType, Raw::RAW data)
     {
         if(data.b)
             return "true";
-
         return "false";
     }
     else if(dataType == DATA_TYPE::CHAR_PTR)

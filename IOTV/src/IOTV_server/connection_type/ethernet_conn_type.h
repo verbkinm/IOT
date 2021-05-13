@@ -6,7 +6,7 @@
 #include <memory>
 #include <iostream>
 
-#include "connection_type.h"
+#include "base_conn_type.h"
 #include "../lib/Log/log.h"
 
 #define DEFAULT_ADDRESS "127.0.0.1"

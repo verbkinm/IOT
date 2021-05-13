@@ -1,31 +1,37 @@
-#ifndef CHANNELMANAGER_H
-#define CHANNELMANAGER_H
+#ifndef BASE_HOST_H
+#define BASE_HOST_H
 
 #include <QTimer>
 
 #include <set>
 #include <map>
 
-#include "channels/read_channel.h"
-#include "channels/write_channel.h"
+#include "read_channel.h"
+#include "write_channel.h"
+#include "Base_Host_global.h"
 
 #define TIMER_INTERVAL 10000
 
-class ChannelManager : public QObject
+class BASE_HOST_EXPORT Base_Host : public QObject
 {
     Q_OBJECT
 public:
-    ChannelManager(QObject* parent = nullptr);
+    Base_Host(QObject* parent = nullptr);
+    virtual ~Base_Host();
 
     bool addReadSubChannel(Raw::DATA_TYPE dataType);
     bool addWriteSubChannel(Raw::DATA_TYPE dataType);
     void removeAllSubChannel();
 
+    void setId(uint8_t id);
+    void setDescription(const QString &description);
     bool setReadChannelData(size_t channelNumber, Raw::RAW rawData);
 
-    Raw::DATA_TYPE getReadChannelDataType(size_t index) const;
-    Raw::RAW getReadChannelData(size_t index) const;
-    Raw::DATA_TYPE getWriteChannelDataType(size_t index) const;
+    uint8_t getId() const;
+    QString getDescription() const;
+    Raw::DATA_TYPE getReadChannelDataType(uint8_t channelNumber) const;
+    Raw::RAW getReadChannelData(uint8_t channelNumber) const;
+    Raw::DATA_TYPE getWriteChannelDataType(uint8_t channelNumber) const;
 
     const std::set<uint8_t> &getExpectedResponseRead() const;
     const std::map<uint8_t, Raw::RAW> &getExpectedResponseWrite() const;
@@ -42,7 +48,16 @@ public:
 
     void stopTimer();
 
-private:
+    virtual QString getName() const = 0;
+    virtual bool isConnected() const = 0;
+    virtual int64_t readData(uint8_t channelNumber) = 0;
+    virtual int64_t writeData(uint8_t channelNumber, Raw::RAW rawData) = 0;
+    virtual void dataResived(QByteArray data) = 0;
+
+protected:
+    uint8_t _id;
+    QString _description;
+
     Read_Channel _readChannel;
     Write_Channel _writeChannel;
 
@@ -55,4 +70,4 @@ signals:
     void signalTimerResponse();
 };
 
-#endif // CHANNELMANAGER_H
+#endif // BASE_HOST_H

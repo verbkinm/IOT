@@ -10,8 +10,6 @@ public:
 
     virtual bool removeSubchannel(uint8_t index) override;
     virtual void removeAllSubchanel() override;
-
-    bool setRange(uint8_t index);
 };
 
 #endif // WRITE_CHANNEL_H

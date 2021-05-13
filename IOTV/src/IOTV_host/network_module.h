@@ -5,7 +5,7 @@
 #include <QTcpSocket>
 
 #include "iot_server.h"
-#include "protocol_class.h"
+#include "Protocols/IOTV_SH.h"
 
 class Network_Module : public QTcpServer
 {

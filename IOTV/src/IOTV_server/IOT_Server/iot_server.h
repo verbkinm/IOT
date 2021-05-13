@@ -12,7 +12,7 @@ class IOT_Server : public QObject
 {
     Q_OBJECT
 public:
-    explicit IOT_Server(QObject *parent = nullptr);
+    IOT_Server(QObject *parent = nullptr);
 
     QString getFileSettingName() const;
     QString getProgramVersion() const;

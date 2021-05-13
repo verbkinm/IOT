@@ -5,47 +5,41 @@
 
 #include "connection_type/ethernet_conn_type.h"
 #include "connection_type/com_conn_type.h"
-#include "channels/channelmanager.h"
+#include "base_host.h"
 
-class IOT_Host : public QObject
+class IOT_Host : public Base_Host
 {
     Q_OBJECT
 public:
     IOT_Host(const QString &name, QObject* parent = nullptr);
-    virtual ~IOT_Host();
 
     void printDebugData() const;
 
     void setConnectionTypeEthernet(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr);
 
-    void setId(uint8_t id);
-    void setDescription(const QString &description);
     void setInterval(uint interval);
     void setLogFile(const QString &logFile);
 
-    QString getName() const;
-    uint8_t getId() const;
-    QString getDescription() const;
+    QString getName() const override;
     QString getLogFile() const;
 
     Base_conn_type::Conn_type getConnectionType() const;
 
-    qint64 readData(uint8_t channelNumber);
-    qint64 writeData(uint8_t channelNumber, Raw::RAW rawData);
+    bool isConnected() const override;
+
+    int64_t readData(uint8_t channelNumber) override;
+    int64_t writeData(uint8_t channelNumber, Raw::RAW rawData) override;
+
+    virtual void dataResived(QByteArray data) override;
 
     void connectToHost();
-
-    ChannelManager channelManager;
 
 private:
     void connectObjects() const;
     void response_WAY_recived(const QByteArray &data);
     void response_READ_recived(const QByteArray &data);
     void response_WRITE_recived(const QByteArray &data);
-
-    uint8_t _id;              // from device
-    QString _description;     // from device
 
     std::unique_ptr<Base_conn_type> _host;
     QString _logFile;
@@ -54,8 +48,8 @@ private:
 
     enum Flag
     {
-        DeviceRegistered = 0x1,
-        ExpectedWay = 0x2,
+        DeviceRegistered = 0x01,
+        ExpectedWay = 0x02
     };
 
 public:
@@ -68,7 +62,6 @@ private slots:
     void slotConnected();
     void slotDisconnected();
 
-    void slotDataRiceved(QByteArray data);
     void slotResendData();
 
     void slotTimeOut();

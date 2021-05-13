@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include "../lib/raw/raw.h"
-#include "../lib/Log/log.h"
+#include "raw.h"
+#include "log.h"
 
 #define READ_CHANNEL_LENGTH 2
 #define WRITE_CHANNEL_LENGTH 1

@@ -19,11 +19,11 @@ bool Channel::setDataType(uint8_t index, Raw::DATA_TYPE dataType)
     }
 }
 
-Raw::DATA_TYPE Channel::getDataType(uint8_t index) const
+Raw::DATA_TYPE Channel::getDataType(uint8_t channelNumber) const
 {
     try
     {
-        return _dataType.at(index);
+        return _dataType.at(channelNumber);
     }
     catch (std::out_of_range &ex)
     {
