@@ -26,10 +26,11 @@ public:
 
     Base_conn_type::Conn_type getConnectionType() const;
 
-    bool isConnected() const override;
+    virtual void setState(bool state) override;
+    virtual bool getState() const override;
 
-    int64_t readData(uint8_t channelNumber) override;
-    int64_t writeData(uint8_t channelNumber, Raw::RAW rawData) override;
+    virtual int64_t readData(uint8_t channelNumber) override;
+    virtual int64_t writeData(uint8_t channelNumber, Raw::RAW rawData) override;
 
     virtual void dataResived(QByteArray data) override;
 
@@ -41,7 +42,7 @@ private:
     void response_READ_recived(const QByteArray &data);
     void response_WRITE_recived(const QByteArray &data);
 
-    std::unique_ptr<Base_conn_type> _host;
+    std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
     QTimer _intervalTimer;

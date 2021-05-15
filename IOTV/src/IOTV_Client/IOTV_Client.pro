@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     GUI/Devices/gui_base_device.cpp \
     GUI/Devices/gui_device_switch.cpp \
+    GUI/Devices/gui_device_unknow.cpp \
     GUI/gui_edit_server.cpp \
     GUI/gui_server.cpp \
     device.cpp \
@@ -20,10 +21,14 @@ SOURCES += \
 HEADERS += \
     GUI/Devices/gui_base_device.h \
     GUI/Devices/gui_device_switch.h \
+    GUI/Devices/gui_device_unknow.h \
     GUI/gui_edit_server.h \
     GUI/gui_server.h \
+    Subject.h \
+    Patterns/device.h \
     device.h \
-    mainwindow.h
+    mainwindow.h \
+    Patterns/observer.h
 
 FORMS += \
     GUI/Devices/gui_base_device.ui \

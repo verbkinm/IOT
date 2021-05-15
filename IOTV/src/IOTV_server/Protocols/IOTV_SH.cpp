@@ -60,7 +60,7 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
         return;
 
     size_t channelNumber = data.at(0) >> 4;
-    uint16_t dataLength = data.at(1) | data.at(2);
+    uint16_t dataLength = (data.at(1) << 8) | data.at(2);
 
     QByteArray buf = data.mid(3);
     Raw::RAW rawData;
@@ -76,7 +76,7 @@ void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
     if(checkResponsetData(data) != Response_Type::RESPONSE_WRITE)
         return;
 
-    size_t channelNumber = data.at(0) >> 4;
+    uint8_t channelNumber = data.at(0) >> 4;
     iotHost.eraseExpectedResponseWrite(channelNumber);
 }
 

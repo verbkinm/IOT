@@ -3,7 +3,7 @@
 #include "IOT_Host.h"
 
 IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(parent),
-    _host(std::make_unique<Base_conn_type>(name)), _logFile(""), _state(0)
+    _conn_type(std::make_unique<Base_conn_type>(name)), _logFile(""), _state(0)
 {
     connectObjects();
     connect(this, &Base_Host::signalTimerResponse, this, &IOT_Host::slotResendData);
@@ -20,13 +20,13 @@ void IOT_Host::printDebugData() const
     qDebug() << "Connection:";
     if(getConnectionType() == Base_conn_type::Conn_type::ETHERNET)
     {
-        qDebug() << "\t" << "addr: " << _host->getAddress();
+        qDebug() << "\t" << "addr: " << _conn_type->getAddress();
 
-        Base_conn_type *tmpPtr = _host.get();
+        Base_conn_type *tmpPtr = _conn_type.get();
         qDebug() << "\t" << "port: " + QString::number(qobject_cast<Ethernet_conn_type*>(tmpPtr)->getPort());
     }
     else if(getConnectionType() == Base_conn_type::Conn_type::COM)
-        qDebug() << "\t" << "addr: " << _host->getAddress();
+        qDebug() << "\t" << "addr: " << _conn_type->getAddress();
 
     qDebug() << "read channels length: " << readChannelLength();
     for (uint8_t i = 0; i < readChannelLength(); ++i)
@@ -48,10 +48,24 @@ void IOT_Host::printDebugData() const
 
 Base_conn_type::Conn_type IOT_Host::getConnectionType() const
 {
-    return _host->getConnectionType();
+    return _conn_type->getConnectionType();
 }
 
-bool IOT_Host::isConnected() const
+void IOT_Host::setState(bool state)
+{
+    if(state)
+    {
+        _state.setFlag(DeviceRegistered);
+        _state.setFlag(ExpectedWay, false);
+    }
+    else
+    {
+        _state.setFlag(DeviceRegistered, false);
+        _state.setFlag(ExpectedWay, false);
+    }
+}
+
+bool IOT_Host::getState() const
 {
     return _state.testFlag(Flag::DeviceRegistered);
 }
@@ -65,7 +79,7 @@ int64_t IOT_Host::readData(uint8_t channelNumber)
     IOTV_SH::query_READ(data, channelNumber);
 
     if(insertExpectedResponseRead(channelNumber))
-        return _host->write(data);
+        return _conn_type->write(data);
 
     return -1;
 }
@@ -79,7 +93,7 @@ int64_t IOT_Host::writeData(uint8_t channelNumber, Raw::RAW rawData)
     IOTV_SH::query_WRITE(data, channelNumber, rawData);
 
     if(insertExpectedResponseWrite(channelNumber, rawData))
-        return _host->write(data);
+        return _conn_type->write(data);
 
     return -1;
 }
@@ -97,7 +111,7 @@ void IOT_Host::dataResived(QByteArray data)
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
             response_WRITE_recived(packetData);
         else
-            Log::write(_host->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
+            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
 
         emit signalDataRiceved(); // !!!
     }
@@ -105,22 +119,22 @@ void IOT_Host::dataResived(QByteArray data)
 
 QString IOT_Host::getName() const
 {
-    return _host.get()->getName();
+    return _conn_type.get()->getName();
 }
 
 void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
 {
-    _host = std::make_unique<Ethernet_conn_type>(_host.get()->getName());
-    qobject_cast<Ethernet_conn_type*>(_host.get())->setAddress(addr);
-    qobject_cast<Ethernet_conn_type*>(_host.get())->setPort(port);
+    _conn_type = std::make_unique<Ethernet_conn_type>(_conn_type.get()->getName());
+    qobject_cast<Ethernet_conn_type*>(_conn_type.get())->setAddress(addr);
+    qobject_cast<Ethernet_conn_type*>(_conn_type.get())->setPort(port);
 
     connectObjects();
 }
 
 void IOT_Host::setConnectionTypeCom(const QString &addr)
 {
-    _host = std::make_unique<COM_conn_type>(_host.get()->getName());
-    qobject_cast<COM_conn_type*>(_host.get())->setAddress(addr);
+    _conn_type = std::make_unique<COM_conn_type>(_conn_type.get()->getName());
+    qobject_cast<COM_conn_type*>(_conn_type.get())->setAddress(addr);
 
     connectObjects();
 }
@@ -128,34 +142,34 @@ void IOT_Host::setConnectionTypeCom(const QString &addr)
 
 void IOT_Host::connectToHost()
 {
-    _host->connectToHost();
+    _conn_type->connectToHost();
 }
 
 void IOT_Host::connectObjects() const
 {
-    connect(_host.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
-    connect(_host.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
-    connect(_host.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
 }
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
     if(!_state.testFlag(Flag::ExpectedWay))
     {
-        Log::write(_host->getName() + "WARNING: Received a packet RESPONSE_WAY without a request.");
+        Log::write(_conn_type->getName() + "WARNING: Received a packet RESPONSE_WAY without a request.");
         return;
     }
 
     IOTV_SH::response_WAY(*this, data);
-    _state.setFlag(DeviceRegistered);
-    _state.setFlag(ExpectedWay, false);
+
+    setState(true);
 }
 
 void IOT_Host::response_READ_recived(const QByteArray &data)
 {
     if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
     {
-        Log::write(_host->getName() + "WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
+        Log::write(_conn_type->getName() + "WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
         return;
     }
 
@@ -181,7 +195,7 @@ void IOT_Host::response_WRITE_recived(const QByteArray &data)
 {
     if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
     {
-        Log::write(_host->getName() + "WARRNING: The device is not registered or initialized, but a packet RESPONSE_WRITE is received.");
+        Log::write(_conn_type->getName() + "WARRNING: The device is not registered or initialized, but a packet RESPONSE_WRITE is received.");
         return;
     }
     IOTV_SH::response_WRITE(*this, data);
@@ -194,7 +208,8 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
+    _intervalTimer.stop();
+//    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
     if(interval)
     {
         connect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
@@ -212,14 +227,14 @@ void IOT_Host::slotConnected()
     QByteArray data;
     IOTV_SH::query_WAY(data);
     _state.setFlag(ExpectedWay);
-    _host->write(data);
+    _conn_type->write(data);
 
     emit signalHostConnected();
 }
 
 void IOT_Host::slotDisconnected()
 {
-    _state.setFlag(DeviceRegistered, false);
+    setState(false);
     eraseAllExpectedResponse();
 
     emit signalHostDisconnected();
