@@ -4,12 +4,16 @@
 #include "GUI/Devices/gui_base_device.h"
 #include "Patterns/Subject.h"
 #include "base_host.h"
+#include "protocols.h"
+
+class Server;
 
 class Device : public Base_Host, public Subject
 {
     Q_OBJECT
 public:
-    Device(const QString &name, QObject *parent = nullptr);
+    Device(Server &server, const QString &name, uint8_t id, QObject *parent = nullptr);
+    ~Device();
 
     virtual QString getName() const override;
     virtual bool getState() const override;
@@ -23,18 +27,20 @@ public:
     int getAutoReadInterval() const;
     void setAutoReadInterval(int value);
 
+    virtual qint64 writeToServer(QByteArray data) override;
+
+    void autoReadEnable(bool state);
+
 private:
     const QString _name;
     bool _state;
+    Server &_server;
 
-    QTimer _autoReadInterval;
-
-signals:
-    void signalRead(uint8_t channelNumber);
-    void signalWrite(uint8_t channelNumber, Raw::RAW raw);
+    QTimer _autoReadInterval, _stateInterval;
 
 private slots:
     void slotAutoReadTimeOut();
+    void slotStateIntervalTimeOut();
 };
 
 #endif // DEVICE_H

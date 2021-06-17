@@ -1,4 +1,4 @@
-    #include "mainwindow.h"
+#include "mainwindow.h"
 
 #include <QApplication>
 #include <QLineEdit>
@@ -7,22 +7,36 @@
 #include "GUI/gui_server.h"
 #include "GUI/Devices/gui_device_switch.h"
 #include "GUI/Devices/gui_device_unknow.h"
+#include "GUI/Devices/gui_device_creator.h"
 #include "device.h"
+#include "server.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    MainWindow w;
-//    GUI_Server server("Server #1", "localhost", "image");
-//    server.show();
 
-    auto d = std::make_shared<Device>("name");
+    MainWindow mainWindow;
+    mainWindow.showMaximized();
 
-    GUI_Device_Unknow du(d);
-    du.show();
+    //    QWidget *w = new QWidget;
 
-    GUI_Device_Switch ds(d);
-    ds.show();
+    //    QVBoxLayout *layout = new QVBoxLayout;
+    //    w->setLayout(layout);
+    //    w->show();
+
+    //    QPushButton *btn1 = new QPushButton("1", w);
+    //    QPushButton *btn2 = new QPushButton("2", w);
+
+    //    layout->addWidget(btn1);
+    //    layout->addWidget(btn2);
+
+    //    QPushButton *ptr = qobject_cast<QPushButton*>(layout->itemAt(0)->widget());
+    //    qDebug() << ptr->text();
+    //    delete ptr;
+
+
+
 
     return a.exec();
 }

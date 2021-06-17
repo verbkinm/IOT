@@ -8,7 +8,5 @@ int main(int argc, char *argv[])
 
     Wrapper wrapper;
 
-    QByteArray arr;
-
     return a.exec();
 }

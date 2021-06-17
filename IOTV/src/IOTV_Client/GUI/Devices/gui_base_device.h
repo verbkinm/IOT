@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "Patterns/observer.h"
 
@@ -17,25 +18,23 @@ namespace Ui {
 class GUI_Base_Device;
 }
 
-class GUI_Base_Device : public QWidget, public Observer
+class GUI_Base_Device : public QFrame, public Observer
 {
     Q_OBJECT
 
 public:
-    GUI_Base_Device(std::shared_ptr<Device> device, QWidget *parent = nullptr);
+    GUI_Base_Device(Device &device, QWidget *parent = nullptr);
     ~GUI_Base_Device();
-
-    virtual void update() override{};
 
 protected:
     Ui::GUI_Base_Device *ui;
 
-    std::shared_ptr<Device> _device;
+    Device &_device;
 
     QGridLayout _main_layout;
 
     QLabel _viewName;
-    QPushButton _info;
+    QPushButton _info, _settingsDevice;
 
     void setViewNameFont();
 

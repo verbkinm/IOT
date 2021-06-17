@@ -1,9 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <author/>
- <comment/>
- <exportmacro/>
  <class>GUI_Base_Device</class>
- <widget class="QWidget" name="GUI_Base_Device">
+ <widget class="QFrame" name="GUI_Base_Device">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,9 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Device</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="lineWidth">
+   <number>5</number>
   </property>
  </widget>
- <pixmapfunction/>
+ <resources/>
  <connections/>
 </ui>

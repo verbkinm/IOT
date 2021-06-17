@@ -1,40 +1,52 @@
 #ifndef GUI_SERVER_H
 #define GUI_SERVER_H
 
-#include <QWidget>
+#include <QFrame>
 #include <QMessageBox>
+#include <QAbstractSocket>
 
 #include "gui_edit_server.h"
+#include "Patterns/observer.h"
+
+class Server;
 
 namespace Ui {
 class GUI_Server;
 }
 
-class GUI_Server : public QWidget
+class GUI_Server : public QFrame, public Observer
 {
     Q_OBJECT
 
 public:
-    explicit GUI_Server(const QString &name, const QString &address, const QString &imagePath,
+    explicit GUI_Server(Server &server,
+                        const QString &imagePath = ":/server",
                         QWidget *parent = nullptr);
+
     ~GUI_Server();
 
     void setDevices(uint online, uint offline);
-    void setState(bool state);
+    void setState(QAbstractSocket::SocketState state);
+
+    virtual void update() override;
 
 private:
     Ui::GUI_Server *ui;
     QString _imagePath;
 
+    Server &_server;
+
 private slots:
     void slotEdit();
     void slotDelete();
 
+    void slotConnect();
+    void slotList();
+
 signals:
-    void signalConnect();
-    void signalList();
     void signalEdit();
     void signalDelete();
+
 };
 
 #endif // GUI_SERVER_H

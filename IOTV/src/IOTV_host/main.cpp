@@ -11,7 +11,8 @@ int main(int argc, char *argv[])
 
     Network_Module netServer;
 
-    netServer.listen(QHostAddress("127.0.0.1"), 2021);
+    netServer.listen(QHostAddress("127.0.0.2"), 2021);
+    Log::write("Start service on 127.0.0.2:2021");
 
     return a.exec();
 }

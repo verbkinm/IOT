@@ -8,7 +8,7 @@
 
 #include "Log_global.h"
 
-#define LOG_FILE_NAME "log.txt"
+#define LOG_FILE_NAME "IOTV.log"
 
 class LOG_EXPORT Log
 {

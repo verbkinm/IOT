@@ -8,7 +8,7 @@
 class GUI_Device_Unknow : public GUI_Base_Device
 {
 public:
-    GUI_Device_Unknow(std::shared_ptr<Device> device, QWidget *parent = nullptr);
+    GUI_Device_Unknow(Device &device, QWidget *parent = nullptr);
 
     virtual void update() override;
 private:

@@ -26,7 +26,7 @@ void Network_Module::response(QTcpSocket* socket, QByteArray &data)
 
     socket->write(sentData);
 
-    Log::write("data transmit to " + socket->peerAddress().toString() + "." + QString::number(socket->peerPort())
+    Log::write("data transmit to " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())
                + " -> " + sentData.toHex(':'));
 
     postResponse(socket, data);
@@ -65,7 +65,7 @@ void Network_Module::slotDataRecived()
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     QByteArray data = socket->readAll();
 
-    Log::write("data recived form " + socket->peerAddress().toString() + "." + QString::number(socket->peerPort())
+    Log::write("data recived form " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())
                + " <- " + data.toHex(':'));
     response(socket, data);
 }
@@ -78,8 +78,9 @@ void Network_Module::slotDisconnected()
     disconnect(socket,  &QTcpSocket::disconnected, this, &Network_Module::slotDisconnected);
 
     QString strOut = "disconnected from " + socket->peerAddress().toString()
-            + "." + QString::number(socket->peerPort());
+            + ":" + QString::number(socket->peerPort());
     Log::write(strOut);
+    socket->deleteLater();
 }
 
 void Network_Module::slotError(QAbstractSocket::SocketError error)
@@ -141,4 +142,7 @@ void Network_Module::slotError(QAbstractSocket::SocketError error)
     }
 
     Log::write(this->objectName() + ": " + strErr);
+
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+    socket->deleteLater();
 }

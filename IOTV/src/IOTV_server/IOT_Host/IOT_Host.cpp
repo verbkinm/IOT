@@ -2,7 +2,7 @@
 
 #include "IOT_Host.h"
 
-IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(parent),
+IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile(""), _state(0)
 {
     connectObjects();
@@ -70,32 +70,25 @@ bool IOT_Host::getState() const
     return _state.testFlag(Flag::DeviceRegistered);
 }
 
-int64_t IOT_Host::readData(uint8_t channelNumber)
+qint64 IOT_Host::readData(uint8_t channelNumber)
 {
     if(!_state.testFlag(Flag::DeviceRegistered) || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
-    QByteArray data;
-    IOTV_SH::query_READ(data, channelNumber);
-
-    if(insertExpectedResponseRead(channelNumber))
-        return _conn_type->write(data);
-
-    return -1;
+    return  IOTV_SH::query_READ(*this, channelNumber);
 }
 
-int64_t IOT_Host::writeData(uint8_t channelNumber, Raw::RAW rawData)
+qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW rawData)
 {
     if(!_state.testFlag(Flag::DeviceRegistered) || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
-    QByteArray data;
-    IOTV_SH::query_WRITE(data, channelNumber, rawData);
+    return IOTV_SH::query_WRITE(*this, channelNumber, rawData);
+}
 
-    if(insertExpectedResponseWrite(channelNumber, rawData))
-        return _conn_type->write(data);
-
-    return -1;
+qint64 IOT_Host::writeToServer(QByteArray data)
+{
+    return _conn_type->write(data);
 }
 
 void IOT_Host::dataResived(QByteArray data)
@@ -105,7 +98,10 @@ void IOT_Host::dataResived(QByteArray data)
         IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(packetData);
 
         if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+        {
             response_WAY_recived(packetData);
+            emit signalResponse_Way();
+        }
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
             response_READ_recived(packetData);
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)

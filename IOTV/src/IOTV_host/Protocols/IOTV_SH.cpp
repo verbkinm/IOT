@@ -44,8 +44,8 @@ void Protocol_class::response_WAY(const IOT_Server &iotHost, std::vector<uint8_t
     for (uint8_t i = 0; i < READ_CHANNEL_LENGTH; i++)
         data.push_back(Raw::toUInt8(iotHost._readChannelType[i]));
 
-    for (uint8_t i = 0; i < WRITE_CHANNEL_LENGTH; i++)
-        data.push_back(Raw::toUInt8(iotHost._writeChannelType[i]));
+//    for (uint8_t i = 0; i < WRITE_CHANNEL_LENGTH; i++)
+//        data.push_back(Raw::toUInt8(iotHost._writeChannelType[i]));
 }
 
 void Protocol_class::response_READ(const IOT_Server &iotHost, std::vector<uint8_t> &data)
@@ -70,11 +70,14 @@ void Protocol_class::response_READ(const IOT_Server &iotHost, std::vector<uint8_
 
 void Protocol_class::response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &data)
 {
+    Q_UNUSED(iotHost);
     uint8_t chNumber = data.at(0) >> 4;
-    uint16_t length = data.at(1) | data.at(2);
+//    uint16_t length = data.at(1) | data.at(2);
 
-    for (size_t i = 0; i < length; i++)
-        iotHost._writeChannel[chNumber].array[i] = data.at(i + 3);
+//    for (size_t i = 0; i < length; i++)
+//        iotHost._writeChannel[chNumber].array[i] = data.at(i + 3);
+
+//    iotHost.update();
 
     data.clear();
     data.push_back((chNumber << 4) | 0x04 );

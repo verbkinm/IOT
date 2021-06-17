@@ -7,7 +7,7 @@
 class Subject
 {
 public:
-    Subject(){};
+    Subject(){_observers.clear();};
     virtual ~Subject(){};
 
     void attach(Observer* observer)
@@ -18,6 +18,12 @@ public:
     void detach(Observer* observer)
     {
         _observers.remove(observer);
+    }
+
+    void destroyObservers()
+    {
+        while (_observers.size())
+            (*_observers.begin())->~Observer();
     }
 
     void notify()

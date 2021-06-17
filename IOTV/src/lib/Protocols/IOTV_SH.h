@@ -3,23 +3,13 @@
 
 #include <QByteArray>
 #include "base_host.h"
-//#include "IOT_Host/IOT_Host.h"
 
-#define QUERY_WAY 0x01
-#define QUERY_READ 0x02
-#define QUERY_WRITE 0x00
+#define QUERY_WAY_BYTE 0x01
+#define QUERY_READ_BYTE 0x02
+#define QUERY_WRITE_BYTE 0x00
 
 class IOTV_SH
 {
-
-//private:
-//    enum First_Byte
-//    {
-//        WAY = 0x1,
-//        READ_WRITE = 0x2, //0 - write, 1 - read
-//        QUERY_RESPONSE = 0x4, //0 - query, 1 - response
-//    };
-
 public:
     enum class Response_Type
     {
@@ -29,11 +19,9 @@ public:
         ERROR
     };
 
-//    Q_DECLARE_FLAGS(First_Byte_Flags, First_Byte)
-
     static void query_WAY(QByteArray &data);
-    static void query_READ(QByteArray &data, uint8_t channelNumber);
-    static void query_WRITE(QByteArray &data, uint8_t channelNumber, Raw::RAW writeData);
+    static qint64 query_READ(Base_Host &host, uint8_t channelNumber);
+    static qint64 query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW rawData);
 
     static void response_WAY(Base_Host &iotHost, const QByteArray &data);
     static void response_READ(Base_Host &iotHost, const QByteArray &data);

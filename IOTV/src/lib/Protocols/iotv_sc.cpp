@@ -6,11 +6,11 @@ void IOTV_SC::query_Device_List(QByteArray &data)
     data.append(0x01);
 }
 
-bool IOTV_SC::query_Device_State(QByteArray &data, const QString &deviceName)
+bool IOTV_SC::query_STATE(QByteArray &data, const QString &deviceName)
 {
     data.clear();
 
-    if(deviceName.length() > 31)
+    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME)
         return false;
 
     data.append(deviceName.length() << 3);
@@ -20,25 +20,28 @@ bool IOTV_SC::query_Device_State(QByteArray &data, const QString &deviceName)
     return true;
 }
 
-bool IOTV_SC::query_READ(QByteArray &data, const QString &deviceName, uint8_t channelNumber)
+qint64 IOTV_SC::query_READ(Base_Host &host, const QString &deviceName, uint8_t channelNumber)
 {
-    data.clear();
+    QByteArray data;
 
-    if(deviceName.length() > 31 || channelNumber > 0x0f)
+    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME || channelNumber > 0x0f)
         return false;
 
     data.append( (deviceName.length() << 3) | 0x02);
     data.append(channelNumber);
     data.append(deviceName);
 
-    return true;
+    if(host.insertExpectedResponseRead(channelNumber))
+        return host.writeToServer(data);
+
+    return -1;
 }
 
-bool IOTV_SC::query_WRITE(QByteArray &data, const QString &deviceName, uint8_t channelNumber, Raw::RAW writeData)
+qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW rawData)
 {
-    data.clear();
+    QByteArray data;
 
-    if(deviceName.length() > 31 || channelNumber > 0x0f)
+    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME || channelNumber > 0x0f)
         return false;
 
     data.append(deviceName.length() << 3);
@@ -49,10 +52,13 @@ bool IOTV_SC::query_WRITE(QByteArray &data, const QString &deviceName, uint8_t c
 
     data.append(deviceName);
 
-    for (uint16_t i = 0; i < sizeof (Raw); i++)
-        data.append(writeData.array[i]);
+    for (uint16_t i = 0; i < Raw::size; i++)
+        data.append(rawData.array[i]);
 
-    return true;
+    if(host.insertExpectedResponseWrite(channelNumber, rawData))
+        return host.writeToServer(data);
+
+    return -1;
 }
 
 QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
@@ -77,13 +83,13 @@ QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
     return result;
 }
 
-void IOTV_SC::response_Device_State(Base_Host &iotHost, const QByteArray &data)
+void IOTV_SC::serverResponse_STATE(Base_Host &host, const QByteArray &data)
 {
     bool state = data.at(1) & DEVICE_STATE_RESPONSE_BIT;
-    iotHost.setState(state);
+    host.setState(state);
 }
 
-void IOTV_SC::response_READ(Base_Host &iotHost, const QByteArray &data)
+void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
 {
     uint8_t nameLength = data.at(0) >> 3;
     uint8_t channelNumber = data.at(1) & 0x0f;
@@ -94,14 +100,83 @@ void IOTV_SC::response_READ(Base_Host &iotHost, const QByteArray &data)
     for (uint8_t i = 0; i < dataLength; i++)
         rawData.array[i] = buf.at(i);
 
-    iotHost.setReadChannelData(channelNumber, rawData);
-    iotHost.eraseExpectedResponseRead(channelNumber);
+    host.setReadChannelData(channelNumber, rawData);
+    host.eraseExpectedResponseRead(channelNumber);
 }
 
-void IOTV_SC::response_WRITE(Base_Host &iotHost, const QByteArray &data)
+void IOTV_SC::serverResponse_WRITE(Base_Host &host, const QByteArray &data)
 {
     uint8_t channelNumber = data.at(1) & 0x0f;
-    iotHost.eraseExpectedResponseWrite(channelNumber);
+    host.eraseExpectedResponseWrite(channelNumber);
+}
+
+void IOTV_SC::responceToClient_Device_One(Base_Host &host, QByteArray &data)
+{
+    data.clear();
+    QString name = host.getName();
+    uint8_t nameLength = (name.length()) << 3;
+    data.append(nameLength);
+    data.append(host.getName());
+    data.append(host.getId());
+    data.append(host.getDescription().size() >> 8);
+    data.append(host.getDescription().size());
+    data.append((host.readChannelLength() << 4) | host.writeChannelLength() );
+    data.append(host.getDescription());
+
+    for (uint8_t i = 0; i <  host.readChannelLength(); i++ )
+        data.append(Raw::toUInt8(host.getReadChannelDataType(i)));
+    for (uint8_t i = 0; i <  host.writeChannelLength(); i++ )
+        data.append(Raw::toUInt8(host.getWriteChannelDataType(i)));
+}
+
+void IOTV_SC::responceToClient_State(const Base_Host &host, QByteArray &data)
+{
+    data.clear();
+
+    uint8_t state;
+    if(host.getState())
+        state = 1;
+    else
+        state = 0;
+
+    state <<= 5;
+
+    data.append( (host.getName().length() << 3) | QUERY_RESPONSE_BIT);
+    data.append(0x10 | state);
+    data.append(host.getName());
+}
+
+void IOTV_SC::responceToClient_Read(const Base_Host &host, QByteArray &data)
+{
+    uint8_t nameLength = data.at(0) >> 3;
+    uint8_t channelNumber = data.at(1) & 0x0F;
+    QString deviceName = data.mid(2, nameLength);
+
+    Raw::RAW raw = host.getReadChannelData(channelNumber);
+
+    data.clear();
+
+    data.append((nameLength << 3) | RESPONCE_READ);
+    data.append(channelNumber);
+    data.append(Raw::size >> 8);
+    data.append(Raw::size);
+    data.append(deviceName);
+
+    for (uint8_t i = 0; i < Raw::size; i++)
+        data.append(raw.array[i]);
+}
+
+void IOTV_SC::responceToClient_Write(QByteArray &data)
+{
+    uint8_t nameLength = data.at(0) >> 3;
+    uint8_t channelNumber = data.at(1) & 0x0F;
+    QByteArray deviceName = data.mid(4, nameLength);
+
+    data.clear();
+
+    data.append((nameLength << 3) | RESPONCE_WRITE);
+    data.append(channelNumber);
+    data.append(deviceName);
 }
 
 QByteArrayList IOTV_SC::splitQueryData(QByteArray &data)
@@ -142,48 +217,60 @@ QByteArrayList IOTV_SC::splitQueryData(QByteArray &data)
     return result;
 }
 
-QByteArrayList IOTV_SC::splitResponseData(QByteArray &data) // !!!
+QByteArrayList IOTV_SC::splitResponseData(QByteArray &data)
 {
     QByteArrayList result;
 
     while (data.length())
     {
-        uint8_t nameLength = data.at(0) >> 3;
         IOTV_SC::Response_Type dataType = checkResponsetData(data);
 
         if(dataType == Response_Type::RESPONSE_DEVICE_LIST)
         {
             uint8_t countDivece = data.at(1);
-            QByteArray buff = data.mid(2);
-            uint packetSize = 2;
+            data = data.mid(2);
 
             for(uint8_t i = 0; i < countDivece; i++)
             {
-                uint8_t nameLength = buff.at(0) >> 3;
-                uint16_t dataLength = buff.at(1 + nameLength + 1) << 8 | buff.at(1 + nameLength + 2);
-                uint8_t readChannelCount = buff.at(1 + nameLength + 3) >> 4;
-                uint8_t writeChannelCount = buff.at(1 + nameLength + 3) & 0x0f;
+                uint8_t nameLength = data.at(0) >> 3;
+                uint16_t dataLength = data.at(1 + nameLength + 1) << 8 | data.at(1 + nameLength + 2);
+                uint8_t readChannelCount = data.at(1 + nameLength + 3) >> 4;
+                uint8_t writeChannelCount = data.at(1 + nameLength + 3) & 0x0f;
 
-                uint packageLength = 5 + dataLength + readChannelCount + writeChannelCount;
-                buff.remove(0, packageLength);
-                packetSize += packageLength;
+                uint packageLength = 5 + nameLength + dataLength + readChannelCount + writeChannelCount;
+
+                QByteArray buff;
+                buff.append(RESPONSE_DEVICE_LIST_BYTE);
+                buff.append(countDivece);
+                buff.append(data.mid(0, packageLength));
+
+                result.append(buff);
+                data.remove(0, buff.size() - 2);
             }
         }
         else if(dataType == Response_Type::RESPONSE_STATE)
         {
+            uint8_t nameLength = data.at(0) >> 3;
             result.append(data.mid(0, 2 + nameLength));
             data.remove(0, 2 + nameLength);
         }
         else if(dataType == Response_Type::RESPONSE_READ)
         {
+            uint8_t nameLength = data.at(0) >> 3;
             uint16_t dataLength = data.at(2) << 8 | data.at(3);
             result.append(data.mid(0, 4 + nameLength + dataLength));
             data.remove(0, 4 + nameLength + dataLength);
         }
         else if(dataType == Response_Type::RESPONSE_WRITE)
         {
+            uint8_t nameLength = data.at(0) >> 3;
             result.append(data.mid(0, 2 + nameLength));
             data.remove(0, 2 + nameLength);
+        }
+        else if(dataType == Response_Type::RESPONSE_ERROR)
+        {
+            Log::write("Resive error data: " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+            return result;
         }
     }
     return result;
@@ -285,10 +372,33 @@ bool IOTV_SC::responseName(const QByteArray &data, QString &returnName)
         returnName = data.mid(4, nameLength);
         return true;
     }
-    else if(dataType == Response_Type::RESPONSE_STATE || dataType == Response_Type::RESPONSE_STATE)
+    else if(dataType == Response_Type::RESPONSE_STATE || dataType == Response_Type::RESPONSE_WRITE)
     {
         nameLength = data.at(0) >> 3;
         returnName = data.mid(2, nameLength);
+        return true;
+    }
+
+    return false;
+}
+
+bool IOTV_SC::queryName(const QByteArray &data, QString &returnName)
+{
+    uint8_t nameLength = 0;
+
+    Query_Type dataType = checkQueryData(data);
+    if(dataType == Query_Type::QUERY_DEVICE_LIST || dataType == Query_Type::QUERY_ERROR)
+        return false;
+    else if(dataType == Query_Type::QUERY_READ || dataType == Query_Type::QUERY_STATE)
+    {
+        nameLength = data.at(0) >> 3;
+        returnName = data.mid(2, nameLength);
+        return true;
+    }
+    else if(dataType == Query_Type::QUERY_WRITE)
+    {
+        nameLength = data.at(0) >> 3;
+        returnName = data.mid(4, nameLength);
         return true;
     }
 

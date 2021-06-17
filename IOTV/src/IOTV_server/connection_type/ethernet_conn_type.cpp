@@ -26,7 +26,7 @@ void Ethernet_conn_type::setPort(quint16 port)
 qint64 Ethernet_conn_type::write(const QByteArray &data)
 {
     QString strOut = _name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
-                     + "." + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':');
+                     + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':');
     Log::write(strOut);
     return _tcpSocket->write(data);
 }
@@ -35,7 +35,7 @@ void Ethernet_conn_type::connectToHost()
 {
     _reconnectTimer.start(DEFAULT_INTERVAL);
     _tcpSocket->connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
- }
+}
 
 void Ethernet_conn_type::disconnectFromHost()
 {
@@ -45,7 +45,7 @@ void Ethernet_conn_type::disconnectFromHost()
 void Ethernet_conn_type::slotNewConnection()
 {
     QString strOut = _name + ": connected to " + _tcpSocket->peerAddress().toString()
-                     + "." + QString::number(_tcpSocket->peerPort());
+                     + ":" + QString::number(_tcpSocket->peerPort());
     Log::write(strOut);
 
     connect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
@@ -58,7 +58,7 @@ void Ethernet_conn_type::slotNewConnection()
 void Ethernet_conn_type::slotSocketDisconnected()
 {
     QString strOut = _name + ": disconnected from " + _tcpSocket->peerAddress().toString()
-                   + "." + QString::number(_tcpSocket->peerPort());
+                   + ":" + QString::number(_tcpSocket->peerPort());
     Log::write(strOut);
 
     disconnect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
@@ -73,7 +73,7 @@ void Ethernet_conn_type::slotReadData()
     QByteArray data = _tcpSocket->readAll();
 
     QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
-                     + "." + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
+                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
     Log::write(strOut);
     emit signalDataRiceved(data);
 }

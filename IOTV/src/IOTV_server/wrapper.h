@@ -16,7 +16,7 @@ private:
     std::unique_ptr<IOT_Server> _server;
 
 private slots:
-    void slotFileChange();
+    void slotFileChange(QString fileName);
 };
 
 #endif // WRAPPER_H

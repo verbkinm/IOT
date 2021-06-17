@@ -16,7 +16,7 @@ class BASE_HOST_EXPORT Base_Host : public QObject
 {
     Q_OBJECT
 public:
-    Base_Host(QObject* parent = nullptr);
+    Base_Host(uint8_t id = 0, QObject* parent = nullptr);
     virtual ~Base_Host();
 
     bool addReadSubChannel(Raw::DATA_TYPE dataType);
@@ -54,6 +54,8 @@ public:
     virtual int64_t readData(uint8_t channelNumber) = 0;
     virtual int64_t writeData(uint8_t channelNumber, Raw::RAW rawData) = 0;
     virtual void dataResived(QByteArray data) = 0;
+
+    virtual qint64 writeToServer(QByteArray data) = 0;
 
 protected:
     uint8_t _id;

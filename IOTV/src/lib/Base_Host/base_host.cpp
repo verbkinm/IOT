@@ -1,6 +1,6 @@
 #include "base_host.h"
 
-Base_Host::Base_Host(QObject *parent) : QObject(parent), _id(0), _description("None description")
+Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent), _id(id), _description("None description")
 {
     connect(&_timerResponse, &QTimer::timeout, this, &Base_Host::signalTimerResponse);
 }

@@ -5,6 +5,10 @@
         <file alias="list">img/list.png</file>
         <file alias="connect">img/connect.png</file>
         <file alias="disconnect">img/disconnect.png</file>
+        <file alias="server">img/server.png</file>
+        <file alias="add">img/add.png</file>
+        <file alias="reload">img/reload.png</file>
+        <file alias="remove">img/remove.png</file>
     </qresource>
     <qresource prefix="/devices">
         <file alias="switch_off">img/devices/switch_disabled.png</file>

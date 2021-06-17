@@ -3,27 +3,39 @@
 void IOTV_SH::query_WAY(QByteArray &data)
 {
     data.clear();
-    data.append(QUERY_WAY);
+    data.append(QUERY_WAY_BYTE);
 }
 
-void IOTV_SH::query_READ(QByteArray &data, uint8_t channelNumber)
+qint64 IOTV_SH::query_READ(Base_Host &host, uint8_t channelNumber)
 {
-    data.clear();
+    QByteArray data;
+
     char channel = channelNumber << 4;
-    data.append(channel | QUERY_READ);
+    data.append(channel | QUERY_READ_BYTE);
+
+    if(host.insertExpectedResponseRead(channelNumber))
+        return host.writeToServer(data);
+
+    return -1;
 }
 
-void IOTV_SH::query_WRITE(QByteArray &data, uint8_t channelNumber, Raw::RAW writeData)
+qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW rawData)
 {
-    data.clear();
+    QByteArray data;
+
     char channel = channelNumber << 4;
-    data.append(channel | QUERY_WRITE);
+    data.append(channel | QUERY_WRITE_BYTE);
 
     data.append(char(0x00));
     data.append(0x08);
 
-    for (uint16_t i = 0; i < sizeof (Raw); i++)
-        data.append(writeData.array[i]);
+    for (uint16_t i = 0; i < Raw::size; i++)
+        data.append(rawData.array[i]);
+
+    if(host.insertExpectedResponseWrite(channelNumber, rawData))
+        return host.writeToServer(data);
+
+    return -1;
 }
 
 void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)

@@ -1,7 +1,7 @@
 #include "gui_edit_server.h"
 #include "ui_gui_edit_server.h"
 
-GUI_Edit_Server::GUI_Edit_Server(const QString &name, const QString &address, const QString &imagePath, QWidget *parent) :
+GUI_Edit_Server::GUI_Edit_Server(const QString &name, const QString &address, const QString &port, const QString &imagePath, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::gui_edit_server)
 {
@@ -9,6 +9,7 @@ GUI_Edit_Server::GUI_Edit_Server(const QString &name, const QString &address, co
 
     ui->name->setText(name);
     ui->address->setText(address);
+    ui->port->setText(port);
     ui->imagePath->setText(imagePath);
 
     connect(ui->imagePathButton, &QAbstractButton::clicked, this, &GUI_Edit_Server::slotSelectImage);
@@ -27,6 +28,11 @@ QString GUI_Edit_Server::getName() const
 QString GUI_Edit_Server::getAddress() const
 {
     return ui->address->text();
+}
+
+QString GUI_Edit_Server::getPort() const
+{
+    return ui->port->text();
 }
 
 QString GUI_Edit_Server::getImagePath() const

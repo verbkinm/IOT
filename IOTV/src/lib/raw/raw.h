@@ -56,7 +56,16 @@ public:
     static std::string toString(DATA_TYPE dataType);
     static std::string toString(DATA_TYPE dataType, Raw::RAW data);
 
-//    static const uint8_t size = 8;
+    static const uint8_t size = 8;
+
+//    Integer& operator=(const Integer& right) {
+//        //проверка на самоприсваивание
+//        if (this == &right) {
+//            return *this;
+//        }
+//        value = right.value;
+//        return *this;
+//    }
 };
 
 #endif // RAW_H
