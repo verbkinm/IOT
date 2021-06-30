@@ -52,7 +52,6 @@ void GUI_Device_Switch::slotButtonPressed()
         raw.ui8 = 0;
         _button.setIcon(QIcon(":/devices/switch_off"));
     }
-//    _buttonState = !_buttonState;
 
     _device.writeData(0, raw);
 }

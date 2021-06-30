@@ -33,3 +33,6 @@
 
 build*
 *~lock*
+
+#qt user project file 
+*.pro.user

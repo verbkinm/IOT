@@ -12,6 +12,7 @@ public:
 
 private:
     QPushButton _button;
+    bool _buttonState;
 
 private slots:
     void slotButtonPressed();
