@@ -1,49 +1,71 @@
 #include "gui_base_device.h"
-#include "ui_gui_base_device.h"
 #include "device.h"
+#include "server.h"
+
 
 
 GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
-    QFrame(parent), Observer(),
-    ui(new Ui::GUI_Base_Device), _device(device)
+    QFrame(parent), Observer(), _device(device)
 {
-    this->setAttribute(Qt::WA_DeleteOnClose);
+    this->setFrameStyle(QFrame::StyledPanel);
     device.attach(this);
-    ui->setupUi(this);
 
-    _viewName.setText(_device.getName());
+    _viewName.setText(_device.getViewName());
     setViewNameFont();
 
-    _info.setFixedSize(48, 48);
+    _info.setFixedSize(28, 28);
     _info.setIcon(QIcon(":/devices/info"));
-    _info.setIconSize(QSize(36, 36));
+    _info.setIconSize(QSize(26, 26));
 
-    _main_layout.addWidget(&_viewName, 0, 0, Qt::AlignLeft);
-    _main_layout.addWidget(&_info, 0, 1, Qt::AlignRight);
+    _settingsDevice.setFixedSize(28, 28);
+    _settingsDevice.setIcon(QIcon(":/edit"));
+    _settingsDevice.setIconSize(QSize(26, 26));
+
+    _buttonLayout.addStretch();
+    _buttonLayout.addWidget(&_settingsDevice);
+    _buttonLayout.addWidget(&_info);
+
+    _main_layout.addWidget(&_viewName, 0, 0, 1, 3, Qt::AlignCenter);
+    _main_layout.addLayout(&_buttonLayout, 1, 0, 1, 3, Qt::AlignCenter);
+
+//    _main_layout.addWidget(&_settingsDevice, 0, 1, Qt::AlignRight);
+//    _main_layout.addWidget(&_info, 0, 2, Qt::AlignRight);
 
     setLayout(&_main_layout);
-    resize(280, 180);
+//    resize(280, 180);
     setWindowTitle(_device.getName() + " (" + QString::number(_device.getId()) + ")");
 
     connect(&_info, &QPushButton::clicked, this, &GUI_Base_Device::slotInfoPresses);
+    connect(&_settingsDevice, &QPushButton::clicked, this, &GUI_Base_Device::slotSettingPressed);
 
-    setFixedSize(200, 150);
+    setMaximumSize(200, 150);
+//    setFixedSize(200, 150);
+
+    newObjectName();
 }
 
 GUI_Base_Device::~GUI_Base_Device()
 {
     _device.autoReadEnable(false);
-    _device.setAutoReadInterval(0);
     _device.detach(this);
-    delete ui;
+}
+
+void GUI_Base_Device::setViewName(const QString &name)
+{
+    _viewName.setText(name);
 }
 
 void GUI_Base_Device::setViewNameFont()
 {
     QFont font = _viewName.font();
-    font.setPixelSize(24);
+    font.setPixelSize(18);
     font.setBold(true);
     _viewName.setFont(font);
+}
+
+void GUI_Base_Device::newObjectName()
+{
+    this->setObjectName(_device.objectName());
 }
 
 void GUI_Base_Device::slotInfoPresses()
@@ -58,6 +80,20 @@ void GUI_Base_Device::slotInfoPresses()
             + "\nDevice name: " + _device.getName()
             + "\nDescription: " + _device.getDescription()
             + "\nR/W: " + QString::number(_device.readChannelLength()) + "/" + QString::number(_device.writeChannelLength())
-            + "\nState: " + state;
+            + "\nState: " + state
+            + "\nServer: " + _device.getServer().getName() + "(" + _device.getServer().getServerAddress() + ":" + QString::number(_device.getServer().getServerPort()) + ")";
     QMessageBox::information(this, "Device description", info, QMessageBox::Ok);
+}
+
+void GUI_Base_Device::slotSettingPressed()
+{
+    GUI_edit_base_device gui_edit_device(_device.getViewName());
+    gui_edit_device.setWindowTitle(_device.getName());
+    gui_edit_device.setWindowIcon(QIcon(":/server"));
+
+    if(gui_edit_device.exec() == QDialog::Accepted)
+    {
+        if(gui_edit_device.viewName().length())
+            _device.setViewName(gui_edit_device.viewName());
+    }
 }

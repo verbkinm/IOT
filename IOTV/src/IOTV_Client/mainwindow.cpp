@@ -2,16 +2,21 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+    ui(new Ui::MainWindow)/*, _thread(new QThread)*/
 {
     ui->setupUi(this);
 
+    _serverTab.setParent(ui->tabWidget);
     ui->tabWidget->addTab(&_serverTab, "Servers");
     ui->tabWidget->removeTab(0);
 
     connect(&_serverTab, &Tab::signalAdd, this, &MainWindow::on_actionAdd_server_triggered);
+    connect(&_serverTab, &Tab::signalRemove, this, &MainWindow::on_actionRemove_server_triggered);
+
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::slotTabChange);
+
+//    _thread->start();
 }
 
 MainWindow::~MainWindow()
@@ -19,24 +24,40 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::slotAddDeviceToRoom()
+{
+    QObjectList result;
+    for(auto &elem : _serverTab.childrenPointerList())
+    {
+        GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
+        for(auto const &item : gui_server->server().getDevices())
+            result << item.second.get();
+    }
+
+    ObjectList objList(result);
+
+    if(objList.exec() == QDialog::Accepted)
+    {
+        Tab_Room* tab_room = qobject_cast<Tab_Room*>(sender());
+        for(auto &elem : objList.checkedObject())
+            tab_room->addDevice(elem->parent()->objectName(), qobject_cast<Device*>(elem)->getName());
+
+        tab_room->restructWidget();
+    }
+}
+
 void MainWindow::on_actionAdd_room_triggered()
 {
-    Tab *tab = new Tab;
-    ui->tabWidget->addTab(tab, "New room");
+    Tab_Room *room = new Tab_Room(_serverTab, this);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, "New room"));
 
-    connect(tab, &Tab::signalAdd, this, &MainWindow::slotAddDevice);
+    connect(room, &Tab::signalAdd, this, &MainWindow::slotAddDeviceToRoom);
 }
 
 void MainWindow::on_actionDelete_triggered()
 {
-    ui->tabWidget->removeTab(ui->tabWidget->currentIndex());
-}
-
-void MainWindow::slotAddDevice()
-{
-//    Tab *tab = qobject_cast<Tab*>(sender());
-
-
+    int currentIndex = ui->tabWidget->currentIndex();
+    delete ui->tabWidget->widget(currentIndex);
 }
 
 void MainWindow::slotTabChange(int index)
@@ -55,15 +76,41 @@ void MainWindow::slotTabChange(int index)
 
 void MainWindow::on_actionAdd_server_triggered()
 {
-    Server *server = new Server(this);
+    Server *server = new Server;
+//    server->moveToThread(_thread);
     GUI_Server *gui_server = new GUI_Server(*server);
-    _servers.push_back(server);
-    _gui_servers.push_back(gui_server);
 
     _serverTab.addWidget(gui_server);
+
+    ui->actionRemove_server->setEnabled(true);
+
+    connect(server, &Server::signalDeviceCreated, this, &MainWindow::roomsRestructWidget);
 }
 
 void MainWindow::on_actionRemove_server_triggered()
 {
+    ObjectList objList(_serverTab.childrenPointerList());
 
+    if(objList.exec() == QDialog::Accepted)
+    {
+        for(auto &elem : objList.checkedObject())
+        {
+            GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
+            delete &gui_server->server();
+        }
+        if(_serverTab.childrenPointerList().length() == 0)
+            ui->actionRemove_server->setEnabled(false);
+    }
+}
+
+void MainWindow::roomsRestructWidget()
+{
+    for(int i = 1; i < ui->tabWidget->count(); i++)
+        qobject_cast<Tab_Room*>(ui->tabWidget->widget(i))->restructWidget();
+}
+
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    qApp->exit();
 }

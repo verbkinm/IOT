@@ -19,7 +19,7 @@ qint64 IOTV_SH::query_READ(Base_Host &host, uint8_t channelNumber)
     return -1;
 }
 
-qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW rawData)
+qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData)
 {
     QByteArray data;
 

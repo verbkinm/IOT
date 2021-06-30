@@ -37,7 +37,7 @@ qint64 IOTV_SC::query_READ(Base_Host &host, const QString &deviceName, uint8_t c
     return -1;
 }
 
-qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW rawData)
+qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW &rawData)
 {
     QByteArray data;
 

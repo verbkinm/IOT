@@ -21,7 +21,7 @@ public:
 
     static void query_WAY(QByteArray &data);
     static qint64 query_READ(Base_Host &host, uint8_t channelNumber);
-    static qint64 query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW rawData);
+    static qint64 query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData);
 
     static void response_WAY(Base_Host &iotHost, const QByteArray &data);
     static void response_READ(Base_Host &iotHost, const QByteArray &data);

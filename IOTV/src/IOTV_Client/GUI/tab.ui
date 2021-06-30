@@ -34,11 +34,7 @@
         <height>232</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <layout class="QGridLayout" name="layout"/>
-       </item>
-      </layout>
+      <layout class="QGridLayout" name="scrollContentLayout"/>
      </widget>
     </widget>
    </item>
@@ -75,6 +71,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="removeBtn">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>40</width>

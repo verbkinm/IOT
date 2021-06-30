@@ -5,7 +5,7 @@ GUI_Device_Unknow::GUI_Device_Unknow(Device &device, QWidget *parent) : GUI_Base
 {
     _label.setPixmap(QPixmap(":/devices/unknow"));
 
-    _main_layout.addWidget(&_label, 1, 0, 1, 2, Qt::AlignCenter);
+    _main_layout.addWidget(&_label, 2, 0, 1, 3, Qt::AlignCenter);
 }
 
 void GUI_Device_Unknow::update()
@@ -17,5 +17,7 @@ void GUI_Device_Unknow::update()
         setEnabled(true);
     else
         setEnabled(false);
+
+    setViewName(_device.getViewName());
 }
 

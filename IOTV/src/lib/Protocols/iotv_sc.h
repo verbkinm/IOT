@@ -27,7 +27,7 @@ public:
     static void query_Device_List(QByteArray &data);
     static bool query_STATE(QByteArray &data, const QString &deviceName);
     static qint64 query_READ(Base_Host &host, const QString &deviceName, uint8_t channelNumber);
-    static qint64 query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW rawData);
+    static qint64 query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW &rawData);
 
     static QByteArrayList response_Device_List(const QByteArray &data);
     static void serverResponse_STATE(Base_Host &host, const QByteArray &data);

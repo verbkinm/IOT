@@ -25,10 +25,12 @@ public:
 
     ~GUI_Server();
 
-    void setDevices(uint online, uint offline);
+    void setDevicesState(uint online, uint offline);
     void setState(QAbstractSocket::SocketState state);
 
     virtual void update() override;
+
+    Server &server() const;
 
 private:
     Ui::GUI_Server *ui;
@@ -37,16 +39,9 @@ private:
     Server &_server;
 
 private slots:
-    void slotEdit();
-    void slotDelete();
-
     void slotConnect();
     void slotList();
-
-signals:
-    void signalEdit();
-    void signalDelete();
-
+    void slotEdit();
 };
 
 #endif // GUI_SERVER_H

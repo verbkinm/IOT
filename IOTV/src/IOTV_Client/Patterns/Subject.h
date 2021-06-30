@@ -32,7 +32,6 @@ public:
             observer->update();
     }
 
-private:
     std::list<Observer*> _observers;
 };
 

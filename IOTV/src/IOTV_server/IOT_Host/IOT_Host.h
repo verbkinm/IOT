@@ -30,8 +30,8 @@ public:
     virtual bool getState() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
-    virtual qint64 writeData(uint8_t channelNumber, Raw::RAW rawData) override;
-    virtual qint64 writeToServer(QByteArray data) override;
+    virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
+    virtual qint64 writeToServer(QByteArray &data) override;
 
     virtual void dataResived(QByteArray data) override;
 

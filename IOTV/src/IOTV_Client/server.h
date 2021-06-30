@@ -3,19 +3,14 @@
 
 #include <QTcpSocket>
 #include <QHostAddress>
-#include <QPushButton>
-#include <QScrollArea>
 #include <GUI/gui_server.h>
-#include <GUI/Devices/gui_device_creator.h>
 
-#include "memory.h"
-#include <algorithm>
-#include "map"
-#include <vector>
+#include <memory.h>
+#include <map>
 
 #include "device.h"
 #include "Patterns/Subject.h"
-#include "devicelist.h"
+#include "GUI/devicelist.h"
 
 #define DEFAULT_INTERVAL 5000
 #define RECONNECTING_COUNT 5
@@ -42,14 +37,19 @@ public:
     void connectToHost();
     void disconnectFromHost();
 
-    qint64 writeData(QByteArray data);
+    qint64 writeData(QByteArray &data);
 
-    void deviceListShow();
+    void deviceListShow(const QIcon &windowIcon);
 
     size_t deviceCount() const;
 
+    const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
+
+    void addAlias(const QString &name, const QString &aliasName);
+
 private:
     void createDevice(QByteArray &data);
+    void newObjectName();
 
     QTcpSocket _socket;
     QString _name;
@@ -58,11 +58,9 @@ private:
     QTimer _reconnectTimer;
     uint8_t _reconnectTimerTrying;
 
-    std::map<QString, std::unique_ptr<Device>> _devices;
+    std::map<QString, std::shared_ptr<Device>> _devices;
     std::unique_ptr<DeviceList> _deviceList;
-
-public slots:
-    void slotDeleteForm();
+    std::map<QString, QString> _alias;
 
 private slots:
     void slotConnected();
@@ -70,6 +68,11 @@ private slots:
 
     void slotReadData();
     void slotError(QAbstractSocket::SocketError error);
+
+    void slotDeviceListClose();
+
+signals:
+    void signalDeviceCreated();
 
 };
 

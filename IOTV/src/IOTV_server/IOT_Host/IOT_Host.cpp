@@ -78,7 +78,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
     return  IOTV_SH::query_READ(*this, channelNumber);
 }
 
-qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW rawData)
+qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
     if(!_state.testFlag(Flag::DeviceRegistered) || _state.testFlag(Flag::ExpectedWay))
         return -1;
@@ -86,7 +86,7 @@ qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW rawData)
     return IOTV_SH::query_WRITE(*this, channelNumber, rawData);
 }
 
-qint64 IOT_Host::writeToServer(QByteArray data)
+qint64 IOT_Host::writeToServer(QByteArray &data)
 {
     return _conn_type->write(data);
 }

@@ -14,13 +14,16 @@ SOURCES += \
     GUI/Devices/gui_device_switch.cpp \
     GUI/Devices/gui_device_unknow.cpp \
     GUI/Devices/gui_device_weather_station.cpp \
+    GUI/Devices/gui_edit_base_device.cpp \
+    GUI/tab_room.cpp \
     GUI/gui_edit_server.cpp \
     GUI/gui_server.cpp \
     GUI/tab.cpp \
     device.cpp \
-    devicelist.cpp \
+    GUI/devicelist.cpp \
     main.cpp \
     mainwindow.cpp \
+    GUI/objectlist.cpp \
     server.cpp
 
 HEADERS += \
@@ -29,23 +32,26 @@ HEADERS += \
     GUI/Devices/gui_device_switch.h \
     GUI/Devices/gui_device_unknow.h \
     GUI/Devices/gui_device_weather_station.h \
+    GUI/Devices/gui_edit_base_device.h \
+    GUI/tab_room.h \
     GUI/gui_edit_server.h \
     GUI/gui_server.h \
     GUI/tab.h \
     Patterns/Subject.h \
     device.h \
-    devicelist.h \
+    GUI/devicelist.h \
     mainwindow.h \
     Patterns/observer.h \
+    GUI/objectlist.h \
     server.h
 
 FORMS += \
-    GUI/Devices/gui_base_device.ui \
+    GUI/Devices/gui_edit_base_device.ui \
     GUI/gui_edit_server.ui \
     GUI/tab.ui \
-    devicelist.ui \
     gui_server.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    GUI/objectlist.ui
 
 RESOURCES += \
     img.qrc

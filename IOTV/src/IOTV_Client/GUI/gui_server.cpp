@@ -22,9 +22,8 @@ GUI_Server::GUI_Server(Server &server,
     connect(ui->connect, &QPushButton::clicked, this, &GUI_Server::slotConnect);
     connect(ui->list, &QPushButton::clicked, this, &GUI_Server::slotList);
     connect(ui->edit, &QPushButton::clicked, this, &GUI_Server::slotEdit);
-    connect(ui->deleteServer, &QPushButton::clicked, this, &GUI_Server::slotDelete);
 
-    connect(this, &GUI_Server::signalDelete, &server, &Server::slotDeleteForm);
+    update();
 }
 
 GUI_Server::~GUI_Server()
@@ -33,13 +32,12 @@ GUI_Server::~GUI_Server()
     delete ui;
 }
 
-void GUI_Server::setDevices(uint online, uint offline)
+void GUI_Server::setDevicesState(uint online, uint offline)
 {
     ui->devices->setText(QString::number(online + offline) +
-                         "("
-                         "<font color='green'>" + QString::number(online) + "</font>/"
-                                                                            "<font color='red'>" + QString::number(offline) + "</font>"
-                                                                                                                              ")");
+                         " (" +
+                         "<font color='green'>" + QString::number(online) + "</font>/" +
+                         "<font color='red'>" + QString::number(offline) + "</font>)");
 }
 
 void GUI_Server::setState(QAbstractSocket::SocketState state)
@@ -50,25 +48,25 @@ void GUI_Server::setState(QAbstractSocket::SocketState state)
     {
         ui->state->setText("<font color='green'>Connected</font>");
         ui->connect->setIcon(QIcon(":/connect"));
-        ui->deleteServer->setDisabled(true);
         ui->edit->setDisabled(true);
     }
     else if(state == QAbstractSocket::UnconnectedState)
     {
         ui->state->setText("<font color='red'>Disconnected</font>");
         ui->connect->setIcon(QIcon(":/disconnect"));
-        ui->deleteServer->setEnabled(true);
         ui->edit->setEnabled(true);
     }
 }
 
 void GUI_Server::update()
 {
+    setObjectName(_server.objectName());
+
     ui->name->setText(_server.getName());
     ui->address->setText(_server.getServerAddress() + ":" + QString::number(_server.getServerPort()));
 
     uint online = _server.getDeviceOnline();
-    setDevices(online, _server.getDevicesCount() - online);
+    setDevicesState(online, _server.getDevicesCount() - online);
     setState(_server.state());
 
     if(_server.deviceCount() > 0)
@@ -77,32 +75,41 @@ void GUI_Server::update()
         ui->list->setDisabled(true);
 }
 
+Server &GUI_Server::server() const
+{
+    return _server;
+}
+
 void GUI_Server::slotEdit()
 {
     GUI_Edit_Server gui_edit_server(_server.getName(),
                                     _server.getServerAddress(),
                                     QString::number(_server.getServerPort()),
-                                                    _imagePath);
-    gui_edit_server.show();
+                                    _imagePath);
 
     if(gui_edit_server.exec() == QDialog::Accepted)
     {
+        if(_server.getName() != gui_edit_server.getName())
+        {
+            Tab *tab = qobject_cast<Tab*>(parent()->parent()->parent()->parent()); //!!!!!
+            for (const auto  &elem : tab->childrenPointerList())
+            {
+                GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
+                if(gui_server->server().getName() == gui_edit_server.getName())
+                {
+                    QMessageBox::warning(this, "Warning", "Server with this name alredy exist.", QMessageBox::Ok);
+                    return;
+                }
+            }
+        }
+
         _server.setName(gui_edit_server.getName());
         _server.setServerAddres(gui_edit_server.getAddress());
         _server.setServerPort(gui_edit_server.getPort().toUInt());
 
         _imagePath = gui_edit_server.getImagePath();
         ui->image->setPixmap(QPixmap(_imagePath));
-
-        emit signalEdit();
     }
-}
-
-void GUI_Server::slotDelete()
-{
-    QMessageBox::StandardButton  result = QMessageBox::question(this, "Delete server", "Are you sure want delete this server?", QMessageBox::Ok | QMessageBox::Cancel);
-    if(result == QMessageBox::Ok)
-        emit signalDelete();
 }
 
 void GUI_Server::slotConnect()
@@ -110,15 +117,13 @@ void GUI_Server::slotConnect()
 
     if(_server.state() == QAbstractSocket::UnconnectedState)
     {
-        ui->deleteServer->setDisabled(true);
         ui->edit->setDisabled(true);
         ui->state->setText("<font color='blue'>Connection attempt</font>");
         ui->connect->setDisabled(true);
         _server.connectToHost();
     }
-    else /*    if(_server.state() == QAbstractSocket::ConnectedState)*/
+    else
     {
-        ui->deleteServer->setEnabled(true);
         ui->edit->setEnabled(true);
         _server.disconnectFromHost();
     }
@@ -126,5 +131,5 @@ void GUI_Server::slotConnect()
 
 void GUI_Server::slotList()
 {
-    _server.deviceListShow();
+    _server.deviceListShow(*ui->image->pixmap());
 }

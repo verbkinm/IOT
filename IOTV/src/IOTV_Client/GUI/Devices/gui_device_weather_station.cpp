@@ -7,9 +7,9 @@ GUI_Device_Weather_Station::GUI_Device_Weather_Station(Device &device, QWidget *
     _l2.setText("Humidity (%): ");
     _l3.setText("Pressure (mm Hg): ");
 
-    _main_layout.addWidget(&_l1, 1, 0);
-    _main_layout.addWidget(&_l2, 2, 0);
-    _main_layout.addWidget(&_l3, 3, 0);
+    _main_layout.addWidget(&_l1, 2, 0);
+    _main_layout.addWidget(&_l2, 3, 0);
+    _main_layout.addWidget(&_l3, 4, 0);
 
     _le1.setReadOnly(true);
     _le2.setReadOnly(true);
@@ -19,9 +19,9 @@ GUI_Device_Weather_Station::GUI_Device_Weather_Station(Device &device, QWidget *
     _le2.setAlignment(Qt::AlignCenter);
     _le3.setAlignment(Qt::AlignCenter);
 
-    _main_layout.addWidget(&_le1, 1, 1);
-    _main_layout.addWidget(&_le2, 2, 1);
-    _main_layout.addWidget(&_le3, 3, 1);
+    _main_layout.addWidget(&_le1, 2, 1, 1, 2);
+    _main_layout.addWidget(&_le2, 3, 1, 1, 2);
+    _main_layout.addWidget(&_le3, 4, 1, 1, 2);
 
     _device.autoReadEnable(true);
 }
@@ -36,4 +36,6 @@ void GUI_Device_Weather_Station::update()
         setEnabled(true);
     else
         setEnabled(false);
+
+    setViewName(_device.getViewName());
 }

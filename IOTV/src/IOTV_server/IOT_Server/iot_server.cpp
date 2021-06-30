@@ -87,9 +87,9 @@ void IOT_Server::startTCPServer()
 void IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
 {
     socket->write(data);
-    Log::write("Send to client " + socket->peerAddress().toString() + ":"
-               + QString::number(socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+//    Log::write("Send to client " + socket->peerAddress().toString() + ":"
+//               + QString::number(socket->peerPort())
+//               + " -> " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
 }
 
 QString IOT_Server::getProgramVersion() const
@@ -141,9 +141,9 @@ void IOT_Server::slotDataRecived()
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     QByteArray data = socket->readAll();
 
-    Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
-               + QString::number(socket->peerPort())
-               + " <- " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+//    Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
+//               + QString::number(socket->peerPort())
+//               + " <- " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
 
     for (auto &packetData : IOTV_SC::splitQueryData(data))
     {
