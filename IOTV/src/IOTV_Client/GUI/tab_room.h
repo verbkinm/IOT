@@ -7,6 +7,7 @@
 #include "tab.h"
 #include "GUI/gui_server.h"
 #include "GUI/Devices/gui_device_creator.h"
+#include "objectlist.h"
 
 class Tab_Room : public Tab
 {
@@ -15,7 +16,7 @@ public:
     Tab_Room(const Tab &serverTab, QWidget *parent);
 
     void addDevice(const QString &serverName, const QString &deviceName);
-    void deleteData(const QString &serverName);
+    void deleteDevices();
 
     void restructWidget();
 

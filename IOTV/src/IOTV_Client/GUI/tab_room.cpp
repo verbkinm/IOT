@@ -10,9 +10,19 @@ void Tab_Room::addDevice(const QString &serverName, const QString &deviceName)
     _data[serverName].insert(deviceName);
 }
 
-void Tab_Room::deleteData(const QString &serverName)
+void Tab_Room::deleteDevices() //!!!
 {
-    _data.erase(serverName);
+    ObjectList objList(childrenPointerList());
+
+    if(objList.exec() == QDialog::Accepted)
+    {
+        for(auto &elem : objList.checkedObject())
+        {
+            delete elem;
+        }
+//        if(tab->childrenPointerList().length() == 0)
+//            ui->actionRemove_server->setEnabled(false);
+    }
 }
 
 void Tab_Room::restructWidget()

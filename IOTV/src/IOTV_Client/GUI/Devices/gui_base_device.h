@@ -23,6 +23,8 @@ public:
     GUI_Base_Device(Device &device, QWidget *parent = nullptr);
     ~GUI_Base_Device();
 
+    Device &device() const; //!!!
+
 protected:
     void setViewName(const QString &name);
     void stateAndViewName();

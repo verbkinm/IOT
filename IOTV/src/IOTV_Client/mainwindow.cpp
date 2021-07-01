@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-    ui(new Ui::MainWindow)
+      ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -44,13 +44,19 @@ void MainWindow::slotAddDeviceToRoom()
     }
 }
 
+void MainWindow::slotRemoveDeviceFromRoom()
+{
+    Tab_Room *tab = qobject_cast<Tab_Room*>(ui->tabWidget->currentWidget());
+    tab->deleteDevices();
+}
+
 void MainWindow::on_actionAdd_room_triggered()
 {
     Tab_Room *room = new Tab_Room(_serverTab, this);
     ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, "New room"));
 
     connect(room, &Tab::signalAdd, this, &MainWindow::slotAddDeviceToRoom);
-//    connect(room, &Tab::signalRemove, this, &MainWindow::slotRemoveDeviceFromRoom);
+    connect(room, &Tab::signalRemove, this, &MainWindow::slotRemoveDeviceFromRoom);
 }
 
 void MainWindow::on_actionDelete_triggered()

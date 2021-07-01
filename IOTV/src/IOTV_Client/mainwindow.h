@@ -22,6 +22,7 @@ public:
 
 private slots:
     void slotAddDeviceToRoom();
+    void slotRemoveDeviceFromRoom();
     void slotTabChange(int);
 
     void on_actionAdd_room_triggered();

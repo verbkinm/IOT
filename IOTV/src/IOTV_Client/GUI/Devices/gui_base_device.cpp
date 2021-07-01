@@ -66,6 +66,11 @@ void GUI_Base_Device::stateAndViewName()
         setViewName(_device.getViewName());
 }
 
+Device &GUI_Base_Device::device() const
+{
+    return _device;
+}
+
 void GUI_Base_Device::newObjectName()
 {
     this->setObjectName(_device.objectName());
