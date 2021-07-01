@@ -1,8 +1,9 @@
 #include "tab.h"
 #include "ui_tab.h"
 
-Tab::Tab(QWidget *parent) :
-    QWidget(parent),
+static uint max_column = 3;
+
+Tab::Tab(QWidget *parent) : QWidget(parent),
     ui(new Ui::Tab)
 {
     ui->setupUi(this);
@@ -20,9 +21,12 @@ Tab::~Tab()
 
 void Tab::addWidget(QWidget *widget)
 {
+    if(widget == nullptr)
+        return;
+
     int count = ui->scrollContentLayout->count();
-    int row = count / MAX_COLUMN;
-    int column = count % MAX_COLUMN;
+    int row = count / max_column;
+    int column = count % max_column;
 
     ui->scrollContentLayout->addWidget(widget, row, column);
 
@@ -57,7 +61,7 @@ bool Tab::eventFilter(QObject *watched, QEvent *event)
 {
     Q_UNUSED(watched)
 
-    if(event->type() == QEvent::ChildRemoved /*&& this->isVisible()*/ &&  ui->scrollAreaWidgetContents->children().length() > 0)
+    if(event->type() == QEvent::ChildRemoved &&  ui->scrollAreaWidgetContents->children().length() > 0)
     {
         eventFilterOff();
         layoutClear();
@@ -96,7 +100,7 @@ void Tab::layoutClear()
     while( (item = ui->scrollContentLayout->itemAt(0)) )
     {
         ui->scrollContentLayout->removeItem( item );
-        ui->scrollContentLayout->removeWidget(item->widget());
+        ui->scrollContentLayout->removeWidget(item->widget()); //???
         delete item;
     }
 }

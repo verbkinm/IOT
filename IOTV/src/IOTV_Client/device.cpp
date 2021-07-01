@@ -1,23 +1,19 @@
-#include <QApplication>
-
 #include "device.h"
 #include "server.h"
 
 static int readInterval = 5000;
+static int stateInterval = 5000;
 
 Device::Device(Server &server, const QString &name, uint8_t id, QObject *parent) : Base_Host(id, parent),
     _name(name), _viewName(name), _state(false), _server(server)
 {
     newObjectName();
 
-    _description = "description"; // !!!
-
     connect(&_autoReadInterval, &QTimer::timeout, this, &Device::slotAutoReadTimeOut);
     connect(&_stateInterval, &QTimer::timeout, this, &Device::slotStateIntervalTimeOut);
 
-    _autoReadInterval.stop();
     _autoReadInterval.setInterval(readInterval);
-    _stateInterval.start(5000);
+    _stateInterval.start(stateInterval);
 }
 
 Device::~Device()
@@ -37,9 +33,9 @@ bool Device::getState() const
 
 int64_t Device::readData(uint8_t channelNumber)
 {
-    _autoReadInterval.stop();
+    _autoReadInterval.stop(); //??? Если постоянно читать один канал, авточтение не дойдёт до остальных!
     int64_t res =  Protocols::SC.query_READ(*this, _name, channelNumber);
-    _autoReadInterval.start();
+    _autoReadInterval.start(); //???
     return res;
 }
 
@@ -60,7 +56,6 @@ void Device::dataResived(QByteArray data)
     else
         return;
 
-    qApp->processEvents();
     notify();
 }
 
@@ -81,13 +76,13 @@ void Device::setAutoReadInterval(int value)
 
 qint64 Device::writeToServer(QByteArray &data)
 {
-    //    Log::write(_name + ": Data send to " + _server.getServerAddress() + ":"
-    //               + QString::number(_server.getServerPort())
-    //               + " -> " + data.toHex(':'));
+    Log::write(_name + ": Data send to " + _server.getServerAddress() + ":"
+               + QString::number(_server.getServerPort())
+               + " -> " + data.toHex(':'));
     return _server.writeData(data);
 }
 
-void Device::autoReadEnable(bool state)
+void Device::setAutoReadEnable(bool state)
 {
     if(state)
         _autoReadInterval.start();
@@ -112,22 +107,28 @@ void Device::newObjectName()
     this->setObjectName(_viewName + " (" + _name + ")");
 }
 
-const Server &Device::getServer() const
+QString Device::getServerObjectName() const
 {
-    return _server;
+    return _server.objectName();
 }
 
 void Device::slotAutoReadTimeOut()
 {
+    _autoReadInterval.stop();
+
     for (uint8_t i = 0; i < readChannelLength(); i++)
         Protocols::SC.query_READ(*this, _name, i);
 
-//    notify();
+    _autoReadInterval.start();
 }
 
 void Device::slotStateIntervalTimeOut()
 {
+    _stateInterval.stop();
+
     QByteArray data;
     if(IOTV_SC::query_STATE(data, _name))
         _server.writeData(data);
+
+    _stateInterval.start(); //??? Если во время выполнения слота удалить последний gui_base_device, который остававливает таймер, конец слота опять его включит?
 }

@@ -1,8 +1,6 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#include <QThread>
-
 #include "GUI/Devices/gui_base_device.h"
 #include "Patterns/Subject.h"
 #include "base_host.h"
@@ -31,12 +29,12 @@ public:
 
     virtual qint64 writeToServer(QByteArray &data) override;
 
-    void autoReadEnable(bool state);
+    void setAutoReadEnable(bool state);
 
     QString getViewName() const;
     void setViewName(const QString &viewName);
 
-    const Server &getServer() const;
+    QString getServerObjectName() const;
 
 private:
     void newObjectName();

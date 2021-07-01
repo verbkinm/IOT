@@ -1,7 +1,10 @@
 #include "gui_edit_server.h"
 #include "ui_gui_edit_server.h"
 
-GUI_Edit_Server::GUI_Edit_Server(const QString &name, const QString &address, const QString &port, const QString &imagePath, QWidget *parent) :
+GUI_Edit_Server::GUI_Edit_Server(const QString &name,
+                                 const QString &address, const QString &port,
+                                 const QString &imagePath,
+                                 QWidget *parent) :
     QDialog(parent),
     ui(new Ui::gui_edit_server)
 {

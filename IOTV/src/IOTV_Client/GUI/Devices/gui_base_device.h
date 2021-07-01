@@ -25,6 +25,7 @@ public:
 
 protected:
     void setViewName(const QString &name);
+    void stateAndViewName();
 
     Device &_device;
 

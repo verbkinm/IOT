@@ -22,7 +22,7 @@ public:
 private:
     Ui::ObjectList *ui;
 
-    QStandardItemModel *model;
+    QStandardItemModel *_model;
     QObjectList _objectlist;
 
     void fillModel(QStandardItemModel* model);

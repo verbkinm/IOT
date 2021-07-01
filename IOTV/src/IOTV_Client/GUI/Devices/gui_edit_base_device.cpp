@@ -6,7 +6,6 @@ GUI_edit_base_device::GUI_edit_base_device(const QString &viewName, QWidget *par
     ui(new Ui::GUI_edit_base_device)
 {
     ui->setupUi(this);
-
     ui->viewName->setText(viewName);
 }
 

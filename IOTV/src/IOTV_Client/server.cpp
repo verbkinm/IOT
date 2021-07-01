@@ -1,7 +1,7 @@
 #include "server.h"
 
-#include <QApplication>
-
+static int default_interval = 5000;
+static int reconnecting_count =  5;
 static int number = 0;
 
 Server::Server(QObject *parent) : QObject(parent), _name("server" + QString::number(number++)),
@@ -59,6 +59,16 @@ void Server::setServerPort(const uint16_t &serverPort)
     notify();
 }
 
+void Server::setServerNAP(const QString &name, const QString &serverAddress, const uint16_t &serverPort)
+{
+    _name = name;
+    _serverAddress = serverAddress;
+    _serverPort = serverPort;
+
+    newObjectName();
+    notify();
+}
+
 QAbstractSocket::SocketState Server::state() const
 {
     return _socket.state();
@@ -83,7 +93,7 @@ uint Server::getDeviceOnline() const
 
 void Server::connectToHost()
 {
-    if(_reconnectTimerTrying > RECONNECTING_COUNT)
+    if(_reconnectTimerTrying > reconnecting_count)
     {
         _reconnectTimer.stop();
         _reconnectTimerTrying = 0;
@@ -91,7 +101,7 @@ void Server::connectToHost()
         return;
     }
 
-    _reconnectTimer.start(DEFAULT_INTERVAL);
+    _reconnectTimer.start(default_interval);
     _reconnectTimerTrying += 1;
 
     _socket.connectToHost(_serverAddress, _serverPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
@@ -115,13 +125,6 @@ void Server::deviceListShow(const QIcon &windowIcon)
 
     _deviceList->showMaximized();
     _deviceList->restructWidget();
-
-    connect(_deviceList.get(), &DeviceList::signalClose, this, &Server::slotDeviceListClose);
-}
-
-size_t Server::deviceCount() const
-{
-    return _devices.size();
 }
 
 void Server::createDevice(QByteArray &data)
@@ -134,14 +137,14 @@ void Server::createDevice(QByteArray &data)
     buff.append(0x05);
     buff.append(data.mid(1 + nameLength));
 
-    _devices[name] = std::make_unique<Device>(*this, name, buff.at(1), this);
+    _devices[name] = std::make_shared<Device>(*this, name, buff.at(1), this);
     IOTV_SH::response_WAY(*_devices[name], buff);
 
     const auto it = _alias.find(name);
     if(it != _alias.cend())
         _devices[name]->setViewName(_alias.at(name));
 
-    if(_deviceList.get() != nullptr &&  _deviceList->isVisible())
+    if(_deviceList.get() != nullptr &&  _deviceList->isVisible()) //???
     {
         _deviceList->clear();
         _deviceList->restructWidget();
@@ -168,9 +171,9 @@ void Server::addAlias(const QString &name, const QString &aliasName)
 
 void Server::slotConnected()
 {
-//    QString strOut = _name + ": connected to " + _socket.peerAddress().toString()
-//            + ":" + QString::number(_socket.peerPort());
-//    Log::write(strOut);
+    QString strOut = _name + ": connected to " + _socket.peerAddress().toString()
+                     + ":" + QString::number(_socket.peerPort());
+    Log::write(strOut);
 
     connect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
     connect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
@@ -179,9 +182,9 @@ void Server::slotConnected()
 
     QByteArray data;
     IOTV_SC::query_Device_List(data);
-//    Log::write("Data send to " + _socket.peerAddress().toString() + ":"
-//               + QString::number(_socket.peerPort())
-//               + " -> " + data.toHex(':'));
+    Log::write("Data send to " + _socket.peerAddress().toString() + ":"
+               + QString::number(_socket.peerPort())
+               + " -> " + data.toHex(':'));
     _socket.write(data);
 
     notify();
@@ -190,30 +193,28 @@ void Server::slotConnected()
 void Server::slotDisconnected()
 {
     QString strOut = _name + ": disconnected from " + _socket.peerAddress().toString()
-            + ":" + QString::number(_socket.peerPort());
-//    Log::write(strOut);
+                     + ":" + QString::number(_socket.peerPort());
+    Log::write(strOut);
 
     disconnect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
     disconnect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
 
     _deviceList.reset();
-
     _devices.clear();
+
     notify();
 }
 
 void Server::slotReadData()
 {
-//    qApp->processEvents();
     QByteArray data = _socket.readAll();
 
-//    Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
-//               + QString::number(_socket.peerPort())
-//               + " <- " + data.toHex(':'));
+    Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
+               + QString::number(_socket.peerPort())
+               + " <- " + data.toHex(':'));
 
     for (auto &packetData : IOTV_SC::splitResponseData(data))
     {
-        qApp->processEvents();
         IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
 
         if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
@@ -225,11 +226,12 @@ void Server::slotReadData()
             {
                 if(_devices.find(deviceName) != _devices.end())
                     _devices.at(deviceName)->dataResived(packetData);
-//                else
-//                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+                else
+                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
             }
         }
     }
+
     notify();
 }
 
@@ -291,11 +293,6 @@ void Server::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-//    Log::write(_name + ": " + strErr);
+    Log::write(_name + ": " + strErr);
     //    notify();
-}
-
-void Server::slotDeviceListClose()
-{
-    _deviceList.reset();
 }

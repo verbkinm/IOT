@@ -2,6 +2,7 @@
 #define GUI_DEVICE_WEATHER_STATION_H
 
 #include <QLineEdit>
+
 #include "gui_base_device.h"
 
 class GUI_Device_Weather_Station : public GUI_Base_Device
@@ -13,9 +14,8 @@ public:
     virtual void update() override;
 
 private:
-    QLabel _l1, _l2, _l3;
-    QLineEdit _le1, _le2, _le3;
-
+    QLabel _labelTemperature, _labelHumidity, _labelPressure;
+    QLineEdit _temperature, _humidity, _pressure;
 };
 
 #endif // GUI_DEVICE_WEATHER_STATION_H

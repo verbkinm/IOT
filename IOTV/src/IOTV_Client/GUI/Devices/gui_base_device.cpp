@@ -1,8 +1,5 @@
 #include "gui_base_device.h"
 #include "device.h"
-#include "server.h"
-
-
 
 GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
     QFrame(parent), Observer(), _device(device)
@@ -28,25 +25,20 @@ GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
     _main_layout.addWidget(&_viewName, 0, 0, 1, 3, Qt::AlignCenter);
     _main_layout.addLayout(&_buttonLayout, 1, 0, 1, 3, Qt::AlignCenter);
 
-//    _main_layout.addWidget(&_settingsDevice, 0, 1, Qt::AlignRight);
-//    _main_layout.addWidget(&_info, 0, 2, Qt::AlignRight);
-
     setLayout(&_main_layout);
-//    resize(280, 180);
     setWindowTitle(_device.getName() + " (" + QString::number(_device.getId()) + ")");
 
     connect(&_info, &QPushButton::clicked, this, &GUI_Base_Device::slotInfoPresses);
     connect(&_settingsDevice, &QPushButton::clicked, this, &GUI_Base_Device::slotSettingPressed);
 
     setMaximumSize(200, 150);
-//    setFixedSize(200, 150);
 
     newObjectName();
 }
 
 GUI_Base_Device::~GUI_Base_Device()
 {
-    _device.autoReadEnable(false);
+    _device.setAutoReadEnable(false);
     _device.detach(this);
 }
 
@@ -61,6 +53,17 @@ void GUI_Base_Device::setViewNameFont()
     font.setPixelSize(18);
     font.setBold(true);
     _viewName.setFont(font);
+}
+
+void GUI_Base_Device::stateAndViewName()
+{
+    if(_device.getState() && !isEnabled())
+        setEnabled(true);
+    else if(!_device.getState() && isEnabled())
+        setEnabled(false);
+
+    if(_device.getViewName() != _viewName.text())
+        setViewName(_device.getViewName());
 }
 
 void GUI_Base_Device::newObjectName()
@@ -81,7 +84,7 @@ void GUI_Base_Device::slotInfoPresses()
             + "\nDescription: " + _device.getDescription()
             + "\nR/W: " + QString::number(_device.readChannelLength()) + "/" + QString::number(_device.writeChannelLength())
             + "\nState: " + state
-            + "\nServer: " + _device.getServer().getName() + "(" + _device.getServer().getServerAddress() + ":" + QString::number(_device.getServer().getServerPort()) + ")";
+            + "\nServer: " + _device.getServerObjectName();
     QMessageBox::information(this, "Device description", info, QMessageBox::Ok);
 }
 

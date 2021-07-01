@@ -7,9 +7,9 @@ ObjectList::ObjectList(QObjectList objectlist, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    model = new QStandardItemModel();
-    fillModel(model);
-    ui->treeView->setModel(model);
+    _model = new QStandardItemModel();
+    fillModel(_model);
+    ui->treeView->setModel(_model);
     ui->treeView->setHeaderHidden(true);
     ui->treeView->resizeColumnToContents(0);
 
@@ -44,10 +44,10 @@ QObjectList ObjectList::checkedObject() const
 {
     QObjectList result;
 
-    for (int i = 0; i < model->rowCount(); ++i)
+    for (int i = 0; i < _model->rowCount(); ++i)
     {
-        if(model->item(i,0)->checkState() == Qt::Checked)
-            result << _objectlist.at(i);// = model->item(i,1)->data(Qt::DisplayRole).toString();
+        if(_model->item(i,0)->checkState() == Qt::Checked)
+            result << _objectlist.at(i);
     }
 
     return result;

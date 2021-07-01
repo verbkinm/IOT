@@ -2,6 +2,7 @@
 #define GUI_DEVICE_SWITCH_H
 
 #include "gui_base_device.h"
+#include "device.h"
 
 class GUI_Device_Switch : public GUI_Base_Device
 {
@@ -12,6 +13,7 @@ public:
 
 private:
     QPushButton _button;
+    bool _buttonState;
 
 private slots:
     void slotButtonPressed();
