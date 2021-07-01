@@ -10,41 +10,49 @@ void Tab_Room::addDevice(const QString &serverName, const QString &deviceName)
     _data[serverName].insert(deviceName);
 }
 
+void Tab_Room::deleteData(const QString &serverName)
+{
+    _data.erase(serverName);
+}
+
 void Tab_Room::restructWidget()
 {
     clear();
     for (const auto &[serverName, deviceNameList] : _data)
     {
-        QObject *server = nullptr;
-        for (auto it : _serverTab.childrenPointerList())
-        {
-            GUI_Server *gui_server = qobject_cast<GUI_Server*>(it);
-            if(gui_server->server().objectName() == serverName)
-            {
-                server = it;
-                break;
-            }
-        }
+        QObject *server = serverSearch(serverName);
         if(server != nullptr)
         {
             for (const auto &deviceName : deviceNameList)
-            {
-                auto _devices = qobject_cast<GUI_Server*>(server)->server().getDevices();
-                for (auto [name, dev] : _devices)
-                {
-                    if(deviceName == name)
-                    {
-                        GUI_Base_Device* d = GUI_Device_Creator::createGUIDevice(*dev);
-                        d->setEnabled(false);
-                        addWidget(d);
-                        break;
-                    }
-                    else
-                        qDebug() << "not found device " << deviceName << " on server" << serverName;
-                }
-            }
+                addWidgets(deviceName, server);
         }
-        else
-            qDebug() << "not found server " << serverName;
+    }
+}
+
+QObject *Tab_Room::serverSearch(const QString &serverName) const
+{
+    QObject *server = nullptr;
+    for (auto obj : _serverTab.childrenPointerList())
+    {
+        if(obj->objectName() == serverName)
+        {
+            server = obj;
+            break;
+        }
+    }
+    return server;
+}
+
+void Tab_Room::addWidgets(const QString &deviceName, QObject *server)
+{
+    for (auto [name, dev] : qobject_cast<GUI_Server*>(server)->getDevices())
+    {
+        if(deviceName == name)
+        {
+            GUI_Base_Device* d = GUI_Device_Creator::createGUIDevice(*dev);
+            d->setEnabled(false);
+            addWidget(d);
+            break;
+        }
     }
 }

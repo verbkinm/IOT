@@ -25,9 +25,9 @@ void Ethernet_conn_type::setPort(quint16 port)
 
 qint64 Ethernet_conn_type::write(const QByteArray &data)
 {
-//    QString strOut = _name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
-//                     + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':');
-//    Log::write(strOut);
+    QString strOut = _name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
+                     + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':');
+    Log::write(strOut);
     return _tcpSocket->write(data);
 }
 
@@ -72,9 +72,9 @@ void Ethernet_conn_type::slotReadData()
 {
     QByteArray data = _tcpSocket->readAll();
 
-//    QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
-//                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
-//    Log::write(strOut);
+    QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
+                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
+    Log::write(strOut);
     emit signalDataRiceved(data);
 }
 

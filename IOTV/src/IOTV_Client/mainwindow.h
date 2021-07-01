@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QScrollArea>
-#include <QThread>
 
 #include "server.h"
 #include "GUI/tab_room.h"
@@ -37,7 +36,7 @@ private:
     Ui::MainWindow *ui;
 
     Tab _serverTab;
-//    QThread *_thread;
+    std::list<Server*> _serverList;
 
 protected:
     virtual void closeEvent(QCloseEvent *) override;

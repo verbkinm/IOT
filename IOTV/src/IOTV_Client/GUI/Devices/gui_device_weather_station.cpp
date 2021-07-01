@@ -3,39 +3,41 @@
 
 GUI_Device_Weather_Station::GUI_Device_Weather_Station(Device &device, QWidget *parent) : GUI_Base_Device(device, parent)
 {
-    _l1.setText("Temperature (C): ");
-    _l2.setText("Humidity (%): ");
-    _l3.setText("Pressure (mm Hg): ");
+    _labelTemperature.setText("Temperature (C): ");
+    _labelHumidity.setText("Humidity (%): ");
+    _labelPressure.setText("Pressure (mm Hg): ");
 
-    _main_layout.addWidget(&_l1, 2, 0);
-    _main_layout.addWidget(&_l2, 3, 0);
-    _main_layout.addWidget(&_l3, 4, 0);
+    _main_layout.addWidget(&_labelTemperature, 2, 0);
+    _main_layout.addWidget(&_labelHumidity, 3, 0);
+    _main_layout.addWidget(&_labelPressure, 4, 0);
 
-    _le1.setReadOnly(true);
-    _le2.setReadOnly(true);
-    _le3.setReadOnly(true);
+    _temperature.setReadOnly(true);
+    _humidity.setReadOnly(true);
+    _pressure.setReadOnly(true);
 
-    _le1.setAlignment(Qt::AlignCenter);
-    _le2.setAlignment(Qt::AlignCenter);
-    _le3.setAlignment(Qt::AlignCenter);
+    _temperature.setAlignment(Qt::AlignCenter);
+    _humidity.setAlignment(Qt::AlignCenter);
+    _pressure.setAlignment(Qt::AlignCenter);
 
-    _main_layout.addWidget(&_le1, 2, 1, 1, 2);
-    _main_layout.addWidget(&_le2, 3, 1, 1, 2);
-    _main_layout.addWidget(&_le3, 4, 1, 1, 2);
+    _main_layout.addWidget(&_temperature, 2, 1, 1, 2);
+    _main_layout.addWidget(&_humidity, 3, 1, 1, 2);
+    _main_layout.addWidget(&_pressure, 4, 1, 1, 2);
 
-    _device.autoReadEnable(true);
+    _device.setAutoReadEnable(true);
 }
 
 void GUI_Device_Weather_Station::update()
 {
-    _le1.setText(Raw::toString(_device.getReadChannelDataType(0), _device.getReadChannelData(0)).c_str());
-    _le2.setText(Raw::toString(_device.getReadChannelDataType(1), _device.getReadChannelData(1)).c_str());
-    _le3.setText(Raw::toString(_device.getReadChannelDataType(2), _device.getReadChannelData(2)).c_str());
+    QString temperature = Raw::toString(_device.getReadChannelDataType(0), _device.getReadChannelData(0)).c_str();
+    QString humidity = Raw::toString(_device.getReadChannelDataType(1), _device.getReadChannelData(1)).c_str();
+    QString pressure = Raw::toString(_device.getReadChannelDataType(2), _device.getReadChannelData(2)).c_str();
 
-    if(_device.getState())
-        setEnabled(true);
-    else
-        setEnabled(false);
+    if(_temperature.text() != temperature)
+        _temperature.setText(temperature);
+    if(_humidity.text() != humidity)
+        _humidity.setText(humidity);
+    if(_pressure.text() != pressure)
+        _pressure.setText(pressure);
 
-    setViewName(_device.getViewName());
+    stateAndViewName();
 }

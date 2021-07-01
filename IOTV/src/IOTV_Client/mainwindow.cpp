@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-    ui(new Ui::MainWindow)/*, _thread(new QThread)*/
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&_serverTab, &Tab::signalRemove, this, &MainWindow::on_actionRemove_server_triggered);
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::slotTabChange);
-
-//    _thread->start();
 }
 
 MainWindow::~MainWindow()
@@ -30,7 +28,7 @@ void MainWindow::slotAddDeviceToRoom()
     for(auto &elem : _serverTab.childrenPointerList())
     {
         GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
-        for(auto const &item : gui_server->server().getDevices())
+        for(auto const &item : gui_server->getDevices())
             result << item.second.get();
     }
 
@@ -52,6 +50,7 @@ void MainWindow::on_actionAdd_room_triggered()
     ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, "New room"));
 
     connect(room, &Tab::signalAdd, this, &MainWindow::slotAddDeviceToRoom);
+//    connect(room, &Tab::signalRemove, this, &MainWindow::slotRemoveDeviceFromRoom);
 }
 
 void MainWindow::on_actionDelete_triggered()
@@ -77,8 +76,9 @@ void MainWindow::slotTabChange(int index)
 void MainWindow::on_actionAdd_server_triggered()
 {
     Server *server = new Server;
-//    server->moveToThread(_thread);
-    GUI_Server *gui_server = new GUI_Server(*server);
+    _serverList.push_back(server);
+
+    GUI_Server *gui_server = new GUI_Server(*server, _serverTab);
 
     _serverTab.addWidget(gui_server);
 
@@ -95,8 +95,15 @@ void MainWindow::on_actionRemove_server_triggered()
     {
         for(auto &elem : objList.checkedObject())
         {
-            GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
-            delete &gui_server->server();
+            for (auto &obj : _serverList)
+            {
+                if(elem->objectName() == obj->objectName())
+                {
+                    delete obj;
+                    _serverList.remove(obj);
+                    break;
+                }
+            }
         }
         if(_serverTab.childrenPointerList().length() == 0)
             ui->actionRemove_server->setEnabled(false);

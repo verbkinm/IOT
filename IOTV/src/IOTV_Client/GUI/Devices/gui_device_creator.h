@@ -7,8 +7,6 @@
 
 #include "device.h"
 
-#include <memory>
-
 class GUI_Device_Creator
 {
 public:    

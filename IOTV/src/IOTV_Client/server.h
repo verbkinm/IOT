@@ -12,8 +12,6 @@
 #include "Patterns/Subject.h"
 #include "GUI/devicelist.h"
 
-#define DEFAULT_INTERVAL 5000
-#define RECONNECTING_COUNT 5
 
 class Server : public QObject, public Subject
 {
@@ -31,6 +29,7 @@ public:
     void setName(const QString &name);
     void setServerAddres(const QString &serverAddress);
     void setServerPort(const uint16_t &serverPort);
+    void setServerNAP(const QString &name, const QString &serverAddress, const uint16_t &serverPort);
 
     QAbstractSocket::SocketState state() const;
 
@@ -40,8 +39,6 @@ public:
     qint64 writeData(QByteArray &data);
 
     void deviceListShow(const QIcon &windowIcon);
-
-    size_t deviceCount() const;
 
     const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
 
@@ -68,8 +65,6 @@ private slots:
 
     void slotReadData();
     void slotError(QAbstractSocket::SocketError error);
-
-    void slotDeviceListClose();
 
 signals:
     void signalDeviceCreated();

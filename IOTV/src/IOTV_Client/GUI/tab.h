@@ -4,8 +4,6 @@
 #include <QWidget>
 #include <QCloseEvent>
 
-#define MAX_COLUMN 3
-
 namespace Ui {
 class Tab;
 }
@@ -34,7 +32,6 @@ protected:
 
     virtual void layoutClear();
     virtual void closeEvent(QCloseEvent *event) override;
-//    QLayout *scrollContentLayout();
 
     void hideButtons();
 

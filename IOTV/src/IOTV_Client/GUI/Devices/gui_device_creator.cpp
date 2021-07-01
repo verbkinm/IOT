@@ -6,11 +6,12 @@ GUI_Base_Device *GUI_Device_Creator::createGUIDevice(Device &device)
     {
     case 0:
         return new GUI_Device_Unknow(device);
-        break;
     case 1:
         return new GUI_Device_Switch(device);
     case 2:
         return new GUI_Device_Weather_Station(device);
+    default:
+        return new GUI_Device_Unknow(device);
     }
 
     return new GUI_Device_Unknow(device);
