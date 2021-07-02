@@ -28,6 +28,7 @@ public:
     const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
     void setDevicesState(uint online, uint offline);
     void setState(QAbstractSocket::SocketState state);
+     QAbstractSocket::SocketState state() const;
 
     virtual void update() override;
 

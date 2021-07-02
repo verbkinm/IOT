@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+static QString server_tab_text = "Servers";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow)
@@ -8,13 +10,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     _serverTab.setParent(ui->tabWidget);
-    ui->tabWidget->addTab(&_serverTab, "Servers");
+    ui->tabWidget->addTab(&_serverTab, server_tab_text);
     ui->tabWidget->removeTab(0);
 
     connect(&_serverTab, &Tab::signalAdd, this, &MainWindow::on_actionAdd_server_triggered);
     connect(&_serverTab, &Tab::signalRemove, this, &MainWindow::on_actionRemove_server_triggered);
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::slotTabChange);
+    connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::slotCloseTab);
+    connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked, this, &MainWindow::slotRenameTab);
+
 }
 
 MainWindow::~MainWindow()
@@ -73,10 +78,29 @@ void MainWindow::slotTabChange(int index)
     if(!ui)
         return;
 
-    if(ui->tabWidget->tabText(index) == "Servers" )
+    if(ui->tabWidget->tabText(index) == server_tab_text )
         ui->actionDelete->setEnabled(false);
     else
         ui->actionDelete->setEnabled(true);
+}
+
+void MainWindow::slotCloseTab(int index)
+{
+    if(ui->tabWidget->tabText(index) != server_tab_text)
+        delete ui->tabWidget->widget(index);
+}
+
+void MainWindow::slotRenameTab(int index)
+{
+    if(ui->tabWidget->tabText(index) == server_tab_text)
+        return;
+
+    bool ok = false;
+    QString text = QInputDialog::getText(this, "New name",
+                                         tr("Input new name for tab:"), QLineEdit::Normal,
+                                         ui->tabWidget->tabText(index), &ok);
+    if (ok && !text.isEmpty())
+        ui->tabWidget->setTabText(index, text);
 }
 
 void MainWindow::on_actionAdd_server_triggered()
@@ -91,6 +115,7 @@ void MainWindow::on_actionAdd_server_triggered()
     ui->actionRemove_server->setEnabled(true);
 
     connect(server, &Server::signalDeviceCreated, this, &MainWindow::roomsRestructWidget);
+    connect(server, &Server::signalDisconnected, this, &MainWindow::roomsRestructWidget);
 }
 
 void MainWindow::on_actionRemove_server_triggered()
@@ -114,6 +139,8 @@ void MainWindow::on_actionRemove_server_triggered()
         if(_serverTab.childrenPointerList().length() == 0)
             ui->actionRemove_server->setEnabled(false);
     }
+
+    roomsRestructWidget();
 }
 
 void MainWindow::roomsRestructWidget()

@@ -68,6 +68,7 @@ private slots:
 
 signals:
     void signalDeviceCreated();
+    void signalDisconnected();
 
 };
 

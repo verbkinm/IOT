@@ -7,6 +7,7 @@
 #include "tab.h"
 #include "GUI/gui_server.h"
 #include "GUI/Devices/gui_device_creator.h"
+#include "GUI/Devices/gui_device_cap.h"
 #include "objectlist.h"
 
 class Tab_Room : public Tab

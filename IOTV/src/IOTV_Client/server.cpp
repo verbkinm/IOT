@@ -203,6 +203,8 @@ void Server::slotDisconnected()
     _devices.clear();
 
     notify();
+
+    emit signalDisconnected();
 }
 
 void Server::slotReadData()

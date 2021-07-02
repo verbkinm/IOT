@@ -32,10 +32,7 @@ void ObjectList::fillModel(QStandardItemModel* model)
         row.append(item);
 
         item = new QStandardItem;
-        if(obj->parent()->objectName() == "scrollAreaWidgetContents")   //!!! заплатка
-            item->setData(obj->objectName(), Qt::DisplayRole);
-        else
-            item->setData(obj->parent()->objectName() + ": " + obj->objectName(), Qt::DisplayRole);
+        item->setData(obj->objectName(), Qt::DisplayRole);
 
         item->setEditable(false);
         row.append(item);

@@ -23,6 +23,9 @@ public:
     GUI_Base_Device(Device &device, QWidget *parent = nullptr);
     ~GUI_Base_Device();
 
+    QString getServerObjectName() const;
+    QString getName() const;
+
     Device &device() const; //!!!
 
 protected:

@@ -70,6 +70,11 @@ void GUI_Server::setState(QAbstractSocket::SocketState state)
     }
 }
 
+QAbstractSocket::SocketState GUI_Server::state() const
+{
+    return _server.state();
+}
+
 void GUI_Server::update()
 {
     QString objName = _server.objectName();

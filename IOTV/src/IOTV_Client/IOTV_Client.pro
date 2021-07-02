@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     GUI/Devices/gui_base_device.cpp \
+    GUI/Devices/gui_device_cap.cpp \
     GUI/Devices/gui_device_creator.cpp \
     GUI/Devices/gui_device_switch.cpp \
     GUI/Devices/gui_device_unknow.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     GUI/Devices/gui_base_device.h \
+    GUI/Devices/gui_device_cap.h \
     GUI/Devices/gui_device_creator.h \
     GUI/Devices/gui_device_switch.h \
     GUI/Devices/gui_device_unknow.h \

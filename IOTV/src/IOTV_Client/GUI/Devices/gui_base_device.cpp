@@ -42,6 +42,16 @@ GUI_Base_Device::~GUI_Base_Device()
     _device.detach(this);
 }
 
+QString GUI_Base_Device::getServerObjectName() const
+{
+    return _device.getServerObjectName();
+}
+
+QString GUI_Base_Device::getName() const
+{
+    return _device.getName();
+}
+
 void GUI_Base_Device::setViewName(const QString &name)
 {
     _viewName.setText(name);
@@ -88,7 +98,6 @@ void GUI_Base_Device::slotInfoPresses()
             + "\nDevice name: " + _device.getName()
             + "\nDescription: " + _device.getDescription()
             + "\nR/W: " + QString::number(_device.readChannelLength()) + "/" + QString::number(_device.writeChannelLength())
-            + "\nState: " + state
             + "\nServer: " + _device.getServerObjectName();
     QMessageBox::information(this, "Device description", info, QMessageBox::Ok);
 }

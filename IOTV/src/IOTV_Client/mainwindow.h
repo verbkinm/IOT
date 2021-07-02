@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QScrollArea>
+#include <QInputDialog>
 
 #include "server.h"
 #include "GUI/tab_room.h"
@@ -23,7 +24,9 @@ public:
 private slots:
     void slotAddDeviceToRoom();
     void slotRemoveDeviceFromRoom();
-    void slotTabChange(int);
+    void slotTabChange(int index);
+    void slotCloseTab(int index);
+    void slotRenameTab(int index);
 
     void on_actionAdd_room_triggered();
     void on_actionDelete_triggered();
