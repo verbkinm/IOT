@@ -34,14 +34,15 @@ DEPENDPATH += $$PWD/../raw
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Log/ -llog
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Log/ -llog
-else:unix: LIBS += -L$$OUT_PWD/../Log/ -llog
+#else:unix: LIBS += -L$$OUT_PWD/../Log/ -llog
+else:unix: LIBS += -L$$OUT_PWD/../Log/ -lLog
 
 INCLUDEPATH += $$PWD/../Log
 DEPENDPATH += $$PWD/../Log
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Base_Host/ -lbase_host
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Base_Host/ -lbase_host
-else:unix: LIBS += -L$$OUT_PWD/../Base_Host/ -lbase_host
+else:unix: LIBS += -L$$OUT_PWD/../Base_Host/ -lBase_Host
 
 INCLUDEPATH += $$PWD/../Base_Host
 DEPENDPATH += $$PWD/../Base_Host

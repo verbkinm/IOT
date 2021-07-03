@@ -4,7 +4,8 @@
 GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
     QFrame(parent), Observer(), _device(device)
 {
-    this->setFrameStyle(QFrame::StyledPanel);
+    setFrameStyle(QFrame::StyledPanel);
+    setFrameShadow(QFrame::Raised);
     device.attach(this);
 
     _viewName.setText(_device.getViewName());
@@ -111,6 +112,9 @@ void GUI_Base_Device::slotSettingPressed()
     if(gui_edit_device.exec() == QDialog::Accepted)
     {
         if(gui_edit_device.viewName().length())
+        {
             _device.setViewName(gui_edit_device.viewName());
+            emit signalSettingsEdited();
+        }
     }
 }

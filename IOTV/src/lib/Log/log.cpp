@@ -30,7 +30,7 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     }
 
     QTextStream out(&file);
-    out << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data << endl;
+    out << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data << Qt::endl;
     out.flush();
 
     file.close();

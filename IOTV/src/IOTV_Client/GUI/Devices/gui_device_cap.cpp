@@ -2,7 +2,8 @@
 
 GUI_Device_Cap::GUI_Device_Cap(const QString &server, const QString &name, QWidget *parent) : QFrame(parent)
 {
-    this->setFrameStyle(QFrame::StyledPanel);
+    setFrameStyle(QFrame::StyledPanel);
+    setFrameShadow(QFrame::Raised);
 
     _name.setText(name);
     QFont font = _name.font();

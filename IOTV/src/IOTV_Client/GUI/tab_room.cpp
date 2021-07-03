@@ -64,10 +64,15 @@ void Tab_Room::restructWidget()
     }
 }
 
+const std::map<QString, std::set<QString> > &Tab_Room::data() const
+{
+    return _data;
+}
+
 QObject *Tab_Room::serverSearch(const QString &serverName) const
 {
     QObject *server = nullptr;
-    for (auto obj : _serverTab.childrenPointerList())
+    foreach(const auto &obj, _serverTab.childrenPointerList())
     {
         if( (obj->objectName() == serverName) && (qobject_cast<GUI_Server*>(obj)->state() == QAbstractSocket::ConnectedState) )
         {
@@ -80,7 +85,7 @@ QObject *Tab_Room::serverSearch(const QString &serverName) const
 
 void Tab_Room::addWidgets(const QString &deviceName, QObject *server)
 {
-    for (auto [name, dev] : qobject_cast<GUI_Server*>(server)->getDevices())
+    for (const auto &[name, dev] : qobject_cast<GUI_Server*>(server)->getDevices())
     {
         if(deviceName == name)
         {

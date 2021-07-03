@@ -155,7 +155,7 @@ void IOT_Server::slotDataRecived()
             buff.append(RESPONSE_DEVICE_LIST_BYTE);
             buff.append(_iot_hosts.size());
 
-            for (auto host : _iot_hosts)
+            for (const auto &host : _iot_hosts)
             {
                 QByteArray packetDevice;
                 IOTV_SC::responceToClient_Device_One(*host, packetDevice);
@@ -203,7 +203,7 @@ void IOT_Server::slotDataRecived()
                 {
                     uint8_t nameLength = packetData.at(0) >> 3;
                     uint8_t channelNumber = packetData.at(1) & 0x0F;
-                    QByteArray deviceName = packetData.mid(4, nameLength);
+//                    QByteArray deviceName = packetData.mid(4, nameLength);
 
                     uint16_t dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QInputDialog>
+#include <QSettings>
 
 #include "server.h"
 #include "GUI/tab_room.h"
@@ -29,18 +30,24 @@ private slots:
     void slotRenameTab(int index);
 
     void on_actionAdd_room_triggered();
-    void on_actionDelete_triggered();
+    void on_actionDelete_room_triggered();
 
     void on_actionAdd_server_triggered();
     void on_actionRemove_server_triggered();
 
+    void slotRoomsRestructWidget();
+
 private:
-    void roomsRestructWidget();
+    void checkSettingsFileExist();
+    void readSettings();
+    void saveSettingsServers();
+    void saveSettingsRooms();
 
     Ui::MainWindow *ui;
 
     Tab _serverTab;
     std::list<Server*> _serverList;
+    QSettings _settings;
 
 protected:
     virtual void closeEvent(QCloseEvent *) override;

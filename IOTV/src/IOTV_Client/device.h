@@ -18,8 +18,8 @@ public:
     virtual QString getName() const override;
     virtual bool getState() const override;
 
-    virtual int64_t readData(uint8_t channelNumber) override;
-    virtual int64_t writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
+    virtual qint64 readData(uint8_t channelNumber) override;
+    virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
     virtual void dataResived(QByteArray data) override;
 
     virtual void setState(bool state) override;

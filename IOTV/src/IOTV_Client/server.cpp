@@ -19,7 +19,7 @@ Server::Server(QObject *parent) : QObject(parent), _name("server" + QString::num
 Server::~Server()
 {
     disconnect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
-    _socket.disconnected();
+    _socket.disconnectFromHost();
     destroyObservers();
 }
 
@@ -117,10 +117,10 @@ qint64 Server::writeData(QByteArray &data)
     return _socket.write(data);
 }
 
-void Server::deviceListShow(const QIcon &windowIcon)
+void Server::deviceListShow()
 {
     _deviceList = std::make_unique<DeviceList>(_devices);
-    _deviceList->setWindowIcon(windowIcon);
+    _deviceList->setWindowIcon(QIcon(":/server"));
     _deviceList->setWindowTitle(_serverAddress + ":" + QString::number(_serverPort));
 
     _deviceList->showMaximized();
@@ -167,6 +167,11 @@ void Server::addAlias(const QString &name, const QString &aliasName)
 {
     if(name.length())
         _alias[name] = aliasName;
+}
+
+const std::map<QString, QString> &Server::getAlias() const
+{
+    return _alias;
 }
 
 void Server::slotConnected()

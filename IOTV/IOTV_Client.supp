@@ -1,0 +1,10 @@
+{
+   malloc[Memcheck:Leak]
+   Memcheck:Leak
+   fun:malloc
+   fun:_ZN14QObjectPrivate13addConnectionEiPNS_10ConnectionE
+   obj:/usr/lib/libQt5Core.so.5.15.2
+   fun:_ZN7QObject7connectEPKS_PKcS1_S3_N2Qt14ConnectionTypeE
+   fun:_ZN10MainWindowC1EP7QWidget
+   fun:main
+}

@@ -3,10 +3,10 @@
 #include "IOT_Host.h"
 
 IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
-    _conn_type(std::make_unique<Base_conn_type>(name)), _logFile(""), _state(0)
+    _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
     connectObjects();
-    connect(this, &Base_Host::signalTimerResponse, this, &IOT_Host::slotResendData);
+    connect(this, SIGNAL(signalTimerResponse()), this, SLOT(slotResendData()));
 }
 
 void IOT_Host::printDebugData() const

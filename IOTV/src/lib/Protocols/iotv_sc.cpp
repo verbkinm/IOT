@@ -15,7 +15,7 @@ bool IOTV_SC::query_STATE(QByteArray &data, const QString &deviceName)
 
     data.append(deviceName.length() << 3);
     data.append(0x10);
-    data.append(deviceName);
+    data.append(deviceName.toUtf8());
 
     return true;
 }
@@ -29,7 +29,7 @@ qint64 IOTV_SC::query_READ(Base_Host &host, const QString &deviceName, uint8_t c
 
     data.append( (deviceName.length() << 3) | 0x02);
     data.append(channelNumber);
-    data.append(deviceName);
+    data.append(deviceName.toUtf8());
 
     if(host.insertExpectedResponseRead(channelNumber))
         return host.writeToServer(data);
@@ -50,7 +50,7 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
     data.append(char(0x00));
     data.append(0x08);
 
-    data.append(deviceName);
+    data.append(deviceName.toUtf8());
 
     for (uint16_t i = 0; i < Raw::size; i++)
         data.append(rawData.array[i]);
@@ -116,12 +116,12 @@ void IOTV_SC::responceToClient_Device_One(Base_Host &host, QByteArray &data)
     QString name = host.getName();
     uint8_t nameLength = (name.length()) << 3;
     data.append(nameLength);
-    data.append(host.getName());
+    data.append(host.getName().toUtf8());
     data.append(host.getId());
     data.append(host.getDescription().size() >> 8);
     data.append(host.getDescription().size());
     data.append((host.readChannelLength() << 4) | host.writeChannelLength() );
-    data.append(host.getDescription());
+    data.append(host.getDescription().toUtf8());
 
     for (uint8_t i = 0; i <  host.readChannelLength(); i++ )
         data.append(Raw::toUInt8(host.getReadChannelDataType(i)));
@@ -143,7 +143,7 @@ void IOTV_SC::responceToClient_State(const Base_Host &host, QByteArray &data)
 
     data.append( (host.getName().length() << 3) | QUERY_RESPONSE_BIT);
     data.append(0x10 | state);
-    data.append(host.getName());
+    data.append(host.getName().toUtf8());
 }
 
 void IOTV_SC::responceToClient_Read(const Base_Host &host, QByteArray &data)
@@ -160,7 +160,7 @@ void IOTV_SC::responceToClient_Read(const Base_Host &host, QByteArray &data)
     data.append(channelNumber);
     data.append(Raw::size >> 8);
     data.append(Raw::size);
-    data.append(deviceName);
+    data.append(deviceName.toUtf8());
 
     for (uint8_t i = 0; i < Raw::size; i++)
         data.append(raw.array[i]);

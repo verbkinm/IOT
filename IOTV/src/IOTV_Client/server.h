@@ -38,11 +38,12 @@ public:
 
     qint64 writeData(QByteArray &data);
 
-    void deviceListShow(const QIcon &windowIcon);
+    void deviceListShow();
 
     const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
 
     void addAlias(const QString &name, const QString &aliasName);
+    const std::map<QString, QString> &getAlias() const;
 
 private:
     void createDevice(QByteArray &data);

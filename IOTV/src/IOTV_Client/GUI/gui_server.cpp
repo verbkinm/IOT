@@ -19,7 +19,7 @@ GUI_Server::GUI_Server(Server &server, const Tab &serverTab, QWidget *parent) : 
     connect(ui->list, &QPushButton::clicked, this, &GUI_Server::slotList);
     connect(ui->edit, &QPushButton::clicked, this, &GUI_Server::slotEdit);
 
-    update();
+    //    update();
 }
 
 GUI_Server::~GUI_Server()
@@ -118,7 +118,7 @@ void GUI_Server::slotEdit()
 
         if(_server.getName() != gui_edit_server.getName())
         {
-            for (const auto elem : _serverTab.childrenPointerList())
+            foreach(const auto elem, _serverTab.childrenPointerList())
             {
                 const GUI_Server* gui_server = qobject_cast<GUI_Server*>(elem);
                 if(gui_server->ui->name->text() == gui_edit_server.getName())
@@ -153,5 +153,5 @@ void GUI_Server::slotConnect()
 
 void GUI_Server::slotList()
 {
-    _server.deviceListShow(*ui->image->pixmap());
+    _server.deviceListShow();
 }

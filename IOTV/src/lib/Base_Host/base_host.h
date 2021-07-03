@@ -51,8 +51,8 @@ public:
     virtual QString getName() const = 0;
     virtual bool getState() const = 0;
     virtual void setState(bool state) = 0;
-    virtual int64_t readData(uint8_t channelNumber) = 0;
-    virtual int64_t writeData(uint8_t channelNumber, Raw::RAW &rawData) = 0;
+    virtual qint64 readData(uint8_t channelNumber) = 0;
+    virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) = 0;
     virtual void dataResived(QByteArray data) = 0;
 
     virtual qint64 writeToServer(QByteArray &data) = 0;

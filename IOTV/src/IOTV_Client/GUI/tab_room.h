@@ -21,6 +21,8 @@ public:
 
     void restructWidget();
 
+    const std::map<QString, std::set<QString>> &data() const;
+
 private:
     QObject *serverSearch(const QString &serverName) const;
     void addWidgets(const QString &deviceName, QObject *server);

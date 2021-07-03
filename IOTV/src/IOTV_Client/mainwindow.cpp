@@ -1,11 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-static QString server_tab_text = "Servers";
+QString server_tab_text = "Servers";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow)
+      ui(new Ui::MainWindow),
+      _settings(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Client")
 {
     ui->setupUi(this);
 
@@ -20,10 +21,21 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::slotCloseTab);
     connect(ui->tabWidget, &QTabWidget::tabBarDoubleClicked, this, &MainWindow::slotRenameTab);
 
+    checkSettingsFileExist();
+    readSettings();
 }
 
 MainWindow::~MainWindow()
 {
+    disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::slotTabChange);
+    disconnect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::slotCloseTab);
+
+    for (auto &elem : _serverList)
+    {
+        if(elem != nullptr)
+            delete elem;
+    }
+
     delete ui;
 }
 
@@ -57,14 +69,15 @@ void MainWindow::slotRemoveDeviceFromRoom()
 
 void MainWindow::on_actionAdd_room_triggered()
 {
+    static uint roomNumber = 0;
     Tab_Room *room = new Tab_Room(_serverTab, this);
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, "New room"));
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, "New room " + QString::number(roomNumber++)));
 
     connect(room, &Tab::signalAdd, this, &MainWindow::slotAddDeviceToRoom);
     connect(room, &Tab::signalRemove, this, &MainWindow::slotRemoveDeviceFromRoom);
 }
 
-void MainWindow::on_actionDelete_triggered()
+void MainWindow::on_actionDelete_room_triggered()
 {
     int currentIndex = ui->tabWidget->currentIndex();
     delete ui->tabWidget->widget(currentIndex);
@@ -79,9 +92,9 @@ void MainWindow::slotTabChange(int index)
         return;
 
     if(ui->tabWidget->tabText(index) == server_tab_text )
-        ui->actionDelete->setEnabled(false);
+        ui->actionDelete_room->setEnabled(false);
     else
-        ui->actionDelete->setEnabled(true);
+        ui->actionDelete_room->setEnabled(true);
 }
 
 void MainWindow::slotCloseTab(int index)
@@ -109,13 +122,14 @@ void MainWindow::on_actionAdd_server_triggered()
     _serverList.push_back(server);
 
     GUI_Server *gui_server = new GUI_Server(*server, _serverTab);
+    gui_server->update();
 
     _serverTab.addWidget(gui_server);
 
     ui->actionRemove_server->setEnabled(true);
 
-    connect(server, &Server::signalDeviceCreated, this, &MainWindow::roomsRestructWidget);
-    connect(server, &Server::signalDisconnected, this, &MainWindow::roomsRestructWidget);
+    connect(server, SIGNAL(signalDeviceCreated()), this, SLOT(slotRoomsRestructWidget()));
+    connect(server, SIGNAL(signalDisconnected()), this, SLOT(slotRoomsRestructWidget()));
 }
 
 void MainWindow::on_actionRemove_server_triggered()
@@ -140,17 +154,142 @@ void MainWindow::on_actionRemove_server_triggered()
             ui->actionRemove_server->setEnabled(false);
     }
 
-    roomsRestructWidget();
+    slotRoomsRestructWidget();
 }
 
-void MainWindow::roomsRestructWidget()
+void MainWindow::slotRoomsRestructWidget()
 {
     for(int i = 1; i < ui->tabWidget->count(); i++)
         qobject_cast<Tab_Room*>(ui->tabWidget->widget(i))->restructWidget();
 }
 
+void MainWindow::checkSettingsFileExist()
+{
+    if(!QFileInfo::exists(_settings.fileName()))
+    {
+        _settings.beginGroup("Servers");
+        _settings.beginGroup("server0");
+        _settings.setValue("address", "127.0.0.1");
+        _settings.setValue("port", 2022);
+        _settings.endGroup();
+        _settings.endGroup();
+        _settings.sync();
+    }
+}
+
+void MainWindow::readSettings()
+{
+    _settings.beginGroup("Servers");
+    foreach(const auto &elem, _settings.childGroups())
+    {
+        _settings.beginGroup(elem);
+
+        Server *server = new Server;
+        _serverList.push_back(server);
+
+        server->setName(_settings.group().split('/').at(1));
+        server->setServerAddres(_settings.value("address").toString());
+        server->setServerPort(_settings.value("port").toUInt());
+
+        _settings.beginGroup("alias");
+        foreach(const auto &name, _settings.allKeys())
+            server->addAlias(name, _settings.value(name).toString());
+        _settings.endGroup();
+
+        GUI_Server *gui_server = new GUI_Server(*server, _serverTab);
+        gui_server->update();
+
+        _serverTab.addWidget(gui_server);
+
+        ui->actionRemove_server->setEnabled(true);
+
+        connect(server, SIGNAL(signalDeviceCreated()), this, SLOT(slotRoomsRestructWidget()));
+        connect(server, SIGNAL(signalDisconnected()), this, SLOT(slotRoomsRestructWidget()));
+
+        _settings.endGroup();
+    }
+    _settings.endGroup();
+
+    _settings.beginGroup("Rooms");
+    foreach(const auto &tabNumber, _settings.childGroups())
+    {
+        _settings.beginGroup(tabNumber);
+
+        Tab_Room *room = new Tab_Room(_serverTab, this);
+        ui->tabWidget->setCurrentIndex(ui->tabWidget->addTab(room, _settings.value("tabText").toString()));
+
+        connect(room, &Tab::signalAdd, this, &MainWindow::slotAddDeviceToRoom);
+        connect(room, &Tab::signalRemove, this, &MainWindow::slotRemoveDeviceFromRoom);
+
+        foreach(const auto &serverObjectName, _settings.childGroups())
+        {
+            _settings.beginGroup(serverObjectName);
+            foreach(const auto &dev, _settings.allKeys())
+                room->addDevice(serverObjectName, _settings.value(dev).toString());
+
+            _settings.endGroup();
+        }
+        _settings.endGroup();
+    }
+    _settings.endGroup();
+
+    slotRoomsRestructWidget();
+
+    ui->tabWidget->setCurrentIndex(0);
+}
+
+void MainWindow::saveSettingsServers()
+{
+    _settings.remove("Servers");
+    _settings.beginGroup("Servers");
+    for (const auto &server : _serverList)
+    {
+        _settings.beginGroup(server->getName());
+        _settings.setValue("address", server->getServerAddress());
+        _settings.setValue("port", server->getServerPort());
+
+        _settings.beginGroup("alias");
+        for (const auto &[name, aliasName] : server->getAlias())
+            _settings.setValue(name, aliasName);
+        _settings.endGroup();
+
+        _settings.endGroup();
+    }
+    _settings.endGroup();
+}
+
+void MainWindow::saveSettingsRooms()
+{
+    _settings.remove("Rooms");
+    _settings.beginGroup("Rooms");
+    QTabWidget *tabWidget = ui->tabWidget;
+    for(int i = 1; i < tabWidget->count(); i++)
+    {
+        _settings.beginGroup(QString::number(i));
+        _settings.setValue("tabText", tabWidget->tabText(i));
+
+        Tab_Room *tabRoom = qobject_cast<Tab_Room*>(tabWidget->widget(i));
+        const auto &data = tabRoom->data();
+        uint devNumber = 0;
+        for (const auto &[serverObjectName, deviceSet] : data)
+        {
+            for (const auto &deviceName : deviceSet)
+            {
+                _settings.beginGroup(serverObjectName);
+                _settings.setValue("dev" + QString::number(devNumber++), deviceName);
+                _settings.endGroup();
+            }
+        }
+        _settings.endGroup();
+    }
+    _settings.endGroup();
+}
+
 
 void MainWindow::closeEvent(QCloseEvent *)
 {
+    saveSettingsServers();
+    saveSettingsRooms();
+
     qApp->exit();
 }

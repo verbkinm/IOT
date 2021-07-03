@@ -13,7 +13,7 @@ ObjectList::ObjectList(QObjectList objectlist, QWidget *parent) :
     ui->treeView->setHeaderHidden(true);
     ui->treeView->resizeColumnToContents(0);
 
-    connect(ui->treeView, SIGNAL(clicked(const QModelIndex&)), SLOT(slotClickItem(const QModelIndex&)));
+    connect(ui->treeView, SIGNAL(clicked(QModelIndex)), SLOT(slotClickItem(QModelIndex)));
 }
 
 ObjectList::~ObjectList()

@@ -47,6 +47,9 @@ private:
 private slots:
     void slotInfoPresses();
     void slotSettingPressed();
+
+signals:
+    void signalSettingsEdited();
 };
 
 #endif // GUI_BASE_DEVICE_H

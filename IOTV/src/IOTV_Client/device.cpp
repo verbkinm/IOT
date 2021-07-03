@@ -31,7 +31,7 @@ bool Device::getState() const
     return _state;
 }
 
-int64_t Device::readData(uint8_t channelNumber)
+qint64 Device::readData(uint8_t channelNumber)
 {
     _autoReadInterval.stop(); //??? Если постоянно читать один канал, авточтение не дойдёт до остальных!
     int64_t res =  Protocols::SC.query_READ(*this, _name, channelNumber);
@@ -39,7 +39,7 @@ int64_t Device::readData(uint8_t channelNumber)
     return res;
 }
 
-int64_t Device::writeData(uint8_t channelNumber, Raw::RAW &rawData)
+qint64 Device::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
     return IOTV_SC::query_WRITE(*this, _name, channelNumber, rawData);
 }
