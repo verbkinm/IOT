@@ -5,7 +5,7 @@ Ethernet_conn_type::Ethernet_conn_type(const QString &name, const QString &addre
     _tcpSocket(std::make_unique<QTcpSocket>()), _tcpPort(port)
 {
     _address = address;
-    _conn_type = Conn_type::ETHERNET;
+    _type = Conn_type::ETHERNET;
 
     connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &Ethernet_conn_type::slotNewConnection);
     connect(_tcpSocket.get(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));

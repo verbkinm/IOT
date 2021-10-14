@@ -1,8 +1,12 @@
 #ifndef COM_CONN_TYPE_H
 #define COM_CONN_TYPE_H
 
+#include <QSerialPort>
+
 #include "base_conn_type.h"
 #include "../lib/Log/log.h"
+
+#define DEFAULT_INTERVAL 10000
 
 class COM_conn_type : public Base_conn_type
 {
@@ -10,8 +14,29 @@ class COM_conn_type : public Base_conn_type
 public:
     COM_conn_type(const QString& name, Base_conn_type *parent = nullptr);
 
-public:
+    struct SetingsPort
+    {
+        qint32 baudRate;
+        int dataBits;
+        int parity;
+        int stopBits;
+        int flowControl;
+    };
+
+    void setSettingsPort(const SetingsPort &settingsPort);
+
+    virtual qint64 write(const QByteArray &data) override;
     virtual void connectToHost() override;
+    virtual void disconnectFromHost() override;
+
+private:
+    QSerialPort _serialPort;
+
+private slots:
+    void slotReadData();
+    void slotHandleError(QSerialPort::SerialPortError error);
+
+
 };
 
 #endif // COM_CONN_TYPE_H

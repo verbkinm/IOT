@@ -23,7 +23,7 @@
    <enum>QFrame::StyledPanel</enum>
   </property>
   <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Sunken</enum>
   </property>
   <property name="lineWidth">
    <number>5</number>

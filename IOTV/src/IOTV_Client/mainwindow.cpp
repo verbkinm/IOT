@@ -99,7 +99,10 @@ void MainWindow::slotTabChange(int index)
 
 void MainWindow::slotCloseTab(int index)
 {
-    if(ui->tabWidget->tabText(index) != server_tab_text)
+    if(ui->tabWidget->tabText(index) == server_tab_text)
+        return;
+
+    if(QMessageBox::question(this, "Delete tab", "Are you reale delete this tab?") == QMessageBox::Yes)
         delete ui->tabWidget->widget(index);
 }
 

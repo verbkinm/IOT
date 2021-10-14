@@ -35,14 +35,14 @@ protected:
     Device &_device;
 
     QGridLayout _main_layout;
-    QHBoxLayout _buttonLayout;
-
     QLabel _viewName;
     QPushButton _info, _settingsDevice;
 
 private:
     void newObjectName();
     void setViewNameFont();
+
+    QHBoxLayout _buttonLayout;
 
 private slots:
     void slotInfoPresses();

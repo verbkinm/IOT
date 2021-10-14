@@ -16,7 +16,7 @@ public:
     void printDebugData() const;
 
     void setConnectionTypeEthernet(const QString &addr, quint16 port);
-    void setConnectionTypeCom(const QString &addr);
+    void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
 
     void setInterval(uint interval);
     void setLogFile(const QString &logFile);

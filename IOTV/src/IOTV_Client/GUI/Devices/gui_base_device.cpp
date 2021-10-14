@@ -5,7 +5,7 @@ GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
     QFrame(parent), Observer(), _device(device)
 {
     setFrameStyle(QFrame::StyledPanel);
-    setFrameShadow(QFrame::Raised);
+    setFrameShadow(QFrame::Sunken);
     device.attach(this);
 
     _viewName.setText(_device.getViewName());
@@ -71,11 +71,18 @@ void GUI_Base_Device::stateAndViewName()
     if(_device.getState() && !isEnabled())
         setEnabled(true);
     else if(!_device.getState() && isEnabled())
+    {
         setEnabled(false);
+    }
 
     if(_device.getViewName() != _viewName.text())
         setViewName(_device.getViewName());
 }
+
+//void GUI_Base_Device::addWidget(QWidget *widget, int row, int column, int rowSpan, int columnSpan, Qt::Alignment alignment)
+//{
+//    _deviceLayout.addWidget(widget, row, column, rowSpan, columnSpan, alignment);
+//}
 
 Device &GUI_Base_Device::device() const
 {
@@ -118,3 +125,4 @@ void GUI_Base_Device::slotSettingPressed()
         }
     }
 }
+

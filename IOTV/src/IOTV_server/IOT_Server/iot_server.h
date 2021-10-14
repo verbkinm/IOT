@@ -13,8 +13,6 @@
 #include "protocols.h"
 #include "IOT_Host/IOT_Host.h"
 
-//#define DEFAULT_INTERVAL 5000
-
 class IOT_Server : public QTcpServer
 {
     Q_OBJECT

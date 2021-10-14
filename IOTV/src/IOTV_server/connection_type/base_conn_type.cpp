@@ -13,7 +13,7 @@ Base_conn_type::~Base_conn_type()
 
 Base_conn_type::Conn_type Base_conn_type::getConnectionType() const
 {
-    return _conn_type;
+    return _type;
 }
 
 QString Base_conn_type::getAddress() const

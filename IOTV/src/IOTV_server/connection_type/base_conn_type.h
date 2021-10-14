@@ -32,7 +32,7 @@ public:
 protected:
     const QString _name;
     QString _address;
-    Conn_type _conn_type;
+    Conn_type _type;
     QTimer _reconnectTimer;
 
 signals:

@@ -121,16 +121,21 @@ QString IOT_Host::getName() const
 void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
 {
     _conn_type = std::make_unique<Ethernet_conn_type>(_conn_type.get()->getName());
-    qobject_cast<Ethernet_conn_type*>(_conn_type.get())->setAddress(addr);
-    qobject_cast<Ethernet_conn_type*>(_conn_type.get())->setPort(port);
+
+    Ethernet_conn_type* eth = qobject_cast<Ethernet_conn_type*>(_conn_type.get());
+    eth->setAddress(addr);
+    eth->setPort(port);
 
     connectObjects();
 }
 
-void IOT_Host::setConnectionTypeCom(const QString &addr)
+void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort)
 {
     _conn_type = std::make_unique<COM_conn_type>(_conn_type.get()->getName());
-    qobject_cast<COM_conn_type*>(_conn_type.get())->setAddress(addr);
+
+    COM_conn_type *com = qobject_cast<COM_conn_type*>(_conn_type.get());
+    com->setAddress(addr);
+    com->setSettingsPort(settingPort);
 
     connectObjects();
 }
@@ -152,7 +157,7 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
     if(!_state.testFlag(Flag::ExpectedWay))
     {
-        Log::write(_conn_type->getName() + "WARNING: Received a packet RESPONSE_WAY without a request.");
+        Log::write(_conn_type->getName() + " WARNING: Received a packet RESPONSE_WAY without a request.");
         return;
     }
 
@@ -165,7 +170,7 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
 {
     if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
     {
-        Log::write(_conn_type->getName() + "WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
+        Log::write(_conn_type->getName() + " WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
         return;
     }
 
@@ -191,7 +196,7 @@ void IOT_Host::response_WRITE_recived(const QByteArray &data)
 {
     if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
     {
-        Log::write(_conn_type->getName() + "WARRNING: The device is not registered or initialized, but a packet RESPONSE_WRITE is received.");
+        Log::write(_conn_type->getName() + " WARRNING: The device is not registered or initialized, but a packet RESPONSE_WRITE is received.");
         return;
     }
     IOTV_SH::response_WRITE(*this, data);
@@ -208,8 +213,8 @@ void IOT_Host::setInterval(uint interval)
 //    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
     if(interval)
     {
-        connect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
         _intervalTimer.start(interval);
+        connect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
     }
 }
 

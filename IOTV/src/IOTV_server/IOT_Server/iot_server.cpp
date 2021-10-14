@@ -40,16 +40,28 @@ void IOT_Server::readSettings()
 
         QString connection_type = _settingsHosts.value("connection_type", "ETHERNET").toString();
         QString address = _settingsHosts.value("address", "127.0.0.1").toString();
-        quint16 port = _settingsHosts.value("port", 2021).toUInt();
         uint interval = _settingsHosts.value("interval", 0).toUInt();
         QString logFile = _settingsHosts.value("log_file", "").toString();
 
         _iot_hosts.push_back(std::make_shared<IOT_Host>(group));
 
         if(connection_type == "ETHERNET")
+        {
+            quint16 port = _settingsHosts.value("port", 2021).toUInt();
+
             _iot_hosts.back()->setConnectionTypeEthernet(address, port);
+        }
         else if(connection_type == "COM")
-            _iot_hosts.back()->setConnectionTypeCom(address);
+        {
+            COM_conn_type::SetingsPort settingsPort;
+            settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
+            settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
+            settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
+            settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
+            settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
+
+            _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
+        }
         else
         {
             Log::write("Error: settings file syntax error, [" + group + "]", Log::Flags::WRITE_TO_FILE_AND_STDERR);
@@ -135,7 +147,7 @@ void IOT_Server::slotNewConnection()
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
 }
-// !!!
+//!!!
 void IOT_Server::slotDataRecived()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
@@ -145,7 +157,7 @@ void IOT_Server::slotDataRecived()
                + QString::number(socket->peerPort())
                + " <- " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
 
-    for (auto &packetData : IOTV_SC::splitQueryData(data))
+    for(auto &packetData : IOTV_SC::splitQueryData(data))
     {
         QByteArray buff;
         IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
