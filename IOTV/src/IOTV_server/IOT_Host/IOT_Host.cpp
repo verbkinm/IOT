@@ -6,7 +6,8 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
     connectObjects();
-    connect(this, SIGNAL(signalTimerResponse()), this, SLOT(slotResendData()));
+    connect(this, &IOT_Host::signalTimerResponse, this, &IOT_Host::slotResendData);
+    connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
 
 void IOT_Host::printDebugData() const
@@ -164,6 +165,7 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
     IOTV_SH::response_WAY(*this, data);
 
     setState(true);
+    _timerWAY.stop();
 }
 
 void IOT_Host::response_READ_recived(const QByteArray &data)
@@ -231,6 +233,8 @@ void IOT_Host::slotConnected()
     _conn_type->write(data);
 
     emit signalHostConnected();
+
+    _timerWAY.start(5000);
 }
 
 void IOT_Host::slotDisconnected()
@@ -258,5 +262,13 @@ void IOT_Host::slotTimeOut()
 {
     for (size_t i = 0; i <  readChannelLength(); i++)
         readData(i);
+}
+
+void IOT_Host::slotWAYTimeOut()
+{
+    QByteArray data;
+    IOTV_SH::query_WAY(data);
+    _state.setFlag(ExpectedWay);
+    _conn_type->write(data);
 }
 

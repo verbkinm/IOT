@@ -47,7 +47,7 @@ private:
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
-    QTimer _intervalTimer;
+    QTimer _intervalTimer, _timerWAY;
 
     enum Flag
     {
@@ -68,6 +68,7 @@ private slots:
     void slotResendData();
 
     void slotTimeOut();
+    void slotWAYTimeOut();
 
 signals:
     void signalHostConnected();

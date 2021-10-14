@@ -22,15 +22,18 @@ void loop()
   if(Serial.available() > 0)
   {
     String buffer = Serial.readString();
-    
-    arr.clear();
-    for(int i = 0; i < buffer.length(); i++)
-      arr.push_back((char)buffer[i]);
 
-    //debug_printArray(arr);
-    buffer = "";
-    
-    response(arr); 
+    if(buffer.length() < 256)
+    {
+      arr.clear();
+      for(int i = 0; i < buffer.length(); i++)
+        arr.push_back((char)buffer[i]);
+  
+      //debug_printArray(arr);
+      buffer = "";
+      
+      response(arr); 
+    }
   }
 
   if(iotServer._readChannel[0].ui8 == 0)
