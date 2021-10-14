@@ -65,7 +65,8 @@ private slots:
     void slotConnected();
     void slotDisconnected();
 
-    void slotResendData();
+    void slotResendDataRead();
+    void slotResendDataWrite();
 
     void slotTimeOut();
     void slotWAYTimeOut();

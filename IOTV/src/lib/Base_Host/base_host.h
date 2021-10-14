@@ -10,7 +10,7 @@
 #include "write_channel.h"
 #include "Base_Host_global.h"
 
-#define TIMER_INTERVAL 10000
+#define TIMER_INTERVAL 5000
 
 class BASE_HOST_EXPORT Base_Host : public QObject
 {
@@ -46,7 +46,8 @@ public:
     void eraseExpectedResponseWrite(uint8_t channelNumber);
     void eraseAllExpectedResponse();
 
-    void stopTimer();
+    void stopTimerRead();
+    void stopTimerWrite();
 
     virtual QString getName() const = 0;
     virtual bool getState() const = 0;
@@ -67,10 +68,11 @@ protected:
     std::set<uint8_t> _expectedResponseRead;
     std::map<uint8_t, Raw::RAW> _expectedResponseWrite;
 
-    QTimer _timerResponse;
+    QTimer _timerResponseRead, _timerResponseWrite;
 
 signals:
-    void signalTimerResponse();
+    void signalTimerResponseRead();
+    void signalTimerResponseWrite();
 };
 
 #endif // BASE_HOST_H

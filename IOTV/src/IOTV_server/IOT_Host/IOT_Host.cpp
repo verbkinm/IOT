@@ -6,7 +6,9 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
     connectObjects();
-    connect(this, &IOT_Host::signalTimerResponse, this, &IOT_Host::slotResendData);
+    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
+    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
+
     connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
 
@@ -245,17 +247,22 @@ void IOT_Host::slotDisconnected()
     emit signalHostDisconnected();
 }
 
-void IOT_Host::slotResendData()
+void IOT_Host::slotResendDataWrite()
 {
-    stopTimer();
-
-    const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();
-    for (uint8_t channelNumber : expectedResponseRead)
-        readData(channelNumber);
+    stopTimerWrite();
 
     const std::map<uint8_t, Raw::RAW> &expectedResponseWrite = getExpectedResponseWrite();
     for (auto [key, value] : expectedResponseWrite)
         writeData(key, value);
+}
+
+void IOT_Host::slotResendDataRead()
+{
+    stopTimerRead();
+
+    const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();
+    for (uint8_t channelNumber : expectedResponseRead)
+        readData(channelNumber);
 }
 
 void IOT_Host::slotTimeOut()

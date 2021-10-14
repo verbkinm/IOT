@@ -13,7 +13,7 @@ qint64 IOTV_SH::query_READ(Base_Host &host, uint8_t channelNumber)
     char channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
-    if(!host.insertExpectedResponseRead(channelNumber))
+    if(host.insertExpectedResponseRead(channelNumber))
         return host.writeToServer(data);
 
     return -1;
@@ -32,7 +32,7 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
     for (uint16_t i = 0; i < Raw::size; i++)
         data.append(rawData.array[i]);
 
-    if(!host.insertExpectedResponseWrite(channelNumber, rawData))
+    if(host.insertExpectedResponseWrite(channelNumber, rawData))
         return host.writeToServer(data);
 
     return -1;

@@ -2,7 +2,8 @@
 
 Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent), _id(id), _description("None description")
 {
-    connect(&_timerResponse, &QTimer::timeout, this, &Base_Host::signalTimerResponse);
+    connect(&_timerResponseRead, &QTimer::timeout, this, &Base_Host::signalTimerResponseRead);
+    connect(&_timerResponseWrite, &QTimer::timeout, this, &Base_Host::signalTimerResponseWrite);
 }
 
 Base_Host::~Base_Host()
@@ -68,7 +69,7 @@ bool Base_Host::insertExpectedResponseRead(uint8_t channelNumber)
     }
 
     _expectedResponseRead.insert(channelNumber);
-    _timerResponse.start(TIMER_INTERVAL);
+    _timerResponseRead.start(TIMER_INTERVAL);
 
     return true;
 }
@@ -85,7 +86,7 @@ bool Base_Host::insertExpectedResponseWrite(uint8_t channelNumber, Raw::RAW rawD
     }
 
     _expectedResponseWrite[channelNumber] = rawData;
-    _timerResponse.start(TIMER_INTERVAL);
+    _timerResponseWrite.start(TIMER_INTERVAL);
     return true;
 }
 
@@ -105,9 +106,14 @@ void Base_Host::eraseAllExpectedResponse()
     _expectedResponseWrite.clear();
 }
 
-void Base_Host::stopTimer()
+void Base_Host::stopTimerWrite()
 {
-    _timerResponse.stop();
+    _timerResponseWrite.stop();
+}
+
+void Base_Host::stopTimerRead()
+{
+    _timerResponseRead.stop();
 }
 
 const std::set<uint8_t> &Base_Host::getExpectedResponseRead() const
