@@ -46,9 +46,6 @@ public:
     void eraseExpectedResponseWrite(uint8_t channelNumber);
     void eraseAllExpectedResponse();
 
-    void stopTimerRead();
-    void stopTimerWrite();
-
     virtual QString getName() const = 0;
     virtual bool getState() const = 0;
     virtual void setState(bool state) = 0;
@@ -68,11 +65,8 @@ protected:
     std::set<uint8_t> _expectedResponseRead;
     std::map<uint8_t, Raw::RAW> _expectedResponseWrite;
 
-    QTimer _timerResponseRead, _timerResponseWrite;
-
-signals:
-    void signalTimerResponseRead();
-    void signalTimerResponseWrite();
+    QTimer _timerResponseRead;
+    QTimer _timerResponseWrite;
 };
 
 #endif // BASE_HOST_H

@@ -6,8 +6,9 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
     connectObjects();
-    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
-    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
+
+    connect(&_timerResponseRead, SIGNAL(timeout()), this, SLOT(slotResendDataRead()));
+    connect(&_timerResponseWrite, SIGNAL(timeout()), this, SLOT(slotResendDataWrite()));
 
     connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
@@ -112,7 +113,7 @@ void IOT_Host::dataResived(QByteArray data)
         else
             Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
 
-        emit signalDataRiceved(); // !!!
+        //        emit signalDataRiceved(); // !!!
     }
 }
 
@@ -130,6 +131,9 @@ void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
     eth->setPort(port);
 
     connectObjects();
+
+//    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
+//    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
 }
 
 void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort)
@@ -141,6 +145,9 @@ void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::Se
     com->setSettingsPort(settingPort);
 
     connectObjects();
+
+//    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
+//    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
 }
 
 
@@ -154,6 +161,9 @@ void IOT_Host::connectObjects() const
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
     connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
+
+//    connect(&_timerResponseRead, SIGNAL(timeout()), this, SLOT(slotResendDataRead()));
+//    connect(&_timerResponseWrite, SIGNAL(timeout()), this, SLOT(slotResendDataWrite()));
 }
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
@@ -214,7 +224,7 @@ void IOT_Host::setLogFile(const QString &logFile)
 void IOT_Host::setInterval(uint interval)
 {
     _intervalTimer.stop();
-//    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
+    //    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
     if(interval)
     {
         _intervalTimer.start(interval);
@@ -249,7 +259,8 @@ void IOT_Host::slotDisconnected()
 
 void IOT_Host::slotResendDataWrite()
 {
-    stopTimerWrite();
+    _timerResponseWrite.stop();
+//    stopTimerWrite();
 
     const std::map<uint8_t, Raw::RAW> &expectedResponseWrite = getExpectedResponseWrite();
     for (auto [key, value] : expectedResponseWrite)
@@ -258,7 +269,8 @@ void IOT_Host::slotResendDataWrite()
 
 void IOT_Host::slotResendDataRead()
 {
-    stopTimerRead();
+//    stopTimerRead();
+    _timerResponseRead.stop();
 
     const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();
     for (uint8_t channelNumber : expectedResponseRead)

@@ -75,7 +75,7 @@ signals:
     void signalHostConnected();
     void signalHostDisconnected();
 
-    void signalDataRiceved(); //!!!
+    void signalDataRiceved(); // !!!
 
     void signalResponse_Way();
 };

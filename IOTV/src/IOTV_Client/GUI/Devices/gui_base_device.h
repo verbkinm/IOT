@@ -26,7 +26,7 @@ public:
     QString getServerObjectName() const;
     QString getName() const;
 
-    Device &device() const; //!!!
+//    Device &device() const; //!!!
 
 protected:
     void setViewName(const QString &name);

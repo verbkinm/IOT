@@ -70,12 +70,38 @@ void Ethernet_conn_type::slotSocketDisconnected()
 
 void Ethernet_conn_type::slotReadData()
 {
-    QByteArray data = _tcpSocket->readAll();
+    static QByteArray data;
+    QByteArray buffer;
 
-    QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
-                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
-    Log::write(strOut);
-    emit signalDataRiceved(data);
+    data += _tcpSocket->readAll();
+
+    if(!data.contains("\r\n"))
+    {
+        if(data.length() > 256)
+            Log::write(_name + "Buffer overload: " + data, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+
+        return;
+    }
+    else
+    {
+        auto index = data.indexOf("\r\n");
+        buffer = data.mid(0, index);
+        data = data.mid(index + 2);
+
+        if(!buffer.size() || buffer == "\r\n")
+            return;
+
+        QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
+                         + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + buffer.toHex(':');
+        Log::write(strOut);
+        emit signalDataRiceved(buffer);
+    }
+//    QByteArray data = _tcpSocket->readAll();
+
+//    QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
+//                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
+//    Log::write(strOut);
+//    emit signalDataRiceved(data);
 }
 
 void Ethernet_conn_type::slotError(QAbstractSocket::SocketError error)
@@ -90,16 +116,22 @@ void Ethernet_conn_type::slotError(QAbstractSocket::SocketError error)
         strErr = "The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.";
         break;
     case QAbstractSocket::HostNotFoundError:
+        strErr = "The host address was not found.";
         break;
     case QAbstractSocket::SocketAccessError:
+        strErr = "The socket operation failed because the application lacked the required privileges.";
         break;
     case QAbstractSocket::SocketResourceError:
+        strErr = "The local system ran out of resources (e.g., too many sockets).";
         break;
     case QAbstractSocket::SocketTimeoutError:
+        strErr = "The socket operation timed out.";
         break;
     case QAbstractSocket::DatagramTooLargeError:
+        strErr = "The datagram was larger than the operating system's limit (which can be as low as 8192 bytes).";
         break;
     case QAbstractSocket::NetworkError:
+        strErr = "An error occurred with the network (e.g., the network cable was accidentally plugged out).";
         break;
     case QAbstractSocket::AddressInUseError:
         break;
@@ -130,6 +162,7 @@ void Ethernet_conn_type::slotError(QAbstractSocket::SocketError error)
     case QAbstractSocket::SslInvalidUserDataError:
         break;
     case QAbstractSocket::TemporaryError:
+        strErr = "A temporary error occurred (e.g., operation would block and socket is non-blocking).";
         break;
     case QAbstractSocket::UnknownSocketError:
         strErr = "UnknownSocketError";

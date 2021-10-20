@@ -84,10 +84,10 @@ void GUI_Base_Device::stateAndViewName()
 //    _deviceLayout.addWidget(widget, row, column, rowSpan, columnSpan, alignment);
 //}
 
-Device &GUI_Base_Device::device() const
-{
-    return _device;
-}
+//Device &GUI_Base_Device::device() const
+//{
+//    return _device;
+//}
 
 void GUI_Base_Device::newObjectName()
 {

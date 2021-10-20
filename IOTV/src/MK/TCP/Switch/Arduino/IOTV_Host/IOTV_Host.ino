@@ -1,20 +1,10 @@
-#include <Wire.h>
-#include "Adafruit_VL6180X.h"
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
 IOT_Server iotServer;
+
 Array<char> arr;
 
-const byte     ledPin            = 13;    // номер вывода со светодиодом
-byte           ledState          = LOW;
-const int      relePin           = 10;      //пин для реле
-byte           releState         = LOW;
-bool           powerOn           = false;
-
-Adafruit_VL6180X vl = Adafruit_VL6180X();
-
-void powerShift(int _delay = 500);
 void response(Array<char> &data);
 void postResponse(Array<char> &data);
 
@@ -23,22 +13,8 @@ void debug_printArray(Array<char> &data);
 void setup() 
 {
   Serial.begin(115200);
-
-  vl.begin();
-
-  pinMode(ledPin, OUTPUT);
-  pinMode(relePin, OUTPUT);
-
-  digitalWrite(ledPin, HIGH);
-  
-  for(int i = 0; i < 19; i++)
-  {
-    ledState = !ledState;
-    digitalWrite(ledPin, ledState); 
-    delay(50);
-  }
-  
-  digitalWrite(relePin,releState);
+  pinMode(LED_BUILTIN, OUTPUT);
+  //Serial.setTimeout(1000);
 }
 
 void loop() 
@@ -61,15 +37,10 @@ void loop()
   }
 
   if(iotServer._readChannel[0].ui8 == 0)
-  {
-    powerOn = true;
-    powerShift();
-  }
+    digitalWrite(LED_BUILTIN, LOW);
   else if(iotServer._readChannel[0].ui8 == 1)
-  {
-    powerOn = false;
-    powerShift();
-  }
+    digitalWrite(LED_BUILTIN, HIGH);
+  
 }
 
 void response(Array<char> &data)
@@ -84,12 +55,8 @@ void response(Array<char> &data)
     else if(dataType == Protocol_class::query_type::QUERY_READ)
       Protocol_class::response_READ(iotServer, tmpData);
     else if(dataType == Protocol_class::query_type::QUERY_WRITE)
-    {
-      if(tmpData.size() < ((data[1] | data[2]) + 3))
-        return;
       Protocol_class::response_WRITE(iotServer, tmpData);
-    }
-    else
+   else
       return;
 
   debug_printArray(tmpData);
@@ -117,26 +84,7 @@ void postResponse(Array<char> &data)
 void debug_printArray(Array<char> &data)
 {
   for(int i = 0; i < data.size(); i++)
-    Serial.print(data[i]);
-  Serial.print("\r\n");
-}
+    Serial.print(data[i]); 
 
-void powerShift(int _delay = 500)
-{
-  powerOn = !powerOn;
-  if(powerOn)
-  {
-    ledState = LOW;
-    releState = HIGH;
-  }
-  else 
-  {
-    ledState = HIGH;
-    releState = LOW;
-  }
-  
-  digitalWrite(ledPin,  ledState);
-  digitalWrite(relePin, releState);
-    
-  delay(_delay);
+  Serial.print("\r\n");
 }

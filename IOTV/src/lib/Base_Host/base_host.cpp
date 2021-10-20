@@ -2,15 +2,13 @@
 
 Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent), _id(id), _description("None description")
 {
-    connect(&_timerResponseRead, &QTimer::timeout, this, &Base_Host::signalTimerResponseRead);
-    connect(&_timerResponseWrite, &QTimer::timeout, this, &Base_Host::signalTimerResponseWrite);
+
 }
 
 Base_Host::~Base_Host()
 {
 
 }
-
 
 bool Base_Host::addReadSubChannel(Raw::DATA_TYPE dataType)
 {
@@ -106,15 +104,15 @@ void Base_Host::eraseAllExpectedResponse()
     _expectedResponseWrite.clear();
 }
 
-void Base_Host::stopTimerWrite()
-{
-    _timerResponseWrite.stop();
-}
+//void Base_Host::stopTimerWrite()
+//{
+//    _timerResponseWrite.stop();
+//}
 
-void Base_Host::stopTimerRead()
-{
-    _timerResponseRead.stop();
-}
+//void Base_Host::stopTimerRead()
+//{
+//    _timerResponseRead.stop();
+//}
 
 const std::set<uint8_t> &Base_Host::getExpectedResponseRead() const
 {
