@@ -11,7 +11,6 @@
 
 #define DEFAULT_ADDRESS "127.0.0.1"
 #define DEFAULT_PORT 2021
-#define DEFAULT_INTERVAL 10000
 
 class Ethernet_conn_type : public Base_conn_type
 {

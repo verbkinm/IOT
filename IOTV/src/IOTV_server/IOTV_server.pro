@@ -13,6 +13,7 @@ SOURCES += \
         connection_type/com_conn_type.cpp \
         connection_type/ethernet_conn_type.cpp \
         IOT_Server/iot_server.cpp \
+        connection_type/file_conn_type.cpp \
         main.cpp \
         IOT_Host/IOT_Host.cpp \
         wrapper.cpp
@@ -28,6 +29,7 @@ HEADERS += \
     connection_type/ethernet_conn_type.h \
     IOT_Host/IOT_Host.h \
     IOT_Server/iot_server.h \
+    connection_type/file_conn_type.h \
     wrapper.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw

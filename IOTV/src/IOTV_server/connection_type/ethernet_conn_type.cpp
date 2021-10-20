@@ -96,12 +96,6 @@ void Ethernet_conn_type::slotReadData()
         Log::write(strOut);
         emit signalDataRiceved(buffer);
     }
-//    QByteArray data = _tcpSocket->readAll();
-
-//    QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
-//                     + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + data.toHex(':');
-//    Log::write(strOut);
-//    emit signalDataRiceved(data);
 }
 
 void Ethernet_conn_type::slotError(QAbstractSocket::SocketError error)

@@ -62,6 +62,10 @@ void IOT_Server::readSettings()
 
             _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
         }
+        else if(connection_type == "FILE")
+        {
+            _iot_hosts.back()->setConnectionTypeFile(address);
+        }
         else
         {
             Log::write("Error: settings file syntax error, [" + group + "]", Log::Flags::WRITE_TO_FILE_AND_STDERR);
@@ -215,7 +219,7 @@ void IOT_Server::slotDataRecived()
                 {
                     uint8_t nameLength = packetData.at(0) >> 3;
                     uint8_t channelNumber = packetData.at(1) & 0x0F;
-//                    QByteArray deviceName = packetData.mid(4, nameLength);
+                    //                    QByteArray deviceName = packetData.mid(4, nameLength);
 
                     uint16_t dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 

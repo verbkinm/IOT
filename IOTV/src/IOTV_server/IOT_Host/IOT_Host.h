@@ -5,6 +5,7 @@
 
 #include "connection_type/ethernet_conn_type.h"
 #include "connection_type/com_conn_type.h"
+#include "connection_type/file_conn_type.h"
 #include "base_host.h"
 
 class IOT_Host : public Base_Host
@@ -17,6 +18,7 @@ public:
 
     void setConnectionTypeEthernet(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
+    void setConnectionTypeFile(const QString &addr);
 
     void setInterval(uint interval);
     void setLogFile(const QString &logFile);
@@ -28,7 +30,6 @@ public:
 
     virtual void setState(bool state) override;
     virtual bool getState() const override;
-
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;

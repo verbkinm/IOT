@@ -1,6 +1,8 @@
 #ifndef BASE_CONN_TYPE_H
 #define BASE_CONN_TYPE_H
 
+#define DEFAULT_INTERVAL 10000 // таймер неудавшегося подключения
+
 #include <QTimer>
 
 class Base_conn_type : public QObject
@@ -15,6 +17,7 @@ public:
         NONE,
         COM,
         ETHERNET,
+        FILE
     };
 
     QString getName() const;

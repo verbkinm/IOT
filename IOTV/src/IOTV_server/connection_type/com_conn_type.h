@@ -6,7 +6,6 @@
 #include "base_conn_type.h"
 #include "../lib/Log/log.h"
 
-#define DEFAULT_INTERVAL 10000
 
 class COM_conn_type : public Base_conn_type
 {

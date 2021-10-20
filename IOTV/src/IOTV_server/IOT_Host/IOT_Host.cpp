@@ -131,9 +131,6 @@ void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
     eth->setPort(port);
 
     connectObjects();
-
-//    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
-//    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
 }
 
 void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort)
@@ -145,9 +142,13 @@ void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::Se
     com->setSettingsPort(settingPort);
 
     connectObjects();
+}
 
-//    connect(this, &IOT_Host::signalTimerResponseRead, this, &IOT_Host::slotResendDataRead);
-//    connect(this, &IOT_Host::signalTimerResponseWrite, this, &IOT_Host::slotResendDataWrite);
+void IOT_Host::setConnectionTypeFile(const QString &addr)
+{
+    _conn_type = std::make_unique<File_conn_type>(_conn_type.get()->getName(), addr);
+
+    connectObjects();
 }
 
 
@@ -161,9 +162,6 @@ void IOT_Host::connectObjects() const
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
     connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
-
-//    connect(&_timerResponseRead, SIGNAL(timeout()), this, SLOT(slotResendDataRead()));
-//    connect(&_timerResponseWrite, SIGNAL(timeout()), this, SLOT(slotResendDataWrite()));
 }
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
@@ -260,7 +258,7 @@ void IOT_Host::slotDisconnected()
 void IOT_Host::slotResendDataWrite()
 {
     _timerResponseWrite.stop();
-//    stopTimerWrite();
+    //    stopTimerWrite();
 
     const std::map<uint8_t, Raw::RAW> &expectedResponseWrite = getExpectedResponseWrite();
     for (auto [key, value] : expectedResponseWrite)
@@ -269,7 +267,7 @@ void IOT_Host::slotResendDataWrite()
 
 void IOT_Host::slotResendDataRead()
 {
-//    stopTimerRead();
+    //    stopTimerRead();
     _timerResponseRead.stop();
 
     const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();
