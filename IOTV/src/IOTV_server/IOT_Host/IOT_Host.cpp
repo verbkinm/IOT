@@ -104,7 +104,7 @@ void IOT_Host::dataResived(QByteArray data)
         if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
         {
             response_WAY_recived(packetData);
-            emit signalResponse_Way();
+//            emit signalResponse_Way();
         }
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
             response_READ_recived(packetData);
@@ -237,14 +237,14 @@ QString IOT_Host::getLogFile() const
 
 void IOT_Host::slotConnected()
 {
+    _timerWAY.start(5000);
+
     QByteArray data;
     IOTV_SH::query_WAY(data);
     _state.setFlag(ExpectedWay);
     _conn_type->write(data);
 
     emit signalHostConnected();
-
-    _timerWAY.start(5000);
 }
 
 void IOT_Host::slotDisconnected()

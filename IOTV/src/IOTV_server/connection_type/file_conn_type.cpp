@@ -8,6 +8,9 @@ File_conn_type::File_conn_type(const QString &name, const QString& fileName, Bas
 
 qint64 File_conn_type::write(const QByteArray &data)
 {
+    QString strOut = _name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':');
+    Log::write(strOut);
+
     QByteArray buffer;
     if(data.size() == 1 && data[0] == QUERY_WAY_BYTE)
     {
@@ -30,9 +33,19 @@ qint64 File_conn_type::write(const QByteArray &data)
             buffer.push_back(byte);
 
         buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
-    }
+        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
 
-    emit signalDataRiceved(buffer);
+        strOut = _name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':');
+        Log::write(strOut);
+
+        emit signalDataRiceved(buffer);
+        return 0;
+    }
+    else if(data.size() == 1 && data[0] == QUERY_READ_BYTE)
+    {
+        _file.reset();
+        Log::write(_file.readAll(), Log::Flags::WRITE_TO_STDOUT_ONLY);
+    }
 
     return 0;
 }

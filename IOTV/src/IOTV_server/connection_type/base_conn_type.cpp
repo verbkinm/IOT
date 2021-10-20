@@ -50,6 +50,8 @@ QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
         return "COM";
     else if(conn_type == Conn_type::ETHERNET)
         return "ETHERNET";
+    else if(conn_type == Conn_type::FILE)
+        return "FILE";
 
     return "UNKNOW";
 }
