@@ -4,6 +4,7 @@
 #include "gui_device_switch.h"
 #include "gui_device_weather_station.h"
 #include "gui_device_unknow.h"
+#include "gui_device_text.h"
 
 #include "device.h"
 

@@ -7,6 +7,7 @@ class Read_Channel : public Channel
 {
 public:
     bool addSubchannel(const Raw::DATA_TYPE dataType);
+    ~Read_Channel();
 
     virtual bool removeSubchannel(uint8_t index) override;
     virtual void removeAllSubchanel() override;

@@ -19,9 +19,14 @@ GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
     _settingsDevice.setIcon(QIcon(":/edit"));
     _settingsDevice.setIconSize(QSize(26, 26));
 
+    _showFull.setFixedSize(28, 28);
+    _showFull.setIcon(QIcon(":/devices/showFull"));
+    _showFull.setIconSize(QSize(26, 26));
+
     _buttonLayout.addStretch();
     _buttonLayout.addWidget(&_settingsDevice);
     _buttonLayout.addWidget(&_info);
+    _buttonLayout.addWidget(&_showFull);
 
     _main_layout.addWidget(&_viewName, 0, 0, 1, 3, Qt::AlignCenter);
     _main_layout.addLayout(&_buttonLayout, 1, 0, 1, 3, Qt::AlignCenter);
@@ -31,6 +36,7 @@ GUI_Base_Device::GUI_Base_Device(Device &device, QWidget *parent) :
 
     connect(&_info, &QPushButton::clicked, this, &GUI_Base_Device::slotInfoPresses);
     connect(&_settingsDevice, &QPushButton::clicked, this, &GUI_Base_Device::slotSettingPressed);
+    connect(&_showFull, &QPushButton::clicked, this, &GUI_Base_Device::slotShowFull);
 
     setMaximumSize(200, 150);
 

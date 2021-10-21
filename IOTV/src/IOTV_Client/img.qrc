@@ -15,5 +15,6 @@
         <file alias="switch_on">img/devices/switch_enabled.png</file>
         <file alias="info">img/devices/info.png</file>
         <file alias="unknow">img/devices/Unknow.png</file>
+        <file alias="showFull">img/devices/showFull.png</file>
     </qresource>
 </RCC>

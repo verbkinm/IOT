@@ -258,7 +258,6 @@ void IOT_Host::slotDisconnected()
 void IOT_Host::slotResendDataWrite()
 {
     _timerResponseWrite.stop();
-    //    stopTimerWrite();
 
     const std::map<uint8_t, Raw::RAW> &expectedResponseWrite = getExpectedResponseWrite();
     for (auto [key, value] : expectedResponseWrite)
@@ -267,7 +266,6 @@ void IOT_Host::slotResendDataWrite()
 
 void IOT_Host::slotResendDataRead()
 {
-    //    stopTimerRead();
     _timerResponseRead.stop();
 
     const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();

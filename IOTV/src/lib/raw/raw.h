@@ -46,7 +46,7 @@ public:
         double d;           // 10 double32
                             // 11 double64
         bool b;             // 12
-        const char* str;    // 13
+        char* str;          // 13
 
         char array[8];      // побайтный доступ к RAW
     };
@@ -56,16 +56,7 @@ public:
     static std::string toString(DATA_TYPE dataType);
     static std::string toString(DATA_TYPE dataType, Raw::RAW data);
 
-    static const uint8_t size = 8;
-
-//    Integer& operator=(const Integer& right) {
-//        //проверка на самоприсваивание
-//        if (this == &right) {
-//            return *this;
-//        }
-//        value = right.value;
-//        return *this;
-//    }
+    static const uint8_t size = sizeof (RAW); //!!!
 };
 
 #endif // RAW_H

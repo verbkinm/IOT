@@ -8,6 +8,10 @@
 #define QUERY_READ_BYTE 0x02
 #define QUERY_WRITE_BYTE 0x00
 
+#define RESPONSE_WAY_BYTE 0x05
+#define RESPONSE_READ_BYTE 0x06
+#define RESPONSE_WRITE_BYTE 0x04
+
 class IOTV_SH
 {
 public:

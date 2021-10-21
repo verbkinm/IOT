@@ -95,6 +95,9 @@ void Base_Host::eraseExpectedResponseRead(uint8_t channelNumber)
 
 void Base_Host::eraseExpectedResponseWrite(uint8_t channelNumber)
 {
+    if(_readChannel.getDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && _readChannel.getData(channelNumber).str != nullptr)
+        delete[] _readChannel.getData(channelNumber).str;
+
     _expectedResponseWrite.erase(channelNumber);
 }
 
@@ -103,16 +106,6 @@ void Base_Host::eraseAllExpectedResponse()
     _expectedResponseRead.clear();
     _expectedResponseWrite.clear();
 }
-
-//void Base_Host::stopTimerWrite()
-//{
-//    _timerResponseWrite.stop();
-//}
-
-//void Base_Host::stopTimerRead()
-//{
-//    _timerResponseRead.stop();
-//}
 
 const std::set<uint8_t> &Base_Host::getExpectedResponseRead() const
 {

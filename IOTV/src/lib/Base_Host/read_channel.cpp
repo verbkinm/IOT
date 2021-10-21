@@ -10,12 +10,27 @@ bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
     return true;
 }
 
+Read_Channel::~Read_Channel()
+{
+    for(size_t i = 0; i < _data.size(); i++)
+    {
+        if(_dataType.at(i) == Raw::DATA_TYPE::CHAR_PTR && _data.at(i).str != nullptr)
+            delete[] _data.at(i).str;
+
+        _dataType.erase(_dataType.begin() + i);
+        _data.erase(_data.begin() + i);
+    }
+}
+
 bool Read_Channel::removeSubchannel(uint8_t index)
 {
     try
     {
         if(index >= _dataType.size())
             throw std::out_of_range{"out of range"};
+
+        if(_dataType.at(index) == Raw::DATA_TYPE::CHAR_PTR && _data.at(index).str != nullptr)
+            delete[] _data.at(index).str;
 
         _dataType.erase(_dataType.begin() + index);
         _data.erase(_data.begin() + index);
@@ -31,7 +46,9 @@ bool Read_Channel::removeSubchannel(uint8_t index)
 
 void Read_Channel::removeAllSubchanel()
 {
-    _data.clear();
+    for(size_t i = 0; i < _data.size(); i++)
+        removeSubchannel(i);
+
     _dataType.clear();
 }
 

@@ -8,7 +8,6 @@ public:
     virtual ~Observer(){};
 
     virtual void update() = 0;
-//    virtual void selfDestroy() = 0;
 };
 
 #endif // OBSERVER_H

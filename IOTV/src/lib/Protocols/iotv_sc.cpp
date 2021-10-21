@@ -42,18 +42,34 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
     QByteArray data;
 
     if(deviceName.length() > MAX_LENGTH_DEVICE_NAME || channelNumber > 0x0f)
-        return false;
+        return -1;
 
     data.append(deviceName.length() << 3);
     data.append(channelNumber);
 
-    data.append(char(0x00));
-    data.append(0x08);
+    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
+    {
+        char* ptr = rawData.str;
+        uint16_t strLength = strlen(ptr);
 
-    data.append(deviceName.toUtf8());
+        data.append(strLength >> 8);
+        data.append(strLength);
 
-    for (uint16_t i = 0; i < Raw::size; i++)
-        data.append(rawData.array[i]);
+        data.append(deviceName.toUtf8());
+
+        for (uint16_t i = 0; i < strLength; i++)
+            data.append(ptr[i]);
+    }
+    else
+    {
+        data.append(Raw::size >> 8);
+        data.append(Raw::size);
+
+        data.append(deviceName.toUtf8());
+
+        for (uint16_t i = 0; i < Raw::size; i++)
+            data.append(rawData.array[i]);
+    }
 
     if(host.insertExpectedResponseWrite(channelNumber, rawData))
         return host.writeToServer(data);
@@ -97,8 +113,31 @@ void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
 
     QByteArray buf = data.mid(4 + nameLength);
     Raw::RAW rawData;
-    for (uint8_t i = 0; i < dataLength; i++)
-        rawData.array[i] = buf.at(i);
+
+    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    {
+        char *ptr = new char[dataLength + 1];
+
+        for (uint16_t i = 0; i < dataLength; i++)
+            ptr[i] = buf.at(i);
+        ptr[dataLength] = '\0';
+
+        if(host.getReadChannelData(channelNumber).str != nullptr && strcmp(ptr, host.getReadChannelData(channelNumber).str) == 0)
+        {
+            rawData.str = host.getReadChannelData(channelNumber).str;
+            delete[] ptr;
+        }
+        else
+        {
+            delete[] host.getReadChannelData(channelNumber).str;
+            rawData.str = ptr;
+        }
+    }
+    else
+    {
+        for (uint8_t i = 0; i < dataLength; i++)
+            rawData.array[i] = buf.at(i);
+    }
 
     host.setReadChannelData(channelNumber, rawData);
     host.eraseExpectedResponseRead(channelNumber);
@@ -158,12 +197,28 @@ void IOTV_SC::responceToClient_Read(const Base_Host &host, QByteArray &data)
 
     data.append((nameLength << 3) | RESPONCE_READ);
     data.append(channelNumber);
-    data.append(Raw::size >> 8);
-    data.append(Raw::size);
-    data.append(deviceName.toUtf8());
 
-    for (uint8_t i = 0; i < Raw::size; i++)
-        data.append(raw.array[i]);
+    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    {
+        size_t strLength = strlen(raw.str);
+
+        data.append(strLength >> 8);
+        data.append(strLength);
+        data.append(deviceName.toUtf8());
+
+        for (uint8_t i = 0; i < strLength; i++)
+            data.append(raw.str[i]);
+    }
+    else
+    {
+        data.append(Raw::size >> 8);
+        data.append(Raw::size);
+
+        data.append(deviceName.toUtf8());
+
+        for (uint8_t i = 0; i < Raw::size; i++)
+            data.append(raw.array[i]);
+    }
 }
 
 void IOTV_SC::responceToClient_Write(QByteArray &data)

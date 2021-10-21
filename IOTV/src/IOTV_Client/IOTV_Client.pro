@@ -13,9 +13,11 @@ SOURCES += \
     GUI/Devices/gui_device_cap.cpp \
     GUI/Devices/gui_device_creator.cpp \
     GUI/Devices/gui_device_switch.cpp \
+    GUI/Devices/gui_device_text.cpp \
     GUI/Devices/gui_device_unknow.cpp \
     GUI/Devices/gui_device_weather_station.cpp \
     GUI/Devices/gui_edit_base_device.cpp \
+    GUI/Devices/Full/gui_full_text.cpp \
     GUI/tab_room.cpp \
     GUI/gui_edit_server.cpp \
     GUI/gui_server.cpp \
@@ -32,9 +34,11 @@ HEADERS += \
     GUI/Devices/gui_device_cap.h \
     GUI/Devices/gui_device_creator.h \
     GUI/Devices/gui_device_switch.h \
+    GUI/Devices/gui_device_text.h \
     GUI/Devices/gui_device_unknow.h \
     GUI/Devices/gui_device_weather_station.h \
     GUI/Devices/gui_edit_base_device.h \
+    GUI/Devices/Full/gui_full_text.h \
     GUI/tab_room.h \
     GUI/gui_edit_server.h \
     GUI/gui_server.h \

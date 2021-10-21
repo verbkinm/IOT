@@ -26,14 +26,29 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
     char channel = channelNumber << 4;
     data.append(channel | QUERY_WRITE_BYTE);
 
-    data.append(char(0x00));
-    data.append(0x08);
+    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
+    {
+        uint16_t strLength = strlen(rawData.str);
+        data.append(strLength >> 8);
+        data.append(strLength);
 
-    for (uint16_t i = 0; i < Raw::size; i++)
-        data.append(rawData.array[i]);
+        for (uint16_t i = 0; i < strLength; i++)
+            data.append(rawData.str[i]);
+    }
+    else
+    {
+        data.append(char(0x00));
+        data.append(0x08);
+
+        for (uint16_t i = 0; i < Raw::size; i++)
+            data.append(rawData.array[i]);
+    }
 
     if(host.insertExpectedResponseWrite(channelNumber, rawData))
         return host.writeToServer(data);
+    else
+        delete[] rawData.str;
+
 
     return -1;
 }
@@ -76,8 +91,31 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
 
     QByteArray buf = data.mid(3);
     Raw::RAW rawData;
-    for (uint8_t i = 0; i < dataLength; i++)
-        rawData.array[i] = buf.at(i);
+
+    if(iotHost.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    {
+        char *ptr = new char[dataLength + 1];
+
+        for (uint16_t i = 0; i < dataLength; i++)
+            ptr[i] = buf.at(i);
+        ptr[dataLength] = '\0';
+
+        if(iotHost.getReadChannelData(channelNumber).str != nullptr && strcmp(ptr, iotHost.getReadChannelData(channelNumber).str) == 0)
+        {
+            rawData.str = iotHost.getReadChannelData(channelNumber).str;
+            delete[] ptr;
+        }
+        else
+        {
+            delete[] iotHost.getReadChannelData(channelNumber).str;
+            rawData.str = ptr;
+        }
+    }
+    else
+    {
+        for (uint8_t i = 0; i < dataLength; i++)
+            rawData.array[i] = buf.at(i);
+    }
 
     iotHost.setReadChannelData(channelNumber, rawData);
     iotHost.eraseExpectedResponseRead(channelNumber);

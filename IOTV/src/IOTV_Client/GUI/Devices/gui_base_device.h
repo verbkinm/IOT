@@ -1,7 +1,6 @@
 #ifndef GUI_BASE_DEVICE_H
 #define GUI_BASE_DEVICE_H
 
-#include <QWidget>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -10,8 +9,6 @@
 
 #include "Patterns/observer.h"
 #include "gui_edit_base_device.h"
-
-#include "memory"
 
 class Device;
 
@@ -26,8 +23,6 @@ public:
     QString getServerObjectName() const;
     QString getName() const;
 
-//    Device &device() const; //!!!
-
 protected:
     void setViewName(const QString &name);
     void stateAndViewName();
@@ -36,7 +31,7 @@ protected:
 
     QGridLayout _main_layout;
     QLabel _viewName;
-    QPushButton _info, _settingsDevice;
+    QPushButton _info, _settingsDevice, _showFull;
 
 private:
     void newObjectName();
@@ -47,6 +42,9 @@ private:
 private slots:
     void slotInfoPresses();
     void slotSettingPressed();
+
+protected slots:
+    virtual void slotShowFull(){};
 
 signals:
     void signalSettingsEdited();
