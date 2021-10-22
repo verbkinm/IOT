@@ -16,8 +16,7 @@ public:
 
     Raw::RAW getData(uint8_t index) const;
 
-    Raw::RAW *strPointer(uint8_t index);
-
+    bool clearPointerRAW(uint8_t index);
 
 private:
     std::vector<Raw::RAW> _data;

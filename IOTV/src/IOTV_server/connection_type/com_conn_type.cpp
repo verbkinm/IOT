@@ -136,7 +136,7 @@ void COM_conn_type::slotReadData()
 
     if(!data.contains("\r\n"))
     {
-        if(data.length() > 256)
+        if(data.length() > BUFFER_MAX_SIZE)
             Log::write(_name + "Buffer overload: " + data, Log::Flags::WRITE_TO_FILE_AND_STDERR);
 
         return;

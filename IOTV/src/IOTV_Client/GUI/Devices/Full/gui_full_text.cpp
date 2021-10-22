@@ -5,9 +5,9 @@ Gui_Full_Text::Gui_Full_Text(Device &device, QWidget *parent) : QWidget(parent),
     _readText.setText("Read text");
     _writeText.setText("Write text");
 
-    _layout.addWidget(&_readText);
-    _layout.addWidget(&_writeText);
-    _layout.addWidget(&_text);
+    _layout.addWidget(&_readText, 0, 0);
+    _layout.addWidget(&_writeText, 0, 1);
+    _layout.addWidget(&_text, 1, 0, 1, 2);
     setLayout(&_layout);
 
     slotRead();
@@ -24,19 +24,15 @@ void Gui_Full_Text::slotRead()
 
 void Gui_Full_Text::slotWrite()
 {
-    Raw::RAW raw = _device.getReadChannelData(0);
-    delete[] raw.str;
-
-    QString text = _text.toPlainText();
+    std::string text = _text.toPlainText().toStdString();
     uint16_t textSize = text.size();
 
-    char *ptr = new char[text.size() + 1];
+    char *ptr = new char[textSize + 1]; // очищается в  eraseExpectedResponseWrite
     for (uint16_t i = 0; i < textSize; i++)
-        ptr[i] = text.at(i).toLatin1();
+        ptr[i] = text.at(i);
     ptr[textSize] = '\0';
 
+    Raw::RAW raw;
     raw.str = ptr;
-    _device.setReadChannelData(0, raw);
-
     _device.writeData(0, raw);
 }

@@ -36,7 +36,7 @@ qint64 File_conn_type::write(const QByteArray &data)
     }
     else if(data.size() == 1 && data[0] == QUERY_READ_BYTE)
     {
-        if(QFileInfo(_file).size() > 256)
+        if(QFileInfo(_file).size() > BUFFER_MAX_SIZE)
         {
             Log::write("File " + _file.fileName() + " is large!");
             return 0;

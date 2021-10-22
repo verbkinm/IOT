@@ -81,15 +81,23 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
     }
 }
 
-Raw::RAW *Read_Channel::strPointer(uint8_t index)
+bool Read_Channel::clearPointerRAW(uint8_t index)
 {
     try
     {
-        return &_data.at(index);
+        Raw::RAW &raw = _data.at(index);
+        if(raw.str != nullptr)
+        {
+            delete[] raw.str;
+            raw.str = nullptr;
+            return true;
+        }
+
+        return false;
     }
     catch (std::out_of_range &ex)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
-        return nullptr;
+        return false;
     }
 }

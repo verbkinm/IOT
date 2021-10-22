@@ -73,6 +73,8 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
 
     if(host.insertExpectedResponseWrite(channelNumber, rawData))
         return host.writeToServer(data);
+    else
+        delete[] rawData.str;
 
     return -1;
 }

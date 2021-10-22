@@ -95,11 +95,9 @@ void Base_Host::eraseExpectedResponseRead(uint8_t channelNumber)
 
 void Base_Host::eraseExpectedResponseWrite(uint8_t channelNumber)
 {
-    if(_readChannel.getDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && _readChannel.getData(channelNumber).str != nullptr)
-    {
-        delete[] _readChannel.getData(channelNumber).str;
-        _readChannel.strPointer(channelNumber)->str = nullptr;
-    }
+    Raw::RAW &raw = _expectedResponseWrite.at(channelNumber);
+    if(_writeChannel.getDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && raw.str != nullptr)
+        delete[] raw.str;
 
     _expectedResponseWrite.erase(channelNumber);
 }

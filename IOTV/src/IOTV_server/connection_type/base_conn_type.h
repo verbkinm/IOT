@@ -2,7 +2,7 @@
 #define BASE_CONN_TYPE_H
 
 #define DEFAULT_INTERVAL 10000 // таймер неудавшегося подключения
-
+#define BUFFER_MAX_SIZE 256
 #include <QTimer>
 
 class Base_conn_type : public QObject
