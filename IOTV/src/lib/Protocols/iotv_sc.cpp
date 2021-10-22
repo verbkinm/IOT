@@ -198,7 +198,7 @@ void IOTV_SC::responceToClient_Read(const Base_Host &host, QByteArray &data)
     data.append((nameLength << 3) | RESPONCE_READ);
     data.append(channelNumber);
 
-    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && host.getReadChannelData(channelNumber).str != nullptr)
     {
         size_t strLength = strlen(raw.str);
 

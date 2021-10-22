@@ -37,8 +37,8 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
     }
     else
     {
-        data.append(char(0x00));
-        data.append(0x08);
+        data.append(Raw::size >> 8);
+        data.append(Raw::size);
 
         for (uint16_t i = 0; i < Raw::size; i++)
             data.append(rawData.array[i]);
@@ -48,7 +48,6 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
         return host.writeToServer(data);
     else
         delete[] rawData.str;
-
 
     return -1;
 }
@@ -94,19 +93,20 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
 
     if(iotHost.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
     {
-        char *ptr = new char[dataLength + 1];
+        char *ptr = new char[dataLength + 1]; // удаляется
 
         for (uint16_t i = 0; i < dataLength; i++)
             ptr[i] = buf.at(i);
         ptr[dataLength] = '\0';
 
-        if(iotHost.getReadChannelData(channelNumber).str != nullptr && strcmp(ptr, iotHost.getReadChannelData(channelNumber).str) == 0)
+        if(iotHost.getReadChannelData(channelNumber).str != nullptr && strcmp(ptr, iotHost.getReadChannelData(channelNumber).str) == 0) //если строковые данные уже есть в хосте и они равны тем, что получили, то удаляем то, что получили
         {
             rawData.str = iotHost.getReadChannelData(channelNumber).str;
             delete[] ptr;
         }
         else
         {
+            // удаляем строковые данные в хосте и записываем новые
             delete[] iotHost.getReadChannelData(channelNumber).str;
             rawData.str = ptr;
         }

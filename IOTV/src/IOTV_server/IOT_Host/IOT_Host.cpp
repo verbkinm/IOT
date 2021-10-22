@@ -102,18 +102,13 @@ void IOT_Host::dataResived(QByteArray data)
         IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(packetData);
 
         if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
-        {
             response_WAY_recived(packetData);
-//            emit signalResponse_Way();
-        }
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
             response_READ_recived(packetData);
         else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
             response_WRITE_recived(packetData);
         else
             Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
-
-        //        emit signalDataRiceved(); // !!!
     }
 }
 
@@ -198,6 +193,7 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
         Raw::DATA_TYPE dt = getReadChannelDataType(channelNumber);
         Raw::RAW raw = getReadChannelData(channelNumber);
 
+        //!!! Доделать лог для char* данных
         Log::write("R:"+ QString::number(channelNumber) + "=" +
                    Raw::toString(dt, raw).c_str(),
                    Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
@@ -222,7 +218,6 @@ void IOT_Host::setLogFile(const QString &logFile)
 void IOT_Host::setInterval(uint interval)
 {
     _intervalTimer.stop();
-    //    disconnect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
     if(interval)
     {
         _intervalTimer.start(interval);
@@ -244,7 +239,7 @@ void IOT_Host::slotConnected()
     _state.setFlag(ExpectedWay);
     _conn_type->write(data);
 
-    emit signalHostConnected();
+    emit signalHostConnected(); ///!!!
 }
 
 void IOT_Host::slotDisconnected()
@@ -252,7 +247,7 @@ void IOT_Host::slotDisconnected()
     setState(false);
     eraseAllExpectedResponse();
 
-    emit signalHostDisconnected();
+    emit signalHostDisconnected(); ///!!!
 }
 
 void IOT_Host::slotResendDataWrite()

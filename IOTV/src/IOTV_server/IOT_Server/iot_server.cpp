@@ -220,7 +220,6 @@ void IOT_Server::slotDataRecived()
                     uint8_t nameLength = packetData.at(0) >> 3;
                     uint8_t channelNumber = packetData.at(1) & 0x0F;
 
-
                     uint16_t dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 
                     QByteArray data = packetData.mid(4 + nameLength, dataLength);
@@ -230,7 +229,7 @@ void IOT_Server::slotDataRecived()
                     if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                     {
                         uint16_t strLength = data.size();
-                        ptr = new char[strLength + 1]; // удаляется в eraseExpectedREsponceWrite
+                        ptr = new char[strLength + 1]; // удаляется в eraseExpectedResponceWrite
 
                         for (uint8_t i = 0; i < strLength; ++i)
                             ptr[i] = data.at(i);
@@ -247,8 +246,6 @@ void IOT_Server::slotDataRecived()
                     IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
                     IOTV_SC::responceToClient_Write(packetData);
                     writeToSocket(socket, packetData);
-
-                    //delete[] ptr;//!!! в insertExpectedResponseWrite raw.str будет висячим!
                 }
                 else
                     Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);

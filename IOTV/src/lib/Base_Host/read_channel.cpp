@@ -80,3 +80,16 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
         return type;
     }
 }
+
+Raw::RAW *Read_Channel::strPointer(uint8_t index)
+{
+    try
+    {
+        return &_data.at(index);
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        return nullptr;
+    }
+}
