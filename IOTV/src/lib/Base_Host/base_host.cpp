@@ -95,10 +95,6 @@ void Base_Host::eraseExpectedResponseRead(uint8_t channelNumber)
 
 void Base_Host::eraseExpectedResponseWrite(uint8_t channelNumber)
 {
-    auto it = _expectedResponseWrite.find(channelNumber);
-    if(it == _expectedResponseWrite.end())
-        return;
-
     try
     {
         Raw::RAW &raw = _expectedResponseWrite.at(channelNumber);
@@ -106,9 +102,8 @@ void Base_Host::eraseExpectedResponseWrite(uint8_t channelNumber)
             delete[] raw.str;
 
         _expectedResponseWrite.erase(channelNumber);
-
     }
-    catch (std::out_of_range *e)
+    catch (const std::out_of_range &e)
     {
         QString strOut = "ERROR: std::out_of_range" + QString(Q_FUNC_INFO);
         Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDERR);

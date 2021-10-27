@@ -28,11 +28,13 @@ public:
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 
+protected:
+    virtual QByteArray readAll() override;
+
 private:
     QSerialPort _serialPort;
 
 private slots:
-    void slotReadData();
     void slotHandleError(QSerialPort::SerialPortError error);
 };
 

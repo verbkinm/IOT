@@ -131,45 +131,45 @@ void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
 }
 
 //!!!
-QByteArrayList IOTV_SH::splitResponseData(QByteArray &data)
-{
-    QByteArrayList result;
+//QByteArrayList IOTV_SH::splitResponseData(QByteArray &data)
+//{
+//    QByteArrayList result;
 
-    while (data.length())
-    {
-        QByteArray byteArray;
-        IOTV_SH::Response_Type dataType = checkResponsetData(data);
+//    while (data.length())
+//    {
+//        QByteArray byteArray;
+//        IOTV_SH::Response_Type dataType = checkResponsetData(data);
 
-        if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
-        {
-            uint length = 5 + (data[2] | data[3]) + (data[4] >> 4) + (data[4] & 0x0F);
+//        if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+//        {
+//            uint length = 5 + (data[2] | data[3]) + (data[4] >> 4) + (data[4] & 0x0F);
 
-            byteArray.append(data.mid(0, length));
-            result.append(byteArray);
-            data.remove(0, length);
-        }
-        else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
-        {
-            uint length = (data[1] | data[2]) + 3;
+//            byteArray.append(data.mid(0, length));
+//            result.append(byteArray);
+//            data.remove(0, length);
+//        }
+//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
+//        {
+//            uint length = (data[1] | data[2]) + 3;
 
-            byteArray.append(data.mid(0, length));
-            result.append(byteArray);
-            data.remove(0, length);
-        }
-        else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
-        {
-            byteArray.append(data[0]);
-            result.append(byteArray);
-            data.remove(0, 1);
-        }
-        else if(dataType == IOTV_SH::Response_Type::ERROR)
-        {
-            result.append(data);
-            data.clear();
-        }
-    }
-    return result;
-}
+//            byteArray.append(data.mid(0, length));
+//            result.append(byteArray);
+//            data.remove(0, length);
+//        }
+//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
+//        {
+//            byteArray.append(data[0]);
+//            result.append(byteArray);
+//            data.remove(0, 1);
+//        }
+//        else if(dataType == IOTV_SH::Response_Type::ERROR)
+//        {
+//            result.append(data);
+//            data.clear();
+//        }
+//    }
+//    return result;
+//}
 
 IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
 {

@@ -31,7 +31,7 @@ public:
     static void response_READ(Base_Host &iotHost, const QByteArray &data);
     static void response_WRITE(Base_Host &iotHost, const QByteArray &data);
 
-    static QByteArrayList splitResponseData(QByteArray &data);
+//    static QByteArrayList splitResponseData(QByteArray &data);
 
     static Response_Type checkResponsetData(const QByteArray &data);
 

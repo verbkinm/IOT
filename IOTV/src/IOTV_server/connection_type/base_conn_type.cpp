@@ -56,6 +56,34 @@ QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
     return "UNKNOW";
 }
 
+QByteArray Base_conn_type::readAll()
+{
+    return {0};
+}
+
+void Base_conn_type::slotReadData()
+{
+    static QByteArray data;
+    data += readAll();
+
+    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
+
+    if(!accumPacketResponse.first)
+    {
+        data.clear();
+        return;
+    }
+    if(accumPacketResponse.first && accumPacketResponse.second > 0)
+    {
+        QByteArray buffer = data.mid(0, accumPacketResponse.second);
+        QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
+        Log::write(strOut);
+
+        emit signalDataRiceved(buffer);
+        data = data.mid(accumPacketResponse.second);
+    }
+}
+
 QString Base_conn_type::getName() const
 {
     return _name;

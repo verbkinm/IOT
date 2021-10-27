@@ -26,6 +26,9 @@ public:
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 
+protected:
+    virtual QByteArray readAll() override;
+
 private:
     std::unique_ptr<QTcpSocket> _tcpSocket;
     quint16 _tcpPort;
@@ -34,7 +37,7 @@ private slots:
     void slotNewConnection();
     void slotSocketDisconnected();
 
-    void slotReadData();
+//    void slotReadData();
     void slotError(QAbstractSocket::SocketError error);
 };
 

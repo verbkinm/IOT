@@ -65,6 +65,8 @@ public:
     inline static uint8_t channelNumber(char byte);
     static bool responseName(const QByteArray &data, QString &returnName);
     static bool queryName(const QByteArray &data, QString &returnName);
+
+    static std::pair<bool, int> accumPacket(const QByteArray &data);
 };
 
 #endif // IOTV_SC_H

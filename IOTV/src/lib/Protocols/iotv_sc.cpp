@@ -348,16 +348,11 @@ IOTV_SC::Response_Type IOTV_SC::checkResponsetData(const QByteArray &data)
 
     //DEVISE_LIST
     if(firstByte & DEVICE_BIT)
-    {
-        if(data.length() < 2)
-            return Response_Type::RESPONSE_ERROR;
-
         return Response_Type::RESPONSE_DEVICE_LIST;
-    }
     //DEVICE_STATE
     else if( !(firstByte & READ_WRITE_BIT) && (secondByte & DEVICE_STATE_QUERY_BIT))
     {
-        if(data.length() >= 2 + nameLength)
+        if(data.length() >= (2 + nameLength))
             return Response_Type::RESPONSE_STATE;
     }
     //DEVICE_READ
@@ -460,4 +455,31 @@ bool IOTV_SC::queryName(const QByteArray &data, QString &returnName)
     }
 
     return false;
+}
+
+//!!!
+std::pair<bool, int> IOTV_SC::accumPacket(const QByteArray &data)
+{
+    Response_Type dataType = checkResponsetData(data);
+
+    if(dataType == Response_Type::RESPONSE_ERROR)
+        return {false, 0};
+    else if(dataType == Response_Type::RESPONSE_DEVICE_LIST)
+    {
+
+    }
+    else if(dataType == Response_Type::RESPONSE_STATE)
+    {
+
+    }
+    else if(data.size() > 4 && dataType == Response_Type::RESPONSE_READ)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+    }
+    else if(data.size() > 1 && dataType == Response_Type::RESPONSE_WRITE)
+        return {true, 1};
+    else if(data.size() > 256)
+        return {false, 0};
+
+    return {true, 0};
 }

@@ -155,7 +155,32 @@ void IOT_Server::slotNewConnection()
 void IOT_Server::slotDataRecived()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
-    QByteArray data = socket->readAll();
+
+    static QByteArray data;
+    data += socket->readAll();
+
+    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
+
+    if(!accumPacketResponse.first)
+    {
+        data.clear();
+        return;
+    }
+    if(accumPacketResponse.first && accumPacketResponse.second > 0)
+    {
+        QByteArray buffer = data.mid(0, accumPacketResponse.second);
+        Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
+                   + QString::number(socket->peerPort())
+                   + " <- " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+
+//        emit signalDataRiceved(buffer);
+        data = data.mid(accumPacketResponse.second);
+    }
+
+//    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+//    QByteArray data = socket->readAll();
+
+//--------------------------------------------
 
     Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
                + QString::number(socket->peerPort())

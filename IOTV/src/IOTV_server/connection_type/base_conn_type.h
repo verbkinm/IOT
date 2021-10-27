@@ -40,6 +40,11 @@ protected:
     Conn_type _type;
     QTimer _reconnectTimer;
 
+    virtual QByteArray readAll();
+
+protected slots:
+    void slotReadData();
+
 signals:
     void signalConnected();
     void signalDisconnected();

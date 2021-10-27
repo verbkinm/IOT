@@ -107,20 +107,6 @@ void IOT_Host::dataResived(QByteArray data)
         response_WRITE_recived(data);
     else
         Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
-
-//    for (auto &packetData : IOTV_SH::splitResponseData(data))
-//    {
-//        IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(packetData);
-
-//        if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
-//            response_WAY_recived(packetData);
-//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
-//            response_READ_recived(packetData);
-//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
-//            response_WRITE_recived(packetData);
-//        else
-//            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
-//    }
 }
 
 QString IOT_Host::getName() const

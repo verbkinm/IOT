@@ -127,28 +127,28 @@ void COM_conn_type::setSettingsPort(const SetingsPort &settingsPort)
     }
 }
 
-void COM_conn_type::slotReadData()
-{
-    static QByteArray data;
-    data += _serialPort.readAll();
+//void COM_conn_type::slotReadData()
+//{
+//    static QByteArray data;
+//    data += _serialPort.readAll();
 
-    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
+//    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
 
-    if(!accumPacketResponse.first)
-    {
-        data.clear();
-        return;
-    }
-    if(accumPacketResponse.first && accumPacketResponse.second > 0)
-    {
-        QByteArray buffer = data.mid(0, accumPacketResponse.second);
-        QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
-        Log::write(strOut);
+//    if(!accumPacketResponse.first)
+//    {
+//        data.clear();
+//        return;
+//    }
+//    if(accumPacketResponse.first && accumPacketResponse.second > 0)
+//    {
+//        QByteArray buffer = data.mid(0, accumPacketResponse.second);
+//        QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
+//        Log::write(strOut);
 
-        emit signalDataRiceved(buffer);
-        data = data.mid(accumPacketResponse.second);
-    }
-}
+//        emit signalDataRiceved(buffer);
+//        data = data.mid(accumPacketResponse.second);
+//    }
+//}
 
 void COM_conn_type::slotHandleError(QSerialPort::SerialPortError error)
 {
@@ -173,4 +173,9 @@ void COM_conn_type::disconnectFromHost()
 
     emit signalDisconnected();
     _reconnectTimer.start(DEFAULT_INTERVAL);
+}
+
+QByteArray COM_conn_type::readAll()
+{
+    return _serialPort.readAll();
 }
