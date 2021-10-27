@@ -34,8 +34,6 @@ private:
 private slots:
     void slotReadData();
     void slotHandleError(QSerialPort::SerialPortError error);
-
-
 };
 
 #endif // COM_CONN_TYPE_H

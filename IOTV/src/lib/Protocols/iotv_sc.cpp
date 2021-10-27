@@ -442,8 +442,8 @@ bool IOTV_SC::responseName(const QByteArray &data, QString &returnName)
 bool IOTV_SC::queryName(const QByteArray &data, QString &returnName)
 {
     uint8_t nameLength = 0;
-
     Query_Type dataType = checkQueryData(data);
+
     if(dataType == Query_Type::QUERY_DEVICE_LIST || dataType == Query_Type::QUERY_ERROR)
         return false;
     else if(dataType == Query_Type::QUERY_READ || dataType == Query_Type::QUERY_STATE)

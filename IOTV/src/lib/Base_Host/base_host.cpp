@@ -61,7 +61,7 @@ bool Base_Host::insertExpectedResponseRead(uint8_t channelNumber)
     if(channelNumber >= _readChannel.length())
     {
         QString strOut = "ERROR: " + QString(Q_FUNC_INFO) + ". channelNumber(" + QString::number(channelNumber)
-                         + ") >= Read channel length(" + QString::number(_readChannel.length()) + ")";
+                + ") >= Read channel length(" + QString::number(_readChannel.length()) + ")";
         Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDERR);
         return false;
     }
@@ -77,11 +77,12 @@ bool Base_Host::insertExpectedResponseWrite(uint8_t channelNumber, Raw::RAW rawD
     if(channelNumber >= _writeChannel.length())
     {
         QString strOut = "ERROR: " + QString(Q_FUNC_INFO) + ". channelNumber(" + QString::number(channelNumber)
-                         + ") >= Write channel length(" + QString::number(_readChannel.length()) + ")";
+                + ") >= Write channel length(" + QString::number(_readChannel.length()) + ")";
         Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDERR);
 
         return false;
     }
+
     _expectedResponseWrite[channelNumber] = rawData;
     _timerResponseWrite.start(TIMER_INTERVAL);
     return true;
@@ -94,11 +95,24 @@ void Base_Host::eraseExpectedResponseRead(uint8_t channelNumber)
 
 void Base_Host::eraseExpectedResponseWrite(uint8_t channelNumber)
 {
-    Raw::RAW &raw = _expectedResponseWrite.at(channelNumber);
-    if(_writeChannel.getDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && raw.str != nullptr)
-        delete[] raw.str;
+    auto it = _expectedResponseWrite.find(channelNumber);
+    if(it == _expectedResponseWrite.end())
+        return;
 
-    _expectedResponseWrite.erase(channelNumber);
+    try
+    {
+        Raw::RAW &raw = _expectedResponseWrite.at(channelNumber);
+        if(_writeChannel.getDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && raw.str != nullptr)
+            delete[] raw.str;
+
+        _expectedResponseWrite.erase(channelNumber);
+
+    }
+    catch (std::out_of_range *e)
+    {
+        QString strOut = "ERROR: std::out_of_range" + QString(Q_FUNC_INFO);
+        Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+    }
 }
 
 void Base_Host::eraseAllExpectedResponse()
