@@ -130,29 +130,23 @@ void COM_conn_type::setSettingsPort(const SetingsPort &settingsPort)
 void COM_conn_type::slotReadData()
 {
     static QByteArray data;
-    QByteArray buffer;
-
     data += _serialPort.readAll();
 
-    if(!data.contains("\r\n"))
-    {
-        if(data.length() > BUFFER_MAX_SIZE)
-            Log::write(_name + "Buffer overload: " + data, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
 
+    if(!accumPacketResponse.first)
+    {
+        data.clear();
         return;
     }
-    else
+    if(accumPacketResponse.first && accumPacketResponse.second > 0)
     {
-        auto index = data.indexOf("\r\n");
-        buffer = data.mid(0, index);
-        data = data.mid(index + 2);
-
-        if(!buffer.size() || buffer == "\r\n")
-            return;
-
+        QByteArray buffer = data.mid(0, accumPacketResponse.second);
         QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
         Log::write(strOut);
+
         emit signalDataRiceved(buffer);
+        data = data.mid(accumPacketResponse.second);
     }
 }
 

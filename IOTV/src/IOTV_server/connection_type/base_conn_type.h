@@ -5,6 +5,8 @@
 #define BUFFER_MAX_SIZE 256
 #include <QTimer>
 
+#include "IOTV_SH.h"
+
 class Base_conn_type : public QObject
 {
     Q_OBJECT

@@ -36,8 +36,8 @@ public:
     static Response_Type checkResponsetData(const QByteArray &data);
 
     static uint8_t channelNumber(char byte);
-};
 
-//Q_DECLARE_OPERATORS_FOR_FLAGS(Protocol_Class::First_Byte_Flags)
+    static std::pair<bool, int> accumPacket(const QByteArray &data);
+};
 
 #endif // IOTV_SH_CLASS_H

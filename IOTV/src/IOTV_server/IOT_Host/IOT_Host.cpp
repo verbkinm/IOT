@@ -97,19 +97,30 @@ qint64 IOT_Host::writeToServer(QByteArray &data)
 
 void IOT_Host::dataResived(QByteArray data)
 {
-    for (auto &packetData : IOTV_SH::splitResponseData(data))
-    {
-        IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(packetData);
+    IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
 
-        if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
-            response_WAY_recived(packetData);
-        else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
-            response_READ_recived(packetData);
-        else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
-            response_WRITE_recived(packetData);
-        else
-            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
-    }
+    if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+        response_WAY_recived(data);
+    else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
+        response_READ_recived(data);
+    else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
+        response_WRITE_recived(data);
+    else
+        Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
+
+//    for (auto &packetData : IOTV_SH::splitResponseData(data))
+//    {
+//        IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(packetData);
+
+//        if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+//            response_WAY_recived(packetData);
+//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
+//            response_READ_recived(packetData);
+//        else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
+//            response_WRITE_recived(packetData);
+//        else
+//            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + packetData.toHex(':'));
+//    }
 }
 
 QString IOT_Host::getName() const

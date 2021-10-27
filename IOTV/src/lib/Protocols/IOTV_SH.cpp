@@ -130,6 +130,7 @@ void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
     iotHost.eraseExpectedResponseWrite(channelNumber);
 }
 
+//!!!
 QByteArrayList IOTV_SH::splitResponseData(QByteArray &data)
 {
     QByteArrayList result;
@@ -141,7 +142,7 @@ QByteArrayList IOTV_SH::splitResponseData(QByteArray &data)
 
         if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
         {
-            uint length = 5 + (data[2] | data[3]) + (data[4] >> 4) + (data[4] & 0x0f);
+            uint length = 5 + (data[2] | data[3]) + (data[4] >> 4) + (data[4] & 0x0F);
 
             byteArray.append(data.mid(0, length));
             result.append(byteArray);
@@ -177,17 +178,17 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
 
     uint8_t firstByte = data.at(0);
 
-    if(firstByte == 0x05)
+    if(firstByte == RESPONSE_WAY_BYTE)
         return Response_Type::RESPONSE_WAY;
 
-    firstByte &= 0x0f;
+    firstByte &= 0x0F;
 
     switch (firstByte)
     {
-    case 0x06:
+    case RESPONSE_READ_BYTE:
         return Response_Type::RESPONSE_READ;
         break;
-    case 0x04:
+    case RESPONSE_WRITE_BYTE:
         return Response_Type::RESPONSE_WRITE;
         break;
     default:
@@ -198,4 +199,33 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
 uint8_t IOTV_SH::channelNumber(char byte)
 {
     return (byte >> 4);
+}
+
+std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
+{
+    Response_Type dataType = checkResponsetData(data);
+
+    if(dataType == Response_Type::ERROR)
+        return {false, 0};
+    else if(data.size() > 5 && dataType == Response_Type::RESPONSE_WAY)
+    {
+        uint16_t descriptionLength = (data[2] << 8) | data[3];
+        uint8_t readChannelCount = data[4] >> 4;
+        uint8_t writeChannelCount = data[4] & 0x0F;
+        int packetSize = 5 + descriptionLength + readChannelCount + writeChannelCount;
+        if(data.size() >= packetSize)
+            return {true, packetSize};
+    }
+    else if(data.size() > 3 && dataType == Response_Type::RESPONSE_READ)
+    {
+        uint16_t dataLength = (data[1] << 8) | data[2];
+        if(data.size() >= (3 + dataLength))
+            return {true, (3 + dataLength)};
+    }
+    else if(data.size() > 1 && dataType == Response_Type::RESPONSE_WRITE)
+        return {true, 1};
+    else if(data.size() > 256)
+        return {false, 0};
+
+    return {true, 0};
 }

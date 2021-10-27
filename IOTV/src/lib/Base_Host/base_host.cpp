@@ -82,7 +82,6 @@ bool Base_Host::insertExpectedResponseWrite(uint8_t channelNumber, Raw::RAW rawD
 
         return false;
     }
-
     _expectedResponseWrite[channelNumber] = rawData;
     _timerResponseWrite.start(TIMER_INTERVAL);
     return true;
