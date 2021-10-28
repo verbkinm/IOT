@@ -66,7 +66,7 @@ public:
     static bool responseName(const QByteArray &data, QString &returnName);
     static bool queryName(const QByteArray &data, QString &returnName);
 
-    static std::pair<bool, int> accumPacket(const QByteArray &data);
+    static std::pair<bool, int> accumResponcePacket(const QByteArray &data);
 };
 
 #endif // IOTV_SC_H

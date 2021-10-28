@@ -214,14 +214,23 @@ void Server::slotDisconnected()
 
 void Server::slotReadData()
 {
-    QByteArray data = _socket.readAll();
+    static QByteArray data;
+    data += _socket.readAll();
 
-    Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
-               + QString::number(_socket.peerPort())
-               + " <- " + data.toHex(':'));
+    std::pair<bool, int> accumPacketResponse = IOTV_SC::accumResponcePacket(data);
 
-    for (auto &packetData : IOTV_SC::splitResponseData(data))
+    if(!accumPacketResponse.first)
     {
+        data.clear();
+        return;
+    }
+    else if(accumPacketResponse.first && accumPacketResponse.second)
+    {
+        QByteArray packetData = data.mid(0, accumPacketResponse.second);
+        Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
+                   + QString::number(_socket.peerPort())
+                   + " <- " + data.toHex(':'));
+
         IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
 
         if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
@@ -237,9 +246,32 @@ void Server::slotReadData()
                     Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
             }
         }
+        data = data.mid(accumPacketResponse.second);
+        notify();
     }
 
-    notify();
+
+    // ----------------------------------------------------------
+
+//    for (auto &packetData : IOTV_SC::splitResponseData(data))
+//    {
+//        IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
+
+//        if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
+//            createDevice(packetData);
+//        else
+//        {
+//            QString deviceName;
+//            if(IOTV_SC::responseName(packetData, deviceName))
+//            {
+//                if(_devices.find(deviceName) != _devices.end())
+//                    _devices.at(deviceName)->dataResived(packetData);
+//                else
+//                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+//            }
+//        }
+//    }
+
 }
 
 void Server::slotError(QAbstractSocket::SocketError error)

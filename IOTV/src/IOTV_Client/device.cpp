@@ -47,6 +47,7 @@ qint64 Device::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 void Device::dataResived(QByteArray data)
 {
     IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(data);
+
     if(dataType == IOTV_SC::Response_Type::RESPONSE_STATE)
         IOTV_SC::serverResponse_STATE(*this, data);
     else if(dataType == IOTV_SC::Response_Type::RESPONSE_READ)
@@ -128,7 +129,12 @@ void Device::slotStateIntervalTimeOut()
 
     QByteArray data;
     if(IOTV_SC::query_STATE(data, _name))
+    {
+        Log::write(_name + ": Data send to " + _server.getServerAddress() + ":"
+                   + QString::number(_server.getServerPort())
+                   + " -> " + data.toHex(':'));
         _server.writeData(data);
+    }
 
     _stateInterval.start(); //??? Если во время выполнения слота удалить последний gui_base_device, который остававливает таймер, конец слота опять его включит?
 }

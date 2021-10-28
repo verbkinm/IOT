@@ -411,6 +411,7 @@ uint8_t IOTV_SC::channelNumber(char byte)
     return byte & 0x0F;
 }
 
+//!!! не проверяется длина данных
 bool IOTV_SC::responseName(const QByteArray &data, QString &returnName)
 {
     uint8_t nameLength = 0;
@@ -457,28 +458,77 @@ bool IOTV_SC::queryName(const QByteArray &data, QString &returnName)
     return false;
 }
 
-//!!!
-std::pair<bool, int> IOTV_SC::accumPacket(const QByteArray &data)
+std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
 {
     Response_Type dataType = checkResponsetData(data);
+    uint32_t dataSize = static_cast<uint32_t>(data.size());
 
     if(dataType == Response_Type::RESPONSE_ERROR)
         return {false, 0};
-    else if(dataType == Response_Type::RESPONSE_DEVICE_LIST)
+    else if(dataSize >= 2 && dataType == Response_Type::RESPONSE_DEVICE_LIST)
     {
+        uint8_t countDivece = data.at(1);
+        if(countDivece == 0)
+            return {true, 2};
 
-    }
-    else if(dataType == Response_Type::RESPONSE_STATE)
-    {
+        if(dataSize < 3)
+            return {false, 0};
 
+        QByteArray buffer = data.mid(2);
+        uint64_t bufSize = buffer.size();
+        uint32_t packetSize = 2;
+
+        for(uint8_t i = 0; i < countDivece; i++)
+        {
+            uint8_t nameLength = buffer.at(0) >> 3;
+            int prefixSize = 1 + nameLength; //длина имени устройства + само имя
+            if(bufSize < static_cast<uint32_t>(4 + prefixSize))
+                return {false, 0};
+
+            uint16_t msb = buffer[prefixSize + 1] << 8;
+            uint16_t lsb = buffer[prefixSize + 2];
+            uint16_t descriptionLength = msb | lsb;
+            uint8_t readChannelCount = data[prefixSize + 3] >> 4;
+            uint8_t writeChannelCount = data[prefixSize + 3] & 0x0F;
+            uint64_t subPacketSize = prefixSize + 4 + descriptionLength + readChannelCount + writeChannelCount;
+
+            if(bufSize < subPacketSize)
+                return {false, 0};
+            else
+            {
+                packetSize += subPacketSize;
+                buffer = buffer.mid(subPacketSize - 1);
+                bufSize = buffer.size();
+            }
+        }
+        return {true, packetSize};
     }
-    else if(data.size() > 4 && dataType == Response_Type::RESPONSE_READ)
+    else if(dataSize > 2 && dataType == Response_Type::RESPONSE_STATE)
     {
         uint8_t nameLength = data.at(0) >> 3;
+        uint32_t packetSize = 2 + nameLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
     }
-    else if(data.size() > 1 && dataType == Response_Type::RESPONSE_WRITE)
-        return {true, 1};
-    else if(data.size() > 256)
+    else if(dataSize > 4 && dataType == Response_Type::RESPONSE_READ)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+        uint16_t dataLength = (data.at(2) << 8) | data.at(3);
+        uint32_t packetSize = 4 + nameLength + dataLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
+    }
+    else if(dataSize > 2 && dataType == Response_Type::RESPONSE_WRITE)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+        uint32_t packetSize = 2 + nameLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
+    }
+    else if(dataSize > 256)
         return {false, 0};
 
     return {true, 0};

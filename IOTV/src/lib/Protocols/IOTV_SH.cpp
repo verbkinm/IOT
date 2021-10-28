@@ -204,27 +204,28 @@ uint8_t IOTV_SH::channelNumber(char byte)
 std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
 {
     Response_Type dataType = checkResponsetData(data);
+    uint32_t dataSize = static_cast<uint32_t>(data.size());
 
     if(dataType == Response_Type::ERROR)
         return {false, 0};
-    else if(data.size() > 5 && dataType == Response_Type::RESPONSE_WAY)
+    else if(dataSize > 5 && dataType == Response_Type::RESPONSE_WAY)
     {
         uint16_t descriptionLength = (data[2] << 8) | data[3];
         uint8_t readChannelCount = data[4] >> 4;
         uint8_t writeChannelCount = data[4] & 0x0F;
-        int packetSize = 5 + descriptionLength + readChannelCount + writeChannelCount;
-        if(data.size() >= packetSize)
+        uint32_t packetSize = 5 + descriptionLength + readChannelCount + writeChannelCount;
+        if(dataSize >= packetSize)
             return {true, packetSize};
     }
-    else if(data.size() > 3 && dataType == Response_Type::RESPONSE_READ)
+    else if(dataSize > 3 && dataType == Response_Type::RESPONSE_READ)
     {
         uint16_t dataLength = (data[1] << 8) | data[2];
-        if(data.size() >= (3 + dataLength))
-            return {true, (3 + dataLength)};
+        if(dataSize >= static_cast<uint32_t>(3 + dataLength))
+            return {true, static_cast<uint32_t>(3 + dataLength)};
     }
-    else if(data.size() > 1 && dataType == Response_Type::RESPONSE_WRITE)
+    else if(dataSize > 1 && dataType == Response_Type::RESPONSE_WRITE)
         return {true, 1};
-    else if(data.size() > 256)
+    else if(dataSize > 256)
         return {false, 0};
 
     return {true, 0};
