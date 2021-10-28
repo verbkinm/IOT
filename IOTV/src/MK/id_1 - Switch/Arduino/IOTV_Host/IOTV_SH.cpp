@@ -6,18 +6,13 @@ Protocol_class::query_type Protocol_class::checkQueryData(const Array<char> &dat
         return query_type::ERROR;
 
     uint8_t firstByte = data[0];
-    //firstByte &= 0x0F;
 
     if(firstByte == 0x01)
       return query_type::QUERY_WAY;
     else if(firstByte == 0x02)
       return query_type::QUERY_READ;
     else if( (firstByte & 0x0F) == 0 )
-    {
-      uint16_t length = data[1] | data[2];
-      if(data.size() >= 3 + length)
         return query_type::QUERY_WRITE;
-    }
 
     return query_type::ERROR;
 }
@@ -25,22 +20,18 @@ Protocol_class::query_type Protocol_class::checkQueryData(const Array<char> &dat
 void Protocol_class::response_WAY(const IOT_Server &iotHost, Array<char> &data)
 {
     data.clear();
-    uint8_t byte = 0x05;
-    data.push_back(byte);
+    data.push_back(0x05);
 
     data.push_back(iotHost._id);
 
-    byte = iotHost._description.length() >> 8;
-    data.push_back(byte);
-    byte = iotHost._description.length();
-    data.push_back(byte);
+    uint16_t descriptionLength = strlen(iotHost._description);
+    data.push_back(descriptionLength >> 8);
+    data.push_back(descriptionLength);
 
-    byte = READ_CHANNEL_LENGTH << 4;
-    byte |= WRITE_CHANNEL_LENGTH;
-    data.push_back(byte);
+    data.push_back( (READ_CHANNEL_LENGTH << 4) | WRITE_CHANNEL_LENGTH);
 
-    for (char byte : iotHost._description)
-        data.push_back(byte);
+    for(int i = 0; i < descriptionLength; i++)
+      data.push_back(iotHost._description[i]);
 
     for (uint8_t i = 0; i < READ_CHANNEL_LENGTH; i++)
         data.push_back(Raw::toUInt8(iotHost._readChannelType[i]));
@@ -72,9 +63,9 @@ void Protocol_class::response_READ(const IOT_Server &iotHost, Array<char> &data)
 void Protocol_class::response_WRITE(IOT_Server &iotHost, Array<char> &data)
 {
     uint8_t chNumber = data[0] >> 4;
-    uint16_t length = data[1] | data[2];
+    uint16_t length = (data[1] << 8) | data[2];
 
-    if(data.size() < 3 + length)
+    if(data.size() < (3 + length))
       return;
 
     for (size_t i = 0; i < length; i++)

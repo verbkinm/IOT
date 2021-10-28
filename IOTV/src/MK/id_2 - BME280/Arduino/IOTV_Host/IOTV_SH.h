@@ -2,6 +2,7 @@
 #define PROTOCOL_CLASS_H
 
 #include "iot_server.h"
+#include <WString.h>
 
 template <class T>
 class Array
@@ -9,6 +10,7 @@ class Array
 private:
     int _size;
     T *_data;
+    
 public:
     Array()
     {
@@ -60,31 +62,26 @@ public:
 
     T& operator[](int index)
     {
-//        if(index < 0 || index >= _size)
-//            exit(-1);
-
         return _data[index];
     }
     Array<T>& operator=(Array<T>& rhs)
     {
         clear();
-        _data = new T[rhs.size()];
-        _size = rhs.size();
-        if(rhs._data)
-            memcpy(_data, rhs._data, _size * sizeof(T));
+        
+        if(rhs.size() > 0)
+        {
+          _data = new T[rhs.size()];
+          _size = rhs.size();
+          memcpy(_data, rhs._data, _size * sizeof(T));
+        }
 
         return *this;
     }
 
-    int size()
+    int size() const
     {
         return _size;
     }
-
-//    T* data()
-//    {
-//        return _data;
-//    }
 
     void remove(int from, int count)
     {
@@ -98,9 +95,6 @@ public:
         *this = tmpData;
     }
 };
- 
-//template <typename T> // метод, определенный вне тела класса, нуждается в собственном определении шаблона метода
-//int Array<T>::getLength()  // обратите внимание, имя класса - Array<T>, а не просто Array
  
 
 class Protocol_class
@@ -118,7 +112,6 @@ public:
 
     static void response_WAY(const IOT_Server &iotHost, Array<char> &data);
     static void response_READ(const IOT_Server &iotHost, Array<char> &data);
-    static void response_WRITE(IOT_Server &iotHost, Array<char> &data);
 };
 
 #endif // PROTOCOL_CLASS_H

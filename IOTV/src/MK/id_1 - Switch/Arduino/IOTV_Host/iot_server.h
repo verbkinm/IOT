@@ -1,7 +1,6 @@
 #ifndef IOT_SERVER_H
 #define IOT_SERVER_H
 
-#include <WString.h>
 #include "raw.h"
 
 #define READ_CHANNEL_LENGTH 1
@@ -13,7 +12,7 @@ public:
     IOT_Server();
 
     const uint8_t _id;
-    const String _description;
+    const char* _description;
 
     Raw::RAW _readChannel[READ_CHANNEL_LENGTH];
     Raw::RAW _writeChannel[WRITE_CHANNEL_LENGTH];

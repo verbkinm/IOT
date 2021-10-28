@@ -52,7 +52,7 @@ public:
         double d;           // 10 double32
                             // 11 double64
         bool b;             // 12
-        const char* str;    // 13
+        char* str;    // 13
 
         char array[8];      // побайтный доступ к RAW
     };
@@ -60,7 +60,7 @@ public:
     static DATA_TYPE toDataType(uint8_t type);
     static uint8_t toUInt8(DATA_TYPE dataType);
 
-    static const uint8_t size = 8;
+    static const uint8_t size = sizeof(RAW);
 };
 
 #endif // RAW_H

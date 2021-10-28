@@ -237,7 +237,7 @@ void IOT_Host::slotConnected()
     _state.setFlag(ExpectedWay);
     _conn_type->write(data);
 
-    emit signalHostConnected(); ///!!!
+    emit signalHostConnected(); ///!!! никуда не идут
 }
 
 void IOT_Host::slotDisconnected()
@@ -245,7 +245,7 @@ void IOT_Host::slotDisconnected()
     setState(false);
     eraseAllExpectedResponse();
 
-    emit signalHostDisconnected(); ///!!!
+    emit signalHostDisconnected(); ///!!! никуда не идут
 }
 
 void IOT_Host::slotResendDataWrite()
