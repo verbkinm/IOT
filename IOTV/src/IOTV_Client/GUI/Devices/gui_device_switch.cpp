@@ -14,7 +14,7 @@ GUI_Device_Switch::GUI_Device_Switch(Device &device, QWidget *parent) : GUI_Base
 
     connect(&_button, &QPushButton::clicked, this, &GUI_Device_Switch::slotButtonPressed);
 
-    _device.setAutoReadInterval(1000);
+    _device.setAutoReadInterval(500);
     _device.setAutoReadEnable(true);
 }
 

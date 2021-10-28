@@ -158,6 +158,8 @@ void IOT_Host::connectObjects() const
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
+    _timerWAY.stop();
+
     if(!_state.testFlag(Flag::ExpectedWay))
     {
         Log::write(_conn_type->getName() + " WARNING: Received a packet RESPONSE_WAY without a request.");
@@ -167,7 +169,6 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
     IOTV_SH::response_WAY(*this, data);
 
     setState(true);
-    _timerWAY.stop();
 }
 
 void IOT_Host::response_READ_recived(const QByteArray &data)

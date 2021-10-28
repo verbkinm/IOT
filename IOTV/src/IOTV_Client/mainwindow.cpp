@@ -206,8 +206,8 @@ void MainWindow::readSettings()
 
         ui->actionRemove_server->setEnabled(true);
 
-        connect(server, SIGNAL(signalDeviceCreated()), this, SLOT(slotRoomsRestructWidget()));
-        connect(server, SIGNAL(signalDisconnected()), this, SLOT(slotRoomsRestructWidget()));
+        connect(server, &Server::signalDevicesCreated, this, &MainWindow::slotRoomsRestructWidget);
+        connect(server, &Server::signalDisconnected, this, &MainWindow::slotRoomsRestructWidget);
 
         _settings.endGroup();
     }

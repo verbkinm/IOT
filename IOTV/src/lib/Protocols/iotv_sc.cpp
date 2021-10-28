@@ -488,8 +488,8 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
             uint16_t msb = buffer[prefixSize + 1] << 8;
             uint16_t lsb = buffer[prefixSize + 2];
             uint16_t descriptionLength = msb | lsb;
-            uint8_t readChannelCount = data[prefixSize + 3] >> 4;
-            uint8_t writeChannelCount = data[prefixSize + 3] & 0x0F;
+            uint8_t readChannelCount = buffer[prefixSize + 3] >> 4;
+            uint8_t writeChannelCount = buffer[prefixSize + 3] & 0x0F;
             uint64_t subPacketSize = prefixSize + 4 + descriptionLength + readChannelCount + writeChannelCount;
 
             if(bufSize < subPacketSize)
@@ -497,7 +497,7 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
             else
             {
                 packetSize += subPacketSize;
-                buffer = buffer.mid(subPacketSize - 1);
+                buffer = buffer.mid(subPacketSize);
                 bufSize = buffer.size();
             }
         }

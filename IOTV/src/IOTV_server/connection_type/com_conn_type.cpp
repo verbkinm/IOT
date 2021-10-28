@@ -17,10 +17,8 @@ void COM_conn_type::connectToHost()
         _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
-    QString strOut = _name + ": connected to " + _address;
-    Log::write(strOut);
-
     _reconnectTimer.stop();
+    Log::write(_name + ": connected to " + _address);
     emit signalConnected();
 }
 
@@ -161,8 +159,7 @@ void COM_conn_type::slotHandleError(QSerialPort::SerialPortError error)
 
 qint64 COM_conn_type::write(const QByteArray &data)
 {
-    QString strOut = _name + ": data transmit to " + _address + " -> " + data.toHex(':');
-    Log::write(strOut);
+    Log::write(_name + ": data transmit to " + _address + " -> " + data.toHex(':'));
     return _serialPort.write(data);
 }
 

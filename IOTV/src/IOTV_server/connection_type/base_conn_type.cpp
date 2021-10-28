@@ -73,7 +73,7 @@ void Base_conn_type::slotReadData()
         data.clear();
         return;
     }
-    if(accumPacketResponse.first && accumPacketResponse.second > 0)
+    if(accumPacketResponse.first && accumPacketResponse.second)
     {
         QByteArray buffer = data.mid(0, accumPacketResponse.second);
         QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');

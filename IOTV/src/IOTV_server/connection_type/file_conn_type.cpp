@@ -8,8 +8,7 @@ File_conn_type::File_conn_type(const QString &name, const QString& fileName, Bas
 
 qint64 File_conn_type::write(const QByteArray &data)
 {
-    QString strOut = _name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':');
-    Log::write(strOut);
+    Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
 
     QByteArray buffer;
     if(data.size() == 1 && data[0] == QUERY_WAY_BYTE)
@@ -28,8 +27,7 @@ qint64 File_conn_type::write(const QByteArray &data)
         buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
         buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
 
-        strOut = _name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':');
-        Log::write(strOut);
+        Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
 
         emit signalDataRiceved(buffer);
         return 0;
@@ -54,8 +52,7 @@ qint64 File_conn_type::write(const QByteArray &data)
         for (char byte : dataRead)
             buffer.push_back(byte);
 
-        strOut = _name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':') + " (" + dataRead + ")";
-        Log::write(strOut);
+        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':') + " (" + dataRead + ")");
 
         emit signalDataRiceved(buffer);
     }
@@ -63,8 +60,7 @@ qint64 File_conn_type::write(const QByteArray &data)
     {
         if(data.size() != (3 + (data.at(1) | data.at(2))) )
         {
-            strOut = _name + ": data transimt error" + " -> " + buffer.toHex(':');
-            Log::write(strOut);
+            Log::write(_name + ": data transimt error" + " -> " + buffer.toHex(':'));
             return 0;
         }
 
@@ -73,8 +69,7 @@ qint64 File_conn_type::write(const QByteArray &data)
         _file.close();
         if(!_file.open(QIODevice::WriteOnly))
         {
-            QString strOut = _name + ": can't write to file " + QFileInfo(_file).absoluteFilePath();
-            Log::write(strOut);
+            Log::write(_name + ": can't write to file " + QFileInfo(_file).absoluteFilePath());
             return 0;
         }
         _file.write(buffer);
@@ -84,8 +79,7 @@ qint64 File_conn_type::write(const QByteArray &data)
 
         buffer.clear();
         buffer.push_back(RESPONSE_WRITE_BYTE);
-        strOut = _name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':');
-        Log::write(strOut);
+        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
         emit signalDataRiceved(buffer);
     }
 
@@ -94,25 +88,20 @@ qint64 File_conn_type::write(const QByteArray &data)
 
 void File_conn_type::connectToHost()
 {
+    _reconnectTimer.stop();
     if(!_file.open(QIODevice::ReadOnly))
     {
-        QString strOut = _name + ": can't read file" + QFileInfo(_file).absoluteFilePath();
-        Log::write(strOut);
+        Log::write(_name + ": can't read file" + QFileInfo(_file).absoluteFilePath());
         _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
-
-    QString strOut = _name + ": file " + QFileInfo(_file).absoluteFilePath() + " is open.";
-    Log::write(strOut);
-    _reconnectTimer.stop();
-
+    Log::write(_name + ": file " + QFileInfo(_file).absoluteFilePath() + " is open.");
     emit signalConnected();
 }
 
 void File_conn_type::disconnectFromHost()
 {
-    QString strOut = _name + ": close file " + QFileInfo(_file).absoluteFilePath();
-    Log::write(strOut);
+    Log::write(_name + ": close file " + QFileInfo(_file).absoluteFilePath());
 
     emit signalDisconnected();
 

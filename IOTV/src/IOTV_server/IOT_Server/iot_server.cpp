@@ -94,9 +94,9 @@ void IOT_Server::startTCPServer()
     }
     else
     {
+        _reconnectTimer.stop();
         QString str = "Start TCP server, " + _address + ":" + QString::number(_port);
         Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
-        _reconnectTimer.stop();
     }
 }
 

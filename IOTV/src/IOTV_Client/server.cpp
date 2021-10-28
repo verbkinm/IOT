@@ -127,18 +127,18 @@ void Server::deviceListShow()
     _deviceList->restructWidget();
 }
 
-void Server::createDevice(QByteArray &data)
+void Server::createDevice(const QByteArray &data, const QString &name)
 {
-    data = data.mid(2);
-    uint8_t nameLength = data.at(0) >> 3;
-    QString name = data.mid(1, nameLength);
+    //    data = data.mid(2);
+    //    uint8_t nameLength = data.at(0) >> 3;
+    //    QString name = data.mid(1, nameLength);
 
-    QByteArray buff;
-    buff.append(0x05);
-    buff.append(data.mid(1 + nameLength));
+    //    QByteArray buff;
+    //    buff.append(0x05);
+    //    buff.append(data.mid(1 + nameLength));
 
-    _devices[name] = std::make_shared<Device>(*this, name, buff.at(1), this);
-    IOTV_SH::response_WAY(*_devices[name], buff);
+    _devices[name] = std::make_shared<Device>(*this, name, data.at(1), this);
+    IOTV_SH::response_WAY(*_devices[name], data);
 
     const auto it = _alias.find(name);
     if(it != _alias.cend())
@@ -149,8 +149,6 @@ void Server::createDevice(QByteArray &data)
         _deviceList->clear();
         _deviceList->restructWidget();
     }
-
-    emit signalDeviceCreated();
 }
 
 void Server::newObjectName()
@@ -177,7 +175,7 @@ const std::map<QString, QString> &Server::getAlias() const
 void Server::slotConnected()
 {
     QString strOut = _name + ": connected to " + _socket.peerAddress().toString()
-                     + ":" + QString::number(_socket.peerPort());
+            + ":" + QString::number(_socket.peerPort());
     Log::write(strOut);
 
     connect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
@@ -198,7 +196,7 @@ void Server::slotConnected()
 void Server::slotDisconnected()
 {
     QString strOut = _name + ": disconnected from " + _socket.peerAddress().toString()
-                     + ":" + QString::number(_socket.peerPort());
+            + ":" + QString::number(_socket.peerPort());
     Log::write(strOut);
 
     disconnect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
@@ -217,60 +215,86 @@ void Server::slotReadData()
     static QByteArray data;
     data += _socket.readAll();
 
-    std::pair<bool, int> accumPacketResponse = IOTV_SC::accumResponcePacket(data);
-
-    if(!accumPacketResponse.first)
+    while(data.size())
     {
-        data.clear();
-        return;
-    }
-    else if(accumPacketResponse.first && accumPacketResponse.second)
-    {
-        QByteArray packetData = data.mid(0, accumPacketResponse.second);
-        Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
-                   + QString::number(_socket.peerPort())
-                   + " <- " + data.toHex(':'));
+        std::pair<bool, int> accumPacketResponse = IOTV_SC::accumResponcePacket(data);
 
-        IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
-
-        if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
-            createDevice(packetData);
-        else
+        if(!accumPacketResponse.first)
         {
-            QString deviceName;
-            if(IOTV_SC::responseName(packetData, deviceName))
-            {
-                if(_devices.find(deviceName) != _devices.end())
-                    _devices.at(deviceName)->dataResived(packetData);
-                else
-                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
-            }
+            data.clear();
+            return;
         }
-        data = data.mid(accumPacketResponse.second);
+        else if(accumPacketResponse.first && accumPacketResponse.second)
+        {
+            QByteArray packetData = data.mid(0, accumPacketResponse.second);
+            Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
+                       + QString::number(_socket.peerPort())
+                       + " <- " + data.toHex(':'));
+
+            IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
+
+            if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
+            {
+                packetData = packetData.mid(2);
+                while (packetData.size())
+                {
+                    uint8_t nameLength = packetData.at(0) >> 3;
+                    QString name = packetData.mid(1, nameLength);
+                    packetData = packetData.mid(nameLength);
+                    packetData[0] = 0x05;
+
+                    std::pair<bool, int> WAY_Packet = IOTV_SH::accumPacket(packetData);
+                    if(!WAY_Packet.first)
+                    {
+                        data.clear();
+                        return;
+                    }
+                    if(WAY_Packet.first && WAY_Packet.second)
+                    {
+                        QByteArray buf = packetData.mid(0, WAY_Packet.second);
+                        createDevice(buf, name);
+                        packetData = packetData.mid(WAY_Packet.second);
+                    }
+                }
+                emit signalDevicesCreated();
+            }
+            else
+            {
+                QString deviceName;
+                if(IOTV_SC::responseName(packetData, deviceName))
+                {
+                    if(_devices.find(deviceName) != _devices.end())
+                        _devices.at(deviceName)->dataResived(packetData);
+                    else
+                        Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+                }
+            }
+            data = data.mid(accumPacketResponse.second);
+        }
         notify();
     }
 
 
     // ----------------------------------------------------------
 
-//    for (auto &packetData : IOTV_SC::splitResponseData(data))
-//    {
-//        IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
+    //    for (auto &packetData : IOTV_SC::splitResponseData(data))
+    //    {
+    //        IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(packetData);
 
-//        if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
-//            createDevice(packetData);
-//        else
-//        {
-//            QString deviceName;
-//            if(IOTV_SC::responseName(packetData, deviceName))
-//            {
-//                if(_devices.find(deviceName) != _devices.end())
-//                    _devices.at(deviceName)->dataResived(packetData);
-//                else
-//                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
-//            }
-//        }
-//    }
+    //        if(dataType == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
+    //            createDevice(packetData);
+    //        else
+    //        {
+    //            QString deviceName;
+    //            if(IOTV_SC::responseName(packetData, deviceName))
+    //            {
+    //                if(_devices.find(deviceName) != _devices.end())
+    //                    _devices.at(deviceName)->dataResived(packetData);
+    //                else
+    //                    Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+    //            }
+    //        }
+    //    }
 
 }
 

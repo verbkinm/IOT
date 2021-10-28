@@ -46,7 +46,7 @@ public:
     const std::map<QString, QString> &getAlias() const;
 
 private:
-    void createDevice(QByteArray &data);
+    void createDevice(const QByteArray &data, const QString &name);
     void newObjectName();
 
     QTcpSocket _socket;
@@ -68,7 +68,7 @@ private slots:
     void slotError(QAbstractSocket::SocketError error);
 
 signals:
-    void signalDeviceCreated();
+    void signalDevicesCreated();
     void signalDisconnected();
 
 };

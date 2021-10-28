@@ -25,9 +25,8 @@ void Ethernet_conn_type::setPort(quint16 port)
 
 qint64 Ethernet_conn_type::write(const QByteArray &data)
 {
-    QString strOut = _name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
-                     + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':');
-    Log::write(strOut);
+    Log::write(_name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
+               + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':'));
     return _tcpSocket->write(data);
 }
 
@@ -49,22 +48,20 @@ QByteArray Ethernet_conn_type::readAll()
 
 void Ethernet_conn_type::slotNewConnection()
 {
-    QString strOut = _name + ": connected to " + _tcpSocket->peerAddress().toString()
-                     + ":" + QString::number(_tcpSocket->peerPort());
-    Log::write(strOut);
+    _reconnectTimer.stop();
+    Log::write(_name + ": connected to " + _tcpSocket->peerAddress().toString()
+               + ":" + QString::number(_tcpSocket->peerPort()));
 
     connect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
     connect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &Ethernet_conn_type::slotSocketDisconnected);
 
-    _reconnectTimer.stop();
     emit signalConnected();
 }
 
 void Ethernet_conn_type::slotSocketDisconnected()
 {
-    QString strOut = _name + ": disconnected from " + _tcpSocket->peerAddress().toString()
-                   + ":" + QString::number(_tcpSocket->peerPort());
-    Log::write(strOut);
+    Log::write(_name + ": disconnected from " + _tcpSocket->peerAddress().toString()
+               + ":" + QString::number(_tcpSocket->peerPort()));
 
     disconnect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
     disconnect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &Ethernet_conn_type::slotSocketDisconnected);
