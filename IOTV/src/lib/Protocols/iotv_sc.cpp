@@ -236,103 +236,6 @@ void IOTV_SC::responceToClient_Write(QByteArray &data)
     data.append(deviceName);
 }
 
-QByteArrayList IOTV_SC::splitQueryData(QByteArray &data)
-{
-    QByteArrayList result;
-
-    while (data.length())
-    {
-        IOTV_SC::Query_Type dataType = checkQueryData(data);
-
-        if(dataType == Query_Type::QUERY_DEVICE_LIST)
-        {
-            QByteArray byte;
-            byte.append(data.at(0));
-            result.append(byte);
-            data.remove(0, 1);
-        }
-        else if(dataType == Query_Type::QUERY_STATE)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            result.append(data.mid(0, 2 + nameLength));
-            data.remove(0, 2 + nameLength);
-        }
-        else if(dataType == Query_Type::QUERY_READ)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            result.append(data.mid(0, 2 + nameLength));
-            data.remove(0, 2 + nameLength);
-        }
-        else if(dataType == Query_Type::QUERY_WRITE)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            uint16_t dataLength = data.at(2) << 8 | data.at(3);
-            result.append(data.mid(0, 4 + nameLength + dataLength));
-            data.remove(0, 4 + nameLength + dataLength);
-        }
-    }
-    return result;
-}
-
-QByteArrayList IOTV_SC::splitResponseData(QByteArray &data)
-{
-    QByteArrayList result;
-
-    while (data.length())
-    {
-        IOTV_SC::Response_Type dataType = checkResponsetData(data);
-
-        if(dataType == Response_Type::RESPONSE_DEVICE_LIST)
-        {
-            uint8_t countDivece = data.at(1);
-            data = data.mid(2);
-
-            for(uint8_t i = 0; i < countDivece; i++)
-            {
-                uint8_t nameLength = data.at(0) >> 3;
-                uint16_t dataLength = data.at(1 + nameLength + 1) << 8 | data.at(1 + nameLength + 2);
-                uint8_t readChannelCount = data.at(1 + nameLength + 3) >> 4;
-                uint8_t writeChannelCount = data.at(1 + nameLength + 3) & 0x0f;
-
-                uint packageLength = 5 + nameLength + dataLength + readChannelCount + writeChannelCount;
-
-                QByteArray buff;
-                buff.append(RESPONSE_DEVICE_LIST_BYTE);
-                buff.append(countDivece);
-                buff.append(data.mid(0, packageLength));
-
-                result.append(buff);
-                data.remove(0, buff.size() - 2);
-            }
-        }
-        else if(dataType == Response_Type::RESPONSE_STATE)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            result.append(data.mid(0, 2 + nameLength));
-            data.remove(0, 2 + nameLength);
-        }
-        else if(dataType == Response_Type::RESPONSE_READ)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            uint16_t dataLength = data.at(2) << 8 | data.at(3);
-            result.append(data.mid(0, 4 + nameLength + dataLength));
-            data.remove(0, 4 + nameLength + dataLength);
-        }
-        else if(dataType == Response_Type::RESPONSE_WRITE)
-        {
-            uint8_t nameLength = data.at(0) >> 3;
-            result.append(data.mid(0, 2 + nameLength));
-            data.remove(0, 2 + nameLength);
-        }
-        else if(dataType == Response_Type::RESPONSE_ERROR)
-        {
-            Log::write("Resive error data: " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDERR);
-            return result;
-        }
-    }
-    return result;
-}
-
 IOTV_SC::Response_Type IOTV_SC::checkResponsetData(const QByteArray &data)
 {
     if(data.length() < 2)
@@ -514,7 +417,9 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
     else if(dataSize > 4 && dataType == Response_Type::RESPONSE_READ)
     {
         uint8_t nameLength = data.at(0) >> 3;
-        uint16_t dataLength = (data.at(2) << 8) | data.at(3);
+        uint16_t msb = data.at(2) << 8;
+        uint16_t lsb = data.at(3);
+        uint16_t dataLength = msb | lsb;
         uint32_t packetSize = 4 + nameLength + dataLength;
 
         if(dataSize >= packetSize)
@@ -524,6 +429,48 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
     {
         uint8_t nameLength = data.at(0) >> 3;
         uint32_t packetSize = 2 + nameLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
+    }
+    else if(dataSize > 256)
+        return {false, 0};
+
+    return {true, 0};
+}
+
+std::pair<bool, int> IOTV_SC::accumQueryPacket(const QByteArray &data)
+{
+    Query_Type dataType = checkQueryData(data);
+    uint32_t dataSize = static_cast<uint32_t>(data.size());
+
+    if(dataType == Query_Type::QUERY_ERROR)
+        return {false, 0};
+    else if(dataSize == 1 && dataType == Query_Type::QUERY_DEVICE_LIST)
+        return {true, 1};
+    else if(dataSize >= 3 && dataType == Query_Type::QUERY_STATE)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+        uint32_t packetSize = 2 + nameLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
+    }
+    else if(dataSize >= 3 && dataType == Query_Type::QUERY_READ)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+        uint32_t packetSize = 2 + nameLength;
+
+        if(dataSize >= packetSize)
+            return {true, packetSize};
+    }
+    else if(dataSize >= 5 && dataType == Query_Type::QUERY_WRITE)
+    {
+        uint8_t nameLength = data.at(0) >> 3;
+        uint16_t msb = data.at(2) << 8;
+        uint16_t lsb = data.at(3);
+        uint16_t dataLength = msb | lsb;
+        uint32_t packetSize = 4 + nameLength + dataLength;
 
         if(dataSize >= packetSize)
             return {true, packetSize};

@@ -224,7 +224,7 @@ void Server::slotReadData()
             data.clear();
             return;
         }
-        else if(accumPacketResponse.first && accumPacketResponse.second)
+        if(accumPacketResponse.first && accumPacketResponse.second)
         {
             QByteArray packetData = data.mid(0, accumPacketResponse.second);
             Log::write("Data recived form " + _socket.peerAddress().toString() + ":"
@@ -271,6 +271,9 @@ void Server::slotReadData()
             }
             data = data.mid(accumPacketResponse.second);
         }
+        else
+            break;
+
         notify();
     }
 

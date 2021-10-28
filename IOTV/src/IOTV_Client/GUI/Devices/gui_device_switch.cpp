@@ -14,7 +14,7 @@ GUI_Device_Switch::GUI_Device_Switch(Device &device, QWidget *parent) : GUI_Base
 
     connect(&_button, &QPushButton::clicked, this, &GUI_Device_Switch::slotButtonPressed);
 
-    _device.setAutoReadInterval(500);
+    _device.setAutoReadInterval(1000);
     _device.setAutoReadEnable(true);
 }
 
@@ -31,6 +31,17 @@ void GUI_Device_Switch::update()
         _button.setIcon(QIcon(fileNameOn));
         _buttonState = true;
     }
+
+//    try
+//    {
+//        raw = _device.getExpectedResponseWrite().at(0);
+//        int a = 1;
+
+//    }
+//    catch (const std::out_of_range &e)
+//    {
+//        _button.setEnabled(true);
+//    }
 
     stateAndViewName();
 }
@@ -49,5 +60,6 @@ void GUI_Device_Switch::slotButtonPressed()
         _button.setIcon(QIcon(fileNameOff));
     }
 
+//    _button.setEnabled(false);
     _device.writeData(0, raw);
 }

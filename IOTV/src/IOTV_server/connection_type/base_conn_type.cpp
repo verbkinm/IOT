@@ -66,21 +66,26 @@ void Base_conn_type::slotReadData()
     static QByteArray data;
     data += readAll();
 
-    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
-
-    if(!accumPacketResponse.first)
+    while(data.size())
     {
-        data.clear();
-        return;
-    }
-    if(accumPacketResponse.first && accumPacketResponse.second)
-    {
-        QByteArray buffer = data.mid(0, accumPacketResponse.second);
-        QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
-        Log::write(strOut);
+        std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
 
-        emit signalDataRiceved(buffer);
-        data = data.mid(accumPacketResponse.second);
+        if(!accumPacketResponse.first)
+        {
+            data.clear();
+            return;
+        }
+        if(accumPacketResponse.first && accumPacketResponse.second)
+        {
+            QByteArray buffer = data.mid(0, accumPacketResponse.second);
+            QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
+            Log::write(strOut);
+
+            emit signalDataRiceved(buffer);
+            data = data.mid(accumPacketResponse.second);
+        }
+        else
+            break;
     }
 }
 

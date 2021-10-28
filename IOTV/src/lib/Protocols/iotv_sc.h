@@ -39,9 +39,6 @@ public:
     static void responceToClient_Read(const Base_Host &host, QByteArray &data);
     static void responceToClient_Write(QByteArray &data);
 
-    static QByteArrayList splitQueryData(QByteArray &data);
-    static QByteArrayList splitResponseData(QByteArray &data);
-
     enum class Query_Type
     {
         QUERY_DEVICE_LIST,
@@ -67,6 +64,7 @@ public:
     static bool queryName(const QByteArray &data, QString &returnName);
 
     static std::pair<bool, int> accumResponcePacket(const QByteArray &data);
+    static std::pair<bool, int> accumQueryPacket(const QByteArray &data);
 };
 
 #endif // IOTV_SC_H
