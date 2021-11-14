@@ -1,6 +1,8 @@
 #include "gui_device_weather_station.h"
 #include "device.h"
 
+#include <math.h>
+
 GUI_Device_Weather_Station::GUI_Device_Weather_Station(Device &device, QWidget *parent) : GUI_Base_Device(device, parent)
 {
     _labelTemperature.setText("Temperature (C): ");
@@ -39,9 +41,13 @@ void GUI_Device_Weather_Station::update()
     //    if(_pressure.text() != pressure)
     //        _pressure.setText(pressure);
 
-    _temperature.setText(QString::number(_device.getReadChannelData(0).f));
-    _humidity.setText(QString::number(_device.getReadChannelData(1).f));
-    _pressure.setText(QString::number(_device.getReadChannelData(2).f));
+    float t = _device.getReadChannelData(0).f;
+    float h = _device.getReadChannelData(1).f;
+    float p = _device.getReadChannelData(2).f;
+
+    _temperature.setText(QString::number(round(t * 100) / 100));
+    _humidity.setText(QString::number(round(h * 100) / 100));
+    _pressure.setText(QString::number(round(p * 100) / 100));
 
     stateAndViewName();
 }
