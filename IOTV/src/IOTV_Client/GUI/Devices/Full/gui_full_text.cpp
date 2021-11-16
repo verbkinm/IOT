@@ -25,10 +25,10 @@ void Gui_Full_Text::slotRead()
 void Gui_Full_Text::slotWrite()
 {
     std::string text = _text.toPlainText().toStdString();
-    uint16_t textSize = text.size();
+    quint16 textSize = text.size();
 
     char *ptr = new char[textSize + 1]; // очищается в  eraseExpectedResponseWrite
-    for (uint16_t i = 0; i < textSize; i++)
+    for (quint16 i = 0; i < textSize; i++)
         ptr[i] = text.at(i);
     ptr[textSize] = '\0';
 

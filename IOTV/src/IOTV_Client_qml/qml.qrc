@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Server.qml</file>
+        <file>LineEdit.qml</file>
+        <file>Hosts.qml</file>
+    </qresource>
+</RCC>

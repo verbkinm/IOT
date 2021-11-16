@@ -232,7 +232,7 @@ void IOT_Server::slotDataRecived()
                         uint8_t nameLength = packetData.at(0) >> 3;
                         uint8_t channelNumber = packetData.at(1) & 0x0F;
 
-                        uint16_t dataLength = (packetData.at(2) >> 8) | packetData.at(3);
+                        quint16 dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 
                         QByteArray data = packetData.mid(4 + nameLength, dataLength);
                         Raw::RAW raw;
@@ -240,7 +240,7 @@ void IOT_Server::slotDataRecived()
 
                         if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
-                            uint16_t strLength = data.size();
+                            quint16 strLength = data.size();
                             ptr = new char[strLength + 1]; // удаляется в eraseExpectedResponceWrite
 
                             for (uint8_t i = 0; i < strLength; ++i)

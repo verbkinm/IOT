@@ -50,14 +50,14 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
     if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
     {
         char* ptr = rawData.str;
-        uint16_t strLength = strlen(ptr);
+        quint16 strLength = strlen(ptr);
 
         data.append(strLength >> 8);
         data.append(strLength);
 
         data.append(deviceName.toUtf8());
 
-        for (uint16_t i = 0; i < strLength; i++)
+        for (quint16 i = 0; i < strLength; i++)
             data.append(ptr[i]);
     }
     else
@@ -67,7 +67,7 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
 
         data.append(deviceName.toUtf8());
 
-        for (uint16_t i = 0; i < Raw::size; i++)
+        for (quint16 i = 0; i < Raw::size; i++)
             data.append(rawData.array[i]);
     }
 
@@ -88,7 +88,7 @@ QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
     for(uint8_t i = 0; i < countDivece; i++)
     {
         uint8_t nameLength = buff.at(0) >> 3;
-        uint16_t dataLength = buff.at(1 + nameLength + 1) << 8 | buff.at(1 + nameLength + 2);
+        quint16 dataLength = buff.at(1 + nameLength + 1) << 8 | buff.at(1 + nameLength + 2);
         uint8_t readChannelCount = buff.at(1 + nameLength + 3) >> 4;
         uint8_t writeChannelCount = buff.at(1 + nameLength + 3) & 0x0f;
         uint packageLength = 5 + dataLength + readChannelCount + writeChannelCount;
@@ -111,7 +111,7 @@ void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
 {
     uint8_t nameLength = data.at(0) >> 3;
     uint8_t channelNumber = data.at(1) & 0x0f;
-    uint16_t dataLength = (data.at(2) << 8) | data.at(3);
+    quint16 dataLength = (data.at(2) << 8) | data.at(3);
 
     QByteArray buf = data.mid(4 + nameLength);
     Raw::RAW rawData;
@@ -120,7 +120,7 @@ void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
     {
         char *ptr = new char[dataLength + 1];
 
-        for (uint16_t i = 0; i < dataLength; i++)
+        for (quint16 i = 0; i < dataLength; i++)
             ptr[i] = buf.at(i);
         ptr[dataLength] = '\0';
 
@@ -388,9 +388,9 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
             if(bufSize < static_cast<uint32_t>(4 + prefixSize))
                 return {false, 0};
 
-            uint16_t msb = buffer[prefixSize + 1] << 8;
-            uint16_t lsb = buffer[prefixSize + 2];
-            uint16_t descriptionLength = msb | lsb;
+            quint16 msb = buffer[prefixSize + 1] << 8;
+            quint16 lsb = buffer[prefixSize + 2];
+            quint16 descriptionLength = msb | lsb;
             uint8_t readChannelCount = buffer[prefixSize + 3] >> 4;
             uint8_t writeChannelCount = buffer[prefixSize + 3] & 0x0F;
             uint64_t subPacketSize = prefixSize + 4 + descriptionLength + readChannelCount + writeChannelCount;
@@ -417,9 +417,9 @@ std::pair<bool, int> IOTV_SC::accumResponcePacket(const QByteArray &data)
     else if(dataSize > 4 && dataType == Response_Type::RESPONSE_READ)
     {
         uint8_t nameLength = data.at(0) >> 3;
-        uint16_t msb = data.at(2) << 8;
-        uint16_t lsb = data.at(3);
-        uint16_t dataLength = msb | lsb;
+        quint16 msb = data.at(2) << 8;
+        quint16 lsb = data.at(3);
+        quint16 dataLength = msb | lsb;
         uint32_t packetSize = 4 + nameLength + dataLength;
 
         if(dataSize >= packetSize)
@@ -467,9 +467,9 @@ std::pair<bool, int> IOTV_SC::accumQueryPacket(const QByteArray &data)
     else if(dataSize >= 5 && dataType == Query_Type::QUERY_WRITE)
     {
         uint8_t nameLength = data.at(0) >> 3;
-        uint16_t msb = data.at(2) << 8;
-        uint16_t lsb = data.at(3);
-        uint16_t dataLength = msb | lsb;
+        quint16 msb = data.at(2) << 8;
+        quint16 lsb = data.at(3);
+        quint16 dataLength = msb | lsb;
         uint32_t packetSize = 4 + nameLength + dataLength;
 
         if(dataSize >= packetSize)

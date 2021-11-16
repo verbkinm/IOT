@@ -72,7 +72,7 @@ void Protocol_class::response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &d
 {
     Q_UNUSED(iotHost);
     uint8_t chNumber = data.at(0) >> 4;
-    uint16_t length = data.at(1) | data.at(2);
+    quint16 length = data.at(1) | data.at(2);
 
     for (size_t i = 0; i < length; i++)
         iotHost._writeChannel[chNumber].array[i] = data.at(i + 3);

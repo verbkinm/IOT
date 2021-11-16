@@ -3,19 +3,24 @@
 
 #include <QTcpSocket>
 #include <QHostAddress>
-#include <GUI/gui_server.h>
+#include <QTimer>
 
 #include <memory.h>
 #include <map>
 
 #include "device.h"
 #include "Patterns/Subject.h"
-#include "GUI/devicelist.h"
 
 
 class Server : public QObject, public Subject
 {
     Q_OBJECT
+
+    Q_PROPERTY(QString addr READ getServerAddress WRITE setServerAddres NOTIFY serverAddresChanged)
+    Q_PROPERTY(quint16 port READ getServerPort WRITE setServerPort NOTIFY serverPortChanged)
+    Q_PROPERTY(quint16 totalDevice READ getDevicesCount NOTIFY totalDeviceChanged)
+    Q_PROPERTY(quint16 onlineDevice READ getDeviceOnline NOTIFY onlineDeviceChanged)
+
 public:
     Server(QObject *parent = nullptr);
     ~Server();
@@ -23,8 +28,8 @@ public:
     QString getName() const;
     QString getServerAddress() const;
     quint16 getServerPort() const;
-    uint getDevicesCount() const;
-    uint getDeviceOnline() const;
+    quint16 getDevicesCount() const;
+    quint16 getDeviceOnline() const;
 
     void setName(const QString &name);
     void setServerAddres(const QString &serverAddress);
@@ -33,12 +38,7 @@ public:
 
     QAbstractSocket::SocketState state() const;
 
-    void connectToHost();
-    void disconnectFromHost();
-
     qint64 writeData(QByteArray &data);
-
-    void deviceListShow();
 
     const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
 
@@ -57,10 +57,12 @@ private:
     uint8_t _reconnectTimerTrying;
 
     std::map<QString, std::shared_ptr<Device>> _devices;
-    std::unique_ptr<DeviceList> _deviceList;
     std::map<QString, QString> _alias;
 
-private slots:
+public slots:
+    void connectToHost();
+    void disconnectFromHost();
+
     void slotConnected();
     void slotDisconnected();
 
@@ -68,8 +70,16 @@ private slots:
     void slotError(QAbstractSocket::SocketError error);
 
 signals:
+    void serverAddresChanged(QString addr);
+    void serverPortChanged(quint16 port);
+
+    void totalDeviceChanged();
+    void onlineDeviceChanged();
+
     void signalDevicesCreated();
     void signalDisconnected();
+    void signalConnected();
+
 
 };
 

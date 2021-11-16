@@ -18,8 +18,6 @@ GUI_Server::GUI_Server(Server &server, const Tab &serverTab, QWidget *parent) : 
     connect(ui->connect, &QPushButton::clicked, this, &GUI_Server::slotConnect);
     connect(ui->list, &QPushButton::clicked, this, &GUI_Server::slotList);
     connect(ui->edit, &QPushButton::clicked, this, &GUI_Server::slotEdit);
-
-    //    update();
 }
 
 GUI_Server::~GUI_Server()
