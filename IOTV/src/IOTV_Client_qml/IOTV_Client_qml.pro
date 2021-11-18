@@ -9,7 +9,8 @@ CONFIG += c++17
 SOURCES += \
         device.cpp \
         main.cpp \
-        server.cpp
+        server.cpp \
+        wrapper_device.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,7 +29,8 @@ HEADERS += \
     Patterns/Subject.h \
     Patterns/observer.h \
     device.h \
-    server.h
+    server.h \
+    wrapper_device.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw

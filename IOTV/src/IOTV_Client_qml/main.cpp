@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 
 #include "server.h"
+#include "wrapper_device.h"
 
 
 int main(int argc, char *argv[])
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<Server>("io.qt.Backend_Server", 1, 0, "Backend_Server");
+    qmlRegisterType<Wrapper_Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

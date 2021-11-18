@@ -9,6 +9,11 @@ Page {
     property bool status: false
     property bool connection_attempt: false
 
+    property alias back: backend_server
+
+    signal click()
+    signal disconected()
+
     header: Label {
         text: qsTr("Сервер: " + textHeader())
         font.pixelSize: Qt.application.font.pixelSize * 2
@@ -105,6 +110,7 @@ Page {
             port.color = "white"
 
             devices.text = "(<font color='green'>0</font>/<font color='red'>0</font>)"
+            disconected()
         }
         onAddrChanged: {
             addr.text = addr
@@ -120,8 +126,6 @@ Page {
 
     Button {
         id: btn
-//        width: 150
-//        height: 50;
         anchors.top: devices.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 15
@@ -129,6 +133,7 @@ Page {
         text: "Подключиться"
 
         onClicked: {
+            click()
             if(connection_attempt)
             {
                 backend_server.disconnectFromHost()

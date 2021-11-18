@@ -27,8 +27,8 @@ public:
     void setDescription(const QString &description);
     bool setReadChannelData(size_t channelNumber, Raw::RAW rawData);
 
-    uint8_t getId() const;
-    QString getDescription() const;
+    Q_INVOKABLE quint8 getId() const;
+    Q_INVOKABLE QString getDescription() const;
     Raw::DATA_TYPE getReadChannelDataType(uint8_t channelNumber) const;
     Raw::RAW getReadChannelData(uint8_t channelNumber) const;
     Raw::DATA_TYPE getWriteChannelDataType(uint8_t channelNumber) const;
@@ -36,8 +36,8 @@ public:
     const std::set<uint8_t> &getExpectedResponseRead() const;
     const std::map<uint8_t, Raw::RAW> &getExpectedResponseWrite() const;
 
-    size_t readChannelLength() const;
-    size_t writeChannelLength() const;
+    Q_INVOKABLE int readChannelLength() const;
+    Q_INVOKABLE int writeChannelLength() const;
 
     bool insertExpectedResponseRead(uint8_t channelNumber);
     bool insertExpectedResponseWrite(uint8_t channelNumber, Raw::RAW rawData);

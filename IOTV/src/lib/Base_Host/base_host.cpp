@@ -46,12 +46,12 @@ Raw::DATA_TYPE Base_Host::getWriteChannelDataType(uint8_t channelNumber) const
     return _writeChannel.getDataType(channelNumber);
 }
 
-size_t Base_Host::readChannelLength() const
+int Base_Host::readChannelLength() const
 {
     return _readChannel.length();
 }
 
-size_t Base_Host::writeChannelLength() const
+int Base_Host::writeChannelLength() const
 {
     return _writeChannel.length();
 }
@@ -136,7 +136,7 @@ void Base_Host::setDescription(const QString &description)
     _description = description;
 }
 
-uint8_t Base_Host::getId() const
+quint8 Base_Host::getId() const
 {
     return _id;;
 }

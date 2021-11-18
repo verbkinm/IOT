@@ -3,7 +3,9 @@ import QtQuick.Controls 2.15
 
 ApplicationWindow {
     width: 640
+    minimumWidth: 640
     height: 480
+    minimumHeight: 480
     visible: true
     title: qsTr("IOTV-Клиент")
 
@@ -12,11 +14,22 @@ ApplicationWindow {
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
 
-        Server {
+        Server_Page {
+            onClick: {
+//                console.log(back.objectName)
+            }
+            onDisconected: {
+                host_page.clear()
+            }
+
+            back.onSignalDevicesCreated: {
+                host_page.objectsArray = back.getDevicesToQML()
+                host_page.createDivecGUI()
+            }
         }
 
-        Hosts {
-
+        Hosts_Page {
+            id: host_page
         }
     }
 

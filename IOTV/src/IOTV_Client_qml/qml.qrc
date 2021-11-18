@@ -2,8 +2,15 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>Server.qml</file>
+        <file>Server_Page.qml</file>
         <file>LineEdit.qml</file>
-        <file>Hosts.qml</file>
+        <file>Hosts_Page.qml</file>
+        <file>Divice_0.qml</file>
+        <file>Info.qml</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file alias="id_0">img/Unknow.png</file>
+        <file alias="led_on">img/led_on.png</file>
+        <file alias="led_off">img/led_off.png</file>
     </qresource>
 </RCC>

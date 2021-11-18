@@ -149,6 +149,17 @@ const std::map<QString, QString> &Server::getAlias() const
     return _alias;
 }
 
+QList<QObject*> Server::getDevicesToQML()
+{
+    QList<QObject*> result;
+    for (auto &[key, value] : _devices)
+    {
+        result.append(value.get());
+    }
+
+    return result;
+}
+
 void Server::slotConnected()
 {
     emit signalConnected();

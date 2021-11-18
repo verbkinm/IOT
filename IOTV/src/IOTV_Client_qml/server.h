@@ -45,6 +45,8 @@ public:
     void addAlias(const QString &name, const QString &aliasName);
     const std::map<QString, QString> &getAlias() const;
 
+    Q_INVOKABLE QList<QObject*> getDevicesToQML();
+
 private:
     void createDevice(const QByteArray &data, const QString &name);
     void newObjectName();

@@ -63,6 +63,7 @@ void Device::dataResived(QByteArray data)
 void Device::setState(bool state)
 {
     _state = state;
+    emit signalState(_state);
 }
 
 int Device::getAutoReadInterval() const
