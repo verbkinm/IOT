@@ -11,7 +11,6 @@
 #include "device.h"
 #include "Patterns/Subject.h"
 
-
 class Server : public QObject, public Subject
 {
     Q_OBJECT
@@ -81,8 +80,6 @@ signals:
     void signalDevicesCreated();
     void signalDisconnected();
     void signalConnected();
-
-
 };
 
 #endif // SERVER_H

@@ -5,12 +5,16 @@
         <file>Server_Page.qml</file>
         <file>LineEdit.qml</file>
         <file>Hosts_Page.qml</file>
-        <file>Divice_0.qml</file>
+        <file>Devices/Device_0.qml</file>
         <file>Info.qml</file>
+        <file>Devices/Device_1.qml</file>
+        <file>Devices/Base_Device.qml</file>
+        <file>Devices/Device_3.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file alias="id_0">img/Unknow.png</file>
         <file alias="led_on">img/led_on.png</file>
         <file alias="led_off">img/led_off.png</file>
+        <file alias="info">img/info.png</file>
     </qresource>
 </RCC>

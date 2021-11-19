@@ -14,6 +14,7 @@ public:
     Device(Server &server, const QString &name, uint8_t id, QObject *parent = nullptr);
     ~Device();
 
+    Q_INVOKABLE quint8 getIdToQML() const;
     Q_INVOKABLE virtual QString getName() const override;
     Q_INVOKABLE virtual bool getState() const override;
 
@@ -28,7 +29,7 @@ public:
 
     virtual qint64 writeToServer(QByteArray &data) override;
 
-    void setAutoReadEnable(bool state);
+    Q_INVOKABLE void setAutoReadEnable(bool state);
 
     Q_INVOKABLE QString getViewName() const;
     void setViewName(const QString &viewName);
@@ -51,6 +52,7 @@ private slots:
 
 signals:
     void signalState(bool state);
+    void signalDataReadRecived();
 };
 
 #endif // DEVICE_H

@@ -26,6 +26,10 @@ ApplicationWindow {
                 host_page.objectsArray = back.getDevicesToQML()
                 host_page.createDivecGUI()
             }
+//            back.onTotalDeviceChanged: {
+//                host_page.clear()
+//                host_page.createDivecGUI()
+//            }
         }
 
         Hosts_Page {
@@ -41,7 +45,7 @@ ApplicationWindow {
             text: qsTr("Сервер")
         }
         TabButton {
-            text: qsTr("Хосты")
+            text: qsTr("Устройства")
         }
     }
 }

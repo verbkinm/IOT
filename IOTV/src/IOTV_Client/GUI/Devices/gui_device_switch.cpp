@@ -32,17 +32,6 @@ void GUI_Device_Switch::update()
         _buttonState = true;
     }
 
-//    try
-//    {
-//        raw = _device.getExpectedResponseWrite().at(0);
-//        int a = 1;
-
-//    }
-//    catch (const std::out_of_range &e)
-//    {
-//        _button.setEnabled(true);
-//    }
-
     stateAndViewName();
 }
 

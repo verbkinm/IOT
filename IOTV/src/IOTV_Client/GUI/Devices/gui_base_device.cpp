@@ -85,16 +85,6 @@ void GUI_Base_Device::stateAndViewName()
         setViewName(_device.getViewName());
 }
 
-//void GUI_Base_Device::addWidget(QWidget *widget, int row, int column, int rowSpan, int columnSpan, Qt::Alignment alignment)
-//{
-//    _deviceLayout.addWidget(widget, row, column, rowSpan, columnSpan, alignment);
-//}
-
-//Device &GUI_Base_Device::device() const
-//{
-//    return _device;
-//}
-
 void GUI_Base_Device::newObjectName()
 {
     this->setObjectName(_device.objectName());

@@ -3,6 +3,7 @@
 
 #include "server.h"
 #include "wrapper_device.h"
+#include "wrapper_raw.h"
 
 
 int main(int argc, char *argv[])
@@ -15,6 +16,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<Server>("io.qt.Backend_Server", 1, 0, "Backend_Server");
     qmlRegisterType<Wrapper_Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
+    qmlRegisterType<Wrapper_Raw>("io.qt.Raw", 1, 0, "Raw");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

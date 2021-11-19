@@ -1,7 +1,7 @@
 #include "device.h"
 #include "server.h"
 
-static int readInterval = 5000;
+static int readInterval = 1000;
 static int stateInterval = 5000;
 
 Device::Device(Server &server, const QString &name, uint8_t id, QObject *parent) : Base_Host(id, parent),
@@ -19,6 +19,11 @@ Device::Device(Server &server, const QString &name, uint8_t id, QObject *parent)
 Device::~Device()
 {
     destroyObservers();
+}
+
+quint8 Device::getIdToQML() const
+{
+    return getId();
 }
 
 QString Device::getName() const
@@ -51,13 +56,16 @@ void Device::dataResived(QByteArray data)
     if(dataType == IOTV_SC::Response_Type::RESPONSE_STATE)
         IOTV_SC::serverResponse_STATE(*this, data);
     else if(dataType == IOTV_SC::Response_Type::RESPONSE_READ)
+    {
         IOTV_SC::serverResponse_READ(*this, data);
+        emit signalDataReadRecived();
+    }
     else if(dataType == IOTV_SC::Response_Type::RESPONSE_WRITE)
         IOTV_SC::serverResponse_WRITE(*this, data);
     else
         return;
+//    notify();
 
-    notify();
 }
 
 void Device::setState(bool state)

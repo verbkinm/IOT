@@ -17,8 +17,6 @@ Rectangle {
         Text {
             id: txt
             anchors.centerIn: parent
-            //verticalAlignment: Text.AlignVCenter
-            //horizontalAlignment: Text.AlignHCenter
             text: qsTr("Info")
         }
     }

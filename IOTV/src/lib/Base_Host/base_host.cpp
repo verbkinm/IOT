@@ -136,7 +136,7 @@ void Base_Host::setDescription(const QString &description)
     _description = description;
 }
 
-quint8 Base_Host::getId() const
+uint8_t Base_Host::getId() const
 {
     return _id;;
 }
