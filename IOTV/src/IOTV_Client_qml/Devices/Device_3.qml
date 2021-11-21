@@ -14,11 +14,8 @@ Item {
         onInfo: {
             root.parent.showInfo(this.device)
         }
-        onIdChanged: {
-            root.parent.recreateDevices();
-        }
 
-        device.onSignalDataRecived: {
+        device.onSignalDataReadRecived: {
             lbl.text = device.getReadChannelDataString(0)
         }
     }

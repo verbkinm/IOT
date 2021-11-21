@@ -15,8 +15,8 @@ public:
     ~Device();
 
     Q_INVOKABLE quint8 getIdToQML() const;
-    Q_INVOKABLE virtual QString getName() const override;
-    Q_INVOKABLE virtual bool getState() const override;
+    virtual QString getName() const override;
+    virtual bool getState() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
@@ -53,6 +53,7 @@ private slots:
 signals:
     void signalState(bool state);
     void signalDataReadRecived();
+    void signalRecreateDevices();
 };
 
 #endif // DEVICE_H

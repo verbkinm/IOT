@@ -1,8 +1,6 @@
 import QtQuick 2.0
 
 Item {
-    property alias name: base_device.name
-
     id: root
     width: parent.width - 10
     height: 100
@@ -13,11 +11,9 @@ Item {
         onInfo: {
             root.parent.showInfo(this.device)
         }
-        onIdChanged: {
-            root.parent.recreateDevices();
-        }
     }
 
+    property alias name: base_device.name
     property alias device: base_device.device
 
     Item {

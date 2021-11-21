@@ -14,11 +14,8 @@ Item {
         onInfo: {
             root.parent.showInfo(this.device)
         }
-        onIdChanged: {
-            root.parent.recreateDevices();
-        }
 
-        device.onSignalDataRecived: {
+        device.onSignalDataReadRecived: {
             var result = device.getReadChannelDataUI8(0) === 0 ? false : true
             if(!result && switcher.buttonState)
             {
@@ -30,7 +27,6 @@ Item {
                 switcher.checked = true
                 switcher.buttonState = true
             }
-//            switcher.checked = device.getReadChannelDataUI8(0) === 0 ? false : true
         }
     }
 

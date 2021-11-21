@@ -6,7 +6,6 @@ Rectangle {
     property alias name: title.text
     property alias device: backend_device
 
-    signal idChanged()
     signal info()
 
     id: root
@@ -18,8 +17,6 @@ Rectangle {
         {
             root.color = state ? "#2000FF00" : "#20FF0000"
             root.parent.setState(state)
-            if(state && !getId())
-                idChanged()
         }
     }
 

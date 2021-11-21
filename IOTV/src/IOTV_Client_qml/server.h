@@ -63,6 +63,7 @@ private:
 public slots:
     void connectToHost();
     void disconnectFromHost();
+    void reconnectHost();
 
     void slotConnected();
     void slotDisconnected();

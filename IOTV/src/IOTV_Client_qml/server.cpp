@@ -113,6 +113,12 @@ void Server::disconnectFromHost()
     emit signalDisconnected();
 }
 
+void Server::reconnectHost()
+{
+    disconnectFromHost();
+    connectToHost();
+}
+
 qint64 Server::writeData(QByteArray &data)
 {
     return _socket.write(data);
@@ -126,6 +132,8 @@ void Server::createDevice(const QByteArray &data, const QString &name)
     const auto it = _alias.find(name);
     if(it != _alias.cend())
         _devices[name]->setViewName(_alias.at(name));
+
+    connect(_devices[name].get(), &Device::signalRecreateDevices, this, &Server::reconnectHost);
 }
 
 void Server::newObjectName()

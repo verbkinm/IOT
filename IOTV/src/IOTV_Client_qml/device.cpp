@@ -54,7 +54,13 @@ void Device::dataResived(QByteArray data)
     IOTV_SC::Response_Type dataType = IOTV_SC::checkResponsetData(data);
 
     if(dataType == IOTV_SC::Response_Type::RESPONSE_STATE)
+    {
         IOTV_SC::serverResponse_STATE(*this, data);
+        if(_state && !getId())
+        {
+            emit signalRecreateDevices();
+        }
+    }
     else if(dataType == IOTV_SC::Response_Type::RESPONSE_READ)
     {
         IOTV_SC::serverResponse_READ(*this, data);
@@ -70,6 +76,7 @@ void Device::dataResived(QByteArray data)
 
 void Device::setState(bool state)
 {
+    std::cout << getName().toStdString() << " " << state << " " << std::endl;
     _state = state;
     emit signalState(_state);
 }
@@ -145,5 +152,5 @@ void Device::slotStateIntervalTimeOut()
         _server.writeData(data);
     }
 
-    _stateInterval.start(); //??? Если во время выполнения слота удалить последний gui_base_device, который остававливает таймер, конец слота опять его включит?
+    _stateInterval.start();
 }

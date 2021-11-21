@@ -15,9 +15,8 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
 
         Server_Page {
-            onClick: {
-//                console.log(back.objectName)
-            }
+            id: server
+
             onDisconected: {
                 host_page.clear()
             }
@@ -26,10 +25,6 @@ ApplicationWindow {
                 host_page.objectsArray = back.getDevicesToQML()
                 host_page.createDivecGUI()
             }
-//            back.onTotalDeviceChanged: {
-//                host_page.clear()
-//                host_page.createDivecGUI()
-//            }
         }
 
         Hosts_Page {

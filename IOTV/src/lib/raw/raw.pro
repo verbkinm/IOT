@@ -20,4 +20,5 @@ HEADERS += \
 unix {
     target.path = /usr/lib
 }
-!isEmpty(target.path): INSTALLS += target
+!isEmpty(target.path):
+INSTALLS += target

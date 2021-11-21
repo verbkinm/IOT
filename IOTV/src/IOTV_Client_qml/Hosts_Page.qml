@@ -8,31 +8,35 @@ Page {
     width: 600
     height: 400
 
-    header: Label {
-        text: qsTr("Устройства")
-        font.pixelSize: Qt.application.font.pixelSize * 2
-        padding: 5
-    }
-
-    Column {
-        id: root_column
-        width: parent.width
-        spacing: 5
-        padding: 5
-
-        function showInfo(sender)
-        {
-            var device = sender
-            inf_win.device_id = device.getId()
-            inf_win.device_name = device.getName()
-            inf_win.device_description = device.getDescription()
-            inf_win.channels = device.readChannelLength() + "/" + device.writeChannelLength()
-            inf_win.visible = true
+    header:
+        ToolBar {
+            Label {
+                anchors.centerIn: parent
+                text: qsTr("Устройства")
+                font.pixelSize: Qt.application.font.pixelSize * 2
+                padding: 5
+            }
         }
-        function recreateDevices()
-        {
-            clear()
-            createDivecGUI()
+
+    Flickable{
+        anchors.topMargin: 15
+        anchors.fill: parent
+        contentHeight: childrenRect.height
+        Column {
+            id: root_column
+            width: parent.width
+            spacing: 5
+            padding: 5
+
+            function showInfo(sender)
+            {
+                var device = sender
+                inf_win.device_id = device.getId()
+                inf_win.device_name = device.getName()
+                inf_win.device_description = device.getDescription()
+                inf_win.channels = device.readChannelLength() + "/" + device.writeChannelLength()
+                inf_win.visible = true
+            }
         }
     }
 
@@ -76,9 +80,9 @@ Page {
             if (component.status === Component.Ready)
             {
                 var childObject = component.createObject(root_column);
-                childObject.name = objectsArray[i].getName()
                 childObject.device.setDevice(objectsArray[i])
                 childObject.device.connectSignals()
+                childObject.name = childObject.device.getName()
                 objectsArray[i].setAutoReadEnable(true)
             }
         }
