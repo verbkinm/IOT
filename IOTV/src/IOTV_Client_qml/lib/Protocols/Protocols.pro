@@ -27,21 +27,24 @@ unix {
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../raw/ -lraw
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../raw/ -lraw
-else:unix: LIBS += -L$$OUT_PWD/../raw/ -lraw
+#else:unix: LIBS += -L$$OUT_PWD/../raw/ -lraw
+else:unix: LIBS += -L$$OUT_PWD/../raw/ -lraw_x86
 
 INCLUDEPATH += $$PWD/../raw
 DEPENDPATH += $$PWD/../raw
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Log/ -llog
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Log/ -llog
-else:unix: LIBS += -L$$OUT_PWD/../Log/ -lLog
+#else:unix: LIBS += -L$$OUT_PWD/../Log/ -lLog
+else:unix: LIBS += -L$$OUT_PWD/../Log/ -lLog_x86
 
 INCLUDEPATH += $$PWD/../Log
 DEPENDPATH += $$PWD/../Log
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Base_Host/ -lbase_host
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Base_Host/ -lbase_host
-else:unix: LIBS += -L$$OUT_PWD/../Base_Host/ -lBase_Host
+#else:unix: LIBS += -L$$OUT_PWD/../Base_Host/ -lBase_Host
+else:unix: LIBS += -L$$OUT_PWD/../Base_Host/ -lBase_Host_x86
 
 INCLUDEPATH += $$PWD/../Base_Host
 DEPENDPATH += $$PWD/../Base_Host

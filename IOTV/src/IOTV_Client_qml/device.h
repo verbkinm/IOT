@@ -2,8 +2,8 @@
 #define DEVICE_H
 
 #include "Patterns/Subject.h"
-#include "base_host.h"
-#include "protocols.h"
+#include "lib/Base_Host/base_host.h"
+#include "lib/Protocols/protocols.h"
 
 class Server;
 

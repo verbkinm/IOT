@@ -1,30 +1,19 @@
-import QtQuick 2.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
-Rectangle {
-    property alias text: txt.text
-    opacity: 0.9
-
-    anchors.fill: parent
-    Rectangle{
-        color: "white"
-        border.width: 1
-        border.color: "black"
-        radius: 5
-        height: parent.height * 0.6
-        width: parent.width * 0.5
+Dialog {
         anchors.centerIn: parent
+        property int device_id: 0
+        property string device_name: "None"
+        property string device_description: "None description"
+        property string channels: "0/0"
+        title: device_name
+        standardButtons: Dialog.Ok
 
-        Text {
-            id: txt
-            anchors.centerIn: parent
-            text: qsTr("Info")
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            parent.visible = false
-        }
+    Label {
+        text: "ID устройства: " + device_id + "<br>
+                Имя устройства: \"" + device_name + "\"<br>
+                Описание: \"" + device_description + "\"<br>
+                Каналы R/W: " + channels + "<br>"
     }
 }

@@ -2,7 +2,7 @@
 #define WRAPPER_RAW_H
 
 #include <QObject>
-#include "raw.h"
+#include "lib/raw/raw.h"
 
 class Wrapper_Raw : public QObject
 {
