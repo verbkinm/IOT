@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls 2.2
 import Qt.labs.settings 1.0
 import io.qt.Backend_Server 1.0
 
@@ -37,12 +37,13 @@ Page {
         }
     }
 
-
     Flickable
     {
         anchors.topMargin: 15
         anchors.fill: parent
         contentHeight: label1.height + label2.height + label3.height + btn.height + head.height
+
+        ScrollBar.vertical: ScrollBar { }
 
         Label {
             id: label1

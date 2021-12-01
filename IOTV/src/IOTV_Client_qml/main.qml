@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 
 ApplicationWindow {
     minimumWidth: 480
-    minimumHeight: 640
+    minimumHeight: 40
     visible: true
     title: qsTr("IOTV-Клиент")
 

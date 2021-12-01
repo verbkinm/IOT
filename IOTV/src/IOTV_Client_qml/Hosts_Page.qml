@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls 2.2
 
 Page {
     id: root
@@ -18,10 +18,12 @@ Page {
             }
         }
 
-    Flickable{
+    Flickable {
         anchors.topMargin: 15
         anchors.fill: parent
         contentHeight: root_column.height
+
+        ScrollBar.vertical: ScrollBar { }
 
         Column {
             id: root_column
