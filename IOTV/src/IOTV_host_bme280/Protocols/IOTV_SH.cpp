@@ -44,8 +44,8 @@ void Protocol_class::response_WAY(const IOT_Server &iotHost, std::vector<uint8_t
     for (uint8_t i = 0; i < READ_CHANNEL_LENGTH; i++)
         data.push_back(Raw::toUInt8(iotHost._readChannelType[i]));
 
-    for (uint8_t i = 0; i < WRITE_CHANNEL_LENGTH; i++)
-        data.push_back(Raw::toUInt8(iotHost._writeChannelType[i]));
+//    for (uint8_t i = 0; i < WRITE_CHANNEL_LENGTH; i++)
+//        data.push_back(Raw::toUInt8(iotHost._writeChannelType[i]));
 }
 
 void Protocol_class::response_READ(const IOT_Server &iotHost, std::vector<uint8_t> &data)
