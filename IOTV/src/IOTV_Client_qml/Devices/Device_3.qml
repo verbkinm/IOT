@@ -31,10 +31,6 @@ Item {
             id: lbl
             anchors.centerIn: parent
             text: "Данные не получены!"
-
-//            onToggled: {
-//                console.log(checked)
-//            }
         }
     }
 

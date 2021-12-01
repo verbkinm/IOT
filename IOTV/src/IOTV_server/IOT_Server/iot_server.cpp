@@ -43,28 +43,29 @@ void IOT_Server::readSettings()
         uint interval = _settingsHosts.value("interval", 0).toUInt();
         QString logFile = _settingsHosts.value("log_file", "").toString();
 
-        _iot_hosts.push_back(std::make_shared<IOT_Host>(group));
+        auto host = std::make_shared<IOT_Host>(group);
+        _iot_hosts.push_back(host);
 
         if(connection_type == "ETHERNET")
         {
             quint16 port = _settingsHosts.value("port", 2021).toUInt();
 
-            _iot_hosts.back()->setConnectionTypeEthernet(address, port);
+            host->setConnectionTypeEthernet(address, port);
         }
         else if(connection_type == "COM")
         {
-            COM_conn_type::SetingsPort settingsPort;
+            COM_conn_type::SettingsPort settingsPort;
             settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
             settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
             settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
             settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
             settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
 
-            _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
+            host->setConnectionTypeCom(address, settingsPort);
         }
         else if(connection_type == "FILE")
         {
-            _iot_hosts.back()->setConnectionTypeFile(address);
+            host->setConnectionTypeFile(address);
         }
         else
         {
@@ -72,13 +73,14 @@ void IOT_Server::readSettings()
             exit(1);
         }
 
-        _iot_hosts.back()->setInterval(interval);
-        _iot_hosts.back()->setLogFile(logFile);
+        host->setInterval(interval);
+        host->setLogFile(logFile);
 
         _settingsHosts.endGroup();
-        _iot_hosts.back()->connectToHost();
+        host->connectToHost();
 
-        connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way);
+        IOT_Host *pHost = host.get();
+        connect(pHost, &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way);
     }
 }
 

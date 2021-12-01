@@ -17,15 +17,13 @@ Item {
 
         device.onSignalDataReadRecived: {
             var result = device.getReadChannelDataUI8(0) === 0 ? false : true
-            if(!result && switcher.buttonState)
+            if(!result)
             {
-                switcher.checked = false
-                switcher.buttonState = false
+                btn_img.source = "qrc:/img/led_off"
             }
-            else if(result && !switcher.buttonState)
+            else if(result)
             {
-                switcher.checked = true
-                switcher.buttonState = true
+                btn_img.source = "qrc:/img/led_on"
             }
         }
     }
@@ -37,14 +35,31 @@ Item {
         anchors.fill: parent
         enabled: false
 
-        Switch {
-            id: switcher
-            property bool  buttonState: false
-            anchors.centerIn: parent
+//        Switch {
+//            id: switcher
+//            property bool  buttonState: false
+//            anchors.centerIn: parent
 
-            onToggled: {
-                var value = checked ? 1 : 0
-                base_device.device.writeDataUI8(0, value)
+//            onToggled: {
+//                var value = checked ? 1 : 0
+//                base_device.device.writeDataUI8(0, value)
+//            }
+//        }
+        Button {
+            id: button
+            anchors.centerIn: parent
+            width: 60
+            height: 60
+
+            onClicked: {
+                base_device.device.writeDataUI8(0, !device.getReadChannelDataUI8(0))
+            }
+
+            Image {
+                id: btn_img
+                source: "qrc:/img/led_off"
+                sourceSize: Qt.size(38, 38)
+                anchors.centerIn: parent
             }
         }
     }

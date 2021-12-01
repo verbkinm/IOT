@@ -13,7 +13,7 @@ class COM_conn_type : public Base_conn_type
 public:
     COM_conn_type(const QString& name, Base_conn_type *parent = nullptr);
 
-    struct SetingsPort
+    struct SettingsPort
     {
         qint32 baudRate;
         int dataBits;
@@ -22,7 +22,7 @@ public:
         int flowControl;
     };
 
-    void setSettingsPort(const SetingsPort &settingsPort);
+    void setSettingsPort(const SettingsPort &settingsPort);
 
     virtual qint64 write(const QByteArray &data) override;
     virtual void connectToHost() override;

@@ -12,7 +12,7 @@ Server::Server(QObject *parent) : QObject(parent), _name("server" + QString::num
     newObjectName();
 
     connect(&_socket, &QAbstractSocket::connected, this, &Server::slotConnected);
-    connect(&_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+    connect(&_socket, &QAbstractSocket::errorOccurred, this, &Server::slotError);
     connect(&_reconnectTimer, &QTimer::timeout, this, &Server::connectToHost);
 }
 
@@ -333,4 +333,6 @@ void Server::slotError(QAbstractSocket::SocketError error)
         strErr = "UnknownSocketError";
         break;
     }
+    Log::write(strErr, Log::Flags::WRITE_TO_STDOUT_ONLY);
+    disconnectFromHost();
 }

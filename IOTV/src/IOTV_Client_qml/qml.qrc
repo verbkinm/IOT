@@ -10,6 +10,8 @@
         <file>Devices/Device_1.qml</file>
         <file>Devices/Base_Device.qml</file>
         <file>Devices/Device_3.qml</file>
+        <file>Devices/Device_2.qml</file>
+        <file>Devices/My_Arc.qml</file>
     </qresource>
     <qresource prefix="/img">
         <file alias="id_0">img/Unknow.png</file>

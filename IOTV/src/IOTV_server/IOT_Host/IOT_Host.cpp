@@ -5,10 +5,10 @@
 IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
-    connectObjects();
+//    connectObjects();
 
-    connect(&_timerResponseRead, SIGNAL(timeout()), this, SLOT(slotResendDataRead()));
-    connect(&_timerResponseWrite, SIGNAL(timeout()), this, SLOT(slotResendDataWrite()));
+    connect(&_timerResponseRead, &QTimer::timeout, this, &IOT_Host::slotResendDataRead);
+    connect(&_timerResponseWrite, &QTimer::timeout, this, &IOT_Host::slotResendDataWrite);
 
     connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
@@ -125,7 +125,7 @@ void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
     connectObjects();
 }
 
-void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort)
+void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SettingsPort &settingPort)
 {
     _conn_type = std::make_unique<COM_conn_type>(_conn_type.get()->getName());
 

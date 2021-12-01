@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
+    app.setOrganizationName("VMS");
+//    app.setOrganizationDomain("somecompany.com");
+    app.setApplicationName("IOTV_Client_qml");
 
     qmlRegisterType<Server>("io.qt.Backend_Server", 1, 0, "Backend_Server");
     qmlRegisterType<Wrapper_Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");

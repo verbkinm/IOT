@@ -8,7 +8,7 @@ Ethernet_conn_type::Ethernet_conn_type(const QString &name, const QString &addre
     _type = Conn_type::ETHERNET;
 
     connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &Ethernet_conn_type::slotNewConnection);
-    connect(_tcpSocket.get(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+    connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &Ethernet_conn_type::slotError);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &Ethernet_conn_type::connectToHost);
 }

@@ -2,10 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 ApplicationWindow {
-    width: 640
-    minimumWidth: 640
-    height: 480
-    minimumHeight: 480
+    minimumWidth: 480
+    minimumHeight: 640
     visible: true
     title: qsTr("IOTV-Клиент")
 
@@ -16,6 +14,7 @@ ApplicationWindow {
 
         Server_Page {
             id: server
+//            anchors.fill: parent
 
             onDisconected: {
                 host_page.clear()

@@ -1,10 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Qt.labs.settings 1.0
 import io.qt.Backend_Server 1.0
 
 Page {
-    width: 600
-    height: 400
+    id: page
+    //    width: 600
+    //    height: 400
 
     property bool status: false
     property bool connection_attempt: false
@@ -14,9 +16,16 @@ Page {
     signal click()
     signal disconected()
 
+    Settings {
+        category: "Server"
+        property alias address: addr.text
+        property alias port: port.text
+    }
+
     header:
         ToolBar {
-            Label {
+        id: head
+        Label {
             anchors.centerIn: parent
             text: qsTr("Сервер: " + textHeader())
             font.pixelSize: Qt.application.font.pixelSize * 2
@@ -28,11 +37,13 @@ Page {
         }
     }
 
+
     Flickable
     {
         anchors.topMargin: 15
         anchors.fill: parent
-        contentHeight: childrenRect.height
+        contentHeight: label1.height + label2.height + label3.height + btn.height + head.height
+
         Label {
             id: label1
             text: "Адресс: "

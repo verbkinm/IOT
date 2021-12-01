@@ -22,7 +22,7 @@ void COM_conn_type::connectToHost()
     emit signalConnected();
 }
 
-void COM_conn_type::setSettingsPort(const SetingsPort &settingsPort)
+void COM_conn_type::setSettingsPort(const SettingsPort &settingsPort)
 {
     _serialPort.setPortName(_address);
 

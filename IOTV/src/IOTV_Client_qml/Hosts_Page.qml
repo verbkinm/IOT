@@ -1,13 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-//import QtQuick.Controls 2.2
 
 Page {
     id: root
     property var objectsArray: [] // объекты указатели на Device
 
-    width: 600
-    height: 400
+//    width: 600
+//    height: 400
 
     header:
         ToolBar {
@@ -22,12 +21,17 @@ Page {
     Flickable{
         anchors.topMargin: 15
         anchors.fill: parent
-        contentHeight: childrenRect.height
+        contentHeight: root_column.height
+
         Column {
             id: root_column
             width: parent.width
             spacing: 5
             padding: 5
+
+            onChildrenChanged: {
+
+            }
 
             function showInfo(sender)
             {
@@ -58,6 +62,9 @@ Page {
                 break
                 case 1:
                     component = Qt.createComponent("qrc:/Devices/Device_1.qml");
+                break
+                case 2:
+                    component = Qt.createComponent("qrc:/Devices/Device_2.qml");
                 break
                 case 3:
                     component = Qt.createComponent("qrc:/Devices/Device_3.qml");
