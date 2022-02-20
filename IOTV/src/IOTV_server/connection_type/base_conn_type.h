@@ -1,5 +1,4 @@
-#ifndef BASE_CONN_TYPE_H
-#define BASE_CONN_TYPE_H
+#pragma once
 
 #define DEFAULT_INTERVAL 10000 // таймер неудавшегося подключения
 #define BUFFER_MAX_SIZE 256
@@ -18,7 +17,7 @@ public:
     {
         NONE,
         COM,
-        ETHERNET,
+        TCP,
         FILE
     };
 
@@ -51,5 +50,3 @@ signals:
 
     void signalDataRiceved(QByteArray data);
 };
-
-#endif // BASE_CONN_TYPE_H

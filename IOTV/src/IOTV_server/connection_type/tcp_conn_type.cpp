@@ -1,126 +1,76 @@
-#include "ethernet_conn_type.h"
+#include "tcp_conn_type.h"
 
-Ethernet_conn_type::Ethernet_conn_type(const QString &name, const QString &address,
+TCP_conn_type::TCP_conn_type(const QString &name, const QString &address,
                                        quint16 port, Base_conn_type *parent) : Base_conn_type(name, parent),
     _tcpSocket(std::make_unique<QTcpSocket>()), _tcpPort(port)
 {
     _address = address;
-    _type = Conn_type::ETHERNET;
+    _type = Conn_type::TCP;
 
-    connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &Ethernet_conn_type::slotNewConnection);
-    connect(_tcpSocket.get(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+    connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection);
+    connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError);
 
-    connect(&_reconnectTimer, &QTimer::timeout, this, &Ethernet_conn_type::connectToHost);
+    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost);
 }
 
-quint16 Ethernet_conn_type::getPort() const
+quint16 TCP_conn_type::getPort() const
 {
     return _tcpPort;
 }
 
-void Ethernet_conn_type::setPort(quint16 port)
+void TCP_conn_type::setPort(quint16 port)
 {
     _tcpPort = port;
 }
 
-qint64 Ethernet_conn_type::write(const QByteArray &data)
+qint64 TCP_conn_type::write(const QByteArray &data)
 {
     Log::write(_name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
                + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':'));
     return _tcpSocket->write(data);
 }
 
-void Ethernet_conn_type::connectToHost()
+void TCP_conn_type::connectToHost()
 {
     _reconnectTimer.start(DEFAULT_INTERVAL);
     _tcpSocket->connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
 
-void Ethernet_conn_type::disconnectFromHost()
+void TCP_conn_type::disconnectFromHost()
 {
     _tcpSocket->disconnectFromHost();
 }
 
-QByteArray Ethernet_conn_type::readAll()
+QByteArray TCP_conn_type::readAll()
 {
     return _tcpSocket->readAll();
 }
 
-void Ethernet_conn_type::slotNewConnection()
+void TCP_conn_type::slotNewConnection()
 {
     _reconnectTimer.stop();
     Log::write(_name + ": connected to " + _tcpSocket->peerAddress().toString()
                + ":" + QString::number(_tcpSocket->peerPort()));
 
-    connect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
-    connect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &Ethernet_conn_type::slotSocketDisconnected);
+    connect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
+    connect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalConnected();
 }
 
-void Ethernet_conn_type::slotSocketDisconnected()
+void TCP_conn_type::slotSocketDisconnected()
 {
     Log::write(_name + ": disconnected from " + _tcpSocket->peerAddress().toString()
                + ":" + QString::number(_tcpSocket->peerPort()));
 
-    disconnect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &Ethernet_conn_type::slotReadData);
-    disconnect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &Ethernet_conn_type::slotSocketDisconnected);
+    disconnect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
+    disconnect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalDisconnected();
     _reconnectTimer.start(DEFAULT_INTERVAL);
 }
 
-//void Ethernet_conn_type::slotReadData()
-//{
-//    static QByteArray data;
-//    data += _tcpSocket->readAll();
-
-//    std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
-
-//    if(!accumPacketResponse.first)
-//    {
-//        data.clear();
-//        return;
-//    }
-//    if(accumPacketResponse.first && accumPacketResponse.second > 0)
-//    {
-//        QByteArray buffer = data.mid(0, accumPacketResponse.second);
-//        QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
-//        Log::write(strOut);
-
-//        emit signalDataRiceved(buffer);
-//        data = data.mid(accumPacketResponse.second);
-//    }
-
-////    static QByteArray data;
-////    QByteArray buffer;
-
-////    data += _tcpSocket->readAll();
-
-////    if(!data.contains("\r\n"))
-////    {
-////        if(data.length() > BUFFER_MAX_SIZE)
-////            Log::write(_name + "Buffer overload: " + data, Log::Flags::WRITE_TO_FILE_AND_STDERR);
-
-////        return;
-////    }
-////    else
-////    {
-////        auto index = data.indexOf("\r\n");
-////        buffer = data.mid(0, index);
-////        data = data.mid(index + 2);
-
-////        if(!buffer.size() || buffer == "\r\n")
-////            return;
-
-////        QString strOut = _name + ": data riceved from " + _tcpSocket->peerAddress().toString()
-////                         + ":" + QString::number(_tcpSocket->peerPort()) + " <- " + buffer.toHex(':');
-////        Log::write(strOut);
-////        emit signalDataRiceved(buffer);
-////    }
-//}
-
-void Ethernet_conn_type::slotError(QAbstractSocket::SocketError error)
+void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
 {
     QString strErr;
     switch (error)

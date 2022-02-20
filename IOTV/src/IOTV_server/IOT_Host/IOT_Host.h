@@ -1,9 +1,8 @@
-#ifndef IOT_HOST_H
-#define IOT_HOST_H
+#pragma once
 
 #include <memory>
 
-#include "connection_type/ethernet_conn_type.h"
+#include "connection_type/tcp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
 #include "base_host.h"
@@ -16,7 +15,7 @@ public:
 
     void printDebugData() const;
 
-    void setConnectionTypeEthernet(const QString &addr, quint16 port);
+    void setConnectionTypeTCP(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
     void setConnectionTypeFile(const QString &addr);
 
@@ -82,6 +81,3 @@ signals:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(IOT_Host::Flags)
-
-#endif // IOT_HOST_H
-

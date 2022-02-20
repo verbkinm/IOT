@@ -22,12 +22,12 @@ void IOT_Host::printDebugData() const
     qDebug() << "connection type: " + Base_conn_type::ConnTypeToString(getConnectionType());
 
     qDebug() << "Connection:";
-    if(getConnectionType() == Base_conn_type::Conn_type::ETHERNET)
+    if(getConnectionType() == Base_conn_type::Conn_type::TCP)
     {
         qDebug() << "\t" << "addr: " << _conn_type->getAddress();
 
         Base_conn_type *tmpPtr = _conn_type.get();
-        qDebug() << "\t" << "port: " + QString::number(qobject_cast<Ethernet_conn_type*>(tmpPtr)->getPort());
+        qDebug() << "\t" << "port: " + QString::number(qobject_cast<TCP_conn_type*>(tmpPtr)->getPort());
     }
     else if(getConnectionType() == Base_conn_type::Conn_type::COM)
         qDebug() << "\t" << "addr: " << _conn_type->getAddress();
@@ -114,11 +114,11 @@ QString IOT_Host::getName() const
     return _conn_type.get()->getName();
 }
 
-void IOT_Host::setConnectionTypeEthernet(const QString &addr, quint16 port)
+void IOT_Host::setConnectionTypeTCP(const QString &addr, quint16 port)
 {
-    _conn_type = std::make_unique<Ethernet_conn_type>(_conn_type.get()->getName());
+    _conn_type = std::make_unique<TCP_conn_type>(_conn_type.get()->getName());
 
-    Ethernet_conn_type* eth = qobject_cast<Ethernet_conn_type*>(_conn_type.get());
+    TCP_conn_type* eth = qobject_cast<TCP_conn_type*>(_conn_type.get());
     eth->setAddress(addr);
     eth->setPort(port);
 
@@ -191,10 +191,16 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
         Raw::DATA_TYPE dt = getReadChannelDataType(channelNumber);
         Raw::RAW raw = getReadChannelData(channelNumber);
 
-        //!!! Доделать лог для char* данных
-        Log::write("R:"+ QString::number(channelNumber) + "=" +
-                   Raw::toString(dt, raw).c_str(),
-                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+        if(dt == Raw::DATA_TYPE::CHAR_PTR)
+        {
+            Log::write("R:"+ QString::number(channelNumber) + "=" +
+                       raw.str,
+                       Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+        }
+        else
+            Log::write("R:"+ QString::number(channelNumber) + "=" +
+                       Raw::toString(dt, raw).c_str(),
+                       Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
     }
 }
 

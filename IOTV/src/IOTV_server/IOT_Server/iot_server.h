@@ -1,10 +1,10 @@
-#ifndef IOT_SERVER_H
-#define IOT_SERVER_H
+#pragma once
 
 #include <QSettings>
 #include <QTcpServer>
 #include <QFileInfo>
 #include <QTimer>
+#include <QThread>
 
 #include <vector>
 #include <list>
@@ -30,7 +30,7 @@ private:
 
     void writeToSocket(QTcpSocket* socket, const QByteArray &data);
 
-    std::vector<std::shared_ptr<IOT_Host>> _iot_hosts;
+    std::vector<std::unique_ptr<IOT_Host>> _iot_hosts;
     std::list<QTcpSocket*> _clientList;
     QSettings _settingsServer, _settingsHosts;
     const QString _programVersion;
@@ -50,5 +50,3 @@ private slots:
 
     void slotResponse_Way();
 };
-
-#endif // IOT_SERVER_H

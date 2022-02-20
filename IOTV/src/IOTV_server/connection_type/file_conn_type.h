@@ -1,5 +1,4 @@
-#ifndef FILE_CONN_TYPE_H
-#define FILE_CONN_TYPE_H
+#pragma once
 
 #include <QFileInfo>
 
@@ -21,4 +20,3 @@ private:
     QFile _file;
 };
 
-#endif // FILE_CONN_TYPE_H

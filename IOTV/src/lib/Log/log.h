@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFile>
 #include <QDateTime>
-#include <QDebug>
+#include <iostream>
 
 #include "Log_global.h"
 

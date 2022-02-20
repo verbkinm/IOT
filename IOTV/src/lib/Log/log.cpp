@@ -25,12 +25,12 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     QFile file(fileName);
     if(!file.open(QFile::Append | QFile::Text))
     {
-        qWarning() << "Error write to file " << fileName;
+        std::cerr << "Error write to file " << fileName.toStdString() << '\n';
         return;
     }
 
     QTextStream out(&file);
-    out << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data << Qt::endl;
+    out << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data << '\n';
     out.flush();
 
     file.close();
@@ -38,10 +38,10 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 
 void Log::writeToStdOut(const QString &data)
 {
-    qDebug() << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data;
+    std::cout << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ").toStdString() << data.toStdString() << '\n';;
 }
 
 void Log::writeToStdErr(const QString &data)
 {
-    qWarning() << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data;
+    std::cerr << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ").toStdString() << data.toStdString() << '\n';;
 }

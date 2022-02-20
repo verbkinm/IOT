@@ -1,5 +1,4 @@
-#ifndef COM_CONN_TYPE_H
-#define COM_CONN_TYPE_H
+#pragma once
 
 #include <QSerialPort>
 
@@ -37,5 +36,3 @@ private:
 private slots:
     void slotHandleError(QSerialPort::SerialPortError error);
 };
-
-#endif // COM_CONN_TYPE_H
