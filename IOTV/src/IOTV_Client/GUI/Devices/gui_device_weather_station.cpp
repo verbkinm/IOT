@@ -25,7 +25,15 @@ GUI_Device_Weather_Station::GUI_Device_Weather_Station(Device &device, QWidget *
     _main_layout.addWidget(&_humidity, 3, 1, 1, 2);
     _main_layout.addWidget(&_pressure, 4, 1, 1, 2);
 
+    if(_device.readChannelLength() == 2)
+    {
+        _labelPressure.hide();
+        _pressure.hide();
+    }
+
     _device.setAutoReadEnable(true);
+
+    _showFull.setDisabled(true);
 }
 
 void GUI_Device_Weather_Station::update()
@@ -43,11 +51,15 @@ void GUI_Device_Weather_Station::update()
 
     float t = _device.getReadChannelData(0).f;
     float h = _device.getReadChannelData(1).f;
-    float p = _device.getReadChannelData(2).f;
 
     _temperature.setText(QString::number(round(t * 100) / 100));
     _humidity.setText(QString::number(round(h * 100) / 100));
-    _pressure.setText(QString::number(round(p * 100) / 100));
+
+    if(_device.readChannelLength() == 3)
+    {
+        float p = _device.getReadChannelData(2).f;
+        _pressure.setText(QString::number(round(p * 100) / 100));
+    }
 
     stateAndViewName();
 }

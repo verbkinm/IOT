@@ -47,11 +47,15 @@ void loop()
     }
   }
 
-  delay(2100);
-  
   iotServer._readChannel[0].f = dht.readTemperature();
   iotServer._readChannel[1].f = dht.readHumidity();
-  iotServer._readChannel[2].f = 0;
+
+  while(isnan(iotServer._readChannel[0].f) ||  isnan(iotServer._readChannel[1].f))
+  {
+    delay(2000);
+    iotServer._readChannel[0].f = dht.readTemperature();
+    iotServer._readChannel[1].f = dht.readHumidity();
+  }
 }
 
 void response(Array<char> &data)

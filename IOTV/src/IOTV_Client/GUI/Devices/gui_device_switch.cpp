@@ -16,6 +16,8 @@ GUI_Device_Switch::GUI_Device_Switch(Device &device, QWidget *parent) : GUI_Base
 
     _device.setAutoReadInterval(1000);
     _device.setAutoReadEnable(true);
+
+    _showFull.setDisabled(true);
 }
 
 void GUI_Device_Switch::update()

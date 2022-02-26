@@ -274,7 +274,7 @@ void IOT_Host::slotResendDataRead()
 
 void IOT_Host::slotTimeOut()
 {
-    for (int i = 0; i <  readChannelLength(); i++)
+    for (int i = 0; i < readChannelLength(); i++)
         readData(i);
 }
 

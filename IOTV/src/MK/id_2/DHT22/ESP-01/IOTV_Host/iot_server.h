@@ -3,7 +3,7 @@
 
 #include "raw.h"
 
-#define READ_CHANNEL_LENGTH 3
+#define READ_CHANNEL_LENGTH 2
 #define WRITE_CHANNEL_LENGTH 0
 
 class IOT_Server

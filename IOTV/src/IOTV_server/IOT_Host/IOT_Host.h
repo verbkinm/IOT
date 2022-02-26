@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "connection_type/tcp_conn_type.h"
-#include "connection_type/com_conn_type.h"
-#include "connection_type/file_conn_type.h"
+#include "../connection_type/tcp_conn_type.h"
+#include "../connection_type/com_conn_type.h"
+#include "../connection_type/file_conn_type.h"
 #include "base_host.h"
 
 class IOT_Host : public Base_Host
