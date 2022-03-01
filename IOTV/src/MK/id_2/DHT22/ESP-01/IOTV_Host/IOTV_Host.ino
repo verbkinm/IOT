@@ -75,14 +75,19 @@ void response(Array<char> &data)
     {
       Protocol_class::response_WAY(iotServer, data);
       ArrayToUARTS(data);
-      data.clear();
     }
     else if(data.size() == 1 && dataType == Protocol_class::query_type::QUERY_READ)
     {
       Protocol_class::response_READ(iotServer, data);
       ArrayToUARTS(data);
-      data.clear();
     }
+    else if(data.size() == 1 && dataType == Protocol_class::query_type::QUERY_PING)
+    {
+      Protocol_class::response_PONG(data);
+      ArrayToUARTS(data);
+    }
+
+    data.clear();
 }
 
 void ArrayToUARTS(Array<char> &data)

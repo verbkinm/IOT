@@ -83,3 +83,8 @@ void Protocol_class::response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &d
     data.push_back((chNumber << 4) | 0x04 );
 }
 
+//void Protocol_class::response_PONG(IOT_Server &iotHost)
+//{
+
+//}
+

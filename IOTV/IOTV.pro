@@ -1,8 +1,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    src/IOTV_Tests_Server \
-    src/IOTV_Client_qml \
+#    src/IOTV_Tests_Server \
+#    src/IOTV_Client_qml \
     src/IOTV_Client \
     src/lib \
     src/IOTV_host \

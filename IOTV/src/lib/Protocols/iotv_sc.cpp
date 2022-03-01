@@ -31,10 +31,7 @@ qint64 IOTV_SC::query_READ(Base_Host &host, const QString &deviceName, uint8_t c
     data.append(channelNumber);
     data.append(deviceName.toUtf8());
 
-    if(host.insertExpectedResponseRead(channelNumber))
-        return host.writeToServer(data);
-
-    return -1;
+    return host.writeToServer(data);
 }
 
 qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW &rawData)
@@ -71,12 +68,8 @@ qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t 
             data.append(rawData.array[i]);
     }
 
-    if(host.insertExpectedResponseWrite(channelNumber, rawData))
-        return host.writeToServer(data);
-    else
-        delete[] rawData.str;
-
-    return -1;
+    return host.writeToServer(data);
+//        delete[] rawData.str;
 }
 
 QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
@@ -142,13 +135,12 @@ void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
     }
 
     host.setReadChannelData(channelNumber, rawData);
-    host.eraseExpectedResponseRead(channelNumber);
 }
 
 void IOTV_SC::serverResponse_WRITE(Base_Host &host, const QByteArray &data)
 {
-    uint8_t channelNumber = data.at(1) & 0x0f;
-    host.eraseExpectedResponseWrite(channelNumber);
+//    uint8_t channelNumber = data.at(1) & 0x0f;
+//    host.eraseExpectedResponseWrite(channelNumber);
 }
 
 void IOTV_SC::responceToClient_Device_One(Base_Host &host, QByteArray &data)

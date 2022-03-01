@@ -11,7 +11,9 @@ Protocol_class::query_type Protocol_class::checkQueryData(const Array<char> &dat
       return query_type::QUERY_WAY;
     else if( (firstByte & 0x0F) == 0x02)
       return query_type::QUERY_READ;
-
+    else if(firstByte == 0x08)
+      return query_type::QUERY_PING;
+      
     return query_type::ERROR;
 }
 
@@ -53,4 +55,10 @@ void Protocol_class::response_READ(const IOT_Server &iotHost, Array<char> &data)
     Raw::RAW raw = iotHost._readChannel[chNumber];
     for (uint8_t i = 0; i < 8; i++)
         data.push_back(raw.array[i]);
+}
+
+void Protocol_class::response_PONG(Array<char> &data)
+{
+    data.clear();
+    data.push_back(0x0C);
 }

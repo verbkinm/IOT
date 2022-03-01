@@ -7,9 +7,8 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
 {
     connectObjects();
 
-    connect(&_timerResponseRead, SIGNAL(timeout()), this, SLOT(slotResendDataRead()));
-    connect(&_timerResponseWrite, SIGNAL(timeout()), this, SLOT(slotResendDataWrite()));
-
+    connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
+    connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
     connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
 
@@ -101,12 +100,17 @@ void IOT_Host::dataResived(QByteArray data)
 
     if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
         response_WAY_recived(data);
+    else if(dataType == IOTV_SH::Response_Type::RESPONSE_PONG)
+        response_PONG_recived();
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
         response_READ_recived(data);
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
         response_WRITE_recived(data);
     else
+    {
         Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
+        _conn_type->disconnectFromHost();
+    }
 }
 
 QString IOT_Host::getName() const
@@ -169,6 +173,7 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
     IOTV_SH::response_WAY(*this, data);
 
     setState(true);
+    _timerPing.start(TIMER_PING);
 }
 
 void IOT_Host::response_READ_recived(const QByteArray &data)
@@ -178,11 +183,6 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
         Log::write(_conn_type->getName() + " WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
         return;
     }
-
-    auto list = getExpectedResponseRead();
-    auto it = list.find(IOTV_SH::channelNumber(data[0]));
-    if(it == list.end())
-        return;
 
     IOTV_SH::response_READ(*this, data);
     if(!_logFile.isEmpty())
@@ -214,6 +214,11 @@ void IOT_Host::response_WRITE_recived(const QByteArray &data)
     IOTV_SH::response_WRITE(*this, data);
 }
 
+void IOT_Host::response_PONG_recived()
+{
+    _timerPing.start(TIMER_PING);
+}
+
 void IOT_Host::setLogFile(const QString &logFile)
 {
     _logFile = logFile;
@@ -221,11 +226,11 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    _intervalTimer.stop();
+    _reReadTimer.stop();
     if(interval)
     {
-        _intervalTimer.start(interval);
-        connect(&_intervalTimer, &QTimer::timeout, this, &IOT_Host::slotTimeOut);
+        connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+        _reReadTimer.start(interval);
     }
 }
 
@@ -236,43 +241,26 @@ QString IOT_Host::getLogFile() const
 
 void IOT_Host::slotConnected()
 {
-    _timerWAY.start(5000);
+    _timerWAY.start(TIMER_WAY);
 
     QByteArray data;
     IOTV_SH::query_WAY(data);
     _state.setFlag(ExpectedWay);
     _conn_type->write(data);
 
+    _timerReconnect.start(TIMER_RECONNECT);
     emit signalHostConnected(); ///!!! никуда не идут
 }
 
 void IOT_Host::slotDisconnected()
 {
     setState(false);
-    eraseAllExpectedResponse();
+    _timerPing.stop();
 
     emit signalHostDisconnected(); ///!!! никуда не идут
 }
 
-void IOT_Host::slotResendDataWrite()
-{
-    _timerResponseWrite.stop();
-
-    const std::map<uint8_t, Raw::RAW> &expectedResponseWrite = getExpectedResponseWrite();
-    for (auto [key, value] : expectedResponseWrite)
-        writeData(key, value);
-}
-
-void IOT_Host::slotResendDataRead()
-{
-    _timerResponseRead.stop();
-
-    const std::set<uint8_t> expectedResponseRead = getExpectedResponseRead();
-    for (uint8_t channelNumber : expectedResponseRead)
-        readData(channelNumber);
-}
-
-void IOT_Host::slotTimeOut()
+void IOT_Host::slotReReadTimeOut()
 {
     for (int i = 0; i < readChannelLength(); i++)
         readData(i);
@@ -284,5 +272,18 @@ void IOT_Host::slotWAYTimeOut()
     IOTV_SH::query_WAY(data);
     _state.setFlag(ExpectedWay);
     _conn_type->write(data);
+}
+
+void IOT_Host::slotPingTimeOut()
+{
+    QByteArray data;
+    data.push_back(QUERY_PING_BYTE);
+    _conn_type->write(data);
+}
+
+void IOT_Host::slotReconnectTimeOut()
+{
+    _conn_type->disconnectFromHost();
+    _timerReconnect.stop();
 }
 

@@ -6,9 +6,11 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address,
 {
     _address = address;
     _type = Conn_type::TCP;
+    _tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
     connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection);
     connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError);
+    connect(_tcpSocket.get(), &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost);
 }
@@ -27,6 +29,8 @@ qint64 TCP_conn_type::write(const QByteArray &data)
 {
     Log::write(_name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
                + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':'));
+
+//    auto state = _tcpSocket->state();
     return _tcpSocket->write(data);
 }
 
@@ -68,6 +72,18 @@ void TCP_conn_type::slotSocketDisconnected()
 
     emit signalDisconnected();
     _reconnectTimer.start(DEFAULT_INTERVAL);
+}
+
+void TCP_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState socketState)
+{
+    return;
+//    QAbstractSocket::UnconnectedState0The socket is not connected.
+//    QAbstractSocket::HostLookupState1The socket is performing a host name lookup.
+//    QAbstractSocket::ConnectingState2The socket has started establishing a connection.
+//    QAbstractSocket::ConnectedState3A connection is established.
+//    QAbstractSocket::BoundState4The socket is bound to an address and port.
+//    QAbstractSocket::ClosingState6The socket is about to close (data may still be waiting to be written).
+//    QAbstractSocket::ListeningState5For internal use only.
 }
 
 void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
@@ -135,5 +151,5 @@ void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(_name + ": " + strErr);
+    Log::write("Error! " + _name + ": " + strErr);
 }

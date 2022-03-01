@@ -14,6 +14,7 @@ public:
         QUERY_WAY,
         QUERY_READ,
         QUERY_WRITE,
+        QUERY_PING,
         ERROR
     };
 
@@ -22,6 +23,7 @@ public:
     static void response_WAY(const IOT_Server &iotHost, std::vector<uint8_t> &data);
     static void response_READ(const IOT_Server &iotHost, std::vector<uint8_t> &data);
     static void response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &data);
+//    static void response_PONG(IOT_Server &iotHost);
 };
 
 #endif // PROTOCOL_CLASS_H

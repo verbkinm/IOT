@@ -13,10 +13,7 @@ qint64 IOTV_SH::query_READ(Base_Host &host, uint8_t channelNumber)
     char channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
-    if(host.insertExpectedResponseRead(channelNumber))
-        return host.writeToServer(data);
-
-    return -1;
+    return host.writeToServer(data);
 }
 
 qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData)
@@ -44,12 +41,14 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
             data.append(rawData.array[i]);
     }
 
-    if(host.insertExpectedResponseWrite(channelNumber, rawData))
-        return host.writeToServer(data);
-    else
-        delete[] rawData.str;
+    return host.writeToServer(data);
+    //        delete[] rawData.str;
+}
 
-    return -1;
+void IOTV_SH::query_PING(QByteArray &data)
+{
+    data.clear();
+    data.push_back(QUERY_PING_BYTE);
 }
 
 void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
@@ -58,7 +57,6 @@ void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
         return;
 
     iotHost.removeAllSubChannel();
-    iotHost.eraseAllExpectedResponse();
 
     iotHost.setId(data.at(1));
 
@@ -118,7 +116,6 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
     }
 
     iotHost.setReadChannelData(channelNumber, rawData);
-    iotHost.eraseExpectedResponseRead(channelNumber);
 }
 
 void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
@@ -127,7 +124,13 @@ void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
         return;
 
     uint8_t channelNumber = data.at(0) >> 4;
-    iotHost.eraseExpectedResponseWrite(channelNumber);
+    //    iotHost.eraseExpectedResponseWrite(channelNumber);
+}
+
+void IOTV_SH::response_PONG(QByteArray &data)
+{
+    data.clear();
+    data.push_back(RESPONSE_PONG_BYTE);
 }
 
 IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
@@ -139,6 +142,9 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
 
     if(firstByte == RESPONSE_WAY_BYTE)
         return Response_Type::RESPONSE_WAY;
+    else if(firstByte == RESPONSE_PONG_BYTE)
+        return Response_Type::RESPONSE_PONG;
+
 
     firstByte &= 0x0F;
 

@@ -1,16 +1,9 @@
 #ifndef BASE_HOST_H
 #define BASE_HOST_H
 
-#include <QTimer>
-
-#include <set>
-#include <map>
-
 #include "read_channel.h"
 #include "write_channel.h"
 #include "Base_Host_global.h"
-
-#define TIMER_INTERVAL 5000
 
 class BASE_HOST_EXPORT Base_Host : public QObject
 {
@@ -34,18 +27,8 @@ public:
     Raw::RAW getReadChannelData(uint8_t channelNumber) const;
     Raw::DATA_TYPE getWriteChannelDataType(uint8_t channelNumber) const;
 
-    const std::set<uint8_t> &getExpectedResponseRead() const;
-    const std::map<uint8_t, Raw::RAW> &getExpectedResponseWrite() const;
-
     int readChannelLength() const;
     int writeChannelLength() const;
-
-    bool insertExpectedResponseRead(uint8_t channelNumber);
-    bool insertExpectedResponseWrite(uint8_t channelNumber, Raw::RAW rawData);
-
-    void eraseExpectedResponseRead(uint8_t channelNumber);
-    void eraseExpectedResponseWrite(uint8_t channelNumber);
-    void eraseAllExpectedResponse();
 
     virtual QString getName() const = 0;
     virtual bool getState() const = 0;
@@ -62,12 +45,6 @@ protected:
 
     Read_Channel _readChannel;
     Write_Channel _writeChannel;
-
-    std::set<uint8_t> _expectedResponseRead;
-    std::map<uint8_t, Raw::RAW> _expectedResponseWrite;
-
-    QTimer _timerResponseRead;
-    QTimer _timerResponseWrite;
 };
 
 #endif // BASE_HOST_H

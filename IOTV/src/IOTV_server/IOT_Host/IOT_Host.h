@@ -7,6 +7,10 @@
 #include "../connection_type/file_conn_type.h"
 #include "base_host.h"
 
+#define TIMER_WAY 5000
+#define TIMER_PING 10000
+#define TIMER_RECONNECT 15000
+
 class IOT_Host : public Base_Host
 {
     Q_OBJECT
@@ -43,11 +47,12 @@ private:
     void response_WAY_recived(const QByteArray &data);
     void response_READ_recived(const QByteArray &data);
     void response_WRITE_recived(const QByteArray &data);
+    void response_PONG_recived();
 
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
-    QTimer _intervalTimer, _timerWAY;
+    QTimer _reReadTimer, _timerWAY, _timerPing, _timerReconnect;
 
     enum Flag
     {
@@ -65,11 +70,10 @@ private slots:
     void slotConnected();
     void slotDisconnected();
 
-    void slotResendDataRead();
-    void slotResendDataWrite();
-
-    void slotTimeOut();
+    void slotReReadTimeOut();
     void slotWAYTimeOut();
+    void slotPingTimeOut();
+    void slotReconnectTimeOut();
 
 signals:
     void signalHostConnected();

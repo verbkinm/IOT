@@ -109,6 +109,7 @@ public:
         QUERY_WAY,
         QUERY_READ,
         QUERY_WRITE,
+        QUERY_PING,
         ERROR
     };
 
@@ -116,6 +117,7 @@ public:
 
     static void response_WAY(const IOT_Server &iotHost, Array<char> &data);
     static void response_READ(const IOT_Server &iotHost, Array<char> &data);
+    static void response_PONG(Array<char> &data);
 };
 
 #endif // PROTOCOL_CLASS_H

@@ -2,6 +2,7 @@
 
 #define DEFAULT_INTERVAL 10000 // таймер неудавшегося подключения
 #define BUFFER_MAX_SIZE 256
+
 #include <QTimer>
 
 #include "IOTV_SH.h"

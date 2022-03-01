@@ -1,6 +1,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
+
 #include "Patterns/Subject.h"
 #include "base_host.h"
 #include "protocols.h"
