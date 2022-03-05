@@ -42,22 +42,22 @@ public:
 
         clear();
 
-        _data = new T[newSize];
+        _data = tmp_data;//new T[newSize];
         _size = newSize;
 
-        memcpy(_data, tmp_data, _size * sizeof (T));
+        //memcpy(_data, tmp_data, _size * sizeof (T));
 
-        delete[] tmp_data;
+        //delete[] tmp_data;
     }
 
     void clear()
     {
-        if(_data)
-        {
-            delete[] _data;
-            _data = nullptr;
-            _size = 0;
-        }
+        if(_data == nullptr)
+            return;
+        
+        delete[] _data;
+        _data = nullptr;
+        _size = 0;
     }
     const T& at(int index) const
     {
