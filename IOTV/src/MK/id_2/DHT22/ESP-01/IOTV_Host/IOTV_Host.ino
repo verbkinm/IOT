@@ -64,6 +64,8 @@ void response(Array<char> &data)
     
     if(data.size())
       dataType = Protocol_class::checkQueryData(data);
+    else
+      return;
 
     if(dataType == Protocol_class::query_type::ERROR)
     {
@@ -71,23 +73,24 @@ void response(Array<char> &data)
       return;
     }
   
-    if(data.size() == 1 && dataType == Protocol_class::query_type::QUERY_WAY)
+    if(dataType == Protocol_class::query_type::QUERY_WAY)
     {
       Protocol_class::response_WAY(iotServer, data);
       ArrayToUARTS(data);
+      data.remove(0, 1);
     }
-    else if(data.size() == 1 && dataType == Protocol_class::query_type::QUERY_READ)
+    else if(dataType == Protocol_class::query_type::QUERY_READ)
     {
       Protocol_class::response_READ(iotServer, data);
       ArrayToUARTS(data);
+      data.remove(0, 1);
     }
-    else if(data.size() == 1 && dataType == Protocol_class::query_type::QUERY_PING)
+    else if(dataType == Protocol_class::query_type::QUERY_PING)
     {
       Protocol_class::response_PONG(data);
       ArrayToUARTS(data);
+      data.remove(0, 1);
     }
-
-    data.clear();
 }
 
 void ArrayToUARTS(Array<char> &data)
