@@ -9,11 +9,11 @@ Protocol_class::query_type Protocol_class::checkQueryData(const Array<char> &dat
 
     if(firstByte == 0x01)
       return query_type::QUERY_WAY;
-    else if( (firstByte & 0x0F) == 0x02)
-      return query_type::QUERY_READ;
     else if(firstByte == 0x08)
       return query_type::QUERY_PING;
-      
+    else if( (firstByte & 0x0F) == 0x02)
+      return query_type::QUERY_READ;
+
     return query_type::ERROR;
 }
 

@@ -52,12 +52,12 @@ private:
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
-    QTimer _reReadTimer, _timerWAY, _timerPing, _timerReconnect;
+    QTimer _reReadTimer, /*_timerWAY,*/ _timerPing, _timerReconnect;
 
     enum Flag
     {
         DeviceRegistered = 0x01,
-        ExpectedWay = 0x02
+//        ExpectedWay = 0x02
     };
 
 public:
@@ -71,7 +71,7 @@ private slots:
     void slotDisconnected();
 
     void slotReReadTimeOut();
-    void slotWAYTimeOut();
+//    void slotWAYTimeOut();
     void slotPingTimeOut();
     void slotReconnectTimeOut();
 

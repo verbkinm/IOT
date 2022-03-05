@@ -9,7 +9,9 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
 
     connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
     connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
-    connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
+    connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+
+//    connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
 
 void IOT_Host::printDebugData() const
@@ -56,16 +58,17 @@ Base_conn_type::Conn_type IOT_Host::getConnectionType() const
 
 void IOT_Host::setState(bool state)
 {
-    if(state)
-    {
-        _state.setFlag(DeviceRegistered);
-        _state.setFlag(ExpectedWay, false);
-    }
-    else
-    {
-        _state.setFlag(DeviceRegistered, false);
-        _state.setFlag(ExpectedWay, false);
-    }
+    _state.setFlag(DeviceRegistered, state);
+//    if(state)
+//    {
+//        _state.setFlag(DeviceRegistered);
+//        _state.setFlag(ExpectedWay, false);
+//    }
+//    else
+//    {
+//        _state.setFlag(DeviceRegistered, false);
+//        _state.setFlag(ExpectedWay, false);
+//    }
 }
 
 bool IOT_Host::getState() const
@@ -75,7 +78,7 @@ bool IOT_Host::getState() const
 
 qint64 IOT_Host::readData(uint8_t channelNumber)
 {
-    if(!_state.testFlag(Flag::DeviceRegistered) || _state.testFlag(Flag::ExpectedWay))
+    if(!_state.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
     return  IOTV_SH::query_READ(*this, channelNumber);
@@ -83,7 +86,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
-    if(!_state.testFlag(Flag::DeviceRegistered) || _state.testFlag(Flag::ExpectedWay))
+    if(!_state.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
     return IOTV_SH::query_WRITE(*this, channelNumber, rawData);
@@ -97,6 +100,12 @@ qint64 IOT_Host::writeToServer(QByteArray &data)
 void IOT_Host::dataResived(QByteArray data)
 {
     IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
+
+    if(!_state.testFlag(Flag::DeviceRegistered) && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
+    {
+        Log::write(_conn_type->getName() + " WARRNING: received data but device is not registered: " + data.toHex(':'));
+        return;
+    }
 
     if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
         response_WAY_recived(data);
@@ -162,28 +171,15 @@ void IOT_Host::connectObjects() const
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
-    _timerWAY.stop();
-
-    if(!_state.testFlag(Flag::ExpectedWay))
-    {
-        Log::write(_conn_type->getName() + " WARNING: Received a packet RESPONSE_WAY without a request.");
-        return;
-    }
-
     IOTV_SH::response_WAY(*this, data);
 
     setState(true);
     _timerPing.start(TIMER_PING);
+    _reReadTimer.start();
 }
 
 void IOT_Host::response_READ_recived(const QByteArray &data)
 {
-    if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
-    {
-        Log::write(_conn_type->getName() + " WARNING: The device is not registered or initialized, but a packet RESPONSE_READ is received.");
-        return;
-    }
-
     IOTV_SH::response_READ(*this, data);
     if(!_logFile.isEmpty())
     {
@@ -206,11 +202,6 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
 
 void IOT_Host::response_WRITE_recived(const QByteArray &data)
 {
-    if(_state.testFlag(Flag::ExpectedWay) || !_state.testFlag(Flag::DeviceRegistered))
-    {
-        Log::write(_conn_type->getName() + " WARRNING: The device is not registered or initialized, but a packet RESPONSE_WRITE is received.");
-        return;
-    }
     IOTV_SH::response_WRITE(*this, data);
 }
 
@@ -226,12 +217,13 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    _reReadTimer.stop();
-    if(interval)
-    {
-        connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
-        _reReadTimer.start(interval);
-    }
+    _reReadTimer.setInterval(interval);
+//    _reReadTimer.stop();
+//    if(interval)
+//    {
+//        connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+//        _reReadTimer.start(interval);
+//    }
 }
 
 QString IOT_Host::getLogFile() const
@@ -241,11 +233,8 @@ QString IOT_Host::getLogFile() const
 
 void IOT_Host::slotConnected()
 {
-    _timerWAY.start(TIMER_WAY);
-
     QByteArray data;
     IOTV_SH::query_WAY(data);
-    _state.setFlag(ExpectedWay);
     _conn_type->write(data);
 
     _timerReconnect.start(TIMER_RECONNECT);
@@ -256,6 +245,8 @@ void IOT_Host::slotDisconnected()
 {
     setState(false);
     _timerPing.stop();
+    _reReadTimer.stop();
+    _timerReconnect.stop();
 
     emit signalHostDisconnected(); ///!!! никуда не идут
 }
@@ -266,13 +257,13 @@ void IOT_Host::slotReReadTimeOut()
         readData(i);
 }
 
-void IOT_Host::slotWAYTimeOut()
-{
-    QByteArray data;
-    IOTV_SH::query_WAY(data);
-    _state.setFlag(ExpectedWay);
-    _conn_type->write(data);
-}
+//void IOT_Host::slotWAYTimeOut()
+//{
+//    QByteArray data;
+//    IOTV_SH::query_WAY(data);
+//    _state.setFlag(ExpectedWay);
+//    _conn_type->write(data);
+//}
 
 void IOT_Host::slotPingTimeOut()
 {
@@ -284,6 +275,7 @@ void IOT_Host::slotPingTimeOut()
 void IOT_Host::slotReconnectTimeOut()
 {
     _conn_type->disconnectFromHost();
-    _timerReconnect.stop();
+    Log::write(_conn_type->getName() + " WARRNING: ping timeout");
+//    _timerReconnect.stop();
 }
 
