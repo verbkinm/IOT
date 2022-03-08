@@ -76,6 +76,7 @@ void TCP_conn_type::slotSocketDisconnected()
 
 void TCP_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState socketState)
 {
+    Q_UNUSED(socketState);
     return;
 //    QAbstractSocket::UnconnectedState0The socket is not connected.
 //    QAbstractSocket::HostLookupState1The socket is performing a host name lookup.

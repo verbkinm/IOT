@@ -139,6 +139,8 @@ void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
 
 void IOTV_SC::serverResponse_WRITE(Base_Host &host, const QByteArray &data)
 {
+    Q_UNUSED(host);
+    Q_UNUSED(data);
 //    uint8_t channelNumber = data.at(1) & 0x0f;
 //    host.eraseExpectedResponseWrite(channelNumber);
 }

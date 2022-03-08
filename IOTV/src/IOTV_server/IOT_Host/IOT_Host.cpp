@@ -207,6 +207,7 @@ void IOT_Host::response_WRITE_recived(const QByteArray &data)
 
 void IOT_Host::response_PONG_recived()
 {
+    _timerReconnect.start(TIMER_RECONNECT);
     _timerPing.start(TIMER_PING);
 }
 

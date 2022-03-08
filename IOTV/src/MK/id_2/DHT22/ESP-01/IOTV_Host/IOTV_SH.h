@@ -23,6 +23,16 @@ public:
         _data = new T[length];
         _size = length;
     }
+    
+    Array(const Array &arr)
+    {
+        if(arr.size() > 0)
+        {
+          _data = new T[arr.size()];
+          _size = arr.size();
+          memcpy(_data, arr._data, _size * sizeof(T));
+        }
+    }
 
     ~Array()
     {
@@ -97,6 +107,7 @@ public:
                 tmpData.push_back(_data[i]);
         }
         *this = tmpData;
+        tmpData._data = nullptr;
     }
 };
  

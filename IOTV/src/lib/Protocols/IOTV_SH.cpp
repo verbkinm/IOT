@@ -123,7 +123,8 @@ void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
     if(checkResponsetData(data) != Response_Type::RESPONSE_WRITE)
         return;
 
-    uint8_t channelNumber = data.at(0) >> 4;
+    Q_UNUSED(iotHost);
+//    uint8_t channelNumber = data.at(0) >> 4;
     //    iotHost.eraseExpectedResponseWrite(channelNumber);
 }
 
@@ -173,7 +174,7 @@ std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
 
     if(dataType == Response_Type::ERROR)
         return {false, 0};
-    else if(dataSize > 5 && dataType == Response_Type::RESPONSE_WAY)
+    else if(dataSize >= 5 && dataType == Response_Type::RESPONSE_WAY)
     {
         quint16 descriptionLength = (data[2] << 8) | data[3];
         uint8_t readChannelCount = data[4] >> 4;
@@ -182,13 +183,17 @@ std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
         if(dataSize >= packetSize)
             return {true, packetSize};
     }
-    else if(dataSize > 3 && dataType == Response_Type::RESPONSE_READ)
+    else if(dataSize >= 1 && dataType == Response_Type::RESPONSE_PONG)
+    {
+        return {true, 1};
+    }
+    else if(dataSize >= 3 && dataType == Response_Type::RESPONSE_READ)
     {
         quint16 dataLength = (data[1] << 8) | data[2];
         if(dataSize >= static_cast<uint32_t>(3 + dataLength))
             return {true, static_cast<uint32_t>(3 + dataLength)};
     }
-    else if(dataSize > 1 && dataType == Response_Type::RESPONSE_WRITE)
+    else if(dataSize >= 1 && dataType == Response_Type::RESPONSE_WRITE)
         return {true, 1};
     else if(dataSize > 256)
         return {false, 0};

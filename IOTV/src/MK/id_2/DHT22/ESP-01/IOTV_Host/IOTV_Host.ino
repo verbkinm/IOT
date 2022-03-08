@@ -61,6 +61,7 @@ void loop()
 void response(Array<char> &data)
 {    
     Protocol_class::query_type dataType;
+    Array<char> dataTmp(data);
     
     if(data.size())
       dataType = Protocol_class::checkQueryData(data);
@@ -75,20 +76,20 @@ void response(Array<char> &data)
   
     if(dataType == Protocol_class::query_type::QUERY_WAY)
     {
-      Protocol_class::response_WAY(iotServer, data);
-      ArrayToUARTS(data);
+      Protocol_class::response_WAY(iotServer, dataTmp);
+      ArrayToUARTS(dataTmp);
       data.remove(0, 1);
     }
     else if(dataType == Protocol_class::query_type::QUERY_READ)
     {
-      Protocol_class::response_READ(iotServer, data);
-      ArrayToUARTS(data);
+      Protocol_class::response_READ(iotServer, dataTmp);
+      ArrayToUARTS(dataTmp);
       data.remove(0, 1);
     }
     else if(dataType == Protocol_class::query_type::QUERY_PING)
     {
-      Protocol_class::response_PONG(data);
-      ArrayToUARTS(data);
+      Protocol_class::response_PONG(dataTmp);
+      ArrayToUARTS(dataTmp);
       data.remove(0, 1);
     }
 }
