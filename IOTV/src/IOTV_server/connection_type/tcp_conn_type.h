@@ -8,14 +8,11 @@
 #include "base_conn_type.h"
 #include "../lib/Log/log.h"
 
-#define DEFAULT_ADDRESS "127.0.0.1"
-#define DEFAULT_PORT 2021
-
 class TCP_conn_type : public Base_conn_type
 {
     Q_OBJECT
 public:
-    TCP_conn_type(const QString& name, const QString& address = DEFAULT_ADDRESS, quint16 port = DEFAULT_PORT,
+    TCP_conn_type(const QString& name, const QString& address = "127.0.0.1", quint16 port = 2021,
                        Base_conn_type *parent = nullptr);
 
     quint16 getPort() const;

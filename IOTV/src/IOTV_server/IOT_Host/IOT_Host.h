@@ -7,14 +7,14 @@
 #include "../connection_type/file_conn_type.h"
 #include "base_host.h"
 
-#define TIMER_WAY 5000
-#define TIMER_PING 10000
-#define TIMER_RECONNECT 15000
-
 class IOT_Host : public Base_Host
 {
     Q_OBJECT
 public:
+    static const unsigned int TIMER_WAY = 5000;
+    static const unsigned int TIMER_PING = 10000;
+    static const unsigned int TIMER_RECONNECT = 15000;
+
     IOT_Host(const QString &name, QObject* parent = nullptr);
 
     void printDebugData() const;

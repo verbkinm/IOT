@@ -1,5 +1,4 @@
-#ifndef WRAPPER_H
-#define WRAPPER_H
+#pragma once
 
 #include <QFileSystemWatcher>
 
@@ -18,5 +17,3 @@ private:
 private slots:
     void slotFileChange(QString fileName);
 };
-
-#endif // WRAPPER_H

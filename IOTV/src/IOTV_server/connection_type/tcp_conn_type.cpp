@@ -1,7 +1,6 @@
 #include "tcp_conn_type.h"
 
-TCP_conn_type::TCP_conn_type(const QString &name, const QString &address,
-                                       quint16 port, Base_conn_type *parent) : Base_conn_type(name, parent),
+TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, Base_conn_type *parent) : Base_conn_type(name, parent),
     _tcpSocket(std::make_unique<QTcpSocket>()), _tcpPort(port)
 {
     _address = address;
@@ -30,7 +29,6 @@ qint64 TCP_conn_type::write(const QByteArray &data)
     Log::write(_name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
                + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':'));
 
-//    auto state = _tcpSocket->state();
     return _tcpSocket->write(data);
 }
 

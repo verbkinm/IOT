@@ -1,7 +1,8 @@
 #include "base_conn_type.h"
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
-    _name(name), _address("none address")
+    _name(name), _address("none address")/*,
+    BUFFER_MAX_SIZE(256), DEFAULT_INTERVAL(10000)*/
 {
 
 }
@@ -63,26 +64,31 @@ QByteArray Base_conn_type::readAll()
 
 void Base_conn_type::slotReadData()
 {
-    static QByteArray data;
-    data += readAll();
+    _host_buffer_data += readAll();
 
-    while(data.size())
+    if(_host_buffer_data.size() > BUFFER_MAX_SIZE)
     {
-        std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(data);
+        _host_buffer_data.clear();
+        return;
+    }
+
+    while(_host_buffer_data.size())
+    {
+        std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
 
         if(!accumPacketResponse.first)
         {
-            data.clear();
+            _host_buffer_data.clear();
             return;
         }
-        if(accumPacketResponse.first && accumPacketResponse.second)
+        else if(accumPacketResponse.first && accumPacketResponse.second)
         {
-            QByteArray buffer = data.mid(0, accumPacketResponse.second);
+            QByteArray buffer = _host_buffer_data.mid(0, accumPacketResponse.second);
             QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
             Log::write(strOut);
 
             emit signalDataRiceved(buffer);
-            data = data.mid(accumPacketResponse.second);
+            _host_buffer_data = _host_buffer_data.mid(accumPacketResponse.second);
         }
         else
             break;

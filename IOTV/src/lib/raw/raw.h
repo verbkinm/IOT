@@ -1,5 +1,4 @@
-#ifndef RAW_H
-#define RAW_H
+#pragma once
 
 #include <iostream>
 
@@ -58,5 +57,3 @@ public:
 
     static const uint8_t size = sizeof (RAW); //!!!
 };
-
-#endif // RAW_H

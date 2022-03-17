@@ -5,13 +5,11 @@
 IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
-    connectObjects();
+//    connectObjects();
 
     connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
     connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
     connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
-
-//    connect(&_timerWAY, &QTimer::timeout, this, &IOT_Host::slotWAYTimeOut);
 }
 
 void IOT_Host::printDebugData() const
@@ -59,16 +57,6 @@ Base_conn_type::Conn_type IOT_Host::getConnectionType() const
 void IOT_Host::setState(bool state)
 {
     _state.setFlag(DeviceRegistered, state);
-//    if(state)
-//    {
-//        _state.setFlag(DeviceRegistered);
-//        _state.setFlag(ExpectedWay, false);
-//    }
-//    else
-//    {
-//        _state.setFlag(DeviceRegistered, false);
-//        _state.setFlag(ExpectedWay, false);
-//    }
 }
 
 bool IOT_Host::getState() const
@@ -219,12 +207,6 @@ void IOT_Host::setLogFile(const QString &logFile)
 void IOT_Host::setInterval(uint interval)
 {
     _reReadTimer.setInterval(interval);
-//    _reReadTimer.stop();
-//    if(interval)
-//    {
-//        connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
-//        _reReadTimer.start(interval);
-//    }
 }
 
 QString IOT_Host::getLogFile() const
@@ -258,14 +240,6 @@ void IOT_Host::slotReReadTimeOut()
         readData(i);
 }
 
-//void IOT_Host::slotWAYTimeOut()
-//{
-//    QByteArray data;
-//    IOTV_SH::query_WAY(data);
-//    _state.setFlag(ExpectedWay);
-//    _conn_type->write(data);
-//}
-
 void IOT_Host::slotPingTimeOut()
 {
     QByteArray data;
@@ -277,6 +251,5 @@ void IOT_Host::slotReconnectTimeOut()
 {
     _conn_type->disconnectFromHost();
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
-//    _timerReconnect.stop();
 }
 

@@ -92,7 +92,7 @@ void IOT_Server::startTCPServer()
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
         Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDERR, _logFile);
-        _reconnectTimer.start(DEFAULT_INTERVAL);
+        _reconnectTimer.start(Base_conn_type::DEFAULT_INTERVAL);
     }
     else
     {

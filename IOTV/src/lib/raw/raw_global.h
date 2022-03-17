@@ -1,5 +1,4 @@
-#ifndef RAW_GLOBAL_H
-#define RAW_GLOBAL_H
+#pragma once
 
 #if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #  define Q_DECL_EXPORT __declspec(dllexport)
@@ -14,5 +13,3 @@
 #else
 #  define RAW_EXPORT Q_DECL_IMPORT
 #endif
-
-#endif // RAW_GLOBAL_H

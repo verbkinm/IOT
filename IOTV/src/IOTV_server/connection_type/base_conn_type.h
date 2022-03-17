@@ -1,8 +1,5 @@
 #pragma once
 
-#define DEFAULT_INTERVAL 10000 // таймер неудавшегося подключения
-#define BUFFER_MAX_SIZE 256
-
 #include <QTimer>
 
 #include "IOTV_SH.h"
@@ -22,6 +19,9 @@ public:
         FILE
     };
 
+    static const unsigned int BUFFER_MAX_SIZE = 256;
+    static const unsigned int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+
     QString getName() const;
     QString getAddress() const;
     Conn_type getConnectionType() const;
@@ -39,6 +39,7 @@ protected:
     QString _address;
     Conn_type _type;
     QTimer _reconnectTimer;
+    QByteArray _host_buffer_data;
 
     virtual QByteArray readAll();
 
