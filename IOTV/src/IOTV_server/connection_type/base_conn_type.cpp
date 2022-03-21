@@ -1,8 +1,7 @@
 #include "base_conn_type.h"
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
-    _name(name), _address("none address")/*,
-    BUFFER_MAX_SIZE(256), DEFAULT_INTERVAL(10000)*/
+    _name(name), _address("none address")
 {
 
 }

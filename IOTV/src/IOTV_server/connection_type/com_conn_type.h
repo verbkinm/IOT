@@ -3,7 +3,7 @@
 #include <QSerialPort>
 
 #include "base_conn_type.h"
-#include "../lib/Log/log.h"
+#include "log.h"
 
 
 class COM_conn_type : public Base_conn_type

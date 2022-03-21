@@ -16,9 +16,11 @@ public:
     static const unsigned int TIMER_RECONNECT = 15000;
 
     IOT_Host(const QString &name, QObject* parent = nullptr);
+    ~IOT_Host() = default;
 
     void printDebugData() const;
 
+//    void setConnectionType();
     void setConnectionTypeTCP(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
     void setConnectionTypeFile(const QString &addr);
@@ -52,7 +54,7 @@ private:
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
-    QTimer _reReadTimer, /*_timerWAY,*/ _timerPing, _timerReconnect;
+    QTimer _reReadTimer, _timerPing, _timerReconnect;
 
     enum Flag
     {
@@ -64,14 +66,13 @@ public:
     Q_DECLARE_FLAGS(Flags, Flag)
 
 private:
-    Flags _state;
+    Flags _state_flags;
 
 private slots:
     void slotConnected();
     void slotDisconnected();
 
     void slotReReadTimeOut();
-//    void slotWAYTimeOut();
     void slotPingTimeOut();
     void slotReconnectTimeOut();
 

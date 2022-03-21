@@ -56,17 +56,17 @@ Base_conn_type::Conn_type IOT_Host::getConnectionType() const
 
 void IOT_Host::setState(bool state)
 {
-    _state.setFlag(DeviceRegistered, state);
+    _state_flags.setFlag(DeviceRegistered, state);
 }
 
 bool IOT_Host::getState() const
 {
-    return _state.testFlag(Flag::DeviceRegistered);
+    return _state_flags.testFlag(Flag::DeviceRegistered);
 }
 
 qint64 IOT_Host::readData(uint8_t channelNumber)
 {
-    if(!_state.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
+    if(!_state_flags.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
     return  IOTV_SH::query_READ(*this, channelNumber);
@@ -74,7 +74,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
-    if(!_state.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
+    if(!_state_flags.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
     return IOTV_SH::query_WRITE(*this, channelNumber, rawData);
@@ -89,7 +89,7 @@ void IOT_Host::dataResived(QByteArray data)
 {
     IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
 
-    if(!_state.testFlag(Flag::DeviceRegistered) && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
+    if(!_state_flags.testFlag(Flag::DeviceRegistered) && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
     {
         Log::write(_conn_type->getName() + " WARRNING: received data but device is not registered: " + data.toHex(':'));
         return;

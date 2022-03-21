@@ -1,25 +1,10 @@
 #include <QtTest>
 #include <QCoreApplication>
-#include <QTcpSocket>
 
 #include <iostream>
 
-//#include "../lib/Base_Host/base_host.h"
-//#include "../IOTV_server/connection_type/tcp_conn_type.h"
-//#include "../IOTV_server/connection_type/com_conn_type.h"
-//#include "../IOTV_server/connection_type/file_conn_type.h"
-
-//#include "../lib/raw/raw.h"
-//#include "../lib/Log/log.h"
-
-//#include "../IOTV_server/IOT_Host/IOT_Host.h"
-#include "../IOTV_server/IOT_Server/iot_server.h"
-
-#include "../lib/Protocols/IOTV_SH.h"
-#include "../lib/Protocols/iotv_sc.h"
-
-
-// add necessary includes here
+#include "IOT_Server/iot_server.h"
+#include "wrapper.h"
 
 class server : public QObject
 {
@@ -34,11 +19,14 @@ private slots:
     void cleanupTestCase();
     void test_protocol_IOTV_SH();
 
+private:
+//    IOT_Server _iot_server;
 };
 
 server::server()
 {
     std::cout << "server" << '\n';
+
 }
 
 server::~server()
@@ -48,7 +36,7 @@ server::~server()
 
 void server::initTestCase()
 {
-
+//    std::cout << std::boolalpha << _iot_server.isListening() << '\n';
 }
 
 void server::cleanupTestCase()
@@ -67,9 +55,16 @@ void server::test_protocol_IOTV_SH()
     QCOMPARE(data, dataComp);
     QCOMPARE(data, dataComp); //не пустой data
 
-    IOT_Host host("test_host");
+    IOT_Host host("test_host", nullptr);
+    host.setConnectionTypeTCP("192.168.0.104", 8888);
+    host.connectToHost();
     qint64 res = IOTV_SH::query_READ(host, 0);
+    QCOMPARE(1, res); //кол-во байт
 
+    Raw::RAW raw;
+    raw.ui64 = 0;
+    res = IOTV_SH::query_WRITE(host, 0, raw);
+    QCOMPARE(11, res); //кол-во байт
 }
 
 QTEST_MAIN(server)

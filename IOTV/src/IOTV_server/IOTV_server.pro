@@ -1,7 +1,7 @@
 QT -= gui
-QT += network serialport
+QT += network serialport testlib
 
-CONFIG += c++17 console
+CONFIG += c++17 console warn_on depend_includepath testcase
 CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -14,8 +14,9 @@ SOURCES += \
         IOT_Server/iot_server.cpp \
         connection_type/file_conn_type.cpp \
         connection_type/tcp_conn_type.cpp \
-        main.cpp \
+#        main.cpp \
         IOT_Host/IOT_Host.cpp \
+        tst_server.cpp \
         wrapper.cpp
 
 # Default rules for deployment.

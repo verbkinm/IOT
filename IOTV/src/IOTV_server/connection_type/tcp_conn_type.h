@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "base_conn_type.h"
-#include "../lib/Log/log.h"
+#include "log.h"
 
 class TCP_conn_type : public Base_conn_type
 {
@@ -34,6 +34,5 @@ private slots:
     void slotSocketDisconnected();
     void slotSocketStateChanged(QAbstractSocket::SocketState socketState);
 
-//    void slotReadData();
     void slotError(QAbstractSocket::SocketError error);
 };
