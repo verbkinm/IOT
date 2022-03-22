@@ -65,7 +65,7 @@ void Base_conn_type::slotReadData()
 {
     _host_buffer_data += readAll();
 
-    if(_host_buffer_data.size() > BUFFER_MAX_SIZE)
+    if(_host_buffer_data.size() > static_cast<int>(BUFFER_MAX_SIZE))
     {
         _host_buffer_data.clear();
         return;

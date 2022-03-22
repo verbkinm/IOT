@@ -69,7 +69,8 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
     if(!_state_flags.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
         return -1;
 
-    return  IOTV_SH::query_READ(*this, channelNumber);
+    QByteArray data = IOTV_SH::query_READ(channelNumber);
+    return  writeToServer(data);
 }
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
@@ -216,9 +217,7 @@ QString IOT_Host::getLogFile() const
 
 void IOT_Host::slotConnected()
 {
-    QByteArray data;
-    IOTV_SH::query_WAY(data);
-    _conn_type->write(data);
+    _conn_type->write(IOTV_SH::query_WAY());
 
     _timerReconnect.start(TIMER_RECONNECT);
     emit signalHostConnected(); ///!!! никуда не идут

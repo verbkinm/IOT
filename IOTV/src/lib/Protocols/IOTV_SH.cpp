@@ -1,19 +1,23 @@
 #include "IOTV_SH.h"
 
-void IOTV_SH::query_WAY(QByteArray &data)
+QByteArray IOTV_SH::query_WAY()
 {
+    QByteArray data;
+
     data.clear();
     data.append(QUERY_WAY_BYTE);
+
+    return data;
 }
 
-qint64 IOTV_SH::query_READ(Base_Host &host, uint8_t channelNumber)
+QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
 {
     QByteArray data;
 
     char channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
-    return host.writeToServer(data);
+    return data;
 }
 
 qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData)

@@ -26,8 +26,8 @@ public:
         ERROR
     };
 
-    static void query_WAY(QByteArray &data);
-    static qint64 query_READ(Base_Host &host, uint8_t channelNumber);
+    static QByteArray query_WAY();
+    static QByteArray query_READ(uint8_t channelNumber);
     static qint64 query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData);
     static void query_PING(QByteArray &data);
 

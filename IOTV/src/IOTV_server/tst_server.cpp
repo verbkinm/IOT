@@ -46,25 +46,28 @@ void server::cleanupTestCase()
 
 void server::test_protocol_IOTV_SH()
 {
-    QByteArray data;
-    IOTV_SH::query_WAY(data);
-
     QByteArray dataComp;
     dataComp.push_back(0x01);
 
-    QCOMPARE(data, dataComp);
-    QCOMPARE(data, dataComp); //не пустой data
+    QCOMPARE(dataComp, IOTV_SH::query_WAY());
 
     IOT_Host host("test_host", nullptr);
     host.setConnectionTypeTCP("192.168.0.104", 8888);
     host.connectToHost();
-    qint64 res = IOTV_SH::query_READ(host, 0);
-    QCOMPARE(1, res); //кол-во байт
+
+    QCOMPARE(dataComp, IOTV_SH::query_READ(0));
 
     Raw::RAW raw;
     raw.ui64 = 0;
-    res = IOTV_SH::query_WRITE(host, 0, raw);
+    auto res = IOTV_SH::query_WRITE(host, 0, raw);
     QCOMPARE(11, res); //кол-во байт
+
+    QByteArray expected;
+    expected.push_back(0x01);
+    QCOMPARE(expected, IOTV_SH::query_WAY());
+
+    QByteArray data;
+    IOTV_SH::query_PING(data);
 }
 
 QTEST_MAIN(server)
