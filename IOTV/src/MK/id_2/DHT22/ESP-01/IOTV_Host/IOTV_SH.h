@@ -44,6 +44,9 @@ public:
     {
         int newSize = _size + 1;
         T* tmp_data = new T[newSize];
+        
+        if(tmp_data == nullptr)
+          return;
 
         if(_data)
             memcpy(tmp_data, _data, _size * sizeof(T));
