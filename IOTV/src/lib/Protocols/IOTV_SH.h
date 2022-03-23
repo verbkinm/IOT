@@ -28,8 +28,8 @@ public:
 
     static QByteArray query_WAY();
     static QByteArray query_READ(uint8_t channelNumber);
-    static qint64 query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData);
-    static void query_PING(QByteArray &data);
+    static QByteArray query_WRITE(const Base_Host &host, uint8_t channelNumber, const Raw::RAW &rawData);
+    static QByteArray query_PING();
 
     static void response_WAY(Base_Host &iotHost, const QByteArray &data);
     static void response_READ(Base_Host &iotHost, const QByteArray &data);

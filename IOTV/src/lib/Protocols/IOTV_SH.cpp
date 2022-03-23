@@ -20,7 +20,7 @@ QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
     return data;
 }
 
-qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &rawData)
+QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, const Raw::RAW &rawData)
 {
     QByteArray data;
 
@@ -32,9 +32,7 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
         quint16 strLength = strlen(rawData.str);
         data.append(strLength >> 8);
         data.append(strLength);
-
-        for (quint16 i = 0; i < strLength; i++)
-            data.append(rawData.str[i]);
+        data.append(rawData.str);
     }
     else
     {
@@ -45,14 +43,15 @@ qint64 IOTV_SH::query_WRITE(Base_Host &host, uint8_t channelNumber, Raw::RAW &ra
             data.append(rawData.array[i]);
     }
 
-    return host.writeToServer(data);
-    //        delete[] rawData.str;
+    return data;
 }
 
-void IOTV_SH::query_PING(QByteArray &data)
+QByteArray IOTV_SH::query_PING()
 {
-    data.clear();
+    QByteArray data;
     data.push_back(QUERY_PING_BYTE);
+
+    return data;
 }
 
 void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
