@@ -243,11 +243,11 @@ void IOT_Server::slotDataRecived()
                         if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
                             quint16 strLength = data.size();
-                            ptr = new char[strLength + 1]; // удаляется в eraseExpectedResponceWrite
+                            //!!!
+                            ptr = new char[strLength]; // удаляется в eraseExpectedResponceWrite
 
                             for (uint8_t i = 0; i < strLength; ++i)
                                 ptr[i] = data.at(i);
-                            ptr[strLength] = '\0';
 
                             raw.str = ptr;
                         }
@@ -257,7 +257,11 @@ void IOT_Server::slotDataRecived()
                                 raw.array[i] = data.at(i);
                         }
 
-                        IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
+                        //!!!
+                        QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
+                        findDevice->get()->writeToServer(dataSend);
+                        delete[] raw.str;
+
                         IOTV_SC::responceToClient_Write(packetData);
                         writeToSocket(socket, packetData);
                     }

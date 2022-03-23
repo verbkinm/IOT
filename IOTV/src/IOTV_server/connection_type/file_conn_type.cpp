@@ -13,7 +13,7 @@ qint64 File_conn_type::write(const QByteArray &data)
     QByteArray buffer;
     if(data.size() == 1 && data[0] == QUERY_WAY_BYTE)
     {
-        buffer.clear();
+//        buffer.clear();
 
         buffer.push_back(RESPONSE_WAY_BYTE);
         buffer.push_back(3); // id устройства
@@ -43,7 +43,7 @@ qint64 File_conn_type::write(const QByteArray &data)
         _file.reset();
         QByteArray dataRead = _file.readAll();
 
-        buffer.clear();
+//        buffer.clear();
 
         buffer.push_back(RESPONSE_READ_BYTE);
         buffer.push_back(dataRead.size() >> 8);
@@ -81,6 +81,15 @@ qint64 File_conn_type::write(const QByteArray &data)
         buffer.push_back(RESPONSE_WRITE_BYTE);
         Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
         emit signalDataRiceved(buffer);
+    }
+    else if(data.size() >= 1 && data[0] == QUERY_PING_BYTE)
+    {
+//        buffer = data.mid(0);
+//        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
+//        buffer.clear();
+//        buffer.push_back(RESPONSE_PONG_BYTE);
+////        Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
+//        emit signalDataRiceved(buffer);
     }
 
     return 0;
