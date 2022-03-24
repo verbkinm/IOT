@@ -7,7 +7,8 @@ Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent), _id(id), _d
 
 Base_Host::~Base_Host()
 {
-
+    //Если в каналах тип данных CHAR_PTR необходимо освободить память.
+    _readChannel.removeAllSubchanel();
 }
 
 bool Base_Host::addReadSubChannel(Raw::DATA_TYPE dataType)

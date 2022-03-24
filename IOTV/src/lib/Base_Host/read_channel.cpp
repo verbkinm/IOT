@@ -47,7 +47,10 @@ bool Read_Channel::removeSubchannel(uint8_t index)
 void Read_Channel::removeAllSubchanel()
 {
     for(size_t i = 0; i < _data.size(); i++)
-        removeSubchannel(i);
+        clearPointerRAW(i);
+
+    _data.clear();
+//        removeSubchannel(i);
 
     _dataType.clear();
 }
@@ -76,7 +79,8 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
         Raw::RAW type;
-        type.b = false;
+        type.ui64 = 0; // обнуление всего
+//        type.str = nullptr;
         return type;
     }
 }
@@ -86,7 +90,7 @@ bool Read_Channel::clearPointerRAW(uint8_t index)
     try
     {
         Raw::RAW &raw = _data.at(index);
-        if(raw.str != nullptr)
+        if(_dataType.at(index) == Raw::DATA_TYPE::CHAR_PTR && raw.str != nullptr)
         {
             delete[] raw.str;
             raw.str = nullptr;

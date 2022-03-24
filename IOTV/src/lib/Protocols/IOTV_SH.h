@@ -33,7 +33,7 @@ public:
 
     static void response_WAY(Base_Host &iotHost, const QByteArray &data);
     static void response_READ(Base_Host &iotHost, const QByteArray &data);
-    static void response_WRITE(Base_Host &iotHost, const QByteArray &data);
+    static void response_WRITE(const Base_Host &iotHost, const QByteArray &data);
     static void response_PONG(QByteArray &data);
 
     static Response_Type checkResponsetData(const QByteArray &data);

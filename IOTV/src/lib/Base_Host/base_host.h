@@ -22,10 +22,11 @@ public:
 
     uint8_t getId() const;
     QString getDescription() const;
+
     Raw::DATA_TYPE getReadChannelDataType(uint8_t channelNumber) const;
+    Raw::DATA_TYPE getWriteChannelDataType(uint8_t channelNumber) const;
 
     Raw::RAW getReadChannelData(uint8_t channelNumber) const;
-    Raw::DATA_TYPE getWriteChannelDataType(uint8_t channelNumber) const;
 
     int readChannelLength() const;
     int writeChannelLength() const;

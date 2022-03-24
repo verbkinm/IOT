@@ -16,14 +16,12 @@ void GUI_Device_Text::update()
 {
     Raw::RAW raw = _device.getReadChannelData(0);
 
-    char *ptr = raw.str;
-
-    if(ptr == nullptr)
+    if(raw.str == nullptr)
         _text.clear();
-    else if(strcmp(ptr, _text.toPlainText().toStdString().c_str()) != 0)
+    else if(strcmp(raw.str, _text.toPlainText().toStdString().c_str()) != 0)
     {
         _text.clear();
-        _text.setPlainText(ptr);
+        _text.setPlainText(raw.str);
     }
 
     stateAndViewName();

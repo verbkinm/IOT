@@ -228,7 +228,11 @@ void IOT_Server::slotDataRecived()
                 QString deviceName;
                 if(IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [&deviceName](std::unique_ptr<IOT_Host> &host)
+                    {
+                            return host.get()->getName() == deviceName;
+                    });
+
                     if(findDevice != _iot_hosts.end())
                     {
                         uint8_t nameLength = packetData.at(0) >> 3;
@@ -238,18 +242,13 @@ void IOT_Server::slotDataRecived()
 
                         QByteArray data = packetData.mid(4 + nameLength, dataLength);
                         Raw::RAW raw;
-                        char* ptr = nullptr;
 
                         if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
-                            quint16 strLength = data.size();
-                            //!!!
-                            ptr = new char[strLength]; // удаляется в eraseExpectedResponceWrite
+                            raw.str = new char[data.size()];
 
-                            for (uint8_t i = 0; i < strLength; ++i)
-                                ptr[i] = data.at(i);
-
-                            raw.str = ptr;
+                            for (uint8_t i = 0; i < data.size(); ++i)
+                                raw.str[i] = data.at(i);
                         }
                         else
                         {

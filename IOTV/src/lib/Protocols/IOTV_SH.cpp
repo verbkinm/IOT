@@ -94,22 +94,17 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
 
     if(iotHost.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
     {
-        char *ptr = new char[dataLength + 1]; // удаляется
+        rawData.str = new char[dataLength]; // удаляется в ~Base_Host()
 
         for (quint16 i = 0; i < dataLength; i++)
-            ptr[i] = buf.at(i);
-        ptr[dataLength] = '\0';
+            rawData.str[i] = buf.at(i);
 
-        if(iotHost.getReadChannelData(channelNumber).str != nullptr && strcmp(ptr, iotHost.getReadChannelData(channelNumber).str) == 0) //если строковые данные уже есть в хосте и они равны тем, что получили, то удаляем то, что получили
+        // удаляем строковые данные в хосте и в конце метода мы их туда запишем
+        Raw::RAW raw = (iotHost.getReadChannelData(channelNumber));
+        if(raw.str != nullptr)
         {
-            rawData.str = iotHost.getReadChannelData(channelNumber).str;
-            delete[] ptr;
-        }
-        else
-        {
-            // удаляем строковые данные в хосте и записываем новые
-            delete[] iotHost.getReadChannelData(channelNumber).str;
-            rawData.str = ptr;
+            delete[] raw.str;
+            raw.str = nullptr;
         }
     }
     else
@@ -121,14 +116,13 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
     iotHost.setReadChannelData(channelNumber, rawData);
 }
 
-void IOTV_SH::response_WRITE(Base_Host &iotHost, const QByteArray &data)
+void IOTV_SH::response_WRITE(const Base_Host &iotHost, const QByteArray &data)
 {
+    Q_UNUSED(iotHost);
+    Q_UNUSED(data);
+
     if(checkResponsetData(data) != Response_Type::RESPONSE_WRITE)
         return;
-
-    Q_UNUSED(iotHost);
-//    uint8_t channelNumber = data.at(0) >> 4;
-    //    iotHost.eraseExpectedResponseWrite(channelNumber);
 }
 
 void IOTV_SH::response_PONG(QByteArray &data)

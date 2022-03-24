@@ -27,12 +27,10 @@ void Gui_Full_Text::slotWrite()
     std::string text = _text.toPlainText().toStdString();
     quint16 textSize = text.size();
 
-    char *ptr = new char[textSize + 1]; // очищается в  eraseExpectedResponseWrite
-    for (quint16 i = 0; i < textSize; i++)
-        ptr[i] = text.at(i);
-    ptr[textSize] = '\0';
-
     Raw::RAW raw;
-    raw.str = ptr;
+    raw.str = new char[textSize]; // очищается в  eraseExpectedResponseWrite
+    for (quint16 i = 0; i < textSize; i++)
+        raw.str[i] = text.at(i);
+
     _device.writeData(0, raw);
 }

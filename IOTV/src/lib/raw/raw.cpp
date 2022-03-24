@@ -84,6 +84,7 @@ std::string Raw::toString(Raw::DATA_TYPE dataType)
         return "RAW";
 }
 
+//Использовать для отладки!!!
 std::string Raw::toString(Raw::DATA_TYPE dataType, Raw::RAW data)
 {
     if(dataType == DATA_TYPE::INTEGER_8)
@@ -115,11 +116,12 @@ std::string Raw::toString(Raw::DATA_TYPE dataType, Raw::RAW data)
         return "false";
     }
     else if(dataType == DATA_TYPE::CHAR_PTR)
-        return "STRING data";
+        return data.str; // Можно получить segmentation fail
     else
         return "UNKNOW data type";
 }
 
+//Использовать для отладки!!!
 uint8_t Raw::toUInt8(Raw::DATA_TYPE dataType)
 {
     if(dataType == DATA_TYPE::INTEGER_8)
@@ -150,4 +152,9 @@ uint8_t Raw::toUInt8(Raw::DATA_TYPE dataType)
         return 13;
     else
         return 14;
+}
+
+bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs)
+{
+    return (memcmp(&lhs, &rhs, 8) == 0);
 }

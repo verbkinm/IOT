@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstring>
 
 #include "raw_global.h"
 
@@ -45,15 +46,17 @@ public:
         double d;           // 10 double32
                             // 11 double64
         bool b;             // 12
-        char* str;          // 13
+        char* str;          // 13 Критический сегмент. Обращение к str вызывает segmentation fail, если тип RAW является отличным от CHAR_PTR
 
         char array[8];      // побайтный доступ к RAW
     };
 
     static DATA_TYPE toDataType(uint8_t type);
     static uint8_t toUInt8(DATA_TYPE dataType);
-    static std::string toString(DATA_TYPE dataType);
-    static std::string toString(DATA_TYPE dataType, Raw::RAW data);
+    static std::string toString(DATA_TYPE dataType); //Использовать для отладки!!!
+    static std::string toString(DATA_TYPE dataType, Raw::RAW data); //Использовать для отладки!!!
+
+    friend bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs);
 
     static const uint8_t size = sizeof (RAW); //!!!
 };

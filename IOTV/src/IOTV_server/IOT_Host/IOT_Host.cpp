@@ -5,8 +5,6 @@
 IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
 {
-//    connectObjects();
-
     connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
     connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
     connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
@@ -98,7 +96,14 @@ void IOT_Host::dataResived(QByteArray data)
     }
 
     if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+    {
+        if(_state_flags.testFlag(Flag::DeviceRegistered))
+        {
+            Log::write(_conn_type->getName() + " WARRNING: received responce WAY but device is already registered: " + data.toHex(':'));
+            return;
+        }
         response_WAY_recived(data);
+    }
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_PONG)
         response_PONG_recived();
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
