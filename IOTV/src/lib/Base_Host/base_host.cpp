@@ -1,6 +1,7 @@
 #include "base_host.h"
 
-Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent), _id(id), _description("None description")
+Base_Host::Base_Host(uint8_t id, QObject *parent) :
+    QObject(parent), _id(id), _description("None description")
 {
 
 }

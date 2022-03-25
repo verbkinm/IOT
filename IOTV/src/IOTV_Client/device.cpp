@@ -26,9 +26,14 @@ QString Device::getName() const
     return _name;
 }
 
-bool Device::getState() const
+bool Device::isOnline() const
 {
     return _state;
+}
+
+bool Device::isRegistered() const
+{
+    return false;
 }
 
 qint64 Device::readData(uint8_t channelNumber)
@@ -60,7 +65,7 @@ void Device::dataResived(QByteArray data)
     notify();
 }
 
-void Device::setState(bool state)
+void Device::setOnline(bool state)
 {
     _state = state;
 }

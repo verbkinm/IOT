@@ -16,13 +16,15 @@ public:
     ~Device();
 
     virtual QString getName() const override;
-    virtual bool getState() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
     virtual void dataResived(QByteArray data) override;
 
-    virtual void setState(bool state) override;
+    virtual void setOnline(bool state) override;
+    virtual bool isOnline() const override;
+
+    virtual bool isRegistered() const override;
 
     int getAutoReadInterval() const;
     void setAutoReadInterval(int value);

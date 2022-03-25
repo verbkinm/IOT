@@ -32,8 +32,9 @@ public:
 
     Base_conn_type::Conn_type getConnectionType() const;
 
-    virtual void setState(bool state) override;
-    virtual bool getState() const override;
+    virtual void setOnline(bool state) override;
+    virtual bool isOnline() const override;
+    virtual bool isRegistered() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
@@ -58,7 +59,7 @@ private:
     enum Flag
     {
         DeviceRegistered = 0x01,
-//        ExpectedWay = 0x02
+        DeviceOnline = 0x02
     };
 
 public:

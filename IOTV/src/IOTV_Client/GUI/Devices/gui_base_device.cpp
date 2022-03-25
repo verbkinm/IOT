@@ -74,9 +74,9 @@ void GUI_Base_Device::setViewNameFont()
 
 void GUI_Base_Device::stateAndViewName()
 {
-    if(_device.getState() && !isEnabled())
+    if(_device.isOnline() && !isEnabled())
         setEnabled(true);
-    else if(!_device.getState() && isEnabled())
+    else if(!_device.isOnline() && isEnabled())
     {
         setEnabled(false);
     }
@@ -93,7 +93,7 @@ void GUI_Base_Device::newObjectName()
 void GUI_Base_Device::slotInfoPresses()
 {
     QString state;
-    if(_device.getState())
+    if(_device.isOnline())
         state = "Connected.";
     else
         state = "Not connect.";

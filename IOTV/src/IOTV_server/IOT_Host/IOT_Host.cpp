@@ -52,19 +52,25 @@ Base_conn_type::Conn_type IOT_Host::getConnectionType() const
     return _conn_type->getConnectionType();
 }
 
-void IOT_Host::setState(bool state)
+void IOT_Host::setOnline(bool state)
 {
-    _state_flags.setFlag(DeviceRegistered, state);
+//    _state_flags.setFlag(DeviceRegistered, state);
+    _state_flags.setFlag(DeviceOnline, state);
 }
 
-bool IOT_Host::getState() const
+bool IOT_Host::isOnline() const
+{
+    return _state_flags.testFlag(Flag::DeviceOnline);
+}
+
+bool IOT_Host::isRegistered() const
 {
     return _state_flags.testFlag(Flag::DeviceRegistered);
 }
 
 qint64 IOT_Host::readData(uint8_t channelNumber)
 {
-    if(!_state_flags.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
+    if(!isOnline() || !_state_flags.testFlag(Flag::DeviceRegistered))
         return -1;
 
     QByteArray data = IOTV_SH::query_READ(channelNumber);
@@ -73,7 +79,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
-    if(!_state_flags.testFlag(Flag::DeviceRegistered))// || _state.testFlag(Flag::ExpectedWay))
+    if(!isOnline() || !_state_flags.testFlag(Flag::DeviceRegistered))
         return -1;
 
     QByteArray data = IOTV_SH::query_WRITE(*this, channelNumber, rawData);
@@ -168,7 +174,9 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
     IOTV_SH::response_WAY(*this, data);
 
-    setState(true);
+    setOnline(true);
+    _state_flags.setFlag(Flag::DeviceRegistered);
+
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
 }
@@ -231,7 +239,7 @@ void IOT_Host::slotConnected()
 
 void IOT_Host::slotDisconnected()
 {
-    setState(false);
+    setOnline(false);
     _timerPing.stop();
     _reReadTimer.stop();
     _timerReconnect.stop();

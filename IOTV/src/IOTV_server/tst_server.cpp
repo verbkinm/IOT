@@ -37,6 +37,7 @@ server::server() : _host("test_host", nullptr)
     _host.addWriteSubChannel(Raw::DATA_TYPE::BOOL_8);
 
     _host.setConnectionTypeTCP("192.168.0.104", 8888);
+//    _host.setConnectionTypeFile("/home/user/.config/VMS/IOTV_Hosts.ini");
     _host.connectToHost();
 }
 
@@ -88,8 +89,9 @@ void server::test_protocol_IOTV_SH_query()
         for(int i = 0; i < 11; i++)
             dataComp.push_back(masComp[i]);
 
-        QCOMPARE(dataComp, IOTV_SH::query_WRITE(_host, 1, raw));
+        QVERIFY(dataComp != IOTV_SH::query_WRITE(_host, 1, raw)); // если хост не онлайн -
 
+        raw.ui64 = 0;
         raw.str = new char[11];
         char testStringRaw[] = "test server";
         for (uint8_t i = 0; i < 11; ++i)
@@ -101,7 +103,10 @@ void server::test_protocol_IOTV_SH_query()
         dataComp.push_back(0x0b);
         dataComp.push_back(testStringRaw);
 
-        QCOMPARE(dataComp, IOTV_SH::query_WRITE(_host, 2, raw));
+        QVERIFY(dataComp != IOTV_SH::query_WRITE(_host, 2, raw)); // если хост не онлайн - false
+
+        IOT_Host host("tmp");
+        QVERIFY(dataComp != IOTV_SH::query_WRITE(host, 2, raw)); // если хост не онлайн - false
 
         delete[] raw.str;
         raw.str = nullptr;
@@ -109,7 +114,7 @@ void server::test_protocol_IOTV_SH_query()
 
     //Тест запроса PING
     {
-        QCOMPARE(QUERY_PING_BYTE, IOTV_SH::query_PING()[0]);
+        QCOMPARE(QUERY_PING_BYTE, IOTV_SH::query_PING().at(0));
     }
 }
 
@@ -120,6 +125,12 @@ void server::test_protocol_IOTV_SH_response()
     std::string description = "test description";
 
     data.push_back(0x05); //way
+
+    //Тест не правильного ответа WAY
+    {
+        IOTV_SH::response_WAY(_host, data);
+        QCOMPARE(1, _host.getId());
+    }
     data.push_back(0x01); // id
     data.push_back(char(0x00)); // msb size description
     data.push_back(description.size()); //lsb size description

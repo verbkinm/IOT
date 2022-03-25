@@ -21,8 +21,12 @@ QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
 }
 
 QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, const Raw::RAW &rawData)
-{
+{        
     QByteArray data;
+
+    // если устройство не зарегистрировано, id == 0, то и не может быть произведена в него запись.
+    if(!host.isRegistered())
+        return data;
 
     char channel = channelNumber << 4;
     data.append(channel | QUERY_WRITE_BYTE);
@@ -56,6 +60,7 @@ QByteArray IOTV_SH::query_PING()
 
 void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
 {
+    //!!! проверка длины data
     if(checkResponsetData(data) != Response_Type::RESPONSE_WAY)
         return;
 
@@ -139,7 +144,26 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
     uint8_t firstByte = data.at(0);
 
     if(firstByte == RESPONSE_WAY_BYTE)
+    {
+        if(data.size() > 6)
+        {
+            quint16 descriptionLength = 0;
+            descriptionLength = data.at(2);
+            descriptionLength <<= 8;
+            descriptionLength |= data.at(3);
+
+            uint8_t channelReadLength = data.at(4) >> 4;
+            uint8_t channelWriteLength = data.at(4) & 0x0F;
+
+            quint16 expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
+            if(data.size() < expectedLength)
+                return Response_Type::ERROR;
+        }
+        else
+            return Response_Type::ERROR;
+
         return Response_Type::RESPONSE_WAY;
+    }
     else if(firstByte == RESPONSE_PONG_BYTE)
         return Response_Type::RESPONSE_PONG;
 

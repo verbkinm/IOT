@@ -97,7 +97,7 @@ QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
 void IOTV_SC::serverResponse_STATE(Base_Host &host, const QByteArray &data)
 {
     bool state = data.at(1) & DEVICE_STATE_RESPONSE_BIT;
-    host.setState(state);
+    host.setOnline(state);
 }
 
 void IOTV_SC::serverResponse_READ(Base_Host &host, const QByteArray &data)
@@ -169,7 +169,7 @@ void IOTV_SC::responceToClient_State(const Base_Host &host, QByteArray &data)
     data.clear();
 
     uint8_t state;
-    if(host.getState())
+    if(host.isOnline())
         state = 1;
     else
         state = 0;

@@ -84,7 +84,7 @@ uint Server::getDeviceOnline() const
     int count = 0;
     for (auto &elem : _devices)
     {
-        if(elem.second->getState())
+        if(elem.second->isOnline())
             count++;
     }
 
