@@ -9,13 +9,14 @@ class Base_conn_type : public QObject
     Q_OBJECT
 public:
     Base_conn_type(const QString& name, QObject* parent = nullptr);
-    virtual ~Base_conn_type();
+    virtual ~Base_conn_type() = default;
 
     enum class Conn_type
     {
         NONE,
         COM,
         TCP,
+        UDP,
         FILE
     };
 
