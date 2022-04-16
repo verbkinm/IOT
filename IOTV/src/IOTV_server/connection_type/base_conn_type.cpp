@@ -6,11 +6,6 @@ Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(p
 
 }
 
-Base_conn_type::~Base_conn_type()
-{
-
-}
-
 Base_conn_type::Conn_type Base_conn_type::getConnectionType() const
 {
     return _type;

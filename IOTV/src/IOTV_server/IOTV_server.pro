@@ -16,7 +16,8 @@ SOURCES += \
         connection_type/tcp_conn_type.cpp \
         main.cpp \
         IOT_Host/IOT_Host.cpp \
-#        tst_server.cpp \
+    connection_type/udp_conn_type.cpp \
+        tst_server.cpp \
         wrapper.cpp
 
 # Default rules for deployment.
@@ -31,6 +32,7 @@ HEADERS += \
     IOT_Server/iot_server.h \
     connection_type/file_conn_type.h \
     connection_type/tcp_conn_type.h \
+    connection_type/udp_conn_type.h \
     wrapper.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
