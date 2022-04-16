@@ -15,7 +15,7 @@ public:
     static const unsigned int TIMER_RECONNECT = 15000;
 
     IOT_Host(const QString &name, QObject* parent = nullptr);
-    ~IOT_Host() = default;
+    ~IOT_Host();
 
     void printDebugData() const;
 

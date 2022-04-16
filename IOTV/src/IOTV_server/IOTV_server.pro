@@ -17,7 +17,7 @@ SOURCES += \
         main.cpp \
         IOT_Host/IOT_Host.cpp \
     connection_type/udp_conn_type.cpp \
-        tst_server.cpp \
+        #tst_server.cpp \
         wrapper.cpp
 
 # Default rules for deployment.

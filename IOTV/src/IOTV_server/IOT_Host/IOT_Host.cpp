@@ -10,6 +10,21 @@ IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
     connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
 }
 
+IOT_Host::~IOT_Host()
+{
+    _timerPing.stop();
+    _timerReconnect.stop();
+    _reReadTimer.stop();
+
+    disconnect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
+    disconnect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
+    disconnect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
+
+    disconnect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
+    disconnect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
+    disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+}
+
 void IOT_Host::printDebugData() const
 {
     qDebug() << "\n" << "PRINT DEBUG";
@@ -247,8 +262,9 @@ void IOT_Host::slotDisconnected()
 //    setRegistered(false);
 
     _timerPing.stop();
-    _reReadTimer.stop();
     _timerReconnect.stop();
+    _reReadTimer.stop();
+
 
     emit signalHostDisconnected(); ///!!! никуда не идут
 }

@@ -9,5 +9,16 @@ Udp_conn_type::Udp_conn_type(const QString &name, const QString &address, quint1
 
 qint64 Udp_conn_type::write(const QByteArray &data)
 {
+    Q_UNUSED(data);
+    return -1;
+}
+
+void Udp_conn_type::connectToHost()
+{
+
+}
+
+void Udp_conn_type::disconnectFromHost()
+{
 
 }

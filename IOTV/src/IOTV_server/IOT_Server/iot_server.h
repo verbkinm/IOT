@@ -9,6 +9,7 @@
 #include <vector>
 #include <list>
 #include <memory>
+#include <fstream>
 
 #include "protocols.h"
 #include "IOT_Host/IOT_Host.h"
@@ -29,17 +30,21 @@ private:
     void startTCPServer();
 
     void writeToSocket(QTcpSocket* socket, const QByteArray &data);
+    void clinetOnlineFile() const;
 
     std::vector<std::unique_ptr<IOT_Host>> _iot_hosts;
     std::list<QTcpSocket*> _clientList;
+
     QSettings _settingsServer, _settingsHosts;
+
     const QString _programVersion;
     QString _address;
     quint16 _port;
     QString _logFile;
+
     QTimer _reconnectTimer;
 
-signals:
+    QByteArray _server_buffer_data;
 
 private slots:
     void slotNewConnection();
