@@ -25,7 +25,7 @@ QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, co
     QByteArray data;
 
     // если устройство не зарегистрировано, id == 0, то и не может быть произведена в него запись.
-    if(!host.isRegistered())
+    if(!host.isOnline())
         return data;
 
     char channel = channelNumber << 4;
@@ -219,5 +219,5 @@ std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
     else if(dataSize > 256)
         return {false, 0};
 
-    return {true, 0};
+    return {false, 0};
 }

@@ -54,7 +54,6 @@ Base_conn_type::Conn_type IOT_Host::getConnectionType() const
 
 void IOT_Host::setOnline(bool state)
 {
-//    _state_flags.setFlag(DeviceRegistered, state);
     _state_flags.setFlag(DeviceOnline, state);
 }
 
@@ -63,14 +62,19 @@ bool IOT_Host::isOnline() const
     return _state_flags.testFlag(Flag::DeviceOnline);
 }
 
-bool IOT_Host::isRegistered() const
-{
-    return _state_flags.testFlag(Flag::DeviceRegistered);
-}
+//void IOT_Host::setRegistered(bool state)
+//{
+//    _state_flags.setFlag(DeviceRegistered, state);
+//}
+
+//bool IOT_Host::isRegistered() const
+//{
+//    return _state_flags.testFlag(Flag::DeviceRegistered);
+//}
 
 qint64 IOT_Host::readData(uint8_t channelNumber)
 {
-    if(!isOnline() || !_state_flags.testFlag(Flag::DeviceRegistered))
+    if(!isOnline())// || !isRegistered())
         return -1;
 
     QByteArray data = IOTV_SH::query_READ(channelNumber);
@@ -79,7 +83,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
-    if(!isOnline() || !_state_flags.testFlag(Flag::DeviceRegistered))
+    if(!isOnline())// || !isRegistered())
         return -1;
 
     QByteArray data = IOTV_SH::query_WRITE(*this, channelNumber, rawData);
@@ -95,7 +99,7 @@ void IOT_Host::dataResived(QByteArray data)
 {
     IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
 
-    if(!_state_flags.testFlag(Flag::DeviceRegistered) && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
+    if(!isOnline() && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
     {
         Log::write(_conn_type->getName() + " WARRNING: received data but device is not registered: " + data.toHex(':'));
         return;
@@ -103,7 +107,7 @@ void IOT_Host::dataResived(QByteArray data)
 
     if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
     {
-        if(_state_flags.testFlag(Flag::DeviceRegistered))
+        if(isOnline())
         {
             Log::write(_conn_type->getName() + " WARRNING: received responce WAY but device is already registered: " + data.toHex(':'));
             return;
@@ -175,7 +179,7 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
     IOTV_SH::response_WAY(*this, data);
 
     setOnline(true);
-    _state_flags.setFlag(Flag::DeviceRegistered);
+//    setRegistered(true);
 
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
@@ -240,6 +244,8 @@ void IOT_Host::slotConnected()
 void IOT_Host::slotDisconnected()
 {
     setOnline(false);
+//    setRegistered(false);
+
     _timerPing.stop();
     _reReadTimer.stop();
     _timerReconnect.stop();

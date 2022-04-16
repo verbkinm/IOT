@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "../connection_type/tcp_conn_type.h"
-#include "../connection_type/com_conn_type.h"
-#include "../connection_type/file_conn_type.h"
+#include "connection_type/tcp_conn_type.h"
+#include "connection_type/com_conn_type.h"
+#include "connection_type/file_conn_type.h"
 
 class IOT_Host : public Base_Host
 {
@@ -19,6 +19,7 @@ public:
 
     void printDebugData() const;
 
+//!!!
 //    void setConnectionType();
     void setConnectionTypeTCP(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
@@ -34,7 +35,8 @@ public:
 
     virtual void setOnline(bool state) override;
     virtual bool isOnline() const override;
-    virtual bool isRegistered() const override;
+//    virtual void setRegistered(bool state) override;
+//    virtual bool isRegistered() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;

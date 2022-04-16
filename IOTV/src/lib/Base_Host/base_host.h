@@ -36,7 +36,8 @@ public:
     virtual bool isOnline() const = 0;
     virtual void setOnline(bool state) = 0;
 
-    virtual bool isRegistered() const = 0;
+//    virtual bool isRegistered() const = 0;
+//    virtual void setRegistered(bool state) = 0;
 
     virtual qint64 readData(uint8_t channelNumber) = 0;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) = 0;

@@ -77,7 +77,7 @@ void Base_conn_type::slotReadData()
 
         if(!accumPacketResponse.first)
         {
-            _host_buffer_data.clear();
+//            _host_buffer_data.clear(); //!!!
             return;
         }
         else if(accumPacketResponse.first && accumPacketResponse.second)

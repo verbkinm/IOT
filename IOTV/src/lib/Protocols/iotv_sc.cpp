@@ -472,5 +472,5 @@ std::pair<bool, int> IOTV_SC::accumQueryPacket(const QByteArray &data)
     else if(dataSize > 256)
         return {false, 0};
 
-    return {true, 0};
+    return {false, 0};
 }

@@ -143,7 +143,10 @@ void IOT_Server::slotNewConnection()
 {
     QTcpSocket* socket = this->nextPendingConnection();
     if(!socket)
+    {
+        Log::write("!!! nextPendingConnection: ", Log::Flags::WRITE_TO_FILE_AND_STDOUT, "New_connection.log"); //debug
         return;
+    }
 
     _clientList.push_back(socket);
 
@@ -259,7 +262,9 @@ void IOT_Server::slotDataRecived()
                         //!!!
                         QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
                         findDevice->get()->writeToServer(dataSend);
-                        delete[] raw.str;
+
+                        if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+                            delete[] raw.str;
 
                         IOTV_SC::responceToClient_Write(packetData);
                         writeToSocket(socket, packetData);

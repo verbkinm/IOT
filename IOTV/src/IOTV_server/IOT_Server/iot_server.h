@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "protocols.h"
-#include "../IOT_Host/IOT_Host.h"
+#include "IOT_Host/IOT_Host.h"
 
 class IOT_Server : public QTcpServer
 {

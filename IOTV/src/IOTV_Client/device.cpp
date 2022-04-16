@@ -31,10 +31,15 @@ bool Device::isOnline() const
     return _state;
 }
 
-bool Device::isRegistered() const
-{
-    return false;
-}
+//void Device::setRegistered(bool state)
+//{
+//    Q_UNUSED(state);
+//}
+
+//bool Device::isRegistered() const
+//{
+//    return false;
+//}
 
 qint64 Device::readData(uint8_t channelNumber)
 {

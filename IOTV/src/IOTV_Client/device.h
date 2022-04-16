@@ -24,7 +24,8 @@ public:
     virtual void setOnline(bool state) override;
     virtual bool isOnline() const override;
 
-    virtual bool isRegistered() const override;
+//    virtual void setRegistered(bool state) override;
+//    virtual bool isRegistered() const override;
 
     int getAutoReadInterval() const;
     void setAutoReadInterval(int value);
