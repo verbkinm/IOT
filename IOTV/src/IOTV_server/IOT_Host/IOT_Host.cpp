@@ -77,19 +77,9 @@ bool IOT_Host::isOnline() const
     return _state_flags.testFlag(Flag::DeviceOnline);
 }
 
-//void IOT_Host::setRegistered(bool state)
-//{
-//    _state_flags.setFlag(DeviceRegistered, state);
-//}
-
-//bool IOT_Host::isRegistered() const
-//{
-//    return _state_flags.testFlag(Flag::DeviceRegistered);
-//}
-
 qint64 IOT_Host::readData(uint8_t channelNumber)
 {
-    if(!isOnline())// || !isRegistered())
+    if(!isOnline())
         return -1;
 
     QByteArray data = IOTV_SH::query_READ(channelNumber);
@@ -98,7 +88,7 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
 
 qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
 {
-    if(!isOnline())// || !isRegistered())
+    if(!isOnline())
         return -1;
 
     QByteArray data = IOTV_SH::query_WRITE(*this, channelNumber, rawData);
@@ -114,21 +104,8 @@ void IOT_Host::dataResived(QByteArray data)
 {
     IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
 
-    if(!isOnline() && dataType != IOTV_SH::Response_Type::RESPONSE_WAY)
-    {
-        Log::write(_conn_type->getName() + " WARRNING: received data but device is not registered: " + data.toHex(':'));
-        return;
-    }
-
     if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
-    {
-        if(isOnline())
-        {
-            Log::write(_conn_type->getName() + " WARRNING: received responce WAY but device is already registered: " + data.toHex(':'));
-            return;
-        }
         response_WAY_recived(data);
-    }
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_PONG)
         response_PONG_recived();
     else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
@@ -138,7 +115,7 @@ void IOT_Host::dataResived(QByteArray data)
     else
     {
         Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
-        _conn_type->disconnectFromHost();
+        //        _conn_type->disconnectFromHost();
     }
 }
 
@@ -172,7 +149,6 @@ void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::Se
 void IOT_Host::setConnectionTypeFile(const QString &addr)
 {
     _conn_type = std::make_unique<File_conn_type>(_conn_type.get()->getName(), addr);
-
     connectObjects();
 }
 
@@ -193,9 +169,6 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
 {
     IOTV_SH::response_WAY(*this, data);
 
-    setOnline(true);
-//    setRegistered(true);
-
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
 }
@@ -203,23 +176,24 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
 void IOT_Host::response_READ_recived(const QByteArray &data)
 {
     IOTV_SH::response_READ(*this, data);
-    if(!_logFile.isEmpty())
-    {
-        uint8_t channelNumber = IOTV_SH::channelNumber(data[0]);
-        Raw::DATA_TYPE dt = getReadChannelDataType(channelNumber);
-        Raw::RAW raw = getReadChannelData(channelNumber);
 
-        if(dt == Raw::DATA_TYPE::CHAR_PTR)
-        {
-            Log::write("R:"+ QString::number(channelNumber) + "=" +
-                       raw.str,
-                       Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
-        }
-        else
-            Log::write("R:"+ QString::number(channelNumber) + "=" +
-                       Raw::toString(dt, raw).c_str(),
-                       Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+    if(_logFile.isEmpty())
+        return;
+
+    uint8_t channelNumber = IOTV_SH::channelNumber(data[0]);
+    Raw::DATA_TYPE dt = getReadChannelDataType(channelNumber);
+    Raw::RAW raw = getReadChannelData(channelNumber);
+
+    if(dt == Raw::DATA_TYPE::CHAR_PTR)
+    {
+        Log::write("R:"+ QString::number(channelNumber) + "=" +
+                   raw.str,
+                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
     }
+    else
+        Log::write("R:"+ QString::number(channelNumber) + "=" +
+                   Raw::toString(dt, raw).c_str(),
+                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
 }
 
 void IOT_Host::response_WRITE_recived(const QByteArray &data)
@@ -250,6 +224,7 @@ QString IOT_Host::getLogFile() const
 
 void IOT_Host::slotConnected()
 {
+    setOnline(true);
     _conn_type->write(IOTV_SH::query_WAY());
 
     _timerReconnect.start(TIMER_RECONNECT);
@@ -259,7 +234,6 @@ void IOT_Host::slotConnected()
 void IOT_Host::slotDisconnected()
 {
     setOnline(false);
-//    setRegistered(false);
 
     _timerPing.stop();
     _timerReconnect.stop();

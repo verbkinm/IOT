@@ -9,8 +9,9 @@
 class IOT_Host : public Base_Host
 {
     Q_OBJECT
+
 public:
-    static const unsigned int TIMER_WAY = 5000;
+//    static const unsigned int TIMER_WAY = 5000;
     static const unsigned int TIMER_PING = 10000;
     static const unsigned int TIMER_RECONNECT = 15000;
 
@@ -35,8 +36,6 @@ public:
 
     virtual void setOnline(bool state) override;
     virtual bool isOnline() const override;
-//    virtual void setRegistered(bool state) override;
-//    virtual bool isRegistered() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
     virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
