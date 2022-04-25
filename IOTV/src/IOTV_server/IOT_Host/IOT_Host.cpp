@@ -152,7 +152,6 @@ void IOT_Host::setConnectionTypeFile(const QString &addr)
     connectObjects();
 }
 
-
 void IOT_Host::connectToHost()
 {
     _conn_type->connectToHost();
@@ -261,4 +260,3 @@ void IOT_Host::slotReconnectTimeOut()
     _conn_type->disconnectFromHost();
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
 }
-

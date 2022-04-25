@@ -11,17 +11,13 @@ class IOT_Host : public Base_Host
     Q_OBJECT
 
 public:
-//    static const unsigned int TIMER_WAY = 5000;
-    static const unsigned int TIMER_PING = 10000;
-    static const unsigned int TIMER_RECONNECT = 15000;
-
     IOT_Host(const QString &name, QObject* parent = nullptr);
     ~IOT_Host();
 
     void printDebugData() const;
 
-//!!!
-//    void setConnectionType();
+    //!!!
+    //    void setConnectionType();
     void setConnectionTypeTCP(const QString &addr, quint16 port);
     void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
     void setConnectionTypeFile(const QString &addr);
@@ -51,6 +47,10 @@ private:
     void response_READ_recived(const QByteArray &data);
     void response_WRITE_recived(const QByteArray &data);
     void response_PONG_recived();
+
+    //    static const unsigned int TIMER_WAY = 5000;
+    static const unsigned int TIMER_PING = 10000;
+    static const unsigned int TIMER_RECONNECT = 15000;
 
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
