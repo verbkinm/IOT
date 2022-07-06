@@ -187,12 +187,12 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
     {
         Log::write("R:"+ QString::number(channelNumber) + "=" +
                    raw.str,
-                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+                   Log::Write_Flag::FILE, _logFile);
     }
     else
         Log::write("R:"+ QString::number(channelNumber) + "=" +
                    Raw::toString(dt, raw).c_str(),
-                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+                   Log::Write_Flag::FILE, _logFile);
 }
 
 void IOT_Host::response_WRITE_recived(const QByteArray &data)

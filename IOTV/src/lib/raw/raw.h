@@ -58,5 +58,5 @@ public:
 
     friend bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs);
 
-    static const uint8_t size = sizeof (RAW); //!!!
+    static const uint8_t size = sizeof(RAW);
 };

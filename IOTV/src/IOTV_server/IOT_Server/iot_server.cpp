@@ -14,7 +14,7 @@ IOT_Server::IOT_Server(QObject *parent) : QTcpServer(parent),
 
 IOT_Server::~IOT_Server()
 {
-    Log::write("Stop TCP server.", Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, _logFile);
     while (isListening())
     {
         close();
@@ -68,9 +68,13 @@ void IOT_Server::readSettings()
         {
             _iot_hosts.back()->setConnectionTypeFile(address);
         }
+        else if(connection_type == "UDP")
+        {
+            _iot_hosts.back()->setConnectionTypeFile(address);
+        }
         else
         {
-            Log::write("Error: settings file syntax error, [" + group + "]", Log::Flags::WRITE_TO_FILE_AND_STDERR);
+            Log::write("Error: settings file syntax error, [" + group + "]", Log::Write_Flag::FILE_STDERR);
             exit(1);
         }
 
@@ -91,14 +95,14 @@ void IOT_Server::startTCPServer()
     if(!listen(QHostAddress(_address), _port))
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDERR, _logFile);
+        Log::write(str, Log::Write_Flag::FILE_STDERR, _logFile);
         _reconnectTimer.start(Base_conn_type::DEFAULT_INTERVAL);
     }
     else
     {
         _reconnectTimer.stop();
         QString str = "Start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, _logFile);
     }
 }
 
@@ -107,7 +111,7 @@ void IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
     socket->write(data);
     Log::write("Send to client " + socket->peerAddress().toString() + ":"
                + QString::number(socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
 }
 
 void IOT_Server::clinetOnlineFile() const
@@ -115,7 +119,7 @@ void IOT_Server::clinetOnlineFile() const
     std::ofstream file("client_online.log", std::ios::trunc);
     if(!file.is_open())
     {
-        Log::write("Can't open client_online.log", Log::Flags::WRITE_TO_STDERR_ONLY);
+        Log::write("Can't open client_online.log", Log::Write_Flag::STDERR);
         return;
     }
 
@@ -163,14 +167,14 @@ void IOT_Server::slotNewConnection()
     QTcpSocket* socket = this->nextPendingConnection();
     if(!socket)
     {
-        Log::write("!!! nextPendingConnection: ", Log::Flags::WRITE_TO_FILE_AND_STDOUT, "New_connection.log"); //debug
+        Log::write("!!! nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log"); //debug
         return;
     }
 
     _clientList.push_back(socket);
 
     Log::write("Client new connection: " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort()),
-               Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+               Log::Write_Flag::FILE_STDOUT, _logFile);
 
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
@@ -199,7 +203,7 @@ void IOT_Server::slotDataRecived()
             QByteArray packetData = _server_buffer_data.mid(0, accumQueryPacket.second);
             Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
                        + QString::number(socket->peerPort())
-                       + " <- " + packetData.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                       + " <- " + packetData.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
 
             QByteArray buff;
             IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
@@ -229,7 +233,7 @@ void IOT_Server::slotDataRecived()
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
             else if(dataType == IOTV_SC::Query_Type::QUERY_READ)
@@ -244,7 +248,7 @@ void IOT_Server::slotDataRecived()
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
             else if(dataType == IOTV_SC::Query_Type::QUERY_WRITE)
@@ -290,7 +294,7 @@ void IOT_Server::slotDataRecived()
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
             _server_buffer_data = _server_buffer_data.mid(accumQueryPacket.second);
@@ -310,7 +314,7 @@ void IOT_Server::slotDisconnected()
 
     QString strOut = "Client disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
-    Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
     socket->deleteLater();
 
     clinetOnlineFile();
@@ -374,7 +378,7 @@ void IOT_Server::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(this->objectName() + ": " + strErr, Log::Flags::WRITE_TO_FILE_AND_STDERR, _logFile);
+    Log::write(this->objectName() + ": " + strErr, Log::Write_Flag::FILE_STDERR, _logFile);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();

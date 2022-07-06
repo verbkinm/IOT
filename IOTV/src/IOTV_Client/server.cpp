@@ -266,7 +266,7 @@ void Server::slotReadData()
                     if(_devices.find(deviceName) != _devices.end())
                         _devices.at(deviceName)->dataResived(packetData);
                     else
-                        Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDERR);
+                        Log::write(_name + ": " + "Recived data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDERR);
                 }
             }
             data = data.mid(accumPacketResponse.second);

@@ -4,9 +4,6 @@ Raw::DATA_TYPE Raw::toDataType(uint8_t type)
 {
     switch(type)
     {
-    case 0:
-        return DATA_TYPE::RAW;
-        break;
     case 1:
         return DATA_TYPE::INTEGER_8;
         break;
