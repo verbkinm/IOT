@@ -48,12 +48,12 @@ void IOT_Server::readSettings()
 
         _iot_hosts.emplace_back(std::make_unique<IOT_Host>(group));
 
-        if(connection_type == "TCP")
+        if (connection_type == "TCP")
         {
             quint16 port = _settingsHosts.value("port", 2021).toUInt();
             _iot_hosts.back()->setConnectionTypeTCP(address, port);
         }
-        else if(connection_type == "COM")
+        else if (connection_type == "COM")
         {
             COM_conn_type::SetingsPort settingsPort;
             settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
@@ -64,11 +64,11 @@ void IOT_Server::readSettings()
 
             _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
         }
-        else if(connection_type == "FILE")
+        else if (connection_type == "FILE")
         {
             _iot_hosts.back()->setConnectionTypeFile(address);
         }
-        else if(connection_type == "UDP")
+        else if (connection_type == "UDP")
         {
             _iot_hosts.back()->setConnectionTypeFile(address);
         }
@@ -92,7 +92,7 @@ void IOT_Server::startTCPServer()
 {
     connect(this, &QTcpServer::newConnection, this, &IOT_Server::slotNewConnection);
 
-    if(!listen(QHostAddress(_address), _port))
+    if (!listen(QHostAddress(_address), _port))
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
         Log::write(str, Log::Write_Flag::FILE_STDERR, _logFile);
@@ -117,7 +117,7 @@ void IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
 void IOT_Server::clinetOnlineFile() const
 {
     std::ofstream file("client_online.log", std::ios::trunc);
-    if(!file.is_open())
+    if (!file.is_open())
     {
         Log::write("Can't open client_online.log", Log::Write_Flag::STDERR);
         return;
@@ -140,7 +140,7 @@ QString IOT_Server::getProgramVersion() const
 
 void IOT_Server::checkSettingsFileExist()
 {
-    if(!QFileInfo::exists(_settingsServer.fileName()))
+    if (!QFileInfo::exists(_settingsServer.fileName()))
     {
         _settingsServer.beginGroup("Server");
         _settingsServer.setValue("address", "127.0.0.1");
@@ -149,7 +149,7 @@ void IOT_Server::checkSettingsFileExist()
         _settingsServer.endGroup();
         _settingsServer.sync();
     }
-    if(!QFileInfo::exists(_settingsHosts.fileName()))
+    if (!QFileInfo::exists(_settingsHosts.fileName()))
     {
         _settingsHosts.beginGroup("Default");
         _settingsHosts.setValue("connection_type", "TCP");
@@ -165,7 +165,7 @@ void IOT_Server::checkSettingsFileExist()
 void IOT_Server::slotNewConnection()
 {
     QTcpSocket* socket = this->nextPendingConnection();
-    if(!socket)
+    if (!socket)
     {
         Log::write("!!! nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log"); //debug
         return;
@@ -186,19 +186,21 @@ void IOT_Server::slotNewConnection()
 void IOT_Server::slotDataRecived()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+    if (socket == nullptr)
+        return;
 
     _server_buffer_data += socket->readAll();
 
     while(_server_buffer_data.size())
     {
-        std::pair<bool, int> accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
+        auto accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
 
-        if(!accumQueryPacket.first)
+        if (!accumQueryPacket.first)
         {
             _server_buffer_data.clear();
             return;
         }
-        if(accumQueryPacket.first && accumQueryPacket.second)
+        if (accumQueryPacket.first && accumQueryPacket.second)
         {
             QByteArray packetData = _server_buffer_data.mid(0, accumQueryPacket.second);
             Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
@@ -208,7 +210,7 @@ void IOT_Server::slotDataRecived()
             QByteArray buff;
             IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
 
-            if(dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
+            if (dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
             {
                 buff.append(RESPONSE_DEVICE_LIST_BYTE);
                 buff.append(_iot_hosts.size());
@@ -221,13 +223,13 @@ void IOT_Server::slotDataRecived()
                 }
                 writeToSocket(socket, buff);
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_STATE)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_STATE)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-                    if(findDevice != _iot_hosts.end())
+                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_State(*findDevice->get(), packetData);
                         writeToSocket(socket, packetData);
@@ -236,13 +238,13 @@ void IOT_Server::slotDataRecived()
                         Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_READ)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_READ)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-                    if(findDevice != _iot_hosts.end())
+                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_Read(*findDevice->get(), packetData);
                         writeToSocket(socket, packetData);
@@ -251,17 +253,17 @@ void IOT_Server::slotDataRecived()
                         Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_WRITE)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_WRITE)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [&deviceName](std::unique_ptr<IOT_Host> &host)
+                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&deviceName](std::unique_ptr<IOT_Host> &host)
                     {
                             return host.get()->getName() == deviceName;
                     });
 
-                    if(findDevice != _iot_hosts.end())
+                    if (findDevice != _iot_hosts.end())
                     {
                         uint8_t nameLength = packetData.at(0) >> 3;
                         uint8_t channelNumber = packetData.at(1) & 0x0F;
@@ -271,7 +273,7 @@ void IOT_Server::slotDataRecived()
                         QByteArray data = packetData.mid(4 + nameLength, dataLength);
                         Raw::RAW raw;
 
-                        if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
                             raw.str = new char[data.size()];
 
@@ -287,7 +289,7 @@ void IOT_Server::slotDataRecived()
                         QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
                         findDevice->get()->writeToServer(dataSend);
 
-                        if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                             delete[] raw.str;
 
                         IOTV_SC::responceToClient_Write(packetData);

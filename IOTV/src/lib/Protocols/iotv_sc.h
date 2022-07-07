@@ -1,5 +1,4 @@
-#ifndef IOTV_SC_H
-#define IOTV_SC_H
+#pragma once
 
 #include <QByteArrayList>
 
@@ -66,5 +65,3 @@ public:
     static std::pair<bool, int> accumResponcePacket(const QByteArray &data);
     static std::pair<bool, int> accumQueryPacket(const QByteArray &data);
 };
-
-#endif // IOTV_SC_H

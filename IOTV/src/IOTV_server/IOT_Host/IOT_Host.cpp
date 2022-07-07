@@ -25,6 +25,7 @@ IOT_Host::~IOT_Host()
     disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
 }
 
+//!!!
 void IOT_Host::printDebugData() const
 {
     qDebug() << "\n" << "PRINT DEBUG";
@@ -213,7 +214,8 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    _reReadTimer.setInterval(interval);
+    //!!!
+    _reReadTimer.setInterval(interval < 1000 ? 1000 : interval);
 }
 
 QString IOT_Host::getLogFile() const
@@ -250,8 +252,9 @@ void IOT_Host::slotReReadTimeOut()
 
 void IOT_Host::slotPingTimeOut()
 {
+    //!!!
     QByteArray data;
-    data.push_back(QUERY_PING_BYTE);
+    data.push_back(IOTV_SH::QUERY_PING_BYTE); // = IOTV_SH::QUERY_PING_BYTE, чтобы не включать хедер ради одного значения
     _conn_type->write(data);
 }
 

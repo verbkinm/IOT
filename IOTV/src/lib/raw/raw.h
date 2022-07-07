@@ -8,7 +8,7 @@
 class RAW_EXPORT Raw
 {
 public:
-    enum class DATA_TYPE
+    enum class DATA_TYPE : uint8_t
     {
         INTEGER_8,
         INTEGER_16,
@@ -58,5 +58,5 @@ public:
 
     friend bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs);
 
-    static const uint8_t size = sizeof(RAW);
+    static const uint8_t size;
 };

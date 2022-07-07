@@ -1,6 +1,6 @@
 #include "log.h"
 
-const QString Log::_format = "yyyy.MM.dd hh:mm:ss - ";
+const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss - ";
 
 void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
 {
@@ -22,7 +22,7 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     }
 
     QTextStream out(&file);
-    out << QDateTime::currentDateTime().toString(_format) << data << '\n';
+    out << QDateTime::currentDateTime().toString(_FORMAT) << data << '\n';
     out.flush();
 
     file.close();
@@ -30,10 +30,10 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 
 void Log::writeToStdOut(const QString &data)
 {
-    std::cout << QDateTime::currentDateTime().toString(_format).toStdString() << data.toStdString() << '\n';;
+    std::cout << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
 }
 
 void Log::writeToStdErr(const QString &data)
 {
-    std::cerr << QDateTime::currentDateTime().toString(_format).toStdString() << data.toStdString() << '\n';;
+    std::cerr << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
 }

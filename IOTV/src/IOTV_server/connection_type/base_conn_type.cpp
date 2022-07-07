@@ -60,7 +60,7 @@ void Base_conn_type::slotReadData()
 {
     _host_buffer_data += readAll();
 
-    if(_host_buffer_data.size() > static_cast<int>(BUFFER_MAX_SIZE))
+    if(_host_buffer_data.size() > BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
         return;
@@ -68,21 +68,18 @@ void Base_conn_type::slotReadData()
 
     while(_host_buffer_data.size())
     {
-        std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
+        auto accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
 
         if(!accumPacketResponse.first)
-        {
-//            _host_buffer_data.clear(); //!!!
             return;
-        }
-        else if(accumPacketResponse.first && accumPacketResponse.second)
+        else if(accumPacketResponse.second > 0)
         {
             QByteArray buffer = _host_buffer_data.mid(0, accumPacketResponse.second);
             QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
             Log::write(strOut);
 
-            emit signalDataRiceved(buffer);
             _host_buffer_data = _host_buffer_data.mid(accumPacketResponse.second);
+            emit signalDataRiceved(buffer);
         }
         else
             break;
