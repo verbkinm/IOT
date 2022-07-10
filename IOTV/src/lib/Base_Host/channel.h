@@ -1,5 +1,4 @@
-#ifndef CHANNEL_H
-#define CHANNEL_H
+#pragma once
 
 #include "raw.h"
 #include "log.h"
@@ -22,5 +21,3 @@ public:
 protected:
     std::vector<Raw::DATA_TYPE> _dataType;
 };
-
-#endif // CHANNEL_H

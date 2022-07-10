@@ -1,5 +1,4 @@
-#ifndef READ_CHANNEL_H
-#define READ_CHANNEL_H
+#pragma once
 
 #include "channel.h"
 
@@ -21,5 +20,3 @@ public:
 private:
     std::vector<Raw::RAW> _data;
 };
-
-#endif // READ_CHANNEL_H

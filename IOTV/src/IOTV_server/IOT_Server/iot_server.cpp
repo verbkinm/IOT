@@ -228,7 +228,7 @@ void IOT_Server::slotDataRecived()
                 QString deviceName;
                 if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
                     if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_State(*findDevice->get(), packetData);
@@ -243,7 +243,7 @@ void IOT_Server::slotDataRecived()
                 QString deviceName;
                 if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
                     if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_Read(*findDevice->get(), packetData);
@@ -258,7 +258,7 @@ void IOT_Server::slotDataRecived()
                 QString deviceName;
                 if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&deviceName](std::unique_ptr<IOT_Host> &host)
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [&deviceName](std::unique_ptr<IOT_Host> &host)
                     {
                             return host.get()->getName() == deviceName;
                     });
@@ -271,17 +271,19 @@ void IOT_Server::slotDataRecived()
                         quint16 dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 
                         QByteArray data = packetData.mid(4 + nameLength, dataLength);
-                        Raw::RAW raw;
+                        Raw::RAW raw{0};
 
                         if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
                             raw.str = new char[data.size()];
 
+                            //!!! memcpy
                             for (uint8_t i = 0; i < data.size(); ++i)
                                 raw.str[i] = data.at(i);
                         }
                         else
                         {
+                            //!!! memcpy
                             for (uint8_t i = 0; i < Raw::size; ++i)
                                 raw.array[i] = data.at(i);
                         }

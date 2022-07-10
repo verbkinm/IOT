@@ -2,19 +2,14 @@
 
 QByteArray IOTV_SH::query_WAY()
 {
-    QByteArray data;
-
-    data.clear();
-    data.append(QUERY_WAY_BYTE);
-
-    return data;
+    return {1, QUERY_WAY_BYTE};
 }
 
 QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
 {
     QByteArray data;
 
-    char channel = channelNumber << 4;
+    uint8_t channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
     return data;
@@ -102,7 +97,10 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
         Raw::RAW rawHost = iotHost.getReadChannelData(channelNumber);
         if(rawHost.str != nullptr)
         {
-            if (rawHost.str == buf.data())
+            std::string sHost {rawHost.str};
+            std::string sBuf {buf.data()};
+            if (*rawHost.str != *buf.data())
+//            if (sHost != sBuf)
             {
                 delete[] rawHost.str;
                 rawHost.str = nullptr;

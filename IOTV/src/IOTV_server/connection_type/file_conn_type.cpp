@@ -40,10 +40,11 @@ qint64 File_conn_type::write(const QByteArray &data)
             return 0;
         }
 
-        _file.reset();
-        QByteArray dataRead = _file.readAll();
+        //!!! При изменении файла не обновляется _file!
+        _file.close();
+        _file.open(QIODevice::ReadOnly);
 
-        //        buffer.clear();
+        QByteArray dataRead = _file.readAll();
 
         buffer.push_back(IOTV_SH::RESPONSE_READ_BYTE);
         buffer.push_back(dataRead.size() >> 8);

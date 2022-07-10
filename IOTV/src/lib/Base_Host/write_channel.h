@@ -1,5 +1,4 @@
-#ifndef WRITE_CHANNEL_H
-#define WRITE_CHANNEL_H
+#pragma once
 
 #include "channel.h"
 
@@ -12,4 +11,4 @@ public:
     virtual void removeAllSubchanel() override;
 };
 
-#endif // WRITE_CHANNEL_H
+

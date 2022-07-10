@@ -3,9 +3,7 @@
 bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
 {
     _dataType.push_back(dataType);
-    Raw::RAW rawData;
-    rawData.ui64 = 0;
-    _data.push_back(rawData);
+    _data.emplace_back(Raw::RAW{0});
 
     return true;
 }
@@ -13,13 +11,7 @@ bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
 Read_Channel::~Read_Channel()
 {
     for(size_t i = 0; i < _data.size(); i++)
-    {
-        if(_dataType.at(i) == Raw::DATA_TYPE::CHAR_PTR && _data.at(i).str != nullptr)
-            delete[] _data.at(i).str;
-
-//        _dataType.erase(_dataType.begin() + i);
-//        _data.erase(_data.begin() + i);
-    }
+        clearPointerRAW(i);
 }
 
 bool Read_Channel::removeSubchannel(uint8_t index)
@@ -77,10 +69,8 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
     catch (std::out_of_range &ex)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
-        Raw::RAW type;
-        type.ui64 = 0; // обнуление всего
-//        type.str = nullptr;
-        return type;
+        Raw::RAW data {0};
+        return data;
     }
 }
 

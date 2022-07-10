@@ -16,6 +16,8 @@ IOT_Host::~IOT_Host()
     _timerReconnect.stop();
     _reReadTimer.stop();
 
+    //!!!
+
     disconnect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
     disconnect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
     disconnect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);

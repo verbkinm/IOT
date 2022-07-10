@@ -3,10 +3,10 @@ TEMPLATE = subdirs
 SUBDIRS += \
 #    src/IOTV_Tests_Server \
 #    src/IOTV_Client_qml \
-    TEST_IOTV_server \
-    src/IOTV_Client \
+#    TEST_IOTV_server \
+#    src/IOTV_Client \
     src/lib \
-    src/IOTV_host \
+#    src/IOTV_host \
     src/IOTV_host_bme280 \
     src/IOTV_server
 
