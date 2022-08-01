@@ -40,51 +40,56 @@ void IOT_Server::readSettings()
     for (const auto &group : _settingsHosts.childGroups())
     {
         _settingsHosts.beginGroup(group);
+        IOT_Host_StructSettings structSettings;
 
-        QString connection_type = _settingsHosts.value("connection_type", "TCP").toString();
-        QString address = _settingsHosts.value("address", "127.0.0.1").toString();
-        uint interval = _settingsHosts.value("interval", 1000).toUInt();
-        QString logFile = _settingsHosts.value("log_file", "").toString();
+        structSettings.name = group;
+        structSettings.connection_type = _settingsHosts.value("connection_type", "TCP").toString();
+        structSettings.address = _settingsHosts.value("address", "127.0.0.1").toString();
+        structSettings.interval = _settingsHosts.value("interval", 1000).toUInt();
+        structSettings.logFile = _settingsHosts.value("log_file", "").toString();
 
-        _iot_hosts.emplace_back(std::make_unique<IOT_Host>(group));
+        _iot_hosts.emplace_back(std::make_unique<IOT_Host>(structSettings));
 
-        if (connection_type == "TCP")
-        {
-            quint16 port = _settingsHosts.value("port", 2021).toUInt();
-            _iot_hosts.back()->setConnectionTypeTCP(address, port);
-        }
-        else if (connection_type == "COM")
-        {
-            COM_conn_type::SetingsPort settingsPort;
-            settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
-            settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
-            settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
-            settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
-            settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
+        connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way, Qt::QueuedConnection);
 
-            _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
-        }
-        else if (connection_type == "FILE")
-        {
-            _iot_hosts.back()->setConnectionTypeFile(address);
-        }
-        else if (connection_type == "UDP")
-        {
-            _iot_hosts.back()->setConnectionTypeFile(address);
-        }
-        else
-        {
-            Log::write("Error: settings file syntax error, [" + group + "]", Log::Write_Flag::FILE_STDERR);
-            exit(1);
-        }
+        _iot_hosts.back()->runInNewThread();
 
-        _iot_hosts.back()->setInterval(interval);
-        _iot_hosts.back()->setLogFile(logFile);
+//        if (connection_type == "TCP")
+//        {
+//            quint16 port = _settingsHosts.value("port", 2021).toUInt();
+//            _iot_hosts.back()->setConnectionTypeTCP(address, port);
+//        }
+//        else if (connection_type == "COM")
+//        {
+//            COM_conn_type::SetingsPort settingsPort;
+//            settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
+//            settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
+//            settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
+//            settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
+//            settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
+
+//            _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
+//        }
+//        else if (connection_type == "FILE")
+//        {
+//            _iot_hosts.back()->setConnectionTypeFile(address);
+//        }
+//        else if (connection_type == "UDP")
+//        {
+//            _iot_hosts.back()->setConnectionTypeFile(address);
+//        }
+//        else
+//        {
+//            Log::write("Error: settings file syntax error, [" + group + "]", Log::Write_Flag::FILE_STDERR);
+//            exit(1);
+//        }
+
+//        _iot_hosts.back()->setInterval(interval);
+//        _iot_hosts.back()->setLogFile(logFile);
 
         _settingsHosts.endGroup();
-        _iot_hosts.back()->connectToHost();
+//        _iot_hosts.back()->connectToHost();
 
-        connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way);
     }
 }
 
@@ -178,11 +183,13 @@ void IOT_Server::slotNewConnection()
 
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
+//!!! deleteLater в слоте slotDisconnected
+//    connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
 
     clinetOnlineFile();
 }
 
-//!!! слишком большой метод
+//!!! слишком большой метод, должен выполняться для каждого клиента в отдельном потоке!
 void IOT_Server::slotDataRecived()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
@@ -261,7 +268,7 @@ void IOT_Server::slotDataRecived()
                     auto findDevice = std::ranges::find_if (_iot_hosts, [&deviceName](std::unique_ptr<IOT_Host> &host)
                     {
                             return host.get()->getName() == deviceName;
-                    });
+                });
 
                     if (findDevice != _iot_hosts.end())
                     {
@@ -313,6 +320,7 @@ void IOT_Server::slotDisconnected()
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     _clientList.remove(socket);
 
+//!!!
     disconnect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     disconnect(socket,  &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
 

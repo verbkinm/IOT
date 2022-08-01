@@ -13,6 +13,7 @@
 
 #include "protocols.h"
 #include "IOT_Host/IOT_Host.h"
+#include "IOT_Host/iot_host_structsettings.h"
 
 class IOT_Server : public QTcpServer
 {

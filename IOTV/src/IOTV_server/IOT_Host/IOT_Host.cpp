@@ -2,12 +2,13 @@
 
 #include "IOT_Host.h"
 
-IOT_Host::IOT_Host(const QString &name, QObject* parent) : Base_Host(0, parent),
-    _conn_type(std::make_unique<Base_conn_type>(name)), _logFile("")
+IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0, parent),
+    _structSettings(structSettings)
 {
-    connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
-    connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
-    connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+    connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
+    //    connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut, Qt::QueuedConnection);
+    //    connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
+    //    connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut, Qt::QueuedConnection);
 }
 
 IOT_Host::~IOT_Host()
@@ -25,6 +26,8 @@ IOT_Host::~IOT_Host()
     disconnect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
     disconnect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
     disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+
+    _thread.quit();
 }
 
 //!!!
@@ -129,7 +132,7 @@ QString IOT_Host::getName() const
 
 void IOT_Host::setConnectionTypeTCP(const QString &addr, quint16 port)
 {
-    _conn_type = std::make_unique<TCP_conn_type>(_conn_type.get()->getName());
+    _conn_type = std::make_unique<TCP_conn_type>(_structSettings.name);
 
     TCP_conn_type* eth = qobject_cast<TCP_conn_type*>(_conn_type.get());
     eth->setAddress(addr);
@@ -140,7 +143,7 @@ void IOT_Host::setConnectionTypeTCP(const QString &addr, quint16 port)
 
 void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort)
 {
-    _conn_type = std::make_unique<COM_conn_type>(_conn_type.get()->getName());
+    _conn_type = std::make_unique<COM_conn_type>(_structSettings.name);
 
     COM_conn_type *com = qobject_cast<COM_conn_type*>(_conn_type.get());
     com->setAddress(addr);
@@ -151,7 +154,7 @@ void IOT_Host::setConnectionTypeCom(const QString &addr, const COM_conn_type::Se
 
 void IOT_Host::setConnectionTypeFile(const QString &addr)
 {
-    _conn_type = std::make_unique<File_conn_type>(_conn_type.get()->getName(), addr);
+    _conn_type = std::make_unique<File_conn_type>(_structSettings.name, _structSettings.address);
     connectObjects();
 }
 
@@ -160,11 +163,23 @@ void IOT_Host::connectToHost()
     _conn_type->connectToHost();
 }
 
+bool IOT_Host::runInNewThread()
+{
+    this->moveToThread(&_thread);
+    _timerPing.moveToThread(&_thread);
+    _timerReconnect.moveToThread(&_thread);
+    _reReadTimer.moveToThread(&_thread);
+
+    _thread.start();
+
+    return _thread.isRunning();
+}
+
 void IOT_Host::connectObjects() const
 {
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived, Qt::QueuedConnection);
 }
 
 void IOT_Host::response_WAY_recived(const QByteArray &data)
@@ -256,7 +271,7 @@ void IOT_Host::slotPingTimeOut()
 {
     //!!!
     QByteArray data;
-    data.push_back(IOTV_SH::QUERY_PING_BYTE); // = IOTV_SH::QUERY_PING_BYTE, чтобы не включать хедер ради одного значения
+    data.push_back(IOTV_SH::QUERY_PING_BYTE);
     _conn_type->write(data);
 }
 
@@ -264,4 +279,41 @@ void IOT_Host::slotReconnectTimeOut()
 {
     _conn_type->disconnectFromHost();
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
+}
+
+void IOT_Host::slotNewThreadStart()
+{
+    connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut, Qt::QueuedConnection);
+    connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
+    connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut, Qt::QueuedConnection);
+
+    setInterval(_structSettings.interval);
+    setLogFile(_structSettings.logFile);
+
+    if (_structSettings.connection_type == "TCP")
+        setConnectionTypeTCP(_structSettings.address, _structSettings.port);
+//    else if (_structSettings.connection_type == "COM")
+//    {
+//        COM_conn_type::SetingsPort settingsPort;
+//        settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
+//        settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
+//        settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
+//        settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
+//        settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
+
+//        _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
+//    }
+    else if (_structSettings.connection_type == "FILE")
+        setConnectionTypeFile(_structSettings.address);
+//    else if (_structSettings.connection_type == "UDP")
+//    {
+//        _iot_hosts.back()->setConnectionTypeFile(address);
+//    }
+    else
+    {
+//        Log::write("Error: settings file syntax error, [" + group + "]", Log::Write_Flag::FILE_STDERR);
+        exit(1);
+    }
+
+    connectToHost();
 }

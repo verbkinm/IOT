@@ -26,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    IOT_Host/iot_host_structsettings.h \
     connection_type/base_conn_type.h \
     connection_type/com_conn_type.h \
     IOT_Host/IOT_Host.h \

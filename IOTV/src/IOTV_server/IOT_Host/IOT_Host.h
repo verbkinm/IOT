@@ -1,29 +1,28 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
+
+#include <QThread>
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
+#include "iot_host_structsettings.h"
 
 class IOT_Host : public Base_Host
 {
     Q_OBJECT
 
 public:
-    IOT_Host(const QString &name, QObject* parent = nullptr);
+    IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent = nullptr);
     ~IOT_Host();
 
     void printDebugData() const;
 
     //!!!
     //    void setConnectionType();
-    void setConnectionTypeTCP(const QString &addr, quint16 port);
-    void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
-    void setConnectionTypeFile(const QString &addr);
 
-    void setInterval(uint interval);
-    void setLogFile(const QString &logFile);
 
     QString getName() const override;
     QString getLogFile() const;
@@ -41,20 +40,35 @@ public:
 
     void connectToHost();
 
+    bool runInNewThread();
+
 private:
+    void setConnectionTypeTCP(const QString &addr, quint16 port);
+    void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
+    void setConnectionTypeFile(const QString &addr);
+
+    void setInterval(uint interval);
+    void setLogFile(const QString &logFile);
+
     void connectObjects() const;
+
     void response_WAY_recived(const QByteArray &data);
     void response_READ_recived(const QByteArray &data);
     void response_WRITE_recived(const QByteArray &data);
     void response_PONG_recived();
 
-    static const unsigned int TIMER_PING = 10000;
-    static const unsigned int TIMER_RECONNECT = 15000;
+    static constexpr unsigned int TIMER_PING = 10000;
+    static constexpr unsigned int TIMER_RECONNECT = 15000;
 
     std::unique_ptr<Base_conn_type> _conn_type;
     QString _logFile;
 
     QTimer _reReadTimer, _timerPing, _timerReconnect;
+
+    std::mutex _mutexParametersChange;
+    QThread _thread;
+
+    IOT_Host_StructSettings _structSettings;
 
     enum Flag
     {
@@ -75,6 +89,8 @@ private slots:
     void slotReReadTimeOut();
     void slotPingTimeOut();
     void slotReconnectTimeOut();
+
+    void slotNewThreadStart();
 
 signals:
     void signalHostConnected();
