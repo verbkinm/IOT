@@ -50,6 +50,10 @@ void IOT_Server::readSettings()
 
         _iot_hosts.emplace_back(std::make_unique<IOT_Host>(structSettings));
 
+//        QByteArray ba;
+//        Base_Host *bh = _iot_hosts.back().get();
+//        IOTV_SH::response_WAY(*bh, ba);
+
         connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way, Qt::QueuedConnection);
 
         _iot_hosts.back()->runInNewThread();

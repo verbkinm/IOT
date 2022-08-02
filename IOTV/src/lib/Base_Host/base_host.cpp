@@ -14,22 +14,30 @@ Base_Host::~Base_Host()
 
 bool Base_Host::addReadSubChannel(Raw::DATA_TYPE dataType)
 {
+    std::lock_guard lg(_mutexParametersChange);
+
     return _readChannel.addSubchannel(dataType);
 }
 
 bool Base_Host::addWriteSubChannel(Raw::DATA_TYPE dataType)
 {
+    std::lock_guard lg(_mutexParametersChange);
+
     return _writeChannel.addSubchannel(dataType);
 }
 
 void Base_Host::removeAllSubChannel()
 {
+    std::lock_guard lg(_mutexParametersChange);
+
     _readChannel.removeAllSubchanel();
     _writeChannel.removeAllSubchanel();
 }
 
 bool Base_Host::setReadChannelData(size_t channelNumber, Raw::RAW rawData)
 {
+    std::lock_guard lg(_mutexParametersChange);
+
     return _readChannel.setData(channelNumber, rawData);
 }
 

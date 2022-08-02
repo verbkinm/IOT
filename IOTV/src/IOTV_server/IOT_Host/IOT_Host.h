@@ -1,9 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
-
-#include <QThread>
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/com_conn_type.h"
@@ -18,18 +15,11 @@ public:
     IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent = nullptr);
     ~IOT_Host();
 
-    void printDebugData() const;
-
-    //!!!
-    //    void setConnectionType();
-
-
     QString getName() const override;
     QString getLogFile() const;
 
     Base_conn_type::Conn_type getConnectionType() const;
 
-    virtual void setOnline(bool state) override;
     virtual bool isOnline() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
@@ -38,17 +28,19 @@ public:
 
     virtual void dataResived(QByteArray data) override;
 
-    void connectToHost();
-
-    bool runInNewThread();
+    virtual bool runInNewThread() override;
 
 private:
-    void setConnectionTypeTCP(const QString &addr, quint16 port);
-    void setConnectionTypeCom(const QString &addr, const COM_conn_type::SetingsPort &settingPort);
-    void setConnectionTypeFile(const QString &addr);
+    void connectToHost();
+
+    void setConnectionTypeTCP();
+    void setConnectionTypeCom(const COM_conn_type::SetingsPort &settingPort);
+    void setConnectionTypeFile();
 
     void setInterval(uint interval);
     void setLogFile(const QString &logFile);
+
+    virtual void setOnline(bool state) override;
 
     void connectObjects() const;
 
@@ -64,9 +56,6 @@ private:
     QString _logFile;
 
     QTimer _reReadTimer, _timerPing, _timerReconnect;
-
-    std::mutex _mutexParametersChange;
-    QThread _thread;
 
     IOT_Host_StructSettings _structSettings;
 
@@ -96,7 +85,7 @@ signals:
     void signalHostConnected();
     void signalHostDisconnected();
 
-    void signalDataRiceved(); // !!!
+    void signalDataRiceved();
 
     void signalResponse_Way();
 };

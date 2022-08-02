@@ -1,5 +1,9 @@
 #pragma once
 
+#include <mutex>
+
+#include <QThread>
+
 #include "read_channel.h"
 #include "write_channel.h"
 #include "Base_Host_global.h"
@@ -11,7 +15,7 @@ public:
     Base_Host(uint8_t id = 0, QObject* parent = nullptr);
     virtual ~Base_Host();
 
-    bool addReadSubChannel(Raw::DATA_TYPE dataType);
+
     bool addWriteSubChannel(Raw::DATA_TYPE dataType);
     void removeAllSubChannel();
 
@@ -41,11 +45,20 @@ public:
 
     virtual qint64 writeToServer(QByteArray &data) = 0;
 
+    virtual bool runInNewThread() = 0;
+
 protected:
+    bool addReadSubChannel(Raw::DATA_TYPE dataType);
+
     uint8_t _id;
     QString _description;
 
     Read_Channel _readChannel;
     Write_Channel _writeChannel;
+
+    std::mutex _mutexParametersChange;
+    QThread _thread;
+
+    friend class IOTV_SH;
 };
 
