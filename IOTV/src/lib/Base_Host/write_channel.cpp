@@ -4,6 +4,7 @@ bool Write_Channel::addSubchannel(Raw::DATA_TYPE dataType)
 {
     _dataType.push_back(dataType);
 
+    ///!!!
     return true;
 }
 

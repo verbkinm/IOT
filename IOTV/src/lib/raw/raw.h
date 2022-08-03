@@ -1,14 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <cstring>
+#include <vector>
 
 #include "raw_global.h"
 
 class RAW_EXPORT Raw
 {
 public:
-    enum class DATA_TYPE : uint8_t
+    enum class DATA_TYPE : char
     {
         INTEGER_8,
         INTEGER_16,
@@ -30,33 +29,23 @@ public:
         RAW
     };
 
-    union RAW
-    {
-        int8_t i8;          // 1
-        int16_t i16;        // 2
-        int32_t i32;        // 3
-        int64_t i64;        // 4
+    Raw();
 
-        uint8_t ui8;        // 5
-        uint16_t ui16;      // 6
-        uint32_t ui32;      // 7
-        uint64_t ui64;      // 8
+    static DATA_TYPE toDataType(char type);
+    static char toUInt8(DATA_TYPE dataType);
 
-        float f;            // 9
-        double d;           // 10 double32
-                            // 11 double64
-        bool b;             // 12
-        char* str;          // 13 Критический сегмент. Обращение к str вызывает segmentation fail, если тип RAW является отличным от CHAR_PTR
+    friend bool operator==(const Raw &lhs, const Raw &rhs);
 
-        char array[8];      // побайтный доступ к RAW
-    };
+    unsigned short size() const;
 
-    static DATA_TYPE toDataType(uint8_t type);
-    static uint8_t toUInt8(DATA_TYPE dataType);
-    static std::string toString(DATA_TYPE dataType); //Использовать для отладки!!!
-    static std::string toString(DATA_TYPE dataType, Raw::RAW data); //Использовать для отладки!!!
+    void setType(DATA_TYPE newType);
+    void setData(std::vector<char> &newData);
+    void push_back(char byte);
 
-    friend bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs);
+    DATA_TYPE type() const;
+    const std::vector<char> &data() const;
 
-    static const uint8_t size;
+private:
+    DATA_TYPE _type;
+    std::vector<char> _data;
 };

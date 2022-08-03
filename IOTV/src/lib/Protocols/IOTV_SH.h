@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QByteArray>
-#include "base_host.h"
+#include "raw.h"
 
 class IOTV_SH
 {
@@ -28,20 +28,67 @@ public:
         RESPONSE_PONG_BYTE = 0x0C
     };
 
+    struct RESPONSE_PKG
+    {
+        Response_Type type = Response_Type::ERROR;
+    };
+
+    struct RESPONSE_WAY : RESPONSE_PKG
+    {
+        RESPONSE_WAY()
+        {
+            type = Response_Type::RESPONSE_WAY;
+        }
+
+        uint8_t id;
+        std::string description;
+        std::vector<Raw::DATA_TYPE> readChannels;
+        std::vector<Raw::DATA_TYPE> writeChannels;
+    };
+
+    struct RESPONSE_WRITE : RESPONSE_PKG
+    {
+        RESPONSE_WRITE()
+        {
+            type = Response_Type::RESPONSE_WRITE;
+        }
+
+        uint8_t chanelNumber;
+    };
+
+    struct RESPONSE_READ : RESPONSE_WRITE
+    {
+        RESPONSE_READ()
+        {
+            type = Response_Type::RESPONSE_READ;
+        }
+
+        QByteArray data;
+    };
+
+    struct RESPONSE_PONG : RESPONSE_PKG
+    {
+        RESPONSE_PONG()
+        {
+            type = Response_Type::RESPONSE_PONG;
+        }
+
+        bool state;
+    };
+
     static QByteArray query_WAY();
     static QByteArray query_READ(uint8_t channelNumber);
-    static QByteArray query_WRITE(const Base_Host &host, uint8_t channelNumber, const Raw::RAW &rawData);
+    static QByteArray query_WRITE(uint8_t channelNumber, const Raw &rawData);
     static QByteArray query_PING();
-
-    static void response_WAY(Base_Host &iotHost, const QByteArray &data);
-    static void response_READ(Base_Host &iotHost, const QByteArray &data);
-    static void response_WRITE(const Base_Host &iotHost, const QByteArray &data);
-    static void response_PONG(QByteArray &data);
-
-    static Response_Type checkResponsetData(const QByteArray &data);
 
     static uint8_t channelNumber(uint8_t byte);
 
-    static std::pair<bool, uint32_t> accumPacket(const QByteArray &data);
+    static RESPONSE_PKG accumPacket(QByteArray &data);
+
+private:
+    static RESPONSE_PKG createResponse_WAY_PKG(QByteArray &data);
+    static RESPONSE_PKG createResponse_READ_PKG(QByteArray &data);
+    static RESPONSE_PKG createResponse_WRITE_PKG(QByteArray &data);
+    static RESPONSE_PKG createResponse_PONG_PKG(QByteArray &data);
 };
 

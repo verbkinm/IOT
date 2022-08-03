@@ -3,8 +3,9 @@
 bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
 {
     _dataType.push_back(dataType);
-    _data.emplace_back(Raw::RAW{0});
+    _data.emplace_back(Raw{});
 
+    //!!!
     return true;
 }
 
@@ -46,7 +47,7 @@ void Read_Channel::removeAllSubchanel()
     _dataType.clear();
 }
 
-bool Read_Channel::setData(uint8_t index, Raw::RAW rawData)
+bool Read_Channel::setData(uint8_t index, Raw rawData)
 {
     try
     {
@@ -60,7 +61,7 @@ bool Read_Channel::setData(uint8_t index, Raw::RAW rawData)
     }
 }
 
-Raw::RAW Read_Channel::getData(uint8_t index) const
+Raw Read_Channel::getData(uint8_t index) const
 {
     try
     {
@@ -69,8 +70,7 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
     catch (std::out_of_range &ex)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
-        Raw::RAW data {0};
-        return data;
+        return {};
     }
 }
 

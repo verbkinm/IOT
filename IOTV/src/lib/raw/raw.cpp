@@ -1,8 +1,11 @@
 #include "raw.h"
 
-const uint8_t Raw::size = sizeof(RAW);
+Raw::Raw() : _type(DATA_TYPE::RAW)
+{
 
-Raw::DATA_TYPE Raw::toDataType(uint8_t type)
+}
+
+Raw::DATA_TYPE Raw::toDataType(char type)
 {
     switch(type)
     {
@@ -51,109 +54,37 @@ Raw::DATA_TYPE Raw::toDataType(uint8_t type)
     }
 }
 
-std::string Raw::toString(Raw::DATA_TYPE dataType)
+unsigned short Raw::size() const
 {
-    if(dataType == DATA_TYPE::INTEGER_8)
-        return "INTEGER_8";
-    else if(dataType == DATA_TYPE::INTEGER_16)
-        return "INTEGER_16";
-    else if(dataType == DATA_TYPE::INTEGER_32)
-        return "INTEGER_32";
-    else if(dataType == DATA_TYPE::INTEGER_64)
-        return "INTEGER_64";
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_8)
-        return "UNSIGNED_INTEGER_8";
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_16)
-        return "UNSIGNED_INTEGER_16";
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_32)
-        return "UNSIGNED_INTEGER_32";
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_64)
-        return "UNSIGNED_INTEGER_64";
-    else if(dataType == DATA_TYPE::FLOAT_32)
-        return "FLOAT_32";
-    else if(dataType == DATA_TYPE::DOUBLE_32)
-        return "DOUBLE_32";
-    else if(dataType == DATA_TYPE::DOUBLE_64)
-        return "DOUBLE_64";
-    else if(dataType == DATA_TYPE::BOOL_8)
-        return "BOOL_8";
-    else if(dataType == DATA_TYPE::CHAR_PTR)
-        return "CHAR_PTR";
-    else
-        return "RAW";
+    return _data.size();
 }
 
-//Использовать для отладки!!!
-std::string Raw::toString(Raw::DATA_TYPE dataType, Raw::RAW data)
+const std::vector<char> &Raw::data() const
 {
-    if(dataType == DATA_TYPE::INTEGER_8)
-        return  std::to_string(data.i8);
-    else if(dataType == DATA_TYPE::INTEGER_16)
-        return std::to_string(data.i16);
-    else if(dataType == DATA_TYPE::INTEGER_32)
-        return std::to_string(data.i32);
-    else if(dataType == DATA_TYPE::INTEGER_64)
-        return std::to_string(data.i64);
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_8)
-        return std::to_string(data.ui8);
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_16)
-        return std::to_string(data.ui16);
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_32)
-        return std::to_string(data.ui32);
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_64)
-        return std::to_string(data.ui64);
-    else if(dataType == DATA_TYPE::FLOAT_32)
-        return std::to_string(data.f);
-    else if(dataType == DATA_TYPE::DOUBLE_32)
-        return std::to_string(data.d);
-    else if(dataType == DATA_TYPE::DOUBLE_64)
-        return std::to_string(data.d);
-    else if(dataType == DATA_TYPE::BOOL_8)
-    {
-        if(data.b)
-            return "true";
-        return "false";
-    }
-    else if(dataType == DATA_TYPE::CHAR_PTR)
-        return data.str; // Можно получить segmentation fail
-    else
-        return "UNKNOW data type";
+    return _data;
 }
 
-//Использовать для отладки!!!
-uint8_t Raw::toUInt8(Raw::DATA_TYPE dataType)
+void Raw::setData(std::vector<char> &newData)
 {
-    if(dataType == DATA_TYPE::INTEGER_8)
-        return 1;
-    else if(dataType == DATA_TYPE::INTEGER_16)
-        return 2;
-    else if(dataType == DATA_TYPE::INTEGER_32)
-        return 3;
-    else if(dataType == DATA_TYPE::INTEGER_64)
-        return 4;
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_8)
-        return 5;
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_16)
-        return 6;
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_32)
-        return 7;
-    else if(dataType == DATA_TYPE::UNSIGNED_INTEGER_64)
-        return 8;
-    else if(dataType == DATA_TYPE::FLOAT_32)
-        return 9;
-    else if(dataType == DATA_TYPE::DOUBLE_32)
-        return 10;
-    else if(dataType == DATA_TYPE::DOUBLE_64)
-        return 11;
-    else if(dataType == DATA_TYPE::BOOL_8)
-        return 12;
-    else if(dataType == DATA_TYPE::CHAR_PTR)
-        return 13;
-    else
-        return 14;
+    _data = std::move(newData);
 }
 
-bool operator==(const Raw::RAW &lhs, const Raw::RAW &rhs)
+void Raw::push_back(char byte)
 {
-    return (memcmp(&lhs, &rhs, 8) == 0);
+    _data.push_back(byte);
+}
+
+Raw::DATA_TYPE Raw::type() const
+{
+    return _type;
+}
+
+void Raw::setType(DATA_TYPE newType)
+{
+    _type = newType;
+}
+
+bool operator==(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.type() == rhs.type() && lhs.data() == rhs.data());
 }

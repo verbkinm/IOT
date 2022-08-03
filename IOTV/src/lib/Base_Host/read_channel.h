@@ -11,12 +11,12 @@ public:
     virtual bool removeSubchannel(uint8_t index) override;
     virtual void removeAllSubchanel() override;
 
-    bool setData(uint8_t index, Raw::RAW rawData);
+    bool setData(uint8_t index, Raw rawData);
 
-    Raw::RAW getData(uint8_t index) const;
+    Raw getData(uint8_t index) const;
 
     bool clearPointerRAW(uint8_t index);
 
 private:
-    std::vector<Raw::RAW> _data;
+    std::vector<Raw> _data;
 };
