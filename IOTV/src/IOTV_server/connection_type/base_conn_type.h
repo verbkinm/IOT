@@ -2,6 +2,7 @@
 
 #include <QTimer>
 
+#include "log.h"
 #include "IOTV_SH.h"
 
 class Base_conn_type : public QObject
@@ -20,8 +21,8 @@ public:
         FILE
     };
 
-    static const int BUFFER_MAX_SIZE = 256;
-    static const int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+    static constexpr int BUFFER_MAX_SIZE = 256;
+    static constexpr int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
 
     QString getName() const;
     QString getAddress() const;
@@ -51,5 +52,5 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
-    void signalDataRiceved(QByteArray data);
+    void signalDataRiceved(IOTV_SH::RESPONSE_PKG data);
 };

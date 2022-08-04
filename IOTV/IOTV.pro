@@ -5,9 +5,10 @@ SUBDIRS += \
 #    src/IOTV_Client_qml \
 #    TEST_IOTV_server \
 #    src/IOTV_Client \
+    src/Tests \
     src/lib \
 #    src/IOTV_host \
-    src/IOTV_host_bme280 \
+#    src/IOTV_host_bme280 \
     src/IOTV_server
 
 DISTFILES += \

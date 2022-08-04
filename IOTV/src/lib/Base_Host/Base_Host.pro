@@ -11,16 +11,12 @@ CONFIG += c++17
 
 SOURCES += \
     base_host.cpp \
-    channel.cpp \
-    read_channel.cpp \
-    write_channel.cpp
+    channel.cpp
 
 HEADERS += \
     Base_Host_global.h \
     base_host.h \
-    channel.h \
-    read_channel.h \
-    write_channel.h
+    channel.h
 
 # Default rules for deployment.
 unix {
@@ -41,3 +37,10 @@ else:unix: LIBS += -L$$OUT_PWD/../Log/ -lLog
 
 INCLUDEPATH += $$PWD/../Log
 DEPENDPATH += $$PWD/../Log
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Protocols/ -lProtocols
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Protocols/ -lProtocols
+else:unix: LIBS += -L$$OUT_PWD/../Protocols/ -lProtocols
+
+INCLUDEPATH += $$PWD/../Protocols
+DEPENDPATH += $$PWD/../Protocols
