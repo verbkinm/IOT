@@ -7,7 +7,7 @@ SUBDIRS += \
 #    src/IOTV_Client \
     src/lib \
 #    src/IOTV_host \
-    src/IOTV_host_bme280 \
+#    src/IOTV_host_bme280 \
     src/IOTV_server
 
 DISTFILES += \
