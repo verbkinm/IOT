@@ -19,6 +19,8 @@ void Network_Module::response(QTcpSocket* socket, QByteArray &data)
         Protocol_class::response_READ(iotServer, vectorData);
     else if(dataType == Protocol_class::query_type::QUERY_WRITE)
         Protocol_class::response_WRITE(iotServer, vectorData);
+    else if(dataType == Protocol_class::query_type::QUERY_PING)
+        Protocol_class::response_Pong(vectorData);
 
     QByteArray sentData;
     for (auto byte : vectorData)
@@ -43,6 +45,8 @@ void Network_Module::postResponse(QTcpSocket *socket, QByteArray &data)
     if(dataType == Protocol_class::query_type::QUERY_WAY)
         data.remove(0, 1);
     else if(dataType == Protocol_class::query_type::QUERY_READ)
+        data.remove(0, 1);
+    else if(dataType == Protocol_class::query_type::QUERY_PING)
         data.remove(0, 1);
     else if(dataType == Protocol_class::query_type::QUERY_WRITE)
         data.remove(0, (data[1] | data[2]) + 3);

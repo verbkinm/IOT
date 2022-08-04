@@ -1,38 +1,97 @@
 #include "channel.h"
 
-bool Channel::setDataType(uint8_t index, Raw::DATA_TYPE dataType)
+void Channel::addSubchannel(const Raw &data)
+{
+    _data.push_back(data);
+}
+
+bool Channel::removeSubchannel(uint8_t channelNumber)
 {
     try
     {
-        _dataType.at(index) = dataType;
+        if(channelNumber > _data.size())
+            throw std::out_of_range{"out of range"};
+
+        _data.erase(_data.begin() + channelNumber);
         return true;
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return false;
+    }
+}
+
+void Channel::removeAllSubchanel()
+{
+    _data.clear();
+}
+
+bool Channel::setData(uint8_t channelNumber, const Raw &data)
+{
+    try
+    {
+        _data.at(channelNumber) = data;
+        return true;
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
     catch (std::invalid_argument &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
 }
 
-Raw::DATA_TYPE Channel::getDataType(uint8_t channelNumber) const
+bool Channel::setData(uint8_t channelNumber, const std::vector<uint8_t> &data)
 {
     try
     {
-        return _dataType.at(channelNumber);
+        _data.at(channelNumber).setData(data);
+        return true;
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
-        return Raw::DATA_TYPE::RAW;
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return false;
+    }
+    catch (std::invalid_argument &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return false;
     }
 }
 
-uint8_t Channel::length() const
+Raw Channel::getData(uint8_t channelNumber) const
 {
-    return _dataType.size();
+    try
+    {
+        return _data.at(channelNumber);
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return {};
+    }
+}
+
+Raw::DATA_TYPE Channel::getType(uint8_t channelNumber) const
+{
+    try
+    {
+        return _data.at(channelNumber).type();
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return Raw::DATA_TYPE::NONE;
+    }
+}
+
+uint8_t Channel::size() const
+{
+    return _data.size();
 }

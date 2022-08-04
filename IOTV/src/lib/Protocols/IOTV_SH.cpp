@@ -2,50 +2,33 @@
 
 QByteArray IOTV_SH::query_WAY()
 {
-    QByteArray data;
-
-    data.clear();
-    data.append(QUERY_WAY_BYTE);
-
-    return data;
+    return {1, QUERY_WAY_BYTE};
 }
 
 QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
 {
     QByteArray data;
 
-    char channel = channelNumber << 4;
+    uint8_t channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
     return data;
 }
 
-QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, const Raw::RAW &rawData)
-{        
+QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
+{
     QByteArray data;
+    data.append((channelNumber << 4) | QUERY_WRITE_BYTE);
 
-    // если устройство не зарегистрировано, id == 0, то и не может быть произведена в него запись.
-    if(!host.isOnline())
-        return data;
+    uint16_t size = rawData.size();
 
-    char channel = channelNumber << 4;
-    data.append(channel | QUERY_WRITE_BYTE);
+    data.push_back(size >> 8);
+    data.push_back(size);
 
-    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
-    {
-        quint16 strLength = strlen(rawData.str);
-        data.append(strLength >> 8);
-        data.append(strLength);
-        data.append(rawData.str);
-    }
-    else
-    {
-        data.append(Raw::size >> 8);
-        data.append(Raw::size);
-
-        for (quint16 i = 0; i < Raw::size; i++)
-            data.append(rawData.array[i]);
-    }
+    data.append(vecUInt8ToQByteArray(rawData.data()));
+//    auto &dataFromRaw = rawData.data();
+//    for (uint16_t i = 0; i < size; i++)
+//        data.push_back(dataFromRaw[i]);
 
     return data;
 }
@@ -58,166 +41,142 @@ QByteArray IOTV_SH::query_PING()
     return data;
 }
 
-void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
+IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
 {
-    //!!! проверка длины data
-    if(checkResponsetData(data) != Response_Type::RESPONSE_WAY)
-        return;
+    uint16_t descriptionLength = 0;
+    uint8_t channelReadLength = 0;
+    uint8_t channelWriteLength = 0;
+    uint16_t expectedLength = 0;
 
-    iotHost.removeAllSubChannel();
+    if (data.size() >= 5)
+    {
+        descriptionLength = data.at(2);
+        descriptionLength <<= 8;
+        descriptionLength |= data.at(3);
 
-    iotHost.setId(data.at(1));
+        channelReadLength = data.at(4) >> 4;
+        channelWriteLength = data.at(4) & 0x0F;
 
-    quint16 descriptionLength = 0;
-    descriptionLength = data.at(2);
-    descriptionLength <<= 8;
-    descriptionLength |= data.at(3);
+        expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
 
-    uint8_t channelReadLength = data.at(4) >> 4;
-    uint8_t channelWriteLength = data.at(4) & 0x0F;
+        if (data.size() < expectedLength)
+            return {};
+    }
+    else
+        return {};
 
-    iotHost.setDescription(data.mid(5, descriptionLength));
+    RESPONSE_WAY pkg_data;
+
+    pkg_data.id = data.at(1);
+    pkg_data.description = data.mid(5, descriptionLength).data();
 
     int index = 5 + descriptionLength;
     for (uint8_t i = 0; i < channelReadLength; i++)
-        iotHost.addReadSubChannel(Raw::toDataType(data.at(index++)));
+        pkg_data.readChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
+    pkg_data.readChannel.shrink_to_fit();
 
     for (uint8_t i = 0; i < channelWriteLength; i++)
-        iotHost.addWriteSubChannel(Raw::toDataType(data.at(index++)));
+        pkg_data.writeChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
+    pkg_data.writeChannel.shrink_to_fit();
+
+    data = data.mid(expectedLength);
+
+    return pkg_data;
 }
 
-void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
+IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_READ_PKG(QByteArray &data)
 {
-    if(checkResponsetData(data) != Response_Type::RESPONSE_READ)
-        return;
+    if (data.length() < 3)
+        return {};
 
-    size_t channelNumber = data.at(0) >> 4;
-    quint16 dataLength = (data.at(1) << 8) | data.at(2);
+    uint16_t dataLength = (data.at(1) << 8) | static_cast<uint8_t>(data.at(2)); //  cast - чтобы не было отрицательного значения dataLength
 
-    QByteArray buf = data.mid(3);
-    Raw::RAW rawData;
+    if (data.length() < (3 + dataLength))
+        return {};
 
-    if(iotHost.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
-    {
-        rawData.str = new char[dataLength]; // удаляется в ~Base_Host()
+    RESPONSE_READ pkg_data;
 
-        for (quint16 i = 0; i < dataLength; i++)
-            rawData.str[i] = buf.at(i);
+    pkg_data.chanelNumber = data.at(0) >> 4;;
+    pkg_data.data = data.mid(3, dataLength);
 
-        // удаляем строковые данные в хосте и в конце метода мы их туда запишем
-        Raw::RAW raw = (iotHost.getReadChannelData(channelNumber));
-        if(raw.str != nullptr)
-        {
-            delete[] raw.str;
-            raw.str = nullptr;
-        }
-    }
-    else
-    {
-        for (uint8_t i = 0; i < dataLength; i++)
-            rawData.array[i] = buf.at(i);
-    }
+    data = data.mid(3 + dataLength);
 
-    iotHost.setReadChannelData(channelNumber, rawData);
+    return pkg_data;
 }
 
-void IOTV_SH::response_WRITE(const Base_Host &iotHost, const QByteArray &data)
+IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WRITE_PKG(QByteArray &data)
 {
-    Q_UNUSED(iotHost);
-    Q_UNUSED(data);
+    if (data.isEmpty())
+        return {};
 
-    if(checkResponsetData(data) != Response_Type::RESPONSE_WRITE)
-        return;
+    RESPONSE_WRITE pkg_data;
+    pkg_data.chanelNumber = data.at(0) >> 4;
+
+    data = data.mid(1);
+
+    return pkg_data;
 }
 
-void IOTV_SH::response_PONG(QByteArray &data)
+IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_PONG_PKG(QByteArray &data)
 {
-    data.clear();
-    data.push_back(RESPONSE_PONG_BYTE);
+    if (data.isEmpty())
+        return {};
+
+    RESPONSE_PONG pkg_data;
+    pkg_data.state = true;
+
+    data = data.mid(1);
+
+    return pkg_data;
 }
 
-IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
-{
-    if(data.length() == 0)
-        return Response_Type::ERROR;
-
-    uint8_t firstByte = data.at(0);
-
-    if(firstByte == RESPONSE_WAY_BYTE)
-    {
-        if(data.size() > 6)
-        {
-            quint16 descriptionLength = 0;
-            descriptionLength = data.at(2);
-            descriptionLength <<= 8;
-            descriptionLength |= data.at(3);
-
-            uint8_t channelReadLength = data.at(4) >> 4;
-            uint8_t channelWriteLength = data.at(4) & 0x0F;
-
-            quint16 expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
-            if(data.size() < expectedLength)
-                return Response_Type::ERROR;
-        }
-        else
-            return Response_Type::ERROR;
-
-        return Response_Type::RESPONSE_WAY;
-    }
-    else if(firstByte == RESPONSE_PONG_BYTE)
-        return Response_Type::RESPONSE_PONG;
-
-
-    firstByte &= 0x0F;
-
-    switch (firstByte)
-    {
-    case RESPONSE_READ_BYTE:
-        return Response_Type::RESPONSE_READ;
-        break;
-    case RESPONSE_WRITE_BYTE:
-        return Response_Type::RESPONSE_WRITE;
-        break;
-    default:
-        return Response_Type::ERROR;
-    }
-}
-
-uint8_t IOTV_SH::channelNumber(char byte)
+uint8_t IOTV_SH::channelNumber(uint8_t byte)
 {
     return (byte >> 4);
 }
 
-std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
+IOTV_SH::RESPONSE_PKG IOTV_SH::accumPacket(QByteArray &data)
 {
-    Response_Type dataType = checkResponsetData(data);
-    uint32_t dataSize = static_cast<uint32_t>(data.size());
+    if(data.isEmpty())
+        return {};
 
-    if(dataType == Response_Type::ERROR)
-        return {false, 0};
-    else if(dataSize >= 5 && dataType == Response_Type::RESPONSE_WAY)
-    {
-        quint16 descriptionLength = (data[2] << 8) | data[3];
-        uint8_t readChannelCount = data[4] >> 4;
-        uint8_t writeChannelCount = data[4] & 0x0F;
-        uint32_t packetSize = 5 + descriptionLength + readChannelCount + writeChannelCount;
-        if(dataSize >= packetSize)
-            return {true, packetSize};
-    }
-    else if(dataSize >= 1 && dataType == Response_Type::RESPONSE_PONG)
-    {
-        return {true, 1};
-    }
-    else if(dataSize >= 3 && dataType == Response_Type::RESPONSE_READ)
-    {
-        quint16 dataLength = (data[1] << 8) | data[2];
-        if(dataSize >= static_cast<uint32_t>(3 + dataLength))
-            return {true, static_cast<uint32_t>(3 + dataLength)};
-    }
-    else if(dataSize >= 1 && dataType == Response_Type::RESPONSE_WRITE)
-        return {true, 1};
-    else if(dataSize > 256)
-        return {false, 0};
+    uint8_t firstByte = data.at(0);
 
-    return {false, 0};
+    if(firstByte == RESPONSE_WAY_BYTE)
+        return createResponse_WAY_PKG(data);
+    else if(firstByte == RESPONSE_PONG_BYTE)
+        return createResponse_PONG_PKG(data);
+
+    firstByte &= 0x0F;
+    switch (firstByte)
+    {
+    case RESPONSE_READ_BYTE:
+        return createResponse_READ_PKG(data);
+        break;
+    case RESPONSE_WRITE_BYTE:
+        return createResponse_WRITE_PKG(data);
+        break;
+    default:
+        return {};
+    }
+}
+
+QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)
+{
+    QByteArray arr;
+
+    for (auto el : vec)
+        arr.push_back(el);
+
+    return arr;
+}
+
+std::vector<uint8_t> IOTV_SH::QByteArrayToVecUInt8(const QByteArray &arr)
+{
+    std::vector<uint8_t> vec;
+
+    for (auto el : arr)
+        vec.push_back(el);
+
+    return vec;
 }

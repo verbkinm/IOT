@@ -1,7 +1,7 @@
 QT -= gui
 QT += network serialport testlib
 
-CONFIG += c++17 console warn_on depend_includepath testcase
+CONFIG += c++2a console warn_on depend_includepath testcase
 CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -16,8 +16,8 @@ SOURCES += \
         connection_type/tcp_conn_type.cpp \
         main.cpp \
         IOT_Host/IOT_Host.cpp \
-    connection_type/udp_conn_type.cpp \
-        #tst_server.cpp \
+        connection_type/udp_conn_type.cpp \
+#tst_server.cpp \
         wrapper.cpp
 
 # Default rules for deployment.
@@ -26,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    IOT_Host/iot_host_structsettings.h \
     connection_type/base_conn_type.h \
     connection_type/com_conn_type.h \
     IOT_Host/IOT_Host.h \

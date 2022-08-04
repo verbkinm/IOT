@@ -1,23 +1,15 @@
 #include "log.h"
 
-void Log::write(const QString& data, Flags pathToWrite, const QString &fileName)
+const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss - ";
+
+void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
 {
-    if(pathToWrite == Flags::WRITE_TO_STDOUT_ONLY)
+    if(writeFlags.testFlag(Write_Flag::FILE))
+        writeToFile(fileName, data);
+    if(writeFlags.testFlag(Write_Flag::STDOUT))
         writeToStdOut(data);
-    else if(pathToWrite == Flags::WRITE_TO_STDERR_ONLY)
+    if(writeFlags.testFlag(Write_Flag::STDERR))
         writeToStdErr(data);
-    else if(pathToWrite == Flags::WRITE_TO_FILE_ONLY)
-        writeToFile(fileName, data);
-    else if(pathToWrite == Flags::WRITE_TO_FILE_AND_STDOUT)
-    {
-        writeToStdOut(data);
-        writeToFile(fileName, data);
-    }
-    else if(pathToWrite == Flags::WRITE_TO_FILE_AND_STDERR)
-    {
-        writeToStdErr(data);
-        writeToFile(fileName, data);
-    }
 }
 
 void Log::writeToFile(const QString &fileName, const QString &data)
@@ -30,7 +22,7 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     }
 
     QTextStream out(&file);
-    out << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ") << data << '\n';
+    out << QDateTime::currentDateTime().toString(_FORMAT) << data << '\n';
     out.flush();
 
     file.close();
@@ -38,10 +30,10 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 
 void Log::writeToStdOut(const QString &data)
 {
-    std::cout << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ").toStdString() << data.toStdString() << '\n';;
+    std::cout << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
 }
 
 void Log::writeToStdErr(const QString &data)
 {
-    std::cerr << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss - ").toStdString() << data.toStdString() << '\n';;
+    std::cerr << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
 }

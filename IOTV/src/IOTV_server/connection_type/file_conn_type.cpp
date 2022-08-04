@@ -2,37 +2,27 @@
 
 File_conn_type::File_conn_type(const QString &name, const QString& fileName, Base_conn_type *parent) : Base_conn_type(name, parent), _file(fileName)
 {
+    _type = Conn_type::FILE;
     connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
 }
-
 
 qint64 File_conn_type::write(const QByteArray &data)
 {
     Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
 
-    QByteArray buffer;
-    if(data.size() == 1 && data[0] == QUERY_WAY_BYTE)
+    if(data.size() == 1 && data[0] == IOTV_SH::QUERY_WAY_BYTE)
     {
-        //        buffer.clear();
+        IOTV_SH::RESPONSE_WAY pkg;
+        pkg.id = 3;
+        pkg.description = _file.fileName().toStdString();
+        pkg.readChannel.push_back(Raw::DATA_TYPE::STRING);
+        pkg.writeChannel.push_back(Raw::DATA_TYPE::STRING);
 
-        buffer.push_back(RESPONSE_WAY_BYTE);
-        buffer.push_back(3); // id устройства
-        buffer.push_back(_file.fileName().size() >> 8);
-        buffer.push_back(_file.fileName().size());
-        buffer.push_back(0x11);
+        emit signalDataRiceved(pkg);
 
-        for (char byte : _file.fileName().toStdString())
-            buffer.push_back(byte);
-
-        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
-        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
-
-        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
-
-        emit signalDataRiceved(buffer);
         return 0;
     }
-    else if(data.size() == 1 && data[0] == QUERY_READ_BYTE)
+    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_READ_BYTE)
     {
         if(QFileInfo(_file).size() > BUFFER_MAX_SIZE)
         {
@@ -40,31 +30,26 @@ qint64 File_conn_type::write(const QByteArray &data)
             return 0;
         }
 
-        _file.reset();
-        QByteArray dataRead = _file.readAll();
+        _file.close();
+        _file.open(QIODevice::ReadOnly);
 
-        //        buffer.clear();
+        IOTV_SH::RESPONSE_READ pkg;
+        pkg.data = _file.readAll();
 
-        buffer.push_back(RESPONSE_READ_BYTE);
-        buffer.push_back(dataRead.size() >> 8);
-        buffer.push_back(dataRead.size());
-
-        for (char byte : dataRead)
-            buffer.push_back(byte);
-
-        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':') + " (" + dataRead + ")");
-
-        emit signalDataRiceved(buffer);
+        emit signalDataRiceved(pkg);
     }
-    else if(data.size() >= 3 && data[0] == QUERY_WRITE_BYTE)
+    else if(data.size() >= 3 && data[0] == IOTV_SH::QUERY_WRITE_BYTE)
     {
         if(data.size() != (3 + (data.at(1) | data.at(2))) )
         {
-            Log::write(_name + ": data transimt error" + " -> " + buffer.toHex(':'));
+            Log::write(_name + ": data transimt error" + " -> " + data.toHex(':'));
             return 0;
         }
 
-        buffer = data.mid(3);
+        IOTV_SH::RESPONSE_WRITE pkg;
+        pkg.chanelNumber = 0;
+
+        QByteArray buffer = data.mid(3);
 
         _file.close();
         if(!_file.open(QIODevice::WriteOnly))
@@ -77,17 +62,17 @@ qint64 File_conn_type::write(const QByteArray &data)
 
         _file.open(QIODevice::ReadOnly);
 
-        buffer.clear();
-        buffer.push_back(RESPONSE_WRITE_BYTE);
         Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
-        emit signalDataRiceved(buffer);
+        emit signalDataRiceved(pkg);
     }
-    else if(data.size() == 1 && data[0] == QUERY_PING_BYTE)
+    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_PING_BYTE)
     {
-        buffer.push_back(RESPONSE_PONG_BYTE);
-        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
+        IOTV_SH::RESPONSE_PONG pkg;
+        pkg.state = true;
 
-        emit signalDataRiceved(buffer);
+        Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + data.toHex(':'));
+
+        emit signalDataRiceved(pkg);
     }
 
     return 0;

@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 #include <QString>
 #include <QFile>
@@ -9,27 +8,26 @@
 
 #include "Log_global.h"
 
-#define LOG_FILE_NAME "IOTV.log"
-
 class LOG_EXPORT Log
 {
 public:
-
-    enum class Flags
+    enum class Write_Flag : uint8_t
     {
-        WRITE_TO_FILE_ONLY,
-        WRITE_TO_STDOUT_ONLY,
-        WRITE_TO_STDERR_ONLY,
-        WRITE_TO_FILE_AND_STDOUT,
-        WRITE_TO_FILE_AND_STDERR
+        FILE = 0x01,
+        STDOUT = 0x02,
+        STDERR = 0x04,
+        FILE_STDOUT = FILE | STDOUT,
+        FILE_STDERR = FILE | STDERR
     };
+     Q_DECLARE_FLAGS(Write_Flags, Write_Flag)
 
-    static void write(const QString& data, Flags pathToWrite = Log::Flags::WRITE_TO_FILE_AND_STDOUT, const QString &fileName = LOG_FILE_NAME);
+    static void write(const QString& data, Write_Flags writeFlags = Write_Flag::STDOUT, const QString &fileName = "default.log");
 
 private:
     static void writeToFile(const QString &fileName, const QString &data);
     static void writeToStdOut(const QString &data);
     static void writeToStdErr(const QString &data);
-};
 
-#endif // LOG_H
+    static const QString _FORMAT;
+};
+Q_DECLARE_OPERATORS_FOR_FLAGS(Log::Write_Flags)

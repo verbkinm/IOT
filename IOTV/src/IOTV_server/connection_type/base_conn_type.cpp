@@ -60,32 +60,22 @@ void Base_conn_type::slotReadData()
 {
     _host_buffer_data += readAll();
 
-    if(_host_buffer_data.size() > static_cast<int>(BUFFER_MAX_SIZE))
+    if (_host_buffer_data.size() > BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
         return;
     }
 
-    while(_host_buffer_data.size())
+    QByteArray tmp = _host_buffer_data;
+    IOTV_SH::RESPONSE_PKG accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
+
+    if (accumPacketResponse.type != IOTV_SH::Response_Type::ERROR)
     {
-        std::pair<bool, int> accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
+        int difference = tmp.size() - _host_buffer_data.size();
+        QString strOut = _name + ": data riceved from " + _address + " <- " + tmp.mid(difference).toHex(':');
+        Log::write(strOut);
 
-        if(!accumPacketResponse.first)
-        {
-//            _host_buffer_data.clear(); //!!!
-            return;
-        }
-        else if(accumPacketResponse.first && accumPacketResponse.second)
-        {
-            QByteArray buffer = _host_buffer_data.mid(0, accumPacketResponse.second);
-            QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
-            Log::write(strOut);
-
-            emit signalDataRiceved(buffer);
-            _host_buffer_data = _host_buffer_data.mid(accumPacketResponse.second);
-        }
-        else
-            break;
+        emit signalDataRiceved(accumPacketResponse);
     }
 }
 
