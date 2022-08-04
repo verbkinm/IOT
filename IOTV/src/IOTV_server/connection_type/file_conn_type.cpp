@@ -6,7 +6,6 @@ File_conn_type::File_conn_type(const QString &name, const QString& fileName, Bas
     connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
 }
 
-
 qint64 File_conn_type::write(const QByteArray &data)
 {
     Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
@@ -25,8 +24,8 @@ qint64 File_conn_type::write(const QByteArray &data)
         for (char byte : _file.fileName().toStdString())
             buffer.push_back(byte);
 
-        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
-        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::CHAR_PTR));
+        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::STRING));
+        buffer.push_back(Raw::toUInt8(Raw::DATA_TYPE::STRING));
 
         Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
 

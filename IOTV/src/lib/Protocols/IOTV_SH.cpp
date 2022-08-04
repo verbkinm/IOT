@@ -25,9 +25,10 @@ QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
     data.push_back(size >> 8);
     data.push_back(size);
 
-    auto &dataFromRaw = rawData.data();
-    for (uint16_t i = 0; i < size; i++)
-        data.push_back(dataFromRaw[i]);
+    data.append(vecUInt8ToQByteArray(rawData.data()));
+//    auto &dataFromRaw = rawData.data();
+//    for (uint16_t i = 0; i < size; i++)
+//        data.push_back(dataFromRaw[i]);
 
     return data;
 }
@@ -67,16 +68,16 @@ IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
     RESPONSE_WAY pkg_data;
 
     pkg_data.id = data.at(1);
-    pkg_data.description = data.mid(5, descriptionLength);
+    pkg_data.description = data.mid(5, descriptionLength).data();
 
     int index = 5 + descriptionLength;
     for (uint8_t i = 0; i < channelReadLength; i++)
-        pkg_data.readChannels.push_back(Raw::toDataType(data.at(index++)));
-    pkg_data.readChannels.shrink_to_fit();
+        pkg_data.readChannel.push_back(Raw::toDataType(data.at(index++)));
+    pkg_data.readChannel.shrink_to_fit();
 
     for (uint8_t i = 0; i < channelWriteLength; i++)
-        pkg_data.writeChannels.push_back(Raw::toDataType(data.at(index++)));
-    pkg_data.writeChannels.shrink_to_fit();
+        pkg_data.writeChannel.push_back(Raw::toDataType(data.at(index++)));
+    pkg_data.writeChannel.shrink_to_fit();
 
     data = data.mid(expectedLength);
 
@@ -158,4 +159,24 @@ IOTV_SH::RESPONSE_PKG IOTV_SH::accumPacket(QByteArray &data)
     default:
         return {};
     }
+}
+
+QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)
+{
+    QByteArray arr;
+
+    for (auto el : vec)
+        arr.push_back(el);
+
+    return arr;
+}
+
+std::vector<uint8_t> IOTV_SH::QByteArrayToVecUInt8(const QByteArray &arr)
+{
+    std::vector<uint8_t> vec;
+
+    for (auto el : arr)
+        vec.push_back(el);
+
+    return vec;
 }

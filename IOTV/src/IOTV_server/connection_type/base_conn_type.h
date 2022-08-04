@@ -2,6 +2,7 @@
 
 #include <QTimer>
 
+#include "log.h"
 #include "IOTV_SH.h"
 
 class Base_conn_type : public QObject
@@ -51,5 +52,5 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
-    void signalDataRiceved(QByteArray data);
+    void signalDataRiceved(IOTV_SH::RESPONSE_PKG data);
 };

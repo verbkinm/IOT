@@ -42,8 +42,8 @@ public:
 
         uint8_t id;
         std::string description;
-        std::vector<Raw::DATA_TYPE> readChannels;
-        std::vector<Raw::DATA_TYPE> writeChannels;
+        std::vector<Raw::DATA_TYPE> readChannel;
+        std::vector<Raw::DATA_TYPE> writeChannel;
     };
 
     struct RESPONSE_WRITE : RESPONSE_PKG
@@ -84,6 +84,9 @@ public:
     static uint8_t channelNumber(uint8_t byte);
 
     static RESPONSE_PKG accumPacket(QByteArray &data);
+
+    static QByteArray vecUInt8ToQByteArray(const std::vector<uint8_t> &vec);
+    static std::vector<uint8_t> QByteArrayToVecUInt8(const QByteArray &arr);
 
 private:
     static RESPONSE_PKG createResponse_WAY_PKG(QByteArray &data);

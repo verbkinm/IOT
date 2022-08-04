@@ -1,11 +1,21 @@
 #include "raw.h"
 
-Raw::Raw() : _type(DATA_TYPE::RAW)
+Raw::Raw() : _type(DATA_TYPE::NONE)
 {
 
 }
 
-Raw::DATA_TYPE Raw::toDataType(char type)
+Raw::Raw(DATA_TYPE type) : _type(type)
+{
+
+}
+
+Raw::Raw(DATA_TYPE type, const std::vector<uint8_t> &data) : _type(type), _data(data)
+{
+
+}
+
+Raw::DATA_TYPE Raw::toDataType(uint8_t type)
 {
     switch(type)
     {
@@ -46,7 +56,7 @@ Raw::DATA_TYPE Raw::toDataType(char type)
         return DATA_TYPE::BOOL_8;
         break;
     case 13:
-        return DATA_TYPE::CHAR_PTR;
+        return DATA_TYPE::STRING;
         break;
     default:
         return DATA_TYPE::RAW;
@@ -59,19 +69,24 @@ unsigned short Raw::size() const
     return _data.size();
 }
 
-const std::vector<char> &Raw::data() const
+const std::vector<uint8_t> &Raw::data() const
 {
     return _data;
 }
 
-void Raw::setData(std::vector<char> &newData)
+void Raw::setData(const std::vector<uint8_t> &newData)
 {
-    _data = std::move(newData);
+    _data = newData;
 }
 
-void Raw::push_back(char byte)
+void Raw::push_back(uint8_t byte)
 {
     _data.push_back(byte);
+}
+
+void Raw::clear()
+{
+    _data.clear();
 }
 
 Raw::DATA_TYPE Raw::type() const

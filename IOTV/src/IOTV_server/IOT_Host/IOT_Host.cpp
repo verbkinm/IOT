@@ -2,7 +2,7 @@
 
 #include "IOT_Host.h"
 
-IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0, parent),
+IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0), QObject(parent),
     _structSettings(structSettings)
 {
     connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
@@ -10,20 +10,7 @@ IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : B
 
 IOT_Host::~IOT_Host()
 {
-//    _timerPing.stop();
-//    _timerReconnect.stop();
-//    _reReadTimer.stop();
-
     //!!!
-
-//    disconnect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
-//    disconnect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
-//    disconnect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
-
-//    disconnect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
-//    disconnect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
-//    disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
-
     _thread.quit();
 }
 
@@ -52,42 +39,36 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
     return  writeToServer(data);
 }
 
-qint64 IOT_Host::writeData(uint8_t channelNumber, Raw::RAW &rawData)
+qint64 IOT_Host::writeData(uint8_t channelNumber, const Raw &data)
 {
     if(!isOnline())
         return -1;
 
-    QByteArray data = IOTV_SH::query_WRITE(*this, channelNumber, rawData);
-    return writeToServer(data);
+    return writeToServer(IOTV_SH::query_WRITE(channelNumber, data));
 }
 
-qint64 IOT_Host::writeToServer(QByteArray &data)
+qint64 IOT_Host::writeToServer(const QByteArray &data)
 {
     return _conn_type->write(data);
 }
 
-void IOT_Host::dataResived(QByteArray data)
+void IOT_Host::dataResived(const IOTV_SH::RESPONSE_PKG &data)
 {
-    IOTV_SH::Response_Type dataType = IOTV_SH::checkResponsetData(data);
-
-    if(dataType == IOTV_SH::Response_Type::RESPONSE_WAY)
+    if(data.type == IOTV_SH::Response_Type::RESPONSE_WAY)
         response_WAY_recived(data);
-    else if(dataType == IOTV_SH::Response_Type::RESPONSE_PONG)
-        response_PONG_recived();
-    else if(dataType == IOTV_SH::Response_Type::RESPONSE_READ)
+    else if(data.type == IOTV_SH::Response_Type::RESPONSE_PONG)
+        response_PONG_recived(data);
+    else if(data.type == IOTV_SH::Response_Type::RESPONSE_READ)
         response_READ_recived(data);
-    else if(dataType == IOTV_SH::Response_Type::RESPONSE_WRITE)
+    else if(data.type == IOTV_SH::Response_Type::RESPONSE_WRITE)
         response_WRITE_recived(data);
     else
-    {
-        Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
-        //        _conn_type->disconnectFromHost();
-    }
+        Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
 }
 
-QString IOT_Host::getName() const
+std::string IOT_Host::getName() const
 {
-    return _conn_type.get()->getName();
+    return _conn_type.get()->getName().toStdString();
 }
 
 void IOT_Host::setConnectionTypeTCP()
@@ -143,9 +124,21 @@ void IOT_Host::connectObjects() const
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived, Qt::QueuedConnection);
 }
 
-void IOT_Host::response_WAY_recived(const QByteArray &data)
+void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG &pkg)
 {
-    IOTV_SH::response_WAY(*this, data);
+    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_WAY)
+        return;
+
+    const IOTV_SH::RESPONSE_WAY &wayPkg = static_cast<const IOTV_SH::RESPONSE_WAY &>(pkg);
+
+    this->setId(wayPkg.id);
+    this->setDescription(wayPkg.description);
+
+    for (uint8_t i = 0; i < wayPkg.readChannel.size(); i++)
+        this->addReadSubChannel({wayPkg.readChannel.at(i)});
+
+    for (uint8_t i = 0; i < wayPkg.writeChannel.size(); i++)
+        this->addWriteSubChannel({wayPkg.writeChannel.at(i)});
 
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
@@ -153,38 +146,48 @@ void IOT_Host::response_WAY_recived(const QByteArray &data)
     emit signalResponse_Way();
 }
 
-void IOT_Host::response_READ_recived(const QByteArray &data)
+void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG &pkg)
 {
-    IOTV_SH::response_READ(*this, data);
+    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_READ)
+        return;
+
+    const IOTV_SH::RESPONSE_READ &readPkg = static_cast<const IOTV_SH::RESPONSE_READ &>(pkg);
+
+    this->setReadChannelData(readPkg.chanelNumber, IOTV_SH::QByteArrayToVecUInt8(readPkg.data));
 
     if(_logFile.isEmpty())
         return;
 
-    uint8_t channelNumber = IOTV_SH::channelNumber(data[0]);
-    Raw::DATA_TYPE dt = getReadChannelDataType(channelNumber);
-    Raw::RAW raw = getReadChannelData(channelNumber);
-
-    if(dt == Raw::DATA_TYPE::CHAR_PTR)
+    if(this->getReadChannelType(readPkg.chanelNumber) == Raw::DATA_TYPE::STRING)
     {
-        Log::write("R:"+ QString::number(channelNumber) + "=" +
-                   raw.str,
+        Log::write("R:"+ QString::number(readPkg.chanelNumber) + "=" +
+                   readPkg.data,
                    Log::Write_Flag::FILE, _logFile);
     }
     else
-        Log::write("R:"+ QString::number(channelNumber) + "=" +
-                   Raw::toString(dt, raw).c_str(),
+        Log::write("R:"+ QString::number(readPkg.chanelNumber) + "=" +
+                   readPkg.data.toHex(':'),
                    Log::Write_Flag::FILE, _logFile);
 }
 
-void IOT_Host::response_WRITE_recived(const QByteArray &data)
+void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG &pkg)
 {
-    IOTV_SH::response_WRITE(*this, data);
+    //Нет никакой реакции на ответ о записи
+    Q_UNUSED(pkg)
 }
 
-void IOT_Host::response_PONG_recived()
+void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG &pkg)
 {
-    _timerReconnect.start(TIMER_RECONNECT);
-    _timerPing.start(TIMER_PING);
+    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_PONG)
+        return;
+
+    const IOTV_SH::RESPONSE_PONG &pongPkg = static_cast<const IOTV_SH::RESPONSE_PONG &>(pkg);
+
+    if (pongPkg.state)
+    {
+        _timerReconnect.start(TIMER_RECONNECT);
+        _timerPing.start(TIMER_PING);
+    }
 }
 
 void IOT_Host::setLogFile(const QString &logFile)
@@ -194,7 +197,6 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    //!!!
     _reReadTimer.setInterval(interval < 1000 ? 1000 : interval);
 }
 
@@ -255,23 +257,23 @@ void IOT_Host::slotNewThreadStart()
 
     if (_structSettings.connection_type == "TCP")
         setConnectionTypeTCP();
-//    else if (_structSettings.connection_type == "COM")
-//    {
-//        COM_conn_type::SetingsPort settingsPort;
-//        settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
-//        settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
-//        settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
-//        settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
-//        settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
+    //    else if (_structSettings.connection_type == "COM")
+    //    {
+    //        COM_conn_type::SetingsPort settingsPort;
+    //        settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
+    //        settingsPort.dataBits = _settingsHosts.value("dataBits", 8).toInt();
+    //        settingsPort.parity = _settingsHosts.value("parity", 0).toInt();
+    //        settingsPort.stopBits = _settingsHosts.value("stopBits", 1).toInt();
+    //        settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
 
-//        _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
-//    }
+    //        _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
+    //    }
     else if (_structSettings.connection_type == "FILE")
         setConnectionTypeFile();
-//    else if (_structSettings.connection_type == "UDP")
-//    {
-//        _iot_hosts.back()->setConnectionTypeFile(address);
-//    }
+    //    else if (_structSettings.connection_type == "UDP")
+    //    {
+    //        _iot_hosts.back()->setConnectionTypeFile(address);
+    //    }
     else
     {
         Log::write("Error: settings file syntax error, [" + _structSettings.name + "]", Log::Write_Flag::FILE_STDERR);

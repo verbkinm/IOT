@@ -1,13 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <cstdint>
 
 #include "raw_global.h"
 
 class RAW_EXPORT Raw
 {
 public:
-    enum class DATA_TYPE : char
+    enum class DATA_TYPE : uint8_t
     {
         INTEGER_8,
         INTEGER_16,
@@ -24,28 +25,33 @@ public:
         DOUBLE_64,
 
         BOOL_8,
-        CHAR_PTR,
+        STRING,
 
-        RAW
+        RAW,
+        NONE
     };
 
     Raw();
+    Raw(DATA_TYPE type);
+    Raw(DATA_TYPE type, const std::vector<uint8_t> &data);
 
-    static DATA_TYPE toDataType(char type);
-    static char toUInt8(DATA_TYPE dataType);
+    static DATA_TYPE toDataType(uint8_t type);
+    static uint8_t toUInt8(DATA_TYPE dataType);
 
     friend bool operator==(const Raw &lhs, const Raw &rhs);
 
     unsigned short size() const;
 
     void setType(DATA_TYPE newType);
-    void setData(std::vector<char> &newData);
-    void push_back(char byte);
+    void setData(const std::vector<uint8_t> &newData);
+
+    void push_back(uint8_t byte);
+    void clear();
 
     DATA_TYPE type() const;
-    const std::vector<char> &data() const;
+    const std::vector<uint8_t> &data() const;
 
 private:
     DATA_TYPE _type;
-    std::vector<char> _data;
+    std::vector<uint8_t> _data;
 };

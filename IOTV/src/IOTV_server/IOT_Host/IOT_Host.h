@@ -1,21 +1,24 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
+#include "base_host.h"
 #include "iot_host_structsettings.h"
 
-class IOT_Host : public Base_Host
+#include <QThread>
+
+class IOT_Host : public Base_Host, public QObject
 {
     Q_OBJECT
-
 public:
     IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent = nullptr);
     ~IOT_Host();
 
-    QString getName() const override;
+    std::string getName() const override;
     QString getLogFile() const;
 
     Base_conn_type::Conn_type getConnectionType() const;
@@ -23,12 +26,12 @@ public:
     virtual bool isOnline() const override;
 
     virtual qint64 readData(uint8_t channelNumber) override;
-    virtual qint64 writeData(uint8_t channelNumber, Raw::RAW &rawData) override;
-    virtual qint64 writeToServer(QByteArray &data) override;
+    virtual qint64 writeData(uint8_t channelNumber, const Raw &data) override;
 
-    virtual void dataResived(QByteArray data) override;
+    virtual qint64 writeToServer(const QByteArray &data) override;
+    virtual void dataResived(const IOTV_SH::RESPONSE_PKG &data) override;
 
-    virtual bool runInNewThread() override;
+    bool runInNewThread();
 
 private:
     void connectToHost();
@@ -44,10 +47,10 @@ private:
 
     void connectObjects() const;
 
-    void response_WAY_recived(const QByteArray &data);
-    void response_READ_recived(const QByteArray &data);
-    void response_WRITE_recived(const QByteArray &data);
-    void response_PONG_recived();
+    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG &pkg);
+    void response_READ_recived(const IOTV_SH::RESPONSE_PKG &pkg);
+    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG &pkg);
+    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG &pkg);
 
     static constexpr unsigned int TIMER_PING = 10000;
     static constexpr unsigned int TIMER_RECONNECT = 15000;
@@ -58,6 +61,9 @@ private:
     QTimer _reReadTimer, _timerPing, _timerReconnect;
 
     IOT_Host_StructSettings _structSettings;
+
+    QThread _thread;
+    std::mutex _mutexParametersChange;
 
     enum Flag
     {

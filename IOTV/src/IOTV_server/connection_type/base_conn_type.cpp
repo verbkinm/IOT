@@ -60,29 +60,22 @@ void Base_conn_type::slotReadData()
 {
     _host_buffer_data += readAll();
 
-    if(_host_buffer_data.size() > BUFFER_MAX_SIZE)
+    if (_host_buffer_data.size() > BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
         return;
     }
 
-    while(_host_buffer_data.size())
+    QByteArray tmp = _host_buffer_data;
+    IOTV_SH::RESPONSE_PKG accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
+
+    if (accumPacketResponse.type != IOTV_SH::Response_Type::ERROR)
     {
-        auto accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
+        int difference = tmp.size() - _host_buffer_data.size();
+        QString strOut = _name + ": data riceved from " + _address + " <- " + tmp.mid(difference).toHex(':');
+        Log::write(strOut);
 
-        if(!accumPacketResponse.first)
-            return;
-        else if(accumPacketResponse.second > 0)
-        {
-            QByteArray buffer = _host_buffer_data.mid(0, accumPacketResponse.second);
-            QString strOut = _name + ": data riceved from " + _address + " <- " + buffer.toHex(':');
-            Log::write(strOut);
-
-            _host_buffer_data = _host_buffer_data.mid(accumPacketResponse.second);
-            emit signalDataRiceved(buffer);
-        }
-        else
-            break;
+        emit signalDataRiceved(accumPacketResponse);
     }
 }
 
