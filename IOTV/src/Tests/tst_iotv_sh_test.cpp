@@ -188,6 +188,7 @@ void IOTV_SH_test::response()
         QByteArray data;
         data.push_back(0x10 | IOTV_SH::RESPONSE_PONG_BYTE);
 
+
         QVERIFY(IOTV_SH::accumPacket(data).type != pkg.type);
     }
 }
