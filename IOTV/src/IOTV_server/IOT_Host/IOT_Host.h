@@ -11,7 +11,7 @@
 
 #include <QThread>
 
-class IOT_Host : public Base_Host, public QObject
+class IOT_Host : public Base_Host
 {
     Q_OBJECT
 public:

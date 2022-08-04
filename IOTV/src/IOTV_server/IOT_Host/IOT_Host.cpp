@@ -2,7 +2,7 @@
 
 #include "IOT_Host.h"
 
-IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0), QObject(parent),
+IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0, parent),
     _structSettings(structSettings)
 {
     connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);

@@ -72,11 +72,11 @@ IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
 
     int index = 5 + descriptionLength;
     for (uint8_t i = 0; i < channelReadLength; i++)
-        pkg_data.readChannel.push_back(Raw::toDataType(data.at(index++)));
+        pkg_data.readChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
     pkg_data.readChannel.shrink_to_fit();
 
     for (uint8_t i = 0; i < channelWriteLength; i++)
-        pkg_data.writeChannel.push_back(Raw::toDataType(data.at(index++)));
+        pkg_data.writeChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
     pkg_data.writeChannel.shrink_to_fit();
 
     data = data.mid(expectedLength);

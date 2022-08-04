@@ -35,12 +35,9 @@ public:
     Raw(DATA_TYPE type);
     Raw(DATA_TYPE type, const std::vector<uint8_t> &data);
 
-    static DATA_TYPE toDataType(uint8_t type);
-    static uint8_t toUInt8(DATA_TYPE dataType);
-
     friend bool operator==(const Raw &lhs, const Raw &rhs);
 
-    unsigned short size() const;
+    uint16_t size() const;
 
     void setType(DATA_TYPE newType);
     void setData(const std::vector<uint8_t> &newData);
