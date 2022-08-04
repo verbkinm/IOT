@@ -20,8 +20,8 @@ public:
         FILE
     };
 
-    static const unsigned int BUFFER_MAX_SIZE = 256;
-    static const unsigned int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+    static const int BUFFER_MAX_SIZE = 256;
+    static const int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
 
     QString getName() const;
     QString getAddress() const;

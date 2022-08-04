@@ -3,9 +3,7 @@
 bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
 {
     _dataType.push_back(dataType);
-    Raw::RAW rawData;
-    rawData.ui64 = 0;
-    _data.push_back(rawData);
+    _data.emplace_back(Raw::RAW{0});
 
     return true;
 }
@@ -13,13 +11,7 @@ bool Read_Channel::addSubchannel(const Raw::DATA_TYPE dataType)
 Read_Channel::~Read_Channel()
 {
     for(size_t i = 0; i < _data.size(); i++)
-    {
-        if(_dataType.at(i) == Raw::DATA_TYPE::CHAR_PTR && _data.at(i).str != nullptr)
-            delete[] _data.at(i).str;
-
-        _dataType.erase(_dataType.begin() + i);
-        _data.erase(_data.begin() + i);
-    }
+        clearPointerRAW(i);
 }
 
 bool Read_Channel::removeSubchannel(uint8_t index)
@@ -34,11 +26,12 @@ bool Read_Channel::removeSubchannel(uint8_t index)
 
         _dataType.erase(_dataType.begin() + index);
         _data.erase(_data.begin() + index);
+
         return true;
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
 
@@ -50,8 +43,6 @@ void Read_Channel::removeAllSubchanel()
         clearPointerRAW(i);
 
     _data.clear();
-//        removeSubchannel(i);
-
     _dataType.clear();
 }
 
@@ -64,7 +55,7 @@ bool Read_Channel::setData(uint8_t index, Raw::RAW rawData)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
 }
@@ -77,11 +68,9 @@ Raw::RAW Read_Channel::getData(uint8_t index) const
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
-        Raw::RAW type;
-        type.ui64 = 0; // обнуление всего
-//        type.str = nullptr;
-        return type;
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Raw::RAW data {0};
+        return data;
     }
 }
 
@@ -101,7 +90,7 @@ bool Read_Channel::clearPointerRAW(uint8_t index)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
 }

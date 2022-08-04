@@ -16,6 +16,8 @@ IOT_Host::~IOT_Host()
     _timerReconnect.stop();
     _reReadTimer.stop();
 
+    //!!!
+
     disconnect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected);
     disconnect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected);
     disconnect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived);
@@ -25,6 +27,7 @@ IOT_Host::~IOT_Host()
     disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
 }
 
+//!!!
 void IOT_Host::printDebugData() const
 {
     qDebug() << "\n" << "PRINT DEBUG";
@@ -187,12 +190,12 @@ void IOT_Host::response_READ_recived(const QByteArray &data)
     {
         Log::write("R:"+ QString::number(channelNumber) + "=" +
                    raw.str,
-                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+                   Log::Write_Flag::FILE, _logFile);
     }
     else
         Log::write("R:"+ QString::number(channelNumber) + "=" +
                    Raw::toString(dt, raw).c_str(),
-                   Log::Flags::WRITE_TO_FILE_ONLY, _logFile);
+                   Log::Write_Flag::FILE, _logFile);
 }
 
 void IOT_Host::response_WRITE_recived(const QByteArray &data)
@@ -213,7 +216,8 @@ void IOT_Host::setLogFile(const QString &logFile)
 
 void IOT_Host::setInterval(uint interval)
 {
-    _reReadTimer.setInterval(interval);
+    //!!!
+    _reReadTimer.setInterval(interval < 1000 ? 1000 : interval);
 }
 
 QString IOT_Host::getLogFile() const
@@ -250,8 +254,9 @@ void IOT_Host::slotReReadTimeOut()
 
 void IOT_Host::slotPingTimeOut()
 {
+    //!!!
     QByteArray data;
-    data.push_back(QUERY_PING_BYTE);
+    data.push_back(IOTV_SH::QUERY_PING_BYTE); // = IOTV_SH::QUERY_PING_BYTE, чтобы не включать хедер ради одного значения
     _conn_type->write(data);
 }
 

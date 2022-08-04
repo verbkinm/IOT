@@ -12,4 +12,5 @@ void Wrapper::slotFileChange(QString fileName)
 {
     Log::write("Setting file changed: " + fileName);
     _server = std::make_unique<IOT_Server>();
+    _watcher.addPaths(_server->getFileSettingNames());
 }

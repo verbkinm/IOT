@@ -1,7 +1,7 @@
 QT -= gui
 QT += network serialport testlib
 
-CONFIG += c++17 console warn_on depend_includepath testcase
+CONFIG += c++2a console warn_on depend_includepath testcase
 CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.

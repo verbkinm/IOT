@@ -14,7 +14,7 @@ IOT_Server::IOT_Server(QObject *parent) : QTcpServer(parent),
 
 IOT_Server::~IOT_Server()
 {
-    Log::write("Stop TCP server.", Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, _logFile);
     while (isListening())
     {
         close();
@@ -48,12 +48,12 @@ void IOT_Server::readSettings()
 
         _iot_hosts.emplace_back(std::make_unique<IOT_Host>(group));
 
-        if(connection_type == "TCP")
+        if (connection_type == "TCP")
         {
             quint16 port = _settingsHosts.value("port", 2021).toUInt();
             _iot_hosts.back()->setConnectionTypeTCP(address, port);
         }
-        else if(connection_type == "COM")
+        else if (connection_type == "COM")
         {
             COM_conn_type::SetingsPort settingsPort;
             settingsPort.baudRate = _settingsHosts.value("baudRate", 115200).toInt();
@@ -64,13 +64,17 @@ void IOT_Server::readSettings()
 
             _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
         }
-        else if(connection_type == "FILE")
+        else if (connection_type == "FILE")
+        {
+            _iot_hosts.back()->setConnectionTypeFile(address);
+        }
+        else if (connection_type == "UDP")
         {
             _iot_hosts.back()->setConnectionTypeFile(address);
         }
         else
         {
-            Log::write("Error: settings file syntax error, [" + group + "]", Log::Flags::WRITE_TO_FILE_AND_STDERR);
+            Log::write("Error: settings file syntax error, [" + group + "]", Log::Write_Flag::FILE_STDERR);
             exit(1);
         }
 
@@ -88,17 +92,17 @@ void IOT_Server::startTCPServer()
 {
     connect(this, &QTcpServer::newConnection, this, &IOT_Server::slotNewConnection);
 
-    if(!listen(QHostAddress(_address), _port))
+    if (!listen(QHostAddress(_address), _port))
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDERR, _logFile);
+        Log::write(str, Log::Write_Flag::FILE_STDERR, _logFile);
         _reconnectTimer.start(Base_conn_type::DEFAULT_INTERVAL);
     }
     else
     {
         _reconnectTimer.stop();
         QString str = "Start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, _logFile);
     }
 }
 
@@ -107,15 +111,15 @@ void IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
     socket->write(data);
     Log::write("Send to client " + socket->peerAddress().toString() + ":"
                + QString::number(socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
 }
 
 void IOT_Server::clinetOnlineFile() const
 {
     std::ofstream file("client_online.log", std::ios::trunc);
-    if(!file.is_open())
+    if (!file.is_open())
     {
-        Log::write("Can't open client_online.log", Log::Flags::WRITE_TO_STDERR_ONLY);
+        Log::write("Can't open client_online.log", Log::Write_Flag::STDERR);
         return;
     }
 
@@ -136,7 +140,7 @@ QString IOT_Server::getProgramVersion() const
 
 void IOT_Server::checkSettingsFileExist()
 {
-    if(!QFileInfo::exists(_settingsServer.fileName()))
+    if (!QFileInfo::exists(_settingsServer.fileName()))
     {
         _settingsServer.beginGroup("Server");
         _settingsServer.setValue("address", "127.0.0.1");
@@ -145,7 +149,7 @@ void IOT_Server::checkSettingsFileExist()
         _settingsServer.endGroup();
         _settingsServer.sync();
     }
-    if(!QFileInfo::exists(_settingsHosts.fileName()))
+    if (!QFileInfo::exists(_settingsHosts.fileName()))
     {
         _settingsHosts.beginGroup("Default");
         _settingsHosts.setValue("connection_type", "TCP");
@@ -161,16 +165,16 @@ void IOT_Server::checkSettingsFileExist()
 void IOT_Server::slotNewConnection()
 {
     QTcpSocket* socket = this->nextPendingConnection();
-    if(!socket)
+    if (!socket)
     {
-        Log::write("!!! nextPendingConnection: ", Log::Flags::WRITE_TO_FILE_AND_STDOUT, "New_connection.log"); //debug
+        Log::write("!!! nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log"); //debug
         return;
     }
 
     _clientList.push_back(socket);
 
     Log::write("Client new connection: " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort()),
-               Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+               Log::Write_Flag::FILE_STDOUT, _logFile);
 
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
@@ -182,29 +186,31 @@ void IOT_Server::slotNewConnection()
 void IOT_Server::slotDataRecived()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+    if (socket == nullptr)
+        return;
 
     _server_buffer_data += socket->readAll();
 
     while(_server_buffer_data.size())
     {
-        std::pair<bool, int> accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
+        auto accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
 
-        if(!accumQueryPacket.first)
+        if (!accumQueryPacket.first)
         {
             _server_buffer_data.clear();
             return;
         }
-        if(accumQueryPacket.first && accumQueryPacket.second)
+        if (accumQueryPacket.first && accumQueryPacket.second)
         {
             QByteArray packetData = _server_buffer_data.mid(0, accumQueryPacket.second);
             Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
                        + QString::number(socket->peerPort())
-                       + " <- " + packetData.toHex(':'), Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                       + " <- " + packetData.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
 
             QByteArray buff;
             IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
 
-            if(dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
+            if (dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
             {
                 buff.append(RESPONSE_DEVICE_LIST_BYTE);
                 buff.append(_iot_hosts.size());
@@ -217,47 +223,47 @@ void IOT_Server::slotDataRecived()
                 }
                 writeToSocket(socket, buff);
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_STATE)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_STATE)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-                    if(findDevice != _iot_hosts.end())
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_State(*findDevice->get(), packetData);
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_READ)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_READ)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-                    if(findDevice != _iot_hosts.end())
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+                    if (findDevice != _iot_hosts.end())
                     {
                         IOTV_SC::responceToClient_Read(*findDevice->get(), packetData);
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
-            else if(dataType == IOTV_SC::Query_Type::QUERY_WRITE)
+            else if (dataType == IOTV_SC::Query_Type::QUERY_WRITE)
             {
                 QString deviceName;
-                if(IOTV_SC::queryName(packetData, deviceName))
+                if (IOTV_SC::queryName(packetData, deviceName))
                 {
-                    auto findDevice = std::find_if(_iot_hosts.begin(), _iot_hosts.end(), [&deviceName](std::unique_ptr<IOT_Host> &host)
+                    auto findDevice = std::ranges::find_if (_iot_hosts, [&deviceName](std::unique_ptr<IOT_Host> &host)
                     {
                             return host.get()->getName() == deviceName;
                     });
 
-                    if(findDevice != _iot_hosts.end())
+                    if (findDevice != _iot_hosts.end())
                     {
                         uint8_t nameLength = packetData.at(0) >> 3;
                         uint8_t channelNumber = packetData.at(1) & 0x0F;
@@ -265,17 +271,19 @@ void IOT_Server::slotDataRecived()
                         quint16 dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 
                         QByteArray data = packetData.mid(4 + nameLength, dataLength);
-                        Raw::RAW raw;
+                        Raw::RAW raw{0};
 
-                        if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                         {
                             raw.str = new char[data.size()];
 
+                            //!!! memcpy
                             for (uint8_t i = 0; i < data.size(); ++i)
                                 raw.str[i] = data.at(i);
                         }
                         else
                         {
+                            //!!! memcpy
                             for (uint8_t i = 0; i < Raw::size; ++i)
                                 raw.array[i] = data.at(i);
                         }
@@ -283,14 +291,14 @@ void IOT_Server::slotDataRecived()
                         QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
                         findDevice->get()->writeToServer(dataSend);
 
-                        if(findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
                             delete[] raw.str;
 
                         IOTV_SC::responceToClient_Write(packetData);
                         writeToSocket(socket, packetData);
                     }
                     else
-                        Log::write("Client send data to unknow device name - " + deviceName, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
                 }
             }
             _server_buffer_data = _server_buffer_data.mid(accumQueryPacket.second);
@@ -310,7 +318,7 @@ void IOT_Server::slotDisconnected()
 
     QString strOut = "Client disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
-    Log::write(strOut, Log::Flags::WRITE_TO_FILE_AND_STDOUT, _logFile);
+    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
     socket->deleteLater();
 
     clinetOnlineFile();
@@ -374,7 +382,7 @@ void IOT_Server::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(this->objectName() + ": " + strErr, Log::Flags::WRITE_TO_FILE_AND_STDERR, _logFile);
+    Log::write(this->objectName() + ": " + strErr, Log::Write_Flag::FILE_STDERR, _logFile);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();

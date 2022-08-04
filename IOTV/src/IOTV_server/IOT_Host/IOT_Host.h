@@ -48,7 +48,6 @@ private:
     void response_WRITE_recived(const QByteArray &data);
     void response_PONG_recived();
 
-    //    static const unsigned int TIMER_WAY = 5000;
     static const unsigned int TIMER_PING = 10000;
     static const unsigned int TIMER_RECONNECT = 15000;
 

@@ -16,6 +16,8 @@ Protocol_class::query_type Protocol_class::checkQueryData(const std::vector<uint
         return query_type::QUERY_READ;
     case 0x00:
         return query_type::QUERY_WRITE;
+    case 0x08:
+        return query_type::QUERY_PING;
     default:
         return query_type::ERROR;
     }
@@ -81,5 +83,11 @@ void Protocol_class::response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &d
 
     data.clear();
     data.push_back((chNumber << 4) | 0x04 );
+}
+
+void Protocol_class::response_Pong(std::vector<uint8_t> &data)
+{
+    data.clear();
+    data.push_back(0x0C);
 }
 

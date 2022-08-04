@@ -7,7 +7,7 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     _type = Conn_type::TCP;
     _tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-    connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection);
+    connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection/*, Qt::QueuedConnection*/);
     connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError);
     connect(_tcpSocket.get(), &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged);
 

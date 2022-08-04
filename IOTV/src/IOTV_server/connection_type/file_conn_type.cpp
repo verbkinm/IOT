@@ -11,11 +11,11 @@ qint64 File_conn_type::write(const QByteArray &data)
     Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'));
 
     QByteArray buffer;
-    if(data.size() == 1 && data[0] == QUERY_WAY_BYTE)
+    if(data.size() == 1 && data[0] == IOTV_SH::QUERY_WAY_BYTE)
     {
         //        buffer.clear();
 
-        buffer.push_back(RESPONSE_WAY_BYTE);
+        buffer.push_back(IOTV_SH::RESPONSE_WAY_BYTE);
         buffer.push_back(3); // id устройства
         buffer.push_back(_file.fileName().size() >> 8);
         buffer.push_back(_file.fileName().size());
@@ -32,7 +32,7 @@ qint64 File_conn_type::write(const QByteArray &data)
         emit signalDataRiceved(buffer);
         return 0;
     }
-    else if(data.size() == 1 && data[0] == QUERY_READ_BYTE)
+    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_READ_BYTE)
     {
         if(QFileInfo(_file).size() > BUFFER_MAX_SIZE)
         {
@@ -40,12 +40,13 @@ qint64 File_conn_type::write(const QByteArray &data)
             return 0;
         }
 
-        _file.reset();
+        //!!! При изменении файла не обновляется _file!
+        _file.close();
+        _file.open(QIODevice::ReadOnly);
+
         QByteArray dataRead = _file.readAll();
 
-        //        buffer.clear();
-
-        buffer.push_back(RESPONSE_READ_BYTE);
+        buffer.push_back(IOTV_SH::RESPONSE_READ_BYTE);
         buffer.push_back(dataRead.size() >> 8);
         buffer.push_back(dataRead.size());
 
@@ -56,7 +57,7 @@ qint64 File_conn_type::write(const QByteArray &data)
 
         emit signalDataRiceved(buffer);
     }
-    else if(data.size() >= 3 && data[0] == QUERY_WRITE_BYTE)
+    else if(data.size() >= 3 && data[0] == IOTV_SH::QUERY_WRITE_BYTE)
     {
         if(data.size() != (3 + (data.at(1) | data.at(2))) )
         {
@@ -78,13 +79,13 @@ qint64 File_conn_type::write(const QByteArray &data)
         _file.open(QIODevice::ReadOnly);
 
         buffer.clear();
-        buffer.push_back(RESPONSE_WRITE_BYTE);
+        buffer.push_back(IOTV_SH::RESPONSE_WRITE_BYTE);
         Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
         emit signalDataRiceved(buffer);
     }
-    else if(data.size() == 1 && data[0] == QUERY_PING_BYTE)
+    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_PING_BYTE)
     {
-        buffer.push_back(RESPONSE_PONG_BYTE);
+        buffer.push_back(IOTV_SH::RESPONSE_PONG_BYTE);
         Log::write(_name + ": data riceved from  " + _file.fileName() + " <- " + buffer.toHex(':'));
 
         emit signalDataRiceved(buffer);

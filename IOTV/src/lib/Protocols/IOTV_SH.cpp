@@ -2,19 +2,14 @@
 
 QByteArray IOTV_SH::query_WAY()
 {
-    QByteArray data;
-
-    data.clear();
-    data.append(QUERY_WAY_BYTE);
-
-    return data;
+    return {1, QUERY_WAY_BYTE};
 }
 
 QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
 {
     QByteArray data;
 
-    char channel = channelNumber << 4;
+    uint8_t channel = channelNumber << 4;
     data.append(channel | QUERY_READ_BYTE);
 
     return data;
@@ -33,7 +28,7 @@ QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, co
 
     if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
     {
-        quint16 strLength = strlen(rawData.str);
+        uint16_t strLength = strlen(rawData.str);
         data.append(strLength >> 8);
         data.append(strLength);
         data.append(rawData.str);
@@ -43,7 +38,7 @@ QByteArray IOTV_SH::query_WRITE(const Base_Host &host, uint8_t channelNumber, co
         data.append(Raw::size >> 8);
         data.append(Raw::size);
 
-        for (quint16 i = 0; i < Raw::size; i++)
+        for (uint16_t i = 0; i < Raw::size; i++)
             data.append(rawData.array[i]);
     }
 
@@ -68,7 +63,7 @@ void IOTV_SH::response_WAY(Base_Host &iotHost, const QByteArray &data)
 
     iotHost.setId(data.at(1));
 
-    quint16 descriptionLength = 0;
+    uint16_t descriptionLength = 0;
     descriptionLength = data.at(2);
     descriptionLength <<= 8;
     descriptionLength |= data.at(3);
@@ -92,37 +87,45 @@ void IOTV_SH::response_READ(Base_Host &iotHost, const QByteArray &data)
         return;
 
     size_t channelNumber = data.at(0) >> 4;
-    quint16 dataLength = (data.at(1) << 8) | data.at(2);
+    uint16_t dataLength = (data.at(1) << 8) | static_cast<uint8_t>(data.at(2)); //  cast - чтобы не было отрицательного значения dataLength
 
     QByteArray buf = data.mid(3);
-    Raw::RAW rawData;
+    Raw::RAW rawData {0};
 
     if(iotHost.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
     {
-        rawData.str = new char[dataLength]; // удаляется в ~Base_Host()
-
-        for (quint16 i = 0; i < dataLength; i++)
-            rawData.str[i] = buf.at(i);
-
-        // удаляем строковые данные в хосте и в конце метода мы их туда запишем
-        Raw::RAW raw = (iotHost.getReadChannelData(channelNumber));
-        if(raw.str != nullptr)
+        Raw::RAW rawHost = iotHost.getReadChannelData(channelNumber);
+        if(rawHost.str != nullptr)
         {
-            delete[] raw.str;
-            raw.str = nullptr;
+            std::string sHost {rawHost.str};
+            std::string sBuf {buf.data()};
+            if (*rawHost.str != *buf.data())
+//            if (sHost != sBuf)
+            {
+                delete[] rawHost.str;
+                rawHost.str = nullptr;
+
+                rawData.str = new char[dataLength]; // удаляется в ~Base_Host()
+                memcpy(rawData.str, buf.data(), dataLength);
+            }
+            else
+                rawData = rawHost;
+        }
+        else
+        {
+            rawData.str = new char[dataLength]; // удаляется в ~Base_Host()
+            memcpy(rawData.str, buf.data(), dataLength);
         }
     }
     else
-    {
-        for (uint8_t i = 0; i < dataLength; i++)
-            rawData.array[i] = buf.at(i);
-    }
+        memcpy(rawData.array, buf.data(), dataLength);
 
     iotHost.setReadChannelData(channelNumber, rawData);
 }
 
 void IOTV_SH::response_WRITE(const Base_Host &iotHost, const QByteArray &data)
 {
+    //!!!
     Q_UNUSED(iotHost);
     Q_UNUSED(data);
 
@@ -147,7 +150,7 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
     {
         if(data.size() > 6)
         {
-            quint16 descriptionLength = 0;
+            uint16_t descriptionLength = 0;
             descriptionLength = data.at(2);
             descriptionLength <<= 8;
             descriptionLength |= data.at(3);
@@ -155,7 +158,7 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
             uint8_t channelReadLength = data.at(4) >> 4;
             uint8_t channelWriteLength = data.at(4) & 0x0F;
 
-            quint16 expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
+            uint16_t expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
             if(data.size() < expectedLength)
                 return Response_Type::ERROR;
         }
@@ -167,9 +170,7 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
     else if(firstByte == RESPONSE_PONG_BYTE)
         return Response_Type::RESPONSE_PONG;
 
-
     firstByte &= 0x0F;
-
     switch (firstByte)
     {
     case RESPONSE_READ_BYTE:
@@ -183,21 +184,21 @@ IOTV_SH::Response_Type IOTV_SH::checkResponsetData(const QByteArray &data)
     }
 }
 
-uint8_t IOTV_SH::channelNumber(char byte)
+uint8_t IOTV_SH::channelNumber(uint8_t byte)
 {
     return (byte >> 4);
 }
 
-std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
+std::pair<bool, uint32_t> IOTV_SH::accumPacket(const QByteArray &data)
 {
     Response_Type dataType = checkResponsetData(data);
-    uint32_t dataSize = static_cast<uint32_t>(data.size());
+    uint32_t dataSize = data.size();
 
     if(dataType == Response_Type::ERROR)
         return {false, 0};
     else if(dataSize >= 5 && dataType == Response_Type::RESPONSE_WAY)
     {
-        quint16 descriptionLength = (data[2] << 8) | data[3];
+        uint16_t descriptionLength = (data[2] << 8) | data[3];
         uint8_t readChannelCount = data[4] >> 4;
         uint8_t writeChannelCount = data[4] & 0x0F;
         uint32_t packetSize = 5 + descriptionLength + readChannelCount + writeChannelCount;
@@ -210,13 +211,13 @@ std::pair<bool, int> IOTV_SH::accumPacket(const QByteArray &data)
     }
     else if(dataSize >= 3 && dataType == Response_Type::RESPONSE_READ)
     {
-        quint16 dataLength = (data[1] << 8) | data[2];
-        if(dataSize >= static_cast<uint32_t>(3 + dataLength))
-            return {true, static_cast<uint32_t>(3 + dataLength)};
+        uint16_t dataLength = (data[1] << 8) | data[2];
+        if(dataSize >= (3u + dataLength))
+            return {true, 3 + dataLength};
     }
     else if(dataSize >= 1 && dataType == Response_Type::RESPONSE_WRITE)
         return {true, 1};
-    else if(dataSize > 256)
+    else if(dataSize > 256) // максимальный размер пакета данных
         return {false, 0};
 
     return {false, 0};

@@ -1,5 +1,4 @@
-#ifndef BASE_HOST_H
-#define BASE_HOST_H
+#pragma once
 
 #include "read_channel.h"
 #include "write_channel.h"
@@ -50,4 +49,3 @@ protected:
     Write_Channel _writeChannel;
 };
 
-#endif // BASE_HOST_H

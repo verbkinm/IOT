@@ -19,7 +19,7 @@ bool Write_Channel::removeSubchannel(uint8_t index)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Flags::WRITE_TO_FILE_AND_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
         return false;
     }
 }
