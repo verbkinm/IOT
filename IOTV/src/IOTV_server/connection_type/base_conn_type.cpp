@@ -37,6 +37,14 @@ void Base_conn_type::disconnectFromHost()
 
 }
 
+void Base_conn_type::trimBufferFromBegin(u_int8_t size)
+{
+    if (size > _host_buffer_data.size())
+        return;
+
+    _host_buffer_data = _host_buffer_data.mid(0, size);
+}
+
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
 {
     if(conn_type == Conn_type::NONE)
@@ -59,6 +67,7 @@ QByteArray Base_conn_type::readAll()
 void Base_conn_type::slotReadData()
 {
     _host_buffer_data += readAll();
+    Log::write(_name + ": <- " + _host_buffer_data.toHex(':'));
 
     if (_host_buffer_data.size() > BUFFER_MAX_SIZE)
     {
@@ -66,17 +75,7 @@ void Base_conn_type::slotReadData()
         return;
     }
 
-    QByteArray tmp = _host_buffer_data;
-    IOTV_SH::RESPONSE_PKG accumPacketResponse = IOTV_SH::accumPacket(_host_buffer_data);
-
-    if (accumPacketResponse.type != IOTV_SH::Response_Type::ERROR)
-    {
-        int difference = tmp.size() - _host_buffer_data.size();
-        QString strOut = _name + ": data riceved from " + _address + " <- " + tmp.mid(difference).toHex(':');
-        Log::write(strOut);
-
-        emit signalDataRiceved(accumPacketResponse);
-    }
+    emit signalDataRiceved(_host_buffer_data);
 }
 
 QString Base_conn_type::getName() const

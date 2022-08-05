@@ -45,7 +45,7 @@ protected:
 
     virtual qint64 readData(uint8_t channelNumber) = 0;
     virtual qint64 writeData(uint8_t channelNumber, const Raw &rawData) = 0;
-    virtual void dataResived(const IOTV_SH::RESPONSE_PKG &data) = 0;
+    virtual void dataResived(QByteArray data) = 0;
 
     virtual qint64 writeToServer(const QByteArray &data) = 0;
 

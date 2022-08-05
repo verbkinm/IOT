@@ -29,7 +29,7 @@ public:
     virtual qint64 writeData(uint8_t channelNumber, const Raw &data) override;
 
     virtual qint64 writeToServer(const QByteArray &data) override;
-    virtual void dataResived(const IOTV_SH::RESPONSE_PKG &data) override;
+    virtual void dataResived(QByteArray data) override;
 
     bool runInNewThread();
 
@@ -47,10 +47,10 @@ private:
 
     void connectObjects() const;
 
-    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG &pkg);
-    void response_READ_recived(const IOTV_SH::RESPONSE_PKG &pkg);
-    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG &pkg);
-    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG &pkg);
+    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+    void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
 
     static constexpr unsigned int TIMER_PING = 10000;
     static constexpr unsigned int TIMER_RECONNECT = 15000;
@@ -62,7 +62,7 @@ private:
 
     IOT_Host_StructSettings _structSettings;
 
-    QThread _thread;
+    QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange;
 
     enum Flag
@@ -86,6 +86,7 @@ private slots:
     void slotReconnectTimeOut();
 
     void slotNewThreadStart();
+    void slotThreadStop();
 
 signals:
     void signalHostConnected();

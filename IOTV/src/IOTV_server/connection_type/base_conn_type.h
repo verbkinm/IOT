@@ -34,6 +34,8 @@ public:
     virtual void connectToHost();
     virtual void disconnectFromHost();
 
+    void trimBufferFromBegin(u_int8_t size);
+
     static QString ConnTypeToString(Conn_type conn_type);
 
 protected:
@@ -52,5 +54,5 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
-    void signalDataRiceved(IOTV_SH::RESPONSE_PKG data);
+    void signalDataRiceved(QByteArray);
 };

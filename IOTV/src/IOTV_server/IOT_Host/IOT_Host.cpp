@@ -6,12 +6,24 @@ IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : B
     _structSettings(structSettings)
 {
     connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
+    connect(&_thread, &QThread::finished, this, &IOT_Host::slotThreadStop, Qt::QueuedConnection);
 }
 
 IOT_Host::~IOT_Host()
 {
     //!!!
+//    this->moveToThread(_parentThread);
+
+//    _timerPing.moveToThread(_parentThread);
+//    _timerReconnect.moveToThread(_parentThread);
+//    _reReadTimer.moveToThread(_parentThread);
+
+//    disconnect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
+//    disconnect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
+//    disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
+
     _thread.quit();
+    _thread.wait();
 }
 
 Base_conn_type::Conn_type IOT_Host::getConnectionType() const
@@ -52,16 +64,24 @@ qint64 IOT_Host::writeToServer(const QByteArray &data)
     return _conn_type->write(data);
 }
 
-void IOT_Host::dataResived(const IOTV_SH::RESPONSE_PKG &data)
+void IOT_Host::dataResived(QByteArray data)
 {
-    if(data.type == IOTV_SH::Response_Type::RESPONSE_WAY)
-        response_WAY_recived(data);
-    else if(data.type == IOTV_SH::Response_Type::RESPONSE_PONG)
-        response_PONG_recived(data);
-    else if(data.type == IOTV_SH::Response_Type::RESPONSE_READ)
-        response_READ_recived(data);
-    else if(data.type == IOTV_SH::Response_Type::RESPONSE_WRITE)
-        response_WRITE_recived(data);
+    int dataSize = data.size();
+
+    IOTV_SH::RESPONSE_PKG *pkg = IOTV_SH::accumPacket(data);
+    if (pkg == nullptr)
+        return;
+
+    this->_conn_type->trimBufferFromBegin(dataSize - data.size());
+
+    if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
+        response_WAY_recived(pkg);
+    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
+        response_PONG_recived(pkg);
+    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
+        response_READ_recived(pkg);
+    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
+        response_WRITE_recived(pkg);
     else
         Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
 }
@@ -106,6 +126,7 @@ void IOT_Host::connectToHost()
 
 bool IOT_Host::runInNewThread()
 {
+    _parentThread = QThread::currentThread();
     this->moveToThread(&_thread);
 
     _timerPing.moveToThread(&_thread);
@@ -124,21 +145,27 @@ void IOT_Host::connectObjects() const
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived, Qt::QueuedConnection);
 }
 
-void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG &pkg)
+void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
-    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_WAY)
+    if (pkg == nullptr)
         return;
 
-    const IOTV_SH::RESPONSE_WAY &wayPkg = static_cast<const IOTV_SH::RESPONSE_WAY &>(pkg);
+    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WAY)
+    {
+        delete pkg;
+        return;
+    }
 
-    this->setId(wayPkg.id);
-    this->setDescription(wayPkg.description);
+    const IOTV_SH::RESPONSE_WAY *wayPkg = static_cast<const IOTV_SH::RESPONSE_WAY*>(pkg);
 
-    for (uint8_t i = 0; i < wayPkg.readChannel.size(); i++)
-        this->addReadSubChannel({wayPkg.readChannel.at(i)});
+    this->setId(wayPkg->id);
+    this->setDescription(wayPkg->description);
 
-    for (uint8_t i = 0; i < wayPkg.writeChannel.size(); i++)
-        this->addWriteSubChannel({wayPkg.writeChannel.at(i)});
+    for (uint8_t i = 0; i < wayPkg->readChannel.size(); i++)
+        this->addReadSubChannel({wayPkg->readChannel.at(i)});
+
+    for (uint8_t i = 0; i < wayPkg->writeChannel.size(); i++)
+        this->addWriteSubChannel({wayPkg->writeChannel.at(i)});
 
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
@@ -146,44 +173,64 @@ void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG &pkg)
     emit signalResponse_Way();
 }
 
-void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG &pkg)
+void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
-    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_READ)
+    if (pkg == nullptr)
         return;
 
-    const IOTV_SH::RESPONSE_READ &readPkg = static_cast<const IOTV_SH::RESPONSE_READ &>(pkg);
+    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_READ)
+    {
+        delete pkg;
+        return;
+    }
 
-    this->setReadChannelData(readPkg.chanelNumber, IOTV_SH::QByteArrayToVecUInt8(readPkg.data));
+    const IOTV_SH::RESPONSE_READ *readPkg = static_cast<const IOTV_SH::RESPONSE_READ *>(pkg);
+
+    this->setReadChannelData(readPkg->chanelNumber, IOTV_SH::QByteArrayToVecUInt8(readPkg->data));
 
     if(_logFile.isEmpty())
         return;
 
-    if(this->getReadChannelType(readPkg.chanelNumber) == Raw::DATA_TYPE::STRING)
+    if(this->getReadChannelType(readPkg->chanelNumber) == Raw::DATA_TYPE::STRING)
     {
-        Log::write("R:"+ QString::number(readPkg.chanelNumber) + "=" +
-                   readPkg.data,
+        Log::write("R:"+ QString::number(readPkg->chanelNumber) + "=" +
+                   readPkg->data,
                    Log::Write_Flag::FILE, _logFile);
     }
     else
-        Log::write("R:"+ QString::number(readPkg.chanelNumber) + "=" +
-                   readPkg.data.toHex(':'),
+        Log::write("R:"+ QString::number(readPkg->chanelNumber) + "=" +
+                   readPkg->data.toHex(':'),
                    Log::Write_Flag::FILE, _logFile);
 }
 
-void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG &pkg)
+void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
+    if (pkg == nullptr)
+        return;
+
+    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WRITE)
+    {
+        delete pkg;
+        return;
+    }
     //Нет никакой реакции на ответ о записи
     Q_UNUSED(pkg)
 }
 
-void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG &pkg)
+void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
-    if (pkg.type != IOTV_SH::Response_Type::RESPONSE_PONG)
+    if (pkg == nullptr)
         return;
 
-    const IOTV_SH::RESPONSE_PONG &pongPkg = static_cast<const IOTV_SH::RESPONSE_PONG &>(pkg);
+    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_PONG)
+    {
+        delete pkg;
+        return;
+    }
 
-    if (pongPkg.state)
+    const IOTV_SH::RESPONSE_PONG *pongPkg = static_cast<const IOTV_SH::RESPONSE_PONG *>(pkg);
+
+    if (pongPkg->state)
     {
         _timerReconnect.start(TIMER_RECONNECT);
         _timerPing.start(TIMER_PING);
@@ -281,4 +328,9 @@ void IOT_Host::slotNewThreadStart()
     }
 
     connectToHost();
+}
+
+void IOT_Host::slotThreadStop()
+{
+
 }

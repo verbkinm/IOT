@@ -20,6 +20,9 @@ IOT_Server::~IOT_Server()
         close();
         QThread::sleep(1);
     }
+
+//    for (auto &el : _iot_hosts)
+//        el.reset();
 }
 
 QStringList IOT_Server::getFileSettingNames() const
