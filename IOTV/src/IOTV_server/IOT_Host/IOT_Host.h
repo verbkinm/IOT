@@ -95,6 +95,8 @@ signals:
     void signalDataRiceved();
 
     void signalResponse_Way();
+
+    void signalStopThread();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(IOT_Host::Flags)

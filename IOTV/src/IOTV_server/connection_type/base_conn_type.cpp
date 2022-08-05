@@ -39,10 +39,12 @@ void Base_conn_type::disconnectFromHost()
 
 void Base_conn_type::trimBufferFromBegin(u_int8_t size)
 {
+    std::lock_guard lg(_hostBuffMutex);
+
     if (size > _host_buffer_data.size())
         return;
 
-    _host_buffer_data = _host_buffer_data.mid(0, size);
+    _host_buffer_data = _host_buffer_data.mid(size);
 }
 
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
@@ -66,10 +68,12 @@ QByteArray Base_conn_type::readAll()
 
 void Base_conn_type::slotReadData()
 {
+    std::lock_guard lg(_hostBuffMutex);
+
     _host_buffer_data += readAll();
     Log::write(_name + ": <- " + _host_buffer_data.toHex(':'));
 
-    if (_host_buffer_data.size() > BUFFER_MAX_SIZE)
+    if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
         return;

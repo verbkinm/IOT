@@ -6,23 +6,12 @@ IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : B
     _structSettings(structSettings)
 {
     connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
-    connect(&_thread, &QThread::finished, this, &IOT_Host::slotThreadStop, Qt::QueuedConnection);
+    connect(this, &IOT_Host::signalStopThread, this, &IOT_Host::slotThreadStop, Qt::QueuedConnection);
 }
 
 IOT_Host::~IOT_Host()
 {
-    //!!!
-//    this->moveToThread(_parentThread);
-
-//    _timerPing.moveToThread(_parentThread);
-//    _timerReconnect.moveToThread(_parentThread);
-//    _reReadTimer.moveToThread(_parentThread);
-
-//    disconnect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut);
-//    disconnect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut);
-//    disconnect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut);
-
-    _thread.quit();
+    emit signalStopThread();
     _thread.wait();
 }
 
@@ -68,22 +57,24 @@ void IOT_Host::dataResived(QByteArray data)
 {
     int dataSize = data.size();
 
-    IOTV_SH::RESPONSE_PKG *pkg = IOTV_SH::accumPacket(data);
-    if (pkg == nullptr)
-        return;
+    IOTV_SH::RESPONSE_PKG *pkg;
+    while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
+    {
+        this->_conn_type->trimBufferFromBegin(dataSize - data.size());
 
-    this->_conn_type->trimBufferFromBegin(dataSize - data.size());
+        if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
+            response_WAY_recived(pkg);
+        else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
+            response_PONG_recived(pkg);
+        else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
+            response_READ_recived(pkg);
+        else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
+            response_WRITE_recived(pkg);
+        else
+            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
 
-    if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
-        response_WAY_recived(pkg);
-    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
-        response_PONG_recived(pkg);
-    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
-        response_READ_recived(pkg);
-    else if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
-        response_WRITE_recived(pkg);
-    else
-        Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
+        delete pkg;
+    }
 }
 
 std::string IOT_Host::getName() const
@@ -126,7 +117,11 @@ void IOT_Host::connectToHost()
 
 bool IOT_Host::runInNewThread()
 {
+    if (_parentThread == QThread::currentThread())
+        return false;
+
     _parentThread = QThread::currentThread();
+
     this->moveToThread(&_thread);
 
     _timerPing.moveToThread(&_thread);
@@ -269,6 +264,8 @@ void IOT_Host::slotDisconnected()
     _timerReconnect.stop();
     _reReadTimer.stop();
 
+    _conn_type->trimBufferFromBegin(0);
+
 
     emit signalHostDisconnected(); ///!!! никуда не идут
 }
@@ -332,5 +329,12 @@ void IOT_Host::slotNewThreadStart()
 
 void IOT_Host::slotThreadStop()
 {
+    if (_parentThread == nullptr)
+        return;
 
+    this->moveToThread(_parentThread);
+
+    _timerPing.moveToThread(_parentThread);
+    _timerReconnect.moveToThread(_parentThread);
+    _reReadTimer.moveToThread(_parentThread);
 }

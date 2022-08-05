@@ -20,9 +20,6 @@ IOT_Server::~IOT_Server()
         close();
         QThread::sleep(1);
     }
-
-//    for (auto &el : _iot_hosts)
-//        el.reset();
 }
 
 QStringList IOT_Server::getFileSettingNames() const
@@ -48,6 +45,7 @@ void IOT_Server::readSettings()
         structSettings.name = group;
         structSettings.connection_type = _settingsHosts.value("connection_type", "TCP").toString();
         structSettings.address = _settingsHosts.value("address", "127.0.0.1").toString();
+        structSettings.port = _settingsHosts.value("port", 0).toUInt();
         structSettings.interval = _settingsHosts.value("interval", 1000).toUInt();
         structSettings.logFile = _settingsHosts.value("log_file", "").toString();
 

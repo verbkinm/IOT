@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include <QTimer>
 
 #include "log.h"
@@ -44,6 +46,8 @@ protected:
     Conn_type _type;
     QTimer _reconnectTimer;
     QByteArray _host_buffer_data;
+
+    std::mutex _hostBuffMutex;
 
     virtual QByteArray readAll();
 
