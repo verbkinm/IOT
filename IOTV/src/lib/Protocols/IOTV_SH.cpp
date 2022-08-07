@@ -60,10 +60,10 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
         expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
 
         if (data.size() < expectedLength)
-            return nullptr;
+            return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
     }
     else
-        return nullptr;
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);;
 
     RESPONSE_WAY *pkg_data = new RESPONSE_WAY;
 
@@ -87,12 +87,12 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
 IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_READ_PKG(QByteArray &data)
 {
     if (data.length() < 3)
-        return nullptr;
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
     uint16_t dataLength = (data.at(1) << 8) | static_cast<uint8_t>(data.at(2)); //  cast - чтобы не было отрицательного значения dataLength
 
     if (data.length() < (3 + dataLength))
-        return nullptr;
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
     RESPONSE_READ *pkg_data = new RESPONSE_READ;
 

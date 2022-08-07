@@ -43,6 +43,7 @@ public:
 protected:
     const QString _name;
     QString _address;
+    QString _logFile;
     Conn_type _type;
     QTimer _reconnectTimer;
     QByteArray _host_buffer_data;

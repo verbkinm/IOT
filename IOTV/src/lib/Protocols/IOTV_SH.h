@@ -12,6 +12,7 @@ public:
         RESPONSE_READ,
         RESPONSE_WRITE,
         RESPONSE_PONG,
+        RESPONSE_INCOMPLETE,
         ERROR
     };
 
@@ -30,14 +31,16 @@ public:
 
     struct RESPONSE_PKG
     {
-        Response_Type type = Response_Type::ERROR;
+        Response_Type type;
+        RESPONSE_PKG(Response_Type resType = Response_Type::ERROR) : type(resType)
+        {}
     };
 
     struct RESPONSE_WAY : RESPONSE_PKG
     {
-        RESPONSE_WAY()
+        RESPONSE_WAY() : RESPONSE_PKG(Response_Type::RESPONSE_WAY)
         {
-            type = Response_Type::RESPONSE_WAY;
+
         }
 
         uint8_t id;
@@ -48,9 +51,9 @@ public:
 
     struct RESPONSE_WRITE : RESPONSE_PKG
     {
-        RESPONSE_WRITE()
+        RESPONSE_WRITE() : RESPONSE_PKG(Response_Type::RESPONSE_WRITE)
         {
-            type = Response_Type::RESPONSE_WRITE;
+
         }
 
         uint8_t chanelNumber;
@@ -68,9 +71,9 @@ public:
 
     struct RESPONSE_PONG : RESPONSE_PKG
     {
-        RESPONSE_PONG()
+        RESPONSE_PONG() : RESPONSE_PKG(Response_Type::RESPONSE_PONG)
         {
-            type = Response_Type::RESPONSE_PONG;
+
         }
 
         bool state;

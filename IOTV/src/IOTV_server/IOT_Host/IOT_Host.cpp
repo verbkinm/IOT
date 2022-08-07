@@ -55,11 +55,18 @@ qint64 IOT_Host::writeToServer(const QByteArray &data)
 
 void IOT_Host::dataResived(QByteArray data)
 {
+
     int dataSize = data.size();
 
     IOTV_SH::RESPONSE_PKG *pkg;
     while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
     {
+        if (pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE)
+        {
+            delete pkg;
+            return;
+        }
+
         this->_conn_type->trimBufferFromBegin(dataSize - data.size());
 
         if(pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
@@ -75,6 +82,8 @@ void IOT_Host::dataResived(QByteArray data)
 
         delete pkg;
     }
+
+    this->_conn_type->trimBufferFromBegin(1);
 }
 
 std::string IOT_Host::getName() const
@@ -155,6 +164,8 @@ void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 
     this->setId(wayPkg->id);
     this->setDescription(wayPkg->description);
+
+    this->removeAllSubChannel();
 
     for (uint8_t i = 0; i < wayPkg->readChannel.size(); i++)
         this->addReadSubChannel({wayPkg->readChannel.at(i)});
@@ -264,7 +275,7 @@ void IOT_Host::slotDisconnected()
     _timerReconnect.stop();
     _reReadTimer.stop();
 
-    _conn_type->trimBufferFromBegin(0);
+    _conn_type->trimBufferFromBegin(static_cast<uint8_t>(Base_conn_type::BUFFER_MAX_SIZE));
 
 
     emit signalHostDisconnected(); ///!!! никуда не идут

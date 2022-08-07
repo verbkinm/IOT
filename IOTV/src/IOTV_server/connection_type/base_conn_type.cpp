@@ -40,10 +40,6 @@ void Base_conn_type::disconnectFromHost()
 void Base_conn_type::trimBufferFromBegin(u_int8_t size)
 {
     std::lock_guard lg(_hostBuffMutex);
-
-    if (size > _host_buffer_data.size())
-        return;
-
     _host_buffer_data = _host_buffer_data.mid(size);
 }
 
@@ -71,11 +67,12 @@ void Base_conn_type::slotReadData()
     std::lock_guard lg(_hostBuffMutex);
 
     _host_buffer_data += readAll();
-    Log::write(_name + ": <- " + _host_buffer_data.toHex(':'));
+    Log::write(_name + ": <- " + _host_buffer_data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
     if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
+        Log::write(_name + ": buffer cleared!", Log::Write_Flag::FILE_STDOUT);
         return;
     }
 
