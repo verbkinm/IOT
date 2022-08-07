@@ -27,7 +27,7 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
     return _readChannel.setData(channelNumber, data);
 }
 
-bool Base_Host::setReadChannelData(uint8_t channelNumber, const std::vector<uint8_t> &data)
+bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
     return _readChannel.setData(channelNumber, data);
 }

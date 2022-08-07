@@ -1,4 +1,4 @@
-CONFIG -= qt
+CONFIG += qt
 
 TEMPLATE = lib
 DEFINES += RAW_LIBRARY

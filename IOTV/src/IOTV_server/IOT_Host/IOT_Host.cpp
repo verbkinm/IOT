@@ -192,21 +192,17 @@ void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 
     const IOTV_SH::RESPONSE_READ *readPkg = static_cast<const IOTV_SH::RESPONSE_READ *>(pkg);
 
-    this->setReadChannelData(readPkg->chanelNumber, IOTV_SH::QByteArrayToVecUInt8(readPkg->data));
+    this->setReadChannelData(readPkg->chanelNumber, readPkg->data);
 
     if(_logFile.isEmpty())
         return;
 
-    if(this->getReadChannelType(readPkg->chanelNumber) == Raw::DATA_TYPE::STRING)
-    {
-        Log::write("R:"+ QString::number(readPkg->chanelNumber) + "=" +
-                   readPkg->data,
-                   Log::Write_Flag::FILE, _logFile);
-    }
-    else
-        Log::write("R:"+ QString::number(readPkg->chanelNumber) + "=" +
-                   readPkg->data.toHex(':'),
-                   Log::Write_Flag::FILE, _logFile);
+    Raw raw(this->getReadChannelType(readPkg->chanelNumber), readPkg->data);
+    Log::write("R:"
+               + QString::number(readPkg->chanelNumber)
+               + "="
+               + raw.strData(),
+               Log::Write_Flag::FILE_STDOUT, _logFile);
 }
 
 void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)

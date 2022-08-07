@@ -1,10 +1,12 @@
 #pragma once
 
+#include <mutex>
+#include <iostream>
+
 #include <QString>
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
-#include <iostream>
 
 #include "Log_global.h"
 
@@ -29,5 +31,6 @@ private:
     static void writeToStdErr(const QString &data);
 
     static const QString _FORMAT;
+    static std::mutex _mutex;
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(Log::Write_Flags)

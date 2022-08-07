@@ -12,7 +12,7 @@ public:
 
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
-    bool setReadChannelData(uint8_t channelNumber, const std::vector<uint8_t> &data);
+    bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
 
     bool setWriteChannelData(uint8_t channelNumber, const Raw &data);
 

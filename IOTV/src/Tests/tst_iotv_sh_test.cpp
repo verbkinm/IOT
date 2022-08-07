@@ -70,127 +70,132 @@ void IOTV_SH_test::query()
 
 void IOTV_SH_test::response()
 {
-//    {
-//        //Ответ WAY
-//        IOTV_SH::RESPONSE_WAY pkg;
-//        pkg.id = 3;
-//        pkg.description = "test";
-//        pkg.readChannel = {Raw::DATA_TYPE::BOOL_8};
-//        pkg.writeChannel = {Raw::DATA_TYPE::BOOL_8};
+    {
+        //Ответ WAY
+        IOTV_SH::RESPONSE_WAY pkg;
+        pkg.id = 3;
+        pkg.description = "test";
+        pkg.readChannel = {Raw::DATA_TYPE::BOOL_8};
+        pkg.writeChannel = {Raw::DATA_TYPE::BOOL_8};
 
-//        const char arr[] = {static_cast<char>(IOTV_SH::RESPONSE_WAY_BYTE),
-//                            static_cast<char>(pkg.id),
-//                            static_cast<char>(pkg.description.size() >> 8),
-//                            static_cast<char>(pkg.description.size()),
-//                            static_cast<char>((pkg.readChannel.size() << 4) | pkg.writeChannel.size())
-//                           };
+        const char arr[] = {static_cast<char>(IOTV_SH::RESPONSE_WAY_BYTE),
+                            static_cast<char>(pkg.id),
+                            static_cast<char>(pkg.description.size() >> 8),
+                            static_cast<char>(pkg.description.size()),
+                            static_cast<char>((pkg.readChannel.size() << 4) | pkg.writeChannel.size())
+                           };
 
-//        QByteArray data(QByteArray::fromRawData(arr, 5));
+        QByteArray data(QByteArray::fromRawData(arr, 5));
 
-//        for (auto ch : pkg.description)
-//            data.push_back(ch);
+        for (auto ch : pkg.description)
+            data.push_back(ch);
 
-//        data.push_back(static_cast<char>(pkg.readChannel.at(0)));
-//        data.push_back(static_cast<char>(pkg.writeChannel.at(0)));
+        data.push_back(static_cast<char>(pkg.readChannel.at(0)));
+        data.push_back(static_cast<char>(pkg.writeChannel.at(0)));
 
-//        int onePkg = data.size();
+        int onePkg = data.size();
 
-//        data = data.repeated(3);
-//        data.push_back('\0'); // мусорный байт
+        data = data.repeated(3);
+        data.push_back('\0'); // мусорный байт
 
-//        QCOMPARE(data.size(), onePkg * 3 + 1);
+        QCOMPARE(data.size(), onePkg * 3 + 1);
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), onePkg * 2 + 1);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), onePkg * 2 + 1);
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), onePkg + 1);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), onePkg + 1);
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), 1);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), 1);
 
-//        IOTV_SH::RESPONSE_PKG errorPkg;
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, errorPkg.type);
-//    }
+        QCOMPARE(IOTV_SH::accumPacket(data), nullptr);
 
-//    {
-//        //Ответ READ
-//        uint8_t channelNumber = 1;
-//        uint16_t digit = 257;
+        data = QByteArray::fromRawData(arr, 5);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_INCOMPLETE);
+    }
 
-//        QByteArray data;
-//        data.push_back(digit >> 8);
-//        data.push_back(digit);
+    {
+        //Ответ READ
+        uint8_t channelNumber = 1;
+        uint16_t digit = 257;
 
-//        IOTV_SH::RESPONSE_READ pkg;
-//        pkg.chanelNumber = channelNumber;
-//        pkg.data = data;
+        QByteArray data;
+        data.push_back(digit >> 8);
+        data.push_back(digit);
 
-//        data.clear();
-//        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_READ_BYTE);
-//        data.push_back(pkg.data.size() >> 8);
-//        data.push_back(pkg.data.size());
-//        data.append(pkg.data);
+        IOTV_SH::RESPONSE_READ pkg;
+        pkg.chanelNumber = channelNumber;
+        pkg.data = data;
 
-//        int onePkg = data.size();
-//        data = data.repeated(3);
-//        data.push_back('\0'); // мусорный байт
+        data.clear();
+        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_READ_BYTE);
+        data.push_back(pkg.data.size() >> 8);
+        data.push_back(pkg.data.size());
+        data.append(pkg.data);
 
-//        QCOMPARE(data.size(), onePkg * 3 + 1);
+        int onePkg = data.size();
+        data = data.repeated(3);
+        data.push_back('\0'); // мусорный байт
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), onePkg * 2 + 1);
+        QCOMPARE(data.size(), onePkg * 3 + 1);
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), onePkg + 1);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), onePkg * 2 + 1);
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//        QCOMPARE(data.size(), 1);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), onePkg + 1);
 
-//        uint16_t result;
-//        std::memcpy(&result, pkg.data.data(), sizeof(result));
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+        QCOMPARE(data.size(), 1);
 
-//        QCOMPARE(result, digit);
+        uint16_t result;
+        std::memcpy(&result, pkg.data.data(), sizeof(result));
 
-//        IOTV_SH::RESPONSE_PKG errorPkg;
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, errorPkg.type);
-//    }
+        QCOMPARE(result, digit);
 
-//    {
-//        //Ответ WRITE
-//        uint8_t channelNumber = 1;
+        QCOMPARE(IOTV_SH::accumPacket(data), nullptr);
 
-//        IOTV_SH::RESPONSE_WRITE pkg;
-//        pkg.chanelNumber = channelNumber;
+        data.clear();
+        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_READ_BYTE);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_INCOMPLETE);
+    }
 
-//        QByteArray data;
-//        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_WRITE_BYTE);
+    {
+        //Ответ WRITE
+        uint8_t channelNumber = 1;
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//    }
+        IOTV_SH::RESPONSE_WRITE pkg;
+        pkg.chanelNumber = channelNumber;
 
-//    {
-//        //Ответ PONG
-//        IOTV_SH::RESPONSE_PONG pkg;
-//        pkg.state = true;
+        QByteArray data;
+        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_WRITE_BYTE);
 
-//        QByteArray data;
-//        data.push_back(IOTV_SH::RESPONSE_PONG_BYTE);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+    }
 
-//        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
-//    }
+    {
+        //Ответ PONG
+        IOTV_SH::RESPONSE_PONG pkg;
+        pkg.state = true;
 
-//    {
-//        //ОШИБКИ
-//        IOTV_SH::RESPONSE_PONG pkg;
-//        pkg.state = true;
+        QByteArray data;
+        data.push_back(IOTV_SH::RESPONSE_PONG_BYTE);
 
-//        QByteArray data;
-//        data.push_back(0x10 | IOTV_SH::RESPONSE_PONG_BYTE);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
+    }
+
+    {
+        //ОШИБКИ
+        IOTV_SH::RESPONSE_PONG pkg;
+        pkg.state = true;
+
+        QByteArray data;
+        data.push_back(0x10 | IOTV_SH::RESPONSE_PONG_BYTE);
 
 
-//        QVERIFY(IOTV_SH::accumPacket(data).type != pkg.type);
-//    }
+        QVERIFY(IOTV_SH::accumPacket(data) == nullptr);
+    }
 }
 
 QTEST_APPLESS_MAIN(IOTV_SH_test)

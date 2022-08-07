@@ -46,7 +46,7 @@ bool Channel::setData(uint8_t channelNumber, const Raw &data)
     }
 }
 
-bool Channel::setData(uint8_t channelNumber, const std::vector<uint8_t> &data)
+bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
 {
     try
     {
