@@ -59,8 +59,8 @@ void IOTV_SH_test::query()
         data.push_back(raw.size());
         data.push_back(raw.data().at(0));
 
-        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw).length(), 4);
-        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw), data);
+//        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw).length(), 4);
+//        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw), data);
     }
 
     {
@@ -89,8 +89,8 @@ void IOTV_SH_test::response()
 
         QByteArray data(QByteArray::fromRawData(arr, 5));
 
-        for (auto ch : pkg.description)
-            data.push_back(ch);
+//        for (auto ch : pkg.description)
+//            data.push_back(ch);
 
         data.push_back(static_cast<char>(pkg.readChannel.at(0)));
         data.push_back(static_cast<char>(pkg.writeChannel.at(0)));

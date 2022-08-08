@@ -15,7 +15,7 @@ QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
     return data;
 }
 
-QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
+QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const QByteArray &rawData)
 {
     QByteArray data;
     data.append((channelNumber << 4) | QUERY_WRITE_BYTE);
@@ -26,9 +26,6 @@ QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
     data.push_back(size);
 
     data.append(rawData.data());
-//    auto &dataFromRaw = rawData.data();
-//    for (uint16_t i = 0; i < size; i++)
-//        data.push_back(dataFromRaw[i]);
 
     return data;
 }

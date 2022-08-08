@@ -10,7 +10,7 @@ qint64 File_conn_type::write(const QByteArray &data)
 {
     Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
-    if(data.size() == 1 && data[0] == IOTV_SH::QUERY_WAY_BYTE)
+    if((data.size() == 1) && (data[0] == IOTV_SH::QUERY_WAY_BYTE))
     {
         QByteArray recv;
         recv.push_back(IOTV_SH::RESPONSE_WAY_BYTE);
@@ -27,7 +27,7 @@ qint64 File_conn_type::write(const QByteArray &data)
 
         return 0;
     }
-    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_READ_BYTE)
+    else if((data.size() == 1) && (data[0] == IOTV_SH::QUERY_READ_BYTE))
     {
         if(QFileInfo(_file).size() > BUFFER_MAX_SIZE)
         {
@@ -85,6 +85,10 @@ qint64 File_conn_type::write(const QByteArray &data)
 
         _host_buffer_data = recv;
         slotReadData();
+    }
+    else
+    {
+        ;
     }
 
     return 0;

@@ -33,18 +33,18 @@ public:
     {
         Response_Type type;
         RESPONSE_PKG(Response_Type resType = Response_Type::ERROR) : type(resType)
-        {}
+        {
+        }
     };
 
     struct RESPONSE_WAY : RESPONSE_PKG
     {
         RESPONSE_WAY() : RESPONSE_PKG(Response_Type::RESPONSE_WAY)
         {
-
         }
 
         uint8_t id;
-        std::string description;
+        QString description;
         std::vector<Raw::DATA_TYPE> readChannel;
         std::vector<Raw::DATA_TYPE> writeChannel;
     };
@@ -53,7 +53,6 @@ public:
     {
         RESPONSE_WRITE() : RESPONSE_PKG(Response_Type::RESPONSE_WRITE)
         {
-
         }
 
         uint8_t chanelNumber;
@@ -71,9 +70,8 @@ public:
 
     struct RESPONSE_PONG : RESPONSE_PKG
     {
-        RESPONSE_PONG() : RESPONSE_PKG(Response_Type::RESPONSE_PONG)
+        RESPONSE_PONG() : RESPONSE_PKG(Response_Type::RESPONSE_PONG), state(false)
         {
-
         }
 
         bool state;
@@ -81,7 +79,7 @@ public:
 
     static QByteArray query_WAY();
     static QByteArray query_READ(uint8_t channelNumber);
-    static QByteArray query_WRITE(uint8_t channelNumber, const Raw &rawData);
+    static QByteArray query_WRITE(uint8_t channelNumber, const QByteArray &rawData);
     static QByteArray query_PING();
 
     static uint8_t channelNumber(uint8_t byte);

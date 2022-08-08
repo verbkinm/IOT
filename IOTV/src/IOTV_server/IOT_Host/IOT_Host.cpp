@@ -1,9 +1,7 @@
-#include "../Protocols/IOTV_SH.h"
-
 #include "IOT_Host.h"
 
-IOT_Host::IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent) : Base_Host(0, parent),
-    _structSettings(structSettings)
+IOT_Host::IOT_Host(IOT_Host_StructSettings *structSettings, QObject* parent) : Base_Host(0, parent),
+    _structSettings(structSettings), _parentThread(QThread::currentThread())
 {
     connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOT_Host::signalStopThread, this, &IOT_Host::slotThreadStop, Qt::QueuedConnection);
@@ -40,22 +38,27 @@ qint64 IOT_Host::readData(uint8_t channelNumber)
     return  writeToServer(data);
 }
 
-qint64 IOT_Host::writeData(uint8_t channelNumber, const Raw &data)
+qint64 IOT_Host::writeData(uint8_t channelNumber, const QByteArray &data)
 {
-    if(!isOnline())
+    if(!isOnline() || (channelNumber >= this->getWriteChannelLength()))
         return -1;
 
     return writeToServer(IOTV_SH::query_WRITE(channelNumber, data));
 }
 
+Raw IOT_Host::data(uint8_t channelNumber) const
+{
+    return this->getReadChannelData(channelNumber);
+}
+
 qint64 IOT_Host::writeToServer(const QByteArray &data)
 {
+    std::lock_guard lg(_mutexWrite);
     return _conn_type->write(data);
 }
 
 void IOT_Host::dataResived(QByteArray data)
 {
-
     int dataSize = data.size();
 
     IOTV_SH::RESPONSE_PKG *pkg;
@@ -86,36 +89,38 @@ void IOT_Host::dataResived(QByteArray data)
     this->_conn_type->trimBufferFromBegin(1);
 }
 
-std::string IOT_Host::getName() const
+QString IOT_Host::getName() const
 {
-    return _conn_type.get()->getName().toStdString();
+    return _conn_type.get()->getName();
 }
 
 void IOT_Host::setConnectionTypeTCP()
 {
-    _conn_type = std::make_unique<TCP_conn_type>(_structSettings.name);
-
-    TCP_conn_type* eth = qobject_cast<TCP_conn_type*>(_conn_type.get());
-    eth->setAddress(_structSettings.address);
-    eth->setPort(_structSettings.port);
+    IOT_Host_StructSettings_TCP *setting = static_cast<IOT_Host_StructSettings_TCP*>(_structSettings);
+    if (setting == nullptr)
+    {
+        Log::write(Q_FUNC_INFO, Log::Write_Flag::FILE_STDERR);
+        exit(-1);
+    }
+    _conn_type = std::make_unique<TCP_conn_type>(setting->name, setting->address, setting->port);
 
     connectObjects();
 }
 
-void IOT_Host::setConnectionTypeCom(const COM_conn_type::SetingsPort &settingPort)
+void IOT_Host::setConnectionTypeCom()
 {
-    _conn_type = std::make_unique<COM_conn_type>(_structSettings.name);
+    _conn_type = std::make_unique<COM_conn_type>(_structSettings->name);
 
-    COM_conn_type *com = qobject_cast<COM_conn_type*>(_conn_type.get());
-    com->setAddress(_structSettings.address);
-    com->setSettingsPort(settingPort);
+//    COM_conn_type *com = qobject_cast<COM_conn_type*>(_conn_type.get());
+//    com->setAddress(_structSettings->address);
+//    com->setSettingsPort(settingPort);
 
     connectObjects();
 }
 
 void IOT_Host::setConnectionTypeFile()
 {
-    _conn_type = std::make_unique<File_conn_type>(_structSettings.name, _structSettings.address);
+    _conn_type = std::make_unique<File_conn_type>(_structSettings->name, _structSettings->address);
     connectObjects();
 }
 
@@ -126,10 +131,8 @@ void IOT_Host::connectToHost()
 
 bool IOT_Host::runInNewThread()
 {
-    if (_parentThread == QThread::currentThread())
+    if (_parentThread == &_thread)
         return false;
-
-    _parentThread = QThread::currentThread();
 
     this->moveToThread(&_thread);
 
@@ -202,7 +205,7 @@ void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
                + QString::number(readPkg->chanelNumber)
                + "="
                + raw.strData(),
-               Log::Write_Flag::FILE_STDOUT, _logFile);
+               Log::Write_Flag::FILE, _logFile);
 }
 
 void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
@@ -279,7 +282,7 @@ void IOT_Host::slotDisconnected()
 
 void IOT_Host::slotReReadTimeOut()
 {
-    for (int i = 0; i < readChannelLength(); i++)
+    for (int i = 0; i < getReadChannelLength(); i++)
         readData(i);
 }
 
@@ -303,10 +306,10 @@ void IOT_Host::slotNewThreadStart()
     connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
     connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut, Qt::QueuedConnection);
 
-    setInterval(_structSettings.interval);
-    setLogFile(_structSettings.logFile);
+    setInterval(_structSettings->interval);
+    setLogFile(_structSettings->logFile);
 
-    if (_structSettings.connection_type == "TCP")
+    if (_structSettings->connection_type == "TCP")
         setConnectionTypeTCP();
     //    else if (_structSettings.connection_type == "COM")
     //    {
@@ -319,7 +322,7 @@ void IOT_Host::slotNewThreadStart()
 
     //        _iot_hosts.back()->setConnectionTypeCom(address, settingsPort);
     //    }
-    else if (_structSettings.connection_type == "FILE")
+    else if (_structSettings->connection_type == "FILE")
         setConnectionTypeFile();
     //    else if (_structSettings.connection_type == "UDP")
     //    {
@@ -327,7 +330,7 @@ void IOT_Host::slotNewThreadStart()
     //    }
     else
     {
-        Log::write("Error: settings file syntax error, [" + _structSettings.name + "]", Log::Write_Flag::FILE_STDERR);
+        Log::write("Error: settings file syntax error, [" + _structSettings->name + "]", Log::Write_Flag::FILE_STDERR);
         exit(1);
     }
 

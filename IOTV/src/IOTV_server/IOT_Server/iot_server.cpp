@@ -40,20 +40,28 @@ void IOT_Server::readSettings()
     for (const auto &group : _settingsHosts.childGroups())
     {
         _settingsHosts.beginGroup(group);
-        IOT_Host_StructSettings structSettings;
+        IOT_Host_StructSettings *structSettings = new IOT_Host_StructSettings;
 
-        structSettings.name = group;
-        structSettings.connection_type = _settingsHosts.value("connection_type", "TCP").toString();
-        structSettings.address = _settingsHosts.value("address", "127.0.0.1").toString();
-        structSettings.port = _settingsHosts.value("port", 0).toUInt();
-        structSettings.interval = _settingsHosts.value("interval", 1000).toUInt();
-        structSettings.logFile = _settingsHosts.value("log_file", "").toString();
+        structSettings->name = group;
+        structSettings->connection_type = _settingsHosts.value("connection_type", "TCP").toString();
+        structSettings->address = _settingsHosts.value("address", "127.0.0.1").toString();
+        structSettings->interval = _settingsHosts.value("interval", 1000).toUInt();
+        structSettings->logFile = _settingsHosts.value("log_file", "").toString();
+
+        if (structSettings->connection_type == "TCP")
+        {
+            IOT_Host_StructSettings_TCP *settings = new IOT_Host_StructSettings_TCP(structSettings);
+            settings->port = _settingsHosts.value("port", 0).toUInt();
+            delete structSettings;
+            structSettings = settings;
+        }
 
         _iot_hosts.emplace_back(std::make_unique<IOT_Host>(structSettings));
 
         connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way, Qt::QueuedConnection);
 
-        _iot_hosts.back()->runInNewThread();
+        if (!_iot_hosts.back()->runInNewThread())
+            Log::write("Error: Can't run IOT_Host in new thread", Log::Write_Flag::FILE_STDOUT);
 
         _settingsHosts.endGroup();
     }
@@ -90,7 +98,7 @@ void IOT_Server::clinetOnlineFile() const
     std::ofstream file("client_online.log", std::ios::trunc);
     if (!file.is_open())
     {
-        Log::write("Can't open client_online.log", Log::Write_Flag::STDERR);
+        Log::write("Can't open client_online.log", Log::Write_Flag::FILE_STDERR);
         return;
     }
 
@@ -149,8 +157,8 @@ void IOT_Server::slotNewConnection()
 
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
-//!!! deleteLater в слоте slotDisconnected
-//    connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+    //!!! deleteLater в слоте slotDisconnected
+    //    connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
 
     clinetOnlineFile();
 }
@@ -158,127 +166,127 @@ void IOT_Server::slotNewConnection()
 //!!! слишком большой метод, должен выполняться для каждого клиента в отдельном потоке!
 void IOT_Server::slotDataRecived()
 {
-//    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
-//    if (socket == nullptr)
-//        return;
+    //    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+    //    if (socket == nullptr)
+    //        return;
 
-//    _server_buffer_data += socket->readAll();
+    //    _server_buffer_data += socket->readAll();
 
-//    while(_server_buffer_data.size())
-//    {
-//        auto accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
+    //    while(_server_buffer_data.size())
+    //    {
+    //        auto accumQueryPacket= IOTV_SC::accumQueryPacket(_server_buffer_data);
 
-//        if (!accumQueryPacket.first)
-//        {
-//            _server_buffer_data.clear();
-//            return;
-//        }
-//        if (accumQueryPacket.first && accumQueryPacket.second)
-//        {
-//            QByteArray packetData = _server_buffer_data.mid(0, accumQueryPacket.second);
-//            Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
-//                       + QString::number(socket->peerPort())
-//                       + " <- " + packetData.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
+    //        if (!accumQueryPacket.first)
+    //        {
+    //            _server_buffer_data.clear();
+    //            return;
+    //        }
+    //        if (accumQueryPacket.first && accumQueryPacket.second)
+    //        {
+    //            QByteArray packetData = _server_buffer_data.mid(0, accumQueryPacket.second);
+    //            Log::write("Client data recived form " + socket->peerAddress().toString() + ":"
+    //                       + QString::number(socket->peerPort())
+    //                       + " <- " + packetData.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
 
-//            QByteArray buff;
-//            IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
+    //            QByteArray buff;
+    //            IOTV_SC::Query_Type dataType = IOTV_SC::checkQueryData(packetData);
 
-//            if (dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
-//            {
-//                buff.append(RESPONSE_DEVICE_LIST_BYTE);
-//                buff.append(_iot_hosts.size());
+    //            if (dataType == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
+    //            {
+    //                buff.append(RESPONSE_DEVICE_LIST_BYTE);
+    //                buff.append(_iot_hosts.size());
 
-//                for(const auto &host : _iot_hosts)
-//                {
-//                    QByteArray packetDevice;
-//                    IOTV_SC::responceToClient_Device_One(*host, packetDevice);
-//                    buff.append(packetDevice);
-//                }
-//                writeToSocket(socket, buff);
-//            }
-//            else if (dataType == IOTV_SC::Query_Type::QUERY_STATE)
-//            {
-//                QString deviceName;
-//                if (IOTV_SC::queryName(packetData, deviceName))
-//                {
-//                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-//                    if (findDevice != _iot_hosts.end())
-//                    {
-//                        IOTV_SC::responceToClient_State(*findDevice->get(), packetData);
-//                        writeToSocket(socket, packetData);
-//                    }
-//                    else
-//                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
-//                }
-//            }
-//            else if (dataType == IOTV_SC::Query_Type::QUERY_READ)
-//            {
-//                QString deviceName;
-//                if (IOTV_SC::queryName(packetData, deviceName))
-//                {
-//                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
-//                    if (findDevice != _iot_hosts.end())
-//                    {
-//                        IOTV_SC::responceToClient_Read(*findDevice->get(), packetData);
-//                        writeToSocket(socket, packetData);
-//                    }
-//                    else
-//                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
-//                }
-//            }
-//            else if (dataType == IOTV_SC::Query_Type::QUERY_WRITE)
-//            {
-//                QString deviceName;
-//                if (IOTV_SC::queryName(packetData, deviceName))
-//                {
-//                    auto findDevice = std::ranges::find_if (_iot_hosts, [&deviceName](std::unique_ptr<IOT_Host> &host)
-//                    {
-//                            return host.get()->getName() == deviceName;
-//                });
+    //                for(const auto &host : _iot_hosts)
+    //                {
+    //                    QByteArray packetDevice;
+    //                    IOTV_SC::responceToClient_Device_One(*host, packetDevice);
+    //                    buff.append(packetDevice);
+    //                }
+    //                writeToSocket(socket, buff);
+    //            }
+    //            else if (dataType == IOTV_SC::Query_Type::QUERY_STATE)
+    //            {
+    //                QString deviceName;
+    //                if (IOTV_SC::queryName(packetData, deviceName))
+    //                {
+    //                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+    //                    if (findDevice != _iot_hosts.end())
+    //                    {
+    //                        IOTV_SC::responceToClient_State(*findDevice->get(), packetData);
+    //                        writeToSocket(socket, packetData);
+    //                    }
+    //                    else
+    //                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
+    //                }
+    //            }
+    //            else if (dataType == IOTV_SC::Query_Type::QUERY_READ)
+    //            {
+    //                QString deviceName;
+    //                if (IOTV_SC::queryName(packetData, deviceName))
+    //                {
+    //                    auto findDevice = std::ranges::find_if (_iot_hosts, [deviceName](std::unique_ptr<IOT_Host> &host){ return host.get()->getName() == deviceName; });
+    //                    if (findDevice != _iot_hosts.end())
+    //                    {
+    //                        IOTV_SC::responceToClient_Read(*findDevice->get(), packetData);
+    //                        writeToSocket(socket, packetData);
+    //                    }
+    //                    else
+    //                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
+    //                }
+    //            }
+    //            else if (dataType == IOTV_SC::Query_Type::QUERY_WRITE)
+    //            {
+    //                QString deviceName;
+    //                if (IOTV_SC::queryName(packetData, deviceName))
+    //                {
+    //                    auto findDevice = std::ranges::find_if (_iot_hosts, [&deviceName](std::unique_ptr<IOT_Host> &host)
+    //                    {
+    //                            return host.get()->getName() == deviceName;
+    //                });
 
-//                    if (findDevice != _iot_hosts.end())
-//                    {
-//                        uint8_t nameLength = packetData.at(0) >> 3;
-//                        uint8_t channelNumber = packetData.at(1) & 0x0F;
+    //                    if (findDevice != _iot_hosts.end())
+    //                    {
+    //                        uint8_t nameLength = packetData.at(0) >> 3;
+    //                        uint8_t channelNumber = packetData.at(1) & 0x0F;
 
-//                        quint16 dataLength = (packetData.at(2) >> 8) | packetData.at(3);
+    //                        quint16 dataLength = (packetData.at(2) >> 8) | packetData.at(3);
 
-//                        QByteArray data = packetData.mid(4 + nameLength, dataLength);
-//                        Raw::RAW raw{0};
+    //                        QByteArray data = packetData.mid(4 + nameLength, dataLength);
+    //                        Raw::RAW raw{0};
 
-//                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
-//                        {
-//                            raw.str = new char[data.size()];
+    //                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    //                        {
+    //                            raw.str = new char[data.size()];
 
-//                            //!!! memcpy
-//                            for (uint8_t i = 0; i < data.size(); ++i)
-//                                raw.str[i] = data.at(i);
-//                        }
-//                        else
-//                        {
-//                            //!!! memcpy
-//                            for (uint8_t i = 0; i < Raw::size; ++i)
-//                                raw.array[i] = data.at(i);
-//                        }
+    //                            //!!! memcpy
+    //                            for (uint8_t i = 0; i < data.size(); ++i)
+    //                                raw.str[i] = data.at(i);
+    //                        }
+    //                        else
+    //                        {
+    //                            //!!! memcpy
+    //                            for (uint8_t i = 0; i < Raw::size; ++i)
+    //                                raw.array[i] = data.at(i);
+    //                        }
 
-//                        QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
-//                        findDevice->get()->writeToServer(dataSend);
+    //                        QByteArray dataSend = IOTV_SH::query_WRITE(*findDevice->get(), channelNumber, raw);
+    //                        findDevice->get()->writeToServer(dataSend);
 
-//                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
-//                            delete[] raw.str;
+    //                        if (findDevice->get()->getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR)
+    //                            delete[] raw.str;
 
-//                        IOTV_SC::responceToClient_Write(packetData);
-//                        writeToSocket(socket, packetData);
-//                    }
-//                    else
-//                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
-//                }
-//            }
-//            _server_buffer_data = _server_buffer_data.mid(accumQueryPacket.second);
-//        }
-//        else
-//            break;
-//    }
+    //                        IOTV_SC::responceToClient_Write(packetData);
+    //                        writeToSocket(socket, packetData);
+    //                    }
+    //                    else
+    //                        Log::write("Client send data to unknow device name - " + deviceName, Log::Write_Flag::FILE_STDOUT, _logFile);
+    //                }
+    //            }
+    //            _server_buffer_data = _server_buffer_data.mid(accumQueryPacket.second);
+    //        }
+    //        else
+    //            break;
+    //    }
 }
 
 void IOT_Server::slotDisconnected()
@@ -286,7 +294,7 @@ void IOT_Server::slotDisconnected()
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     _clientList.remove(socket);
 
-//!!!
+    //!!!
     disconnect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     disconnect(socket,  &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
 
@@ -364,14 +372,14 @@ void IOT_Server::slotError(QAbstractSocket::SocketError error)
 
 void IOT_Server::slotResponse_Way()
 {
-//    IOT_Host *host = qobject_cast<IOT_Host*>(sender());
+    //    IOT_Host *host = qobject_cast<IOT_Host*>(sender());
 
-//    QByteArray data;
-//    IOTV_SC::responceToClient_Device_One(*host, data);
+    //    QByteArray data;
+    //    IOTV_SC::responceToClient_Device_One(*host, data);
 
-//    data.insert(0, RESPONSE_DEVICE_LIST_BYTE);
-//    data.insert(1, 1);
+    //    data.insert(0, RESPONSE_DEVICE_LIST_BYTE);
+    //    data.insert(1, 1);
 
-//    for (auto &socket : _clientList)
-//        writeToSocket(socket, data);
+    //    for (auto &socket : _clientList)
+    //        writeToSocket(socket, data);
 }

@@ -15,35 +15,36 @@ class IOT_Host : public Base_Host
 {
     Q_OBJECT
 public:
-    IOT_Host(IOT_Host_StructSettings &structSettings, QObject* parent = nullptr);
+    IOT_Host(IOT_Host_StructSettings *structSettings, QObject* parent = nullptr);
     ~IOT_Host();
 
-    std::string getName() const override;
+    QString getName() const override;
     QString getLogFile() const;
 
     Base_conn_type::Conn_type getConnectionType() const;
 
     virtual bool isOnline() const override;
 
-    virtual qint64 readData(uint8_t channelNumber) override;
-    virtual qint64 writeData(uint8_t channelNumber, const Raw &data) override;
-
-    virtual qint64 writeToServer(const QByteArray &data) override;
-    virtual void dataResived(QByteArray data) override;
+    virtual qint64 writeData(uint8_t channelNumber, const QByteArray &data) override;
+    Raw data(uint8_t channelNumber) const;
 
     bool runInNewThread();
 
 private:
+    virtual qint64 readData(uint8_t channelNumber) override;
+    virtual void dataResived(QByteArray data) override;
+    virtual qint64 writeToServer(const QByteArray &data) override;
+
     void connectToHost();
 
     void setConnectionTypeTCP();
-    void setConnectionTypeCom(const COM_conn_type::SetingsPort &settingPort);
+    void setConnectionTypeCom();
     void setConnectionTypeFile();
 
     void setInterval(uint interval);
     void setLogFile(const QString &logFile);
 
-    virtual void setOnline(bool state) override;
+    void setOnline(bool state);
 
     void connectObjects() const;
 
@@ -60,10 +61,10 @@ private:
 
     QTimer _reReadTimer, _timerPing, _timerReconnect;
 
-    IOT_Host_StructSettings _structSettings;
+    IOT_Host_StructSettings *_structSettings;
 
     QThread _thread, *_parentThread;
-    std::mutex _mutexParametersChange;
+    std::mutex _mutexParametersChange, _mutexWrite;
 
     enum Flag
     {
