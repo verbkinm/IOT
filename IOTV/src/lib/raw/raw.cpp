@@ -36,53 +36,43 @@ QString Raw::strData() const
 
     switch (_type)
     {
-    //UNSIGNED
-    case DATA_TYPE::UNSIGNED_INTEGER_8:
-        result = QString::number(*reinterpret_cast<const uint8_t*>(_data.data()));
-        break;
-    case DATA_TYPE::UNSIGNED_INTEGER_16:
-        result = QString::number(*reinterpret_cast<const uint16_t*>(_data.data()));
-        break;
-    case DATA_TYPE::UNSIGNED_INTEGER_32:
-        result = QString::number(*reinterpret_cast<const uint32_t*>(_data.data()));
-        break;
-    case DATA_TYPE::UNSIGNED_INTEGER_64:
-        result = QString::number(*reinterpret_cast<const uint64_t*>(_data.data()));
-        break;
-    //SIGNED
-    case DATA_TYPE::INTEGER_8:
+    case DATA_TYPE::INT_8:
         result = QString::number(*reinterpret_cast<const int8_t*>(_data.data()));
         break;
-    case DATA_TYPE::INTEGER_16:
-        result = QString::number(*reinterpret_cast<const int16_t*>(_data.data()));
+    case DATA_TYPE::INT_16:
+        result = QString::number(qToBigEndian(*reinterpret_cast<const int16_t*>(_data.data())));
         break;
-    case DATA_TYPE::INTEGER_32:
-        result = QString::number(*reinterpret_cast<const int32_t*>(_data.data()));
+    case DATA_TYPE::INT_32:
+        result = QString::number(qToBigEndian(*reinterpret_cast<const int32_t*>(_data.data())));
         break;
-    case DATA_TYPE::INTEGER_64:
-        result = QString::number(*reinterpret_cast<const int64_t*>(_data.data()));
+    case DATA_TYPE::INT_64:
+        //qToBigEndian c int64_t не отрабатывает правильно
+        result = QString::number(qToBigEndian(*reinterpret_cast<const qint64*>(_data.data())));
         break;
-    //REAL
+
     case DATA_TYPE::FLOAT_32:
+    {
+        //        float value = qToBigEndian(*reinterpret_cast<const float*>(_data.data()));
         result = QString::number(*reinterpret_cast<const float*>(_data.data()), 'l', 4);
+    }
         break;
-    case DATA_TYPE::DOUBLE_32:
+
     case DATA_TYPE::DOUBLE_64:
+    {
+        //        double value = qToBigEndian(*reinterpret_cast<const double*>(_data.data()));
         result = QString::number(*reinterpret_cast<const double*>(_data.data()), 'l', 4);
+    }
         break;
-    //BOOL
-    case DATA_TYPE::BOOL_8:
+
+    case DATA_TYPE::BOOL:
         result = *reinterpret_cast<const bool*>(_data.data()) ? "true" : "false";
         break;
-    //STRING
     case DATA_TYPE::STRING:
         result = _data.data();
         break;
-    //RAW
     case DATA_TYPE::RAW:
         result = _data.toHex(':');
         break;
-    //NONE
     default:
         result = "";
         break;

@@ -1,6 +1,9 @@
 #include <QtTest>
 #include <QVariant>
 
+#include <cstring>
+#include <algorithm>
+
 #include <raw.h>
 
 class Test_Raw : public QObject
@@ -45,55 +48,13 @@ QByteArray Test_Raw::foo(size_t size, const char *value)
 void Test_Raw::test_case1()
 {
     {
-        // uint8_t
-        uint8_t value = -1;
-        QByteArray data = foo(sizeof(value), (const char*)&value);\
-
-        Raw raw(Raw::DATA_TYPE::UNSIGNED_INTEGER_8, data);
-        QCOMPARE(raw.strData(), QString::number(value));
-    }
-
-    {
-        // uint16_t
-        uint16_t value = -1;
-        QByteArray data = foo(sizeof(value), (const char*)&value);
-
-        QCOMPARE(*reinterpret_cast<uint16_t*>(data.data()), value);
-
-        Raw raw(Raw::DATA_TYPE::UNSIGNED_INTEGER_16, data);
-        QCOMPARE(raw.strData(), QString::number(value));
-    }
-
-    {
-        // uint32_t
-        uint32_t value = -1;
-        QByteArray data = foo(sizeof(value), (const char*)&value);
-
-        QCOMPARE(QString::number(*reinterpret_cast<uint32_t*>(data.data())), QString::number(value));
-
-        Raw raw(Raw::DATA_TYPE::UNSIGNED_INTEGER_32, data);
-        QCOMPARE(raw.strData(), QString::number(value));
-    }
-
-    {
-        // uint64_t
-        uint64_t value = -1234567890;
-        QByteArray data = foo(sizeof(value), (const char*)&value);
-
-        QCOMPARE(QString::number(*reinterpret_cast<uint64_t*>(data.data())), QString::number(value));
-
-        Raw raw(Raw::DATA_TYPE::UNSIGNED_INTEGER_64, data);
-        QCOMPARE(raw.strData(), QString::number(value));
-    }
-
-    {
         // int8_t
         int8_t value = -1;
         QByteArray data = foo(sizeof(value), (const char*)&value);
 
         QCOMPARE(static_cast<int8_t>(data.at(0)), value);
 
-        Raw raw(Raw::DATA_TYPE::INTEGER_8, data);
+        Raw raw(Raw::DATA_TYPE::INT_8, data);
         QCOMPARE(raw.strData(), QString::number(value));
     }
 
@@ -104,8 +65,17 @@ void Test_Raw::test_case1()
 
         QCOMPARE(*reinterpret_cast<int16_t*>(data.data()), value);
 
-        Raw raw(Raw::DATA_TYPE::INTEGER_16, data);
+        Raw raw(Raw::DATA_TYPE::INT_16, data);
         QCOMPARE(raw.strData(), QString::number(value));
+
+        {
+            QByteArray data;
+            data.push_back(0xab);
+            data.push_back(0xcd);
+
+            Raw raw(Raw::DATA_TYPE::INT_16, data);
+            QCOMPARE(raw.strData(), "-21555");
+        }
     }
 
     {
@@ -115,7 +85,7 @@ void Test_Raw::test_case1()
 
         QCOMPARE(QString::number(*reinterpret_cast<int32_t*>(data.data())), QString::number(value));
 
-        Raw raw(Raw::DATA_TYPE::INTEGER_32, data);
+        Raw raw(Raw::DATA_TYPE::INT_32, data);
         QCOMPARE(raw.strData(), QString::number(value));
     }
 
@@ -126,7 +96,7 @@ void Test_Raw::test_case1()
 
         QCOMPARE(QString::number(*reinterpret_cast<int64_t*>(data.data())), QString::number(value));
 
-        Raw raw(Raw::DATA_TYPE::INTEGER_64, data);
+        Raw raw(Raw::DATA_TYPE::INT_64, data);
         QCOMPARE(raw.strData(), QString::number(value));
     }
 
@@ -159,7 +129,7 @@ void Test_Raw::test_case1()
 
         QCOMPARE(QString::number(*reinterpret_cast<bool*>(data.data())), QString::number(value));
 
-        Raw raw(Raw::DATA_TYPE::BOOL_8, data);
+        Raw raw(Raw::DATA_TYPE::BOOL, data);
         QCOMPARE(raw.strData(), value ? "true" : "false");
     }
 
@@ -172,6 +142,16 @@ void Test_Raw::test_case1()
 
         Raw raw(Raw::DATA_TYPE::STRING, data);
         QCOMPARE(raw.strData(), value);
+    }
+
+    {
+        // raw
+        QByteArray dataRaw;
+        dataRaw.push_back(0xab);
+        dataRaw.push_back(0xcd);
+
+        Raw raw(Raw::DATA_TYPE::RAW, dataRaw);
+        QCOMPARE(raw.strData(), "ab:cd");
     }
 
     {

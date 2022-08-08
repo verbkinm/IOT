@@ -1,37 +1,33 @@
 #pragma once
 
 #include <cstdint>
+#include <algorithm>
 
 #include <QByteArray>
-#include <QString>
-#include <QVariant>
+#include <QtEndian>
 
 #include "raw_global.h"
 
 class RAW_EXPORT Raw
 {
 public:
+
+    //Принята BigEndian последовательность в коде
     enum class DATA_TYPE : uint8_t
     {
-        INTEGER_8 = 0x00,
-        INTEGER_16 = 0x01,
-        INTEGER_32 = 0x02,
-        INTEGER_64 = 0x03,
+        INT_8,
+        INT_16,
+        INT_32,
+        INT_64,
 
-        UNSIGNED_INTEGER_8 = 0x04,
-        UNSIGNED_INTEGER_16 = 0x05,
-        UNSIGNED_INTEGER_32 = 0x06,
-        UNSIGNED_INTEGER_64 = 0x07,
+        FLOAT_32,
+        DOUBLE_64, // на МК double 32-битный может быть
 
-        FLOAT_32 = 0x08,
-        DOUBLE_32 = 0x09,
-        DOUBLE_64 = 0x0A,
+        BOOL,
+        STRING,
 
-        BOOL_8 = 0x0B,
-        STRING = 0x0C,
-
-        RAW = 0x0D,
-        NONE = 0x0E
+        RAW,
+        NONE
     };
 
     Raw();
@@ -52,7 +48,6 @@ public:
     const QByteArray &data() const;
 
     QString strData() const;
-
 
 private:
     DATA_TYPE _type;

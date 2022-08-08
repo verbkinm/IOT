@@ -1,5 +1,7 @@
 #include <QtTest>
 
+#include <cstring>
+
 #include "IOTV_SH.h"
 
 // add necessary includes here
@@ -48,7 +50,7 @@ void IOTV_SH_test::query()
         //Запрос WRITE
         uint8_t channelNumber = 1;
 
-        Raw raw(Raw::DATA_TYPE::BOOL_8);
+        Raw raw(Raw::DATA_TYPE::BOOL);
         raw.push_back(1);
 
         QByteArray data;
@@ -75,8 +77,8 @@ void IOTV_SH_test::response()
         IOTV_SH::RESPONSE_WAY pkg;
         pkg.id = 3;
         pkg.description = "test";
-        pkg.readChannel = {Raw::DATA_TYPE::BOOL_8};
-        pkg.writeChannel = {Raw::DATA_TYPE::BOOL_8};
+        pkg.readChannel = {Raw::DATA_TYPE::BOOL};
+        pkg.writeChannel = {Raw::DATA_TYPE::BOOL};
 
         const char arr[] = {static_cast<char>(IOTV_SH::RESPONSE_WAY_BYTE),
                             static_cast<char>(pkg.id),
