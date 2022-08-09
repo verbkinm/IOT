@@ -33,7 +33,7 @@ protected:
     Raw::DATA_TYPE getReadChannelType(uint8_t channelNumber) const;
     Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
 
-    Raw getReadChannelData(uint8_t channelNumber) const;
+    QByteArray getReadChannelData(uint8_t channelNumber) const;
 
     uint8_t getReadChannelLength() const;
     uint8_t getWriteChannelLength() const;

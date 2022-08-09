@@ -104,7 +104,7 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_READ_PKG(QByteArray &data)
 IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WRITE_PKG(QByteArray &data)
 {
     if (data.isEmpty())
-        return nullptr;
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::ERROR);
 
     RESPONSE_WRITE *pkg_data = new RESPONSE_WRITE;
     pkg_data->chanelNumber = data.at(0) >> 4;
@@ -117,7 +117,7 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WRITE_PKG(QByteArray &data)
 IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_PONG_PKG(QByteArray &data)
 {
     if (data.isEmpty())
-        return nullptr;
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::ERROR);
 
     RESPONSE_PONG *pkg_data = new RESPONSE_PONG;
     pkg_data->state = true;
@@ -135,7 +135,7 @@ uint8_t IOTV_SH::channelNumber(uint8_t byte)
 IOTV_SH::RESPONSE_PKG *IOTV_SH::accumPacket(QByteArray &data)
 {
     if(data.isEmpty())
-        return nullptr;
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::ERROR);
 
     uint8_t firstByte = data.at(0);
 
@@ -154,10 +154,10 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::accumPacket(QByteArray &data)
         return createResponse_WRITE_PKG(data);
         break;
     default:
-        return nullptr;
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::ERROR);
     }
 
-    return nullptr;
+    return new IOTV_SH::RESPONSE_PKG(Response_Type::ERROR);
 }
 
 QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)

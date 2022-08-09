@@ -14,7 +14,7 @@ public:
     bool setData(uint8_t channelNumber, const Raw &data);
     bool setData(uint8_t channelNumber, const QByteArray &data);
 
-    Raw getData(uint8_t channelNumber) const;
+    QByteArray getData(uint8_t channelNumber) const;
     Raw::DATA_TYPE getType(uint8_t channelNumber) const;
 
     uint8_t size() const;

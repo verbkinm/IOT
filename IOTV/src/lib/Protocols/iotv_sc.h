@@ -2,8 +2,6 @@
 
 #include <QByteArrayList>
 
-#include "base_host.h"
-
 #define RESPONSE_DEVICE_LIST_BYTE 0x05
 
 //First byte
@@ -23,10 +21,10 @@
 class IOTV_SC
 {
 public:
-    static void query_Device_List(QByteArray &data);
-    static bool query_STATE(QByteArray &data, const QString &deviceName);
-    static qint64 query_READ(Base_Host &host, const QString &deviceName, uint8_t channelNumber);
-    static qint64 query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW &rawData);
+    static QByteArray query_Device_List();
+    static QByteArray query_STATE(const QString &deviceName);
+    static QByteArray query_READ(const QString &deviceName, uint8_t channelNumber);
+    static QByteArray query_WRITE(const QString &deviceName, uint8_t channelNumber, const QByteArray &rawData);
 
     static QByteArrayList response_Device_List(const QByteArray &data);
     static void serverResponse_STATE(Base_Host &host, const QByteArray &data);

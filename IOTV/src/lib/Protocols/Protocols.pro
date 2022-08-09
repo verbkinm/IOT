@@ -16,7 +16,7 @@ SOURCES += \
 HEADERS += \
     IOTV_SH.h \
     Protocols_global.h \
-#    iotv_sc.h \
+    iotv_sc.h \
     protocols.h
 
 # Default rules for deployment.

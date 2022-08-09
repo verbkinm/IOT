@@ -40,23 +40,18 @@ void IOT_Server::readSettings()
     for (const auto &group : _settingsHosts.childGroups())
     {
         _settingsHosts.beginGroup(group);
-        IOT_Host_StructSettings *structSettings = new IOT_Host_StructSettings;
+        std::unordered_map<QString, QString> setting;
 
-        structSettings->name = group;
-        structSettings->connection_type = _settingsHosts.value("connection_type", "TCP").toString();
-        structSettings->address = _settingsHosts.value("address", "127.0.0.1").toString();
-        structSettings->interval = _settingsHosts.value("interval", 1000).toUInt();
-        structSettings->logFile = _settingsHosts.value("log_file", "").toString();
+        setting[hostField::name] = group;
+        setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, "TCP").toString();
+        setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
+        setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
+        setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, "").toString();
 
-        if (structSettings->connection_type == "TCP")
-        {
-            IOT_Host_StructSettings_TCP *settings = new IOT_Host_StructSettings_TCP(structSettings);
-            settings->port = _settingsHosts.value("port", 0).toUInt();
-            delete structSettings;
-            structSettings = settings;
-        }
+        if (setting[hostField::connection_type] == connectionType::TCP)
+            setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
-        _iot_hosts.emplace_back(std::make_unique<IOT_Host>(structSettings));
+        _iot_hosts.emplace_back(std::make_unique<IOT_Host>(setting));
 
         connect(_iot_hosts.back().get(), &IOT_Host::signalResponse_Way, this, &IOT_Server::slotResponse_Way, Qt::QueuedConnection);
 

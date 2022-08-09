@@ -9,6 +9,7 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ConfigTypes.cpp \
         connection_type/base_conn_type.cpp \
         connection_type/com_conn_type.cpp \
         IOT_Server/iot_server.cpp \
@@ -17,8 +18,7 @@ SOURCES += \
         main.cpp \
         IOT_Host/IOT_Host.cpp \
         connection_type/udp_conn_type.cpp \
-#tst_server.cpp \
-        wrapper.cpp
+        wrapper.cpp \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -26,7 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    IOT_Host/iot_host_structsettings.h \
+    ConfigTypes.h \
     connection_type/base_conn_type.h \
     connection_type/com_conn_type.h \
     IOT_Host/IOT_Host.h \

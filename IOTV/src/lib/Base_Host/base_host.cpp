@@ -42,7 +42,7 @@ Raw::DATA_TYPE Base_Host::getReadChannelType(uint8_t channelNumber) const
     return _readChannel.getType(channelNumber);
 }
 
-Raw Base_Host::getReadChannelData(uint8_t channelNumber) const
+QByteArray Base_Host::getReadChannelData(uint8_t channelNumber) const
 {
     return _readChannel.getData(channelNumber);
 }
