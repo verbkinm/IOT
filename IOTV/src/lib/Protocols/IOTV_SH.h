@@ -3,6 +3,23 @@
 #include <QByteArray>
 #include "raw.h"
 
+/*
+ * Обработка сырах данных сервером полученных от устройств
+ */
+
+enum : uint8_t
+{
+    QUERY_WAY_BYTE = 0x01,
+    QUERY_READ_BYTE = 0x02,
+    QUERY_WRITE_BYTE = 0x00,
+    QUERY_PING_BYTE = 0x08,
+
+    RESPONSE_WAY_BYTE = 0x05,
+    RESPONSE_READ_BYTE = 0x06,
+    RESPONSE_WRITE_BYTE = 0x04,
+    RESPONSE_PONG_BYTE = 0x0C
+};
+
 class IOTV_SH
 {
 public:
@@ -13,26 +30,13 @@ public:
         RESPONSE_WRITE,
         RESPONSE_PONG,
         RESPONSE_INCOMPLETE,
-        ERROR
-    };
-
-    enum : uint8_t
-    {
-        QUERY_WAY_BYTE = 0x01,
-        QUERY_READ_BYTE = 0x02,
-        QUERY_WRITE_BYTE = 0x00,
-        QUERY_PING_BYTE = 0x08,
-
-        RESPONSE_WAY_BYTE = 0x05,
-        RESPONSE_READ_BYTE = 0x06,
-        RESPONSE_WRITE_BYTE = 0x04,
-        RESPONSE_PONG_BYTE = 0x0C
+        RESPONSE_ERROR
     };
 
     struct RESPONSE_PKG
     {
         Response_Type type;
-        RESPONSE_PKG(Response_Type resType = Response_Type::ERROR) : type(resType)
+        RESPONSE_PKG(Response_Type resType = Response_Type::RESPONSE_ERROR) : type(resType)
         {
         }
     };
@@ -81,8 +85,6 @@ public:
     static QByteArray query_READ(uint8_t channelNumber);
     static QByteArray query_WRITE(uint8_t channelNumber, const QByteArray &rawData);
     static QByteArray query_PING();
-
-    static uint8_t channelNumber(uint8_t byte);
 
     static RESPONSE_PKG *accumPacket(QByteArray &data);
 

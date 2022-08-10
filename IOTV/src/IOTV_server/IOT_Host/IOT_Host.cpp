@@ -60,7 +60,7 @@ void IOT_Host::dataResived(QByteArray data)
     while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
     {
         if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
-                ((pkg->type == IOTV_SH::Response_Type::ERROR) && (data.size() == 0)))
+                ((pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR) && (data.size() == 0)))
         {
             delete pkg;
             return;
@@ -76,7 +76,7 @@ void IOT_Host::dataResived(QByteArray data)
             response_READ_recived(pkg);
         else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
             response_WRITE_recived(pkg);
-        else if (pkg->type == IOTV_SH::Response_Type::ERROR)
+        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
             this->_conn_type->trimBufferFromBegin(1);
         else
             Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
