@@ -1,5 +1,4 @@
 #include "iot_server.h"
-#include <time.h>
 
 void IOT_Server::newValue()
 {

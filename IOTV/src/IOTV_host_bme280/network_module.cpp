@@ -62,6 +62,7 @@ void Network_Module::slotNewConnection()
 
     connect(socket, &QTcpSocket::readyRead, this, &Network_Module::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &Network_Module::slotDisconnected);
+    connect(socket, &QTcpSocket::disconnected, this, &QObject::deleteLater);
 }
 
 void Network_Module::slotDataRecived()
@@ -84,7 +85,6 @@ void Network_Module::slotDisconnected()
     QString strOut = "disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
     Log::write(strOut);
-    socket->deleteLater();
 }
 
 void Network_Module::slotError(QAbstractSocket::SocketError error)

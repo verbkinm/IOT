@@ -25,13 +25,6 @@ HEADERS += \
     network_module.h
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-else:unix: LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-
-INCLUDEPATH += $$PWD/../lib/raw
-DEPENDPATH += $$PWD/../lib/raw
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
 else:unix: LIBS += -L$$OUT_PWD/../lib/Log/ -lLog

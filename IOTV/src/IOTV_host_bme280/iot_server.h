@@ -1,11 +1,10 @@
-#ifndef IOT_SERVER_H
-#define IOT_SERVER_H
+#pragma once
 
 #include <iostream>
 #include <QTimer>
 
-#include "raw.h"
 #include "log.h"
+#include "Protocols/IOTV_SH.h"
 
 #define READ_CHANNEL_LENGTH 3
 #define WRITE_CHANNEL_LENGTH 0
@@ -23,13 +22,9 @@ public:
     const uint8_t _id;
     const std::string _description;
 
-    Raw::RAW _readChannel[READ_CHANNEL_LENGTH];
-    Raw::RAW _writeChannel[WRITE_CHANNEL_LENGTH];
+    float ch1, ch2, ch3;
 
-    Raw::DATA_TYPE _readChannelType[READ_CHANNEL_LENGTH];
-    Raw::DATA_TYPE _writeChannelType[WRITE_CHANNEL_LENGTH];
+    Protocol_class::DATA_TYPE ch1Type;
 
     void update();
 };
-
-#endif // IOT_SERVER_H
