@@ -8,24 +8,21 @@
 /*
  * Обработка сырах данных, полученных клиентом от сервера
  */
-enum : uint8_t
-{
-    QUERY_DEV_LIST_BYTE = 0x01,
-    QUERY_STATE_FIRST_BYTE = 0x00,
-    QUERY_STATE_BYTE = 0x10,
-    QUERY_READ_BYTE = 0x02,
-    QUERY_WRITE_BYTE = 0x00,
-
-    //!!!
-    RESPONSE_DEV_LIST_BYTE = 0x05,
-    RESPONSE_STATE_BYTE = 0x10,
-    RESPONSE_READ_BYTE = 0x02,
-    RESPONSE_WRITE_BYTE = 0x00,
-};
 
 class Client_RX
 {
 public:
+    enum : uint8_t
+    {
+        RESPONSE_DEV_LIST_BYTE = 0x05,
+        RESPONSE_STATE_FIRST_BYTE = 0x04,
+        RESPONSE_STATE_SECOND_BYTE = 0x10,
+        RESPONSE_READ_BYTE = 0x06,
+        RESPONSE_WRITE_BYTE = 0x04,
+
+        RESPONSE_STATE_BIT_MASK = 0x20
+    };
+
     enum class Response_Type : uint8_t
     {
         RESPONSE_DEVICE_LIST,
@@ -44,6 +41,7 @@ public:
         Response_Type type;
     };
 
+
     struct DEV_PKG
     {
         DEV_PKG() : id(0), error(true)
@@ -57,6 +55,13 @@ public:
         std::vector<Raw::DATA_TYPE> readChannel;
         std::vector<Raw::DATA_TYPE> writeChannel;
 
+        friend bool operator==(const DEV_PKG &lhs, const DEV_PKG &rhs)
+        {
+            auto res = std::make_tuple(lhs.id, lhs.error, lhs.name, lhs.description, lhs.readChannel, lhs.writeChannel) ==
+                         std::make_tuple(rhs.id, rhs.error, rhs.name, rhs.description, rhs.readChannel, rhs.writeChannel);
+            return res;
+        }
+
     };
 
     struct RESPONSE_DEV_LIST_PKG : RESPONSE_PKG
@@ -65,6 +70,12 @@ public:
         {
         }
         std::vector<DEV_PKG> devs;
+
+        friend bool operator==(const RESPONSE_DEV_LIST_PKG &lhs, const RESPONSE_DEV_LIST_PKG &rhs)
+        {
+            return std::make_tuple(lhs.type, lhs.devs) ==
+                    std::make_tuple(rhs.type, rhs.devs);;
+        }
     };
 
     struct RESPONSE_STATE_PKG : RESPONSE_PKG
@@ -74,6 +85,12 @@ public:
         }
         QString name;
         bool state;
+
+        friend bool operator==(const RESPONSE_STATE_PKG &lhs, const RESPONSE_STATE_PKG &rhs)
+        {
+            return std::make_tuple(lhs.type, lhs.name, lhs.state) ==
+                    std::make_tuple(rhs.type, rhs.name, rhs.state);
+        }
     };
 
     struct RESPONSE_WRITE_PKG : RESPONSE_PKG
@@ -83,6 +100,12 @@ public:
         }
         QString name;
         uint8_t channelNumber;
+
+        friend bool operator==(const RESPONSE_WRITE_PKG &lhs, const RESPONSE_WRITE_PKG &rhs)
+        {
+            return std::make_tuple(lhs.type, lhs.name, lhs.channelNumber) ==
+                    std::make_tuple(rhs.type, rhs.name, rhs.channelNumber);
+        }
     };
 
     struct RESPONSE_READ_PKG : RESPONSE_WRITE_PKG
@@ -92,6 +115,12 @@ public:
             type = Response_Type::RESPONSE_READ;
         }
         QByteArray data;
+
+        friend bool operator==(const RESPONSE_READ_PKG &lhs, const RESPONSE_READ_PKG &rhs)
+        {
+            return std::make_tuple(lhs.type, lhs.name, lhs.channelNumber, lhs.data) ==
+                    std::make_tuple(rhs.type, rhs.name, rhs.channelNumber, rhs.data);
+        }
     };
 
     static RESPONSE_PKG *accumResponsePacket(QByteArray &data);
@@ -111,6 +140,16 @@ private:
 
 class Client_TX
 {
+public:
+    enum : uint8_t
+    {
+        QUERY_DEV_LIST_BYTE = 0x01,
+        QUERY_STATE_FIRST_BYTE = 0x00,
+        QUERY_STATE_SECOND_BYTE = 0x10,
+        QUERY_READ_BYTE = 0x02,
+        QUERY_WRITE_BYTE = 0x00
+    };
+
     static QByteArray query_Device_List();
     static QByteArray query_STATE(const QString &deviceName);
     static QByteArray query_READ(const QString &deviceName, uint8_t channelNumber);

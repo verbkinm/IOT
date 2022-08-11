@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    Tests \
+    TEST_IOTV_SC \
+    TEST_IOTV_SH \
     Test_Raw

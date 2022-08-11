@@ -111,7 +111,7 @@ void IOTV_SH_test::response()
         QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data), nullptr);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
 
         data = QByteArray::fromRawData(arr, 5);
         QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_INCOMPLETE);
@@ -156,7 +156,7 @@ void IOTV_SH_test::response()
 
         QCOMPARE(result, digit);
 
-        QCOMPARE(IOTV_SH::accumPacket(data), nullptr);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
 
         data.clear();
         data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_READ_BYTE);
@@ -196,7 +196,7 @@ void IOTV_SH_test::response()
         data.push_back(0x10 | IOTV_SH::RESPONSE_PONG_BYTE);
 
 
-        QVERIFY(IOTV_SH::accumPacket(data) == nullptr);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
     }
 }
 
