@@ -11,8 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         Protocols/IOTV_SH.cpp \
         iot_server.cpp \
-        main.cpp \
-        network_module.cpp
+        main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,8 +20,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     Protocols/IOTV_SH.h \
-    iot_server.h \
-    network_module.h
+    iot_server.h
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLog

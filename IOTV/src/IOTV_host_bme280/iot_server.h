@@ -16,15 +16,18 @@ class IOT_Server : public QObject
     QTimer _timer;
 
     void newValue();
+
 public:
     IOT_Server();
 
     const uint8_t _id;
     const std::string _description;
 
-    float ch1, ch2, ch3;
+    float _readChannel[READ_CHANNEL_LENGTH];
+    uint8_t _readChannelType[READ_CHANNEL_LENGTH];
 
-    Protocol_class::DATA_TYPE ch1Type;
+    float _writeChannel[WRITE_CHANNEL_LENGTH];
+    uint8_t _writeChannelType[WRITE_CHANNEL_LENGTH];
 
     void update();
 };

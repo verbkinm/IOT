@@ -1,15 +1,14 @@
 #pragma once
 
-#include <stdint.h>
-#include <vector>
+#include <QByteArray>
 
-#include "iot_server.h"
+class IOT_Server;
 
 class Protocol_class
 {
 public:
     //Принята BigEndian последовательность в коде
-    enum DATA_TYPE : uint8_t
+    enum DATA_TYPE
     {
         INT_8,
         INT_16,
@@ -26,19 +25,21 @@ public:
         NONE
     };
 
-    enum class query_type
+    enum
     {
-        QUERY_WAY,
-        QUERY_READ,
-        QUERY_WRITE,
-        QUERY_PING,
-        ERROR
+        QUERY_WAY_BYTE = 0x01,
+        QUERY_READ_BYTE = 0x02,
+        QUERY_WRITE_BYTE = 0x00,
+        QUERY_PING_BYTE = 0x08,
+
+        RESPONSE_WAY_BYTE = 0x05,
+        RESPONSE_READ_BYTE = 0x06,
+        RESPONSE_WRITE_BYTE = 0x04,
+        RESPONSE_PONG_BYTE = 0x0C
     };
 
-    static query_type checkQueryData(const std::vector<uint8_t> &data);
-
-    static void response_WAY(const IOT_Server &iotHost, std::vector<uint8_t> &data);
-    static void response_READ(const IOT_Server &iotHost, std::vector<uint8_t> &data);
-    static void response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &data);
-    static void response_Pong(std::vector<uint8_t> &data);
+    static QByteArray response_WAY(const IOT_Server &iotHost);
+    static QByteArray response_READ(const IOT_Server &iotHost, const QByteArray &inputData);
+//    static void response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &data);
+    static QByteArray response_Pong();
 };

@@ -133,7 +133,7 @@ bool IOT_Host::runInNewThread()
     this->moveToThread(&_thread);
 
     _timerPing.moveToThread(&_thread);
-    _timerReconnect.moveToThread(&_thread);
+    _timerPong.moveToThread(&_thread);
     _reReadTimer.moveToThread(&_thread);
 
     _thread.start();
@@ -233,7 +233,7 @@ void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 
     if (pongPkg->state)
     {
-        _timerReconnect.start(TIMER_RECONNECT);
+        _timerPong.start(TIMER_PONG);
         _timerPing.start(TIMER_PING);
     }
 }
@@ -243,7 +243,7 @@ void IOT_Host::slotConnected()
     setOnline(true);
     _conn_type->write(IOTV_SH::query_WAY());
 
-    _timerReconnect.start(TIMER_RECONNECT);
+    _timerPong.start(TIMER_PONG);
     emit signalHostConnected(); ///!!! никуда не идут
 }
 
@@ -252,7 +252,7 @@ void IOT_Host::slotDisconnected()
     setOnline(false);
 
     _timerPing.stop();
-    _timerReconnect.stop();
+    _timerPong.stop();
     _reReadTimer.stop();
 
     _conn_type->trimBufferFromBegin(static_cast<uint8_t>(Base_conn_type::BUFFER_MAX_SIZE));
@@ -283,7 +283,7 @@ void IOT_Host::slotReconnectTimeOut()
 void IOT_Host::slotNewThreadStart()
 {
     connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut, Qt::QueuedConnection);
-    connect(&_timerReconnect, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
+    connect(&_timerPong, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
     connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut, Qt::QueuedConnection);
 
     auto interval = _settingsData[hostField::interval].toUInt();
@@ -302,6 +302,6 @@ void IOT_Host::slotThreadStop()
     this->moveToThread(_parentThread);
 
     _timerPing.moveToThread(_parentThread);
-    _timerReconnect.moveToThread(_parentThread);
+    _timerPong.moveToThread(_parentThread);
     _reReadTimer.moveToThread(_parentThread);
 }

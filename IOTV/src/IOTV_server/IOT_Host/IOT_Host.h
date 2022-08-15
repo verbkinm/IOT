@@ -46,12 +46,12 @@ private:
     void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
 
     static constexpr unsigned int TIMER_PING = 10000;
-    static constexpr unsigned int TIMER_RECONNECT = 15000;
+    static constexpr unsigned int TIMER_PONG = 15000;
 
     std::unique_ptr<Base_conn_type> _conn_type;
-    const QString &_logFile;
+    const QString _logFile;
 
-    QTimer _reReadTimer, _timerPing, _timerReconnect;
+    QTimer _reReadTimer, _timerPing, _timerPong;
 
     std::unordered_map<QString, QString>  _settingsData;
 
