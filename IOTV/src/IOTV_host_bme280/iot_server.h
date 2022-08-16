@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <QTimer>
 
 #include "log.h"
 #include "Protocols/IOTV_SH.h"
@@ -13,12 +12,10 @@ class IOT_Server : public QObject
 {
     Q_OBJECT
 
-    QTimer _timer;
-
-    void newValue();
-
 public:
     IOT_Server();
+
+    void newValue();
 
     const uint8_t _id;
     const std::string _description;

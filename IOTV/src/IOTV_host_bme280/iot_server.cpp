@@ -17,9 +17,6 @@ IOT_Server::IOT_Server() : _id(2), _description("bme280")
     _readChannelType[0] = Protocol_class::DATA_TYPE::FLOAT_32;
     _readChannelType[1] = Protocol_class::DATA_TYPE::FLOAT_32;
     _readChannelType[2] = Protocol_class::DATA_TYPE::FLOAT_32;
-
-    connect(&_timer, &QTimer::timeout, this, &IOT_Server::newValue);
-    _timer.start(1000);
 }
 
 void IOT_Server::update()

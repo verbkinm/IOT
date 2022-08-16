@@ -67,7 +67,7 @@ void Base_conn_type::slotReadData()
     std::lock_guard lg(_hostBuffMutex);
 
     _host_buffer_data += readAll();
-    Log::write(_name + ": <- " + _host_buffer_data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
     if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
     {

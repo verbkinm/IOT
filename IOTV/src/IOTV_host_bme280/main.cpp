@@ -8,43 +8,56 @@
 #include "Protocols/IOTV_SH.h"
 #include "iot_server.h"
 
-QTcpServer server;
-QTcpSocket* socket = nullptr;
-QByteArray buffer, resivedBuffer;
+QTcpServer *server = nullptr;
+QTcpSocket *socket = nullptr;
+char resivedBuffer[BUFSIZ] {0};
 IOT_Server iot;
 
 void slotDataRecived()
 {
-    resivedBuffer += socket->readAll();
+//    resivedBuffer +=
+    socket->read(resivedBuffer, 1);
 
-    Log::write("data recived form " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())
-               + " <- " + resivedBuffer.toHex(':'));
-
+//    Log::write("data recived form " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())
+//               + " <- " + resivedBuffer.toHex(':'));
 Mark:
-    if (resivedBuffer.isEmpty())
-        return;
+//    if (resivedBuffer.isEmpty())
+//        return;
 
-    if (resivedBuffer.at(0) == Protocol_class::QUERY_WAY_BYTE)
+    char *data = nullptr;
+    uint16_t dataSize = 0;
+
+    if (resivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE)
     {
-        socket->write(Protocol_class::response_WAY(iot));
-        resivedBuffer = resivedBuffer.mid(1);
+        dataSize = Protocol_class::response_WAY(iot, data);
+        socket->write(data, dataSize);
+        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
     }
 
-    else if ((resivedBuffer.at(0) & 0x0F) == Protocol_class::QUERY_READ_BYTE)
+    else if ((resivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE)
     {
-        socket->write(Protocol_class::response_READ(iot, resivedBuffer));
-        resivedBuffer = resivedBuffer.mid(1);
-    }
-    else if (resivedBuffer.at(0) == Protocol_class::QUERY_PING_BYTE)
-    {
-        socket->write(Protocol_class::response_Pong());
-        resivedBuffer = resivedBuffer.mid(1);
-    }
-    else
-        resivedBuffer.clear();
+        iot.newValue();
 
-    if (resivedBuffer.size() > 0)
-        goto Mark;
+        uint8_t channelNumber = resivedBuffer[0] >> 4;
+        dataSize = Protocol_class::response_READ(iot, channelNumber, data);
+
+        socket->write(data, dataSize);
+        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
+    }
+    else if (resivedBuffer[0] == Protocol_class::QUERY_PING_BYTE)
+    {
+        dataSize = Protocol_class::response_Pong(data);
+        socket->write(data, dataSize);
+        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
+    }
+//    else
+//        resivedBuffer.clear();
+
+//    if (data != nullptr)
+//        delete[] data;
+
+//    if (resivedBuffer.size() > 0)
+//        goto Mark; //!!!
 }
 
 void slotDisconnected()
@@ -56,7 +69,7 @@ void slotDisconnected()
 
 void slotNewConnection()
 {
-    socket = server.nextPendingConnection();
+    socket = server->nextPendingConnection();
     Log::write("new connection: "+ socket->peerAddress().toString() + QString::number(socket->peerPort()));
 
     QObject::connect(socket, &QTcpSocket::readyRead, slotDataRecived);
@@ -68,12 +81,14 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    QObject::connect(&server, &QTcpServer::newConnection, [&](){
+    server = new QTcpServer;
+
+    QObject::connect(server, &QTcpServer::newConnection, [&](){
         slotNewConnection();
     });
 
 
-    server.listen(QHostAddress("127.0.0.1"), 2023);
+    server->listen(QHostAddress("127.0.0.1"), 2023);
     Log::write("Start service on 127.0.0.1:2023");
 
     return a.exec();
