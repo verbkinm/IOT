@@ -1,22 +1,21 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
-
 uint16_t Protocol_class::response_WAY(const IOT_Server &iotHost, char *outData)
 {
-    uint16_t descriptionLength = iotHost._description.size();
+    uint16_t descriptionLength = strlen(iotHost._description);
     uint8_t channelRead = READ_CHANNEL_LENGTH;
     uint8_t channelWrite = WRITE_CHANNEL_LENGTH;
     uint16_t dataSize = 5 + descriptionLength + channelRead + channelWrite;
 
     outData[0] = RESPONSE_WAY_BYTE;
     outData[1] = iotHost._id;
-    outData[2] = iotHost._description.size() << 8;
-    outData[3] = iotHost._description.size();
+    outData[2] = strlen(iotHost._description) << 8;
+    outData[3] = strlen(iotHost._description);
 
     outData[4] = (channelRead << 4) | channelWrite;
 
-    memcpy(&outData[5], iotHost._description.data(), descriptionLength);
+    memcpy(&outData[5], iotHost._description, descriptionLength);
     memcpy(&outData[5 + descriptionLength], iotHost._readChannelType, channelRead);
 
     return dataSize;

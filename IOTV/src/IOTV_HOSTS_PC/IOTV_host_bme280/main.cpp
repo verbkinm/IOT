@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-#include "log.h"
 #include "Protocols/IOTV_SH.h"
 #include "iot_server.h"
 
@@ -32,7 +31,6 @@ void slotDataRecived()
             memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
             ptrBuf--;
         }
-
         else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE)
         {
             iot.newValue();
@@ -59,14 +57,15 @@ void slotDisconnected()
 {
     QString strOut = "disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
-    Log::write(strOut);
+    std::cout << strOut.toStdString() << std::endl;
 }
 
 //для ПК
 void slotNewConnection()
 {
     socket = server->nextPendingConnection();
-    Log::write("new connection: "+ socket->peerAddress().toString() + QString::number(socket->peerPort()));
+    QString strOut = "new connection: "+ socket->peerAddress().toString() + QString::number(socket->peerPort());
+    std::cout << strOut.toStdString() << std::endl;
 
     QObject::connect(socket, &QTcpSocket::readyRead, slotDataRecived);
     QObject::connect(socket, &QTcpSocket::disconnected, slotDisconnected);
@@ -83,9 +82,8 @@ int main(int argc, char *argv[])
         slotNewConnection();
     });
 
-
     server->listen(QHostAddress("127.0.0.1"), 2023);
-    Log::write("Start service on 127.0.0.1:2023");
+    std::cout << "Start service on 127.0.0.1:2023" << std::endl;
 
     return a.exec();
 }
