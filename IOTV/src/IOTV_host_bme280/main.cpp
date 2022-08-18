@@ -10,56 +10,51 @@
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
-char resivedBuffer[BUFSIZ] {0};
+
 IOT_Server iot;
+
+char recivedBuffer[BUFSIZ] {0}, transmitBuffer[BUFSIZ] {0};
+char* ptrBuf = recivedBuffer;
+
 
 void slotDataRecived()
 {
-//    resivedBuffer +=
-    socket->read(resivedBuffer, 1);
-
-//    Log::write("data recived form " + socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())
-//               + " <- " + resivedBuffer.toHex(':'));
-Mark:
-//    if (resivedBuffer.isEmpty())
-//        return;
-
-    char *data = nullptr;
     uint16_t dataSize = 0;
+    uint64_t recvSize = socket->read(ptrBuf, BUFSIZ); //!!!
+    ptrBuf += recvSize;
 
-    if (resivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE)
+    while(ptrBuf != recivedBuffer)
     {
-        dataSize = Protocol_class::response_WAY(iot, data);
-        socket->write(data, dataSize);
-        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
+        if (recivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE)
+        {
+            dataSize = Protocol_class::response_WAY(iot, transmitBuffer);
+            socket->write(transmitBuffer, dataSize);
+            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
+            ptrBuf--;
+        }
+
+        else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE)
+        {
+            iot.newValue();
+
+            dataSize = Protocol_class::response_READ(iot, recivedBuffer, transmitBuffer);
+
+            socket->write(transmitBuffer, dataSize);
+            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
+            ptrBuf--;
+        }
+        else if (recivedBuffer[0] == Protocol_class::QUERY_PING_BYTE)
+        {
+            dataSize = Protocol_class::response_Pong(transmitBuffer);
+            socket->write(transmitBuffer, dataSize);
+            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
+            ptrBuf--;
+        }
+        else
+            ptrBuf = recivedBuffer;
     }
-
-    else if ((resivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE)
-    {
-        iot.newValue();
-
-        uint8_t channelNumber = resivedBuffer[0] >> 4;
-        dataSize = Protocol_class::response_READ(iot, channelNumber, data);
-
-        socket->write(data, dataSize);
-        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
-    }
-    else if (resivedBuffer[0] == Protocol_class::QUERY_PING_BYTE)
-    {
-        dataSize = Protocol_class::response_Pong(data);
-        socket->write(data, dataSize);
-        memmove((void*)resivedBuffer, (void*)&resivedBuffer[1], BUFSIZ - 1);
-    }
-//    else
-//        resivedBuffer.clear();
-
-//    if (data != nullptr)
-//        delete[] data;
-
-//    if (resivedBuffer.size() > 0)
-//        goto Mark; //!!!
 }
-
+//для ПК
 void slotDisconnected()
 {
     QString strOut = "disconnected from " + socket->peerAddress().toString()
@@ -67,6 +62,7 @@ void slotDisconnected()
     Log::write(strOut);
 }
 
+//для ПК
 void slotNewConnection()
 {
     socket = server->nextPendingConnection();
