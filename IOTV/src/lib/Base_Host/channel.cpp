@@ -46,7 +46,7 @@ bool Channel::setData(uint8_t channelNumber, const Raw &data)
     }
 }
 
-bool Channel::setData(uint8_t channelNumber, const std::vector<uint8_t> &data)
+bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
 {
     try
     {
@@ -65,11 +65,11 @@ bool Channel::setData(uint8_t channelNumber, const std::vector<uint8_t> &data)
     }
 }
 
-Raw Channel::getData(uint8_t channelNumber) const
+QByteArray Channel::getData(uint8_t channelNumber) const
 {
     try
     {
-        return _data.at(channelNumber);
+        return _data.at(channelNumber).data();
     }
     catch (std::out_of_range &ex)
     {

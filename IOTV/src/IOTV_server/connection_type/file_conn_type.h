@@ -16,6 +16,8 @@ public:
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 
+    virtual QByteArray readAll() override;
+
 private:
     QFile _file;
 };

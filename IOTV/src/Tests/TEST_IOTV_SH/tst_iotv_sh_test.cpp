@@ -1,5 +1,7 @@
 #include <QtTest>
 
+#include <cstring>
+
 #include "IOTV_SH.h"
 
 // add necessary includes here
@@ -48,7 +50,7 @@ void IOTV_SH_test::query()
         //Запрос WRITE
         uint8_t channelNumber = 1;
 
-        Raw raw(Raw::DATA_TYPE::BOOL_8);
+        Raw raw(Raw::DATA_TYPE::BOOL);
         raw.push_back(1);
 
         QByteArray data;
@@ -57,8 +59,8 @@ void IOTV_SH_test::query()
         data.push_back(raw.size());
         data.push_back(raw.data().at(0));
 
-        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw).length(), 4);
-        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw), data);
+        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw.data()).length(), 4);
+        QCOMPARE(IOTV_SH::query_WRITE(channelNumber, raw.data()), data);
     }
 
     {
@@ -73,10 +75,10 @@ void IOTV_SH_test::response()
     {
         //Ответ WAY
         IOTV_SH::RESPONSE_WAY pkg;
-        pkg.id = 1;
+        pkg.id = 3;
         pkg.description = "test";
-        pkg.readChannel = {Raw::DATA_TYPE::BOOL_8};
-        pkg.writeChannel = {Raw::DATA_TYPE::BOOL_8};
+        pkg.readChannel = {Raw::DATA_TYPE::BOOL};
+        pkg.writeChannel = {Raw::DATA_TYPE::BOOL};
 
         const char arr[] = {static_cast<char>(IOTV_SH::RESPONSE_WAY_BYTE),
                             static_cast<char>(pkg.id),
@@ -87,7 +89,7 @@ void IOTV_SH_test::response()
 
         QByteArray data(QByteArray::fromRawData(arr, 5));
 
-        for (auto ch : pkg.description)
+        for (auto ch : pkg.description.toStdString())
             data.push_back(ch);
 
         data.push_back(static_cast<char>(pkg.readChannel.at(0)));
@@ -100,17 +102,19 @@ void IOTV_SH_test::response()
 
         QCOMPARE(data.size(), onePkg * 3 + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), onePkg * 2 + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), onePkg + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), 1);
 
-        IOTV_SH::RESPONSE_PKG errorPkg;
-        QCOMPARE(IOTV_SH::accumPacket(data).type, errorPkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
+
+        data = QByteArray::fromRawData(arr, 5);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_INCOMPLETE);
     }
 
     {
@@ -138,13 +142,13 @@ void IOTV_SH_test::response()
 
         QCOMPARE(data.size(), onePkg * 3 + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), onePkg * 2 + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), onePkg + 1);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
         QCOMPARE(data.size(), 1);
 
         uint16_t result;
@@ -152,8 +156,11 @@ void IOTV_SH_test::response()
 
         QCOMPARE(result, digit);
 
-        IOTV_SH::RESPONSE_PKG errorPkg;
-        QCOMPARE(IOTV_SH::accumPacket(data).type, errorPkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
+
+        data.clear();
+        data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_READ_BYTE);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_INCOMPLETE);
     }
 
     {
@@ -166,7 +173,7 @@ void IOTV_SH_test::response()
         QByteArray data;
         data.push_back((channelNumber << 4) | IOTV_SH::RESPONSE_WRITE_BYTE);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
     }
 
     {
@@ -177,7 +184,7 @@ void IOTV_SH_test::response()
         QByteArray data;
         data.push_back(IOTV_SH::RESPONSE_PONG_BYTE);
 
-        QCOMPARE(IOTV_SH::accumPacket(data).type, pkg.type);
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, pkg.type);
     }
 
     {
@@ -188,7 +195,8 @@ void IOTV_SH_test::response()
         QByteArray data;
         data.push_back(0x10 | IOTV_SH::RESPONSE_PONG_BYTE);
 
-        QVERIFY(IOTV_SH::accumPacket(data).type != pkg.type);
+
+        QCOMPARE(IOTV_SH::accumPacket(data)->type, IOTV_SH::Response_Type::RESPONSE_ERROR);
     }
 }
 

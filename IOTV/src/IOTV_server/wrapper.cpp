@@ -5,12 +5,12 @@ Wrapper::Wrapper(QObject *parent) : QObject(parent), _server(std::make_unique<IO
     Log::write("Start program IOTV_Server " + _server->getProgramVersion());
 
     _watcher.addPaths(_server->getFileSettingNames());
-    connect(&_watcher, SIGNAL(fileChanged(QString)), SLOT(slotFileChange(QString)) );
+    connect(&_watcher, &QFileSystemWatcher::fileChanged, this, &Wrapper::slotFileChange);
 }
 
 void Wrapper::slotFileChange(QString fileName)
 {
+    _watcher.addPaths(_server->getFileSettingNames());
     Log::write("Setting file changed: " + fileName);
     _server = std::make_unique<IOT_Server>();
-    _watcher.addPaths(_server->getFileSettingNames());
 }

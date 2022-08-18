@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include <QTimer>
 
 #include "log.h"
@@ -34,14 +36,19 @@ public:
     virtual void connectToHost();
     virtual void disconnectFromHost();
 
+    void trimBufferFromBegin(u_int8_t size);
+
     static QString ConnTypeToString(Conn_type conn_type);
 
 protected:
     const QString _name;
     QString _address;
+    QString _logFile;
     Conn_type _type;
     QTimer _reconnectTimer;
     QByteArray _host_buffer_data;
+
+    std::mutex _hostBuffMutex;
 
     virtual QByteArray readAll();
 
@@ -52,5 +59,5 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
-    void signalDataRiceved(IOTV_SH::RESPONSE_PKG data);
+    void signalDataRiceved(QByteArray);
 };

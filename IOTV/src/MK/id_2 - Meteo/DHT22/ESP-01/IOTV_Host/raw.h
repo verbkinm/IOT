@@ -16,24 +16,25 @@ class  Raw
 public:
     enum class DATA_TYPE
     {
-        INTEGER_8,
-        INTEGER_16,
-        INTEGER_32,
-        //INTEGER_64,
+        INTEGER_8 = 0x00,
+        INTEGER_16 = 0x01,
+        INTEGER_32 = 0x02,
+        INTEGER_64 = 0x03,
 
-        UNSIGNED_INTEGER_8,
-        UNSIGNED_INTEGER_16,
-        UNSIGNED_INTEGER_32,
-        //UNSIGNED_INTEGER_64,
+        UNSIGNED_INTEGER_8 = 0x04,
+        UNSIGNED_INTEGER_16 = 0x05,
+        UNSIGNED_INTEGER_32 = 0x06,
+        UNSIGNED_INTEGER_64 = 0x07,
 
-        FLOAT_32,
-        DOUBLE_32,
-        //DOUBLE_64,
+        FLOAT_32 = 0x08,
+        DOUBLE_32 = 0x09,
+        DOUBLE_64 = 0x0A,
 
-        BOOL_8,
-        CHAR_PTR,
+        BOOL_8 = 0x0B,
+        STRING = 0x0C,
 
-        RAW
+        RAW = 0x0D,
+        NONE = 0x0E
     };
 
     union RAW

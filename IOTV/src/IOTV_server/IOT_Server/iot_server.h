@@ -12,8 +12,8 @@
 #include <fstream>
 
 #include "protocols.h"
+#include "ConfigTypes.h"
 #include "IOT_Host/IOT_Host.h"
-#include "IOT_Host/iot_host_structsettings.h"
 
 class IOT_Server : public QTcpServer
 {
@@ -30,8 +30,8 @@ private:
     void readSettings();
     void startTCPServer();
 
-    void writeToSocket(QTcpSocket* socket, const QByteArray &data);
-    void clinetOnlineFile() const;
+    quint64 writeToSocket(QTcpSocket* socket, const QByteArray &data);
+    void clientOnlineFile() const;
 
     std::vector<std::unique_ptr<IOT_Host>> _iot_hosts;
     std::list<QTcpSocket*> _clientList;

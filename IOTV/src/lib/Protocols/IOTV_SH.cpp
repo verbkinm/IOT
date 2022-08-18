@@ -15,7 +15,7 @@ QByteArray IOTV_SH::query_READ(uint8_t channelNumber)
     return data;
 }
 
-QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
+QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const QByteArray &rawData)
 {
     QByteArray data;
     data.append((channelNumber << 4) | QUERY_WRITE_BYTE);
@@ -25,10 +25,7 @@ QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const Raw &rawData)
     data.push_back(size >> 8);
     data.push_back(size);
 
-    data.append(vecUInt8ToQByteArray(rawData.data()));
-//    auto &dataFromRaw = rawData.data();
-//    for (uint16_t i = 0; i < size; i++)
-//        data.push_back(dataFromRaw[i]);
+    data.append(rawData.data());
 
     return data;
 }
@@ -41,7 +38,7 @@ QByteArray IOTV_SH::query_PING()
     return data;
 }
 
-IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
+IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
 {
     uint16_t descriptionLength = 0;
     uint8_t channelReadLength = 0;
@@ -60,85 +57,80 @@ IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
         expectedLength = 5 + descriptionLength + channelReadLength + channelWriteLength;
 
         if (data.size() < expectedLength)
-            return {};
+            return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
     }
     else
-        return {};
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);;
 
-    RESPONSE_WAY pkg_data;
+    RESPONSE_WAY *pkg_data = new RESPONSE_WAY;
 
-    pkg_data.id = data.at(1);
-    pkg_data.description = data.mid(5, descriptionLength).data();
+    pkg_data->id = data.at(1);
+    pkg_data->description = data.mid(5, descriptionLength).data();
 
     int index = 5 + descriptionLength;
     for (uint8_t i = 0; i < channelReadLength; i++)
-        pkg_data.readChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
-    pkg_data.readChannel.shrink_to_fit();
+        pkg_data->readChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
+    pkg_data->readChannel.shrink_to_fit();
 
     for (uint8_t i = 0; i < channelWriteLength; i++)
-        pkg_data.writeChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
-    pkg_data.writeChannel.shrink_to_fit();
+        pkg_data->writeChannel.push_back(static_cast<Raw::DATA_TYPE>(data.at(index++)));
+    pkg_data->writeChannel.shrink_to_fit();
 
     data = data.mid(expectedLength);
 
     return pkg_data;
 }
 
-IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_READ_PKG(QByteArray &data)
+IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_READ_PKG(QByteArray &data)
 {
     if (data.length() < 3)
-        return {};
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
     uint16_t dataLength = (data.at(1) << 8) | static_cast<uint8_t>(data.at(2)); //  cast - чтобы не было отрицательного значения dataLength
 
     if (data.length() < (3 + dataLength))
-        return {};
+        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
-    RESPONSE_READ pkg_data;
+    RESPONSE_READ *pkg_data = new RESPONSE_READ;
 
-    pkg_data.chanelNumber = data.at(0) >> 4;;
-    pkg_data.data = data.mid(3, dataLength);
+    pkg_data->chanelNumber = data.at(0) >> 4;;
+    pkg_data->data = data.mid(3, dataLength);
 
     data = data.mid(3 + dataLength);
 
     return pkg_data;
 }
 
-IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_WRITE_PKG(QByteArray &data)
+IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WRITE_PKG(QByteArray &data)
 {
     if (data.isEmpty())
-        return {};
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 
-    RESPONSE_WRITE pkg_data;
-    pkg_data.chanelNumber = data.at(0) >> 4;
+    RESPONSE_WRITE *pkg_data = new RESPONSE_WRITE;
+    pkg_data->chanelNumber = data.at(0) >> 4;
 
     data = data.mid(1);
 
     return pkg_data;
 }
 
-IOTV_SH::RESPONSE_PKG IOTV_SH::createResponse_PONG_PKG(QByteArray &data)
+IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_PONG_PKG(QByteArray &data)
 {
     if (data.isEmpty())
-        return {};
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 
-    RESPONSE_PONG pkg_data;
-    pkg_data.state = true;
+    RESPONSE_PONG *pkg_data = new RESPONSE_PONG;
+    pkg_data->state = true;
 
     data = data.mid(1);
 
     return pkg_data;
 }
 
-uint8_t IOTV_SH::channelNumber(uint8_t byte)
-{
-    return (byte >> 4);
-}
-
-IOTV_SH::RESPONSE_PKG IOTV_SH::accumPacket(QByteArray &data)
+IOTV_SH::RESPONSE_PKG *IOTV_SH::accumPacket(QByteArray &data)
 {
     if(data.isEmpty())
-        return {};
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 
     uint8_t firstByte = data.at(0);
 
@@ -156,9 +148,9 @@ IOTV_SH::RESPONSE_PKG IOTV_SH::accumPacket(QByteArray &data)
     case RESPONSE_WRITE_BYTE:
         return createResponse_WRITE_PKG(data);
         break;
-    default:
-        return {};
     }
+
+    return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 }
 
 QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)

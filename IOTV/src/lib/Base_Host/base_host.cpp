@@ -27,7 +27,7 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
     return _readChannel.setData(channelNumber, data);
 }
 
-bool Base_Host::setReadChannelData(uint8_t channelNumber, const std::vector<uint8_t> &data)
+bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
     return _readChannel.setData(channelNumber, data);
 }
@@ -42,7 +42,7 @@ Raw::DATA_TYPE Base_Host::getReadChannelType(uint8_t channelNumber) const
     return _readChannel.getType(channelNumber);
 }
 
-Raw Base_Host::getReadChannelData(uint8_t channelNumber) const
+QByteArray Base_Host::getReadChannelData(uint8_t channelNumber) const
 {
     return _readChannel.getData(channelNumber);
 }
@@ -52,12 +52,12 @@ Raw::DATA_TYPE Base_Host::getWriteChannelType(uint8_t channelNumber) const
     return _writeChannel.getType(channelNumber);
 }
 
-uint8_t Base_Host::readChannelLength() const
+uint8_t Base_Host::getReadChannelLength() const
 {
     return _readChannel.size();
 }
 
-uint8_t Base_Host::writeChannelLength() const
+uint8_t Base_Host::getWriteChannelLength() const
 {
     return _writeChannel.size();
 }
@@ -77,17 +77,17 @@ void Base_Host::setId(uint8_t id)
     _id = id;
 }
 
-void Base_Host::setDescription(const std::string &description)
+void Base_Host::setDescription(const QString description)
 {
     _description = description;
 }
 
 uint8_t Base_Host::getId() const
 {
-    return _id;;
+    return _id;
 }
 
-std::string Base_Host::getDescription() const
+QString Base_Host::getDescription() const
 {
     return _description;
 }

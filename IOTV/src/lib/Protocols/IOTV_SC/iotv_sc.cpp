@@ -1,75 +1,52 @@
 #include "iotv_sc.h"
 
-void IOTV_SC::query_Device_List(QByteArray &data)
+QByteArray IOTV_SC::query_Device_List()
 {
-    data.clear();
-    data.append(0x01);
+    QByteArray data;
+    data.push_back(0x01); //!!!
+    return data;
 }
 
-bool IOTV_SC::query_STATE(QByteArray &data, const QString &deviceName)
-{
-    data.clear();
-
-    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME)
-        return false;
-
-    data.append(deviceName.length() << 3);
-    data.append(0x10);
-    data.append(deviceName.toUtf8());
-
-    return true;
-}
-
-qint64 IOTV_SC::query_READ(Base_Host &host, const QString &deviceName, uint8_t channelNumber)
+QByteArray IOTV_SC::query_STATE(const QString &deviceName)
 {
     QByteArray data;
 
-    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME || channelNumber > 0x0f)
-        return false;
+    uint8_t length = deviceName.length() << 3;
+    data.push_back(length);
+    data.push_back(0x10); //!!! 0x10
+    // length >> 3 - пресекаем размер больше допустимого
+    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
 
-    data.append( (deviceName.length() << 3) | 0x02);
-    data.append(channelNumber);
-    data.append(deviceName.toUtf8());
-
-    return host.writeToServer(data);
+    return data;
 }
 
-qint64 IOTV_SC::query_WRITE(Base_Host &host, const QString &deviceName, uint8_t channelNumber, Raw::RAW &rawData)
+QByteArray IOTV_SC::query_READ(const QString &deviceName, uint8_t channelNumber)
 {
     QByteArray data;
 
-    if(deviceName.length() > MAX_LENGTH_DEVICE_NAME || channelNumber > 0x0f)
-        return -1;
+    uint8_t length = deviceName.length() << 3;
+    data.push_back(length | 0x02); //!!! 0x02
+    data.push_back(0x0F & channelNumber);
+    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
 
-    data.append(deviceName.length() << 3);
-    data.append(channelNumber);
+    return data;
+}
 
-    if(host.getReadChannelDataType(channelNumber) == Raw::DATA_TYPE::CHAR_PTR && rawData.str != nullptr)
-    {
-        char* ptr = rawData.str;
-        quint16 strLength = strlen(ptr);
+QByteArray IOTV_SC::query_WRITE(const QString &deviceName, uint8_t channelNumber, const QByteArray &rawData)
+{
+    QByteArray data;
 
-        data.append(strLength >> 8);
-        data.append(strLength);
+    uint8_t length = deviceName.length() << 3;
 
-        data.append(deviceName.toUtf8());
+    data.push_back(deviceName.length());
+    data.push_back(channelNumber);
 
-        for (quint16 i = 0; i < strLength; i++)
-            data.append(ptr[i]);
-    }
-    else
-    {
-        data.append(Raw::size >> 8);
-        data.append(Raw::size);
+    data.push_back(rawData.size() >> 8);
+    data.push_back(rawData.size());
+    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
+    data.append(rawData);
 
-        data.append(deviceName.toUtf8());
-
-        for (quint16 i = 0; i < Raw::size; i++)
-            data.append(rawData.array[i]);
-    }
-
-    return host.writeToServer(data);
-//        delete[] rawData.str;
+    return data;
 }
 
 QByteArrayList IOTV_SC::response_Device_List(const QByteArray &data)
