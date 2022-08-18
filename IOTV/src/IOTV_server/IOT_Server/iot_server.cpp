@@ -80,15 +80,20 @@ void IOT_Server::startTCPServer()
     }
 }
 
-void IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
+quint64 IOT_Server::writeToSocket(QTcpSocket *socket, const QByteArray &data)
 {
+    if (socket == nullptr)
+        return -1;
+
     socket->write(data);
     Log::write("Send to client " + socket->peerAddress().toString() + ":"
                + QString::number(socket->peerPort())
                + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT, _logFile);
+
+    return socket->write(data);
 }
 
-void IOT_Server::clinetOnlineFile() const
+void IOT_Server::clientOnlineFile() const
 {
     std::ofstream file("client_online.log", std::ios::trunc);
     if (!file.is_open())
@@ -139,6 +144,8 @@ void IOT_Server::checkSettingsFileExist()
 void IOT_Server::slotNewConnection()
 {
     QTcpSocket* socket = this->nextPendingConnection();
+
+    //!!!
     if (!socket)
     {
         Log::write("!!! nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log"); //debug
@@ -152,10 +159,9 @@ void IOT_Server::slotNewConnection()
 
     connect(socket, &QTcpSocket::readyRead, this, &IOT_Server::slotDataRecived);
     connect(socket, &QTcpSocket::disconnected, this, &IOT_Server::slotDisconnected);
-    //!!! deleteLater в слоте slotDisconnected
-    //    connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+    connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
 
-    clinetOnlineFile();
+    clientOnlineFile();
 }
 
 //!!! слишком большой метод, должен выполняться для каждого клиента в отдельном потоке!
@@ -296,9 +302,8 @@ void IOT_Server::slotDisconnected()
     QString strOut = "Client disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
-    socket->deleteLater();
 
-    clinetOnlineFile();
+    clientOnlineFile();
 }
 
 void IOT_Server::slotError(QAbstractSocket::SocketError error)
