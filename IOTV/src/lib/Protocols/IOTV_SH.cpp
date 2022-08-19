@@ -83,6 +83,9 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_WAY_PKG(QByteArray &data)
 
 IOTV_SH::RESPONSE_PKG *IOTV_SH::createResponse_READ_PKG(QByteArray &data)
 {
+    if (data.isEmpty())
+        return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
+
     if (data.length() < 3)
         return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 

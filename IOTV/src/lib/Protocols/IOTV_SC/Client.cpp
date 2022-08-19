@@ -19,11 +19,11 @@ Client_RX::RESPONSE_PKG *Client_RX::accumPacket(QByteArray &data)
         break;
     case IOTV_SC::RESPONSE_STATE_FIRST_BYTE: // он же RESPONSE_WRITE_BYTE
     {
-        if (data.size() == 1)
+        if (data.size() < 2)
             return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
         //у пакетов state и write одинаковые младшие 3 бита, отличие во втором байте в 4 разряде
-        if (data.at(1) & IOTV_SC::RESPONSE_STATE_BIT_MASK)
+        if (data.at(1) & IOTV_SC::STATE_BIT_MASK)
             return createResponse_STATE_PKG(data);
 
         return createResponse_WRITE_PKG(data);
@@ -115,7 +115,7 @@ Client_RX::RESPONSE_PKG *Client_RX::createResponse_STATE_PKG(QByteArray &data)
 
     RESPONSE_STATE_PKG *pkg = new RESPONSE_STATE_PKG;
 
-    pkg->state = static_cast<uint8_t>(data.at(1)) & IOTV_SC::RESPONSE_STATE_BIT_MASK;
+    pkg->state = static_cast<uint8_t>(data.at(1)) & IOTV_SC::STATE_BIT_MASK;
     pkg->name = data.mid(2, nameLength);
 
     data = data.mid(2 + nameLength);

@@ -60,23 +60,36 @@ public:
         QUERY_READ_PKG() : QUERY_PKG(Query_Type::QUERY_READ)
         {
         }
-        bool state = false;
         QString name;
+        uint8_t channelNumber = 0;
 
         friend bool operator==(const QUERY_READ_PKG &lhs, const QUERY_READ_PKG &rhs)
         {
-            return std::make_tuple(lhs.type, lhs.state, lhs.name) ==
-                    std::make_tuple(rhs.type, rhs.state, rhs.name);
+            return std::make_tuple(lhs.type, lhs.name, lhs.channelNumber) ==
+                    std::make_tuple(rhs.type, rhs.name, rhs.channelNumber);
+        }
+    };
+
+    struct QUERY_WRITE_PKG : QUERY_READ_PKG
+    {
+        QUERY_WRITE_PKG()
+        {
+            type = Query_Type::QUERY_WRITE;
+        }
+        QByteArray data;
+
+        friend bool operator==(const QUERY_WRITE_PKG &lhs, const QUERY_WRITE_PKG &rhs)
+        {
+            return std::make_tuple(lhs.type, lhs.name, lhs.channelNumber, lhs.data) ==
+                    std::make_tuple(rhs.type, rhs.name, rhs.channelNumber, rhs.data);
         }
     };
 
     static QUERY_PKG *accumPacket(QByteArray &data);
 
-//private:
-//    static RESPONSE_PKG *createResponse_DEV_LIST_PKG(QByteArray &data);
-//    static DEV_PKG createResponse_DEV_PKG(QByteArray &data);
-
-//    static RESPONSE_PKG *createResponse_STATE_PKG(QByteArray &data);
-//    static RESPONSE_PKG *createResponse_READ_PKG(QByteArray &data);
-//    static RESPONSE_PKG *createResponse_WRITE_PKG(QByteArray &data);
+private:
+    static QUERY_PKG *createQuery_DEV_LIST_PKG(QByteArray &data);
+    static QUERY_PKG *createQuery_READ_PKG(QByteArray &data);
+    static QUERY_PKG *createQuery_STATE_PKG(QByteArray &data);
+    static QUERY_PKG *createQuery_WRITE_PKG(QByteArray &data);
 };

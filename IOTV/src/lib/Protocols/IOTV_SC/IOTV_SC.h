@@ -22,7 +22,7 @@ namespace IOTV_SC
         RESPONSE_READ_BYTE = 0x06,
         RESPONSE_WRITE_BYTE = 0x04,
 
-        RESPONSE_STATE_BIT_MASK = 0x20
+        STATE_BIT_MASK = 0x20
     };
 
     class Client_RX;
