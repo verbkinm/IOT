@@ -88,8 +88,8 @@ public:
 
     static RESPONSE_PKG *accumPacket(QByteArray &data);
 
-    static QByteArray vecUInt8ToQByteArray(const std::vector<uint8_t> &vec);
-    static std::vector<uint8_t> QByteArrayToVecUInt8(const QByteArray &arr);
+//    static QByteArray vecUInt8ToQByteArray(const std::vector<uint8_t> &vec);
+//    static std::vector<uint8_t> QByteArrayToVecUInt8(const QByteArray &arr);
 
 private:
     static RESPONSE_PKG *createResponse_WAY_PKG(QByteArray &data);

@@ -11,14 +11,15 @@ CONFIG += c++17
 
 SOURCES += \
     IOTV_SC/Client.cpp \
+    IOTV_SC/Server.cpp \
     IOTV_SH.cpp \
-#    iotv_sc.cpp
 
 HEADERS += \
     IOTV_SC/Client.h \
+    IOTV_SC/IOTV_SC.h \
+    IOTV_SC/Server.h \
     IOTV_SH.h \
     Protocols_global.h \
-    iotv_sc.h \
     protocols.h
 
 # Default rules for deployment.

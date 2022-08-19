@@ -1,62 +1,62 @@
-#include "IOT_Host.h"
+#include "iotv_host.h"
 
-IOT_Host::IOT_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
+IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread())
 {
-    connect(&_thread, &QThread::started, this, &IOT_Host::slotNewThreadStart, Qt::QueuedConnection);
-    connect(this, &IOT_Host::signalStopThread, this, &IOT_Host::slotThreadStop, Qt::QueuedConnection);
+    connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
+    connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
 }
 
-IOT_Host::~IOT_Host()
+IOTV_Host::~IOTV_Host()
 {
     emit signalStopThread();
     _thread.wait();
 }
 
-void IOT_Host::setOnline(bool state)
+void IOTV_Host::setOnline(bool state)
 {
     std::lock_guard lg(_mutexParametersChange);
     _state_flags.setFlag(DeviceOnline, state);
 }
 
-bool IOT_Host::isOnline() const
+bool IOTV_Host::isOnline() const
 {
     return _state_flags.testFlag(Flag::DeviceOnline);
 }
 
-qint64 IOT_Host::readData(uint8_t channelNumber)
+qint64 IOTV_Host::read(uint8_t channelNumber)
 {
     if(!isOnline())
         return -1;
 
-    return  writeToServer(IOTV_SH::query_READ(channelNumber));
+    return  writeToRemoteHost(IOTV_SH::query_READ(channelNumber));
 }
 
-qint64 IOT_Host::writeData(uint8_t channelNumber, const QByteArray &data)
+qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
 {
     if(!isOnline() || (channelNumber >= this->getWriteChannelLength()))
         return -1;
 
-    return writeToServer(IOTV_SH::query_WRITE(channelNumber, data));
+    return writeToRemoteHost(IOTV_SH::query_WRITE(channelNumber, data));
 }
 
-QByteArray IOT_Host::readData(uint8_t channelNumber) const
+QByteArray IOTV_Host::readData(uint8_t channelNumber) const
 {
     return this->getReadChannelData(channelNumber);
 }
 
-qint64 IOT_Host::writeToServer(const QByteArray &data)
+qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data)
 {
-    //!!!
     std::lock_guard lg(_mutexWrite);
     return _conn_type->write(data);
 }
 
-void IOT_Host::dataResived(QByteArray data)
+void IOTV_Host::dataResived(QByteArray data)
 {
     int dataSize = data.size();
 
     IOTV_SH::RESPONSE_PKG *pkg;
+    //!!! переделать логику с trimBufferFromBegin, возможно удалить его вовсе
     while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
     {
         if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
@@ -85,18 +85,18 @@ void IOT_Host::dataResived(QByteArray data)
     }
 }
 
-QString IOT_Host::getName() const
+QString IOTV_Host::getName() const
 {
     return _conn_type.get()->getName();
 }
 
-void IOT_Host::connectToHost()
+void IOTV_Host::connectToHost()
 {
     _conn_type->connectToHost();
 }
 
 //!!!
-void IOT_Host::setConnectionType()
+void IOTV_Host::setConnectionType()
 {
     const auto &connType = _settingsData[hostField::connection_type];
     if (connType == connectionType::TCP)
@@ -125,7 +125,7 @@ void IOT_Host::setConnectionType()
     connectObjects();
 }
 
-bool IOT_Host::runInNewThread()
+bool IOTV_Host::runInNewThread()
 {
     if (_parentThread == &_thread)
         return false;
@@ -141,14 +141,14 @@ bool IOT_Host::runInNewThread()
     return _thread.isRunning();
 }
 
-void IOT_Host::connectObjects() const
+void IOTV_Host::connectObjects() const
 {
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOT_Host::slotConnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOT_Host::slotDisconnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOT_Host::dataResived, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::dataResived, Qt::QueuedConnection);
 }
 
-void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+void IOTV_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -174,11 +174,9 @@ void IOT_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 
     _timerPing.start(TIMER_PING);
     _reReadTimer.start();
-
-    emit signalResponse_Way();
 }
 
-void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+void IOTV_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -204,7 +202,7 @@ void IOT_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
                Log::Write_Flag::FILE, _logFile);
 }
 
-void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+void IOTV_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -218,7 +216,7 @@ void IOT_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     Q_UNUSED(pkg)
 }
 
-void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+void IOTV_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -238,7 +236,7 @@ void IOT_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     }
 }
 
-void IOT_Host::slotConnected()
+void IOTV_Host::slotConnected()
 {
     setOnline(true);
     _conn_type->write(IOTV_SH::query_WAY());
@@ -247,7 +245,7 @@ void IOT_Host::slotConnected()
     emit signalHostConnected(); ///!!! никуда не идут
 }
 
-void IOT_Host::slotDisconnected()
+void IOTV_Host::slotDisconnected()
 {
     setOnline(false);
 
@@ -261,30 +259,30 @@ void IOT_Host::slotDisconnected()
     emit signalHostDisconnected(); ///!!! никуда не идут
 }
 
-void IOT_Host::slotReReadTimeOut()
+void IOTV_Host::slotReReadTimeOut()
 {
     for (int i = 0; i < getReadChannelLength(); i++)
-        readData(i);
+        read(i);
 }
 
-void IOT_Host::slotPingTimeOut()
+void IOTV_Host::slotPingTimeOut()
 {
     QByteArray data;
     data.push_back(IOTV_SH::QUERY_PING_BYTE);
     _conn_type->write(data);
 }
 
-void IOT_Host::slotReconnectTimeOut()
+void IOTV_Host::slotReconnectTimeOut()
 {
     _conn_type->disconnectFromHost();
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
 }
 
-void IOT_Host::slotNewThreadStart()
+void IOTV_Host::slotNewThreadStart()
 {
-    connect(&_timerPing, &QTimer::timeout, this, &IOT_Host::slotPingTimeOut, Qt::QueuedConnection);
-    connect(&_timerPong, &QTimer::timeout, this, &IOT_Host::slotReconnectTimeOut, Qt::QueuedConnection);
-    connect(&_reReadTimer, &QTimer::timeout, this, &IOT_Host::slotReReadTimeOut, Qt::QueuedConnection);
+    connect(&_timerPing, &QTimer::timeout, this, &IOTV_Host::slotPingTimeOut, Qt::QueuedConnection);
+    connect(&_timerPong, &QTimer::timeout, this, &IOTV_Host::slotReconnectTimeOut, Qt::QueuedConnection);
+    connect(&_reReadTimer, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
 
     auto interval = _settingsData[hostField::interval].toUInt();
     _reReadTimer.setInterval(interval < 1000 ? 1000 : interval);
@@ -294,7 +292,7 @@ void IOT_Host::slotNewThreadStart()
     connectToHost();
 }
 
-void IOT_Host::slotThreadStop()
+void IOTV_Host::slotThreadStop()
 {
     if (_parentThread == nullptr)
         return;
@@ -304,4 +302,6 @@ void IOT_Host::slotThreadStop()
     _timerPing.moveToThread(_parentThread);
     _timerPong.moveToThread(_parentThread);
     _reReadTimer.moveToThread(_parentThread);
+
+    _thread.exit();
 }

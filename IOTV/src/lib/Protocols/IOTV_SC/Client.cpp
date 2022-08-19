@@ -1,29 +1,29 @@
 #include "Client.h"
+#include "IOTV_SC.h"
 
-
-Client_RX::RESPONSE_PKG *Client_RX::accumResponsePacket(QByteArray &data)
+Client_RX::RESPONSE_PKG *Client_RX::accumPacket(QByteArray &data)
 {
     if(data.isEmpty())
         return new Client_RX::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 
     uint8_t firstByte = static_cast<uint8_t>(data.at(0));
 
-    if(firstByte == RESPONSE_DEV_LIST_BYTE)
+    if(firstByte == IOTV_SC::RESPONSE_DEV_LIST_BYTE)
         return createResponse_DEV_LIST_PKG(data);
 
     firstByte &= 0x07; // пакет определяется по первым трём битам
     switch (firstByte)
     {
-    case RESPONSE_READ_BYTE:
+    case IOTV_SC::RESPONSE_READ_BYTE:
         return createResponse_READ_PKG(data);
         break;
-    case RESPONSE_STATE_FIRST_BYTE: // он же RESPONSE_WRITE_BYTE
+    case IOTV_SC::RESPONSE_STATE_FIRST_BYTE: // он же RESPONSE_WRITE_BYTE
     {
         if (data.size() == 1)
             return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
         //у пакетов state и write одинаковые младшие 3 бита, отличие во втором байте в 4 разряде
-        if (data.at(1) & RESPONSE_STATE_BIT_MASK)
+        if (data.at(1) & IOTV_SC::RESPONSE_STATE_BIT_MASK)
             return createResponse_STATE_PKG(data);
 
         return createResponse_WRITE_PKG(data);
@@ -55,9 +55,6 @@ Client_RX::RESPONSE_PKG *Client_RX::createResponse_DEV_LIST_PKG(QByteArray &data
 
         devVec[i] = dev;
     }
-
-//    if (copyData.size() > 0)
-//        return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
     RESPONSE_DEV_LIST_PKG *pkg = new RESPONSE_DEV_LIST_PKG;
     pkg->devs = devVec;
@@ -118,7 +115,7 @@ Client_RX::RESPONSE_PKG *Client_RX::createResponse_STATE_PKG(QByteArray &data)
 
     RESPONSE_STATE_PKG *pkg = new RESPONSE_STATE_PKG;
 
-    pkg->state = static_cast<uint8_t>(data.at(1)) & RESPONSE_STATE_BIT_MASK;
+    pkg->state = static_cast<uint8_t>(data.at(1)) & IOTV_SC::RESPONSE_STATE_BIT_MASK;
     pkg->name = data.mid(2, nameLength);
 
     data = data.mid(2 + nameLength);
@@ -177,7 +174,7 @@ Client_RX::RESPONSE_PKG *Client_RX::createResponse_WRITE_PKG(QByteArray &data)
 QByteArray Client_TX::query_Device_List()
 {
     QByteArray data;
-    data.push_back(QUERY_DEV_LIST_BYTE);
+    data.push_back(IOTV_SC::QUERY_DEV_LIST_BYTE);
     return data;
 }
 
@@ -186,8 +183,8 @@ QByteArray Client_TX::query_STATE(const QString &deviceName)
     QByteArray data;
 
     uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
-    data.push_back(length | QUERY_STATE_FIRST_BYTE);
-    data.push_back(QUERY_STATE_SECOND_BYTE);
+    data.push_back(length | IOTV_SC::QUERY_STATE_FIRST_BYTE);
+    data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     // length >> 3 - пресекаем размер больше допустимого
     data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
 
@@ -199,7 +196,7 @@ QByteArray Client_TX::query_READ(const QString &deviceName, uint8_t channelNumbe
     QByteArray data;
 
     uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
-    data.push_back(length | QUERY_READ_BYTE);
+    data.push_back(length | IOTV_SC::QUERY_READ_BYTE);
     data.push_back(0x0F & channelNumber);
     // length >> 3 - пресекаем размер больше допустимого
     data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
@@ -213,7 +210,7 @@ QByteArray Client_TX::query_WRITE(const QString &deviceName, uint8_t channelNumb
 
     uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
 
-    data.push_back(length | QUERY_WRITE_BYTE);
+    data.push_back(length | IOTV_SC::QUERY_WRITE_BYTE);
     data.push_back(0x0F & channelNumber);
 
     data.push_back(static_cast<uint8_t>(rawData.size()) >> 8);

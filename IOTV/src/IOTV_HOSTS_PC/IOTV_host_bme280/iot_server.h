@@ -7,10 +7,10 @@
 #define READ_CHANNEL_LENGTH 3
 #define WRITE_CHANNEL_LENGTH 0
 
-class IOT_Server
+class IOTV_Server
 {
 public:
-    IOT_Server();
+    IOTV_Server();
 
     //для ПК
     void newValue();

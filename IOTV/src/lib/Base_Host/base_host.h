@@ -42,11 +42,11 @@ protected:
 
     virtual bool isOnline() const = 0;
 
-    virtual qint64 readData(uint8_t channelNumber) = 0;
-    virtual qint64 writeData(uint8_t channelNumber, const QByteArray &rawData) = 0;
+    virtual qint64 read(uint8_t channelNumber) = 0;
+    virtual qint64 write(uint8_t channelNumber, const QByteArray &rawData) = 0;
     virtual void dataResived(QByteArray data) = 0;
 
-    virtual qint64 writeToServer(const QByteArray &data) = 0;
+    virtual qint64 writeToRemoteHost(const QByteArray &data) = 0;
 
     uint8_t _id;
     QString _description;

@@ -12,17 +12,6 @@
 class Client_RX
 {
 public:
-    enum : uint8_t
-    {
-        RESPONSE_DEV_LIST_BYTE = 0x05,
-        RESPONSE_STATE_FIRST_BYTE = 0x04,
-        RESPONSE_STATE_SECOND_BYTE = 0x10,
-        RESPONSE_READ_BYTE = 0x06,
-        RESPONSE_WRITE_BYTE = 0x04,
-
-        RESPONSE_STATE_BIT_MASK = 0x20
-    };
-
     enum class Response_Type : uint8_t
     {
         RESPONSE_DEVICE_LIST,
@@ -123,7 +112,7 @@ public:
         }
     };
 
-    static RESPONSE_PKG *accumResponsePacket(QByteArray &data);
+    static RESPONSE_PKG *accumPacket(QByteArray &data);
 
 private:
     static RESPONSE_PKG *createResponse_DEV_LIST_PKG(QByteArray &data);
@@ -141,17 +130,9 @@ private:
 class Client_TX
 {
 public:
-    enum : uint8_t
-    {
-        QUERY_DEV_LIST_BYTE = 0x01,
-        QUERY_STATE_FIRST_BYTE = 0x00,
-        QUERY_STATE_SECOND_BYTE = 0x10,
-        QUERY_READ_BYTE = 0x02,
-        QUERY_WRITE_BYTE = 0x00
-    };
-
     static QByteArray query_Device_List();
     static QByteArray query_STATE(const QString &deviceName);
     static QByteArray query_READ(const QString &deviceName, uint8_t channelNumber);
     static QByteArray query_WRITE(const QString &deviceName, uint8_t channelNumber, const QByteArray &rawData);
 };
+

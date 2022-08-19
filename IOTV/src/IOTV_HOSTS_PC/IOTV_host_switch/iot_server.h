@@ -5,10 +5,10 @@
 #define READ_CHANNEL_LENGTH 1
 #define WRITE_CHANNEL_LENGTH 1
 
-class IOT_Server
+class IOTV_Server
 {
 public:
-    IOT_Server();
+    IOTV_Server();
 
     const uint8_t _id;
     const char *_description;

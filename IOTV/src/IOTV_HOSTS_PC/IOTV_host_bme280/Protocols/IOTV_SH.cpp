@@ -1,7 +1,7 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
-uint16_t Protocol_class::response_WAY(const IOT_Server &iotHost, char *outData)
+uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
 {
     uint16_t descriptionLength = strlen(iotHost._description);
     uint8_t channelRead = READ_CHANNEL_LENGTH;
@@ -21,7 +21,7 @@ uint16_t Protocol_class::response_WAY(const IOT_Server &iotHost, char *outData)
     return dataSize;
 }
 
-uint16_t Protocol_class::response_READ(const IOT_Server &iotHost, const char *inData, char *outData)
+uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *inData, char *outData)
 {
     uint8_t channelNumber = inData[0] >> 4;
     auto value = iotHost._readChannel[channelNumber];

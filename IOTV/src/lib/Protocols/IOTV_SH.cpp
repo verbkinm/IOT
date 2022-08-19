@@ -153,22 +153,22 @@ IOTV_SH::RESPONSE_PKG *IOTV_SH::accumPacket(QByteArray &data)
     return new IOTV_SH::RESPONSE_PKG(Response_Type::RESPONSE_ERROR);
 }
 
-QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)
-{
-    QByteArray arr;
+//QByteArray IOTV_SH::vecUInt8ToQByteArray(const std::vector<uint8_t> &vec)
+//{
+//    QByteArray arr;
 
-    for (auto el : vec)
-        arr.push_back(el);
+//    for (auto el : vec)
+//        arr.push_back(el);
 
-    return arr;
-}
+//    return arr;
+//}
 
-std::vector<uint8_t> IOTV_SH::QByteArrayToVecUInt8(const QByteArray &arr)
-{
-    std::vector<uint8_t> vec;
+//std::vector<uint8_t> IOTV_SH::QByteArrayToVecUInt8(const QByteArray &arr)
+//{
+//    std::vector<uint8_t> vec;
 
-    for (auto el : arr)
-        vec.push_back(el);
+//    for (auto el : arr)
+//        vec.push_back(el);
 
-    return vec;
-}
+//    return vec;
+//}

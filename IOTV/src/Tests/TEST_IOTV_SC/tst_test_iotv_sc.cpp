@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "IOTV_SC/Client.h"
+#include "IOTV_SC.h"
 
 class TEST_IOTV_SC : public QObject
 {
@@ -41,8 +41,8 @@ void TEST_IOTV_SC::Client_TX_tset_longName()
 
     QByteArray data;
     uint8_t nameLength = devName.size() << 3;
-    data.push_back( nameLength | Client_TX::QUERY_STATE_FIRST_BYTE);
-    data.push_back(Client_TX::QUERY_STATE_SECOND_BYTE);
+    data.push_back( nameLength | IOTV_SC::QUERY_STATE_FIRST_BYTE);
+    data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     data.append(devName.mid(0, (nameLength >> 3)).toLocal8Bit());
 
     QCOMPARE(Client_TX::query_STATE(devName), data);
@@ -59,8 +59,8 @@ void TEST_IOTV_SC::Client_TX__query_STATE()
     QString devName = "Test dev name 123";
 
     QByteArray data;
-    data.push_back( (devName.size() << 3) | Client_TX::QUERY_STATE_FIRST_BYTE);
-    data.push_back(Client_TX::QUERY_STATE_SECOND_BYTE);
+    data.push_back( (devName.size() << 3) | IOTV_SC::QUERY_STATE_FIRST_BYTE);
+    data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     data.append(devName.toLocal8Bit());
 
     QCOMPARE(Client_TX::query_STATE(devName), data);
@@ -72,7 +72,7 @@ void TEST_IOTV_SC::Client_TX__query_READ()
     uint8_t channelNUmber = 1;
 
     QByteArray data;
-    data.push_back((devName.size() << 3) | Client_TX::QUERY_READ_BYTE);
+    data.push_back((devName.size() << 3) | IOTV_SC::QUERY_READ_BYTE);
     data.push_back(channelNUmber);
     data.append(devName.toLocal8Bit());
 
@@ -91,7 +91,7 @@ void TEST_IOTV_SC::Client_TX__query_WRITE()
     rawData.push_back(4);
     rawData.push_back(5);
 
-    data.push_back((devName.size() << 3) | Client_TX::QUERY_WRITE_BYTE);
+    data.push_back((devName.size() << 3) | IOTV_SC::QUERY_WRITE_BYTE);
     data.push_back(channelNUmber);
     data.push_back(rawData.size() >> 8);
     data.push_back(rawData.size());
@@ -129,7 +129,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
     pkg.devs.push_back(devPkg2);
 
     QByteArray data;
-    data.push_back(Client_RX::RESPONSE_DEV_LIST_BYTE);
+    data.push_back(IOTV_SC::RESPONSE_DEV_LIST_BYTE);
     data.push_back(pkg.devs.size());
 
     data.push_back(devPkg1.name.size() << 3);
@@ -164,12 +164,12 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
     QByteArray copyData = data;
 
     {
-        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumResponsePacket(data)) == pkg);
+        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(data)) == pkg);
         QCOMPARE(data.size(), 0);
 
         data.push_back(0xFF);
 
-        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumResponsePacket(data))->type == Client_RX::Response_Type::RESPONSE_ERROR);
+        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(data))->type == Client_RX::Response_Type::RESPONSE_ERROR);
         QCOMPARE(data.size(), 1);
     }
 
@@ -178,11 +178,11 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
 
         copyData.push_back(0xFF);
 
-        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumResponsePacket(copyData)) == pkg);
+        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(copyData)) == pkg);
         QCOMPARE(copyData.size(), 1);
 
         copyData2 = copyData2.mid(0, copyData2.size() - 3);
-        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumResponsePacket(copyData2))->type == Client_RX::Response_Type::RESPONSE_INCOMPLETE);
+        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(copyData2))->type == Client_RX::Response_Type::RESPONSE_INCOMPLETE);
         QCOMPARE(copyData2.size(), 79);
     }
 }
@@ -193,15 +193,15 @@ void TEST_IOTV_SC::Client_RX__createResponse_STATE_PKG()
     bool state = true;
 
     QByteArray data;
-    data.push_back((devName.size() << 3) | Client_RX::RESPONSE_STATE_FIRST_BYTE);
-    data.push_back((state << 5) | Client_RX::RESPONSE_STATE_SECOND_BYTE);
+    data.push_back((devName.size() << 3) | IOTV_SC::RESPONSE_STATE_FIRST_BYTE);
+    data.push_back((state << 5) | IOTV_SC::RESPONSE_STATE_SECOND_BYTE);
     data.append(devName.toLocal8Bit());
 
     Client_RX::RESPONSE_STATE_PKG pkg;
     pkg.name = devName;
     pkg.state = state;
 
-    Client_RX::RESPONSE_STATE_PKG *resPkg = static_cast<Client_RX::RESPONSE_STATE_PKG*>(Client_RX::accumResponsePacket(data));
+    Client_RX::RESPONSE_STATE_PKG *resPkg = static_cast<Client_RX::RESPONSE_STATE_PKG*>(Client_RX::accumPacket(data));
 
     QCOMPARE(*resPkg, pkg);
     pkg.state = false;
@@ -222,7 +222,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_READ_PKG()
     rawData.push_back(4);
     rawData.push_back(5);
 
-    data.push_back((devName.size() << 3) | Client_RX::RESPONSE_READ_BYTE);
+    data.push_back((devName.size() << 3) | IOTV_SC::RESPONSE_READ_BYTE);
     data.push_back(channelNumber);
     data.push_back(rawData.size() >> 8);
     data.push_back(rawData.size());
@@ -234,7 +234,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_READ_PKG()
     pkg.channelNumber = channelNumber;
     pkg.data = rawData;
 
-    QCOMPARE(*static_cast<Client_RX::RESPONSE_READ_PKG*>(Client_RX::accumResponsePacket(data)), pkg);
+    QCOMPARE(*static_cast<Client_RX::RESPONSE_READ_PKG*>(Client_RX::accumPacket(data)), pkg);
 }
 
 void TEST_IOTV_SC::Client_RX__createResponse_WRITE_PKG()
@@ -243,7 +243,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_WRITE_PKG()
     uint8_t channelNumber = 15;
 
     QByteArray data;
-    data.push_back((devName.size() << 3) | Client_RX::RESPONSE_WRITE_BYTE);
+    data.push_back((devName.size() << 3) | IOTV_SC::RESPONSE_WRITE_BYTE);
     data.push_back(channelNumber);
     data.append(devName.toLocal8Bit());
 
@@ -251,7 +251,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_WRITE_PKG()
     pkg.name = devName;
     pkg.channelNumber = channelNumber;
 
-    QCOMPARE(*static_cast<Client_RX::RESPONSE_WRITE_PKG*>(Client_RX::accumResponsePacket(data)), pkg);
+    QCOMPARE(*static_cast<Client_RX::RESPONSE_WRITE_PKG*>(Client_RX::accumPacket(data)), pkg);
 }
 
 QTEST_APPLESS_MAIN(TEST_IOTV_SC)

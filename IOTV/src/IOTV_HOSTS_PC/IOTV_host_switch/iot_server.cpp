@@ -1,6 +1,6 @@
 #include "iot_server.h"
 
-IOT_Server::IOT_Server() : _id(1), _description("switch")
+IOTV_Server::IOTV_Server() : _id(1), _description("switch")
 {
     _readChannel[0] = false;
 

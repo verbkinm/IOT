@@ -2,7 +2,7 @@
 
 #include <QFileSystemWatcher>
 
-#include "IOT_Server/iot_server.h"
+#include "IOTV_Server/iotv_server.h"
 
 class Wrapper : public QObject
 {
@@ -12,7 +12,7 @@ public:
 
 private:
     QFileSystemWatcher _watcher;
-    std::unique_ptr<IOT_Server> _server;
+    std::unique_ptr<IOTV_Server> _server;
 
 private slots:
     void slotFileChange(QString fileName);

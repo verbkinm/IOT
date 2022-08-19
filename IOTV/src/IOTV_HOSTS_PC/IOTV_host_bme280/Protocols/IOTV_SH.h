@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <cstring>
 
-class IOT_Server;
+class IOTV_Server;
 
 class Protocol_class
 {
@@ -39,8 +39,8 @@ public:
         RESPONSE_PONG_BYTE = 0x0C
     };
 
-    static uint16_t response_WAY(const IOT_Server &iotHost, char *outData);
-    static uint16_t response_READ(const IOT_Server &iotHost, const char *inData, char *outData);
+    static uint16_t response_WAY(const IOTV_Server &iotHost, char *outData);
+    static uint16_t response_READ(const IOTV_Server &iotHost, const char *inData, char *outData);
 //    static void response_WRITE(IOT_Server &iotHost, std::vector<uint8_t> &data);
     static uint16_t response_Pong(char *outData);
 };

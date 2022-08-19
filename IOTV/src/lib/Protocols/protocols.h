@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "iotv_sc.h"
+#include "IOTV_SC/IOTV_SC.h"
 #include "IOTV_SH.h"
 
 #include "Protocols_global.h"

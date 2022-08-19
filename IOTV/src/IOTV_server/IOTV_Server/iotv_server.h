@@ -6,21 +6,22 @@
 #include <QTimer>
 #include <QThread>
 
-#include <vector>
 #include <list>
-#include <memory>
 #include <fstream>
 
 #include "protocols.h"
 #include "ConfigTypes.h"
-#include "IOT_Host/IOT_Host.h"
 
-class IOT_Server : public QTcpServer
+#include "IOTV_Host/iotv_host.h"
+
+class IOTV_Client;
+
+class IOTV_Server : public QTcpServer
 {
     Q_OBJECT
 public:
-    IOT_Server(QObject *parent = nullptr);
-    ~IOT_Server();
+    IOTV_Server(QObject *parent = nullptr);
+    ~IOTV_Server();
 
     QStringList getFileSettingNames() const;
     QString getProgramVersion() const;
@@ -30,11 +31,10 @@ private:
     void readSettings();
     void startTCPServer();
 
-    quint64 writeToSocket(QTcpSocket* socket, const QByteArray &data);
     void clientOnlineFile() const;
 
-    std::vector<std::unique_ptr<IOT_Host>> _iot_hosts;
-    std::list<QTcpSocket*> _clientList;
+    std::list<IOTV_Host> _iot_hosts;
+    std::list<IOTV_Client> _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
 
@@ -49,10 +49,7 @@ private:
 
 private slots:
     void slotNewConnection();
-    void slotDataRecived();
-
     void slotDisconnected();
-    void slotError(QAbstractSocket::SocketError error);
 
-    void slotResponse_Way();
+    void slotError(QAbstractSocket::SocketError error);
 };

@@ -10,7 +10,7 @@
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
 
-IOT_Server iot;
+IOTV_Server iot;
 
 char recivedBuffer[BUFSIZ] {0}, transmitBuffer[BUFSIZ] {0};
 char* ptrBuf = recivedBuffer;

@@ -1,7 +1,7 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
-uint16_t Protocol_class::response_WAY(const IOT_Server &iotHost, char *outData)
+uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
 {
     uint16_t descriptionLength = strlen(iotHost._description);
     uint8_t channelRead = READ_CHANNEL_LENGTH;
@@ -21,7 +21,7 @@ uint16_t Protocol_class::response_WAY(const IOT_Server &iotHost, char *outData)
     return dataSize;
 }
 
-uint16_t Protocol_class::response_READ(const IOT_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
+uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
 {
     uint16_t realDataSize = ptrInData - inData;
 
@@ -47,7 +47,7 @@ uint16_t Protocol_class::response_READ(const IOT_Server &iotHost, const char *in
     return dataSize;
 }
 
-uint16_t Protocol_class::response_WRITE(IOT_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
+uint16_t Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
 {
     uint16_t realDataSize = ptrInData - inData;
 

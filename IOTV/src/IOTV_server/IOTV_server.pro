@@ -10,13 +10,14 @@ CONFIG -= app_bundle
 
 SOURCES += \
     ConfigTypes.cpp \
+    IOTV_Server/iotv_server.cpp \
+    IOTV_Host/iotv_host.cpp \
+    IOTV_Client/iotv_client.cpp \
         connection_type/base_conn_type.cpp \
         connection_type/com_conn_type.cpp \
-        IOT_Server/iot_server.cpp \
         connection_type/file_conn_type.cpp \
         connection_type/tcp_conn_type.cpp \
         main.cpp \
-        IOT_Host/IOT_Host.cpp \
         connection_type/udp_conn_type.cpp \
         wrapper.cpp \
 
@@ -27,10 +28,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     ConfigTypes.h \
+    IOTV_Server/iotv_server.h \
+    IOTV_Host/iotv_host.h \
+    IOTV_Client/iotv_client.h \
     connection_type/base_conn_type.h \
     connection_type/com_conn_type.h \
-    IOT_Host/IOT_Host.h \
-    IOT_Server/iot_server.h \
     connection_type/file_conn_type.h \
     connection_type/tcp_conn_type.h \
     connection_type/udp_conn_type.h \

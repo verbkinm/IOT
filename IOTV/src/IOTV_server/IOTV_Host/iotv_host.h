@@ -11,26 +11,26 @@
 
 #include <QThread>
 
-class IOT_Host : public Base_Host
+class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
-    IOT_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
-    ~IOT_Host();
+    IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
+    ~IOTV_Host();
 
     QString getName() const override;
 
     virtual bool isOnline() const override;
 
-    virtual qint64 writeData(uint8_t channelNumber, const QByteArray &data) override;
+    virtual qint64 write(uint8_t channelNumber, const QByteArray &data) override;
     QByteArray readData(uint8_t channelNumber) const;
 
     bool runInNewThread();
 
 private:
-    virtual qint64 readData(uint8_t channelNumber) override;
+    virtual qint64 read(uint8_t channelNumber) override;
     virtual void dataResived(QByteArray data) override;
-    virtual qint64 writeToServer(const QByteArray &data) override;
+    virtual qint64 writeToRemoteHost(const QByteArray &data) override;
 
     void connectToHost();
 
@@ -45,8 +45,8 @@ private:
     void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
     void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
 
-    static constexpr unsigned int TIMER_PING = 10000;
-    static constexpr unsigned int TIMER_PONG = 15000;
+    static constexpr uint16_t TIMER_PING = 10000;
+    static constexpr uint16_t TIMER_PONG = 15000;
 
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
@@ -87,9 +87,7 @@ signals:
 
     void signalDataRiceved();
 
-    void signalResponse_Way();
-
     void signalStopThread();
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(IOT_Host::Flags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(IOTV_Host::Flags)
