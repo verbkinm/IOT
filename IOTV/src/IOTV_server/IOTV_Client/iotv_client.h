@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <algorithm>
 
 #include <QTcpSocket>
 #include <QHostAddress>
@@ -28,6 +29,13 @@ private:
     QTcpSocket *_socket;
 
     std::list<IOTV_Host> &_hosts;
+
+    QByteArray recivedBuff;
+
+    void query_DEV_LIST_recived(Server_RX::QUERY_PKG *pkg);
+    void query_STATE_recived(Server_RX::QUERY_PKG *pkg);
+    void query_READ_recived(Server_RX::QUERY_PKG *pkg);
+    void query_WRITE_recived(Server_RX::QUERY_PKG *pkg);
 
 private slots:
     void slotDisconnected();

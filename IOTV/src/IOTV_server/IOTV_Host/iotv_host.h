@@ -15,6 +15,7 @@ class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
+    IOTV_Host() = default;
     IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
     ~IOTV_Host();
 

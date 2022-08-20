@@ -33,6 +33,7 @@ private:
 
     void clientOnlineFile() const;
 
+    //!!! unordered_set
     std::list<IOTV_Host> _iot_hosts;
     std::list<IOTV_Client> _iot_clients;
 
