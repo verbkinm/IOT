@@ -101,7 +101,7 @@ Server_RX::QUERY_PKG *Server_RX::createQuery_WRITE_PKG(QByteArray &data)
     uint8_t nameLength = static_cast<uint8_t>(data.at(0)) >> 3;
 
     uint8_t MSB = data.at(2) << 8;
-    uint8_t LSB = data.at(3 + nameLength);
+    uint8_t LSB = data.at(3);
     uint16_t dataLength = (MSB << 8) | LSB;
 
     if (data.size() < (4 + nameLength + dataLength))

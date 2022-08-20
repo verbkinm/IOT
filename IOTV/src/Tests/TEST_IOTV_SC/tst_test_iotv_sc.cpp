@@ -298,7 +298,7 @@ void TEST_IOTV_SC::Server_RX__createQuery_READ_PKG()
 
 void TEST_IOTV_SC::Server_RX__createQuery_STATE_PKG()
 {
-    QString name = "test";
+    QString name = "";
     uint8_t channelNumber = 3;
 
     QByteArray data;
@@ -318,7 +318,32 @@ void TEST_IOTV_SC::Server_RX__createQuery_STATE_PKG()
 
 void TEST_IOTV_SC::Server_RX__createQuery_WRITE_PKG()
 {
+    QString name = "test";
+    uint8_t channelNumber = 15;
+    QByteArray TX_data;
+    TX_data.append(name.toLocal8Bit());
 
+    QByteArray data;
+    data.push_back((uint8_t(name.size()) << 3) | IOTV_SC::QUERY_WRITE_BYTE);
+    data.push_back(0x0F & channelNumber);
+    data.push_back(TX_data.size() << 8);
+    data.push_back(TX_data.size());
+    data.append(name.toLocal8Bit());
+    data.append(TX_data);
+
+    data.push_back(0xFF); //мусор
+
+    Server_RX::QUERY_WRITE_PKG pkg;
+    pkg.name = name;
+    pkg.channelNumber = channelNumber;
+    pkg.data = TX_data;
+
+    QCOMPARE(data.size(), 4 + name.size() + TX_data.size() + 1);
+    QCOMPARE(*static_cast<Server_RX::QUERY_WRITE_PKG*>(Server_RX::accumPacket(data)), pkg);
+    QCOMPARE(data.size(), 1);
+
+    QCOMPARE(Server_RX::accumPacket(data)->type, Server_RX::Query_Type::QUERY_ERROR);
+    QCOMPARE(data.size(), 1);
 }
 
 QTEST_APPLESS_MAIN(TEST_IOTV_SC)
