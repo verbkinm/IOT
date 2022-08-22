@@ -10,14 +10,11 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    IOTV_SC/Client.cpp \
-    IOTV_SC/Server.cpp \
+    IOTV_SC.cpp \
     IOTV_SH.cpp \
 
 HEADERS += \
-    IOTV_SC/Client.h \
-    IOTV_SC/IOTV_SC.h \
-    IOTV_SC/Server.h \
+    IOTV_SC.h \
     IOTV_SH.h \
     Protocols_global.h \
     protocols.h

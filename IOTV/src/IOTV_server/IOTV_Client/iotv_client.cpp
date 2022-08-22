@@ -31,35 +31,35 @@ const QTcpSocket *IOTV_Client::socket() const
     return _socket;
 }
 
-void IOTV_Client::query_DEV_LIST_recived(Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
 
-    if (pkg->type != Server_RX::Query_Type::QUERY_DEVICE_LIST)
+    if (pkg->type != IOTV_SC::Server_RX::Query_Type::QUERY_DEVICE_LIST)
     {
         delete pkg;
         return;
     }
 
-    auto *devListPkg = static_cast<const Server_RX::QUERY_DEV_LIST_PKG*>(pkg);
+    auto *devListPkg = static_cast<const IOTV_SC::Server_RX::QUERY_DEV_LIST_PKG*>(pkg);
 
     //!!!
 //    devListPkg->
 }
 
-void IOTV_Client::query_STATE_recived(Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
 
-    if (pkg->type != Server_RX::Query_Type::QUERY_STATE)
+    if (pkg->type != IOTV_SC::Server_RX::Query_Type::QUERY_STATE)
     {
         delete pkg;
         return;
     }
 
-    auto *statePkg = static_cast<const Server_RX::QUERY_STATE_PKG*>(pkg);
+    auto *statePkg = static_cast<const IOTV_SC::Server_RX::QUERY_STATE_PKG*>(pkg);
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
@@ -71,15 +71,17 @@ void IOTV_Client::query_STATE_recived(Server_RX::QUERY_PKG *pkg)
         //!!!
     }
 
+//    IOTV_SC::Server_RX::
+
 //    _hosts.statePkg->name
 }
 
-void IOTV_Client::query_READ_recived(Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
 
 }
 
-void IOTV_Client::query_WRITE_recived(Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
 
 }
@@ -114,12 +116,12 @@ void IOTV_Client::slotReadData()
                + QString::number(socket()->peerPort())
                + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
-    Server_RX::QUERY_PKG *pkg;
-    while ((pkg = Server_RX::accumPacket(recivedBuff)) != nullptr)
+    IOTV_SC::Server_RX::QUERY_PKG *pkg;
+    while ((pkg = IOTV_SC::Server_RX::accumPacket(recivedBuff)) != nullptr)
     {
-        if (pkg->type == Server_RX::Query_Type::QUERY_INCOMPLETE)
+        if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_INCOMPLETE)
         {
-            if (pkg->type == Server_RX::Query_Type::QUERY_ERROR)
+            if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_ERROR)
             {
                 Log::write("WARRNING: received data from " +
                            _socket->peerName() +
@@ -132,13 +134,13 @@ void IOTV_Client::slotReadData()
             break;
         }
 
-        if (pkg->type == Server_RX::Query_Type::QUERY_DEVICE_LIST)
+        if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_DEVICE_LIST)
             query_DEV_LIST_recived(pkg);
-        else if (pkg->type == Server_RX::Query_Type::QUERY_STATE)
+        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_STATE)
             query_STATE_recived(pkg);
-        else if (pkg->type == Server_RX::Query_Type::QUERY_READ)
+        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_READ)
             query_STATE_recived(pkg);
-        else if (pkg->type == Server_RX::Query_Type::QUERY_WRITE)
+        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_WRITE)
             query_WRITE_recived(pkg);
         else
         {

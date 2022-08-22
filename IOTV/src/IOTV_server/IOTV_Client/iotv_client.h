@@ -9,7 +9,7 @@
 
 #include "log.h"
 #include "IOTV_Host/iotv_host.h"
-#include "IOTV_SC/IOTV_SC.h"
+#include "IOTV_SC.h"
 
 class IOTV_Client : public QObject
 {
@@ -32,10 +32,10 @@ private:
 
     QByteArray recivedBuff;
 
-    void query_DEV_LIST_recived(Server_RX::QUERY_PKG *pkg);
-    void query_STATE_recived(Server_RX::QUERY_PKG *pkg);
-    void query_READ_recived(Server_RX::QUERY_PKG *pkg);
-    void query_WRITE_recived(Server_RX::QUERY_PKG *pkg);
+    void query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
+    void query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
+    void query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
+    void query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
 
 private slots:
     void slotDisconnected();

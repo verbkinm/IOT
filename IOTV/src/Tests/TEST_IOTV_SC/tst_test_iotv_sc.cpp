@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "protocols.h"
+#include "raw.h"
 
 class TEST_IOTV_SC : public QObject
 {
@@ -51,13 +52,13 @@ void TEST_IOTV_SC::Client_TX_tset_longName()
     data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     data.append(devName.mid(0, (nameLength >> 3)).toLocal8Bit());
 
-    QCOMPARE(Client_TX::query_STATE(devName), data);
+    QCOMPARE(IOTV_SC::Client_TX::query_STATE(devName), data);
 }
 
 void TEST_IOTV_SC::Client_TX__queryDevice_List()
 {
-    QCOMPARE(Client_TX::query_Device_List().size(), 1);
-    QCOMPARE(Client_TX::query_Device_List()[0], 1);
+    QCOMPARE(IOTV_SC::Client_TX::query_Device_List().size(), 1);
+    QCOMPARE(IOTV_SC::Client_TX::query_Device_List()[0], 1);
 }
 
 void TEST_IOTV_SC::Client_TX__query_STATE()
@@ -69,7 +70,7 @@ void TEST_IOTV_SC::Client_TX__query_STATE()
     data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     data.append(devName.toLocal8Bit());
 
-    QCOMPARE(Client_TX::query_STATE(devName), data);
+    QCOMPARE(IOTV_SC::Client_TX::query_STATE(devName), data);
 }
 
 void TEST_IOTV_SC::Client_TX__query_READ()
@@ -82,7 +83,7 @@ void TEST_IOTV_SC::Client_TX__query_READ()
     data.push_back(channelNUmber);
     data.append(devName.toLocal8Bit());
 
-    QCOMPARE(Client_TX::query_READ(devName, channelNUmber), data);
+    QCOMPARE(IOTV_SC::Client_TX::query_READ(devName, channelNUmber), data);
 }
 
 void TEST_IOTV_SC::Client_TX__query_WRITE()
@@ -104,14 +105,14 @@ void TEST_IOTV_SC::Client_TX__query_WRITE()
     data.append(devName.toLocal8Bit());
     data.append(rawData);
 
-    QCOMPARE(Client_TX::query_WRITE(devName, channelNUmber, rawData), data);
+    QCOMPARE(IOTV_SC::Client_TX::query_WRITE(devName, channelNUmber, rawData), data);
 }
 
 void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
 {
-    Client_RX::RESPONSE_DEV_LIST_PKG pkg;
+    IOTV_SC::Client_RX::RESPONSE_DEV_LIST_PKG pkg;
 
-    Client_RX::DEV_PKG devPkg1;
+    IOTV_SC::Client_RX::DEV_PKG devPkg1;
     devPkg1.id = 1;
     devPkg1.error = false;
     devPkg1.name = "First dev";
@@ -121,7 +122,7 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
     devPkg1.writeChannel.push_back(Raw::DATA_TYPE::BOOL);
     devPkg1.writeChannel.push_back(Raw::DATA_TYPE::DOUBLE_64);
 
-    Client_RX::DEV_PKG devPkg2;
+    IOTV_SC::Client_RX::DEV_PKG devPkg2;
     devPkg2.id = 2;
     devPkg2.error = false;
     devPkg2.name = "Second dev";
@@ -170,12 +171,12 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
     QByteArray copyData = data;
 
     {
-        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(data)) == pkg);
+        QVERIFY(*static_cast<IOTV_SC::Client_RX::RESPONSE_DEV_LIST_PKG*>(IOTV_SC::Client_RX::accumPacket(data)) == pkg);
         QCOMPARE(data.size(), 0);
 
         data.push_back(0xFF);
 
-        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(data))->type == Client_RX::Response_Type::RESPONSE_ERROR);
+        QVERIFY(static_cast<IOTV_SC::Client_RX::RESPONSE_DEV_LIST_PKG*>(IOTV_SC::Client_RX::accumPacket(data))->type == IOTV_SC::Client_RX::Response_Type::RESPONSE_ERROR);
         QCOMPARE(data.size(), 1);
     }
 
@@ -184,11 +185,11 @@ void TEST_IOTV_SC::Client_RX__createResponse_DEV_LIST_PKG()
 
         copyData.push_back(0xFF);
 
-        QVERIFY(*static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(copyData)) == pkg);
+        QVERIFY(*static_cast<IOTV_SC::Client_RX::RESPONSE_DEV_LIST_PKG*>(IOTV_SC::Client_RX::accumPacket(copyData)) == pkg);
         QCOMPARE(copyData.size(), 1);
 
         copyData2 = copyData2.mid(0, copyData2.size() - 3);
-        QVERIFY(static_cast<Client_RX::RESPONSE_DEV_LIST_PKG*>(Client_RX::accumPacket(copyData2))->type == Client_RX::Response_Type::RESPONSE_INCOMPLETE);
+        QVERIFY(static_cast<IOTV_SC::Client_RX::RESPONSE_DEV_LIST_PKG*>(IOTV_SC::Client_RX::accumPacket(copyData2))->type == IOTV_SC::Client_RX::Response_Type::RESPONSE_INCOMPLETE);
         QCOMPARE(copyData2.size(), 79);
     }
 }
@@ -203,11 +204,11 @@ void TEST_IOTV_SC::Client_RX__createResponse_STATE_PKG()
     data.push_back((state << 5) | IOTV_SC::RESPONSE_STATE_SECOND_BYTE);
     data.append(devName.toLocal8Bit());
 
-    Client_RX::RESPONSE_STATE_PKG pkg;
+    IOTV_SC::Client_RX::RESPONSE_STATE_PKG pkg;
     pkg.name = devName;
     pkg.state = state;
 
-    Client_RX::RESPONSE_STATE_PKG *resPkg = static_cast<Client_RX::RESPONSE_STATE_PKG*>(Client_RX::accumPacket(data));
+    IOTV_SC::Client_RX::RESPONSE_STATE_PKG *resPkg = static_cast<IOTV_SC::Client_RX::RESPONSE_STATE_PKG*>(IOTV_SC::Client_RX::accumPacket(data));
 
     QCOMPARE(*resPkg, pkg);
     pkg.state = false;
@@ -235,12 +236,12 @@ void TEST_IOTV_SC::Client_RX__createResponse_READ_PKG()
     data.append(devName.toLocal8Bit());
     data.append(rawData);
 
-    Client_RX::RESPONSE_READ_PKG pkg;
+    IOTV_SC::Client_RX::RESPONSE_READ_PKG pkg;
     pkg.name = devName;
     pkg.channelNumber = channelNumber;
     pkg.data = rawData;
 
-    QCOMPARE(*static_cast<Client_RX::RESPONSE_READ_PKG*>(Client_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Client_RX::RESPONSE_READ_PKG*>(IOTV_SC::Client_RX::accumPacket(data)), pkg);
 }
 
 void TEST_IOTV_SC::Client_RX__createResponse_WRITE_PKG()
@@ -253,11 +254,11 @@ void TEST_IOTV_SC::Client_RX__createResponse_WRITE_PKG()
     data.push_back(channelNumber);
     data.append(devName.toLocal8Bit());
 
-    Client_RX::RESPONSE_WRITE_PKG pkg;
+    IOTV_SC::Client_RX::RESPONSE_WRITE_PKG pkg;
     pkg.name = devName;
     pkg.channelNumber = channelNumber;
 
-    QCOMPARE(*static_cast<Client_RX::RESPONSE_WRITE_PKG*>(Client_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Client_RX::RESPONSE_WRITE_PKG*>(IOTV_SC::Client_RX::accumPacket(data)), pkg);
 }
 
 void TEST_IOTV_SC::Server_RX__createQuery_DEV_LIST_PKG()
@@ -265,10 +266,10 @@ void TEST_IOTV_SC::Server_RX__createQuery_DEV_LIST_PKG()
     QByteArray data;
     data.push_back(IOTV_SC::QUERY_DEV_LIST_BYTE);
 
-    Server_RX::QUERY_DEV_LIST_PKG pkg;
+    IOTV_SC::Server_RX::QUERY_DEV_LIST_PKG pkg;
 
     QCOMPARE(data.size(), 1);
-    QCOMPARE(*static_cast<Server_RX::QUERY_DEV_LIST_PKG*>(Server_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Server_RX::QUERY_DEV_LIST_PKG*>(IOTV_SC::Server_RX::accumPacket(data)), pkg);
     QCOMPARE(data.size(), 0);
 }
 
@@ -284,15 +285,15 @@ void TEST_IOTV_SC::Server_RX__createQuery_READ_PKG()
 
     data.push_back(0xFF); //мусор
 
-    Server_RX::QUERY_READ_PKG pkg;
+    IOTV_SC::Server_RX::QUERY_READ_PKG pkg;
     pkg.name = name;
     pkg.channelNumber = channelNumber;
 
     QCOMPARE(data.size(), 2 + name.size() + 1);
-    QCOMPARE(*static_cast<Server_RX::QUERY_READ_PKG*>(Server_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Server_RX::QUERY_READ_PKG*>(IOTV_SC::Server_RX::accumPacket(data)), pkg);
     QCOMPARE(data.size(), 1);
 
-    QCOMPARE(Server_RX::accumPacket(data)->type, Server_RX::Query_Type::QUERY_ERROR);
+    QCOMPARE(IOTV_SC::Server_RX::accumPacket(data)->type, IOTV_SC::Server_RX::Query_Type::QUERY_ERROR);
     QCOMPARE(data.size(), 1);
 }
 
@@ -308,11 +309,11 @@ void TEST_IOTV_SC::Server_RX__createQuery_STATE_PKG()
 
     data.push_back(0xFF); //мусор
 
-    Server_RX::QUERY_STATE_PKG pkg;
+    IOTV_SC::Server_RX::QUERY_STATE_PKG pkg;
     pkg.name = name;
 
     QCOMPARE(data.size(), 2 + name.size() + 1);
-    QCOMPARE(*static_cast<Server_RX::QUERY_STATE_PKG*>(Server_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Server_RX::QUERY_STATE_PKG*>(IOTV_SC::Server_RX::accumPacket(data)), pkg);
     QCOMPARE(data.size(), 1);
 }
 
@@ -333,16 +334,16 @@ void TEST_IOTV_SC::Server_RX__createQuery_WRITE_PKG()
 
     data.push_back(0xFF); //мусор
 
-    Server_RX::QUERY_WRITE_PKG pkg;
+    IOTV_SC::Server_RX::QUERY_WRITE_PKG pkg;
     pkg.name = name;
     pkg.channelNumber = channelNumber;
     pkg.data = TX_data;
 
     QCOMPARE(data.size(), 4 + name.size() + TX_data.size() + 1);
-    QCOMPARE(*static_cast<Server_RX::QUERY_WRITE_PKG*>(Server_RX::accumPacket(data)), pkg);
+    QCOMPARE(*static_cast<IOTV_SC::Server_RX::QUERY_WRITE_PKG*>(IOTV_SC::Server_RX::accumPacket(data)), pkg);
     QCOMPARE(data.size(), 1);
 
-    QCOMPARE(Server_RX::accumPacket(data)->type, Server_RX::Query_Type::QUERY_ERROR);
+    QCOMPARE(IOTV_SC::Server_RX::accumPacket(data)->type, IOTV_SC::Server_RX::Query_Type::QUERY_ERROR);
     QCOMPARE(data.size(), 1);
 }
 
