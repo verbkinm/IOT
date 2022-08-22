@@ -52,7 +52,6 @@ namespace IOTV_SC
             Response_Type type;
         };
 
-
         struct DEV_PKG
         {
             DEV_PKG() : id(0), error(true)
@@ -72,7 +71,6 @@ namespace IOTV_SC
                              std::make_tuple(rhs.id, rhs.error, rhs.name, rhs.description, rhs.readChannel, rhs.writeChannel);
                 return res;
             }
-
         };
 
         struct RESPONSE_DEV_LIST_PKG : RESPONSE_PKG
@@ -249,7 +247,18 @@ namespace IOTV_SC
         static QUERY_PKG *createQuery_WRITE_PKG(QByteArray &data);
     };
 
+    /*
+     * Генерация сырах данных сервером для отправки клиенту
+     */
 
-//    #include "IOTV_SC/Client.h"
-//    #include "IOTV_SC/Server.h"
+    class Server_TX
+    {
+    public:
+//        static QByteArray query_Device_List();
+        static QByteArray response_STATE(const QString &deviceName, bool state);
+        static QByteArray response_READ(const QString &deviceName, bool state, const QByteArray &rawData);
+//        static QByteArray query_READ(const QString &deviceName, uint8_t channelNumber);
+//        static QByteArray query_WRITE(const QString &deviceName, uint8_t channelNumber, const QByteArray &rawData);
+    };
+
 }

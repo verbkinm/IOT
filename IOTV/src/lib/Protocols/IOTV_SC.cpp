@@ -344,3 +344,32 @@ IOTV_SC::Server_RX::QUERY_PKG *IOTV_SC::Server_RX::createQuery_WRITE_PKG(QByteAr
 
     return pkg;
 }
+
+QByteArray IOTV_SC::Server_TX::response_STATE(const QString &deviceName, bool state)
+{
+    QByteArray data;
+
+    uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
+
+    data.push_back(length | IOTV_SC::RESPONSE_STATE_FIRST_BYTE);
+    data.push_back((static_cast<uint8_t>(state) << 5) | IOTV_SC::RESPONSE_STATE_SECOND_BYTE);
+    // length >> 3 - пресекаем размер больше допустимого
+    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
+
+    return data;
+}
+
+QByteArray IOTV_SC::Server_TX::response_READ(const QString &deviceName, bool state, const QByteArray &rawData)
+{
+    QByteArray data;
+
+    //!!!
+    // пресекаем размер больше допустимого
+    uint8_t length = static_cast<uint8_t>(deviceName.length()) & 0x1F;
+
+    data.push_back((length << 3) | IOTV_SC::RESPONSE_READ_BYTE);
+    data.push_back();
+    data.append(deviceName.mid(0, length).toLocal8Bit());
+
+    return data;
+}

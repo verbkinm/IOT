@@ -67,13 +67,9 @@ void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
     });
 
     if (it != _hosts.end())
-    {
-        //!!!
-    }
-
-//    IOTV_SC::Server_RX::
-
-//    _hosts.statePkg->name
+        _socket->write(IOTV_SC::Server_TX::response_STATE(statePkg->name, it->isOnline()));
+    else
+        _socket->write(IOTV_SC::Server_TX::response_STATE(statePkg->name, false));
 }
 
 void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
@@ -149,7 +145,7 @@ void IOTV_Client::slotReadData()
                        "Unknow pkg.type = " +
                        QString::number(int(pkg->type)),
                        Log::Write_Flag::FILE_STDERR);
-            exit(-1);
+//            exit(-1);
         }
 
         delete pkg;
