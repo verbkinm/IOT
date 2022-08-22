@@ -32,10 +32,10 @@ private:
 
     QByteArray recivedBuff;
 
-    void query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
-    void query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
-    void query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
-    void query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
+    void query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
+    void query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
+    void query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
+    void query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
 
 private slots:
     void slotDisconnected();

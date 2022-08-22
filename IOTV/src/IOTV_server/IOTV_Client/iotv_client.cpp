@@ -31,55 +31,91 @@ const QTcpSocket *IOTV_Client::socket() const
     return _socket;
 }
 
-void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
 {
-    if (pkg == nullptr)
+    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_DEVICE_LIST))
         return;
 
-    if (pkg->type != IOTV_SC::Server_RX::Query_Type::QUERY_DEVICE_LIST)
+    IOTV_SC::RESPONSE_DEV_LIST_PKG responseDevListPkg;
+    responseDevListPkg.devs.reserve(_hosts.size());
+    for (const auto &host : _hosts)
     {
-        delete pkg;
-        return;
+        IOTV_SC::DEV_PKG dev;
+        dev.id = host.getId();
+        dev.name = host.getName();
+        dev.description = host.getDescription();
+
+        dev.readChannel.resize(host.getReadChannelLength());
+        for (uint8_t i = 0; i < host.getReadChannelLength(); i++)
+            dev.readChannel.at(i) = host.getReadChannelType(i);
+
+        dev.writeChannel.resize(host.getWriteChannelLength());
+        for (uint8_t i = 0; i < host.getWriteChannelLength(); i++)
+            dev.writeChannel.at(i) = host.getWriteChannelType(i);
+
+        responseDevListPkg.devs.push_back(dev);
     }
 
-    auto *devListPkg = static_cast<const IOTV_SC::Server_RX::QUERY_DEV_LIST_PKG*>(pkg);
-
-    //!!!
-//    devListPkg->
+    _socket->write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
 }
 
-void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
 {
-    if (pkg == nullptr)
+    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_STATE))
         return;
 
-    if (pkg->type != IOTV_SC::Server_RX::Query_Type::QUERY_STATE)
-    {
-        delete pkg;
-        return;
-    }
-
-    auto *statePkg = static_cast<const IOTV_SC::Server_RX::QUERY_STATE_PKG*>(pkg);
+    auto queryStatePkg = static_cast<IOTV_SC::Server_RX::QUERY_STATE_PKG*>(pkg);
+    IOTV_SC::RESPONSE_STATE_PKG responseStatePkg;
+    responseStatePkg.name = queryStatePkg->name;
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
-        return iotv_host.getName() == statePkg->name;
+        return iotv_host.getName() == queryStatePkg->name;
     });
 
     if (it != _hosts.end())
-        _socket->write(IOTV_SC::Server_TX::response_STATE(statePkg->name, it->isOnline()));
+        responseStatePkg.state = it->isOnline();
     else
-        _socket->write(IOTV_SC::Server_TX::response_STATE(statePkg->name, false));
+        responseStatePkg.state = false;
+
+    _socket->write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
 }
 
-void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
 {
+    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_READ))
+        return;
 
+    auto queryReadPkg = static_cast<IOTV_SC::Server_RX::QUERY_READ_PKG*>(pkg);
+    IOTV_SC::RESPONSE_READ_PKG responseReadPkg;
+    responseReadPkg.name = queryReadPkg->name;
+    responseReadPkg.channelNumber = queryReadPkg->channelNumber;
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == queryReadPkg->name;
+    });
+
+    if (it != _hosts.end())
+        responseReadPkg.data = it->readData(responseReadPkg.channelNumber);
+
+    _socket->write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
 }
 
-void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
+void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
 {
+    if (pkg == nullptr)
+        return;
 
+    if (pkg->type != IOTV_SC::Query_Type::QUERY_WRITE)
+        return;
+
+    auto queryWritePkg = static_cast<IOTV_SC::Server_RX::QUERY_WRITE_PKG*>(pkg);
+    IOTV_SC::RESPONSE_WRITE_PKG responseWritePkg;
+    responseWritePkg.name = queryWritePkg->name;
+    responseWritePkg.channelNumber = queryWritePkg->channelNumber;
+
+    _socket->write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
 }
 
 void IOTV_Client::slotDisconnected()
@@ -115,28 +151,37 @@ void IOTV_Client::slotReadData()
     IOTV_SC::Server_RX::QUERY_PKG *pkg;
     while ((pkg = IOTV_SC::Server_RX::accumPacket(recivedBuff)) != nullptr)
     {
-        if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_INCOMPLETE)
+        if (pkg->type == IOTV_SC::Query_Type::QUERY_INCOMPLETE)
         {
-            if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_ERROR)
+            delete pkg;
+            break;
+        }
+
+        if (pkg->type == IOTV_SC::Query_Type::QUERY_ERROR)
+        {
+            if (recivedBuff.size() > 0)
             {
                 Log::write("WARRNING: received data from " +
                            _socket->peerName() +
                            _socket->peerAddress().toString() +
                            ":" +
                            QString::number(_socket->peerPort()) +
-                           "UNKNOW: " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+                           "UNKNOW: " +
+                           recivedBuff.toHex(':'),
+                           Log::Write_Flag::FILE_STDOUT);
+                recivedBuff.clear();
             }
             delete pkg;
             break;
         }
 
-        if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_DEVICE_LIST)
+        if (pkg->type == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
             query_DEV_LIST_recived(pkg);
-        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_STATE)
+        else if (pkg->type == IOTV_SC::Query_Type::QUERY_STATE)
             query_STATE_recived(pkg);
-        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_READ)
+        else if (pkg->type == IOTV_SC::Query_Type::QUERY_READ)
             query_STATE_recived(pkg);
-        else if (pkg->type == IOTV_SC::Server_RX::Query_Type::QUERY_WRITE)
+        else if (pkg->type == IOTV_SC::Query_Type::QUERY_WRITE)
             query_WRITE_recived(pkg);
         else
         {
@@ -145,9 +190,8 @@ void IOTV_Client::slotReadData()
                        "Unknow pkg.type = " +
                        QString::number(int(pkg->type)),
                        Log::Write_Flag::FILE_STDERR);
-//            exit(-1);
+            exit(-1);
         }
-
         delete pkg;
     }
 

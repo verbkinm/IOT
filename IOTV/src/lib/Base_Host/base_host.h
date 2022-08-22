@@ -10,6 +10,17 @@ public:
     Base_Host(uint8_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
 
+    uint8_t getId() const;
+    QString getDescription() const;
+
+    virtual QString getName() const = 0;
+
+    uint8_t getReadChannelLength() const;
+    uint8_t getWriteChannelLength() const;
+
+    Raw::DATA_TYPE getReadChannelType(uint8_t channelNumber) const;
+    Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
+
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
@@ -27,18 +38,7 @@ protected:
     void setId(uint8_t id);
     void setDescription(const QString description);
 
-    uint8_t getId() const;
-    QString getDescription() const;
-
-    Raw::DATA_TYPE getReadChannelType(uint8_t channelNumber) const;
-    Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
-
     QByteArray getReadChannelData(uint8_t channelNumber) const;
-
-    uint8_t getReadChannelLength() const;
-    uint8_t getWriteChannelLength() const;
-
-    virtual QString getName() const = 0;
 
     virtual bool isOnline() const = 0;
 
