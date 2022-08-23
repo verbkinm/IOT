@@ -30,6 +30,11 @@ private slots:
     void Server_RX__createQuery_READ_PKG();
     void Server_RX__createQuery_STATE_PKG();
     void Server_RX__createQuery_WRITE_PKG();
+
+    void Server_TX__createResponse_DEV_LIST_PKG();
+    void Server_TX__createResponse_READ_PKG();
+    void Server_TX__createResponse_STATE_PKG();
+    void Server_TX__createResponse_WRITE_PKG();
 };
 
 TEST_IOTV_SC::TEST_IOTV_SC()
@@ -345,6 +350,108 @@ void TEST_IOTV_SC::Server_RX__createQuery_WRITE_PKG()
 
     QCOMPARE(IOTV_SC::Server_RX::accumPacket(data)->type, IOTV_SC::Query_Type::QUERY_ERROR);
     QCOMPARE(data.size(), 1);
+}
+
+void TEST_IOTV_SC::Server_TX__createResponse_DEV_LIST_PKG()
+{
+    IOTV_SC::RESPONSE_DEV_LIST_PKG pkg;
+    IOTV_SC::DEV_PKG dev;
+
+    dev.id = 1;
+    dev.description = "description";
+    dev.name = "Name";
+    std::vector<Raw::DATA_TYPE> vec;
+    vec.push_back(Raw::DATA_TYPE::BOOL);
+    vec.push_back(Raw::DATA_TYPE::DOUBLE_64);
+    vec.push_back(Raw::DATA_TYPE::STRING);
+    dev.readChannel = vec;
+    vec.push_back(Raw::DATA_TYPE::FLOAT_32);
+    dev.writeChannel = vec;
+
+    pkg.devs.push_back(dev);
+
+    dev.id = 2;
+    dev.name = "New name";
+    vec.clear();
+    dev.readChannel = vec;
+    vec.push_back(Raw::DATA_TYPE::BOOL);
+    dev.writeChannel = vec;
+
+//    pkg.devs.push_back(dev);
+
+    QByteArray data;
+    data.push_back(IOTV_SC::RESPONSE_DEV_LIST_BYTE);
+    data.push_back(pkg.devs.size());
+
+    for (uint8_t i = 0; i < pkg.devs.size(); i++)
+    {
+        data.push_back(pkg.devs.at(i).name.size() << 3);
+        data.append(pkg.devs.at(i).name.toLocal8Bit());
+        data.push_back(pkg.devs.at(i).id);
+        data.push_back(pkg.devs.at(i).description.size() >> 8);
+        data.push_back(pkg.devs.at(i).description.size());
+        data.push_back((pkg.devs.at(i).readChannel.size() << 4) | pkg.devs.at(i).writeChannel.size());
+
+        data.append(pkg.devs.at(i).description.toLocal8Bit());
+
+        for (uint8_t j = 0; j < pkg.devs.at(i).readChannel.size(); j++)
+            data.push_back(static_cast<uint8_t>(pkg.devs.at(i).readChannel.at(j)));
+
+        for (uint8_t j = 0; j < pkg.devs.at(i).writeChannel.size(); j++)
+            data.push_back(static_cast<uint8_t>(pkg.devs.at(i).writeChannel.at(j)));
+    }
+
+    QCOMPARE(IOTV_SC::Server_TX::response_DEV_LIST(pkg), data);
+}
+
+void TEST_IOTV_SC::Server_TX__createResponse_READ_PKG()
+{
+    IOTV_SC::RESPONSE_READ_PKG pkg;
+    pkg.name = "Name";
+    pkg.channelNumber = 5;
+    QByteArray rawData;
+    rawData.push_back(1);
+    rawData.push_back(2);
+    rawData.push_back(3);
+    pkg.data = rawData;
+
+    QByteArray data;
+    data.push_back((pkg.name.size() << 3) | IOTV_SC::RESPONSE_READ_BYTE);
+    data.push_back(0x0F & pkg.channelNumber);
+    data.push_back(pkg.data.size() << 8);
+    data.push_back(pkg.data.size());
+    data.append(pkg.name.toLocal8Bit());
+    data.append(pkg.data);
+
+    QCOMPARE(IOTV_SC::Server_TX::response_READ(pkg), data);
+}
+
+void TEST_IOTV_SC::Server_TX__createResponse_STATE_PKG()
+{
+    IOTV_SC::RESPONSE_STATE_PKG pkg;
+    pkg.name = "Name";
+    pkg.state = true;
+
+    QByteArray data;
+    data.push_back((pkg.name.size() << 3) | IOTV_SC::RESPONSE_STATE_FIRST_BYTE);
+    data.push_back(0x30 | IOTV_SC::RESPONSE_STATE_SECOND_BYTE | (pkg.state << 5));
+    data.append(pkg.name.toLocal8Bit());
+
+    QCOMPARE(IOTV_SC::Server_TX::response_STATE(pkg), data);
+}
+
+void TEST_IOTV_SC::Server_TX__createResponse_WRITE_PKG()
+{
+    IOTV_SC::RESPONSE_WRITE_PKG pkg;
+    pkg.name = "Name";
+    pkg.channelNumber = 5;
+
+    QByteArray data;
+    data.push_back((pkg.name.size() << 3) | IOTV_SC::RESPONSE_WRITE_BYTE);
+    data.push_back(0x0F & pkg.channelNumber);
+    data.append(pkg.name.toLocal8Bit());
+
+    QCOMPARE(IOTV_SC::Server_TX::response_WRITE(pkg), data);
 }
 
 QTEST_APPLESS_MAIN(TEST_IOTV_SC)

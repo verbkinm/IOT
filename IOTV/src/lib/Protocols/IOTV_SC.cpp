@@ -354,16 +354,27 @@ QByteArray IOTV_SC::Server_TX::response_DEV_LIST(const RESPONSE_DEV_LIST_PKG &pk
 
     for (uint8_t i = 0; i < pkg.devs.size(); i++)
     {
-        data.push_back(pkg.devs.at(i).id);
-        data.push_back(pkg.devs.at(i).description.size() << 8);
-        data.push_back(pkg.devs.at(i).description.size());
-        data.push_back((pkg.devs.at(i).readChannel.size() << 4) | pkg.devs.at(i).writeChannel.size());
-        data.append(pkg.devs.at(i).description.toLocal8Bit());
+        uint8_t nameLength = pkg.devs.at(i).name.size();
 
-        for (uint8_t readChannels = 0; readChannels < pkg.devs.at(i).readChannel.size(); readChannels++)
+        uint8_t MSB = static_cast<uint8_t>(pkg.devs.at(i).description.size()) >> 8;
+        uint8_t LSB = static_cast<uint8_t>(pkg.devs.at(i).description.size());
+        uint16_t descriptionLength = (MSB << 8) | LSB;
+
+        uint8_t readChannelSize = 0x0F & pkg.devs.at(i).readChannel.size();
+        uint8_t writeChannelSize = 0x0F & pkg.devs.at(i).writeChannel.size();
+
+        data.push_back(nameLength << 3);
+        data.append(pkg.devs.at(i).name.mid(0, nameLength).toLocal8Bit());
+        data.push_back(pkg.devs.at(i).id);
+        data.push_back(MSB);
+        data.push_back(LSB);
+        data.push_back((readChannelSize << 4) | writeChannelSize);
+        data.append(pkg.devs.at(i).description.mid(0, descriptionLength).toLocal8Bit());
+
+        for (uint8_t readChannels = 0; readChannels < readChannelSize; readChannels++)
             data.push_back(static_cast<uint8_t>(pkg.devs.at(i).readChannel.at(readChannels)));
 
-        for (uint8_t writeChannels = 0; writeChannels < pkg.devs.at(i).writeChannel.size(); writeChannels++)
+        for (uint8_t writeChannels = 0; writeChannels < writeChannelSize; writeChannels++)
             data.push_back(static_cast<uint8_t>(pkg.devs.at(i).writeChannel.at(writeChannels)));
     }
 
