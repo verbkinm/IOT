@@ -1,6 +1,6 @@
 #include "tcp_conn_type.h"
 
-TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, Base_conn_type *parent) : Base_conn_type(name, parent),
+TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, QObject *parent) : Base_conn_type(name, parent),
     _tcpSocket(std::make_unique<QTcpSocket>()), _tcpPort(port)
 {
     _address = address;
@@ -11,7 +11,7 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
     connect(_tcpSocket.get(), &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 
-    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost);
+    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
 }
 
 quint16 TCP_conn_type::getPort() const
@@ -26,8 +26,14 @@ void TCP_conn_type::setPort(quint16 port)
 
 qint64 TCP_conn_type::write(const QByteArray &data)
 {
-    Log::write(_name + ": data transmit to " + _tcpSocket->peerAddress().toString() +
-               + ":" + QString::number(_tcpSocket->peerPort()) + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name +
+               ": data transmit to " +
+               _tcpSocket->peerAddress().toString() +
+               ":" +
+               QString::number(_tcpSocket->peerPort()) +
+               " -> " +
+               data.toHex(':'),
+               Log::Write_Flag::FILE_STDOUT);
 
     return _tcpSocket->write(data);
 }

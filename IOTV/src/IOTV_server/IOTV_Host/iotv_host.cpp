@@ -3,6 +3,10 @@
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread())
 {
+    _timerPing.setParent(this);
+    _timerPong.setParent(this);
+    _reReadTimer.setParent(this);
+
     connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
 }
@@ -100,13 +104,18 @@ void IOTV_Host::setConnectionType()
 {
     const auto &connType = _settingsData[hostField::connection_type];
     if (connType == connectionType::TCP)
-        _conn_type = std::make_unique<TCP_conn_type>(_settingsData[hostField::name], _settingsData[hostField::address], _settingsData[hostField::port].toUInt());
+    {
+        _conn_type = std::make_unique<TCP_conn_type>(_settingsData[hostField::name],
+                _settingsData[hostField::address],
+                _settingsData[hostField::port].toUInt(),
+                this);
+    }
     else if (connType == connectionType::UDP)
         //!!!
         ;
     else if (connType == connectionType::COM)
     {
-        _conn_type = std::make_unique<COM_conn_type>(_settingsData["name"]);
+        _conn_type = std::make_unique<COM_conn_type>(_settingsData["name"], this);
 
         //    COM_conn_type *com = qobject_cast<COM_conn_type*>(_conn_type.get());
         //    com->setAddress(_structSettings->address);
@@ -120,9 +129,11 @@ void IOTV_Host::setConnectionType()
         //        settingsPort.flowControl = _settingsHosts.value("flowControl", 0).toInt();
     }
     else if (connType == connectionType::FILE)
-        _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"]);
+        _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
 
-    connectObjects();
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::dataResived, Qt::QueuedConnection);
 }
 
 bool IOTV_Host::runInNewThread()
@@ -132,20 +143,9 @@ bool IOTV_Host::runInNewThread()
 
     this->moveToThread(&_thread);
 
-    _timerPing.moveToThread(&_thread);
-    _timerPong.moveToThread(&_thread);
-    _reReadTimer.moveToThread(&_thread);
-
     _thread.start();
 
     return _thread.isRunning();
-}
-
-void IOTV_Host::connectObjects() const
-{
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::dataResived, Qt::QueuedConnection);
 }
 
 void IOTV_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)

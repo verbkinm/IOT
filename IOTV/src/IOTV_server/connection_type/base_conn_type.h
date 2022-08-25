@@ -1,7 +1,5 @@
 #pragma once
 
-#include <mutex>
-
 #include <QTimer>
 
 #include "log.h"
@@ -11,7 +9,7 @@ class Base_conn_type : public QObject
 {
     Q_OBJECT
 public:
-    Base_conn_type(const QString& name, QObject* parent = nullptr);
+    Base_conn_type(const QString& name, QObject* parent);
     virtual ~Base_conn_type() = default;
 
     enum class Conn_type

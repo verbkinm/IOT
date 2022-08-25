@@ -10,7 +10,7 @@ class COM_conn_type : public Base_conn_type
 {
     Q_OBJECT
 public:
-    COM_conn_type(const QString& name, Base_conn_type *parent = nullptr);
+    COM_conn_type(const QString& name, QObject *parent);
 
     struct SetingsPort
     {

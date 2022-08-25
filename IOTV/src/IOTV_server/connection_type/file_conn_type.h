@@ -10,7 +10,7 @@ class File_conn_type : public Base_conn_type
 {
     Q_OBJECT
 public:
-    File_conn_type(const QString& name, const QString& fileName, Base_conn_type *parent = nullptr);
+    File_conn_type(const QString& name, const QString& fileName, QObject *parent);
 
     virtual qint64 write(const QByteArray &data) override;
     virtual void connectToHost() override;

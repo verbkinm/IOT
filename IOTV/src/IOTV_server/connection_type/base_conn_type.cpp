@@ -1,9 +1,10 @@
 #include "base_conn_type.h"
+#include <QDebug>
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
     _name(name), _address("none address")
 {
-
+    _reconnectTimer.setParent(parent);
 }
 
 Base_conn_type::Conn_type Base_conn_type::getConnectionType() const

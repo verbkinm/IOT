@@ -12,8 +12,7 @@ class TCP_conn_type : public Base_conn_type
 {
     Q_OBJECT
 public:
-    TCP_conn_type(const QString& name, const QString& address = "127.0.0.1", quint16 port = 2021,
-                       Base_conn_type *parent = nullptr);
+    TCP_conn_type(const QString& name, const QString& address, quint16 port, QObject *parent);
 
     quint16 getPort() const;
     void setPort(quint16 port);
@@ -28,6 +27,7 @@ protected:
 private:
     std::unique_ptr<QTcpSocket> _tcpSocket;
     quint16 _tcpPort;
+
 
 private slots:
     void slotNewConnection();

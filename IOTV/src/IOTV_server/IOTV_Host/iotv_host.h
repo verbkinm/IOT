@@ -39,8 +39,6 @@ private:
 
     void setOnline(bool state);
 
-    void connectObjects() const;
-
     void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
     void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
     void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
