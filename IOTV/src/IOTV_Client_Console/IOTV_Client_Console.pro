@@ -1,6 +1,8 @@
-QT += quick network
+QT -= gui
+QT += network
 
-CONFIG += c++17
+CONFIG += c++2a console
+CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -8,32 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
         client.cpp \
-#        device.cpp \
-        main.cpp \
-#        wrapper_device.cpp \
-#        wrapper_raw.cpp
-
-RESOURCES += qml.qrc
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-#QML_DESIGNER_IMPORT_PATH =
+        console_interface.cpp \
+        main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-HEADERS += \
-    Patterns/Subject.h \
-    Patterns/observer.h \
-    client.h \
-#    device.h \
-#    wrapper_device.h \
-#    wrapper_raw.h
-
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Hostd
@@ -63,4 +46,6 @@ else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
 INCLUDEPATH += $$PWD/../lib/raw
 DEPENDPATH += $$PWD/../lib/raw
 
-DISTFILES +=
+HEADERS += \
+    client.h \
+    console_interface.h

@@ -51,6 +51,10 @@ void IOTV_Server::readSettings()
         if (setting[hostField::connection_type] == connectionType::TCP)
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
+        //!!!
+        //if (setting[hostField::connection_type] == connectionType::COM)
+        //  ;
+
         _iot_hosts.emplace_back(setting);
         if (!_iot_hosts.back().runInNewThread())
         {
@@ -83,6 +87,7 @@ void IOTV_Server::startTCPServer()
 void IOTV_Server::clientOnlineFile() const
 {
     std::ofstream file("client_online.log", std::ios::trunc);
+
     if (!file.is_open())
     {
         Log::write("Can't open client_online.log", Log::Write_Flag::FILE_STDERR);
@@ -151,17 +156,14 @@ void IOTV_Server::slotNewConnection()
                Log::Write_Flag::FILE_STDOUT, _logFile);
 
     connect(&_iot_clients.back(), &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected);
-    //    clientOnlineFile();
+    clientOnlineFile();
 }
 
 void IOTV_Server::slotDisconnected()
 {
     IOTV_Client* client = qobject_cast<IOTV_Client*>(sender());
 
-    QString strOut = "Client disconnected from "
-            + client->socket()->peerAddress().toString()
-            + ":" + QString::number(client->socket()->peerPort());
-
+    QString strOut = "Client disconnected";
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
 
     _iot_clients.remove(*client);

@@ -1,5 +1,4 @@
-#ifndef SERVER_H
-#define SERVER_H
+#pragma once
 
 #include <QTcpSocket>
 #include <QHostAddress>
@@ -11,7 +10,7 @@
 #include "device.h"
 #include "Patterns/Subject.h"
 
-class Server : public QObject, public Subject
+class Client : public QObject, public Subject
 {
     Q_OBJECT
 
@@ -21,8 +20,8 @@ class Server : public QObject, public Subject
     Q_PROPERTY(quint16 onlineDevice READ getDeviceOnline NOTIFY onlineDeviceChanged)
 
 public:
-    Server(QObject *parent = nullptr);
-    ~Server();
+    Client(QObject *parent = nullptr);
+    ~Client();
 
     QString getName() const;
     QString getServerAddress() const;
@@ -37,7 +36,7 @@ public:
 
     QAbstractSocket::SocketState state() const;
 
-    qint64 writeData(QByteArray &data);
+    qint64 writeData(const QByteArray &data);
 
     const std::map<QString, std::shared_ptr<Device> > &getDevices() const;
 
@@ -82,5 +81,3 @@ signals:
     void signalDisconnected();
     void signalConnected();
 };
-
-#endif // SERVER_H

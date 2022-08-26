@@ -1,18 +1,18 @@
-#ifndef DEVICE_H
-#define DEVICE_H
-
+#pragma once
 
 #include "Patterns/Subject.h"
 #include "base_host.h"
 #include "protocols.h"
 
-class Server;
+#include <QTimer>
+
+class Client;
 
 class Device : public Base_Host, public Subject
 {
     Q_OBJECT
 public:
-    Device(Server &server, const QString &name, uint8_t id, QObject *parent = nullptr);
+    Device(Client &server, const QString &name, uint8_t id, QObject *parent = nullptr);
     ~Device();
 
     Q_INVOKABLE quint8 getIdToQML() const;
@@ -43,7 +43,7 @@ private:
     const QString _name;
     QString _viewName;
     bool _state;
-    Server &_server;
+    Client &_server;
 
     QTimer _autoReadInterval, _stateInterval;
 
@@ -56,5 +56,3 @@ signals:
     void signalDataReadRecived();
     void signalRecreateDevices();
 };
-
-#endif // DEVICE_H

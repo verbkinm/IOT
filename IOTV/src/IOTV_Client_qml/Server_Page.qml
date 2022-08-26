@@ -129,7 +129,6 @@ Page {
             onTotalDeviceChanged: {
                 devices.text = "(<font color='green'>" + onlineDevice + "</font>/<font color='red'>" + (totalDevice - onlineDevice) + "</font>)"
             }
-
         }
 
         Button {

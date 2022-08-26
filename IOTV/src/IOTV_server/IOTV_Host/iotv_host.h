@@ -81,9 +81,6 @@ private slots:
     void slotThreadStop();
 
 signals:
-    void signalHostConnected();
-    void signalHostDisconnected();
-
     void signalDataRiceved();
 
     void signalStopThread();

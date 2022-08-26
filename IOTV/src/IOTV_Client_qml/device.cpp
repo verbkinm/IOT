@@ -1,10 +1,10 @@
 #include "device.h"
-#include "server.h"
+#include "client.h"
 
 static int readInterval = 1000;
 static int stateInterval = 5000;
 
-Device::Device(Server &server, const QString &name, uint8_t id, QObject *parent) : Base_Host(id, parent),
+Device::Device(Client &server, const QString &name, uint8_t id, QObject *parent) : Base_Host(id, parent),
     _name(name), _viewName(name), _state(false), _server(server)
 {
     newObjectName();

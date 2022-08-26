@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "server.h"
+#include "client.h"
 #include "wrapper_device.h"
 #include "wrapper_raw.h"
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<Server>("io.qt.Backend_Server", 1, 0, "Backend_Server");
+    qmlRegisterType<Client>("io.qt.Backend_Server", 1, 0, "Backend_Server");
     qmlRegisterType<Wrapper_Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
     qmlRegisterType<Wrapper_Raw>("io.qt.Raw", 1, 0, "Raw");
 

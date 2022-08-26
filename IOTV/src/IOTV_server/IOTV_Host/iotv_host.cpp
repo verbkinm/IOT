@@ -242,7 +242,6 @@ void IOTV_Host::slotConnected()
     _conn_type->write(IOTV_SH::query_WAY());
 
     _timerPong.start(TIMER_PONG);
-    emit signalHostConnected(); ///!!! никуда не идут
 }
 
 void IOTV_Host::slotDisconnected()
@@ -254,9 +253,6 @@ void IOTV_Host::slotDisconnected()
     _reReadTimer.stop();
 
     _conn_type->trimBufferFromBegin(static_cast<uint8_t>(Base_conn_type::BUFFER_MAX_SIZE));
-
-
-    emit signalHostDisconnected(); ///!!! никуда не идут
 }
 
 void IOTV_Host::slotReReadTimeOut()

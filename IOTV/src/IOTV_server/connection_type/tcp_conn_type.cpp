@@ -1,15 +1,16 @@
 #include "tcp_conn_type.h"
 
-TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, QObject *parent) : Base_conn_type(name, parent),
-    _tcpSocket(std::make_unique<QTcpSocket>()), _tcpPort(port)
+TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, QObject *parent) :
+    Base_conn_type(name, parent),
+    _tcpPort(port)
 {
     _address = address;
     _type = Conn_type::TCP;
-    _tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+    _tcpSocket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-    connect(_tcpSocket.get(), &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection, Qt::QueuedConnection);
-    connect(_tcpSocket.get(), &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
-    connect(_tcpSocket.get(), &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
+    connect(&_tcpSocket, &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection, Qt::QueuedConnection);
+    connect(&_tcpSocket, &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
+    connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
 }
@@ -28,52 +29,51 @@ qint64 TCP_conn_type::write(const QByteArray &data)
 {
     Log::write(_name +
                ": data transmit to " +
-               _tcpSocket->peerAddress().toString() +
+               _tcpSocket.peerAddress().toString() +
                ":" +
-               QString::number(_tcpSocket->peerPort()) +
+               QString::number(_tcpSocket.peerPort()) +
                " -> " +
                data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT);
 
-    return _tcpSocket->write(data);
+    return _tcpSocket.write(data);
 }
 
 void TCP_conn_type::connectToHost()
 {
     _reconnectTimer.start(DEFAULT_INTERVAL);
-    _tcpSocket->connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
+    _tcpSocket.connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
 
 void TCP_conn_type::disconnectFromHost()
 {
-    _tcpSocket->disconnectFromHost();
+    _tcpSocket.disconnectFromHost();
 }
 
 QByteArray TCP_conn_type::readAll()
 {
-    return _tcpSocket->readAll();
+    return _tcpSocket.readAll();
 }
 
 void TCP_conn_type::slotNewConnection()
 {
     _reconnectTimer.stop();
-    Log::write(_name + ": connected to " + _tcpSocket->peerAddress().toString()
-               + ":" + QString::number(_tcpSocket->peerPort()), Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": connected to " + _tcpSocket.peerAddress().toString()
+               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
 
-    connect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
-    connect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
+    connect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
+    connect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalConnected();
 }
 
 void TCP_conn_type::slotSocketDisconnected()
 {
-    Log::write(_name + ": disconnected from " + _tcpSocket->peerAddress().toString()
-               + ":" + QString::number(_tcpSocket->peerPort()), Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": disconnected from " + _tcpSocket.peerAddress().toString()
+               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
 
-    disconnect(_tcpSocket.get(), &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
-    disconnect(_tcpSocket.get(),  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
-    disconnect(_tcpSocket.get(),  &QTcpSocket::disconnected, _tcpSocket.get(), &TCP_conn_type::deleteLater);
+    disconnect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
+    disconnect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalDisconnected();
     _reconnectTimer.start(DEFAULT_INTERVAL);

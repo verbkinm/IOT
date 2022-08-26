@@ -1,65 +1,65 @@
-#include "server.h"
+#include "client.h"
 
 static int default_interval = 5000;
 static int reconnecting_count =  5;
 static int number = 0;
 
-Server::Server(QObject *parent) : QObject(parent), _name("server" + QString::number(number++)),
+Client::Client(QObject *parent) : QObject(parent), _name("server" + QString::number(number++)),
     _serverAddress("127.0.0.1"),
     _serverPort(2022),
     _reconnectTimerTrying(0)
 {
     newObjectName();
 
-    connect(&_socket, &QAbstractSocket::connected, this, &Server::slotConnected);
+    connect(&_socket, &QAbstractSocket::connected, this, &Client::slotConnected);
     connect(&_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
-    connect(&_reconnectTimer, &QTimer::timeout, this, &Server::connectToHost);
+    connect(&_reconnectTimer, &QTimer::timeout, this, &Client::connectToHost);
 }
 
-Server::~Server()
+Client::~Client()
 {
-    disconnect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
+    disconnect(&_socket,  &QTcpSocket::disconnected, this, &Client::slotDisconnected);
     _socket.disconnectFromHost();
     destroyObservers();
 }
 
-QString Server::getName() const
+QString Client::getName() const
 {
     return _name;
 }
 
-void Server::setName(const QString &name)
+void Client::setName(const QString &name)
 {
     _name = name;
     newObjectName();
     notify();
 }
 
-QString Server::getServerAddress() const
+QString Client::getServerAddress() const
 {
     return _serverAddress;
 }
 
-void Server::setServerAddres(const QString &serverAddress)
+void Client::setServerAddres(const QString &serverAddress)
 {
     _serverAddress = serverAddress;
     newObjectName();
     notify();
 }
 
-quint16 Server::getServerPort() const
+quint16 Client::getServerPort() const
 {
     return _serverPort;
 }
 
-void Server::setServerPort(const quint16 &serverPort)
+void Client::setServerPort(const quint16 &serverPort)
 {
     _serverPort = serverPort;
     newObjectName();
     notify();
 }
 
-void Server::setServerNAP(const QString &name, const QString &serverAddress, const quint16 &serverPort)
+void Client::setServerNAP(const QString &name, const QString &serverAddress, const quint16 &serverPort)
 {
     _name = name;
     _serverAddress = serverAddress;
@@ -69,17 +69,17 @@ void Server::setServerNAP(const QString &name, const QString &serverAddress, con
     notify();
 }
 
-QAbstractSocket::SocketState Server::state() const
+QAbstractSocket::SocketState Client::state() const
 {
     return _socket.state();
 }
 
-quint16 Server::getDevicesCount() const
+quint16 Client::getDevicesCount() const
 {
     return _devices.size();
 }
 
-quint16 Server::getDeviceOnline() const
+quint16 Client::getDeviceOnline() const
 {
     int count = 0;
     for (auto &elem : _devices)
@@ -91,7 +91,7 @@ quint16 Server::getDeviceOnline() const
     return count;
 }
 
-void Server::connectToHost()
+void Client::connectToHost()
 {
     if(_reconnectTimerTrying > reconnecting_count)
     {
@@ -107,57 +107,58 @@ void Server::connectToHost()
     _socket.connectToHost(_serverAddress, _serverPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
 
-void Server::disconnectFromHost()
+void Client::disconnectFromHost()
 {
     _socket.disconnectFromHost();
     emit signalDisconnected();
 }
 
-void Server::reconnectHost()
+void Client::reconnectHost()
 {
     disconnectFromHost();
     connectToHost();
 }
 
-qint64 Server::writeData(QByteArray &data)
+qint64 Client::writeData(const QByteArray &data)
 {
     return _socket.write(data);
 }
 
-void Server::createDevice(const QByteArray &data, const QString &name)
+void Client::createDevice(const QByteArray &data, const QString &name)
 {
     _devices[name] = std::make_shared<Device>(*this, name, data.at(1), this);
+    IOTV_SC
     IOTV_SH::response_WAY(*_devices[name], data);
 
     const auto it = _alias.find(name);
     if(it != _alias.cend())
         _devices[name]->setViewName(_alias.at(name));
 
-    connect(_devices[name].get(), &Device::signalRecreateDevices, this, &Server::reconnectHost);
+    connect(_devices[name].get(), &Device::signalRecreateDevices, this, &Client::reconnectHost);
 }
 
-void Server::newObjectName()
+void Client::newObjectName()
 {
     this->setObjectName(_name + "(" + _serverAddress + ":" + QString::number(_serverPort) + ")");
 }
 
-const std::map<QString, std::shared_ptr<Device> > &Server::getDevices() const
+const std::map<QString, std::shared_ptr<Device> > &Client::getDevices() const
 {
     return _devices;
 }
 
-void Server::addAlias(const QString &name, const QString &aliasName)
+void Client::addAlias(const QString &name, const QString &aliasName)
 {
     if(name.length())
         _alias[name] = aliasName;
 }
 
-const std::map<QString, QString> &Server::getAlias() const
+const std::map<QString, QString> &Client::getAlias() const
 {
     return _alias;
 }
 
-QList<QObject*> Server::getDevicesToQML()
+QList<QObject*> Client::getDevicesToQML()
 {
     QList<QObject*> result;
     for (auto &[key, value] : _devices)
@@ -168,7 +169,7 @@ QList<QObject*> Server::getDevicesToQML()
     return result;
 }
 
-void Server::slotConnected()
+void Client::slotConnected()
 {
     emit signalConnected();
 
@@ -176,13 +177,12 @@ void Server::slotConnected()
             + ":" + QString::number(_socket.peerPort());
     Log::write(strOut);
 
-    connect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
-    connect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
+    connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReadData);
+    connect(&_socket,  &QTcpSocket::disconnected, this, &Client::slotDisconnected);
 
     _reconnectTimer.stop();
 
-    QByteArray data;
-    IOTV_SC::query_Device_List(data);
+    QByteArray data = IOTV_SC::Client_TX::query_Device_List();
     Log::write("Data send to " + _socket.peerAddress().toString() + ":"
                + QString::number(_socket.peerPort())
                + " -> " + data.toHex(':'));
@@ -191,14 +191,14 @@ void Server::slotConnected()
     notify();
 }
 
-void Server::slotDisconnected()
+void Client::slotDisconnected()
 {
     QString strOut = _name + ": disconnected from " + _socket.peerAddress().toString()
             + ":" + QString::number(_socket.peerPort());
     Log::write(strOut);
 
-    disconnect(&_socket, &QTcpSocket::readyRead, this, &Server::slotReadData);
-    disconnect(&_socket,  &QTcpSocket::disconnected, this, &Server::slotDisconnected);
+    disconnect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReadData);
+    disconnect(&_socket,  &QTcpSocket::disconnected, this, &Client::slotDisconnected);
 
     _devices.clear();
 
@@ -207,7 +207,7 @@ void Server::slotDisconnected()
     emit signalDisconnected();
 }
 
-void Server::slotReadData()
+void Client::slotReadData()
 {
     static QByteArray data;
     data += _socket.readAll();
@@ -276,7 +276,7 @@ void Server::slotReadData()
     }
 }
 
-void Server::slotError(QAbstractSocket::SocketError error)
+void Client::slotError(QAbstractSocket::SocketError error)
 {
     QString strErr;
     switch (error)

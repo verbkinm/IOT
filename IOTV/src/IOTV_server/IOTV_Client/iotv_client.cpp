@@ -1,11 +1,19 @@
 #include "iotv_client.h"
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObject *parent) : QObject(parent),
-    _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts)
+    _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts),
+    _silenceInterval(60000)
 {
     _socket->setParent(this);
+    _silenceTimer.setParent(this);
+
     connect(&_thread, &QThread::started, this, &IOTV_Client::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Client::signalStopThread, this, &IOTV_Client::slotThreadStop, Qt::QueuedConnection);
+
+    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
+
+    _silenceTimer.setInterval(_silenceInterval);
+    _silenceTimer.start();
 }
 
 IOTV_Client::~IOTV_Client()
@@ -127,11 +135,13 @@ void IOTV_Client::slotNewThreadStart()
 {
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
     connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
-    connect(_socket, &QTcpSocket::disconnected, _socket, &QObject::deleteLater);
 }
 
 void IOTV_Client::slotThreadStop()
 {
+    if (_socket != nullptr)
+        delete _socket;
+
     if (_parentThread == nullptr)
         return;
 
@@ -142,6 +152,7 @@ void IOTV_Client::slotThreadStop()
 
 void IOTV_Client::slotReadData()
 {
+    _silenceTimer.start();
     recivedBuff += _socket->readAll();
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
