@@ -3,8 +3,7 @@
 
 IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
-    _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
-    _programVersion("0.2")
+    _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts")
 {
     checkSettingsFileExist();
     readSettings();
@@ -52,16 +51,12 @@ void IOTV_Server::readSettings()
         if (setting[hostField::connection_type] == connectionType::TCP)
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
-        //!!!
-        _iot_hosts.emplace_back(new QThread, new IOTV_Host(setting));
-        _iot_hosts.back().second->moveToThread(_iot_hosts.back().first);
-        _iot_hosts.back().first->start();
-
-//        if (!_iot_hosts.back().runInNewThread())
-//        {
-//            Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Host in new thread", Log::Write_Flag::FILE_STDOUT);
-//            exit(1);
-//        }
+        _iot_hosts.emplace_back(setting);
+        if (!_iot_hosts.back().runInNewThread())
+        {
+            Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Host in new thread", Log::Write_Flag::FILE_STDOUT);
+            exit(1);
+        }
 
         _settingsHosts.endGroup();
     }
@@ -106,11 +101,6 @@ void IOTV_Server::clientOnlineFile() const
     }
 
     file.close();
-}
-
-QString IOTV_Server::getProgramVersion() const
-{
-    return _programVersion;
 }
 
 void IOTV_Server::checkSettingsFileExist()
