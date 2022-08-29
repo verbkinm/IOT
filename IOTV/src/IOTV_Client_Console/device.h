@@ -12,6 +12,7 @@ class Device : public Base_Host
 public:
     Device() = default;
     Device(const IOTV_SC::DEV_PKG &dev, QObject *parent = nullptr);
+    void update(const IOTV_SC::DEV_PKG &pkg);
 
     virtual QString getName() const override;
 
@@ -21,6 +22,8 @@ public:
     bool setData(uint8_t channelNumber, const QByteArray &data);
 
     void setReadInterval(int interval);
+
+    friend bool operator==(const Device &lhs, const Device &rhs);
 
 private:
     const QString _name;

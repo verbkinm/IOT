@@ -37,6 +37,8 @@ private:
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
+    QTimer _timerDevList;
+
     QString _address;
     quint16 _port;
 
@@ -49,7 +51,9 @@ private:
     void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
     void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
     void response_READ(IOTV_SC::RESPONSE_PKG *pkg);
-    void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg);
+    void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const;
+
+    void write(const QByteArray &data);
 
 private slots:
     void slotConnected();
@@ -59,6 +63,7 @@ private slots:
 
     void slotQueryRead();
     void slotQueryState();
+    void slotQueryDevList();
 
     void slotError(QAbstractSocket::SocketError error);
 

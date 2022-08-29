@@ -64,7 +64,7 @@ void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) con
         responseDevListPkg.devs.push_back(dev);
     }
 
-    _socket->write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
+    write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
 }
 
 void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
@@ -86,7 +86,7 @@ void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     else
         responseStatePkg.state = false;
 
-    _socket->write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
+    write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
 }
 
 void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
@@ -107,7 +107,7 @@ void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     if (it != _hosts.end())
         responseReadPkg.data = it->readData(responseReadPkg.channelNumber);
 
-    _socket->write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
+    write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
 }
 
 void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
@@ -123,7 +123,15 @@ void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     responseWritePkg.name = queryWritePkg->name;
     responseWritePkg.channelNumber = queryWritePkg->channelNumber;
 
-    _socket->write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
+    write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
+}
+
+void IOTV_Client::write(const QByteArray &data) const
+{
+    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
+               + QString::number(_socket->peerPort())
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    _socket->write(data);
 }
 
 void IOTV_Client::slotDisconnected()

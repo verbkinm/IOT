@@ -22,6 +22,20 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
     _timerState.start();
 }
 
+void Device::update(const IOTV_SC::DEV_PKG &pkg)
+{
+    this->setId(pkg.id);
+    this->setDescription(pkg.description);
+
+    this->removeAllSubChannel();
+
+    for (const auto &type : pkg.readChannel)
+        this->addReadSubChannel({type});
+
+    for (const auto &type : pkg.writeChannel)
+        this->addWriteSubChannel({type});
+}
+
 QString Device::getName() const
 {
     return _name;
@@ -46,4 +60,19 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 void Device::setReadInterval(int interval)
 {
     _timerRead.setInterval(interval);
+}
+
+bool operator==(const Device &lhs, const Device &rhs)
+{
+    if (std::make_tuple(lhs.getId(), lhs.getName(), lhs.getDescription(), lhs.getReadChannelLength(), lhs.getWriteChannelLength()) ==
+            std::make_tuple(rhs.getId(), rhs.getName(), rhs.getDescription(), rhs.getReadChannelLength(), rhs.getWriteChannelLength()))
+    {
+        for (uint8_t i = 0; i < lhs.getReadChannelLength(); i++)
+        {
+            if (lhs.getReadChannelType(i) != rhs.getReadChannelType(i))
+                return false;
+        }
+        return true;
+    }
+    return false;
 }

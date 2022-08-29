@@ -41,6 +41,8 @@ private:
     void query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
     void query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
 
+    void write(const QByteArray &data) const;
+
 private slots:
     void slotDisconnected();
 

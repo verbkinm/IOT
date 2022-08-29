@@ -6,6 +6,9 @@ Client::Client(const QString &address, const quint16 &port, QObject *parent) : Q
     connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected);
     connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected);
     connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData);
+
+    connect(&_timerDevList, &QTimer::timeout, this, &Client::slotQueryDevList);
+    _timerDevList.start(5000);
 }
 
 Client::~Client()
@@ -65,17 +68,21 @@ void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
 
     for (const auto &dev : responsePkg->devs)
     {
-       auto result = _devices.emplace(dev.name, dev);
-       if (result.second)
-       {
-           connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead);
-           connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState);
-       }
-       else
-       {
-           QString str = QString(Q_FUNC_INFO) + " " + dev.name + " can't create new device";
-           Log::write(str, Log::Write_Flag::FILE_STDOUT);
-       }
+        auto result = _devices.emplace(dev.name, dev);
+        if (result.second)
+        {
+            connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead);
+            connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState);
+        }
+        else
+        {
+            Device &oldDev = result.first->second;
+            if (oldDev != Device(dev))
+                oldDev.update(dev);
+
+//            QString str = QString(Q_FUNC_INFO) + " " + dev.name + " can't create new device";
+//            Log::write(str, Log::Write_Flag::FILE_STDOUT);
+        }
     }
 }
 
@@ -113,7 +120,7 @@ void Client::response_READ(IOTV_SC::RESPONSE_PKG *pkg)
     _devices[responsePkg->name].setData(responsePkg->channelNumber, responsePkg->data);
 }
 
-void Client::response_WRITE(IOTV_SC::RESPONSE_PKG *pkg)
+void Client::response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const
 {
     if ((pkg == nullptr) || (pkg->type != IOTV_SC::Response_Type::RESPONSE_WRITE))
         return;
@@ -121,22 +128,33 @@ void Client::response_WRITE(IOTV_SC::RESPONSE_PKG *pkg)
     //Нет никакой реакции на ответ о записи
 }
 
+void Client::write(const QByteArray &data)
+{
+    if (data.isEmpty())
+        return;
+
+    Log::write("Client transmit to server" + _socket.peerAddress().toString() + ':'
+               + QString::number(_socket.peerPort())
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    _socket.write(data);
+}
+
 void Client::slotConnected()
 {
     Log::write("Connected to " +
                _socket.peerAddress().toString() +
-               ":" +
+               ':' +
                QString::number(_socket.peerPort()),
                Log::Write_Flag::FILE_STDOUT);
 
-    _socket.write(IOTV_SC::Client_TX::query_Device_List());
+    write(IOTV_SC::Client_TX::query_Device_List());
 }
 
 void Client::slotDisconnected()
 {
     Log::write("Disconnected from " +
                _socket.peerAddress().toString() +
-               ":" +
+               ':' +
                QString::number(_socket.peerPort()),
                Log::Write_Flag::FILE_STDOUT);
 }
@@ -147,7 +165,7 @@ void Client::slotReciveData()
 
     Log::write("Data recive from " +
                _socket.peerAddress().toString() +
-               ":" +
+               ':' +
                QString::number(_socket.peerPort()) +
                " <- " +
                _recivedBuff.toHex(':'),
@@ -169,7 +187,7 @@ void Client::slotReciveData()
                 Log::write("WARRNING: received data from " +
                            _socket.peerName() +
                            _socket.peerAddress().toString() +
-                           ":" +
+                           ':' +
                            QString::number(_socket.peerPort()) +
                            "UNKNOW: " +
                            _recivedBuff.toHex(':'),
@@ -212,7 +230,7 @@ void Client::slotQueryRead()
     for (uint8_t i = 0; i < dev->getReadChannelLength(); i++)
         data += IOTV_SC::Client_TX::query_READ(dev->getName(), i);
 
-    _socket.write(data);
+    write(data);
 }
 
 void Client::slotQueryState()
@@ -226,7 +244,12 @@ void Client::slotQueryState()
     for (uint8_t i = 0; i < dev->getReadChannelLength(); i++)
         data += IOTV_SC::Client_TX::query_STATE(dev->getName());
 
-    _socket.write(data);
+    write(data);
+}
+
+void Client::slotQueryDevList()
+{
+    write(IOTV_SC::Client_TX::query_Device_List());
 }
 
 void Client::slotError(QAbstractSocket::SocketError error)
