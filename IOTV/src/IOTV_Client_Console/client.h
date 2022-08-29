@@ -1,11 +1,14 @@
 #pragma once
 
+#include <unordered_map>
+
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QTimer>
 
 #include "log.h"
 #include "IOTV_SC.h"
+#include "device.h"
 
 class Client : public QObject
 {
@@ -32,6 +35,7 @@ public:
 
 private:
     QTcpSocket _socket;
+    QByteArray _recivedBuff;
 
     QString _address;
     quint16 _port;
@@ -40,11 +44,22 @@ private:
 
     uint8_t _reconnectTimerTrying;
 
+    std::unordered_map<QString, Device> _devices;
+
+    void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
+    void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
+    void response_READ(IOTV_SC::RESPONSE_PKG *pkg);
+    void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg);
+
 private slots:
     void slotConnected();
     void slotDisconnected();
 
-    void slotReadData();
+    void slotReciveData();
+
+    void slotQueryRead();
+    void slotQueryState();
+
     void slotError(QAbstractSocket::SocketError error);
 
 signals:

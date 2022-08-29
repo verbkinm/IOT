@@ -11,6 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         client.cpp \
         console_interface.cpp \
+        device.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -48,4 +49,5 @@ DEPENDPATH += $$PWD/../lib/raw
 
 HEADERS += \
     client.h \
-    console_interface.h
+    console_interface.h \
+    device.h

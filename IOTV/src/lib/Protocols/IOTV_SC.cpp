@@ -26,7 +26,7 @@ IOTV_SC::RESPONSE_PKG *IOTV_SC::Client_RX::accumPacket(QByteArray &data)
             return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
         //у пакетов state и write одинаковые младшие 3 бита, отличие во втором байте в 4 разряде
-        if (data.at(1) & IOTV_SC::STATE_BIT_MASK)
+        if (data.at(1) & IOTV_SC::RESPONSE_STATE_SECOND_BYTE)
             return createResponse_STATE_PKG(data);
 
         return createResponse_WRITE_PKG(data);

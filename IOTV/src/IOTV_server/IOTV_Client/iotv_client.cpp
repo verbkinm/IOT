@@ -191,7 +191,7 @@ void IOTV_Client::slotReadData()
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_STATE)
             query_STATE_recived(pkg);
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_READ)
-            query_STATE_recived(pkg);
+            query_READ_recived(pkg);
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_WRITE)
             query_WRITE_recived(pkg);
         else
@@ -205,7 +205,6 @@ void IOTV_Client::slotReadData()
         }
         delete pkg;
     }
-
 }
 
 bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)

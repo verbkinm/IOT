@@ -3,13 +3,14 @@
 #include <memory>
 #include <mutex>
 
+#include <QThread>
+
 #include "connection_type/tcp_conn_type.h"
+#include "connection_type/udp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
 #include "base_host.h"
 #include "ConfigTypes.h"
-
-#include <QThread>
 
 class IOTV_Host : public Base_Host
 {
@@ -23,15 +24,15 @@ public:
 
     virtual bool isOnline() const override;
 
-    virtual qint64 write(uint8_t channelNumber, const QByteArray &data) override;
+    qint64 write(uint8_t channelNumber, const QByteArray &data);
     QByteArray readData(uint8_t channelNumber) const;
 
     bool runInNewThread();
 
 private:
-    virtual qint64 read(uint8_t channelNumber) override;
-    virtual void dataResived(QByteArray data) override;
-    virtual qint64 writeToRemoteHost(const QByteArray &data) override;
+    qint64 read(uint8_t channelNumber);
+    void dataResived(QByteArray data);
+    qint64 writeToRemoteHost(const QByteArray &data);
 
     void connectToHost();
 

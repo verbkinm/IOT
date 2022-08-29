@@ -121,12 +121,13 @@ struct RESPONSE_WRITE_PKG : RESPONSE_PKG
     }
 };
 
-struct RESPONSE_READ_PKG : RESPONSE_WRITE_PKG
+struct RESPONSE_READ_PKG : RESPONSE_PKG
 {
-    RESPONSE_READ_PKG()
+    RESPONSE_READ_PKG() : RESPONSE_PKG(Response_Type::RESPONSE_READ), channelNumber{0}
     {
-        type = Response_Type::RESPONSE_READ;
     }
+    QString name;
+    uint8_t channelNumber;
     QByteArray data;
 
     friend bool operator==(const RESPONSE_READ_PKG &lhs, const RESPONSE_READ_PKG &rhs)
@@ -224,12 +225,13 @@ public:
         }
     };
 
-    struct QUERY_WRITE_PKG : QUERY_READ_PKG
+    struct QUERY_WRITE_PKG : QUERY_PKG
     {
-        QUERY_WRITE_PKG()
+        QUERY_WRITE_PKG() : QUERY_PKG(Query_Type::QUERY_WRITE)
         {
-            type = Query_Type::QUERY_WRITE;
         }
+        QString name;
+        uint8_t channelNumber = 0;
         QByteArray data;
 
         friend bool operator==(const QUERY_WRITE_PKG &lhs, const QUERY_WRITE_PKG &rhs)

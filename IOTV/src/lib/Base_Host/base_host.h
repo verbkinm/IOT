@@ -21,6 +21,8 @@ public:
     Raw::DATA_TYPE getReadChannelType(uint8_t channelNumber) const;
     Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
 
+    QByteArray getReadChannelData(uint8_t channelNumber) const;
+
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
@@ -38,16 +40,9 @@ protected:
     void setId(uint8_t id);
     void setDescription(const QString description);
 
-    QByteArray getReadChannelData(uint8_t channelNumber) const;
-
     virtual bool isOnline() const = 0;
 
-    virtual qint64 read(uint8_t channelNumber) = 0;
-    virtual qint64 write(uint8_t channelNumber, const QByteArray &rawData) = 0;
-    virtual void dataResived(QByteArray data) = 0;
-
-    virtual qint64 writeToRemoteHost(const QByteArray &data) = 0;
-
+private:
     uint8_t _id;
     QString _description;
 
