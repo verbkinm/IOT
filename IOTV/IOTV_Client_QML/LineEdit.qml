@@ -13,11 +13,15 @@ Rectangle {
 
     TextInput{
         id: txt
-        width: parent.width
+        text: "text"
+        anchors.fill: parent
         horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        focus: true
+        antialiasing: true
+        anchors.horizontalCenter: parent.horizontalCenter
         maximumLength: 15
-        font.pixelSize: 24
-        anchors.centerIn: parent
+        font.pixelSize: 18
 
         onFocusChanged: {
             if(focus && !readOnly)

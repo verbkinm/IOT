@@ -4,7 +4,7 @@ SOURCES += \
         main.cpp
 
 resources.prefix = /$${TARGET}
-RESOURCES += resources \
+RESOURCES += \
     qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -18,3 +18,4 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+DISTFILES +=

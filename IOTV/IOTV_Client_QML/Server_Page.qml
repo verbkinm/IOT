@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 //import io.qt.Backend_Server 1.0
 
+
 Page {
     width: 600
     height: 400
@@ -9,7 +10,7 @@ Page {
     property bool status: false
     property bool connection_attempt: false
 
-    property alias back: backend_server
+//    property alias back: backend_server
 
     signal click()
     signal disconected()
@@ -30,15 +31,20 @@ Page {
 
     Flickable
     {
+        id: flickable
         anchors.topMargin: 15
         anchors.fill: parent
         contentHeight: childrenRect.height
         Label {
             id: label1
+            width: 89
+            height: addr.height
             text: "Адресс: "
-            font.pixelSize: 24
+            font.pixelSize: 18
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 10
             anchors.left: parent.left
-            anchors.leftMargin: 5
             anchors.top: parent.top
         }
 
@@ -56,10 +62,15 @@ Page {
 
         Label {
             id: label2
+            width: label1.width
+            height: label1.height
             text: "Порт: "
-            font.pixelSize: 24
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            font.pixelSize: 18
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 10
+            anchors.topMargin: 5
             anchors.top: label1.bottom
         }
 
@@ -75,26 +86,7 @@ Page {
             text: "2022"
             //        inputMask: "99999"
         }
-
-        Label {
-            id: label3
-            text: "Кол-во устройств: "
-            font.pixelSize: 24
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: label2.bottom
-        }
-        Label {
-            id: devices
-            text: "(<font color='green'>0</font>/<font color='red'>0</font>)"
-            font.pixelSize: 24
-
-            anchors.left: label3.right
-            anchors.leftMargin: 5
-            anchors.top: label2.bottom
-        }
-
-//        Backend_Server {
+        //        Backend_Server {
 //            id: backend_server
 
 //            onSignalConnected: {
@@ -133,14 +125,21 @@ Page {
 
         Button {
             id: btn
-            anchors.top: devices.bottom
+            font.pixelSize: 18
+            anchors.horizontalCenterOffset: 0
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 15
-            font.pixelSize: 24
+            hoverEnabled: true
+            autoRepeat: false
+            checkable: false
+            display: AbstractButton.TextBesideIcon
+            highlighted: false
+            flat: false
+            topPadding: 12
             text: "Подключиться"
+            anchors.top: autoConnect.bottom
 
-//            onClicked: {
-//                if(connection_attempt)
+            //            onClicked: {
+            //                if(connection_attempt)
 //                {
 //                    backend_server.disconnectFromHost()
 //                }
@@ -158,10 +157,33 @@ Page {
 //                    port.color = "gainsboro"
 //                }
 //                else
-//                {
-//                    backend_server.disconnectFromHost()
-//                }
-//            }
+            //                {
+            //                    backend_server.disconnectFromHost()
+            //                }
+            //            }
+        }
+
+        CheckBox {
+            id: autoConnect
+            height: label2.height
+            text: qsTr("Автоподключение")
+            anchors.left: parent.left
+            anchors.top: label2.bottom
+            font.pixelSize: 18
+            anchors.leftMargin: 2
+            layer.smooth: false
+            anchors.topMargin: 5
+            font.hintingPreference: Font.PreferFullHinting
+            display: AbstractButton.TextOnly
+            autoRepeat: false
+            autoExclusive: false
+            checked: false
         }
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:0.9}D{i:2}D{i:3}D{i:4}D{i:5}D{i:6}D{i:7}D{i:1}
+}
+##^##*/

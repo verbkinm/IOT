@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>Server_Page.qml</file>
         <file>main.qml</file>
+        <file>LineEdit.qml</file>
+        <file>qtquickcontrols2.conf</file>
     </qresource>
 </RCC>

@@ -21,7 +21,10 @@ ApplicationWindow {
             anchors.fill: parent
             ToolButton {
                 text: qsTr("🏠")
-                onClicked: swipeView.setCurrentIndex(p1)
+                onClicked: {
+                    drawer.close()
+                    swipeView.setCurrentIndex(p1)
+                }
             }
             Label {
                 text: swipeView.itemAt(swipeView.currentIndex).name
@@ -32,7 +35,12 @@ ApplicationWindow {
             }
             ToolButton {
                 text: qsTr("⋮")
-                onClicked: drawer.open()
+                onClicked: {
+                    if (drawer.opened)
+                        drawer.close()
+                    else
+                        drawer.open()
+                }
             }
         }
     }
@@ -140,78 +148,18 @@ ApplicationWindow {
                 contentHeight: childrenRect.height
                 Label {
                     id: label1
-                    text: "Адресс: "
+                    text: "Home"
                     font.pixelSize: 24
                     anchors.left: parent.left
                     anchors.leftMargin: 5
                     anchors.top: parent.top
-                }
-
-                Label {
-                    id: label2
-                    text: "Порт: "
-                    font.pixelSize: 24
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.top: label1.bottom
-                }
-
-                Label {
-                    id: label3
-                    text: "Кол-во устройств: "
-                    font.pixelSize: 24
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.top: label2.bottom
-                }
-                Label {
-                    id: devices
-                    text: "(<font color='green'>0</font>/<font color='red'>0</font>)"
-                    font.pixelSize: 24
-
-                    anchors.left: label3.right
-                    anchors.leftMargin: 5
-                    anchors.top: label2.bottom
-                }
-
-                Button {
-                    id: btn
-                    anchors.top: devices.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.topMargin: 15
-                    font.pixelSize: 24
-                    text: "Подключиться"
-
-                    onClicked: {
-                        if(connection_attempt)
-                        {
-                            backend_server.disconnectFromHost()
-                        }
-                        else if(!status)
-                        {
-                            backend_server.addr = addr.text
-                            backend_server.port = port.text
-                            backend_server.connectToHost()
-                            btn.text = "Подключение..."
-                            connection_attempt = true;
-                            addr.readOnly = true
-                            port.readOnly = true
-
-                            addr.color = "gainsboro"
-                            port.color = "gainsboro"
-                        }
-                        else
-                        {
-                            backend_server.disconnectFromHost()
-                        }
-                    }
                 }
             }
         }
 
         Server_Page{
             id: server
-
+            property string name: "Server"
         }
 
         Page {
