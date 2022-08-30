@@ -1,14 +1,18 @@
 #pragma once
 
-#include <QObject>
+#include "client.h"
 
-class Console_Interface : public QObject
+class Console_Interface
 {
-    Q_OBJECT
 public:
-    Console_Interface(QObject *parent = nullptr);
+    Console_Interface(Client &client);
 
-signals:
+    void exec();
 
+private:
+    Client &_client;
+
+    void printScreen() const;
+    void inputCommand();
 };
 

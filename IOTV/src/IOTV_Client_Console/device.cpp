@@ -4,6 +4,8 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
     : Base_Host{dev.id, parent}, _name{dev.name}, _state{false},
       _timerReadInterval{1000}, _timerStateInterval{1000}
 {
+    _timerRead.setParent(this);
+    _timerState.setParent(this);
     this->setDescription(dev.description);
 
     for (const auto &type : dev.readChannel)
@@ -12,8 +14,8 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
     for (const auto &type : dev.writeChannel)
         this->addWriteSubChannel({type});
 
-    connect(&_timerRead, &QTimer::timeout, this, &Device::signalQueryRead);
-    connect(&_timerState, &QTimer::timeout, this, &Device::signalQueryState);
+    connect(&_timerRead, &QTimer::timeout, this, &Device::signalQueryRead, Qt::QueuedConnection);
+    connect(&_timerState, &QTimer::timeout, this, &Device::signalQueryState, Qt::QueuedConnection);
 
     _timerRead.setInterval(_timerReadInterval);
     _timerState.setInterval(_timerStateInterval);
