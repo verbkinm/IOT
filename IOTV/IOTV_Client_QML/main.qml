@@ -1,5 +1,5 @@
-import QtQuick
-import QtQuick.Controls
+import QtQuick 2.9
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 ApplicationWindow {
@@ -14,6 +14,27 @@ ApplicationWindow {
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
 
+
+
+        Menu {
+            id: menu
+
+            MenuItem {
+                text: "New..."
+                onTriggered: document.reset()
+            }
+            MenuItem {
+                text: "Open..."
+                onTriggered: openDialog.open()
+            }
+            MenuItem {
+                text: "Save"
+                onTriggered: saveDialog.open()
+            }
+        }
+
+
+
     header: ToolBar {
         height: 50
         id: overlayHeader
@@ -22,12 +43,12 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("🏠")
                 onClicked: {
-                    drawer.close()
+                    drawer.visible = false
                     swipeView.setCurrentIndex(p1)
                 }
             }
             Label {
-                text: swipeView.itemAt(swipeView.currentIndex).name
+                text: swipeView.itemAt(swipeView.currentIndex).title
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
@@ -36,10 +57,7 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("⋮")
                 onClicked: {
-                    if (drawer.opened)
-                        drawer.close()
-                    else
-                        drawer.open()
+                    drawer.visible = !drawer.visible
                 }
             }
         }
@@ -76,8 +94,6 @@ ApplicationWindow {
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
-                    //                    border.color: "red"
-                    //                    border.width: 1
 
                     MouseArea{
                         anchors.fill: parent
@@ -96,95 +112,30 @@ ApplicationWindow {
             }
         }
 
-
         ListView {
             id: listView
             anchors.fill: parent
             model: listModel
             delegate: delegate
-
-            //            headerPositioning: ListView.OverlayHeader
-            //            header: Pane {
-            //                id: header
-            //                z: 2
-            //                width: parent.width
-
-            //                contentHeight: logo.height
-
-            //                Image {
-            //                    id: logo
-            //                    width: parent.width / 2
-            //                    anchors.centerIn: parent
-            //                    source: "images/qt-logo.png"
-            //                    fillMode: implicitWidth > width ? Image.PreserveAspectFit : Image.Pad
-            //                }
-
-            //                MenuSeparator {
-            //                    parent: header
-            //                    width: parent.width
-            //                    anchors.verticalCenter: parent.bottom
-            //                    visible: !listView.atYBeginning
-            //                }
-            //            }
         }
     }
 
     SwipeView {
         id: swipeView
         anchors.fill: parent
-        //        currentIndex: tabBar.currentIndex
 
-        Page {
-            width: 600
-            height: 400
+        Home {
             id: p1
-
-            property string name: "Home"
-
-            Flickable
-            {
-                anchors.topMargin: 15
-                anchors.fill: parent
-                contentHeight: childrenRect.height
-                Label {
-                    id: label1
-                    text: "Home"
-                    font.pixelSize: 24
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.top: parent.top
-                }
-            }
+            status: client.status
+            countDevice: client.countDevice
+            countDeviceOnline: client.countDeviceOnline
         }
 
-        Server_Page{
-            id: server
-            property string name: "Server"
-        }
-
-        Page {
-            width: 600
-            height: 400
-            id: p3
-
-            property string name: "Page 2"
-
-            Flickable
-            {
-                anchors.topMargin: 15
-                anchors.fill: parent
-                contentHeight: childrenRect.height
-                Label {
-                    text: "label2: "
-                    font.pixelSize: 24
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.top: parent.top
-                }
-
-            }
+        Client {
+            id: client
         }
     }
+
     PageIndicator {
          id: indicator
 

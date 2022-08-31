@@ -127,8 +127,7 @@ qint64 Client::writeData(const QByteArray &data)
 void Client::createDevice(const QByteArray &data, const QString &name)
 {
     _devices[name] = std::make_shared<Device>(*this, name, data.at(1), this);
-    IOTV_SC
-    IOTV_SH::response_WAY(*_devices[name], data);
+//    IOTV_SH::response_WAY(*_devices[name], data);
 
     const auto it = _alias.find(name);
     if(it != _alias.cend())

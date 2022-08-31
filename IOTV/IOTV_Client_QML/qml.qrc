@@ -1,8 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>Server_Page.qml</file>
+        <file>Client.qml</file>
         <file>main.qml</file>
         <file>LineEdit.qml</file>
         <file>qtquickcontrols2.conf</file>
+        <file>Home.qml</file>
     </qresource>
+    <qresource prefix="/pages"/>
 </RCC>

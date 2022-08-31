@@ -1,37 +1,24 @@
-import QtQuick
-import QtQuick.Controls
-//import io.qt.Backend_Server 1.0
-
+import QtQuick 2.9
+import QtQuick.Controls 2.5
+import io.qt.Backend_Client 1.0
 
 Page {
-    width: 600
-    height: 400
-
     property bool status: false
     property bool connection_attempt: false
 
-//    property alias back: backend_server
+    property int countDevice: 0
+    property int countDeviceOnline: 0
+
+    title: "Server"
+
+    property alias back: backend_client
 
     signal click()
     signal disconected()
 
-//    header:
-//        ToolBar {
-//            Label {
-//            anchors.centerIn: parent
-//            text: qsTr("Сервер: " + textHeader())
-//            font.pixelSize: Qt.application.font.pixelSize * 2
-
-//            function textHeader()
-//            {
-//                return (status ? "<font color='chartreuse'>подключен</font>" : "<font color='red'>отключен</font>")
-//            }
-//        }
-//    }
-
     Flickable
     {
-        id: flickable
+        id: flickable_server
         anchors.topMargin: 15
         anchors.fill: parent
         contentHeight: childrenRect.height
@@ -86,42 +73,42 @@ Page {
             text: "2022"
             //        inputMask: "99999"
         }
-        //        Backend_Server {
-//            id: backend_server
+        Backend_Client {
+            id: backend_client
 
-//            onSignalConnected: {
-//                connection_attempt = false
-//                status = true
-//                btn.text = "Отключиться"
-//                addr.readOnly = true
-//                port.readOnly = true
+            onSignalConnected: {
+                connection_attempt = false
+                status = true
+                btn.text = "Отключиться"
+                addr.readOnly = port.readOnly = true
+                autoConnect.enabled = true
 
-//                addr.color = "gainsboro"
-//                port.color = "gainsboro"
-//            }
-//            onSignalDisconnected: {
-//                connection_attempt = false
-//                status = false
-//                btn.text = "Подключиться"
-//                addr.readOnly = false
-//                port.readOnly = false
+                addr.color = port.color = "gainsboro"
+            }
+            onSignalDisconnected: {
+                connection_attempt = false
+                status = false
+                btn.text = "Подключиться"
+                addr.readOnly = port.readOnly = false
+                autoConnect.enabled = false
 
-//                addr.color = "white"
-//                port.color = "white"
+                addr.color = port.color = "white"
 
-//                devices.text = "(<font color='green'>0</font>/<font color='red'>0</font>)"
-//                disconected()
-//            }
-//            onAddrChanged: {
-//                addr.text = addr
-//            }
-//            onPortChanged: {
-//                port.text = port
-//            }
-//            onTotalDeviceChanged: {
-//                devices.text = "(<font color='green'>" + onlineDevice + "</font>/<font color='red'>" + (totalDevice - onlineDevice) + "</font>)"
-//            }
-//        }
+                disconected()
+            }
+            onAddrChanged: {
+                addr.text = addr
+            }
+            onPortChanged: {
+                port.text = port
+            }
+            onCountDeviceChanged: {
+                countDevice = backend_client.totalDevice
+            }
+            onOnlineDeviceChanged: {
+                countDeviceOnline = backend_client.onlineDevice
+            }
+        }
 
         Button {
             id: btn
@@ -138,29 +125,36 @@ Page {
             text: "Подключиться"
             anchors.top: autoConnect.bottom
 
-            //            onClicked: {
-            //                if(connection_attempt)
-//                {
-//                    backend_server.disconnectFromHost()
-//                }
-//                else if(!status)
-//                {
-//                    backend_server.addr = addr.text
-//                    backend_server.port = port.text
-//                    backend_server.connectToHost()
-//                    btn.text = "Подключение..."
-//                    connection_attempt = true;
-//                    addr.readOnly = true
-//                    port.readOnly = true
+            onClicked: {
+                if(connection_attempt)
+                {
+                    backend_client.disconnectFromHost()
+                    btn.text = "Подключиться"
+                    connection_attempt = false;
+                    addr.readOnly = false
+                    port.readOnly = false
+                    autoConnect.enabled = true
 
-//                    addr.color = "gainsboro"
-//                    port.color = "gainsboro"
-//                }
-//                else
-            //                {
-            //                    backend_server.disconnectFromHost()
-            //                }
-            //            }
+                    addr.color = "white"
+                    port.color = "white"
+                }
+                else if(!status)
+                {
+                    backend_client.addr = addr.text
+                    backend_client.port = port.text
+                    backend_client.connectToHost()
+                    btn.text = "Подключение..."
+                    connection_attempt = true;
+                    addr.readOnly = true
+                    port.readOnly = true
+                    autoConnect.enabled = false
+
+                    addr.color = "gainsboro"
+                    port.color = "gainsboro"
+                }
+                else
+                    backend_client.disconnectFromHost()
+            }
         }
 
         CheckBox {
