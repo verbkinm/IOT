@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.3
 
 ApplicationWindow {
 
@@ -13,27 +14,6 @@ ApplicationWindow {
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
-
-
-
-        Menu {
-            id: menu
-
-            MenuItem {
-                text: "New..."
-                onTriggered: document.reset()
-            }
-            MenuItem {
-                text: "Open..."
-                onTriggered: openDialog.open()
-            }
-            MenuItem {
-                text: "Save"
-                onTriggered: saveDialog.open()
-            }
-        }
-
-
 
     header: ToolBar {
         height: 50
@@ -129,6 +109,12 @@ ApplicationWindow {
             status: client.status
             countDevice: client.countDevice
             countDeviceOnline: client.countDeviceOnline
+
+            onMySignal: {
+//                var component = Qt.createComponent("Home.qml");
+//                if (component.status === Component.Ready)
+//                    component.createObject(swipeView);
+            }
         }
 
         Client {
@@ -137,13 +123,13 @@ ApplicationWindow {
     }
 
     PageIndicator {
-         id: indicator
+        id: indicator
 
-         count: swipeView.count
-         currentIndex: swipeView.currentIndex
+        count: swipeView.count
+        currentIndex: swipeView.currentIndex
 
-         anchors.bottom: swipeView.bottom
-         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: swipeView.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 }
 

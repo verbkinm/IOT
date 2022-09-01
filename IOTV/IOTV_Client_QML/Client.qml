@@ -3,6 +3,8 @@ import QtQuick.Controls 2.5
 import io.qt.Backend_Client 1.0
 
 Page {
+    id: root
+
     property bool status: false
     property bool connection_attempt: false
 
@@ -76,6 +78,8 @@ Page {
         Backend_Client {
             id: backend_client
 
+            Component.onCompleted: console.log(this)
+
             onSignalConnected: {
                 connection_attempt = false
                 status = true
@@ -94,6 +98,12 @@ Page {
 
                 addr.color = port.color = "white"
 
+                var childs = row.children
+                for (var i = 0; i < childs.length; ++i)
+                {
+                    childs[i].destroy()
+                }
+
                 disconected()
             }
             onAddrChanged: {
@@ -103,8 +113,26 @@ Page {
                 port.text = port
             }
             onCountDeviceChanged: {
+                console.log("onCountDeviceChanged")
                 countDevice = backend_client.totalDevice
+                console.log(countDevice)
+                for (var i = 0; i < countDevice; ++i)
+                {
+                    var object = backend_client.devList()[i]
+                    var component = Qt.createComponent("qrc:/Devices/Device_Icon.qml");
+
+                    if (component.status === Component.Ready)
+                    {
+                        var newObject = component.createObject(row, {device: object});
+                        console.log("created: " + newObject +
+                                    " " + newObject.device +
+                                    " " + newObject.device.getName() + " id: " + newObject.device.id())
+                    }
+                    else
+                        console.log("not created: " + component + ". status: " + component.status + "id: " + object.id())
+                }
             }
+
             onOnlineDeviceChanged: {
                 countDeviceOnline = backend_client.onlineDevice
             }
@@ -121,7 +149,6 @@ Page {
             display: AbstractButton.TextBesideIcon
             highlighted: false
             flat: false
-            topPadding: 12
             text: "Подключиться"
             anchors.top: autoConnect.bottom
 
@@ -154,6 +181,8 @@ Page {
                 }
                 else
                     backend_client.disconnectFromHost()
+
+//                popup.open()
             }
         }
 
@@ -173,11 +202,20 @@ Page {
             autoExclusive: false
             checked: false
         }
+        Row {
+            id: row
+            anchors.top: btn.bottom
+            anchors.left: parent.left
+            spacing: 10
+        }
     }
+//    Popup {
+//        id: popup
+//        anchors.centerIn: parent
+//        width: 200
+//        height: 300
+//        modal: true
+//        focus: true
+//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+//    }
 }
-
-/*##^##
-Designer {
-    D{i:0;formeditorZoom:0.9}D{i:2}D{i:3}D{i:4}D{i:5}D{i:6}D{i:7}D{i:1}
-}
-##^##*/

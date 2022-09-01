@@ -9,12 +9,15 @@ class Device : public Base_Host
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool state READ isOnline NOTIFY stateChanged)
+
 public:
     Device() = default;
     Device(const IOTV_SC::DEV_PKG &dev, QObject *parent = nullptr);
     void update(const IOTV_SC::DEV_PKG &pkg);
 
-    virtual QString getName() const override;
+    Q_INVOKABLE virtual QString getName() const override;
+    Q_INVOKABLE int id();
 
     virtual bool isOnline() const override;
     void setState(bool newState);
@@ -32,9 +35,11 @@ private:
     QTimer _timerRead, _timerState;
     uint _timerReadInterval, _timerStateInterval;
 
+
 signals:
     void signalQueryRead();
     void signalQueryState();
     void signalDataChanged(uint8_t channelNumber, QByteArray data);
+    void stateChanged();
 };
 

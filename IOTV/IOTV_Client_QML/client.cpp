@@ -12,6 +12,8 @@ Client::Client(QObject *parent): QObject{parent},
     connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData, Qt::QueuedConnection);
 
     connect(&_timerDevList, &QTimer::timeout, this, &Client::slotQueryDevList, Qt::QueuedConnection);
+
+    qDebug() << this;
 }
 
 Client::~Client()
@@ -116,6 +118,7 @@ void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
         if (result.second)
         {
             result.first->second.setParent(this); //
+            qDebug() << &result.first->second;
             connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
             connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
         }
@@ -217,6 +220,16 @@ void Client::slotDisconnected()
     emit countDeviceChanged();
     emit onlineDeviceChanged();
     emit signalDisconnected();
+}
+
+QList<QObject *> Client::devList()
+{
+    QList<QObject *> list;
+
+    for(auto &[key, val] : _devices)
+        list << &val;
+
+    return list;
 }
 
 void Client::slotReciveData()

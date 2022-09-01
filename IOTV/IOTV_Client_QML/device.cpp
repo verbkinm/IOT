@@ -43,14 +43,14 @@ QString Device::getName() const
     return _name;
 }
 
+int Device::id()
+{
+    return getId();
+}
+
 bool Device::isOnline() const
 {
     return _state;
-}
-
-void Device::setState(bool newState)
-{
-    _state = newState;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
@@ -62,6 +62,15 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 void Device::setReadInterval(int interval)
 {
     _timerRead.setInterval(interval);
+}
+
+void Device::setState(bool newState)
+{
+    if (_state == newState)
+        return;
+
+    _state = newState;
+    emit stateChanged();
 }
 
 bool operator==(const Device &lhs, const Device &rhs)

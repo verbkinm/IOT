@@ -38,6 +38,8 @@ public:
 
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
+    Q_INVOKABLE QList<QObject*> devList();
+
 private:
     QTcpSocket _socket;
     QByteArray _recivedBuff;
