@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
 
     QQmlApplicationEngine engine;
+    Client client;
+    engine.rootContext()->setContextProperty("client", &client);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -20,8 +23,7 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
-    Client client;
-    engine.rootContext()->setContextProperty("client", &client);
+
 
     return app.exec();
 }

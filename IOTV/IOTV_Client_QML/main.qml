@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
+import Qt.labs.platform 1.1
 
 ApplicationWindow {
 
@@ -118,5 +119,32 @@ ApplicationWindow {
             visible: false
         }
     }
+
+//    Popup {
+//        id: popup
+//        anchors.centerIn: parent
+//        //            x: 100
+//        //            y: 100
+////        width: 200
+////        height: 300
+//        modal: true
+//        focus: true
+//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent | Popup.CloseOnPressOutsideParent
+//        opacity: 0.0
+
+////        MouseArea {
+////            width: 200
+////            height: 200
+////            onClicked: popup.close()
+////        }
+
+//        Text { text: "popup"}
+//        BusyIndicator {
+//            id: indicator
+//            antialiasing: true
+//            anchors.centerIn: parent
+//        }
+//    }
+//    Component.onCompleted: {popup.open()}
 }
 

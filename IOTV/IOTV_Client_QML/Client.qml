@@ -1,11 +1,11 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.2
 //import io.qt.Backend_Client 1.0
 
 Page {
     id: root
     title: "Server"
-    anchors.fill: parent
+//    anchors.fill: parent
 
     property bool connection_attempt: false
 
@@ -33,6 +33,7 @@ Page {
             anchors.left: label1.right
             anchors.right: parent.right
             anchors.margins: 5
+            enabled: !indicator.visible
             text: client.addr
 
             onTextChanged: client.addr = text
@@ -57,6 +58,7 @@ Page {
             width: addr.width
             height: 30;
             anchors.top: addr.bottom
+            enabled: !indicator.visible
             anchors.right: parent.right
             anchors.leftMargin: 5
             anchors.rightMargin: 5
@@ -66,27 +68,10 @@ Page {
             onTextChanged: client.port = text
         }
 
-        Connections {
-            target: client
-            function onSignalConnected() {
-                connection_attempt = false
-                btn.text = "Отключиться"
-                addr.readOnly = port.readOnly = true
-                autoConnect.enabled = false
-                addr.color = port.color = "gainsboro"
-            }
-            function onSignalDisconnected() {
-                connection_attempt = false
-                btn.text = "Подключиться"
-                addr.readOnly = port.readOnly = false
-                autoConnect.enabled = true
-                addr.color = port.color = "white"
-            }
-        }
-
         Button {
             id: btn
             font.pixelSize: 18
+            enabled: !indicator.visible
             anchors.horizontalCenterOffset: 0
             anchors.horizontalCenter: parent.horizontalCenter
             hoverEnabled: true
@@ -111,8 +96,6 @@ Page {
                 }
                 else if(!client.state)
                 {
-                    //                    client.addr = addr.text
-                    //                    client.port = port.text
                     client.connectToHost()
                     btn.text = "Подключение..."
                     connection_attempt = true;
@@ -133,6 +116,7 @@ Page {
             anchors.left: parent.left
             anchors.top: label2.bottom
             font.pixelSize: 18
+            enabled: !indicator.visible
             anchors.leftMargin: 10
             layer.smooth: false
             anchors.topMargin: 5
@@ -149,11 +133,57 @@ Page {
     }
 
     Rectangle {
+        id: recIndicator
         anchors.fill: parent
+        layer.enabled: false
+        antialiasing: true
         color: "#aacccccc"
         focus: true
+        visible: connection_attempt
         BusyIndicator {
+            id: indicator
+            antialiasing: true
             anchors.centerIn: parent
         }
     }
+
+
+    Connections {
+        target: client
+        function onSignalConnected() {
+            connection_attempt = false
+            btn.text = "Отключиться"
+            addr.readOnly = port.readOnly = true
+            autoConnect.enabled = false
+            addr.color = port.color = "gainsboro"
+            recIndicator.visible = false
+
+        }
+        function onSignalDisconnected() {
+            connection_attempt = false
+            btn.text = "Подключиться"
+            addr.readOnly = port.readOnly = false
+            autoConnect.enabled = true
+            addr.color = port.color = "white"
+        }
+        function onSignalConnectWait() {
+            btn.text = "Подключиться"
+            connection_attempt = false;
+            addr.readOnly = port.readOnly = false
+            autoConnect.enabled = true
+
+            addr.color = port.color = "white"
+        }
+    }
+
+    Component.onCompleted: {
+        connection_attempt = client.autoConnect
+    }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}D{i:2}D{i:3}D{i:4}D{i:5}D{i:6}D{i:7}D{i:8}
+D{i:1}D{i:10}D{i:9}
+}
+##^##*/

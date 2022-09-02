@@ -108,4 +108,5 @@ signals:
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
+    void signalConnectWait();
 };
