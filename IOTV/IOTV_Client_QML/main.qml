@@ -24,11 +24,11 @@ ApplicationWindow {
                 text: qsTr("🏠")
                 onClicked: {
                     drawer.visible = false
-                    swipeView.setCurrentIndex(p1)
+                    stackView.pop(homePage)
                 }
             }
             Label {
-                text: swipeView.itemAt(swipeView.currentIndex).title
+                text: stackView.currentItem.title
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
@@ -84,7 +84,11 @@ ApplicationWindow {
                             font.pointSize: 12
                         }
                         onClicked: {
-                            swipeView.setCurrentIndex(index)
+                            if (index === 0)
+                                stackView.pop(homePage)
+                            else if (index === 1 && stackView.currentItem != clientPage)
+                                stackView.push(clientPage)
+
                             drawer.visible = 0
                         }
                     }
@@ -100,36 +104,19 @@ ApplicationWindow {
         }
     }
 
-    SwipeView {
-        id: swipeView
+    StackView {
+        id: stackView
         anchors.fill: parent
+        initialItem: homePage
 
         Home {
-            id: p1
-            status: client.status
-            countDevice: client.countDevice
-            countDeviceOnline: client.countDeviceOnline
-
-            onMySignal: {
-//                var component = Qt.createComponent("Home.qml");
-//                if (component.status === Component.Ready)
-//                    component.createObject(swipeView);
-            }
+            id: homePage
         }
 
         Client {
-            id: client
+            id: clientPage
+            visible: false
         }
-    }
-
-    PageIndicator {
-        id: indicator
-
-        count: swipeView.count
-        currentIndex: swipeView.currentIndex
-
-        anchors.bottom: swipeView.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
     }
 }
 

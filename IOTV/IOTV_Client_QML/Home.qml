@@ -1,97 +1,101 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import QtQuick.Dialogs 1.3
-import QtQuick.Extras 1.4
-
 
 Page {
     id: root
-    property bool status: false
-
-    property int countDevice: 0
-    property int countDeviceOnline: 0
-
     title: "Home"
+    anchors.fill: parent
 
-    signal mySignal()
+    footer: Item {
+        height: 20
+        width: parent.width
+        id: footerItem
 
-//    CircularGauge {
-//        maximumValue: 50
-//        minimumValue: -50
-//        value: accelerating ? maximumValue : minimumValue
-//        anchors.centerIn: parent
+        Text {
+            anchors.left: parent.left
+            anchors.margins: 5
+            font.pixelSize: 12
+            text: "Состояние: " + (client.state ? "подключено" : "отключено") +
+                  ", кол-во устройств: (" + client.onlineDevice + "/" + client.totalDevice + ")"
+        }
+    }
+    Connections {
+        target: client
+        function onCountDeviceChanged()
+        {
+            for( var i = 0; i < target.totalDevice; i++)
+            {
+                var device = target.devList()[i];
+                var object = {
+                    name: device.getName(),
+                    source: imageById(device.id())
+                }
+                listModel.append(object)
+            }
+        }
+        function onSignalDisconnected() {listModel.clear()}
+    }
 
-//        property bool accelerating: false
-
-//        Keys.onSpacePressed: accelerating = true
-//        Keys.onReleased: {
-//            if (event.key === Qt.Key_Space) {
-//                accelerating = false;
-//                event.accepted = true;
-//            }
-//        }
-
-//        Component.onCompleted: forceActiveFocus()
-
-//        Behavior on value {
-//            NumberAnimation {
-//                duration: 1000
-//            }
-//        }
-//    }
-
-    Flickable
-    {
-        id: flickable_home
+    GridView {
         anchors.fill: parent
-        contentHeight: childrenRect.height
+        anchors.margins: 5
+        cellHeight: 110
+        cellWidth: 110
 
-//        ScrollBar.vertical: ScrollBar { }
+        model: listModel
+        delegate: contactDelegate
+    }
 
+    Component {
+        id: contactDelegate
+        Rectangle {
+            id: componentRect
+            width: 100
+            height: 100
+            color: "lightsteelblue"
+            border.width: 2
+            border.color: "red"
+            radius: 5
+            smooth: true
 
+            Column {
+                anchors.fill: parent
+                Text {
+                    text: name;
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+                Image
+                {
+                    source: model.source
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
 
-
-//        MessageDialog {
-//            id: messageDialog
-//            title: "May I have your attention please"
-//            text: "It's so cool that you are using Qt Quick."
-//            onAccepted: {
-//                console.log("And of course you could only agree.")
-//            }
-//            Component.onCompleted: visible = true
-//        }
-
-
-        Label {
-            id: label1
-            text: "Состояние: " + (status ? "подключён" : "отключён")
-            font.pixelSize: 12
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.topMargin: 10
-            anchors.top: parent.top
+                Connections {
+                    target: client.deviceByName(name)
+                    function onStateChanged() {
+                        componentRect.border.color = target.state ? "green" : "red"
+                    }
+                    function onSignalUpdate() {
+                        model.source = imageById(target.id())
+                    }
+                }
+            }
         }
+    }
 
-        Label {
-            text: "Количество устройств: (" + countDeviceOnline + "/" + countDevice + ")"
-            font.pixelSize: 12
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.topMargin: 10
-            anchors.top: label1.bottom
-        }
-//        ToggleButton {
-//            anchors.centerIn: parent
-//            Component.onCompleted: clicked()
-//            onClicked: {
-//                if (checked)
-//                {
-//                    text = "on"
-//                    root.mySignal()
-//                }
-//                else
-//                    text = "off"
-//            }
-//        }
+    ListModel {
+        id: listModel
+    }
+
+    function imageById(id)
+    {
+        if (id === 1)
+            return "qrc:/img/led_on.png"
+        else if (id === 2)
+            return "qrc:/img/led_off.png"
+        else if (id === 3)
+            return "qrc:/img/info.png"
+        else
+            return "qrc:/img/Unknow.png"
     }
 }

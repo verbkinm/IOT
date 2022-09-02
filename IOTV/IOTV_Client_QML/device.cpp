@@ -36,6 +36,8 @@ void Device::update(const IOTV_SC::DEV_PKG &pkg)
 
     for (const auto &type : pkg.writeChannel)
         this->addWriteSubChannel({type});
+
+    emit signalUpdate();
 }
 
 QString Device::getName() const

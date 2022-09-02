@@ -5,7 +5,8 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QTimer>
-#include <set>
+#include <QSettings>
+#include <QFileInfo>
 
 #include "log.h"
 #include "IOTV_SC.h"
@@ -19,6 +20,8 @@ class Client : public QObject
     Q_PROPERTY(quint16 port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(quint16 totalDevice READ countDevices NOTIFY countDeviceChanged)
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
+    Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
+    Q_PROPERTY(bool autoConnect READ autoConnect WRITE setAutoConnect NOTIFY autoConnectChanged)
 
 public:
     Client(QObject *parent = nullptr);
@@ -28,10 +31,9 @@ public:
 
     const QString &address() const;
     quint16 port() const;
-    QAbstractSocket::SocketState connectionState() const;
+
     int countDevices() const;
     int countDeviceOnline() const;
-    std::set<QString> deviceList() const;
 
     void setAddress(const QString &address);
     void setPort(quint64 port);
@@ -39,6 +41,12 @@ public:
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
     Q_INVOKABLE QList<QObject*> devList();
+    Q_INVOKABLE QObject *deviceByName(QString name);
+
+    bool stateConnection() const;
+
+    bool autoConnect() const;
+    void setAutoConnect(bool newAutoConnect);
 
 private:
     QTcpSocket _socket;
@@ -46,11 +54,17 @@ private:
 
     QTimer _timerDevList;
     QTimer _reconnectTimer;
+    QTimer _connectWait;
 
     QString _address;
     quint16 _port;
 
+    bool _stateConnection;
+    bool _autoConnect;
+
     std::unordered_map<QString, Device> _devices;
+
+    QSettings _settingClient;
 
     void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
     void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
@@ -58,6 +72,13 @@ private:
     void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const;
 
     void write(const QByteArray &data);
+
+    void setStateConnection(bool newStateConnection);
+
+    void checkSettingsFileExist();
+    void readSettings();
+    void saveSettings();
+
 
 public slots:
     void connectToHost();
@@ -74,6 +95,7 @@ private slots:
     void slotQueryDevList();
 
     void slotError(QAbstractSocket::SocketError error);
+    void slotConnectWait();
 
 signals:
     void signalConnected();
@@ -84,4 +106,6 @@ signals:
 
     void countDeviceChanged();
     void onlineDeviceChanged();
+    void stateConnectionChanged();
+    void autoConnectChanged();
 };

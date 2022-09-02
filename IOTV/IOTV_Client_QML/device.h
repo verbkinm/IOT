@@ -41,5 +41,6 @@ signals:
     void signalQueryState();
     void signalDataChanged(uint8_t channelNumber, QByteArray data);
     void stateChanged();
+    void signalUpdate();
 };
 

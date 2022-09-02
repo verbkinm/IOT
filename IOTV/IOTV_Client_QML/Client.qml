@@ -1,29 +1,18 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import io.qt.Backend_Client 1.0
+//import io.qt.Backend_Client 1.0
 
 Page {
     id: root
+    title: "Server"
+    anchors.fill: parent
 
-    property bool status: false
     property bool connection_attempt: false
 
-    property int countDevice: 0
-    property int countDeviceOnline: 0
-
-    title: "Server"
-
-    property alias back: backend_client
-
-    signal click()
-    signal disconected()
-
-    Flickable
-    {
-        id: flickable_server
-        anchors.topMargin: 15
+    Item {
         anchors.fill: parent
-        contentHeight: childrenRect.height
+        anchors.centerIn: parent.verticalCenter
+
         Label {
             id: label1
             width: 89
@@ -43,10 +32,10 @@ Page {
             anchors.top: parent.top
             anchors.left: label1.right
             anchors.right: parent.right
-            anchors.leftMargin: 5
-            anchors.rightMargin: 5
-            text: "127.0.0.1"
-            //        inputMask: "009.009.009.009"
+            anchors.margins: 5
+            text: client.addr
+
+            onTextChanged: client.addr = text
         }
 
         Label {
@@ -72,69 +61,26 @@ Page {
             anchors.leftMargin: 5
             anchors.rightMargin: 5
             anchors.topMargin: 5
-            text: "2022"
-            //        inputMask: "99999"
+            text: client.port
+
+            onTextChanged: client.port = text
         }
-        Backend_Client {
-            id: backend_client
 
-            Component.onCompleted: console.log(this)
-
-            onSignalConnected: {
+        Connections {
+            target: client
+            function onSignalConnected() {
                 connection_attempt = false
-                status = true
                 btn.text = "Отключиться"
                 addr.readOnly = port.readOnly = true
-                autoConnect.enabled = true
-
+                autoConnect.enabled = false
                 addr.color = port.color = "gainsboro"
             }
-            onSignalDisconnected: {
+            function onSignalDisconnected() {
                 connection_attempt = false
-                status = false
                 btn.text = "Подключиться"
                 addr.readOnly = port.readOnly = false
-                autoConnect.enabled = false
-
+                autoConnect.enabled = true
                 addr.color = port.color = "white"
-
-                var childs = row.children
-                for (var i = 0; i < childs.length; ++i)
-                {
-                    childs[i].destroy()
-                }
-
-                disconected()
-            }
-            onAddrChanged: {
-                addr.text = addr
-            }
-            onPortChanged: {
-                port.text = port
-            }
-            onCountDeviceChanged: {
-                console.log("onCountDeviceChanged")
-                countDevice = backend_client.totalDevice
-                console.log(countDevice)
-                for (var i = 0; i < countDevice; ++i)
-                {
-                    var object = backend_client.devList()[i]
-                    var component = Qt.createComponent("qrc:/Devices/Device_Icon.qml");
-
-                    if (component.status === Component.Ready)
-                    {
-                        var newObject = component.createObject(row, {device: object});
-                        console.log("created: " + newObject +
-                                    " " + newObject.device +
-                                    " " + newObject.device.getName() + " id: " + newObject.device.id())
-                    }
-                    else
-                        console.log("not created: " + component + ". status: " + component.status + "id: " + object.id())
-                }
-            }
-
-            onOnlineDeviceChanged: {
-                countDeviceOnline = backend_client.onlineDevice
             }
         }
 
@@ -155,34 +101,28 @@ Page {
             onClicked: {
                 if(connection_attempt)
                 {
-                    backend_client.disconnectFromHost()
+                    client.disconnectFromHost()
                     btn.text = "Подключиться"
                     connection_attempt = false;
-                    addr.readOnly = false
-                    port.readOnly = false
+                    addr.readOnly = port.readOnly = false
                     autoConnect.enabled = true
 
-                    addr.color = "white"
-                    port.color = "white"
+                    addr.color = port.color = "white"
                 }
-                else if(!status)
+                else if(!client.state)
                 {
-                    backend_client.addr = addr.text
-                    backend_client.port = port.text
-                    backend_client.connectToHost()
+                    //                    client.addr = addr.text
+                    //                    client.port = port.text
+                    client.connectToHost()
                     btn.text = "Подключение..."
                     connection_attempt = true;
-                    addr.readOnly = true
-                    port.readOnly = true
+                    addr.readOnly = port.readOnly = true
                     autoConnect.enabled = false
 
-                    addr.color = "gainsboro"
-                    port.color = "gainsboro"
+                    addr.color = port.color = "gainsboro"
                 }
                 else
-                    backend_client.disconnectFromHost()
-
-//                popup.open()
+                    client.disconnectFromHost()
             }
         }
 
@@ -193,29 +133,27 @@ Page {
             anchors.left: parent.left
             anchors.top: label2.bottom
             font.pixelSize: 18
-            anchors.leftMargin: 2
+            anchors.leftMargin: 10
             layer.smooth: false
             anchors.topMargin: 5
             font.hintingPreference: Font.PreferFullHinting
             display: AbstractButton.TextOnly
             autoRepeat: false
             autoExclusive: false
-            checked: false
-        }
-        Row {
-            id: row
-            anchors.top: btn.bottom
-            anchors.left: parent.left
-            spacing: 10
+            checked: client.autoConnect
+
+            onClicked: {
+                client.autoConnect = checked
+            }
         }
     }
-//    Popup {
-//        id: popup
-//        anchors.centerIn: parent
-//        width: 200
-//        height: 300
-//        modal: true
-//        focus: true
-//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-//    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#aacccccc"
+        focus: true
+        BusyIndicator {
+            anchors.centerIn: parent
+        }
+    }
 }

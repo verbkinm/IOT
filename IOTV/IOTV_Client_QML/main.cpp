@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 
 #include "client.h"
 
@@ -7,7 +8,7 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<Client>("io.qt.Backend_Client", 1, 0, "Backend_Client");
+//    qmlRegisterType<Client>("io.qt.Backend_Client", 1, 0, "Backend_Client");
     qmlRegisterType<Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
 
     QQmlApplicationEngine engine;
@@ -18,6 +19,9 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
+
+    Client client;
+    engine.rootContext()->setContextProperty("client", &client);
 
     return app.exec();
 }
