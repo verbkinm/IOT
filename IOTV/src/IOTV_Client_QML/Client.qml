@@ -145,7 +145,6 @@ Page {
             connection_attempt = false
         }
         function onSignalConnectWait() {
-            console.log("wait")
             connection_attempt = false;
         }
     }

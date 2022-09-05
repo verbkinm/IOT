@@ -5,7 +5,7 @@ Page {
     id: root
 
     //Ссылка на Device
-    property var device: nullptr
+    required property var device
 
     Column {
         id: column
@@ -31,13 +31,6 @@ Page {
             id:wN
         }
     }
-
-//    Connections: {
-//        target: device
-//        function onUpdate() {
-
-//        }
-//    }
 
     Component.onCompleted: {
         title  = Qt.binding(function (){ return device.name})

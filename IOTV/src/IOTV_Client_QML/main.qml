@@ -4,8 +4,6 @@ import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import Qt.labs.platform 1.1
 
-import "./Devices"
-
 ApplicationWindow {
 
     id: window
@@ -19,8 +17,6 @@ ApplicationWindow {
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
-
-    property bool pressBack: false
 
     header: ToolBar {
         height: 50
@@ -152,7 +148,7 @@ ApplicationWindow {
         Client {
             id: clientPage
             visible: false
-        }
+        }        
     }
 
     Popup {

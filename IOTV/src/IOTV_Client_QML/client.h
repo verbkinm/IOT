@@ -80,7 +80,6 @@ private:
     void readSettings();
     void saveSettings();
 
-
 public slots:
     void connectToHost();
     void disconnectFromHost();
