@@ -11,6 +11,8 @@ ApplicationWindow {
     height: 520
     visible: true
     title: qsTr("IOTV Client")
+    minimumWidth: 360
+    minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
@@ -120,31 +122,20 @@ ApplicationWindow {
         }
     }
 
-//    Popup {
-//        id: popup
-//        anchors.centerIn: parent
-//        //            x: 100
-//        //            y: 100
-////        width: 200
-////        height: 300
-//        modal: true
-//        focus: true
-//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent | Popup.CloseOnPressOutsideParent
-//        opacity: 0.0
+    Popup {
+        id: popupWait
+        anchors.centerIn: parent
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        opacity: 0.0
+        visible: clientPage.connection_attempt
 
-////        MouseArea {
-////            width: 200
-////            height: 200
-////            onClicked: popup.close()
-////        }
-
-//        Text { text: "popup"}
-//        BusyIndicator {
-//            id: indicator
-//            antialiasing: true
-//            anchors.centerIn: parent
-//        }
-//    }
-//    Component.onCompleted: {popup.open()}
+        BusyIndicator {
+            id: indicator
+            antialiasing: true
+            anchors.centerIn: parent
+        }
+    }
 }
 

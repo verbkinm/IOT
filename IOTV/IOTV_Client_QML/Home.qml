@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
+import QtQuick.Layouts 1.3
 
 Page {
     id: root
@@ -36,19 +37,58 @@ Page {
         function onSignalDisconnected() {listModel.clear()}
     }
 
+    Rectangle {
+        id:re
+        anchors{
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+
+        //    width: 300
+        anchors.leftMargin: 30
+        anchors.rightMargin: 30
+        border.color: "red"
+        border.width: 1
+    }
     GridView {
-        anchors.fill: parent
-        anchors.margins: 5
-        cellHeight: 110
-        cellWidth: 110
-//        anchors.horizontalCenter: parent.Center
+        id: gridView
+        //        anchors.fill: parent
+        anchors{
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
 
         model: listModel
         delegate: contactDelegate
     }
 
+    onWidthChanged: {
+        console.log("gridView width = " + gridView.width)
+        console.log("gridView parent width = " + gridView.parent.width)
+        console.log("re width = " + re.width)
+//        console.log("gridView childrenRect width = " + gridView.)
+    }
+
+    Component.onCompleted: {
+        console.log("gridView width = " + gridView.width)
+        console.log("gridView parent width = " + gridView.parent.width)
+        console.log("re width = " + re.width)
+        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
+    }
+
+
+
     ListModel {
         id: listModel
+
+        ListElement {}
+        ListElement {}
+        ListElement {}
+        ListElement {}
     }
 
     Component {
@@ -58,7 +98,7 @@ Page {
             width: 100
             height: 100
             color: "lightsteelblue"
-            border.width: 2
+            border.width: 0
             border.color: "red"
             radius: 5
             smooth: true
@@ -73,6 +113,9 @@ Page {
                 {
                     source: model.source
                     anchors.horizontalCenter: parent.horizontalCenter
+                    width: 64
+                    height: 64
+                    //                    fillMode: Image.PreserveAspectFit
                 }
 
                 Connections {
@@ -88,14 +131,12 @@ Page {
         }
     }
 
-
-
     function imageById(id)
     {
         if (id === 1)
-            return "qrc:/img/led_on.png"
+            return "qrc:/img/id/1.png"
         else if (id === 2)
-            return "qrc:/img/led_off.png"
+            return "qrc:/img/id/2.png"
         else if (id === 3)
             return "qrc:/img/info.png"
         else

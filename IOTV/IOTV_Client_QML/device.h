@@ -35,7 +35,6 @@ private:
     QTimer _timerRead, _timerState;
     uint _timerReadInterval, _timerStateInterval;
 
-
 signals:
     void signalQueryRead();
     void signalQueryState();

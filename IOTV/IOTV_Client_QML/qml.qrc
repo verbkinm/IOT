@@ -14,6 +14,8 @@
         <file>img/led_on.png</file>
         <file>img/Unknow.png</file>
         <file>Info.qml</file>
+        <file>img/id/2.png</file>
+        <file>img/id/1.png</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>
