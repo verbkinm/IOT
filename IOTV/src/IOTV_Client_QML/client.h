@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QSettings>
 #include <QFileInfo>
+#include <QEvent>
 
 #include "log.h"
 #include "IOTV_SC.h"

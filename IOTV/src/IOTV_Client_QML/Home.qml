@@ -5,9 +5,8 @@ import QtQuick.Layouts 1.3
 Page {
     id: root
     title: "Home"
-//    anchors.fill: parent
 
-    signal openDevice(string name)
+    signal signalOpenDevice(string name)
 
     footer: Item {
         height: 20
@@ -39,22 +38,23 @@ Page {
         function onSignalDisconnected() {listModel.clear()}
     }
 
-    Rectangle {
-        id:re
-        anchors{
-            left: parent.left
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-        }
+//    Rectangle {
+//        id:re
+//        anchors{
+//            left: parent.left
+//            right: parent.right
+//            top: parent.top
+//            bottom: parent.bottom
+//        }
 
-        //    width: 300
-        anchors.leftMargin: 30
-        anchors.rightMargin: 30
-        border.color: "red"
-        border.width: 1
-    }
+//        //    width: 300
+//        anchors.leftMargin: 30
+//        anchors.rightMargin: 30
+//        border.color: "red"
+//        border.width: 1
+//    }
     GridView {
+        id: gridView
         anchors.fill: parent
         anchors.margins: 5
         cellHeight: 110
@@ -64,29 +64,24 @@ Page {
         delegate: contactDelegate
     }
 
-    onWidthChanged: {
-        console.log("gridView width = " + gridView.width)
-        console.log("gridView parent width = " + gridView.parent.width)
-        console.log("re width = " + re.width)
-//        console.log("gridView childrenRect width = " + gridView.)
-    }
+//    onWidthChanged: {
+////        console.log("gridView width = " + gridView.width)
+////        console.log("gridView parent width = " + gridView.parent.width)
+////        console.log("re width = " + re.width)
+////        console.log("gridView childrenRect width = " + gridView.)
+//    }
 
-    Component.onCompleted: {
-        console.log("gridView width = " + gridView.width)
-        console.log("gridView parent width = " + gridView.parent.width)
-        console.log("re width = " + re.width)
-        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
-    }
+//    Component.onCompleted: {
+////        console.log("gridView width = " + gridView.width)
+////        console.log("gridView parent width = " + gridView.parent.width)
+////        console.log("re width = " + re.width)
+////        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
+//    }
 
 
 
     ListModel {
         id: listModel
-
-        ListElement {}
-        ListElement {}
-        ListElement {}
-        ListElement {}
     }
 
     Component {
@@ -96,7 +91,7 @@ Page {
             width: 100
             height: 100
             color: "lightsteelblue"
-            border.width: 0
+            border.width: 1
             border.color: "red"
             radius: 5
             smooth: true
@@ -104,7 +99,7 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    openDevice(name)
+                    signalOpenDevice(name)
                 }
             }
 
@@ -120,7 +115,6 @@ Page {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: 64
                     height: 64
-                    //                    fillMode: Image.PreserveAspectFit
                 }
 
                 Connections {
@@ -138,6 +132,7 @@ Page {
 
     function imageById(id)
     {
+        console.log("imageById" + id)
         if (id === 1)
             return "qrc:/img/id/1.png"
         else if (id === 2)

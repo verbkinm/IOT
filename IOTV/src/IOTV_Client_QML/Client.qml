@@ -4,10 +4,8 @@ import QtQuick.Controls 2.2
 Page {
     id: root
     title: "Настройки подключения"
-    anchors.fill: parent
 
     property bool connection_attempt: false
-
 
     Item {
         anchors.fill: parent
@@ -147,6 +145,7 @@ Page {
             connection_attempt = false
         }
         function onSignalConnectWait() {
+            console.log("wait")
             connection_attempt = false;
         }
     }

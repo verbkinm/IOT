@@ -9,6 +9,14 @@ class Device : public Base_Host
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool state READ isOnline NOTIFY stateChanged)
+    Q_PROPERTY(int id READ getId NOTIFY signalIdChanged)
+    Q_PROPERTY(QString name READ getName CONSTANT)
+    Q_PROPERTY(QString description READ getDescription CONSTANT)
+
+    Q_PROPERTY(int readChannelLength READ getReadChannelLength CONSTANT)
+    Q_PROPERTY(int writeChannelLength READ getWriteChannelLength CONSTANT)
+
 public:
     Device() = default;
     Device(const IOTV_SC::DEV_PKG &dev, QObject *parent = nullptr);
@@ -36,5 +44,9 @@ signals:
     void signalQueryRead();
     void signalQueryState();
     void signalDataChanged(uint8_t channelNumber, QByteArray data);
+    void stateChanged();
+    void signalUpdate();
+
+    void signalIdChanged();
 };
 

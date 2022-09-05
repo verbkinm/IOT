@@ -26,21 +26,6 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
 
 void Device::update(const IOTV_SC::DEV_PKG &pkg)
 {
-    if (getId() != pkg.id)
-    {
-        this->setId(pkg.id);
-        emit idChanged();
-    }
-
-    if (getDescription() != pkg.description)
-    {
-        this->setDescription(pkg.description);
-        emit descriptionChanged();
-    }
-
-    if (getName() != pkg.name)
-        emit nameChanged();
-
     this->removeAllSubChannel();
 
     for (const auto &type : pkg.readChannel)

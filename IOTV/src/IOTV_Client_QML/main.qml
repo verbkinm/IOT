@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 import Qt.labs.platform 1.1
 
+import "./Devices"
+
 ApplicationWindow {
 
     id: window
@@ -18,30 +20,47 @@ ApplicationWindow {
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
 
+    property bool pressBack: false
+
     header: ToolBar {
         height: 50
         id: overlayHeader
         RowLayout {
             anchors.fill: parent
+            Label {
+                text: stackView.currentItem.title
+                Layout.alignment: Qt.AlignCenter
+            }
+        }
+    }
+
+    footer: ToolBar {
+        height: 50
+        id: overlayFooter
+        RowLayout {
+            anchors.fill: parent
+            ToolButton {
+                id: pressBack
+                text: qsTr("<")
+                onClicked: {
+                    stackView.pop()
+                }
+                Layout.alignment: Qt.AlignCenter
+            }
             ToolButton {
                 text: qsTr("🏠")
                 onClicked: {
                     drawer.visible = false
                     stackView.pop(homePage)
                 }
-            }
-            Label {
-                text: stackView.currentItem.title
-                elide: Label.ElideRight
-                horizontalAlignment: Qt.AlignHCenter
-                verticalAlignment: Qt.AlignVCenter
-                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignCenter
             }
             ToolButton {
                 text: qsTr("⋮")
                 onClicked: {
                     drawer.visible = !drawer.visible
                 }
+                Layout.alignment: Qt.AlignCenter
             }
         }
     }
@@ -118,10 +137,15 @@ ApplicationWindow {
         Home {
             id: homePage
 
-            onOpenDevice: {
+            onSignalOpenDevice: function(name) {
                 var component = Qt.createComponent("/Devices/Device_0.qml");
                 if (component.status === Component.Ready)
-                    stackView.push(component.createObject(stackView, {device: client.deviceByName(name)}));
+                {
+                    var dev = client.deviceByName(name)
+                    var obj = component.createObject(stackView, {device: dev})
+                    stackView.push(obj);
+                    dev.signalUpdate.connect(function() {pressBack.clicked()})
+                }
             }
         }
 
