@@ -26,8 +26,20 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
 
 void Device::update(const IOTV_SC::DEV_PKG &pkg)
 {
-    this->setId(pkg.id);
-    this->setDescription(pkg.description);
+    if (getId() != pkg.id)
+    {
+        this->setId(pkg.id);
+        emit idChanged();
+    }
+
+    if (getDescription() != pkg.description)
+    {
+        this->setDescription(pkg.description);
+        emit descriptionChanged();
+    }
+
+    if (getName() != pkg.name)
+        emit nameChanged();
 
     this->removeAllSubChannel();
 
@@ -43,11 +55,6 @@ void Device::update(const IOTV_SC::DEV_PKG &pkg)
 QString Device::getName() const
 {
     return _name;
-}
-
-int Device::id()
-{
-    return getId();
 }
 
 bool Device::isOnline() const

@@ -88,7 +88,10 @@ ApplicationWindow {
                             if (index === 0)
                                 stackView.pop(homePage)
                             else if (index === 1 && stackView.currentItem != clientPage)
+                            {
+                                stackView.pop(homePage)
                                 stackView.push(clientPage)
+                            }
 
                             drawer.visible = 0
                         }
@@ -112,6 +115,12 @@ ApplicationWindow {
 
         Home {
             id: homePage
+
+            onOpenDevice: {
+                var component = Qt.createComponent("/Devices/Device_0.qml");
+                if (component.status === Component.Ready)
+                    stackView.push(component.createObject(stackView, {device: client.deviceByName(name)}));
+            }
         }
 
         Client {
@@ -120,31 +129,20 @@ ApplicationWindow {
         }
     }
 
-//    Popup {
-//        id: popup
-//        anchors.centerIn: parent
-//        //            x: 100
-//        //            y: 100
-////        width: 200
-////        height: 300
-//        modal: true
-//        focus: true
-//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent | Popup.CloseOnPressOutsideParent
-//        opacity: 0.0
+    Popup {
+        id: popup_waitConnection
+        anchors.centerIn: parent
+        modal: true
+        focus: true
+        opacity: 0.0
+        visible: clientPage.connection_attempt
 
-////        MouseArea {
-////            width: 200
-////            height: 200
-////            onClicked: popup.close()
-////        }
-
-//        Text { text: "popup"}
-//        BusyIndicator {
-//            id: indicator
-//            antialiasing: true
-//            anchors.centerIn: parent
-//        }
-//    }
-//    Component.onCompleted: {popup.open()}
+        BusyIndicator {
+            id: indicator
+            antialiasing: true
+            anchors.centerIn: parent
+        }
+    }
+    //    Component.onCompleted: {popup.open()}
 }
 

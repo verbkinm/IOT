@@ -1,6 +1,5 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-//import io.qt.Backend_Client 1.0
 
 Page {
     id: root
@@ -11,7 +10,7 @@ Page {
 
     Item {
         anchors.fill: parent
-        anchors.centerIn: parent.verticalCenter
+//        anchors.centerIn: parent.verticalCenter
 
         Label {
             id: label1
@@ -71,7 +70,7 @@ Page {
         Button {
             id: btn
             font.pixelSize: 18
-            enabled: !indicator.visible
+//            enabled: !indicator.visible
             anchors.horizontalCenterOffset: 0
             anchors.horizontalCenter: parent.horizontalCenter
             hoverEnabled: true
@@ -132,20 +131,20 @@ Page {
         }
     }
 
-    Rectangle {
-        id: recIndicator
-        anchors.fill: parent
-        layer.enabled: false
-        antialiasing: true
-        color: "#aacccccc"
-        focus: true
-        visible: connection_attempt
-        BusyIndicator {
-            id: indicator
-            antialiasing: true
-            anchors.centerIn: parent
-        }
-    }
+//    Rectangle {
+//        id: recIndicator
+//        anchors.fill: parent
+//        layer.enabled: false
+//        antialiasing: true
+//        color: "#aacccccc"
+//        focus: true
+//        visible: connection_attempt
+//        BusyIndicator {
+//            id: indicator
+//            antialiasing: true
+//            anchors.centerIn: parent
+//        }
+//    }
 
 
     Connections {
@@ -156,7 +155,7 @@ Page {
             addr.readOnly = port.readOnly = true
             autoConnect.enabled = false
             addr.color = port.color = "gainsboro"
-            recIndicator.visible = false
+//            recIndicator.visible = false
 
         }
         function onSignalDisconnected() {

@@ -4,7 +4,9 @@ import QtQuick.Controls 2.5
 Page {
     id: root
     title: "Home"
-    anchors.fill: parent
+//    anchors.fill: parent
+
+    signal openDevice(string name)
 
     footer: Item {
         height: 20
@@ -27,8 +29,8 @@ Page {
             {
                 var device = target.devList()[i];
                 var object = {
-                    name: device.getName(),
-                    source: imageById(device.id())
+                    name: device.name,
+                    source: imageById(device.id)
                 }
                 listModel.append(object)
             }
@@ -62,6 +64,13 @@ Page {
             radius: 5
             smooth: true
 
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    openDevice(name)
+                }
+            }
+
             Column {
                 anchors.fill: parent
                 Text {
@@ -80,7 +89,7 @@ Page {
                         componentRect.border.color = target.state ? "green" : "red"
                     }
                     function onSignalUpdate() {
-                        model.source = imageById(target.id())
+                        model.source = imageById(target.id)
                     }
                 }
             }

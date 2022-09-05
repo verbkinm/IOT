@@ -24,11 +24,11 @@ Rectangle {
 
         var imageName = ""
 
-        if (device.id() === 0)
+        if (device.id === 0)
             imageName = "qrc:/img/info.png"
-        else if (device.id() === 1)
+        else if (device.id === 1)
             imageName = "qrc:/img/led_off.png"
-        else if (device.id() === 2)
+        else if (device.id === 2)
             imageName = "qrc:/img/led_on.png"
 
         img.source = imageName
