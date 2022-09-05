@@ -396,7 +396,6 @@ void Client::slotError(QAbstractSocket::SocketError error)
 
 void Client::slotConnectWait()
 {
-    qDebug() << "wait";
     emit signalConnectWait();
     _connectWait.stop();
     disconnectFromHost();

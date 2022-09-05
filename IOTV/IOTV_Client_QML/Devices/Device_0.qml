@@ -1,34 +1,35 @@
-import QtQuick 2.0
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.2
+import QtQuick 2.9
+import QtQuick.Controls 2.2
 
-Item {
+Page {
     id: root
-    width: 100 //parent.width - 10
-    height: 100
 
-    property alias name: base_device.name
-    property alias device: base_device.device
+    //Ссылка на Device
+    property var device: nullptr
 
-    Base_Device {
-        id: base_device
-    }
-
-
-    Item {
-        id: main
+    Column {
+        id: column
         anchors.fill: parent
-        enabled: false
 
-        Image {
-            id: img
-            source: "qrc:/img/Unknow.png"
-            sourceSize: Qt.size(64, 64)
-            anchors.centerIn: parent
+        Label {
+            id:l1
+        }
+        Label {
+            id:l2
+        }
+        Label {
+            id:l3
+        }
+        Label {
+            id:l4
         }
     }
-    function setState(state)
-    {
-        main.enabled = state
+
+    Component.onCompleted: {
+        title  = Qt.binding(function (){ return device.name})
+        l1.text = Qt.binding(function (){ return "Имя устройства: " + device.name})
+        l2.text = Qt.binding(function (){ return "ID устройства: " + device.id})
+        l3.text = Qt.binding(function (){ return "Описание: " + device.description})
+        l4.text = Qt.binding(function (){ return "Состояние: " + (device.state ? "онлайн" : "офлайн")})
     }
 }

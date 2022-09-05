@@ -1,6 +1,5 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-//import io.qt.Backend_Client 1.0
 
 Page {
     id: root
@@ -11,6 +10,8 @@ Page {
 
 
     Item {
+        anchors.fill: parent
+//        anchors.centerIn: parent.verticalCenter
         width: 324
         height: 150
 

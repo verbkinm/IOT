@@ -24,12 +24,12 @@ Rectangle {
 
 //        var imageName = ""
 
-//        if (device.id() === 0)
-//            imageName = "qrc:/img/info.png"
-//        else if (device.id() === 1)
-//            imageName = "qrc:/img/led_on.png"
-//        else if (device.id() === 2)
-//            imageName = "qrc:/img/id/2.png"
+        if (device.id === 0)
+            imageName = "qrc:/img/info.png"
+        else if (device.id === 1)
+            imageName = "qrc:/img/led_off.png"
+        else if (device.id === 2)
+            imageName = "qrc:/img/led_on.png"
 
 //        img.source = imageName
 //    }

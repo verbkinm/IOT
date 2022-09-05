@@ -5,7 +5,9 @@ import QtQuick.Layouts 1.3
 Page {
     id: root
     title: "Home"
-    anchors.fill: parent
+//    anchors.fill: parent
+
+    signal openDevice(string name)
 
     footer: Item {
         height: 20
@@ -28,8 +30,8 @@ Page {
             {
                 var device = target.devList()[i];
                 var object = {
-                    name: device.getName(),
-                    source: imageById(device.id())
+                    name: device.name,
+                    source: imageById(device.id)
                 }
                 listModel.append(object)
             }
@@ -53,14 +55,10 @@ Page {
         border.width: 1
     }
     GridView {
-        id: gridView
-        //        anchors.fill: parent
-        anchors{
-            left: parent.left
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-        }
+        anchors.fill: parent
+        anchors.margins: 5
+        cellHeight: 110
+        cellWidth: 110
 
         model: listModel
         delegate: contactDelegate
@@ -103,6 +101,13 @@ Page {
             radius: 5
             smooth: true
 
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    openDevice(name)
+                }
+            }
+
             Column {
                 anchors.fill: parent
                 Text {
@@ -124,7 +129,7 @@ Page {
                         componentRect.border.color = target.state ? "green" : "red"
                     }
                     function onSignalUpdate() {
-                        model.source = imageById(target.id())
+                        model.source = imageById(target.id)
                     }
                 }
             }

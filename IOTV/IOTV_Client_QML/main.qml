@@ -90,7 +90,10 @@ ApplicationWindow {
                             if (index === 0)
                                 stackView.pop(homePage)
                             else if (index === 1 && stackView.currentItem != clientPage)
+                            {
+                                stackView.pop(homePage)
                                 stackView.push(clientPage)
+                            }
 
                             drawer.visible = 0
                         }
@@ -114,6 +117,12 @@ ApplicationWindow {
 
         Home {
             id: homePage
+
+            onOpenDevice: {
+                var component = Qt.createComponent("/Devices/Device_0.qml");
+                if (component.status === Component.Ready)
+                    stackView.push(component.createObject(stackView, {device: client.deviceByName(name)}));
+            }
         }
 
         Client {
