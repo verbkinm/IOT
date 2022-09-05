@@ -41,7 +41,6 @@ Page {
         anchors.margins: 5
         cellHeight: 110
         cellWidth: 110
-//        anchors.horizontalCenter: parent.Center
 
         model: listModel
         delegate: contactDelegate
