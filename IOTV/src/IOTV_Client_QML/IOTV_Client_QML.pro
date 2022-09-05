@@ -26,30 +26,32 @@ HEADERS += \
     client.h \
     device.h
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Base_Host/ -lBase_Host
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Base_Host/ -lBase_Hostd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../src/lib/Base_Host/ -lBase_Host
 
-INCLUDEPATH += $$PWD/../src/lib/Base_Host
-DEPENDPATH += $$PWD/../src/lib/Base_Host
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Protocols/ -lProtocols
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Protocols/ -lProtocolsd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../src/lib/Protocols/ -lProtocols
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocolsd
+else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
 
-INCLUDEPATH += $$PWD/../src/lib/Protocols
-DEPENDPATH += $$PWD/../src/lib/Protocols
+INCLUDEPATH += $$PWD/../lib/Protocols
+DEPENDPATH += $$PWD/../lib/Protocols
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Log/ -lLog
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../src/lib/Log/ -lLogd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../src/lib/Log/ -lLog
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLogd
+else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
 
-INCLUDEPATH += $$PWD/../src/lib/Log
-DEPENDPATH += $$PWD/../src/lib/Log
+INCLUDEPATH += $$PWD/../lib/Log
+DEPENDPATH += $$PWD/../lib/Log
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../src/lib/raw/release/ -lraw
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../src/lib/raw/debug/ -lraw
-else:unix:!macx: LIBS += -L$$OUT_PWD/../src/lib/raw/ -lraw
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/release/ -lraw
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/debug/ -lraw
+else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
 
-INCLUDEPATH += $$PWD/../src/lib/raw
-DEPENDPATH += $$PWD/../src/lib/raw
+INCLUDEPATH += $$PWD/../lib/raw
+DEPENDPATH += $$PWD/../lib/raw
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Hostd
+else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
+
+INCLUDEPATH += $$PWD/../lib/Base_Host
+DEPENDPATH += $$PWD/../lib/Base_Host

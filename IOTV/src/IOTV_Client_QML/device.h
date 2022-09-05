@@ -10,7 +10,7 @@ class Device : public Base_Host
     Q_OBJECT
 
     Q_PROPERTY(bool state READ isOnline NOTIFY stateChanged)
-    Q_PROPERTY(int id READ getId NOTIFY signalIdChanged)
+    Q_PROPERTY(int id READ getId CONSTANT)
     Q_PROPERTY(QString name READ getName CONSTANT)
     Q_PROPERTY(QString description READ getDescription CONSTANT)
 
@@ -46,7 +46,5 @@ signals:
     void signalDataChanged(uint8_t channelNumber, QByteArray data);
     void stateChanged();
     void signalUpdate();
-
-    void signalIdChanged();
 };
 

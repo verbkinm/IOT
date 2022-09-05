@@ -106,7 +106,8 @@ void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
         else
         {
             Device &oldDev = result.first->second;
-            if (oldDev != Device(dev))
+            auto d = Device(dev);
+            if (oldDev != d)
                 oldDev.update(dev);
 
 //            QString str = QString(Q_FUNC_INFO) + " " + dev.name + " can't create new device";
