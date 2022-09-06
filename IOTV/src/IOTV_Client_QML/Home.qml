@@ -21,38 +21,7 @@ Page {
                   ", кол-во устройств: (" + client.onlineDevice + "/" + client.totalDevice + ")"
         }
     }
-    Connections {
-        target: client
-        function onCountDeviceChanged()
-        {
-            for( var i = 0; i < target.totalDevice; i++)
-            {
-                var device = target.devList()[i];
-                var object = {
-                    name: device.name,
-                    source: imageById(device.id)
-                }
-                listModel.append(object)
-            }
-        }
-        function onSignalDisconnected() {listModel.clear()}
-    }
 
-//    Rectangle {
-//        id:re
-//        anchors{
-//            left: parent.left
-//            right: parent.right
-//            top: parent.top
-//            bottom: parent.bottom
-//        }
-
-//        //    width: 300
-//        anchors.leftMargin: 30
-//        anchors.rightMargin: 30
-//        border.color: "red"
-//        border.width: 1
-//    }
     GridView {
         id: gridView
         anchors.fill: parent
@@ -64,19 +33,19 @@ Page {
         delegate: contactDelegate
     }
 
-//    onWidthChanged: {
-////        console.log("gridView width = " + gridView.width)
-////        console.log("gridView parent width = " + gridView.parent.width)
-////        console.log("re width = " + re.width)
-////        console.log("gridView childrenRect width = " + gridView.)
-//    }
+    //    onWidthChanged: {
+    ////        console.log("gridView width = " + gridView.width)
+    ////        console.log("gridView parent width = " + gridView.parent.width)
+    ////        console.log("re width = " + re.width)
+    ////        console.log("gridView childrenRect width = " + gridView.)
+    //    }
 
-//    Component.onCompleted: {
-////        console.log("gridView width = " + gridView.width)
-////        console.log("gridView parent width = " + gridView.parent.width)
-////        console.log("re width = " + re.width)
-////        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
-//    }
+    //    Component.onCompleted: {
+    ////        console.log("gridView width = " + gridView.width)
+    ////        console.log("gridView parent width = " + gridView.parent.width)
+    ////        console.log("re width = " + re.width)
+    ////        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
+    //    }
 
 
 
@@ -130,9 +99,25 @@ Page {
         }
     }
 
+    Connections {
+        target: client
+        function onCountDeviceChanged()
+        {
+            for( var i = 0; i < target.totalDevice; i++)
+            {
+                var device = target.devList()[i];
+                var object = {
+                    name: device.name,
+                    source: imageById(device.id)
+                }
+                listModel.append(object)
+            }
+        }
+        function onSignalDisconnected() {listModel.clear()}
+    }
+
     function imageById(id)
     {
-        console.log("imageById" + id)
         if (id === 1)
             return "qrc:/img/id/1.png"
         else if (id === 2)

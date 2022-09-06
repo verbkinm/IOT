@@ -198,7 +198,7 @@ void IOTV_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     Log::write("R:"
                + QString::number(readPkg->chanelNumber)
                + "="
-               + raw.strData(),
+               + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
 }
 

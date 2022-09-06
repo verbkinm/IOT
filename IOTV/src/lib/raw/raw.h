@@ -12,7 +12,7 @@ class RAW_EXPORT Raw
 {
 public:
 
-    //Принята BigEndian последовательность в коде
+    //Принята BigEndian последовательность
     enum class DATA_TYPE : uint8_t
     {
         INT_8,
@@ -47,7 +47,9 @@ public:
     DATA_TYPE type() const;
     const QByteArray &data() const;
 
-    QString strData() const;
+    std::pair<QString, QString> strData() const;
+
+    static std::pair<QString, QString> strData(const QByteArray &data, DATA_TYPE type);
 
 private:
     DATA_TYPE _type;

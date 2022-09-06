@@ -1,4 +1,5 @@
 #include "device.h"
+#include "raw.h"
 
 Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
     : Base_Host{dev.id, parent}, _name{dev.name}, _state{false},
@@ -52,8 +53,18 @@ bool Device::isOnline() const
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-    emit signalDataChanged(channelNumber, data);
+//    emit signalDataChanged(channelNumber, data);
     return this->setReadChannelData(channelNumber, data);
+}
+
+QString Device::readData(int channelNumber) const
+{
+    return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).first;
+}
+
+QString Device::readDataType(int channelNumber) const
+{
+    return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).second;
 }
 
 void Device::setReadInterval(int interval)

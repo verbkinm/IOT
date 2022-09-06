@@ -25,6 +25,7 @@ ApplicationWindow {
             anchors.fill: parent
             Label {
                 text: stackView.currentItem.title
+                font.pixelSize: 18
                 Layout.alignment: Qt.AlignCenter
             }
         }
@@ -52,7 +53,7 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignCenter
             }
             ToolButton {
-                text: qsTr("⋮")
+                text: qsTr("☰")
                 onClicked: {
                     drawer.visible = !drawer.visible
                 }
@@ -138,7 +139,7 @@ ApplicationWindow {
                 if (component.status === Component.Ready)
                 {
                     var dev = client.deviceByName(name)
-                    var obj = component.createObject(stackView, {device: dev})
+                    var obj = component.createObject(window, {device: dev})
                     stackView.push(obj);
                     dev.signalUpdate.connect(function() {pressBack.clicked()})
                 }

@@ -125,8 +125,8 @@ void Client::response_STATE(IOTV_SC::RESPONSE_PKG *pkg)
 
     if (!_devices.contains(responsePkg->name))
     {
-        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
-        Log::write(str, Log::Write_Flag::FILE_STDOUT);
+//        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
+//        Log::write(str, Log::Write_Flag::FILE_STDOUT);
         return;
     }
 
@@ -146,8 +146,8 @@ void Client::response_READ(IOTV_SC::RESPONSE_PKG *pkg)
 
     if (!_devices.contains(responsePkg->name))
     {
-        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
-        Log::write(str, Log::Write_Flag::FILE_STDOUT);
+//        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
+//        Log::write(str, Log::Write_Flag::FILE_STDOUT);
         return;
     }
 
@@ -167,20 +167,20 @@ void Client::write(const QByteArray &data)
     if (data.isEmpty())
         return;
 
-    Log::write("Client transmit to server" + _socket.peerAddress().toString() + ':'
-               + QString::number(_socket.peerPort())
-               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+//    Log::write("Client transmit to server" + _socket.peerAddress().toString() + ':'
+//               + QString::number(_socket.peerPort())
+//               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
     _socket.write(data);
 }
 
 void Client::slotConnected()
 {
     _connectWait.stop();
-    Log::write("Connected to " +
-               _socket.peerAddress().toString() +
-               ':' +
-               QString::number(_socket.peerPort()),
-               Log::Write_Flag::FILE_STDOUT);
+//    Log::write("Connected to " +
+//               _socket.peerAddress().toString() +
+//               ':' +
+//               QString::number(_socket.peerPort()),
+//               Log::Write_Flag::FILE_STDOUT);
 
     write(IOTV_SC::Client_TX::query_Device_List());
     _timerDevList.start(5000);
@@ -191,11 +191,11 @@ void Client::slotConnected()
 
 void Client::slotDisconnected()
 {
-    Log::write("Disconnected from " +
-               _socket.peerAddress().toString() +
-               ':' +
-               QString::number(_socket.peerPort()),
-               Log::Write_Flag::FILE_STDOUT);
+//    Log::write("Disconnected from " +
+//               _socket.peerAddress().toString() +
+//               ':' +
+//               QString::number(_socket.peerPort()),
+//               Log::Write_Flag::FILE_STDOUT);
 
     _timerDevList.stop();
 
@@ -288,13 +288,13 @@ void Client::slotReciveData()
 {
     _recivedBuff += _socket.readAll();
 
-    Log::write("Data recive from " +
-               _socket.peerAddress().toString() +
-               ':' +
-               QString::number(_socket.peerPort()) +
-               " <- " +
-               _recivedBuff.toHex(':'),
-               Log::Write_Flag::FILE_STDOUT);
+//    Log::write("Data recive from " +
+//               _socket.peerAddress().toString() +
+//               ':' +
+//               QString::number(_socket.peerPort()) +
+//               " <- " +
+//               _recivedBuff.toHex(':'),
+//               Log::Write_Flag::FILE_STDOUT);
 
     IOTV_SC::RESPONSE_PKG *pkg;
     while ((pkg = IOTV_SC::Client_RX::accumPacket(_recivedBuff)) != nullptr)
@@ -309,14 +309,14 @@ void Client::slotReciveData()
         {
             if (_recivedBuff.size() > 0)
             {
-                Log::write("WARRNING: received data from " +
-                           _socket.peerName() +
-                           _socket.peerAddress().toString() +
-                           ':' +
-                           QString::number(_socket.peerPort()) +
-                           "UNKNOW: " +
-                           _recivedBuff.toHex(':'),
-                           Log::Write_Flag::FILE_STDOUT);
+//                Log::write("WARRNING: received data from " +
+//                           _socket.peerName() +
+//                           _socket.peerAddress().toString() +
+//                           ':' +
+//                           QString::number(_socket.peerPort()) +
+//                           "UNKNOW: " +
+//                           _recivedBuff.toHex(':'),
+//                           Log::Write_Flag::FILE_STDOUT);
                 _recivedBuff.clear();
             }
             delete pkg;
@@ -341,10 +341,10 @@ void Client::slotReciveData()
         else
         {
             //иных вариантов быть не должно!
-            Log::write(QString(Q_FUNC_INFO) +
-                       "Unknow pkg.type = " +
-                       QString::number(int(pkg->type)),
-                       Log::Write_Flag::FILE_STDERR);
+//            Log::write(QString(Q_FUNC_INFO) +
+//                       "Unknow pkg.type = " +
+//                       QString::number(int(pkg->type)),
+//                       Log::Write_Flag::FILE_STDERR);
             exit(-1);
         }
         delete pkg;

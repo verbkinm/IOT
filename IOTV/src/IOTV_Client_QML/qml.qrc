@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>Client.qml</file>
         <file>main.qml</file>
-        <file>LineEdit.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>Home.qml</file>
         <file>Devices/Device_Icon.qml</file>
@@ -16,6 +15,8 @@
         <file>Info.qml</file>
         <file>img/id/2.png</file>
         <file>img/id/1.png</file>
+        <file>Devices/ChannelItem.qml</file>
+        <file>Devices/ChannelItemWrite.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>
