@@ -28,6 +28,8 @@ public:
     void setState(bool newState);
 
     bool setData(uint8_t channelNumber, const QByteArray &data);
+
+    Q_INVOKABLE void setDataFromString(int channelNumber, QString data);
     Q_INVOKABLE QString readData(int channelNumber) const;
     Q_INVOKABLE QString readDataType(int channelNumber) const;
 
@@ -42,9 +44,12 @@ private:
     QTimer _timerRead, _timerState;
     uint _timerReadInterval, _timerStateInterval;
 
+    QByteArray stringToByteArray();
+
 signals:
     void signalQueryRead();
     void signalQueryState();
+    void signalQueryWrite(int channelNumber, QByteArray data);
 //    void signalDataChanged(uint8_t channelNumber, QByteArray data);
     void stateChanged();
     void signalUpdate();

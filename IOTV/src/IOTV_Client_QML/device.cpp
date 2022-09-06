@@ -57,6 +57,11 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
     return this->setReadChannelData(channelNumber, data);
 }
 
+void Device::setDataFromString(int channelNumber, QString data)
+{
+    emit signalQueryWrite(channelNumber, Raw::strToByteArray(data, getReadChannelType(channelNumber)));
+}
+
 QString Device::readData(int channelNumber) const
 {
     return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).first;

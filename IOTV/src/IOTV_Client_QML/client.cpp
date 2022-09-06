@@ -102,6 +102,7 @@ void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
             result.first->second.setParent(this);
             connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
             connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
+            connect(&result.first->second, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
         }
         else
         {
@@ -383,6 +384,16 @@ void Client::slotQueryState()
         data += IOTV_SC::Client_TX::query_STATE(dev->getName());
 
     write(data);
+}
+
+void Client::slotQueryWrite(int channelNumber, QByteArray data)
+{
+    Device *dev = qobject_cast<Device*>(sender());
+
+    if ( (dev == nullptr) || !dev->isOnline())
+        return;
+
+    write(IOTV_SC::Client_TX::query_WRITE(dev->getName(), channelNumber, data));
 }
 
 void Client::slotQueryDevList()

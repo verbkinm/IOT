@@ -90,10 +90,9 @@ Page {
             component = Qt.createComponent("ChannelItemWrite.qml");
             if (component.status === Component.Ready)
             {
-                obj = component.createObject(columnWrite, {height: 30, number: i+":", type: device.readDataType(i)})
+                obj = component.createObject(columnWrite, {height: 30, number: i+":", type: device.readDataType(i), _device: device})
                 obj.width = Qt.binding(function(){return columnRead.width})
                 obj.button.text = "➩"
-                obj.signalWrite.connect(function (str){console.log(device.name, " ", obj.number, " ", str)})
             }
         }
         timer.start()

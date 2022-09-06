@@ -90,9 +90,10 @@ public slots:
 private slots:
     void slotReciveData();
 
+    void slotQueryDevList();
     void slotQueryRead();
     void slotQueryState();
-    void slotQueryDevList();
+    void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotError(QAbstractSocket::SocketError error);
     void slotConnectWait();

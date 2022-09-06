@@ -7,7 +7,7 @@ Item {
     property alias type: typeName.text
     property alias button: btn
 
-    signal signalWrite(string str)
+    required property var _device
 
     Label {
         id: lb1
@@ -45,10 +45,10 @@ Item {
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
         font.pixelSize: 12
-//                    readOnly: true
 
         text: ""
         placeholderText: "Введите данные"
+        placeholderTextColor: "#ccc"
         anchors {
             left: typeName.right
             top: parent.top
@@ -74,7 +74,12 @@ Item {
         }
 
         onClicked: {
-            signalWrite(txtField.text)
+//            signalWrite(txtField.text)
+            _device.setDataFromString(lb1.text, txtField.text)
+//            obj.signalWrite.connect(function (str){
+//                console.log(device.name, " ", obj.number, " ", str)
+//                device.setDataFromString(obj.number, str)
+//            })
         }
     }
 }

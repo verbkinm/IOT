@@ -43,10 +43,11 @@ Item {
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
         font.pixelSize: 12
-//                    readOnly: true
+        readOnly: true
 
         text: ""
-        placeholderText: "Введите данные"
+        placeholderText: "Чтение данных..."
+        placeholderTextColor: "#ccc"
         anchors {
             left: typeName.right
             top: parent.top

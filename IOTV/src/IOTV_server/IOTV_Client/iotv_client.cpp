@@ -124,6 +124,14 @@ void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     responseWritePkg.channelNumber = queryWritePkg->channelNumber;
 
     write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == queryWritePkg->name;
+    });
+
+    if (it != _hosts.end())
+        it->write(queryWritePkg->channelNumber, queryWritePkg->data);
 }
 
 void IOTV_Client::write(const QByteArray &data) const

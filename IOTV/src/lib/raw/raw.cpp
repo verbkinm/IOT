@@ -78,6 +78,25 @@ std::pair<QString, QString> Raw::strData(const QByteArray &data, DATA_TYPE type)
     return raw.strData();
 }
 
+QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
+{
+    QByteArray result;
+
+    if (type == DATA_TYPE::BOOL)
+    {
+        bool ok;
+        bool data = dataStr.toInt(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to BOOL error";
+            return {};
+        }
+        result.push_back(data);
+    }
+
+    return result;
+}
+
 void Raw::push_back(uint8_t byte)
 {
     _data.push_back(byte);

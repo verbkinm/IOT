@@ -149,7 +149,19 @@ ApplicationWindow {
         Client {
             id: clientPage
             visible: false
+
+            onConnection_attemptChanged: {
+
+            }
         }        
+    }
+
+    Connections {
+        target: client
+        function onSignalDisconnected() {
+            if (!client.state && (stackView.currentItem != clientPage && stackView.currentItem != homePage))
+                stackView.pop(homePage)
+        }
     }
 
     Popup {

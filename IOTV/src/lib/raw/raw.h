@@ -1,10 +1,11 @@
 #pragma once
 
 #include <cstdint>
-#include <algorithm>
 
 #include <QByteArray>
 #include <QtEndian>
+
+#include <QDebug>
 
 #include "raw_global.h"
 
@@ -50,6 +51,7 @@ public:
     std::pair<QString, QString> strData() const;
 
     static std::pair<QString, QString> strData(const QByteArray &data, DATA_TYPE type);
+    static QByteArray strToByteArray(const QString &dataStr, DATA_TYPE type);
 
 private:
     DATA_TYPE _type;
