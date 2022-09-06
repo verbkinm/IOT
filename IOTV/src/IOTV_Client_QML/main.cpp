@@ -8,7 +8,6 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-//    qmlRegisterType<Client>("io.qt.Backend_Client", 1, 0, "Backend_Client");
     qmlRegisterType<Device>("io.qt.Backend_Device", 1, 0, "Backend_Device");
 
     QQmlApplicationEngine engine;

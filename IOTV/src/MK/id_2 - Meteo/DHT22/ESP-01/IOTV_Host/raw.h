@@ -21,20 +21,14 @@ public:
         INTEGER_32 = 0x02,
         INTEGER_64 = 0x03,
 
-        UNSIGNED_INTEGER_8 = 0x04,
-        UNSIGNED_INTEGER_16 = 0x05,
-        UNSIGNED_INTEGER_32 = 0x06,
-        UNSIGNED_INTEGER_64 = 0x07,
+        FLOAT_32 = 0x04,
+        DOUBLE_64 = 0x05,
 
-        FLOAT_32 = 0x08,
-        DOUBLE_32 = 0x09,
-        DOUBLE_64 = 0x0A,
+        BOOL_8 = 0x06,
+        STRING = 0x07,
 
-        BOOL_8 = 0x0B,
-        STRING = 0x0C,
-
-        RAW = 0x0D,
-        NONE = 0x0E
+        RAW = 0x08,
+        NONE = 0x09
     };
 
     union RAW
