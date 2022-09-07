@@ -9,6 +9,8 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
 
     connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
+
+    connect(this, &IOTV_Host::signalQueryWrite, this, &IOTV_Host::slotQueryWrite, Qt::QueuedConnection);
 }
 
 IOTV_Host::~IOTV_Host()
@@ -300,4 +302,9 @@ void IOTV_Host::slotThreadStop()
     _reReadTimer.moveToThread(_parentThread);
 
     _thread.exit();
+}
+
+void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
+{
+    write(channelNumber, data);
 }

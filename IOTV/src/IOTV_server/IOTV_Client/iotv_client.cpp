@@ -110,7 +110,7 @@ void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
 }
 
-void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
+void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -130,8 +130,9 @@ void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
         return iotv_host.getName() == queryWritePkg->name;
     });
 
-    if (it != _hosts.end())
-        it->write(queryWritePkg->channelNumber, queryWritePkg->data);
+    if (it != _hosts.end()) {
+        emit it->signalQueryWrite(queryWritePkg->channelNumber, queryWritePkg->data);
+    }
 }
 
 void IOTV_Client::write(const QByteArray &data) const

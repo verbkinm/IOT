@@ -81,18 +81,97 @@ std::pair<QString, QString> Raw::strData(const QByteArray &data, DATA_TYPE type)
 QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
 {
     QByteArray result;
+    bool ok;
 
-    if (type == DATA_TYPE::BOOL)
+    if (type == DATA_TYPE::INT_8)
     {
-        bool ok;
-        bool data = dataStr.toInt(&ok);
+        int8_t data = dataStr.toLongLong(&ok);
         if (!ok)
         {
-            qDebug() << "Convert to BOOL error";
+            qDebug() << "Convert to INT_8 error";
             return {};
         }
         result.push_back(data);
     }
+    else if (type == DATA_TYPE::INT_16)
+    {
+        int16_t data = dataStr.toLongLong(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to INT_16 error";
+            return {};
+        }
+        char *ptr = reinterpret_cast<char*>(&data);
+        for (uint i = 0; i < sizeof(data); i++)
+            result.push_back(ptr[i]);
+    }
+    else if (type == DATA_TYPE::INT_32)
+    {
+        int32_t data = dataStr.toLongLong(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to INT_32 error";
+            return {};
+        }
+        char *ptr = reinterpret_cast<char*>(&data);
+        for (uint i = 0; i < sizeof(data); i++)
+            result.push_back(ptr[i]);
+    }
+    else if (type == DATA_TYPE::INT_64)
+    {
+        int64_t data = dataStr.toLongLong(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to INT_64 error";
+            return {};
+        }
+        char *ptr = reinterpret_cast<char*>(&data);
+        for (uint i = 0; i < sizeof(data); i++)
+            result.push_back(ptr[i]);
+    }
+    else if (type == DATA_TYPE::FLOAT_32)
+    {
+        float data = dataStr.toFloat(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to FLOAT_32 error";
+            return {};
+        }
+        char *ptr = reinterpret_cast<char*>(&data);
+        for (uint i = 0; i < sizeof(data); i++)
+            result.push_back(ptr[i]);
+    }
+    else if (type == DATA_TYPE::DOUBLE_64)
+    {
+        double data = dataStr.toDouble(&ok);
+        if (!ok)
+        {
+            qDebug() << "Convert to DOUBLE_64 error";
+            return {};
+        }
+        char *ptr = reinterpret_cast<char*>(&data);
+        for (uint i = 0; i < sizeof(data); i++)
+            result.push_back(ptr[i]);
+    }
+    else if (type == DATA_TYPE::BOOL)
+    {
+        if (dataStr.toUpper() == "TRUE")
+            result.push_back(true);
+        else if ((dataStr.toUpper() == "FALSE"))
+            result.push_back(false);
+        else
+        {
+            bool data = dataStr.toInt(&ok);
+            if (!ok)
+            {
+                qDebug() << "Convert to BOOL error";
+                return {};
+            }
+            result.push_back(data);
+        }
+    }
+    else if (type == DATA_TYPE::RAW || type == DATA_TYPE::STRING)
+        result.append(dataStr.toLocal8Bit());
 
     return result;
 }

@@ -153,7 +153,7 @@ ApplicationWindow {
             onConnection_attemptChanged: {
 
             }
-        }        
+        }
     }
 
     Connections {
@@ -167,16 +167,23 @@ ApplicationWindow {
     Popup {
         id: popupWait
         anchors.centerIn: parent
+        width: parent.width
+        height: parent.height
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
-        opacity: 0.0
         visible: clientPage.connection_attempt
+
+        background: Rectangle{
+            opacity: 0.3
+        }
 
         BusyIndicator {
             id: indicator
             antialiasing: true
             anchors.centerIn: parent
+            visible: true
+            running: true
         }
     }
 }

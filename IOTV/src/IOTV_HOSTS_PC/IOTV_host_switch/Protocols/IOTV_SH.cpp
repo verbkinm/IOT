@@ -66,8 +66,7 @@ uint16_t Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData
 
     char writeData[dataWriteSize];
     memcpy(writeData, &inData[3], dataWriteSize);
-
-    iotHost._readChannel[channelNumber] = (bool)writeData;
+    memcpy(&iotHost._readChannel[channelNumber], writeData, sizeof(iotHost._readChannel[channelNumber]));
 
     outData[0] = channelNumber | Protocol_class::RESPONSE_WRITE_BYTE;
 

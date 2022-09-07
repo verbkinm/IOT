@@ -81,10 +81,14 @@ private slots:
     void slotNewThreadStart();
     void slotThreadStop();
 
+    void slotQueryWrite(int channelNumber, QByteArray data);
+
 signals:
     void signalDataRiceved();
 
     void signalStopThread();
+
+    void signalQueryWrite(int channelNumber, QByteArray data);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(IOTV_Host::Flags)

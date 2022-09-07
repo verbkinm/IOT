@@ -25,7 +25,9 @@ QByteArray IOTV_SH::query_WRITE(uint8_t channelNumber, const QByteArray &rawData
     data.push_back(size >> 8);
     data.push_back(size);
 
-    data.append(rawData.data());
+    auto ptr = rawData.data();
+    for (int i = 0; i < rawData.size(); i++)
+        data.append(ptr[i]);
 
     return data;
 }

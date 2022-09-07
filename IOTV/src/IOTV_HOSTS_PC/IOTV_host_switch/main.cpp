@@ -50,8 +50,8 @@ void slotDataRecived()
         {
             dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
             socket->write(transmitBuffer, dataSize);
-            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
-            ptrBuf--;
+            memmove((void*)recivedBuffer, (void*)&recivedBuffer[dataSize + 3], BUFSIZ - (dataSize + 3));
+            ptrBuf -= dataSize + 3;
         }
         else
             ptrBuf = recivedBuffer;

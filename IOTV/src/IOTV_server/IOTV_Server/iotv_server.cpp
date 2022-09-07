@@ -139,7 +139,7 @@ void IOTV_Server::slotNewConnection()
     if (!socket)
     {
         Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log");
-        exit(1);
+        return;
     }
 
     _iot_clients.emplace_back(socket, _iot_hosts);
