@@ -64,6 +64,7 @@ void Device::setDataFromString(int channelNumber, QString data)
 
 QString Device::readData(int channelNumber) const
 {
+//    std::pair<QString, QString> rest = Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber));
     return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).first;
 }
 

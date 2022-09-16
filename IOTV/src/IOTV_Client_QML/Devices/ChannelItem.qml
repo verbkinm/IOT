@@ -3,13 +3,13 @@ import QtQuick.Controls 2.5
 
 Item {
     property alias text: txtField.text
-    property alias number: lb1.text
+    property int number: 0
     property alias type: typeName.text
     property alias button: btn
 
     Label {
         id: lb1
-        text: "1"
+        text: number + ":"
         font.pixelSize: 12
         anchors {
             left: parent.left

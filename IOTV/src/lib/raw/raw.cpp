@@ -101,6 +101,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_16 error";
             return {};
         }
+        data = qToBigEndian(data);
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
             result.push_back(ptr[i]);

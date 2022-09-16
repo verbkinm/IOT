@@ -35,12 +35,18 @@ qint64 File_conn_type::write(const QByteArray &data)
             return 0;
         }
 
+        if (!_file.open(QIODevice::ReadOnly))
+        {
+            Log::write(_name + ": can't read file" + QFileInfo(_file).absoluteFilePath());
+            return -1;
+        }
+
+        QByteArray fileData = _file.readAll();
         _file.close();
-        _file.open(QIODevice::ReadOnly);
 
         QByteArray recv;
         recv.push_back(IOTV_SH::RESPONSE_READ_BYTE);
-        QByteArray fileData = _file.readAll();
+
         recv.push_back(fileData.size() >> 8);
         recv.push_back(fileData.size());
         recv.append(fileData);
@@ -53,24 +59,21 @@ qint64 File_conn_type::write(const QByteArray &data)
         if(data.size() != (3 + (data.at(1) | data.at(2))) )
         {
             Log::write(_name + ": data transimt error" + " -> " + data.toHex(':'));
-            return 0;
+            return -1;
         }
 
         QByteArray buffer = data.mid(3);
 
-        _file.close();
         if(!_file.open(QIODevice::WriteOnly))
         {
             Log::write(_name + ": can't write to file " + QFileInfo(_file).absoluteFilePath());
-            return 0;
+            return -1;
         }
         _file.write(buffer);
         _file.close();
 
-        _file.open(QIODevice::ReadOnly);
-
         QByteArray recv;
-        recv.push_back(data.at(0) & IOTV_SH::RESPONSE_WRITE_BYTE);
+        recv.push_back(data.at(0) | IOTV_SH::RESPONSE_WRITE_BYTE);
 
         _host_buffer_data = recv;
         slotReadData();
@@ -88,7 +91,8 @@ qint64 File_conn_type::write(const QByteArray &data)
     }
     else
     {
-        ;
+        Log::write(_name + ": error data" + Q_FUNC_INFO + " " + QFileInfo(_file).absoluteFilePath() + " " + data.toHex(':'));
+        _host_buffer_data.clear();
     }
 
     return 0;
@@ -97,12 +101,14 @@ qint64 File_conn_type::write(const QByteArray &data)
 void File_conn_type::connectToHost()
 {
     _reconnectTimer.stop();
-    if(!_file.open(QIODevice::ReadOnly))
+    if(!_file.open(QIODevice::ReadWrite))
     {
-        Log::write(_name + ": can't read file" + QFileInfo(_file).absoluteFilePath());
+        Log::write(_name + ": can't open file to read write " + QFileInfo(_file).absoluteFilePath());
         _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
+    _file.close();
+
     Log::write(_name + ": file " + QFileInfo(_file).absoluteFilePath() + " is open.");
     emit signalConnected();
 }
@@ -113,8 +119,6 @@ void File_conn_type::disconnectFromHost()
     _reconnectTimer.start(DEFAULT_INTERVAL);
 
     emit signalDisconnected();
-
-    _file.close();
 }
 
 QByteArray File_conn_type::readAll()

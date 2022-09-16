@@ -28,15 +28,20 @@ qint64 Base_conn_type::write(const QByteArray &data)
     return -1;
 }
 
-void Base_conn_type::connectToHost()
+void Base_conn_type::clearBufer()
 {
-
+    _host_buffer_data.clear();
 }
 
-void Base_conn_type::disconnectFromHost()
-{
+//void Base_conn_type::connectToHost()
+//{
 
-}
+//}
+
+//void Base_conn_type::disconnectFromHost()
+//{
+
+//}
 
 void Base_conn_type::trimBufferFromBegin(u_int8_t size)
 {

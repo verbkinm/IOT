@@ -43,6 +43,7 @@ ApplicationWindow {
                     stackView.pop()
                 }
                 Layout.alignment: Qt.AlignCenter
+//                visible: false
             }
             ToolButton {
                 text: qsTr("🏠")

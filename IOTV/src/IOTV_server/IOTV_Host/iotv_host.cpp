@@ -83,9 +83,12 @@ void IOTV_Host::dataResived(QByteArray data)
         else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
             response_WRITE_recived(pkg);
         else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
+        {
             this->_conn_type->trimBufferFromBegin(1);
+            data = data.mid(1);
+        }
         else
-            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
+            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
 
         delete pkg;
     }
@@ -254,7 +257,7 @@ void IOTV_Host::slotDisconnected()
     _timerPong.stop();
     _reReadTimer.stop();
 
-    _conn_type->trimBufferFromBegin(static_cast<uint8_t>(Base_conn_type::BUFFER_MAX_SIZE));
+    _conn_type->clearBufer();
 }
 
 void IOTV_Host::slotReReadTimeOut()

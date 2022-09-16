@@ -41,6 +41,6 @@ public:
 
     static uint16_t response_WAY(const IOTV_Server &iotHost, char *outData);
     static uint16_t response_READ(const IOTV_Server &iotHost, const char *inData, const char* ptrInData, char *outData);
-    static uint16_t response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData);
+    static int response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData);
     static uint16_t response_Pong(char *outData);
 };

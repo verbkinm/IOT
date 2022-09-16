@@ -144,7 +144,7 @@ IOTV_SC::RESPONSE_PKG *IOTV_SC::Client_RX::createResponse_READ_PKG(QByteArray &d
     RESPONSE_READ_PKG *pkg = new RESPONSE_READ_PKG;
     pkg->name = data.mid(4, nameLength);
     pkg->channelNumber = channelNumber;
-    pkg->data = data.mid(4 + nameLength);
+    pkg->data = data.mid(4 + nameLength, dataLength);
 
     data = data.mid(4 + nameLength + dataLength);
 

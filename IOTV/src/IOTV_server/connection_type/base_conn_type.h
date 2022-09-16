@@ -31,9 +31,10 @@ public:
     void setAddress(const QString &address);
 
     virtual qint64 write(const QByteArray &data);
-    virtual void connectToHost();
-    virtual void disconnectFromHost();
+    virtual void connectToHost() = 0;
+    virtual void disconnectFromHost() = 0;
 
+    void clearBufer();
     void trimBufferFromBegin(u_int8_t size);
 
     static QString ConnTypeToString(Conn_type conn_type);

@@ -46,14 +46,21 @@ void slotDataRecived()
             memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
             ptrBuf--;
         }
-        else if (recivedBuffer[0] == Protocol_class::QUERY_WRITE_BYTE)
+        else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_WRITE_BYTE)
         {
-            dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
-            socket->write(transmitBuffer, dataSize);
-            memmove((void*)recivedBuffer, (void*)&recivedBuffer[dataSize + 3], BUFSIZ - (dataSize + 3));
-            ptrBuf -= dataSize + 3;
+            //локальный dataSize
+            int dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
+            if (dataSize >= 0)
+            {
+                socket->write(transmitBuffer, 1); // ответ на write = 1 байт
+                memmove((void*)recivedBuffer, (void*)&recivedBuffer[dataSize + 3], BUFSIZ - (dataSize + 3));
+                ptrBuf -= dataSize + 3;
+            }
         }
         else
+            ptrBuf = recivedBuffer;
+
+        if (ptrBuf < recivedBuffer)
             ptrBuf = recivedBuffer;
     }
 }
