@@ -78,7 +78,7 @@ Page {
             var component = Qt.createComponent("ChannelItem.qml");
             if (component.status === Component.Ready)
             {
-                var obj = component.createObject(columnRead, {height: 30, number: i+":", type: device.readDataType(i)})
+                var obj = component.createObject(columnRead, {height: 30, number: i, type: device.readDataType(i)})
                 obj.width = Qt.binding(function(){return columnRead.width})
                 obj.button.text = "✂"
                 obj.text = getData(i)

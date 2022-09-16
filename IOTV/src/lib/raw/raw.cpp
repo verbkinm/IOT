@@ -78,6 +78,13 @@ std::pair<QString, QString> Raw::strData(const QByteArray &data, DATA_TYPE type)
     return raw.strData();
 }
 
+void func(void *data, ssize_t size, QByteArray &result)
+{
+    char *ptr = reinterpret_cast<char*>(&data);
+    for (uint i = 0; i < size; i++)
+        result.push_back(ptr[i]);
+}
+
 QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
 {
     QByteArray result;
@@ -101,7 +108,9 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_16 error";
             return {};
         }
-        data = qToBigEndian(data);
+        if (Q_BYTE_ORDER != Q_BIG_ENDIAN)
+            data = qToBigEndian(data);
+
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
             result.push_back(ptr[i]);
@@ -114,6 +123,9 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_32 error";
             return {};
         }
+        if (Q_BYTE_ORDER != Q_BIG_ENDIAN)
+            data = qToBigEndian(data);
+
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
             result.push_back(ptr[i]);
@@ -126,6 +138,9 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_64 error";
             return {};
         }
+        if (Q_BYTE_ORDER != Q_BIG_ENDIAN)
+            data = qToBigEndian(data);
+
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
             result.push_back(ptr[i]);
