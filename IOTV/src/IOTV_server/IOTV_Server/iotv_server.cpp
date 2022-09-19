@@ -56,6 +56,17 @@ void IOTV_Server::readSettings()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
+//        auto it = std::ranges::find_if(_iot_hosts, [&setting](const IOTV_Host &host){
+//            return host.getName() == setting[hostField::name];
+//        });
+
+//        if (it != _iot_hosts.end())
+//        {
+//            Log::write(QString(Q_FUNC_INFO) + "Error: Double host name in config file - " + setting[hostField::name], Log::Write_Flag::FILE_STDOUT);
+//            std::cout << std::endl;
+//            exit(1);
+//        }
+
         _iot_hosts.emplace_back(setting);
         if (!_iot_hosts.back().runInNewThread())
         {

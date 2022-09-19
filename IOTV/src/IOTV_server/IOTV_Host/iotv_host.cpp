@@ -96,7 +96,10 @@ void IOTV_Host::dataResived(QByteArray data)
 
 QString IOTV_Host::getName() const
 {
-    return _conn_type.get()->getName();
+    if (_conn_type.get() != nullptr)
+        return _conn_type->getName();
+
+    return {};
 }
 
 void IOTV_Host::connectToHost()
