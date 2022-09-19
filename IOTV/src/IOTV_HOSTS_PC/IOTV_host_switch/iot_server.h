@@ -2,7 +2,7 @@
 
 #include "Protocols/IOTV_SH.h"
 
-#define READ_CHANNEL_LENGTH 5
+#define READ_CHANNEL_LENGTH 7
 #define WRITE_CHANNEL_LENGTH 3
 class IOTV_Server
 {

@@ -26,11 +26,14 @@ Page {
         id: gridView
         anchors.fill: parent
         anchors.margins: 5
+        anchors.horizontalCenter: parent.horizontalCenter
         cellHeight: 110
         cellWidth: 110
 
         model: listModel
         delegate: contactDelegate
+
+
     }
 
     //    onWidthChanged: {
@@ -75,7 +78,7 @@ Page {
             Column {
                 anchors.fill: parent
                 Text {
-                    text: name;
+                    text: model.name;
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
                 Image

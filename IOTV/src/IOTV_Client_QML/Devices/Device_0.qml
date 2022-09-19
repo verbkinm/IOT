@@ -8,61 +8,81 @@ Page {
     //Ссылка на Device
     required property var device
 
-    Column {
-        id: column
-        padding: 10
-        spacing: 10
-
-        Label {id:name}
-        Label {id:devId}
-        Label {id:description}
-        Label {id:state}
-    }
-
-    Label {
-        id: lbl1
-        text: "Каналы чтения: "
-        anchors{
-            top: column.bottom
-            left: parent.left
-            leftMargin: 10
-            topMargin: 10
-        }
-    }
-
-    Column {
-        id: columnRead
+    Flickable {
+        id: fl
         width: root.width
-        spacing: 5
-        anchors {
-            top: lbl1.bottom
-            left: parent.left
-            right: parent.right
-            topMargin: 10
-        }
-    }
+        height: root.height
+        //        contentHeight: childrenRect.height
 
-    Label {
-        id: lbl2
-        text: "Каналы записи: "
-        anchors{
-            top: columnRead.bottom
-            left: parent.left
-            leftMargin: 10
-            topMargin: 15
-            bottomMargin: 5
+        ScrollBar.vertical: ScrollBar {
+            id: scroll
+            visible: active
+//            PropertyAnimation {
+//                target: scroll
+//                properties: "visible"
+//                from: true
+//                to: false
+//                duration: 5000
+//                running: true
+//            }
         }
-    }
 
-    Column {
-        id: columnWrite
-        width: root.width
-        spacing: 5
-        anchors {
-            top: lbl2.bottom
-            left: parent.left
-            right: parent.right
-            topMargin: 10
+        Column {
+            id: column
+            padding: 10
+            spacing: 10
+
+            Label {id:name}
+            Label {id:devId}
+            Label {id:description}
+            Label {id:state}
+        }
+
+        Label {
+            id: lbl1
+            text: "Каналы чтения: "
+            anchors{
+                top: column.bottom
+                left: parent.left
+                leftMargin: 10
+                topMargin: 10
+            }
+        }
+
+        Column {
+            id: columnRead
+            width: root.width
+            spacing: 5
+            anchors {
+                top: lbl1.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: 10
+            }
+        }
+
+        Label {
+            id: lbl2
+            text: "Каналы записи: "
+            anchors{
+                top: columnRead.bottom
+                left: parent.left
+                leftMargin: 10
+                topMargin: 15
+                bottomMargin: 5
+            }
+        }
+
+        Column {
+            id: columnWrite
+            width: root.width
+            spacing: 5
+            anchors {
+                top: lbl2.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: 10
+            }
         }
     }
 
@@ -104,13 +124,15 @@ Page {
 
     Timer {
         id: timer
-        interval: 1000
+        interval: 500
         repeat: true
         running: false
         onTriggered: {
             var children = columnRead.children
             for (var i = 0; i < children.length; i++)
                 children[i].text = getData(i)
+
+            fl.contentHeight = column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
         }
     }
 

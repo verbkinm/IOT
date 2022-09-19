@@ -11,6 +11,8 @@ IOTV_Server::IOTV_Server() : _id(1), _description("switch")
     _readChannelType[2] = Protocol_class::DATA_TYPE::DOUBLE_64;
     _readChannelType[3] = Protocol_class::DATA_TYPE::DOUBLE_64;
     _readChannelType[4] = Protocol_class::DATA_TYPE::DOUBLE_64;
+    _readChannelType[5] = Protocol_class::DATA_TYPE::DOUBLE_64;
+    _readChannelType[6] = Protocol_class::DATA_TYPE::DOUBLE_64;
 
     _writeChannelType[0] = Protocol_class::DATA_TYPE::DOUBLE_64;
     _writeChannelType[1] = Protocol_class::DATA_TYPE::DOUBLE_64;

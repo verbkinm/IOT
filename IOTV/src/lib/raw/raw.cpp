@@ -132,7 +132,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
     }
     else if (type == DATA_TYPE::INT_64)
     {
-        int64_t data = dataStr.toLongLong(&ok);
+        qint64 data = dataStr.toLongLong(&ok);
         if (!ok)
         {
             qDebug() << "Convert to INT_64 error";

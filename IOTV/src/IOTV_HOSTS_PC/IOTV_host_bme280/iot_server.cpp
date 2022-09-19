@@ -7,7 +7,7 @@ void IOTV_Server::newValue()
     _readChannel[2] = (rand() % 1000) + (float)(rand() % 100) / 100;
 }
 
-IOTV_Server::IOTV_Server() : _id(2), _description("bme280")
+IOTV_Server::IOTV_Server() : _id(2), _description("Датчик bme280")
 {
     srand(time(0));
     _readChannel[0] = 0.1;

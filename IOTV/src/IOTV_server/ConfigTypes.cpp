@@ -1,14 +1,14 @@
 #include "ConfigTypes.h"
 
-const char* hostField::name = "name";
-const char* hostField::connection_type = "connection_type";
-const char* hostField::address = "address";
-const char* hostField::interval = "interval";
-const char* hostField::logFile = "log_file";
-const char* hostField::port = "port";
+const QString hostField::name = "name";
+const QString hostField::connection_type = "connection_type";
+const QString hostField::address = "address";
+const QString hostField::interval = "interval";
+const QString hostField::logFile = "log_file";
+const QString hostField::port = "port";
 
-const char* connectionType::TCP = "TCP";
-const char* connectionType::FILE = "FILE";
-const char* connectionType::COM = "COM";
-const char* connectionType::UDP = "UDP";
+const QString connectionType::TCP = "TCP";
+const QString connectionType::FILE = "FILE";
+const QString connectionType::COM = "COM";
+const QString connectionType::UDP = "UDP";
 
