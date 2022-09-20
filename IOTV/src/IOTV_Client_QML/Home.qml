@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 
 Page {
     id: root
-    title: "Home"
+    title: "Главная"
 
     signal signalOpenDevice(string name)
 
@@ -23,34 +23,17 @@ Page {
     }
 
     GridView {
-        id: gridView
+        id: listView
+
         anchors.fill: parent
-        anchors.margins: 5
-        anchors.horizontalCenter: parent.horizontalCenter
-        cellHeight: 110
-        cellWidth: 110
+        anchors.margins: 10
+
+        cellHeight: 170
+        cellWidth: 170
 
         model: listModel
         delegate: contactDelegate
-
-
     }
-
-    //    onWidthChanged: {
-    ////        console.log("gridView width = " + gridView.width)
-    ////        console.log("gridView parent width = " + gridView.parent.width)
-    ////        console.log("re width = " + re.width)
-    ////        console.log("gridView childrenRect width = " + gridView.)
-    //    }
-
-    //    Component.onCompleted: {
-    ////        console.log("gridView width = " + gridView.width)
-    ////        console.log("gridView parent width = " + gridView.parent.width)
-    ////        console.log("re width = " + re.width)
-    ////        console.log("gridView childrenRect width = " + gridView.childrenRect.width)
-    //    }
-
-
 
     ListModel {
         id: listModel
@@ -58,15 +41,16 @@ Page {
 
     Component {
         id: contactDelegate
+
         Rectangle {
             id: componentRect
-            width: 100
-            height: 100
+
+            width: 164
+            height: 164
+
             color: "lightsteelblue"
-            border.width: 1
+            border.width: 2
             border.color: "red"
-            radius: 5
-            smooth: true
 
             MouseArea {
                 anchors.fill: parent
@@ -75,31 +59,36 @@ Page {
                 }
             }
 
-            Column {
-                anchors.fill: parent
-                Text {
-                    text: model.name;
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-                Image
-                {
-                    source: model.source
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: 64
-                    height: 64
-                }
+            Text {
+                id: devName
+                text: model.name;
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.margins: 5
+            }
 
-                Connections {
-                    target: client.deviceByName(name)
-                    function onStateChanged() {
-                        componentRect.border.color = target.state ? "green" : "red"
-                    }
-                    function onSignalUpdate() {
-                        model.source = imageById(target.id)
-                    }
+            Image
+            {
+                source: model.source
+                anchors.top: devName.bottom
+                anchors.topMargin: 5
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 124
+                height: 124
+            }
+
+
+            Connections {
+                target: client.deviceByName(name)
+                function onStateChanged() {
+                    componentRect.border.color = target.state ? "green" : "red"
+                }
+                function onSignalUpdate() {
+                    model.source = imageById(target.id)
                 }
             }
         }
+
     }
 
     Connections {

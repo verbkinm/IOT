@@ -9,22 +9,34 @@ Page {
 
     Flickable {
         width: parent.width
-        height: childrenRect.height
-        contentHeight: 1000
-//        contentWidth: 1000
-        Item {
-            id: itm
-            anchors.fill: parent
-//            anchors.verticalCenter: parent.verticalCenter
-//            width: parent.width
-//            height: childrenRect.height
+        height: parent.height
+        contentHeight: 200
+
+        ScrollBar.vertical: ScrollBar {
+            id: scroll
+            visible: active
+        }
+
+        GroupBox {
+            title: "Подключение к серверу"
+            font.pixelSize: 14
+            height: 255
+            anchors
+            {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                leftMargin: 10
+                rightMargin: 10
+                bottomMargin: 10
+            }
 
             Label {
                 id: label1
                 width: 100
                 height: addr.height
                 text: "Адресс: "
-                font.pixelSize: 18
+                font.pixelSize: 14
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
                 anchors {
@@ -32,7 +44,6 @@ Page {
                     top: parent.top
                     margins: 10
                 }
-                leftPadding: 20
             }
 
             Label {
@@ -40,7 +51,7 @@ Page {
                 width: label1.width
                 height: label1.height
                 text: "Порт: "
-                font.pixelSize: 18
+                font.pixelSize: 14
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
                 anchors {
@@ -48,7 +59,6 @@ Page {
                     top: label1.bottom
                     margins: 10
                 }
-                leftPadding: 20
             }
 
             TextField {
@@ -57,7 +67,7 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 antialiasing: true
-                font.pixelSize: 18
+                font.pixelSize: 14
                 placeholderText: "Введите адрес сервера"
                 placeholderTextColor: "#cccccc"
 
@@ -80,7 +90,7 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 antialiasing: true
-                font.pixelSize: 18
+                font.pixelSize: 14
                 placeholderText: "Введите порт сервера"
                 placeholderTextColor: "#cccccc"
 
@@ -99,15 +109,13 @@ Page {
             CheckBox {
                 id: autoConnect
                 height: label2.height
-                text: qsTr("Автоподключение")
+                text: qsTr("Подключение при запуске программы")
                 anchors {
                     left: parent.left
                     top: label2.bottom
                     margins: 10
                 }
-                leftPadding: 20
-
-                font.pixelSize: 18
+                font.pixelSize: 14
 
                 enabled: !client.state
                 checked: client.autoConnect

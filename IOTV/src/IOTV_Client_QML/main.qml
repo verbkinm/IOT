@@ -18,9 +18,33 @@ ApplicationWindow {
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
 
+    Text {
+        text: qsTr("Нет подключения к серверу")
+        anchors.centerIn: parent
+        font.pixelSize: 24
+        visible: !client.state && homePage.visible
+        z: 1
+    }
+
     header: ToolBar {
         height: 50
         id: overlayHeader
+
+        ToolButton {
+            id: pressBack
+            text: qsTr("<")
+
+            anchors{
+                verticalCenter: parent.verticalCenter
+                leftMargin: 20
+                left: parent.left
+            }
+            onClicked: {
+                stackView.pop()
+            }
+            visible: !homePage.visible
+        }
+
         RowLayout {
             anchors.fill: parent
             Label {
@@ -36,15 +60,14 @@ ApplicationWindow {
         id: overlayFooter
         RowLayout {
             anchors.fill: parent
-            ToolButton {
-                id: pressBack
-                text: qsTr("<")
-                onClicked: {
-                    stackView.pop()
-                }
-                Layout.alignment: Qt.AlignCenter
-//                visible: false
-            }
+//            ToolButton {
+//                id: pressBack
+//                text: qsTr("<")
+//                onClicked: {
+//                    stackView.pop()
+//                }
+//                Layout.alignment: Qt.AlignCenter
+//            }
             ToolButton {
                 text: qsTr("🏠")
                 onClicked: {
@@ -80,10 +103,13 @@ ApplicationWindow {
             id: listModel
 
             ListElement {
-                name: "Home"
+                name: "Главная"
             }
             ListElement {
-                name: "Server"
+                name: "Настройки"
+            }
+            ListElement {
+                name: "Выход"
             }
         }
 
@@ -111,6 +137,8 @@ ApplicationWindow {
                                 stackView.pop(homePage)
                                 stackView.push(clientPage)
                             }
+                            else if (index === 2)
+                                Qt.quit()
 
                             drawer.visible = 0
                         }
@@ -136,7 +164,7 @@ ApplicationWindow {
             id: homePage
 
             onSignalOpenDevice: function(name) {
-                var component = Qt.createComponent("/Devices/Device_0.qml");
+                var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
                 if (component.status === Component.Ready)
                 {
                     var dev = client.deviceByName(name)
@@ -145,15 +173,19 @@ ApplicationWindow {
                     dev.signalUpdate.connect(function() {pressBack.clicked()})
                 }
             }
+
+            function createDeviceBy(id)
+            {
+                if (id === 1)
+                    return "/Devices/Device_1.qml"
+                else
+                    return "/Devices/Device_0.qml"
+            }
         }
 
         Client {
             id: clientPage
             visible: false
-
-            onConnection_attemptChanged: {
-
-            }
         }
     }
 

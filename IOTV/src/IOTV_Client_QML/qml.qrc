@@ -4,7 +4,6 @@
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>Home.qml</file>
-        <file>Devices/Device_Icon.qml</file>
         <file>Devices/Device_0.qml</file>
         <file>Devices/Device_1.qml</file>
         <file>Devices/Device_3.qml</file>

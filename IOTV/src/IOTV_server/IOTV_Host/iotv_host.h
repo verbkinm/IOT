@@ -29,6 +29,8 @@ public:
 
     bool runInNewThread();
 
+    const std::unordered_map<QString, QString> &settingsData() const;
+
 private:
     qint64 read(uint8_t channelNumber);
     void dataResived(QByteArray data);

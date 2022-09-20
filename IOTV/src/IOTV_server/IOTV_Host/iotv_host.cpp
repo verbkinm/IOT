@@ -244,6 +244,11 @@ void IOTV_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     }
 }
 
+const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
+{
+    return _settingsData;
+}
+
 void IOTV_Host::slotConnected()
 {
     setOnline(true);
