@@ -8,6 +8,107 @@ Page {
     //Ссылка на Device
     required property var device
 
+    header: Rectangle {
+        height: 64
+
+        Button {
+            id: info
+
+            width: 48
+            height: 48
+
+            anchors{
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+                rightMargin: 10
+            }
+            display: AbstractButton.IconOnly
+            icon {
+                color: "transparent"
+                source: "qrc:/img/info.png"
+            }
+            onClicked: {
+                console.log("info")
+                popup.open()
+            }
+            Popup {
+                id: popup
+
+                parent: root
+                modal: true
+
+                x: Math.round((parent.width - width) / 2)
+                y: Math.round((parent.height - height) / 2)
+                width: root.width
+                height: root.height
+
+                background: Rectangle {
+                    color: Qt.rgba(255, 255, 255, 0.9)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        popup.close()
+                    }
+                }
+
+                Label {
+                    anchors.fill: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: device.description
+                    font.pixelSize: 24
+                    wrapMode: Text.Wrap
+                }
+            }
+        }
+        Button {
+            id: debugMode
+
+            width: 48
+            height: 48
+
+            anchors{
+                right: info.left
+                verticalCenter: parent.verticalCenter
+                rightMargin: 10
+            }
+            display: AbstractButton.IconOnly
+            icon {
+                color: "transparent"
+                source: "qrc:/img/debug.png"
+            }
+
+            onClicked: {
+                var component = Qt.createComponent("/Devices/Device_0.qml");
+                if (component.status === Component.Ready)
+                {
+                    var dev = device
+                    var obj = component.createObject(appStack, {device: dev})
+                    appStack.push(obj);
+                }
+            }
+        }
+        Button {
+            id: readWrite
+
+            width: 48
+            height: 48
+
+            anchors{
+                right: debugMode.left
+                verticalCenter: parent.verticalCenter
+                rightMargin: 10
+            }
+            display: AbstractButton.IconOnly
+            icon {
+                color: "transparent"
+                source: "qrc:/img/pen.png"
+            }
+        }
+    }
+
     Flickable {
         id: fl
         width: root.width
@@ -19,117 +120,18 @@ Page {
             visible: active
         }
 
-        Label {
-            id: devName
-            text: device.name
-            font.pixelSize: 24
-            anchors{
-                top: parent.top
-                horizontalCenter: parent.horizontalCenter
-            }
-        }
-
-        ToggleButton{
-            id: b1
-            anchors{
-                horizontalCenter: parent.horizontalCenter
-                top: devName.bottom
-            }
-            onClicked: {
-
-            }
+        Device_1_switch {
+            device: root.device
+            channel: 0
         }
     }
+
+    Component.onCompleted: {
+        title = device.name
+    }
+
+    onVisibleChanged: {
+        if (appStack.currentItem.title !== root.title)
+            destroy()
+    }
 }
-
-//        Column {
-//            id: columnRead
-//            width: root.width
-//            spacing: 5
-//            anchors {
-//                top: lbl1.bottom
-//                left: parent.left
-//                right: parent.right
-//                topMargin: 10
-//            }
-//        }
-
-//        Label {
-//            id: lbl2
-//            text: "Каналы записи: "
-//            anchors{
-//                top: columnRead.bottom
-//                left: parent.left
-//                leftMargin: 10
-//                topMargin: 15
-//                bottomMargin: 5
-//            }
-//        }
-
-//        Column {
-//            id: columnWrite
-//            width: root.width
-//            spacing: 5
-//            anchors {
-//                top: lbl2.bottom
-//                left: parent.left
-//                right: parent.right
-//                topMargin: 10
-//            }
-//        }
-//    }
-
-//    Component.onCompleted: {
-//        title  = Qt.binding(function (){ return device.name})
-//        name.text = Qt.binding(function (){ return "Имя устройства: " + device.name})
-//        devId.text = Qt.binding(function (){ return "ID устройства: " + device.id})
-//        description.text = Qt.binding(function (){ return "Описание: " + device.description})
-//        state.text = Qt.binding(function (){ return "Состояние: " + (device.state ? "онлайн" : "офлайн")})
-
-//        for (var i = 0; i < device.readChannelLength; i++)
-//        {
-//            var component = Qt.createComponent("ChannelItem.qml");
-//            if (component.status === Component.Ready)
-//            {
-//                var obj = component.createObject(columnRead, {height: 30, number: i, type: device.readDataType(i)})
-//                obj.width = Qt.binding(function(){return columnRead.width})
-//                obj.button.text = "✂"
-//                obj.text = getData(i)
-//            }
-//        }
-
-//        for (i = 0; i < device.writeChannelLength; i++)
-//        {
-//            component = Qt.createComponent("ChannelItemWrite.qml");
-//            if (component.status === Component.Ready)
-//            {
-//                obj = component.createObject(columnWrite, {height: 30, number: i, type: device.readDataType(i), _device: device})
-//                obj.width = Qt.binding(function(){return columnRead.width})
-//                obj.button.text = "➩"
-//            }
-//        }
-//        timer.start()
-//    }
-
-//    onVisibleChanged: {
-//        destroy()
-//    }
-
-//    Timer {
-//        id: timer
-//        interval: 500
-//        repeat: true
-//        running: false
-//        onTriggered: {
-//            var children = columnRead.children
-//            for (var i = 0; i < children.length; i++)
-//                children[i].text = getData(i)
-
-//            fl.contentHeight = column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
-//        }
-//    }
-
-//    function getData(i) {
-//        return device.readData(i)
-//    }
-//}

@@ -18,6 +18,8 @@ ApplicationWindow {
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
 
+    property alias appStack: stackView
+
     Text {
         text: qsTr("Нет подключения к серверу")
         anchors.centerIn: parent
@@ -162,25 +164,6 @@ ApplicationWindow {
 
         Home {
             id: homePage
-
-            onSignalOpenDevice: function(name) {
-                var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
-                if (component.status === Component.Ready)
-                {
-                    var dev = client.deviceByName(name)
-                    var obj = component.createObject(window, {device: dev})
-                    stackView.push(obj);
-                    dev.signalUpdate.connect(function() {pressBack.clicked()})
-                }
-            }
-
-            function createDeviceBy(id)
-            {
-                if (id === 1)
-                    return "/Devices/Device_1.qml"
-                else
-                    return "/Devices/Device_0.qml"
-            }
         }
 
         Client {

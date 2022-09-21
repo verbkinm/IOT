@@ -16,6 +16,9 @@
         <file>img/id/1.png</file>
         <file>Devices/ChannelItem.qml</file>
         <file>Devices/ChannelItemWrite.qml</file>
+        <file>img/debug.png</file>
+        <file>img/pen.png</file>
+        <file>Devices/Device_1_switch.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>

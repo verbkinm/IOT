@@ -6,8 +6,6 @@ Page {
     id: root
     title: "Главная"
 
-    signal signalOpenDevice(string name)
-
     footer: Item {
         height: 20
         width: parent.width
@@ -55,7 +53,22 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    signalOpenDevice(name)
+                    var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
+                    if (component.status === Component.Ready)
+                    {
+                        var dev = client.deviceByName(name)
+                        var obj = component.createObject(window, {device: dev})
+                        appStack.push(obj);
+                        dev.signalUpdate.connect(function() {pressBack.clicked()})
+                    }
+                }
+
+                function createDeviceBy(id)
+                {
+                    if (id === 1)
+                        return "/Devices/Device_1.qml"
+                    else
+                        return "/Devices/Device_0.qml"
                 }
             }
 
@@ -88,7 +101,6 @@ Page {
                 }
             }
         }
-
     }
 
     Connections {

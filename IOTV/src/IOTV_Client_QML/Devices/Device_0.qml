@@ -34,7 +34,12 @@ Page {
 
             Label {id:name}
             Label {id:devId}
-            Label {id:description}
+            Label {
+                id:description
+                wrapMode: Text.Wrap
+                width: fl.width
+                rightPadding: 10
+            }
             Label {id:state}
         }
 
@@ -101,7 +106,7 @@ Page {
                 var obj = component.createObject(columnRead, {height: 30, number: i, type: device.readDataType(i)})
                 obj.width = Qt.binding(function(){return columnRead.width})
                 obj.button.text = "✂"
-                obj.text = getData(i)
+                obj.text = device.readData(i)
             }
         }
 
@@ -130,13 +135,9 @@ Page {
         onTriggered: {
             var children = columnRead.children
             for (var i = 0; i < children.length; i++)
-                children[i].text = getData(i)
+                children[i].text = device.readData(i)
 
             fl.contentHeight = column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
         }
-    }
-
-    function getData(i) {
-        return device.readData(i)
     }
 }

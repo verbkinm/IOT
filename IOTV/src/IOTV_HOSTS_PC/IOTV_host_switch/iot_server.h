@@ -2,7 +2,7 @@
 
 #include "Protocols/IOTV_SH.h"
 
-#define READ_CHANNEL_LENGTH 7
+#define READ_CHANNEL_LENGTH 3
 #define WRITE_CHANNEL_LENGTH 3
 class IOTV_Server
 {
@@ -12,7 +12,7 @@ public:
     const uint8_t _id;
     const char *_description;
 
-    double _readChannel[READ_CHANNEL_LENGTH];
+    bool _readChannel[READ_CHANNEL_LENGTH];
     uint8_t _readChannelType[READ_CHANNEL_LENGTH];
 
     uint8_t _writeChannelType[WRITE_CHANNEL_LENGTH];
