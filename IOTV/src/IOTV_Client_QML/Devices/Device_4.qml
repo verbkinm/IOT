@@ -14,8 +14,8 @@ Page {
         Button {
             id: info
 
-            width: 48
-            height: 48
+            width: 52
+            height: 52
 
             anchors{
                 right: parent.right
@@ -66,8 +66,8 @@ Page {
         Button {
             id: debugMode
 
-            width: 48
-            height: 48
+            width: 52
+            height: 52
 
             anchors{
                 right: info.left
@@ -93,8 +93,8 @@ Page {
         Button {
             id: readWrite
 
-            width: 48
-            height: 48
+            width: 52
+            height: 52
 
             anchors{
                 right: debugMode.left
@@ -119,30 +119,87 @@ Page {
             visible: active
         }
 
-        Column {
-            id: column
-            width: parent.width
+        Image {
+            id: img
+            source: "qrc:/img/id/4.png"
+            width: parent.width - (parent.width * 100 / 10)
+//            height: 150
+            fillMode: Image.PreserveAspectFit
+
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
         }
+
+        Row {
+            anchors {
+                top: img.bottom
+                horizontalCenter: parent.horizontalCenter
+//                left: parent.left
+//                right: parent.right
+            }
+            spacing: 5
+
+            Button {
+                id: play
+                width: 52
+                height: 52
+                text: "▶️"
+                font.pixelSize: 18
+                display: AbstractButton.TextOnly
+            }
+            Button {
+                id: mode1
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "1"
+                font.pixelSize: 18
+            }
+            Button {
+                id: mode2
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "2"
+                font.pixelSize: 18
+            }
+            Button {
+                id: mode3
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "3"
+                font.pixelSize: 18
+            }
+            Button {
+                id: led
+                width: 52
+                height: 52
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/lamp_on.png"
+                }
+            }
+            Button {
+                id: autorepeate
+                width: 52
+                height: 52
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/repeate.png"
+                }
+            }
+        }
+
     }
 
     Component.onCompleted: {
         title = device.name
-
-        if (device.readChannelLength !== device.writeChannelLength)
-        {
-            console.log("error device id 1")
-            return
-        }
-
-        for (var i = 0; i < device.readChannelLength; i++)
-        {
-            var component = Qt.createComponent("Device_1_switch.qml");
-            if (component.status === Component.Ready)
-            {
-                var obj = component.createObject(column, {device: root.device, channel: i})
-                fl.contentHeight = device.readChannelLength * obj.height + header.height
-            }
-        }
     }
 
     onVisibleChanged: {

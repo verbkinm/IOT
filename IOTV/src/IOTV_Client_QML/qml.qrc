@@ -19,6 +19,10 @@
         <file>img/debug.png</file>
         <file>img/pen.png</file>
         <file>Devices/Device_1_switch.qml</file>
+        <file>Devices/Device_4.qml</file>
+        <file>img/id/4.png</file>
+        <file>img/lamp_on.png</file>
+        <file>img/repeate.png</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>

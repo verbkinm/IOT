@@ -8,55 +8,70 @@ Rectangle {
     required property int channel
 
     id: root
-
     height: 150
-    border.color: "black"
-    border.width: 1
 
     anchors{
         left: parent.left
         right: parent.right
-        margins: 5
     }
 
-    ToggleButton{
-        id: button
-        height: 90
-        anchors{
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-        }
-        text: checked ? "Вкл." : "Выкл."
-        onClicked: {
-            timer.stop()
-            var state = button.checked === true ? "true" : "false"
-//            button.checked = !button.checked
-            device.setDataFromString(channel, state)
-            timer.start()
-        }
-    }
+    enabled: device.state
 
-    TextField {
-        id: userDescription
-
-        height: button.height
-        text: "TEXT"
-
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        antialiasing: true
-        readOnly: true
-
-        placeholderText: "Описание..."
-        placeholderTextColor: "#ccc"
-
-        font.pixelSize: 14
-
-        anchors{
-            right: parent.right
+    Rectangle {
+        anchors {
+            fill: parent
+            bottomMargin: 15
+            leftMargin: 10
             rightMargin: 10
-            left: button.right
-            verticalCenter: parent.verticalCenter
+        }
+
+        Rectangle {
+            color: device.state ? Qt.rgba(0.5, 0.5, 0.5, 0) : Qt.rgba(0.5, 0.5, 0.5, 0.2)
+            anchors.fill: parent
+            z: 1
+        }
+
+        border.color: "grey"
+        border.width: 1
+
+        ToggleButton{
+            id: button
+            height: 90
+            anchors{
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
+            text: checked ? "Вкл." : "Выкл."
+            onClicked: {
+                timer.stop()
+                var state = button.checked === true ? "true" : "false"
+                device.setDataFromString(channel, state)
+                timer.start()
+            }
+        }
+
+        TextField {
+            id: userDescription
+
+            height: button.height
+            text: "TEXT"
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            antialiasing: true
+            readOnly: true
+
+            placeholderText: "Описание..."
+            placeholderTextColor: "#ccc"
+
+            font.pixelSize: 14
+
+            anchors{
+                right: parent.right
+                rightMargin: 10
+                left: button.right
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 

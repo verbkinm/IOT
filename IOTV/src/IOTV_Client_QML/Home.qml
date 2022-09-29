@@ -66,7 +66,7 @@ Page {
                 function createDeviceBy(id)
                 {
                     if (id === 1)
-                        return "/Devices/Device_1.qml"
+                        return "/Devices/Device_4.qml"
                     else
                         return "/Devices/Device_0.qml"
                 }

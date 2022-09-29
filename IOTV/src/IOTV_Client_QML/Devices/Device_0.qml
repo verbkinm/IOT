@@ -137,6 +137,7 @@ Page {
             for (var i = 0; i < children.length; i++)
                 children[i].text = device.readData(i)
 
+            //!!!
             fl.contentHeight = column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
         }
     }
