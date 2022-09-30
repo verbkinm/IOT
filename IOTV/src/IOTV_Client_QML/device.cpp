@@ -53,24 +53,27 @@ bool Device::isOnline() const
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-//    emit signalDataChanged(channelNumber, data);
     return this->setReadChannelData(channelNumber, data);
 }
 
 void Device::setDataFromString(int channelNumber, QString data)
 {
-    emit signalQueryWrite(channelNumber, Raw::strToByteArray(data, getReadChannelType(channelNumber)));
+    emit signalQueryWrite(channelNumber, Raw::strToByteArray(data, getWriteChannelType(channelNumber)));
 }
 
 QString Device::readData(int channelNumber) const
 {
-//    std::pair<QString, QString> rest = Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber));
     return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).first;
 }
 
 QString Device::readDataType(int channelNumber) const
 {
     return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).second;
+}
+
+QString Device::writeDataType(int channelNumber) const
+{
+    return Raw::strData(QByteArray {}, getWriteChannelType(channelNumber)).second;
 }
 
 void Device::setReadInterval(int interval)

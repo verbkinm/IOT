@@ -1,11 +1,11 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Extras 1.4
 
 Rectangle {
     //Ссылка на Device
     required property var device
     required property int channel
+    property alias checked: button.checked
 
     id: root
     height: 150
@@ -34,17 +34,17 @@ Rectangle {
         border.color: "grey"
         border.width: 1
 
-        ToggleButton{
+        Switch{
             id: button
             height: 90
             anchors{
                 left: parent.left
                 verticalCenter: parent.verticalCenter
             }
-            text: checked ? "Вкл." : "Выкл."
-            onClicked: {
+
+            onToggled: {
                 timer.stop()
-                var state = button.checked === true ? "true" : "false"
+                var state = button.checked ? "true" : "false"
                 device.setDataFromString(channel, state)
                 timer.start()
             }
@@ -77,7 +77,7 @@ Rectangle {
 
     Timer {
         id: timer
-        interval: 1500
+        interval: 500
         repeat: true
         running: true
         onTriggered: {

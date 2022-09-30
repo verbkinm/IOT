@@ -74,12 +74,7 @@ Item {
         }
 
         onClicked: {
-//            signalWrite(txtField.text)
             _device.setDataFromString(number, txtField.text)
-//            obj.signalWrite.connect(function (str){
-//                console.log(device.name, " ", obj.number, " ", str)
-//                device.setDataFromString(obj.number, str)
-//            })
         }
     }
 }

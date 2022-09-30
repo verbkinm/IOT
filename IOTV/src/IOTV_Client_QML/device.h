@@ -32,6 +32,7 @@ public:
     Q_INVOKABLE void setDataFromString(int channelNumber, QString data);
     Q_INVOKABLE QString readData(int channelNumber) const;
     Q_INVOKABLE QString readDataType(int channelNumber) const;
+    Q_INVOKABLE QString writeDataType(int channelNumber) const;
 
     void setReadInterval(int interval);
 

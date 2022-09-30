@@ -1,6 +1,5 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Extras 1.4
 
 Page {
     id: root
@@ -139,7 +138,7 @@ Page {
             var component = Qt.createComponent("Device_1_switch.qml");
             if (component.status === Component.Ready)
             {
-                var obj = component.createObject(column, {device: root.device, channel: i})
+                var obj = component.createObject(column, {device: root.device, channel: i, checked: root.device.readData(i) === "true" ? true : false})
                 fl.contentHeight = device.readChannelLength * obj.height + header.height
             }
         }
@@ -147,7 +146,10 @@ Page {
 
     onVisibleChanged: {
         if (appStack.currentItem.title !== root.title)
+        {
             destroy()
+            console.log("destroy")
+        }
     }
 }
 

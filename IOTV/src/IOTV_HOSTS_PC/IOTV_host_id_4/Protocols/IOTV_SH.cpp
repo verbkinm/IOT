@@ -17,6 +17,7 @@ uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
 
     memcpy(&outData[5], iotHost._description, descriptionLength);
     memcpy(&outData[5 + descriptionLength], iotHost._readChannelType, channelRead);
+    memcpy(&outData[5 + descriptionLength + channelRead], iotHost._writeChannelType, channelWrite);
 
     return dataSize;
 }
@@ -32,21 +33,20 @@ uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *i
 
     uint16_t dataSize = 3,
             valueSize = 0;
-    char *arr = 0;
 
     if ( channelNumber <= (READ_CHANNEL_LENGTH - 1) )
     {
         auto value = iotHost._readChannel[channelNumber];
-        arr = reinterpret_cast<char*>(&value);
+        char *arr = reinterpret_cast<char*>(&value);
         valueSize = sizeof(value);
         dataSize += valueSize;
+
+        memcpy(&outData[3], arr, valueSize);
     }
 
     outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_READ_BYTE;
     outData[1] = valueSize << 8;
     outData[2] = valueSize;
-
-    memcpy(&outData[3], arr, valueSize);
 
     return dataSize;
 }
@@ -65,10 +65,11 @@ int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, con
     if (realDataSize < (3 + dataWriteSize))
         return -1; //не запрос пришел полный
 
+    // для совместимости с другими устройствами или для расширения каналов
     char writeData[dataWriteSize];
     memcpy(writeData, &inData[3], dataWriteSize);
 
-    if ((dataWriteSize != 0) && (channelNumber <= (WRITE_CHANNEL_LENGTH - 1)))
+    if ((channelNumber < WRITE_CHANNEL_LENGTH) && (dataWriteSize == 1))
         memcpy(&iotHost._readChannel[channelNumber], writeData, sizeof(iotHost._readChannel[channelNumber]));
 
     outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_WRITE_BYTE;

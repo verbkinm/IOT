@@ -9,7 +9,7 @@ class Protocol_class
 {
 public:
     //Принята BigEndian последовательность в коде
-    enum DATA_TYPE
+    enum DATA_TYPE : uint8_t
     {
         INT_8,
         INT_16,

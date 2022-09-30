@@ -5,11 +5,22 @@ CONFIG += c++2a
 SOURCES += \
         client.cpp \
         device.cpp \
+        lib/Base_Host/base_host.cpp \
+        lib/Base_Host/channel.cpp \
+        lib/Log/log.cpp \
+        lib/Protocols/IOTV_SC.cpp \
+        lib/Protocols/IOTV_SH.cpp \
+        lib/raw/raw.cpp \
         main.cpp
 
 resources.prefix = /$${TARGET}
 RESOURCES += \
     qml.qrc
+
+INCLUDEPATH += lib/Base_Host \
+            lib/Log \
+            lib/Protocols \
+            lib/raw
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -24,34 +35,15 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     client.h \
-    device.h
+    device.h \
+    lib/Base_Host/base_host.h \
+    lib/Base_Host/channel.h \
+    lib/Log/log.h \
+    lib/Protocols/IOTV_SC.h \
+    lib/Protocols/IOTV_SH.h \
+    lib/Protocols/protocols.h \
+    lib/raw/raw.h
 
+SUBDIRS += \
+    lib/Base_Host/Base_Host.pro
 
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocolsd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
-
-INCLUDEPATH += $$PWD/../lib/Protocols
-DEPENDPATH += $$PWD/../lib/Protocols
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -lLogd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
-
-INCLUDEPATH += $$PWD/../lib/Log
-DEPENDPATH += $$PWD/../lib/Log
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/release/ -lraw
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/debug/ -lraw
-else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-
-INCLUDEPATH += $$PWD/../lib/raw
-DEPENDPATH += $$PWD/../lib/raw
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Hostd
-else:unix:!macx: LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
-
-INCLUDEPATH += $$PWD/../lib/Base_Host
-DEPENDPATH += $$PWD/../lib/Base_Host

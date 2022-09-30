@@ -23,6 +23,8 @@
         <file>img/id/4.png</file>
         <file>img/lamp_on.png</file>
         <file>img/repeate.png</file>
+        <file>img/lamp_off.png</file>
+        <file>img/4_led.png</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>

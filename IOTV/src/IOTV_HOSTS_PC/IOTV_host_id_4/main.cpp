@@ -15,12 +15,22 @@ IOTV_Server iot;
 char recivedBuffer[BUFSIZ] {0}, transmitBuffer[BUFSIZ] {0};
 char* ptrBuf = recivedBuffer;
 
+void debug()
+{
+    qDebug() << "Play: " << iot.play()
+             << ", Led: " << iot.led()
+             << ", Repeate: " << iot.repeate()
+             << ", Mode: " << iot.mode();
+}
 
 void slotDataRecived()
 {
     uint16_t dataSize = 0;
     uint64_t recvSize = socket->read(ptrBuf, BUFSIZ); //!!!
     ptrBuf += recvSize;
+
+//    if (ptrBuf > recivedBuffer + BUFSIZ - 1)
+//        ptrBuf = recivedBuffer;
 
     while(ptrBuf != recivedBuffer)
     {
@@ -62,6 +72,8 @@ void slotDataRecived()
 
         if (ptrBuf < recivedBuffer)
             ptrBuf = recivedBuffer;
+
+        debug();
     }
 }
 //для ПК
@@ -94,8 +106,8 @@ int main(int argc, char *argv[])
         slotNewConnection();
     });
 
-    server->listen(QHostAddress("127.0.0.1"), 2024);
-    std::cout << "Start service on 127.0.0.1:2024" << std::endl;
+    server->listen(QHostAddress("127.0.0.1"), 2025);
+    std::cout << "Start service on 127.0.0.1:2025" << std::endl;
 
     return a.exec();
 }

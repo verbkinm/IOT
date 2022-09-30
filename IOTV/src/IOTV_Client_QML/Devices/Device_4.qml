@@ -1,12 +1,16 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Extras 1.4
 
 Page {
     id: root
 
     //Ссылка на Device
     required property var device
+
+    property bool playSate: false
+    property bool ledSate: false
+    property bool repeateSate: false
+    property int mode: 0
 
     header: Rectangle {
         height: 64
@@ -121,7 +125,7 @@ Page {
 
         Image {
             id: img
-            source: "qrc:/img/id/4.png"
+            source: playSate ? "qrc:/img/4_led.png" : "qrc:/img/id/4.png"
             width: parent.width - (parent.width * 100 / 10)
 //            height: 150
             fillMode: Image.PreserveAspectFit
@@ -149,30 +153,22 @@ Page {
                 text: "▶️"
                 font.pixelSize: 18
                 display: AbstractButton.TextOnly
-            }
-            Button {
-                id: mode1
-                width: 52
-                height: 52
-                display: AbstractButton.TextOnly
-                text: "1"
-                font.pixelSize: 18
-            }
-            Button {
-                id: mode2
-                width: 52
-                height: 52
-                display: AbstractButton.TextOnly
-                text: "2"
-                font.pixelSize: 18
-            }
-            Button {
-                id: mode3
-                width: 52
-                height: 52
-                display: AbstractButton.TextOnly
-                text: "3"
-                font.pixelSize: 18
+
+                onClicked: {
+                    if (playSate)
+                    {
+                        device.setDataFromString(0, "false")
+                        text = "▶️"
+//                        img.source = "qrc:/img/id/4.png"
+                    }
+                    else
+                    {
+                        device.setDataFromString(0, "true")
+                        text = "⏸"
+//                        img.source = "qrc:/img/4_led.png"
+                    }
+                    playSate = !playSate
+                }
             }
             Button {
                 id: led
@@ -181,7 +177,20 @@ Page {
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
-                    source: "qrc:/img/lamp_on.png"
+                    source: "qrc:/img/lamp_off.png"
+                }
+                onClicked: {
+                    if (ledSate)
+                    {
+                        device.setDataFromString(1, "false")
+                        icon.source = "qrc:/img/lamp_off.png"
+                    }
+                    else
+                    {
+                        device.setDataFromString(1, "true")
+                        icon.source = "qrc:/img/lamp_on.png"
+                    }
+                    ledSate = !ledSate
                 }
             }
             Button {
@@ -193,9 +202,53 @@ Page {
                     color: "transparent"
                     source: "qrc:/img/repeate.png"
                 }
+                onClicked: {
+                    if (repeateSate)
+                    {
+                        device.setDataFromString(2, "false")
+                        icon.source = "qrc:/img/repeate.png"
+                    }
+                    else
+                    {
+                        device.setDataFromString(2, "true")
+                        icon.source = "qrc:/img/repeate.png"
+                    }
+                }
+            }
+            Button {
+                id: mode1
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "1"
+                font.pixelSize: 18
+                onClicked: {
+                    device.setDataFromString(3, "0")
+                }
+            }
+            Button {
+                id: mode2
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "2"
+                font.pixelSize: 18
+                onClicked: {
+                    device.setDataFromString(3, "1")
+                }
+            }
+            Button {
+                id: mode3
+                width: 52
+                height: 52
+                display: AbstractButton.TextOnly
+                text: "3"
+                font.pixelSize: 18
+                onClicked: {
+                    device.setDataFromString(3, "2")
+                }
             }
         }
-
     }
 
     Component.onCompleted: {

@@ -115,8 +115,8 @@ Page {
             component = Qt.createComponent("ChannelItemWrite.qml");
             if (component.status === Component.Ready)
             {
-                obj = component.createObject(columnWrite, {height: 30, number: i, type: device.readDataType(i), _device: device})
-                obj.width = Qt.binding(function(){return columnRead.width})
+                obj = component.createObject(columnWrite, {height: 30, number: i, type: device.writeDataType(i), _device: device})
+                obj.width = Qt.binding(function(){return columnWrite.width})
                 obj.button.text = "➩"
             }
         }

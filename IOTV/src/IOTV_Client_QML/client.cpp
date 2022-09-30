@@ -61,7 +61,7 @@ int Client::countDevices() const
 
 int Client::countDeviceOnline() const
 {
-    auto count = std::ranges::count_if(_devices, [](const auto &pair)
+    auto count = std::count_if(_devices.begin(), _devices.end(), [](const auto &pair)
     {
         return pair.second.isOnline();
     });
@@ -108,7 +108,7 @@ void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
         {
             Device &oldDev = result.first->second;
             auto d = Device(dev);
-            if (oldDev != d)
+            if (!(oldDev == d))
                 oldDev.update(dev);
 
 //            QString str = QString(Q_FUNC_INFO) + " " + dev.name + " can't create new device";
