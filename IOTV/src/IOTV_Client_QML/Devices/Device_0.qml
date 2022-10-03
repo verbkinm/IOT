@@ -123,9 +123,9 @@ Page {
         timer.start()
     }
 
-    onVisibleChanged: {
-        destroy()
-    }
+//    onVisibleChanged: {
+//        destroy()
+//    }
 
     Timer {
         id: timer

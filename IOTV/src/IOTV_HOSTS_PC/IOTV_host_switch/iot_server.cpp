@@ -1,6 +1,6 @@
 #include "iot_server.h"
 
-IOTV_Server::IOTV_Server() : _id(1), _description("Выключатель чего-то такого. Можно включать, а можно выключать =))")
+IOTV_Server::IOTV_Server() : _id(1), _description("switch")
 {
     _readChannel[0] = 0;
     _readChannel[1] = 0;

@@ -65,7 +65,6 @@ int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, con
     if (realDataSize < (3 + dataWriteSize))
         return -1; //не запрос пришел полный
 
-    // для совместимости с другими устройствами или для расширения каналов
     char writeData[dataWriteSize];
     memcpy(writeData, &inData[3], dataWriteSize);
 

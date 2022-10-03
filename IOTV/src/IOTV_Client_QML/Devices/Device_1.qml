@@ -144,12 +144,12 @@ Page {
         }
     }
 
-    onVisibleChanged: {
-        if (appStack.currentItem.title !== root.title)
-        {
-            destroy()
-            console.log("destroy")
-        }
-    }
+//    onVisibleChanged: {
+//        if (appStack.currentItem.title !== root.title)
+//        {
+//            destroy()
+//            console.log("destroy")
+//        }
+//    }
 }
 

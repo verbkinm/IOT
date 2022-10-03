@@ -62,14 +62,6 @@ ApplicationWindow {
         id: overlayFooter
         RowLayout {
             anchors.fill: parent
-//            ToolButton {
-//                id: pressBack
-//                text: qsTr("<")
-//                onClicked: {
-//                    stackView.pop()
-//                }
-//                Layout.alignment: Qt.AlignCenter
-//            }
             ToolButton {
                 text: qsTr("🏠")
                 onClicked: {
@@ -136,7 +128,7 @@ ApplicationWindow {
                                 stackView.pop(homePage)
                             else if (index === 1 && stackView.currentItem != clientPage)
                             {
-                                stackView.pop(homePage)
+//                                stackView.pop(homePage)
                                 stackView.push(clientPage)
                             }
                             else if (index === 2)

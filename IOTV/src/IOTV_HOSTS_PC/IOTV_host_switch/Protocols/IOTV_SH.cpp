@@ -16,7 +16,9 @@ uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
     outData[4] = (channelRead << 4) | channelWrite;
 
     memcpy(&outData[5], iotHost._description, descriptionLength);
+
     memcpy(&outData[5 + descriptionLength], iotHost._readChannelType, channelRead);
+    memcpy(&outData[5 + descriptionLength + channelRead], iotHost._writeChannelType, channelWrite);
 
     return dataSize;
 }

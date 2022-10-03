@@ -57,7 +57,7 @@ Page {
                     if (component.status === Component.Ready)
                     {
                         var dev = client.deviceByName(name)
-                        var obj = component.createObject(window, {device: dev})
+                        var obj = component.createObject(appStack, {device: dev})
                         appStack.push(obj);
                         dev.signalUpdate.connect(function() {pressBack.clicked()})
                     }
@@ -90,6 +90,7 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 124
                 height: 124
+                fillMode: Image.PreserveAspectFit
             }
 
 

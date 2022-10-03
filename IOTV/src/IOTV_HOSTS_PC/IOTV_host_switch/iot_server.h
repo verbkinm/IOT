@@ -13,7 +13,7 @@ public:
     const char *_description;
 
     bool _readChannel[READ_CHANNEL_LENGTH];
-    uint8_t _readChannelType[READ_CHANNEL_LENGTH];
+    Protocol_class::DATA_TYPE _readChannelType[READ_CHANNEL_LENGTH];
 
-    uint8_t _writeChannelType[WRITE_CHANNEL_LENGTH];
+    Protocol_class::DATA_TYPE _writeChannelType[WRITE_CHANNEL_LENGTH];
 };

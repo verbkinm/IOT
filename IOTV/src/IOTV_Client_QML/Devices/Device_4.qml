@@ -135,14 +135,22 @@ Page {
                 left: parent.left
                 right: parent.right
             }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    if (playSate)
+                        device.setDataFromString(0, "false")
+                    else
+                        device.setDataFromString(0, "true")
+                }
+            }
         }
 
         Row {
             anchors {
                 top: img.bottom
                 horizontalCenter: parent.horizontalCenter
-//                left: parent.left
-//                right: parent.right
             }
             spacing: 5
 
@@ -150,24 +158,15 @@ Page {
                 id: play
                 width: 52
                 height: 52
-                text: "▶️"
+                text: playSate ? "⏸" : "▶"
                 font.pixelSize: 18
                 display: AbstractButton.TextOnly
 
                 onClicked: {
                     if (playSate)
-                    {
                         device.setDataFromString(0, "false")
-                        text = "▶️"
-//                        img.source = "qrc:/img/id/4.png"
-                    }
                     else
-                    {
                         device.setDataFromString(0, "true")
-                        text = "⏸"
-//                        img.source = "qrc:/img/4_led.png"
-                    }
-                    playSate = !playSate
                 }
             }
             Button {
@@ -177,20 +176,13 @@ Page {
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
-                    source: "qrc:/img/lamp_off.png"
+                    source: ledSate ? "qrc:/img/lamp_on.png" : "qrc:/img/lamp_off.png"
                 }
                 onClicked: {
                     if (ledSate)
-                    {
                         device.setDataFromString(1, "false")
-                        icon.source = "qrc:/img/lamp_off.png"
-                    }
                     else
-                    {
                         device.setDataFromString(1, "true")
-                        icon.source = "qrc:/img/lamp_on.png"
-                    }
-                    ledSate = !ledSate
                 }
             }
             Button {
@@ -200,19 +192,13 @@ Page {
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
-                    source: "qrc:/img/repeate.png"
+                    source: repeateSate ? "qrc:/img/repeate.png" : "qrc:/img/repeate_off.png"
                 }
                 onClicked: {
                     if (repeateSate)
-                    {
                         device.setDataFromString(2, "false")
-                        icon.source = "qrc:/img/repeate.png"
-                    }
                     else
-                    {
                         device.setDataFromString(2, "true")
-                        icon.source = "qrc:/img/repeate.png"
-                    }
                 }
             }
             Button {
@@ -255,9 +241,22 @@ Page {
         title = device.name
     }
 
-    onVisibleChanged: {
-        if (appStack.currentItem.title !== root.title)
-            destroy()
+    Timer {
+        id: timer
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: {
+            playSate = device.readData(0) === "true" ? true : false
+            ledSate = device.readData(1) === "true" ? true : false
+            repeateSate = device.readData(2) === "true" ? true : false
+            mode = device.readData(3) === "true" ? true : false
+        }
     }
+
+//    onVisibleChanged: {
+//        if (appStack.currentItem.title !== root.title)
+//            destroy()
+//    }
 }
 

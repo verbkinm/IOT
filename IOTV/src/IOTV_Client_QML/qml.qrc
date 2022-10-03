@@ -25,6 +25,7 @@
         <file>img/repeate.png</file>
         <file>img/lamp_off.png</file>
         <file>img/4_led.png</file>
+        <file>img/repeate_off.png</file>
     </qresource>
     <qresource prefix="/pages"/>
 </RCC>
