@@ -154,12 +154,23 @@ ApplicationWindow {
         anchors.fill: parent
         initialItem: homePage
 
+        onCurrentItemChanged: {
+            console.log(stackView.currentItem.objectName)
+            if (stackView.currentItem.objectName == homePage.objectName)
+            {
+                for (var i = stackView.children.length - 1; i > 2; i--)
+                    stackView.children[i].destroy()
+            }
+        }
+
         Home {
             id: homePage
+            objectName: "Home"
         }
 
         Client {
             id: clientPage
+            objectName: "Client"
             visible: false
         }
     }
@@ -174,6 +185,7 @@ ApplicationWindow {
 
     Popup {
         id: popupWait
+        objectName: "Popup"
         anchors.centerIn: parent
         width: parent.width
         height: parent.height

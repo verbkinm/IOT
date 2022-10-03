@@ -124,8 +124,15 @@ Page {
     }
 
 //    onVisibleChanged: {
-//        destroy()
+//        for (var i = 0; i < appStack.children.length; i++)
+//        {
+//            console.log(appStack.children[i].objectName)
+//        }
 //    }
+
+    Component.onDestruction: {
+        console.log("Device 0 destruct: ", objectName)
+    }
 
     Timer {
         id: timer

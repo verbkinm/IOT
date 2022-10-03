@@ -1,4 +1,4 @@
-QT += quick
+QT += quick multimedia
 
 CONFIG += c++2a
 
@@ -46,4 +46,3 @@ HEADERS += \
 
 SUBDIRS += \
     lib/Base_Host/Base_Host.pro
-

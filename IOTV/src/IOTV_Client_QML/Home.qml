@@ -53,11 +53,27 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
+                    var find = false
+                    var pageObject
+                    for (var i = 0; i < appStack.children.length; i++)
+                        if (appStack.children[i].objectName === name)
+                        {
+                            find = true
+                            pageObject = appStack.children[i]
+                            break
+                        }
+                    if (find)
+                    {
+                        appStack.push(pageObject)
+                        return
+                    }
+
                     var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
                     if (component.status === Component.Ready)
                     {
                         var dev = client.deviceByName(name)
                         var obj = component.createObject(appStack, {device: dev})
+                        obj.objectName = name
                         appStack.push(obj);
                         dev.signalUpdate.connect(function() {pressBack.clicked()})
                     }

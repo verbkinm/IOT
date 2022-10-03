@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QtMultimedia 5.9
 
 Page {
     id: root
@@ -12,109 +13,13 @@ Page {
     property bool repeateSate: false
     property int mode: 0
 
-    header: Rectangle {
-        height: 64
-
-        Button {
-            id: info
-
-            width: 52
-            height: 52
-
-            anchors{
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: 10
-            }
-            display: AbstractButton.IconOnly
-            icon {
-                color: "transparent"
-                source: "qrc:/img/info.png"
-            }
-            onClicked: {
-                console.log("info")
-                popup.open()
-            }
-            Popup {
-                id: popup
-
-                parent: root
-                modal: true
-
-                x: Math.round((parent.width - width) / 2)
-                y: Math.round((parent.height - height) / 2)
-                width: root.width
-                height: root.height
-
-                background: Rectangle {
-                    color: Qt.rgba(255, 255, 255, 0.9)
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        popup.close()
-                    }
-                }
-
-                Label {
-                    anchors.fill: parent
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    text: device.description
-                    font.pixelSize: 24
-                    wrapMode: Text.Wrap
-                }
-            }
-        }
-        Button {
-            id: debugMode
-
-            width: 52
-            height: 52
-
-            anchors{
-                right: info.left
-                verticalCenter: parent.verticalCenter
-                rightMargin: 10
-            }
-            display: AbstractButton.IconOnly
-            icon {
-                color: "transparent"
-                source: "qrc:/img/debug.png"
-            }
-
-            onClicked: {
-                var component = Qt.createComponent("/Devices/Device_0.qml");
-                if (component.status === Component.Ready)
-                {
-                    var dev = device
-                    var obj = component.createObject(appStack, {device: dev})
-                    appStack.push(obj);
-                }
-            }
-        }
-        Button {
-            id: readWrite
-
-            width: 52
-            height: 52
-
-            anchors{
-                right: debugMode.left
-                verticalCenter: parent.verticalCenter
-                rightMargin: 10
-            }
-            display: AbstractButton.IconOnly
-            icon {
-                color: "transparent"
-                source: "qrc:/img/pen.png"
-            }
-        }
+    header: DeviceHeader {
+        id: headerPanel
     }
 
     Flickable {
         id: fl
+        enabled: device.state
         width: root.width
         height: root.height
 
@@ -148,6 +53,7 @@ Page {
         }
 
         Row {
+            id: row
             anchors {
                 top: img.bottom
                 horizontalCenter: parent.horizontalCenter
@@ -250,9 +156,22 @@ Page {
             playSate = device.readData(0) === "true" ? true : false
             ledSate = device.readData(1) === "true" ? true : false
             repeateSate = device.readData(2) === "true" ? true : false
-            mode = device.readData(3) === "true" ? true : false
+//            mode = device.readData(3) === "true" ? true : false
+
+            fl.contentHeight = img.height + row.height + headerPanel.height
         }
     }
+
+    Component.onDestruction: {
+        console.log("Device 4 destruct: ", objectName)
+    }
+
+//    onVisibleChanged: {
+//        for (var i = 0; i < appStack.children.length; i++)
+//        {
+//            console.log(appStack.children[i], " - ", appStack.children[i].objectName)
+//        }
+//    }
 
 //    onVisibleChanged: {
 //        if (appStack.currentItem.title !== root.title)
