@@ -1,4 +1,5 @@
-QT += quick multimedia
+QT += quick
+#multimedia
 
 CONFIG += c++2a
 

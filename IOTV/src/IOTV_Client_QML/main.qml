@@ -158,7 +158,7 @@ ApplicationWindow {
             console.log(stackView.currentItem.objectName)
             if (stackView.currentItem.objectName == homePage.objectName)
             {
-                for (var i = stackView.children.length - 1; i > 2; i--)
+                for (var i = stackView.children.length - 1; i > 1; i--)
                     stackView.children[i].destroy()
             }
         }

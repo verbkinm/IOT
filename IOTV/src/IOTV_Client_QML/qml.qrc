@@ -27,6 +27,9 @@
         <file>img/4_led.png</file>
         <file>img/repeate_off.png</file>
         <file>Devices/DeviceHeader.qml</file>
+        <file>audio/click.ogg</file>
+        <file>audio/click.mp3</file>
     </qresource>
     <qresource prefix="/pages"/>
+    <qresource prefix="/audio"/>
 </RCC>

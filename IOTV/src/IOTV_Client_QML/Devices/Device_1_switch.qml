@@ -85,7 +85,7 @@ Rectangle {
     }
 
     Component.onDestruction: {
-        console.log("Device 4_1 destruct:", objectName)
+        console.log("Device 1_1 destruct:", objectName)
     }
 
 //    Component.onDestruction: {

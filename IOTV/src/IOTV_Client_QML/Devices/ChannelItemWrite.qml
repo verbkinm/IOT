@@ -45,6 +45,7 @@ Item {
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
         font.pixelSize: 12
+        enabled: device.state
 
         text: ""
         placeholderText: "Введите данные"

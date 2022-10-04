@@ -35,7 +35,6 @@ Rectangle {
             source: "qrc:/img/info.png"
         }
         onClicked: {
-            console.log("info")
             popup.open()
         }
         Popup {

@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QTimer>
 
 #include <iostream>
 
@@ -99,12 +100,19 @@ void slotNewConnection()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    QTimer timer;
+    timer.setInterval(5000);
+    timer.start();
 
     server = new QTcpServer;
 
     QObject::connect(server, &QTcpServer::newConnection, [&](){
         slotNewConnection();
     });
+
+//    QObject::connect(&timer, &QTimer::timeout, [&](){
+//       iot.setPlay(!iot.play());
+//    });
 
     server->listen(QHostAddress("127.0.0.1"), 2025);
     std::cout << "Start service on 127.0.0.1:2025" << std::endl;

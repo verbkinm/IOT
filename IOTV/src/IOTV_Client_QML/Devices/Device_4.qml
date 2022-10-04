@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtMultimedia 5.9
+//import QtMultimedia 5.9
 
 Page {
     id: root
@@ -11,7 +11,7 @@ Page {
     property bool playSate: false
     property bool ledSate: false
     property bool repeateSate: false
-    property int mode: 0
+    property string mode: "-1" //первый запуск popup закроется при изменении занчение mode
 
     header: DeviceHeader {
         id: headerPanel
@@ -24,7 +24,12 @@ Page {
         height: root.height
 
         ScrollBar.vertical: ScrollBar {
-            id: scroll
+            id: scrollVer
+            visible: active
+        }
+
+        ScrollBar.horizontal: ScrollBar {
+            id: scrollHor
             visible: active
         }
 
@@ -32,7 +37,6 @@ Page {
             id: img
             source: playSate ? "qrc:/img/4_led.png" : "qrc:/img/id/4.png"
             width: parent.width - (parent.width * 100 / 10)
-//            height: 150
             fillMode: Image.PreserveAspectFit
 
             anchors {
@@ -44,6 +48,7 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
+                    clickButton()
                     if (playSate)
                         device.setDataFromString(0, "false")
                     else
@@ -69,6 +74,7 @@ Page {
                 display: AbstractButton.TextOnly
 
                 onClicked: {
+                    clickButton()
                     if (playSate)
                         device.setDataFromString(0, "false")
                     else
@@ -85,6 +91,7 @@ Page {
                     source: ledSate ? "qrc:/img/lamp_on.png" : "qrc:/img/lamp_off.png"
                 }
                 onClicked: {
+                    clickButton()
                     if (ledSate)
                         device.setDataFromString(1, "false")
                     else
@@ -101,6 +108,7 @@ Page {
                     source: repeateSate ? "qrc:/img/repeate.png" : "qrc:/img/repeate_off.png"
                 }
                 onClicked: {
+                    clickButton()
                     if (repeateSate)
                         device.setDataFromString(2, "false")
                     else
@@ -115,6 +123,8 @@ Page {
                 text: "1"
                 font.pixelSize: 18
                 onClicked: {
+                    mode = "-1"
+                    clickButton()
                     device.setDataFromString(3, "0")
                 }
             }
@@ -126,6 +136,8 @@ Page {
                 text: "2"
                 font.pixelSize: 18
                 onClicked: {
+                    mode = "-1"
+                    clickButton()
                     device.setDataFromString(3, "1")
                 }
             }
@@ -137,6 +149,8 @@ Page {
                 text: "3"
                 font.pixelSize: 18
                 onClicked: {
+                    mode = "-1"
+                    clickButton()
                     device.setDataFromString(3, "2")
                 }
             }
@@ -153,12 +167,39 @@ Page {
         repeat: true
         running: true
         onTriggered: {
-            playSate = device.readData(0) === "true" ? true : false
-            ledSate = device.readData(1) === "true" ? true : false
-            repeateSate = device.readData(2) === "true" ? true : false
-//            mode = device.readData(3) === "true" ? true : false
+            var pS = device.readData(0) === "true" ? true : false
+            var lS = device.readData(1) === "true" ? true : false
+            var rS = device.readData(2) === "true" ? true : false
+            var mS = device.readData(3)
+
+            if (pS !== playSate || lS !== ledSate || rS !== repeateSate || mS !== mode)
+            {
+                popup.open()
+                popupTimer.start()
+            }
+
+            if (!device.state)
+            {
+                popupTimer.stop()
+                popup.open()
+            }
+
+            playSate = pS
+            ledSate = lS
+            repeateSate = rS
+            mode = mS
 
             fl.contentHeight = img.height + row.height + headerPanel.height
+        }
+    }
+
+    Timer {
+        id: popupTimer
+        interval: 300
+        running: false
+        repeat: false
+        onTriggered: {
+            popup.close()
         }
     }
 
@@ -166,16 +207,58 @@ Page {
         console.log("Device 4 destruct: ", objectName)
     }
 
-//    onVisibleChanged: {
-//        for (var i = 0; i < appStack.children.length; i++)
-//        {
-//            console.log(appStack.children[i], " - ", appStack.children[i].objectName)
+//    MediaPlayer {
+//        id: player
+//        volume: 1.0
+//        audioRole: MediaPlayer.SonificationRole
+//        onError: {
+//            console.log("player error", player.errorString)
 //        }
 //    }
 
-//    onVisibleChanged: {
-//        if (appStack.currentItem.title !== root.title)
-//            destroy()
-//    }
+    Rectangle {
+        id: popup
+        width: parent.width
+        height: parent.height
+        z: 1
+//        visible: true
+        color: Qt.rgba(1, 1, 1, 0.5)
+
+        MouseArea {
+            anchors.fill: parent
+        }
+
+        BusyIndicator {
+            id: indicator
+            antialiasing: true
+            anchors.centerIn: parent
+            visible: true
+            running: true
+        }
+
+        function open() {
+            popup.visible = true
+        }
+        function close() {
+            popup.visible = false
+        }
+    }
+
+    Connections {
+        target: device
+        function onStateChanged() {
+            if (!device.state)
+                popup.open()
+            else
+                popup.close()
+        }
+    }
+
+    function clickButton()
+    {
+//        player.source = "qrc:/audio/click.mp3"
+//        player.play()
+        popup.open()
+    }
 }
 
