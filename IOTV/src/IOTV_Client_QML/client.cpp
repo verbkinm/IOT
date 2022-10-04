@@ -6,7 +6,6 @@ Client::Client(QObject *parent): QObject{parent},
 {
     _socket.setParent(this);
     _timerDevList.setParent(this);
-    _reconnectTimer.setParent(this);
     _connectWait.setParent(this);
 
     checkSettingsFileExist();
@@ -177,6 +176,7 @@ void Client::write(const QByteArray &data)
 void Client::slotConnected()
 {
     _connectWait.stop();
+
 //    Log::write("Connected to " +
 //               _socket.peerAddress().toString() +
 //               ':' +

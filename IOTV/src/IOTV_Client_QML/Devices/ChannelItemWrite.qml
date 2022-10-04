@@ -9,6 +9,8 @@ Item {
 
     required property var _device
 
+    height: 50
+
     Label {
         id: lb1
         text: number + ":"
@@ -62,15 +64,18 @@ Item {
     Button {
         id: btn
 
-        width: 32
-        height: 32
+        width: 46
+        height: 46
 
         font.pixelSize: 12
+        icon {
+            color: "transparent"
+            source: "qrc:/img/send.png"
+        }
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            leftMargin: 10
             rightMargin: 10
         }
 

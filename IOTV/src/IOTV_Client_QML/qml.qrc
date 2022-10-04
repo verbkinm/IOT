@@ -8,27 +8,39 @@
         <file>Devices/Device_1.qml</file>
         <file>Devices/Device_3.qml</file>
         <file>img/info.png</file>
-        <file>img/led_off.png</file>
-        <file>img/led_on.png</file>
-        <file>img/Unknow.png</file>
         <file>Info.qml</file>
         <file>img/id/2.png</file>
         <file>img/id/1.png</file>
         <file>Devices/ChannelItem.qml</file>
         <file>Devices/ChannelItemWrite.qml</file>
         <file>img/debug.png</file>
-        <file>img/pen.png</file>
         <file>Devices/Device_1_switch.qml</file>
         <file>Devices/Device_4.qml</file>
         <file>img/id/4.png</file>
         <file>img/lamp_on.png</file>
-        <file>img/repeate.png</file>
         <file>img/lamp_off.png</file>
-        <file>img/4_led.png</file>
         <file>img/repeate_off.png</file>
         <file>Devices/DeviceHeader.qml</file>
         <file>audio/click.ogg</file>
         <file>audio/click.mp3</file>
+        <file>img/toy.png</file>
+        <file>img/files.png</file>
+        <file>img/switch.png</file>
+        <file>img/unknown.png</file>
+        <file>img/repeate_on.png</file>
+        <file>img/send.png</file>
+        <file>img/back.png</file>
+        <file>img/menu.png</file>
+        <file>img/home.png</file>
+        <file>img/pause.png</file>
+        <file>img/settings.png</file>
+        <file>img/play.png</file>
+        <file>img/humidity.png</file>
+        <file>img/id/3.png</file>
+        <file>img/cloud_on.png</file>
+        <file>img/cloud_off.png</file>
+        <file>img/copy.png</file>
+        <file>img/id/0.png</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>

@@ -126,7 +126,7 @@ Rectangle {
         display: AbstractButton.IconOnly
         icon {
             color: "transparent"
-            source: "qrc:/img/pen.png"
+            source: "qrc:/img/settings.png"
         }
     }
 }

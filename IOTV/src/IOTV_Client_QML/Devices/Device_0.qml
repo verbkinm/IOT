@@ -103,9 +103,8 @@ Page {
             var component = Qt.createComponent("ChannelItem.qml");
             if (component.status === Component.Ready)
             {
-                var obj = component.createObject(columnRead, {height: 30, number: i, type: device.readDataType(i)})
+                var obj = component.createObject(columnRead, {number: i, type: device.readDataType(i)})
                 obj.width = Qt.binding(function(){return columnRead.width})
-                obj.button.text = "✂"
                 obj.text = device.readData(i)
             }
         }
@@ -115,9 +114,8 @@ Page {
             component = Qt.createComponent("ChannelItemWrite.qml");
             if (component.status === Component.Ready)
             {
-                obj = component.createObject(columnWrite, {height: 30, number: i, type: device.writeDataType(i), _device: device})
+                obj = component.createObject(columnWrite, {number: i, type: device.writeDataType(i), _device: device})
                 obj.width = Qt.binding(function(){return columnWrite.width})
-                obj.button.text = "➩"
             }
         }
         timer.start()

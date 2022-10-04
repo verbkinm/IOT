@@ -7,6 +7,9 @@ Item {
     property alias type: typeName.text
     property alias button: btn
 
+    height: 50
+    width: parent.width
+
     Label {
         id: lb1
         text: number + ":"
@@ -50,25 +53,29 @@ Item {
         placeholderTextColor: "#ccc"
         anchors {
             left: typeName.right
-            top: parent.top
             right: btn.left
-            bottom: parent.bottom
             leftMargin: 10
             rightMargin: 10
+            verticalCenter: parent.verticalCenter
         }
     }
     Button {
         id: btn
 
-        width: 32
-        height: 32
+        width: 46
+        height: 46
+
+        display: AbstractButton.IconOnly
 
         font.pixelSize: 12
+        icon {
+            color: "transparent"
+            source: "qrc:/img/copy.png"
+        }
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            leftMargin: 10
             rightMargin: 10
         }
 

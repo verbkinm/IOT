@@ -29,6 +29,7 @@ Page {
                 leftMargin: 10
                 rightMargin: 10
                 bottomMargin: 10
+                topMargin: 10
             }
 
             Label {
@@ -127,7 +128,7 @@ Page {
 
             Button {
                 id: btn
-                width: 160
+                width: 180
                 font.pixelSize: 18
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
@@ -140,7 +141,6 @@ Page {
                 }
                 anchors.top: autoConnect.bottom
                 anchors.margins: 10
-
 
                 onClicked: {
                     if(connection_attempt)

@@ -17,16 +17,9 @@ ApplicationWindow {
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
+    property bool exit: false
 
     property alias appStack: stackView
-
-    Text {
-        text: qsTr("Нет подключения к серверу")
-        anchors.centerIn: parent
-        font.pixelSize: 24
-        visible: !client.state && homePage.visible
-        z: 1
-    }
 
     header: ToolBar {
         height: 50
@@ -34,7 +27,10 @@ ApplicationWindow {
 
         ToolButton {
             id: pressBack
-            text: qsTr("<")
+            icon {
+                color: "transparent"
+                source: "qrc:/img/back.png"
+            }
 
             anchors{
                 verticalCenter: parent.verticalCenter
@@ -63,7 +59,10 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             ToolButton {
-                text: qsTr("🏠")
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/home.png"
+                }
                 onClicked: {
                     drawer.visible = false
                     stackView.pop(homePage)
@@ -71,7 +70,10 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignCenter
             }
             ToolButton {
-                text: qsTr("☰")
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/menu.png"
+                }
                 onClicked: {
                     drawer.visible = !drawer.visible
                 }
@@ -128,11 +130,14 @@ ApplicationWindow {
                                 stackView.pop(homePage)
                             else if (index === 1 && stackView.currentItem != clientPage)
                             {
-//                                stackView.pop(homePage)
+                                //                                stackView.pop(homePage)
                                 stackView.push(clientPage)
                             }
                             else if (index === 2)
+                            {
+                                exit = true
                                 Qt.quit()
+                            }
 
                             drawer.visible = 0
                         }
@@ -206,5 +211,14 @@ ApplicationWindow {
             running: true
         }
     }
+
+    onClosing: {
+        if (!exit)
+        {
+            close.accepted = false
+            appStack.pop()
+        }
+    }
+
 }
 

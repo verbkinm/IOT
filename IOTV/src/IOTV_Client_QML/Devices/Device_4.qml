@@ -35,7 +35,7 @@ Page {
 
         Image {
             id: img
-            source: playSate ? "qrc:/img/4_led.png" : "qrc:/img/id/4.png"
+            source: playSate ? "qrc:/img/cloud_on.png" : "qrc:/img/cloud_off.png"
             width: parent.width - (parent.width * 100 / 10)
             fillMode: Image.PreserveAspectFit
 
@@ -46,6 +46,7 @@ Page {
             }
 
             MouseArea {
+                hoverEnabled: true
                 anchors.fill: parent
                 onClicked: {
                     clickButton()
@@ -69,9 +70,12 @@ Page {
                 id: play
                 width: 52
                 height: 52
-                text: playSate ? "⏸" : "▶"
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: playSate ? "qrc:/img/pause.png" : "qrc:/img/play.png"
+                }
                 font.pixelSize: 18
-                display: AbstractButton.TextOnly
 
                 onClicked: {
                     clickButton()
@@ -105,7 +109,7 @@ Page {
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
-                    source: repeateSate ? "qrc:/img/repeate.png" : "qrc:/img/repeate_off.png"
+                    source: repeateSate ? "qrc:/img/repeate_on.png" : "qrc:/img/repeate_off.png"
                 }
                 onClicked: {
                     clickButton()

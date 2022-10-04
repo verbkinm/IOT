@@ -53,9 +53,7 @@ private:
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    QTimer _timerDevList;
-    QTimer _reconnectTimer;
-    QTimer _connectWait;
+    QTimer _timerDevList, _connectWait;
 
     QString _address;
     quint16 _port;
