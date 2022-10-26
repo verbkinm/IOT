@@ -7,7 +7,9 @@ Page {
     //Ссылка на Device
     required property var device
 
-    header: DeviceHeader {}
+    header: DeviceHeader {
+        id: headerPanel
+    }
 
     Flickable {
         id: fl
@@ -31,7 +33,7 @@ Page {
 
         if (device.readChannelLength !== device.writeChannelLength)
         {
-            console.log("error device id 1")
+            console.error("error device id 1")
             return
         }
 
@@ -51,12 +53,9 @@ Page {
         console.log("Device 1 destruct: ", objectName)
     }
 
-    //    onVisibleChanged: {
-    //        if (appStack.currentItem.title !== root.title)
-    //        {
-    //            destroy()
-    //            console.log("destroy")
-    //        }
-    //    }
+    BusyRect {
+        visible: !device.state
+    }
+
 }
 

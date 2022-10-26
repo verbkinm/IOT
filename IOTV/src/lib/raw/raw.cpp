@@ -78,13 +78,6 @@ std::pair<QString, QString> Raw::strData(const QByteArray &data, DATA_TYPE type)
     return raw.strData();
 }
 
-void func(void *data, ssize_t size, QByteArray &result)
-{
-    char *ptr = reinterpret_cast<char*>(&data);
-    for (uint i = 0; i < size; i++)
-        result.push_back(ptr[i]);
-}
-
 QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
 {
     QByteArray result;

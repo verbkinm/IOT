@@ -87,8 +87,8 @@ Page {
             }
             Button {
                 id: led
-                width: 52
-                height: 52
+                width: play.width
+                height: play.height
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
@@ -104,8 +104,8 @@ Page {
             }
             Button {
                 id: autorepeate
-                width: 52
-                height: 52
+                width: play.width
+                height: play.height
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
@@ -121,8 +121,8 @@ Page {
             }
             Button {
                 id: mode1
-                width: 52
-                height: 52
+                width: play.width
+                height: play.height
                 display: AbstractButton.TextOnly
                 text: "1"
                 font.pixelSize: 18
@@ -134,11 +134,11 @@ Page {
             }
             Button {
                 id: mode2
-                width: 52
-                height: 52
+                width: play.width
+                height: play.height
                 display: AbstractButton.TextOnly
                 text: "2"
-                font.pixelSize: 18
+                font.pixelSize: mode1.font.pixelSize
                 onClicked: {
                     mode = "-1"
                     clickButton()
@@ -147,11 +147,11 @@ Page {
             }
             Button {
                 id: mode3
-                width: 52
-                height: 52
+                width: play.width
+                height: play.height
                 display: AbstractButton.TextOnly
                 text: "3"
-                font.pixelSize: 18
+                font.pixelSize: mode1.font.pixelSize
                 onClicked: {
                     mode = "-1"
                     clickButton()
@@ -199,7 +199,7 @@ Page {
 
     Timer {
         id: popupTimer
-        interval: 300
+        interval: 500
         running: false
         repeat: false
         onTriggered: {
@@ -220,32 +220,8 @@ Page {
 //        }
 //    }
 
-    Rectangle {
+    BusyRect {
         id: popup
-        width: parent.width
-        height: parent.height
-        z: 1
-//        visible: true
-        color: Qt.rgba(1, 1, 1, 0.5)
-
-        MouseArea {
-            anchors.fill: parent
-        }
-
-        BusyIndicator {
-            id: indicator
-            antialiasing: true
-            anchors.centerIn: parent
-            visible: true
-            running: true
-        }
-
-        function open() {
-            popup.visible = true
-        }
-        function close() {
-            popup.visible = false
-        }
     }
 
     Connections {

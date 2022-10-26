@@ -7,7 +7,9 @@
 
 #include <QDebug>
 
-class Raw
+#include "raw_global.h"
+
+class RAW_EXPORT Raw
 {
 public:
 

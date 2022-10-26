@@ -27,6 +27,15 @@ Page {
         font.pixelSize: 24
         visible: !client.state
         z: 1
+        wrapMode: Text.Wrap
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                appStack.push(clientPage)
+//                popupWait.open()
+            }
+        }
     }
 
     ListView {
@@ -78,24 +87,24 @@ Page {
 
                 anchors.margins: 5
 
-//                ScaleAnimator {
-//                    id: scaleAnimMin
-//                    target: componentRect
-//                    from: 1
-//                    to: 0.85
-//                    easing.type: Easing.InCubic;
-//                    duration: 150
-//                    running: false
-//                }
-//                ScaleAnimator {
-//                    id: scaleAnimMax
-//                    target: componentRect
-//                    from: 0.85
-//                    to: 1
-//                    easing.type: Easing.InCubic;
-//                    duration: 150
-//                    running: false
-//                }
+                //                ScaleAnimator {
+                //                    id: scaleAnimMin
+                //                    target: componentRect
+                //                    from: 1
+                //                    to: 0.85
+                //                    easing.type: Easing.InCubic;
+                //                    duration: 150
+                //                    running: false
+                //                }
+                //                ScaleAnimator {
+                //                    id: scaleAnimMax
+                //                    target: componentRect
+                //                    from: 0.85
+                //                    to: 1
+                //                    easing.type: Easing.InCubic;
+                //                    duration: 150
+                //                    running: false
+                //                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -125,16 +134,16 @@ Page {
                             appStack.push(obj);
                             dev.signalUpdate.connect(function() {pressBack.clicked()})
                         }
-//                        scaleAnimMin.running = true
-//                        scaleAnimMax.running = true
+                        //                        scaleAnimMin.running = true
+                        //                        scaleAnimMax.running = true
                     }
 
-//                    onEntered: {
-//                        scaleAnimMin.running = true
-//                    }
-//                    onExited: {
-//                        scaleAnimMax.running = true
-//                    }
+                    //                    onEntered: {
+                    //                        scaleAnimMin.running = true
+                    //                    }
+                    //                    onExited: {
+                    //                        scaleAnimMax.running = true
+                    //                    }
 
                     function createDeviceBy(id)
                     {
@@ -186,7 +195,7 @@ Page {
                         else
                             animColorOffline.running = true
 
-//                        componentRect.color = target.state ? Qt.rgba(0, 1, 0, 0.1) : Qt.rgba(1, 0, 0, 0.1)
+                        //                        componentRect.color = target.state ? Qt.rgba(0, 1, 0, 0.1) : Qt.rgba(1, 0, 0, 0.1)
                     }
                     function onSignalUpdate() {
                         model.source = imageById(target.id)

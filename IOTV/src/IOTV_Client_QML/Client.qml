@@ -177,4 +177,8 @@ Page {
     Component.onCompleted: {
         connection_attempt = client.autoConnect
     }
+
+    Component.onDestruction: {
+        console.log("Client page destruct: ", objectName)
+    }
 }

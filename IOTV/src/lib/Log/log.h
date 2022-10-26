@@ -8,9 +8,7 @@
 #include <QDateTime>
 #include <QTextStream>
 
-#include "Log_global.h"
-
-class LOG_EXPORT Log
+class Log
 {
 public:
     enum class Write_Flag : uint8_t

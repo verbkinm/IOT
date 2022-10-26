@@ -12,17 +12,83 @@ Rectangle {
             top: parent.top
             bottom: parent.bottom
             left: parent.left
-            right: readWrite.left
+            right: settings.left
         }
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }
 
     Button {
-        id: info
+        id: settings
 
         width: 52
         height: 52
+
+        anchors{
+            right: debugMode.left
+            verticalCenter: parent.verticalCenter
+            rightMargin: 10
+        }
+        display: AbstractButton.IconOnly
+        icon {
+            color: "transparent"
+            source: "qrc:/img/settings.png"
+        }
+    }
+
+    Button {
+        id: debugMode
+
+        width: settings.width
+        height: settings.height
+
+        anchors{
+            right: info.left
+            verticalCenter: parent.verticalCenter
+            rightMargin: 10
+        }
+        display: AbstractButton.IconOnly
+        icon {
+            color: "transparent"
+            source: "qrc:/img/debug.png"
+        }
+
+        onClicked: {
+            var find = false
+            var pageObject
+
+            for (var i = 0; i < appStack.children.length; i++)
+            {
+                if (appStack.children[i].objectName === name + "_debug")
+                {
+                    find = true
+                    pageObject = appStack.children[i]
+                    break
+                }
+            }
+
+            if (find)
+            {
+                appStack.push(pageObject)
+                return
+            }
+
+            var component = Qt.createComponent("/Devices/Device_0.qml");
+            if (component.status === Component.Ready)
+            {
+                var dev = device
+                var obj = component.createObject(appStack, {device: dev})
+                obj.objectName = name + "_debug"
+                appStack.push(obj);
+            }
+        }
+    }
+
+    Button {
+        id: info
+
+        width: settings.width
+        height: settings.height
 
         anchors{
             right: parent.right
@@ -67,66 +133,6 @@ Rectangle {
                 font.pixelSize: 24
                 wrapMode: Text.Wrap
             }
-        }
-    }
-    Button {
-        id: debugMode
-
-        width: 52
-        height: 52
-
-        anchors{
-            right: info.left
-            verticalCenter: parent.verticalCenter
-            rightMargin: 10
-        }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
-            source: "qrc:/img/debug.png"
-        }
-
-        onClicked: {
-            var find = false
-            var pageObject
-            for (var i = 0; i < appStack.children.length; i++)
-                if (appStack.children[i].objectName === name + "_debug")
-                {
-                    find = true
-                    pageObject = appStack.children[i]
-                    break
-                }
-            if (find)
-            {
-                appStack.push(pageObject)
-                return
-            }
-
-            var component = Qt.createComponent("/Devices/Device_0.qml");
-            if (component.status === Component.Ready)
-            {
-                var dev = device
-                var obj = component.createObject(appStack, {device: dev})
-                obj.objectName = name + "_debug"
-                appStack.push(obj);
-            }
-        }
-    }
-    Button {
-        id: readWrite
-
-        width: 52
-        height: 52
-
-        anchors{
-            right: debugMode.left
-            verticalCenter: parent.verticalCenter
-            rightMargin: 10
-        }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
-            source: "qrc:/img/settings.png"
         }
     }
 }

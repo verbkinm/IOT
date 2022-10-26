@@ -20,6 +20,12 @@ SOURCES += \
         main.cpp \
         connection_type/udp_conn_type.cpp \
         wrapper.cpp \
+        ../lib/Base_Host/base_host.cpp \
+        ../lib/Base_Host/channel.cpp \
+        ../lib/Log/log.cpp \
+        ../lib/Protocols/IOTV_SC.cpp \
+        ../lib/Protocols/IOTV_SH.cpp \
+        ../lib/raw/raw.cpp \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -36,32 +42,16 @@ HEADERS += \
     connection_type/file_conn_type.h \
     connection_type/tcp_conn_type.h \
     connection_type/udp_conn_type.h \
-    wrapper.h
+    wrapper.h \
+    ../lib/Base_Host/base_host.h \
+    ../lib/Base_Host/channel.h \
+    ../lib/Log/log.h \
+    ../lib/Protocols/IOTV_SC.h \
+    ../lib/Protocols/IOTV_SH.h \
+    ../lib/Protocols/protocols.h \
+    ../lib/raw/raw.h
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-else:unix: LIBS += -L$$OUT_PWD/../lib/raw/ -lraw
-
-INCLUDEPATH += $$PWD/../lib/raw
-DEPENDPATH += $$PWD/../lib/raw
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -llog
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Log/ -llog
-else:unix: LIBS += -L$$OUT_PWD/../lib/Log/ -lLog
-
-INCLUDEPATH += $$PWD/../lib/Log
-DEPENDPATH += $$PWD/../lib/Log
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lbase_host
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lbase_host
-else:unix: LIBS += -L$$OUT_PWD/../lib/Base_Host/ -lBase_Host
-
-INCLUDEPATH += $$PWD/../lib/Base_Host
-DEPENDPATH += $$PWD/../lib/Base_Host
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
-else:unix: LIBS += -L$$OUT_PWD/../lib/Protocols/ -lProtocols
-
-INCLUDEPATH += $$PWD/../lib/Protocols
-DEPENDPATH += $$PWD/../lib/Protocols
+INCLUDEPATH += ../lib/Base_Host \
+            ../lib/Log \
+            ../lib/Protocols \
+            ../lib/raw

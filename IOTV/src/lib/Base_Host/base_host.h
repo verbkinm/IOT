@@ -2,9 +2,8 @@
 
 #include "channel.h"
 #include "IOTV_SH.h"
-#include "Base_Host_global.h"
 
-class BASE_HOST_EXPORT Base_Host : public QObject
+class Base_Host : public QObject
 {
 public:
     Base_Host(uint8_t id = 0, QObject *parent = nullptr);
