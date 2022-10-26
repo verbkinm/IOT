@@ -59,7 +59,6 @@ Page {
                 width: parent.width
                 height: 64
 
-                //            color: "lightsteelblue"
                 border.width: 1
                 border.color: Qt.rgba(0, 0, 0, 0.5)
                 radius: 5
@@ -79,24 +78,24 @@ Page {
 
                 anchors.margins: 5
 
-                ScaleAnimator {
-                    id: scaleAnimMin
-                    target: componentRect
-                    from: 1
-                    to: 0.85
-                    easing.type: Easing.InCubic;
-                    duration: 150
-                    running: false
-                }
-                ScaleAnimator {
-                    id: scaleAnimMax
-                    target: componentRect
-                    from: 0.85
-                    to: 1
-                    easing.type: Easing.InCubic;
-                    duration: 150
-                    running: false
-                }
+//                ScaleAnimator {
+//                    id: scaleAnimMin
+//                    target: componentRect
+//                    from: 1
+//                    to: 0.85
+//                    easing.type: Easing.InCubic;
+//                    duration: 150
+//                    running: false
+//                }
+//                ScaleAnimator {
+//                    id: scaleAnimMax
+//                    target: componentRect
+//                    from: 0.85
+//                    to: 1
+//                    easing.type: Easing.InCubic;
+//                    duration: 150
+//                    running: false
+//                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -126,8 +125,8 @@ Page {
                             appStack.push(obj);
                             dev.signalUpdate.connect(function() {pressBack.clicked()})
                         }
-                        scaleAnimMin.running = true
-                        scaleAnimMax.running = true
+//                        scaleAnimMin.running = true
+//                        scaleAnimMax.running = true
                     }
 
 //                    onEntered: {
