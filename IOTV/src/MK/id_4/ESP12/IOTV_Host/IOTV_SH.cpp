@@ -1,6 +1,8 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
+#include <Arduino.h>
+
 uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
 {
     uint16_t descriptionLength = strlen(iotHost._description);
@@ -54,13 +56,21 @@ uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *i
 int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
 {
     uint16_t realDataSize = ptrInData - inData;
+    Serial.print("realDataSize = ");
+    Serial.println(realDataSize);
 
     if (realDataSize < 3)
         return -1; //не запрос пришел полный
 
     uint8_t channelNumber = inData[0] >> 4;
+    
+    Serial.print("channelNumber = ");
+    Serial.println(channelNumber);
 
     uint16_t dataWriteSize = (uint16_t(inData[1]) << 8) | inData[2];
+
+    Serial.print("dataWriteSize = ");
+    Serial.println(dataWriteSize);
 
     if (realDataSize < (3 + dataWriteSize))
         return -1; //не запрос пришел полный
@@ -72,6 +82,9 @@ int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, con
         memcpy(&iotHost._readChannel[channelNumber], writeData, sizeof(iotHost._readChannel[channelNumber]));
 
     outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_WRITE_BYTE;
+
+    Serial.print("outData[0] = ");
+    Serial.println(outData[0], HEX);
 
     return dataWriteSize;
 }
