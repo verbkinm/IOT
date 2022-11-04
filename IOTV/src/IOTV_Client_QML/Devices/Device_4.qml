@@ -11,7 +11,7 @@ Page {
     property bool playSate: false
     property bool ledSate: false
     property bool repeateSate: false
-    property string mode: "-1" //первый запуск popup закроется при изменении занчение mode
+    property string mode: "0" //первый запуск popup закроется при изменении занчение mode
 
     header: DeviceHeader {
         id: headerPanel
@@ -50,10 +50,7 @@ Page {
                 anchors.fill: parent
                 onClicked: {
                     clickButton()
-                    if (playSate)
-                        device.setDataFromString(0, "false")
-                    else
-                        device.setDataFromString(0, "true")
+                    device.setDataFromString(0, "true")
                 }
             }
         }
@@ -79,10 +76,7 @@ Page {
 
                 onClicked: {
                     clickButton()
-                    if (playSate)
-                        device.setDataFromString(0, "false")
-                    else
-                        device.setDataFromString(0, "true")
+                    device.setDataFromString(0, "true")
                 }
             }
             Button {
@@ -127,9 +121,9 @@ Page {
                 text: "1"
                 font.pixelSize: 18
                 onClicked: {
-                    mode = "-1"
-                    clickButton()
-                    device.setDataFromString(3, "0")
+                    popup.open()
+                    popupTimer.start()
+                    device.setDataFromString(3, "1")
                 }
             }
             Button {
@@ -140,9 +134,9 @@ Page {
                 text: "2"
                 font.pixelSize: mode1.font.pixelSize
                 onClicked: {
-                    mode = "-1"
-                    clickButton()
-                    device.setDataFromString(3, "1")
+                    popup.open()
+                    popupTimer.start()
+                    device.setDataFromString(3, "2")
                 }
             }
             Button {
@@ -153,9 +147,9 @@ Page {
                 text: "3"
                 font.pixelSize: mode1.font.pixelSize
                 onClicked: {
-                    mode = "-1"
-                    clickButton()
-                    device.setDataFromString(3, "2")
+                    popup.open()
+                    popupTimer.start()
+                    device.setDataFromString(3, "3")
                 }
             }
         }
@@ -174,9 +168,8 @@ Page {
             var pS = device.readData(0) === "true" ? true : false
             var lS = device.readData(1) === "true" ? true : false
             var rS = device.readData(2) === "true" ? true : false
-            var mS = device.readData(3)
 
-            if (pS !== playSate || lS !== ledSate || rS !== repeateSate || mS !== mode)
+            if (pS !== playSate || lS !== ledSate || rS !== repeateSate)
             {
                 popup.open()
                 popupTimer.start()
@@ -191,7 +184,6 @@ Page {
             playSate = pS
             ledSate = lS
             repeateSate = rS
-            mode = mS
 
             fl.contentHeight = img.height + row.height + headerPanel.height
         }
@@ -211,14 +203,14 @@ Page {
         console.log("Device 4 destruct: ", objectName)
     }
 
-//    MediaPlayer {
-//        id: player
-//        volume: 1.0
-//        audioRole: MediaPlayer.SonificationRole
-//        onError: {
-//            console.log("player error", player.errorString)
-//        }
-//    }
+    //    MediaPlayer {
+    //        id: player
+    //        volume: 1.0
+    //        audioRole: MediaPlayer.SonificationRole
+    //        onError: {
+    //            console.log("player error", player.errorString)
+    //        }
+    //    }
 
     BusyRect {
         id: popup
@@ -236,8 +228,8 @@ Page {
 
     function clickButton()
     {
-//        player.source = "qrc:/audio/click.mp3"
-//        player.play()
+        //        player.source = "qrc:/audio/click.mp3"
+        //        player.play()
         popup.open()
     }
 }

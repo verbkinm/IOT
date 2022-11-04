@@ -5,6 +5,24 @@
 
 #define BUFFSIZE 36
 
+//D0 == GPIO_16
+//D1 == GPIO_5
+//D2 == GPIO_4
+//D3 == GPIO_0
+//D4 == GPIO_2
+//D5 == GPIO_14
+//D6 == GPIO_12
+//D7 == GPIO_13
+//D8 == GPIO_15
+#define PLAY_PIN 5
+#define LED_PIN 4
+#define MODE_1_PIN 14
+#define MODE_2_PIN 12
+#define MODE_3_PIN 13
+#define IS_PLAYING_PIN 16
+
+uint8_t modeArr[3] = {MODE_1_PIN, MODE_2_PIN, MODE_3_PIN};
+
 const char* ssid = "TP-Link_A6BE";
 const char* password = "41706831";
 
@@ -44,6 +62,19 @@ void setup()
   server.begin();
 
   ptrBuf = recivedBuffer;
+
+  pinMode(PLAY_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);  
+  pinMode(MODE_1_PIN, OUTPUT);
+  pinMode(MODE_2_PIN, OUTPUT);  
+  pinMode(MODE_3_PIN, OUTPUT);  
+  pinMode(IS_PLAYING_PIN, INPUT);  
+
+  digitalWrite(PLAY_PIN, LOW);
+  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(MODE_1_PIN, LOW);
+  digitalWrite(MODE_2_PIN, LOW);
+  digitalWrite(MODE_3_PIN, LOW);
 }
 
 void loop() 
@@ -60,26 +91,56 @@ void loop()
   else 
   {
     while (client.available()) 
-    {
       dataRecived();
-    }
-//      
-      // Serial.print(client.read(), HEX);
   }
 
-  // if (WiFi.status() != WL_CONNECTED)
-  // {
-  //   client.flush();
-  //   ptrBuf = recivedBuffer;
+  if (iot.repeate() && !iot.isPlaing())
+    iot.setPlayStop(1);
 
-  //   Serial.println("Wifi not connect");
-  //   Serial.print("Connecting");
-  //   while (WiFi.status() != WL_CONNECTED)
-  //   {
-  //     Serial.print('.');
-  //     delay(500);
-  //   }
-  // }
+  if (iot.playStop())
+  {
+    bool tmpState = digitalRead(IS_PLAYING_PIN);
+
+    digitalWrite(PLAY_PIN, HIGH);
+    delay(1000);
+    digitalWrite(PLAY_PIN, LOW);
+
+    iot.setPlaing(digitalRead(IS_PLAYING_PIN));
+    if (iot.isPlaing() != tmpState)
+      iot.setPlayStop(0);
+  }
+  else if (iot.mode() > 0 && iot.mode() < 4)
+  {
+    Serial.print("set mode: ");
+    Serial.println(iot.mode());
+
+    digitalWrite(modeArr[iot.mode() - 1], HIGH);
+    delay(1000);
+    digitalWrite(modeArr[iot.mode() - 1], LOW);
+
+    iot.setPlaing(digitalRead(IS_PLAYING_PIN));
+    if (iot.isPlaing())
+      iot.setMode(0);
+  }
+
+  digitalWrite(LED_PIN, iot.led());
+
+  //!!!
+  iot.setPlaing(digitalRead(IS_PLAYING_PIN));
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    client.flush();
+    ptrBuf = recivedBuffer;
+
+    Serial.println("Wifi not connect");
+    Serial.print("Connecting");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      Serial.print('.');
+      delay(500);
+    }
+  }
 }
 
 void dataRecived() 
@@ -123,12 +184,12 @@ void dataRecived()
      else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_WRITE_BYTE) 
      {
        // лоакальный dataSize, так как response_WRITE может вернуть -1
-       Serial.println("debug WRITE");
-       Serial.println(recivedBuffer[0], HEX);
+        Serial.println("debug WRITE");
+        Serial.println(recivedBuffer[0], HEX);
 
-       for (int i = 0; i < 16; i++)
-        Serial.print(recivedBuffer[i], HEX);
-       Serial.println();
+        for (int i = 0; i < 16; i++)
+          Serial.print(recivedBuffer[i], HEX);
+        Serial.println();
        
        int dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
        Serial.print("dataSize = ");
@@ -155,7 +216,9 @@ void dataRecived()
 void debug() 
 {
   Serial.print("Play: ");
-  Serial.print(iot.play());
+  Serial.print(iot.playStop());
+  Serial.print(", isPlaying: ");
+  Serial.print(iot.isPlaing());
   Serial.print(", Led: ");
   Serial.print(iot.led());
   Serial.print(", Repeate: ");
