@@ -42,6 +42,9 @@
         <file>img/copy.png</file>
         <file>img/id/0.png</file>
         <file>Devices/BusyRect.qml</file>
+        <file>img/palette.png</file>
+        <file>img/tree.png</file>
+        <file>img/note.png</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>

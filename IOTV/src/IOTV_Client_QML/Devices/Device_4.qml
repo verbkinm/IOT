@@ -117,8 +117,11 @@ Page {
                 id: mode1
                 width: play.width
                 height: play.height
-                display: AbstractButton.TextOnly
-                text: "1"
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/palette.png"
+                }
                 font.pixelSize: 18
                 onClicked: {
                     popup.open()
@@ -130,9 +133,11 @@ Page {
                 id: mode2
                 width: play.width
                 height: play.height
-                display: AbstractButton.TextOnly
-                text: "2"
-                font.pixelSize: mode1.font.pixelSize
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/note.png"
+                }
                 onClicked: {
                     popup.open()
                     popupTimer.start()
@@ -143,9 +148,11 @@ Page {
                 id: mode3
                 width: play.width
                 height: play.height
-                display: AbstractButton.TextOnly
-                text: "3"
-                font.pixelSize: mode1.font.pixelSize
+                display: AbstractButton.IconOnly
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/tree.png"
+                }
                 onClicked: {
                     popup.open()
                     popupTimer.start()
