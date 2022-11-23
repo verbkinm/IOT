@@ -26,14 +26,27 @@ Page {
             id: column
             width: parent.width
             spacing: 15
+            topPadding: 15
 
             //Температура
             Rectangle {
                 width: parent.width * 0.8
                 height: 80
 
-//                border.width: 1
-//                border.color: "red"
+                border.width: 1
+                border.color: "grey"
+                radius: 10
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.00;
+                        color: "#e0d9d9";
+                    }
+                    GradientStop {
+                        position: 1.00;
+                        color: "#ffffff";
+                    }
+                }
 
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -71,8 +84,20 @@ Page {
                 width: parent.width * 0.8
                 height: 80
 
-                //                border.width: 1
-                //                border.color: "red"
+                border.width: 1
+                border.color: "grey"
+                radius: 10
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.00;
+                        color: "#e0d9d9";
+                    }
+                    GradientStop {
+                        position: 1.00;
+                        color: "#ffffff";
+                    }
+                }
 
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -99,7 +124,6 @@ Page {
                     anchors {
                         left: img_humidity.right
                         leftMargin: 20
-                        //                        right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
                 }
@@ -112,8 +136,20 @@ Page {
                 height: 80
                 visible: false
 
-//                                border.width: 1
-//                                border.color: "red"
+                border.width: 1
+                border.color: "grey"
+                radius: 10
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.00;
+                        color: "#e0d9d9";
+                    }
+                    GradientStop {
+                        position: 1.00;
+                        color: "#ffffff";
+                    }
+                }
 
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -124,7 +160,6 @@ Page {
                     source: "qrc:/img/id_1/pressure.png"
                     fillMode: Image.PreserveAspectFit
                     height: parent.height * 0.70
-//                    antialiasing: true
 
                     anchors {
                         rightMargin: 20
@@ -154,7 +189,7 @@ Page {
                     anchors {
                         left: lbl_pressure.right
                         right: parent.right
-//                        bottom: lbl_pressure.bottom
+                        //                        bottom: lbl_pressure.bottom
                         verticalCenter: parent.verticalCenter
                     }
                 }

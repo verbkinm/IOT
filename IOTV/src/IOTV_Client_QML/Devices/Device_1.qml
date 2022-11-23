@@ -25,6 +25,8 @@ Page {
         Column {
             id: column
             width: parent.width
+            spacing: 15
+            topPadding: 15
         }
     }
 

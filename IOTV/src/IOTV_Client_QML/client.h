@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include <QTcpSocket>
 #include <QHostAddress>
@@ -61,7 +61,7 @@ private:
     bool _stateConnection;
     bool _autoConnect;
 
-    std::unordered_map<QString, Device> _devices;
+    std::map<QString, Device> _devices;
 
     QSettings _settingClient;
 

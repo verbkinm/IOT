@@ -9,7 +9,7 @@ Rectangle {
     property bool switchOn: false
 
     id: root
-    height: 150
+    height: 80
 
     anchors{
         left: parent.left
@@ -17,23 +17,36 @@ Rectangle {
     }
 
     Rectangle {
+        height: parent.height
+        width: parent.width * 0.8
+
         anchors {
-            fill: parent
-            bottomMargin: 15
-            leftMargin: 10
-            rightMargin: 10
+            horizontalCenter: parent.horizontalCenter
         }
 
         border.color: "grey"
         border.width: 1
+        radius: 15
+
+        gradient: Gradient {
+            GradientStop {
+                position: 0.00;
+                color: "#e0d9d9";
+            }
+            GradientStop {
+                position: 1.00;
+                color: "#ffffff";
+            }
+        }
 
         Switch{
             id: button
-            height: 90
+            height: 80
 
             checked: switchOn
             anchors{
                 left: parent.left
+                leftMargin: 30
                 verticalCenter: parent.verticalCenter
             }
 
@@ -50,27 +63,34 @@ Rectangle {
             }
         }
 
-        TextField {
+        Label {
             id: userDescription
 
             height: button.height
-            text: "TEXT"
+            text: "Канал " + channel
+            wrapMode: Text.WrapAnywhere
+            elide: Text.ElideRight
+            maximumLineCount: 2
 
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             antialiasing: true
-            readOnly: true
 
-            placeholderText: "Описание..."
-            placeholderTextColor: "#ccc"
-
-            font.pixelSize: 14
+            font.pixelSize: 18
 
             anchors{
                 right: parent.right
                 rightMargin: 10
                 left: button.right
                 verticalCenter: parent.verticalCenter
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    button.toggle()
+                    button.toggled()
+                }
             }
         }
     }
@@ -100,7 +120,6 @@ Rectangle {
         running: true
         repeat: false
         onTriggered: {
-            console.log("popupTimer")
             popup.close()
         }
     }
