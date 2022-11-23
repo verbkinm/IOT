@@ -38,7 +38,7 @@ Page {
         }
     }
 
-    ListView {
+    /*GridView*/ ListView{
         id: listView
 
         anchors {
@@ -50,7 +50,7 @@ Page {
 
         model: listModel
         delegate: contactDelegate
-        spacing: 15
+//        spacing: 15
     }
 
     ListModel {
@@ -63,8 +63,8 @@ Page {
         Rectangle {
             id: componentRect
 
-            width: parent.width
-            height: 80
+            width: 120
+            height: 120
 
             border.width: 1
             border.color: Qt.rgba(0, 0, 0, 0.5)
@@ -84,7 +84,7 @@ Page {
                 running: false
             }
 
-//            anchors.margins: 5
+            //            anchors.margins: 5
 
             //                ScaleAnimator {
             //                    id: scaleAnimMin
@@ -109,20 +109,20 @@ Page {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    var find = false
-                    var pageObject
-                    for (var i = 0; i < appStack.children.length; i++)
-                        if (appStack.children[i].objectName === name)
-                        {
-                            find = true
-                            pageObject = appStack.children[i]
-                            break
-                        }
-                    if (find)
-                    {
-                        appStack.push(pageObject)
-                        return
-                    }
+                    //                    var find = false
+                    //                    var pageObject
+                    //                    for (var i = 0; i < appStack.children.length; i++)
+                    //                        if (appStack.children[i].objectName === name)
+                    //                        {
+                    //                            find = true
+                    //                            pageObject = appStack.children[i]
+                    //                            break
+                    //                        }
+                    //                    if (find)
+                    //                    {
+                    //                        appStack.push(pageObject)
+                    //                        return
+                    //                    }
 
                     var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
                     if (component.status === Component.Ready)
@@ -162,30 +162,29 @@ Page {
                 id: icon
                 source: model.source
                 anchors {
-                    //                    top: parent.top
-                    //                    bottom: parent.bottom
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                    margins: 5
+                    top: parent.top
+                    horizontalCenter: parent.horizontalCenter
+                    topMargin: 10
                 }
                 width: 54
                 height: 54
                 fillMode: Image.PreserveAspectFit
             }
 
-            Text {
+            Label {
                 id: devName
                 text: model.name;
-                font.pixelSize: 18
+                font.pixelSize: 16
                 anchors {
-                    left: icon.right
+                    left: parent.left
                     right: parent.right
-                    top: parent.top
+                    top: icon.bottom
                     bottom: parent.bottom
                 }
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
+                elide: Text.ElideRight
             }
 
             Connections {
