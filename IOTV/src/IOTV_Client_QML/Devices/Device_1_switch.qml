@@ -24,12 +24,6 @@ Rectangle {
             rightMargin: 10
         }
 
-        //        Rectangle {
-        //            color: device.state ? Qt.rgba(0.5, 0.5, 0.5, 0) : Qt.rgba(0.5, 0.5, 0.5, 0.2)
-        //            anchors.fill: parent
-        //            z: 1
-        //        }
-
         border.color: "grey"
         border.width: 1
 
@@ -45,16 +39,14 @@ Rectangle {
 
             onToggled: {
                 var state = button.checked ? "true" : "false"
+                button.checked = !button.checked
 
                 if (switchOn)
                     device.setDataFromString(channel, "false")
                 else
                     device.setDataFromString(channel, "true")
 
-                button.checked = !button.checked
                 clickButton()
-
-//                switchOn = !switchOn
             }
         }
 
@@ -96,11 +88,7 @@ Rectangle {
                 popupTimer.start()
             }
             else
-            {
                 button.checked = switchOn
-//                popup.close()
-//                popupTimer.stop()
-            }
 
             switchOn = btnCheck
         }
@@ -108,7 +96,7 @@ Rectangle {
 
     Timer {
         id: popupTimer
-        interval: 500
+        interval: timer.interval * 1.25
         running: true
         repeat: false
         onTriggered: {
@@ -116,10 +104,6 @@ Rectangle {
             popup.close()
         }
     }
-
-//    Component.onCompleted: {
-//        popup.close()
-//    }
 
     Component.onDestruction: {
         console.log("Device 1_1 destruct:", objectName)

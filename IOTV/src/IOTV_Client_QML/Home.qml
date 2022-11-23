@@ -149,6 +149,8 @@ Page {
                     {
                         if (id === 1)
                             return "/Devices/Device_1.qml"
+                        else if (id === 2)
+                            return "/Devices/Device_2.qml"
                         else if (id === 4)
                             return "/Devices/Device_4.qml"
                         else

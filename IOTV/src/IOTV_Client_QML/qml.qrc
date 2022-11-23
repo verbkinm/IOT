@@ -45,6 +45,10 @@
         <file>img/palette.png</file>
         <file>img/tree.png</file>
         <file>img/note.png</file>
+        <file>img/id_1/humidity.png</file>
+        <file>img/id_1/pressure.png</file>
+        <file>img/id_1/temperature.png</file>
+        <file>Devices/Device_2.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>
