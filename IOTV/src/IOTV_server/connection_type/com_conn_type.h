@@ -5,7 +5,6 @@
 #include "base_conn_type.h"
 #include "log.h"
 
-
 class COM_conn_type : public Base_conn_type
 {
     Q_OBJECT

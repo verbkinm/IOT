@@ -1,11 +1,19 @@
 #include "iotv_client.h"
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObject *parent) : QObject(parent),
-    _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts)
+    _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts),
+    _silenceInterval(60000)
 {
     _socket->setParent(this);
+    _silenceTimer.setParent(this);
+
     connect(&_thread, &QThread::started, this, &IOTV_Client::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Client::signalStopThread, this, &IOTV_Client::slotThreadStop, Qt::QueuedConnection);
+
+    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
+
+    _silenceTimer.setInterval(_silenceInterval);
+    _silenceTimer.start();
 }
 
 IOTV_Client::~IOTV_Client()
@@ -56,7 +64,7 @@ void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) con
         responseDevListPkg.devs.push_back(dev);
     }
 
-    _socket->write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
+    write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
 }
 
 void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
@@ -78,7 +86,7 @@ void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     else
         responseStatePkg.state = false;
 
-    _socket->write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
+    write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
 }
 
 void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
@@ -99,10 +107,10 @@ void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     if (it != _hosts.end())
         responseReadPkg.data = it->readData(responseReadPkg.channelNumber);
 
-    _socket->write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
+    write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
 }
 
-void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
+void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
 {
     if (pkg == nullptr)
         return;
@@ -115,7 +123,24 @@ void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
     responseWritePkg.name = queryWritePkg->name;
     responseWritePkg.channelNumber = queryWritePkg->channelNumber;
 
-    _socket->write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
+    write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == queryWritePkg->name;
+    });
+
+    if (it != _hosts.end()) {
+        emit it->signalQueryWrite(queryWritePkg->channelNumber, queryWritePkg->data);
+    }
+}
+
+void IOTV_Client::write(const QByteArray &data) const
+{
+    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
+               + QString::number(_socket->peerPort())
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    _socket->write(data);
 }
 
 void IOTV_Client::slotDisconnected()
@@ -127,11 +152,13 @@ void IOTV_Client::slotNewThreadStart()
 {
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
     connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
-    connect(_socket, &QTcpSocket::disconnected, _socket, &QObject::deleteLater);
 }
 
 void IOTV_Client::slotThreadStop()
 {
+    if (_socket != nullptr)
+        delete _socket;
+
     if (_parentThread == nullptr)
         return;
 
@@ -142,6 +169,7 @@ void IOTV_Client::slotThreadStop()
 
 void IOTV_Client::slotReadData()
 {
+    _silenceTimer.start();
     recivedBuff += _socket->readAll();
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
@@ -180,7 +208,7 @@ void IOTV_Client::slotReadData()
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_STATE)
             query_STATE_recived(pkg);
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_READ)
-            query_STATE_recived(pkg);
+            query_READ_recived(pkg);
         else if (pkg->type == IOTV_SC::Query_Type::QUERY_WRITE)
             query_WRITE_recived(pkg);
         else
@@ -194,7 +222,6 @@ void IOTV_Client::slotReadData()
         }
         delete pkg;
     }
-
 }
 
 bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)

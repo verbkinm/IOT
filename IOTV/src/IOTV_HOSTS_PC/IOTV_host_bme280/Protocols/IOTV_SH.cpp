@@ -23,6 +23,7 @@ uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
 
 uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *inData, char *outData)
 {
+    //!!! нет проверки на номер канала !!!
     uint8_t channelNumber = inData[0] >> 4;
     auto value = iotHost._readChannel[channelNumber];
     char *arr = reinterpret_cast<char*>(&value);

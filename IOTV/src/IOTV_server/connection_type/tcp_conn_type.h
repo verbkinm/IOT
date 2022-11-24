@@ -2,8 +2,6 @@
 
 #include <QTcpSocket>
 #include <QHostAddress>
-#include <memory>
-#include <iostream>
 
 #include "base_conn_type.h"
 #include "log.h"
@@ -25,7 +23,7 @@ protected:
     virtual QByteArray readAll() override;
 
 private:
-    std::unique_ptr<QTcpSocket> _tcpSocket;
+    QTcpSocket _tcpSocket;
     quint16 _tcpPort;
 
 

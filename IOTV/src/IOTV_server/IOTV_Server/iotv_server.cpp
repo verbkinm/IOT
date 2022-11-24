@@ -42,7 +42,8 @@ void IOTV_Server::readSettings()
         _settingsHosts.beginGroup(group);
         std::unordered_map<QString, QString> setting;
 
-        setting[hostField::name] = group;
+        setting[hostField::name] = group.toLatin1();
+        setting[hostField::name] = setting[hostField::name].toLocal8Bit().size() > 30 ? setting[hostField::name].toLocal8Bit().mid(0, 30) : setting[hostField::name];
         setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, "TCP").toString();
         setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
@@ -50,6 +51,21 @@ void IOTV_Server::readSettings()
 
         if (setting[hostField::connection_type] == connectionType::TCP)
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
+
+        //!!!
+        //if (setting[hostField::connection_type] == connectionType::COM)
+        //  ;
+
+        auto it = std::ranges::find_if(_iot_hosts, [&setting](const IOTV_Host &host){
+            return host.settingsData().at(hostField::name) == setting[hostField::name];
+        });
+
+        if (it != _iot_hosts.end())
+        {
+            Log::write(QString(Q_FUNC_INFO) + ", Error: Double host name in config file - " + setting[hostField::name], Log::Write_Flag::FILE_STDOUT);
+            std::cout << std::endl;
+            exit(1);
+        }
 
         _iot_hosts.emplace_back(setting);
         if (!_iot_hosts.back().runInNewThread())
@@ -83,6 +99,7 @@ void IOTV_Server::startTCPServer()
 void IOTV_Server::clientOnlineFile() const
 {
     std::ofstream file("client_online.log", std::ios::trunc);
+
     if (!file.is_open())
     {
         Log::write("Can't open client_online.log", Log::Write_Flag::FILE_STDERR);
@@ -134,7 +151,7 @@ void IOTV_Server::slotNewConnection()
     if (!socket)
     {
         Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log");
-        exit(1);
+        return;
     }
 
     _iot_clients.emplace_back(socket, _iot_hosts);
@@ -151,17 +168,14 @@ void IOTV_Server::slotNewConnection()
                Log::Write_Flag::FILE_STDOUT, _logFile);
 
     connect(&_iot_clients.back(), &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected);
-    //    clientOnlineFile();
+    clientOnlineFile();
 }
 
 void IOTV_Server::slotDisconnected()
 {
     IOTV_Client* client = qobject_cast<IOTV_Client*>(sender());
 
-    QString strOut = "Client disconnected from "
-            + client->socket()->peerAddress().toString()
-            + ":" + QString::number(client->socket()->peerPort());
-
+    QString strOut = "Client disconnected";
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
 
     _iot_clients.remove(*client);

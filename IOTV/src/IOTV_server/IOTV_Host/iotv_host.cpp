@@ -9,6 +9,8 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
 
     connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
+
+    connect(this, &IOTV_Host::signalQueryWrite, this, &IOTV_Host::slotQueryWrite, Qt::QueuedConnection);
 }
 
 IOTV_Host::~IOTV_Host()
@@ -81,9 +83,12 @@ void IOTV_Host::dataResived(QByteArray data)
         else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
             response_WRITE_recived(pkg);
         else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
+        {
             this->_conn_type->trimBufferFromBegin(1);
+            data = data.mid(1);
+        }
         else
-            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: ");
+            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
 
         delete pkg;
     }
@@ -91,7 +96,10 @@ void IOTV_Host::dataResived(QByteArray data)
 
 QString IOTV_Host::getName() const
 {
-    return _conn_type.get()->getName();
+    if (_conn_type.get() != nullptr)
+        return _conn_type->getName();
+
+    return {};
 }
 
 void IOTV_Host::connectToHost()
@@ -198,7 +206,7 @@ void IOTV_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     Log::write("R:"
                + QString::number(readPkg->chanelNumber)
                + "="
-               + raw.strData(),
+               + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
 }
 
@@ -236,13 +244,17 @@ void IOTV_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
     }
 }
 
+const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
+{
+    return _settingsData;
+}
+
 void IOTV_Host::slotConnected()
 {
     setOnline(true);
     _conn_type->write(IOTV_SH::query_WAY());
 
     _timerPong.start(TIMER_PONG);
-    emit signalHostConnected(); ///!!! никуда не идут
 }
 
 void IOTV_Host::slotDisconnected()
@@ -253,10 +265,7 @@ void IOTV_Host::slotDisconnected()
     _timerPong.stop();
     _reReadTimer.stop();
 
-    _conn_type->trimBufferFromBegin(static_cast<uint8_t>(Base_conn_type::BUFFER_MAX_SIZE));
-
-
-    emit signalHostDisconnected(); ///!!! никуда не идут
+    _conn_type->clearBufer();
 }
 
 void IOTV_Host::slotReReadTimeOut()
@@ -304,4 +313,9 @@ void IOTV_Host::slotThreadStop()
     _reReadTimer.moveToThread(_parentThread);
 
     _thread.exit();
+}
+
+void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
+{
+    write(channelNumber, data);
 }

@@ -1,19 +1,20 @@
 #pragma once
+#include <QString>
 
 struct hostField
 {
-    static const char* name;
-    static const char* connection_type;
-    static const char* address;
-    static const char* interval;
-    static const char* logFile;
-    static const char* port;
+    static const QString name;
+    static const QString connection_type;
+    static const QString address;
+    static const QString interval;
+    static const QString logFile;
+    static const QString port;
 };
 
 struct connectionType
 {
-    static const char* TCP;
-    static const char* FILE;
-    static const char* COM;
-    static const char* UDP;
+    static const QString TCP;
+    static const QString FILE;
+    static const QString COM;
+    static const QString UDP;
 };

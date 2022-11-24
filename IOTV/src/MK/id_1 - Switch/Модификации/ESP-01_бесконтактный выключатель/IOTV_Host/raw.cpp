@@ -46,10 +46,8 @@ Raw::DATA_TYPE Raw::toDataType(iot_uint8_t type)
     case 13:
         return DATA_TYPE::CHAR_PTR;
         break;
-    default:
-        return DATA_TYPE::RAW;
-        break;
     }
+    return DATA_TYPE::RAW;
 }
 
 iot_uint8_t Raw::toUInt8(Raw::DATA_TYPE dataType)

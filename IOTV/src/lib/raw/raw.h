@@ -1,18 +1,17 @@
 #pragma once
 
 #include <cstdint>
-#include <algorithm>
 
 #include <QByteArray>
 #include <QtEndian>
 
-#include "raw_global.h"
+#include <QDebug>
 
-class RAW_EXPORT Raw
+class Raw
 {
 public:
 
-    //Принята BigEndian последовательность в коде
+    //Принята BigEndian последовательность
     enum class DATA_TYPE : uint8_t
     {
         INT_8,
@@ -47,7 +46,10 @@ public:
     DATA_TYPE type() const;
     const QByteArray &data() const;
 
-    QString strData() const;
+    std::pair<QString, QString> strData() const;
+
+    static std::pair<QString, QString> strData(const QByteArray &data, DATA_TYPE type);
+    static QByteArray strToByteArray(const QString &dataStr, DATA_TYPE type);
 
 private:
     DATA_TYPE _type;

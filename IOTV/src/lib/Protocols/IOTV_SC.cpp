@@ -26,7 +26,7 @@ IOTV_SC::RESPONSE_PKG *IOTV_SC::Client_RX::accumPacket(QByteArray &data)
             return new RESPONSE_PKG(Response_Type::RESPONSE_INCOMPLETE);
 
         //у пакетов state и write одинаковые младшие 3 бита, отличие во втором байте в 4 разряде
-        if (data.at(1) & IOTV_SC::STATE_BIT_MASK)
+        if (data.at(1) & IOTV_SC::RESPONSE_STATE_SECOND_BYTE)
             return createResponse_STATE_PKG(data);
 
         return createResponse_WRITE_PKG(data);
@@ -144,7 +144,7 @@ IOTV_SC::RESPONSE_PKG *IOTV_SC::Client_RX::createResponse_READ_PKG(QByteArray &d
     RESPONSE_READ_PKG *pkg = new RESPONSE_READ_PKG;
     pkg->name = data.mid(4, nameLength);
     pkg->channelNumber = channelNumber;
-    pkg->data = data.mid(4 + nameLength);
+    pkg->data = data.mid(4 + nameLength, dataLength);
 
     data = data.mid(4 + nameLength + dataLength);
 
@@ -185,11 +185,12 @@ QByteArray IOTV_SC::Client_TX::query_STATE(const QString &deviceName)
 {
     QByteArray data;
 
-    uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
+    uint8_t length = static_cast<uint8_t>(deviceName.toLocal8Bit().length()) << 3;
+
     data.push_back(length | IOTV_SC::QUERY_STATE_FIRST_BYTE);
     data.push_back(IOTV_SC::QUERY_STATE_SECOND_BYTE);
     // length >> 3 - пресекаем размер больше допустимого
-    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
+    data.append(deviceName.toLocal8Bit().mid(0, (length >> 3)));
 
     return data;
 }
@@ -198,11 +199,12 @@ QByteArray IOTV_SC::Client_TX::query_READ(const QString &deviceName, uint8_t cha
 {
     QByteArray data;
 
-    uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
+    uint8_t length = static_cast<uint8_t>(deviceName.toLocal8Bit().length()) << 3;
+
     data.push_back(length | IOTV_SC::QUERY_READ_BYTE);
     data.push_back(0x0F & channelNumber);
     // length >> 3 - пресекаем размер больше допустимого
-    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
+    data.append(deviceName.toLocal8Bit().mid(0, (length >> 3)));
 
     return data;
 }
@@ -211,7 +213,7 @@ QByteArray IOTV_SC::Client_TX::query_WRITE(const QString &deviceName, uint8_t ch
 {
     QByteArray data;
 
-    uint8_t length = static_cast<uint8_t>(deviceName.length()) << 3;
+    uint8_t length = static_cast<uint8_t>(deviceName.toLocal8Bit().length()) << 3;
 
     data.push_back(length | IOTV_SC::QUERY_WRITE_BYTE);
     data.push_back(0x0F & channelNumber);
@@ -219,7 +221,7 @@ QByteArray IOTV_SC::Client_TX::query_WRITE(const QString &deviceName, uint8_t ch
     data.push_back(static_cast<uint8_t>(rawData.size()) >> 8);
     data.push_back(static_cast<uint8_t>(rawData.size()));
     // length >> 3 - пресекаем размер больше допустимого
-    data.append(deviceName.mid(0, (length >> 3)).toLocal8Bit());
+    data.append(deviceName.toLocal8Bit().mid(0, (length >> 3)));
     data.append(rawData);
 
     return data;
@@ -234,7 +236,7 @@ IOTV_SC::Server_RX::QUERY_PKG *IOTV_SC::Server_RX::accumPacket(QByteArray &data)
     if(data.isEmpty())
         return new QUERY_PKG(Query_Type::QUERY_ERROR);
 
-    uint8_t firstByte = data.at(0);
+    uint8_t firstByte = static_cast<uint8_t>(data.at(0));
 
     if(firstByte == IOTV_SC::QUERY_DEV_LIST_BYTE)
         return createQuery_DEV_LIST_PKG(data);
@@ -304,7 +306,7 @@ IOTV_SC::Server_RX::QUERY_PKG *IOTV_SC::Server_RX::createQuery_STATE_PKG(QByteAr
     if (data.size() < 2)
         return new QUERY_PKG(Query_Type::QUERY_INCOMPLETE);
 
-    uint8_t nameLength = data.at(0) >> 3;
+    uint8_t nameLength = static_cast<uint8_t>(data.at(0)) >> 3;
 
     if (data.size() < (2 + nameLength))
         return new QUERY_PKG(Query_Type::QUERY_INCOMPLETE);
@@ -354,17 +356,18 @@ QByteArray IOTV_SC::Server_TX::response_DEV_LIST(const RESPONSE_DEV_LIST_PKG &pk
 
     for (uint8_t i = 0; i < pkg.devs.size(); i++)
     {
-        uint8_t nameLength = pkg.devs.at(i).name.size();
+        uint8_t nameLength = pkg.devs.at(i).name.toLocal8Bit().size();
+        nameLength = nameLength > 30 ? 30 : nameLength;
 
-        uint8_t MSB = static_cast<uint8_t>(pkg.devs.at(i).description.size()) >> 8;
-        uint8_t LSB = static_cast<uint8_t>(pkg.devs.at(i).description.size());
+        uint8_t MSB = static_cast<uint8_t>(pkg.devs.at(i).description.toLocal8Bit().size()) >> 8;
+        uint8_t LSB = static_cast<uint8_t>(pkg.devs.at(i).description.toLocal8Bit().size());
         uint16_t descriptionLength = (MSB << 8) | LSB;
 
         uint8_t readChannelSize = 0x0F & pkg.devs.at(i).readChannel.size();
         uint8_t writeChannelSize = 0x0F & pkg.devs.at(i).writeChannel.size();
 
         data.push_back(nameLength << 3);
-        data.append(pkg.devs.at(i).name.mid(0, nameLength).toLocal8Bit());
+        data.append(pkg.devs.at(i).name.toLocal8Bit().mid(0, nameLength));
         data.push_back(pkg.devs.at(i).id);
         data.push_back(MSB);
         data.push_back(LSB);
@@ -385,12 +388,12 @@ QByteArray IOTV_SC::Server_TX::response_STATE(const RESPONSE_STATE_PKG &pkg)
 {
     QByteArray data;
 
-    uint8_t length = static_cast<uint8_t>(pkg.name.length()) << 3;
+    uint8_t length = static_cast<uint8_t>(pkg.name.toLocal8Bit().length()) << 3;
 
     data.push_back(length | IOTV_SC::RESPONSE_STATE_FIRST_BYTE);
     data.push_back((static_cast<uint8_t>(pkg.state) << 5) | IOTV_SC::RESPONSE_STATE_SECOND_BYTE);
     // length >> 3 - пресекаем размер больше допустимого
-    data.append(pkg.name.mid(0, (length >> 3)).toLocal8Bit());
+    data.append(pkg.name.toLocal8Bit().mid(0, (length >> 3)));
 
     return data;
 }
@@ -400,13 +403,13 @@ QByteArray IOTV_SC::Server_TX::response_READ(const RESPONSE_READ_PKG &pkg)
     QByteArray data;
 
     // пресекаем размер больше допустимого
-    uint8_t length = static_cast<uint8_t>(pkg.name.length()) & 0x1F;
+    uint8_t length = static_cast<uint8_t>(pkg.name.toLocal8Bit().length()) & 0x1F;
 
     data.push_back((length << 3) | IOTV_SC::RESPONSE_READ_BYTE);
     data.push_back(0x0F & pkg.channelNumber);
     data.push_back(static_cast<uint8_t>(pkg.data.size()) << 8);
     data.push_back(static_cast<uint8_t>(pkg.data.size()));
-    data.append(pkg.name.mid(0, length).toLocal8Bit());
+    data.append(pkg.name.toLocal8Bit().mid(0, length));
     data.append(pkg.data);
 
     return data;
@@ -416,11 +419,11 @@ QByteArray IOTV_SC::Server_TX::response_WRITE(const RESPONSE_WRITE_PKG &pkg)
 {
     QByteArray data;
     // пресекаем размер больше допустимого
-    uint8_t length = static_cast<uint8_t>(pkg.name.length()) & 0x1F;
+    uint8_t length = static_cast<uint8_t>(pkg.name.toLocal8Bit().length()) & 0x1F;
 
     data.push_back((length << 3) | IOTV_SC::RESPONSE_WRITE_BYTE);
     data.push_back(0x0F & pkg.channelNumber);
-    data.append(pkg.name.mid(0, length).toLocal8Bit());
+    data.append(pkg.name.toLocal8Bit().mid(0, length));
 
     return data;
 }
