@@ -22,9 +22,9 @@ Page {
     }
 
     Text {
-        text: qsTr("Нет подключения к серверу")
+        text: qsTr("Подключения не установлено")
         anchors.centerIn: parent
-        font.pixelSize: 24
+        font.pixelSize: 18
         visible: !client.state
         z: 1
         wrapMode: Text.Wrap
@@ -38,19 +38,21 @@ Page {
         }
     }
 
-    /*GridView*/ ListView{
+    GridView /*ListView*/{
         id: listView
+        cellHeight: 130
+        cellWidth: 130
 
         anchors {
             fill: parent
-            leftMargin: width * 0.1
-            rightMargin: width * 0.1
+            leftMargin: parent.width * 0.1
+            rightMargin: parent.width * 0.1
             topMargin: 15
         }
 
         model: listModel
         delegate: contactDelegate
-//        spacing: 15
+        //        spacing: 15
     }
 
     ListModel {
@@ -180,6 +182,8 @@ Page {
                     right: parent.right
                     top: icon.bottom
                     bottom: parent.bottom
+                    leftMargin: 5
+                    rightMargin: 5
                 }
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter

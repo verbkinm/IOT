@@ -28,6 +28,8 @@ Page {
             spacing: 15
             topPadding: 15
 
+
+
             //Температура
             Rectangle {
                 width: parent.width * 0.8

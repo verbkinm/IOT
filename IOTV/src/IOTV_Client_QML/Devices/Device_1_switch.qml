@@ -11,6 +11,8 @@ Rectangle {
     id: root
     height: 80
 
+    color: Qt.rgba(0, 0, 0, 0)
+
     anchors{
         left: parent.left
         right: parent.right
@@ -93,6 +95,10 @@ Rectangle {
                 }
             }
         }
+
+        BusyRect {
+            id: popup
+        }
     }
 
     Timer {
@@ -126,10 +132,6 @@ Rectangle {
 
     Component.onDestruction: {
         console.log("Device 1_1 destruct:", objectName)
-    }
-
-    BusyRect {
-        id: popup
     }
 
     function clickButton()
