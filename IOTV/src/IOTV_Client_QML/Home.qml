@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
+import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -175,20 +176,34 @@ Page {
 
             Label {
                 id: devName
-                text: model.name;
+                text: client.deviceByName(model.name).aliasName
                 font.pixelSize: 16
                 anchors {
                     left: parent.left
                     right: parent.right
                     top: icon.bottom
                     bottom: parent.bottom
-                    leftMargin: 5
-                    rightMargin: 5
+                    leftMargin: 10
+                    rightMargin: 10
                 }
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
+
+                Settings {
+                    id: setting
+                    category: model.name
+                    property string name
+
+                    Component.onCompleted: {
+                        if (this.name.length === 0)
+                            this.name = model.name
+
+                        var dev = client.deviceByName(model.name)
+                        dev.aliasName = this.name
+                    }
+                }
             }
 
             Connections {

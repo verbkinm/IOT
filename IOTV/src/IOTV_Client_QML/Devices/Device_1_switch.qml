@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.settings 1.1
 
 Rectangle {
     //Ссылка на Device
@@ -69,8 +70,7 @@ Rectangle {
             id: userDescription
 
             height: button.height
-            text: "Канал " + channel
-            wrapMode: Text.WrapAnywhere
+            wrapMode: Text.WordWrap
             elide: Text.ElideRight
             maximumLineCount: 2
 
@@ -98,6 +98,11 @@ Rectangle {
 
         BusyRect {
             id: popup
+
+            Component.onCompleted: {
+                if (!device.state)
+                    close()
+            }
         }
     }
 
@@ -107,6 +112,9 @@ Rectangle {
         repeat: true
         running: true
         onTriggered: {
+            if (!device.state)
+                return
+
             var btnCheck = device.readData(channel) === "true" ? true : false
             if (btnCheck !== switchOn)
             {
@@ -128,6 +136,17 @@ Rectangle {
         onTriggered: {
             popup.close()
         }
+    }
+
+    Settings {
+        id: setting
+        category: device.name + "_channel_" + channel
+        property alias name: userDescription.text
+    }
+
+    Component.onCompleted: {
+        if (setting.name.length === 0)
+            setting.name = "Канал " + channel
     }
 
     Component.onDestruction: {

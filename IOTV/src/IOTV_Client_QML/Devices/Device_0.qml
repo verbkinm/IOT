@@ -1,12 +1,14 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Qt.labs.settings 1.1
 
 Page {
-    id: root
-
     //Ссылка на Device
     required property var device
+
+    id: root
+    title: device.aliasName
 
     Flickable {
         id: fl
@@ -33,6 +35,12 @@ Page {
             spacing: 10
 
             Label {id:name}
+            Label {
+                id:aliasName
+                width: fl.width
+                wrapMode: Text.Wrap
+                maximumLineCount: 3
+            }
             Label {id:devId}
             Label {
                 id:description
@@ -92,8 +100,9 @@ Page {
     }
 
     Component.onCompleted: {
-        title  = Qt.binding(function (){ return device.name})
+        //!!!
         name.text = Qt.binding(function (){ return "Имя устройства: " + device.name})
+        aliasName.text = Qt.binding(function (){ return "Псевдоним: " + device.aliasName})
         devId.text = Qt.binding(function (){ return "ID устройства: " + device.id})
         description.text = Qt.binding(function (){ return "Описание: " + device.description})
         state.text = Qt.binding(function (){ return "Состояние: " + (device.state ? "онлайн" : "офлайн")})

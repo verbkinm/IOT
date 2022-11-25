@@ -43,18 +43,21 @@ ApplicationWindow {
             visible: !homePage.visible
         }
 
-        RowLayout {
-            anchors.fill: parent
-            Label {
-                text: stackView.currentItem.title
-                font.pixelSize: 18
-                Layout.alignment: Qt.AlignCenter
-            }
+        Label {
+            width: parent.width
+            height: parent.height
+            text: stackView.currentItem.title
+            elide: Text.ElideRight
+            font.pixelSize: 18
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            leftPadding: pressBack.width + pressBack.anchors.leftMargin
+            rightPadding: pressBack.width + pressBack.anchors.leftMargin
         }
     }
 
     footer: ToolBar {
-        height: 50
+        height: overlayHeader.height
         id: overlayFooter
         RowLayout {
             anchors.fill: parent
@@ -239,7 +242,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                text: "Клиент IOTV\n Версия 0.2 "
+                text: "Клиент IOTV\n Версия " + Qt.application.version
                 font.pixelSize: 24
                 wrapMode: Text.Wrap
             }

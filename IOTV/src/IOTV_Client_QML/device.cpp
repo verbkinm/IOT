@@ -104,3 +104,16 @@ bool operator==(const Device &lhs, const Device &rhs)
     }
     return false;
 }
+
+const QString &Device::aliasName() const
+{
+    return _aliasName;
+}
+
+void Device::setAliasName(const QString &newAliasName)
+{
+    if (_aliasName == newAliasName)
+        return;
+    _aliasName = newAliasName;
+    emit aliasNameChanged();
+}

@@ -1,11 +1,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.settings 1.1
 
 Page {
-    id: root
-
     //Ссылка на Device
     required property var device
+
+    id: root
+    title: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel
@@ -200,11 +202,15 @@ Page {
 
     }
 
+    Settings {
+        id: setting
+        category: device.name
+        property alias name: root.title
+    }
+
     Component.onCompleted: {
         //        if (device.readChannelLength < 2 || device.readChannelLength > 2)
         //            this.destroy();
-
-        title = device.name
 
         if (device.readChannelLength === 3)
             pressure.visible = true
