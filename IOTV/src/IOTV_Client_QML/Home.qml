@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
+import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -22,9 +23,9 @@ Page {
     }
 
     Text {
-        text: qsTr("Нет подключения к серверу")
+        text: qsTr("Подключения не установлено")
         anchors.centerIn: parent
-        font.pixelSize: 24
+        font.pixelSize: 18
         visible: !client.state
         z: 1
         wrapMode: Text.Wrap
@@ -33,21 +34,26 @@ Page {
             anchors.fill: parent
             onClicked: {
                 appStack.push(clientPage)
-//                popupWait.open()
+                //                popupWait.open()
             }
         }
     }
 
-    ListView {
+    GridView /*ListView*/{
         id: listView
+        cellHeight: 130
+        cellWidth: 130
 
         anchors {
             fill: parent
-            margins: 10
+            leftMargin: parent.width * 0.1
+            rightMargin: parent.width * 0.1
+            topMargin: 15
         }
 
         model: listModel
         delegate: contactDelegate
+        //        spacing: 15
     }
 
     ListModel {
@@ -58,151 +64,164 @@ Page {
         id: contactDelegate
 
         Rectangle {
-            id: wrapper
-            width: parent.width
-            height: 74
+            id: componentRect
 
-            Rectangle {
-                id: componentRect
+            width: 120
+            height: 120
 
-                width: parent.width
-                height: 64
+            border.width: 1
+            border.color: Qt.rgba(0, 0, 0, 0.5)
+            radius: 15
 
-                border.width: 1
-                border.color: Qt.rgba(0, 0, 0, 0.5)
-                radius: 5
-                color: Qt.rgba(1, 0, 0, 0.1)
-                ColorAnimation on color {
-                    id: animColorOffline
-                    to:  Qt.rgba(1, 0, 0, 0.1)
-                    duration: 1000
-                    running : false
-                }
-                ColorAnimation on color {
-                    id: animColorOnline
-                    to: Qt.rgba(0, 1, 0, 0.1)
-                    duration: 1000
-                    running: false
-                }
+            color: Qt.rgba(1, 0, 0, 0.1)
+            ColorAnimation on color {
+                id: animColorOffline
+                to:  Qt.rgba(1, 0, 0, 0.1)
+                duration: 1000
+                running : false
+            }
+            ColorAnimation on color {
+                id: animColorOnline
+                to: Qt.rgba(0, 1, 0, 0.1)
+                duration: 1000
+                running: false
+            }
 
-                anchors.margins: 5
+            //            anchors.margins: 5
 
-                //                ScaleAnimator {
-                //                    id: scaleAnimMin
-                //                    target: componentRect
-                //                    from: 1
-                //                    to: 0.85
-                //                    easing.type: Easing.InCubic;
-                //                    duration: 150
-                //                    running: false
-                //                }
-                //                ScaleAnimator {
-                //                    id: scaleAnimMax
-                //                    target: componentRect
-                //                    from: 0.85
-                //                    to: 1
-                //                    easing.type: Easing.InCubic;
-                //                    duration: 150
-                //                    running: false
-                //                }
+            //                ScaleAnimator {
+            //                    id: scaleAnimMin
+            //                    target: componentRect
+            //                    from: 1
+            //                    to: 0.85
+            //                    easing.type: Easing.InCubic;
+            //                    duration: 150
+            //                    running: false
+            //                }
+            //                ScaleAnimator {
+            //                    id: scaleAnimMax
+            //                    target: componentRect
+            //                    from: 0.85
+            //                    to: 1
+            //                    easing.type: Easing.InCubic;
+            //                    duration: 150
+            //                    running: false
+            //                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        var find = false
-                        var pageObject
-                        for (var i = 0; i < appStack.children.length; i++)
-                            if (appStack.children[i].objectName === name)
-                            {
-                                find = true
-                                pageObject = appStack.children[i]
-                                break
-                            }
-                        if (find)
-                        {
-                            appStack.push(pageObject)
-                            return
-                        }
-
-                        var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
-                        if (component.status === Component.Ready)
-                        {
-                            var dev = client.deviceByName(name)
-                            var obj = component.createObject(appStack, {device: dev})
-                            obj.objectName = name
-                            appStack.push(obj);
-                            dev.signalUpdate.connect(function() {pressBack.clicked()})
-                        }
-                        //                        scaleAnimMin.running = true
-                        //                        scaleAnimMax.running = true
-                    }
-
-                    //                    onEntered: {
-                    //                        scaleAnimMin.running = true
-                    //                    }
-                    //                    onExited: {
-                    //                        scaleAnimMax.running = true
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    //                    var find = false
+                    //                    var pageObject
+                    //                    for (var i = 0; i < appStack.children.length; i++)
+                    //                        if (appStack.children[i].objectName === name)
+                    //                        {
+                    //                            find = true
+                    //                            pageObject = appStack.children[i]
+                    //                            break
+                    //                        }
+                    //                    if (find)
+                    //                    {
+                    //                        appStack.push(pageObject)
+                    //                        return
                     //                    }
 
-                    function createDeviceBy(id)
+                    var component = Qt.createComponent(createDeviceBy(client.deviceByName(name).id));
+                    if (component.status === Component.Ready)
                     {
-                        if (id === 1)
-                            return "/Devices/Device_1.qml"
-                        else if (id === 4)
-                            return "/Devices/Device_4.qml"
-                        else
-                            return "/Devices/Device_0.qml"
+                        var dev = client.deviceByName(name)
+                        var obj = component.createObject(appStack, {device: dev})
+                        obj.objectName = name
+                        appStack.push(obj);
+                        dev.signalUpdate.connect(function() {pressBack.clicked()})
                     }
+                    //                        scaleAnimMin.running = true
+                    //                        scaleAnimMax.running = true
                 }
 
-                Image
+                //                    onEntered: {
+                //                        scaleAnimMin.running = true
+                //                    }
+                //                    onExited: {
+                //                        scaleAnimMax.running = true
+                //                    }
+
+                function createDeviceBy(id)
                 {
-                    id: icon
-                    source: model.source
-                    anchors {
-                        //                    top: parent.top
-                        //                    bottom: parent.bottom
-                        left: parent.left
-                        verticalCenter: parent.verticalCenter
-                        margins: 5
-                    }
-                    width: 54
-                    height: 54
-                    fillMode: Image.PreserveAspectFit
+                    if (id === 1)
+                        return "/Devices/Device_1.qml"
+                    else if (id === 2)
+                        return "/Devices/Device_2.qml"
+                    else if (id === 4)
+                        return "/Devices/Device_4.qml"
+                    else
+                        return "/Devices/Device_0.qml"
                 }
+            }
 
-                Text {
-                    id: devName
-                    text: model.name;
-                    font.pixelSize: 18
-                    anchors {
-                        left: icon.right
-                        right: parent.right
-                        top: parent.top
-                        bottom: parent.bottom
-                    }
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    wrapMode: Text.Wrap
+            Image
+            {
+                id: icon
+                source: model.source
+                anchors {
+                    top: parent.top
+                    horizontalCenter: parent.horizontalCenter
+                    topMargin: 10
                 }
+                width: 54
+                height: 54
+                fillMode: Image.PreserveAspectFit
+            }
 
-                Connections {
-                    target: client.deviceByName(name)
-                    function onStateChanged() {
-                        if (target.state)
-                            animColorOnline.running = true
-                        else
-                            animColorOffline.running = true
+            Label {
+                id: devName
+                text: client.deviceByName(model.name).aliasName
+                font.pixelSize: 16
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: icon.bottom
+                    bottom: parent.bottom
+                    leftMargin: 10
+                    rightMargin: 10
+                }
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.Wrap
+                elide: Text.ElideRight
 
-                        //                        componentRect.color = target.state ? Qt.rgba(0, 1, 0, 0.1) : Qt.rgba(1, 0, 0, 0.1)
-                    }
-                    function onSignalUpdate() {
-                        model.source = imageById(target.id)
+                Settings {
+                    id: setting
+                    category: model.name
+                    property string name
+
+                    Component.onCompleted: {
+                        if (this.name.length === 0)
+                            this.name = model.name
+
+                        var dev = client.deviceByName(model.name)
+                        dev.aliasName = this.name
                     }
                 }
             }
+
+            Connections {
+                target: client.deviceByName(name)
+                function onStateChanged() {
+                    if (target.state)
+                        animColorOnline.running = true
+                    else
+                        animColorOffline.running = true
+
+                    //                        componentRect.color = target.state ? Qt.rgba(0, 1, 0, 0.1) : Qt.rgba(1, 0, 0, 0.1)
+                }
+                function onSignalUpdate() {
+                    model.source = imageById(target.id)
+                }
+            }
         }
+
     }
 
     Connections {

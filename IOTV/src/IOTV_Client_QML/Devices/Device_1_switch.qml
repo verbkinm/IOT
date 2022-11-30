@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.settings 1.1
 
 Rectangle {
     //Ссылка на Device
@@ -9,7 +10,9 @@ Rectangle {
     property bool switchOn: false
 
     id: root
-    height: 150
+    height: 80
+
+    color: Qt.rgba(0, 0, 0, 0)
 
     anchors{
         left: parent.left
@@ -17,68 +20,88 @@ Rectangle {
     }
 
     Rectangle {
-        anchors {
-            fill: parent
-            bottomMargin: 15
-            leftMargin: 10
-            rightMargin: 10
-        }
+        height: parent.height
+        width: parent.width * 0.8
 
-        //        Rectangle {
-        //            color: device.state ? Qt.rgba(0.5, 0.5, 0.5, 0) : Qt.rgba(0.5, 0.5, 0.5, 0.2)
-        //            anchors.fill: parent
-        //            z: 1
-        //        }
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+        }
 
         border.color: "grey"
         border.width: 1
+        radius: 15
+
+        gradient: Gradient {
+            GradientStop {
+                position: 0.00;
+                color: "#e0d9d9";
+            }
+            GradientStop {
+                position: 1.00;
+                color: "#ffffff";
+            }
+        }
 
         Switch{
             id: button
-            height: 90
+            height: 80
 
             checked: switchOn
             anchors{
                 left: parent.left
+                leftMargin: 30
                 verticalCenter: parent.verticalCenter
             }
 
             onToggled: {
                 var state = button.checked ? "true" : "false"
+                button.checked = !button.checked
 
                 if (switchOn)
                     device.setDataFromString(channel, "false")
                 else
                     device.setDataFromString(channel, "true")
 
-                button.checked = !button.checked
                 clickButton()
-
-//                switchOn = !switchOn
             }
         }
 
-        TextField {
+        Label {
             id: userDescription
 
             height: button.height
-            text: "TEXT"
+            wrapMode: Text.WordWrap
+            elide: Text.ElideRight
+            maximumLineCount: 2
 
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             antialiasing: true
-            readOnly: true
 
-            placeholderText: "Описание..."
-            placeholderTextColor: "#ccc"
-
-            font.pixelSize: 14
+            font.pixelSize: 18
 
             anchors{
                 right: parent.right
                 rightMargin: 10
                 left: button.right
                 verticalCenter: parent.verticalCenter
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    button.toggle()
+                    button.toggled()
+                }
+            }
+        }
+
+        BusyRect {
+            id: popup
+
+            Component.onCompleted: {
+                if (!device.state)
+                    close()
             }
         }
     }
@@ -89,6 +112,9 @@ Rectangle {
         repeat: true
         running: true
         onTriggered: {
+            if (!device.state)
+                return
+
             var btnCheck = device.readData(channel) === "true" ? true : false
             if (btnCheck !== switchOn)
             {
@@ -96,11 +122,7 @@ Rectangle {
                 popupTimer.start()
             }
             else
-            {
                 button.checked = switchOn
-//                popup.close()
-//                popupTimer.stop()
-            }
 
             switchOn = btnCheck
         }
@@ -108,25 +130,27 @@ Rectangle {
 
     Timer {
         id: popupTimer
-        interval: 500
+        interval: timer.interval * 1.25
         running: true
         repeat: false
         onTriggered: {
-            console.log("popupTimer")
             popup.close()
         }
     }
 
-//    Component.onCompleted: {
-//        popup.close()
-//    }
+    Settings {
+        id: setting
+        category: device.name + "_channel_" + channel
+        property alias name: userDescription.text
+    }
+
+    Component.onCompleted: {
+        if (setting.name.length === 0)
+            setting.name = "Канал " + channel
+    }
 
     Component.onDestruction: {
         console.log("Device 1_1 destruct:", objectName)
-    }
-
-    BusyRect {
-        id: popup
     }
 
     function clickButton()

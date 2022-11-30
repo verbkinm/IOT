@@ -1,15 +1,11 @@
 #include "client.h"
 
 Client::Client(QObject *parent): QObject{parent},
-    _address{"127.0.0.1"}, _port{2022}, _stateConnection{false}, _autoConnect{false},
-    _settingClient(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Client")
+    _stateConnection{false}
 {
     _socket.setParent(this);
     _timerDevList.setParent(this);
     _connectWait.setParent(this);
-
-    checkSettingsFileExist();
-    readSettings();
 
     connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
     connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected, Qt::QueuedConnection);
@@ -17,20 +13,17 @@ Client::Client(QObject *parent): QObject{parent},
 
     connect(&_timerDevList, &QTimer::timeout, this, &Client::slotQueryDevList, Qt::QueuedConnection);
     connect(&_connectWait, &QTimer::timeout, this, &Client::slotConnectWait, Qt::QueuedConnection);
-
-    if (_autoConnect)
-        connectToHost();
 }
 
 Client::~Client()
 {
-    saveSettings();
+
 }
 
-void Client::connectToHost()
+void Client::connectToHost(const QString &address, qint64 port)
 {
-    _socket.connectToHost(_address, _port);
-    _connectWait.start(5000);
+    _socket.connectToHost(address, port);
+    _connectWait.start(TIME_OUT);
 }
 
 void Client::disconnectFromHost()
@@ -41,16 +34,6 @@ void Client::disconnectFromHost()
 qint64 Client::writeData(const QByteArray &data)
 {
     return _socket.write(data);
-}
-
-const QString &Client::address() const
-{
-    return _address;
-}
-
-quint16 Client::port() const
-{
-    return _port;
 }
 
 int Client::countDevices() const
@@ -66,16 +49,6 @@ int Client::countDeviceOnline() const
     });
 
     return count;
-}
-
-void Client::setAddress(const QString &address)
-{
-    _address = address;
-}
-
-void Client::setPort(quint64 port)
-{
-    _port = port;
 }
 
 QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) const
@@ -184,7 +157,7 @@ void Client::slotConnected()
 //               Log::Write_Flag::FILE_STDOUT);
 
     write(IOTV_SC::Client_TX::query_Device_List());
-    _timerDevList.start(5000);
+    _timerDevList.start(TIME_OUT);
 
     setStateConnection(true);
     emit signalConnected();
@@ -228,20 +201,6 @@ bool Client::stateConnection() const
     return _stateConnection;
 }
 
-bool Client::autoConnect() const
-{
-    return _autoConnect;
-}
-
-void Client::setAutoConnect(bool newAutoConnect)
-{
-    if (_autoConnect == newAutoConnect)
-        return;
-
-    _autoConnect = newAutoConnect;
-    emit autoConnectChanged();
-}
-
 void Client::setStateConnection(bool newStateConnection)
 {
     if (_stateConnection == newStateConnection)
@@ -249,40 +208,6 @@ void Client::setStateConnection(bool newStateConnection)
 
     _stateConnection = newStateConnection;
     emit stateConnectionChanged();
-}
-
-void Client::checkSettingsFileExist()
-{
-    if (!QFileInfo::exists(_settingClient.fileName()))
-    {
-        _settingClient.beginGroup("Client");
-        _settingClient.setValue("address", "127.0.0.1");
-        _settingClient.setValue("port", 2022);
-        _settingClient.setValue("autoConnect", false);
-        _settingClient.endGroup();
-        _settingClient.sync();
-    }
-}
-
-void Client::readSettings()
-{
-    _settingClient.beginGroup("Client");
-
-    _address = _settingClient.value("address", "127.0.0.1").toString();
-    _port = _settingClient.value("port", 2022).toULongLong();
-    _autoConnect = _settingClient.value("autoConnect", false).toBool();
-
-    _settingClient.endGroup();
-}
-
-void Client::saveSettings()
-{
-    _settingClient.beginGroup("Client");
-    _settingClient.setValue("address", _address);
-    _settingClient.setValue("port", _port);
-    _settingClient.setValue("autoConnect", _autoConnect);
-    _settingClient.endGroup();
-    _settingClient.sync();
 }
 
 void Client::slotReciveData()
@@ -411,4 +336,6 @@ void Client::slotConnectWait()
     emit signalConnectWait();
     _connectWait.stop();
     disconnectFromHost();
+
+
 }

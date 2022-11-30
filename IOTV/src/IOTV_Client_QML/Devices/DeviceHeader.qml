@@ -34,6 +34,10 @@ Rectangle {
             color: "transparent"
             source: "qrc:/img/settings.png"
         }
+
+        onClicked: {
+            createComp("/Devices/Setting/Setting.qml", "_setting")
+        }
     }
 
     Button {
@@ -54,33 +58,7 @@ Rectangle {
         }
 
         onClicked: {
-            var find = false
-            var pageObject
-
-            for (var i = 0; i < appStack.children.length; i++)
-            {
-                if (appStack.children[i].objectName === name + "_debug")
-                {
-                    find = true
-                    pageObject = appStack.children[i]
-                    break
-                }
-            }
-
-            if (find)
-            {
-                appStack.push(pageObject)
-                return
-            }
-
-            var component = Qt.createComponent("/Devices/Device_0.qml");
-            if (component.status === Component.Ready)
-            {
-                var dev = device
-                var obj = component.createObject(appStack, {device: dev})
-                obj.objectName = name + "_debug"
-                appStack.push(obj);
-            }
+            createComp("/Devices/Device_0.qml", "_debug")
         }
     }
 
@@ -133,6 +111,37 @@ Rectangle {
                 font.pixelSize: 24
                 wrapMode: Text.Wrap
             }
+        }
+    }
+
+    function createComp(fileName, postfix)
+    {
+        var find = false
+        var pageObject
+
+        for (var i = 0; i < appStack.children.length; i++)
+        {
+            if (appStack.children[i].objectName === name + postfix)
+            {
+                find = true
+                pageObject = appStack.children[i]
+                break
+            }
+        }
+
+        if (find)
+        {
+            appStack.push(pageObject)
+            return
+        }
+
+        var component = Qt.createComponent(fileName);
+        if (component.status === Component.Ready)
+        {
+            var dev = device
+            var obj = component.createObject(appStack, {device: dev})
+            obj.objectName = name + postfix
+            appStack.push(obj);
         }
     }
 }

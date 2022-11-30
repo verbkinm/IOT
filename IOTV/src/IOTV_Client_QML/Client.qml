@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
+import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -80,8 +81,8 @@ Page {
                     rightMargin: 20
                 }
                 enabled: !client.state
-                text: client.addr
-                onTextChanged: client.addr = text
+                text: settings.address
+                onTextChanged: settings.address = text
             }
 
             TextField {
@@ -103,9 +104,9 @@ Page {
                     margins: 10
                     rightMargin: 20
                 }
-                text: client.port
+                text: settings.port
 
-                onTextChanged: client.port = text
+                onTextChanged: settings.port = text
             }
             CheckBox {
                 id: autoConnect
@@ -119,11 +120,11 @@ Page {
                 font.pixelSize: 14
 
                 enabled: !client.state
-                checked: client.autoConnect
+                checked: settings.autoConnect
 
-                onClicked: {
-                    client.autoConnect = checked
-                }
+//                onClicked: {
+//                    client.autoConnect = checked
+//                }
             }
 
             Button {
@@ -151,7 +152,7 @@ Page {
                     }
                     else if(!client.state)
                     {
-                        client.connectToHost()
+                        client.connectToHost(addr.text, port.text)
                         connection_attempt = true;
                     }
                     else
@@ -159,6 +160,14 @@ Page {
                 }
             }
         }
+    }
+
+    Settings {
+        id: settings
+        category: "Client"
+        property alias address: addr.text
+        property alias port: port.text
+        property alias autoConnect: autoConnect.checked
     }
 
     Connections {
@@ -171,11 +180,14 @@ Page {
         }
         function onSignalConnectWait() {
             connection_attempt = false;
+            connectionError.open()
         }
     }
 
     Component.onCompleted: {
-        connection_attempt = client.autoConnect
+        connection_attempt = settings.autoConnect
+        if (connection_attempt)
+            client.connectToHost(addr.text, port.text)
     }
 
     Component.onDestruction: {

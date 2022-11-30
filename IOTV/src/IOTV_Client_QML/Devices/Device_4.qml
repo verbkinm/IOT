@@ -3,15 +3,14 @@ import QtQuick.Controls 2.2
 //import QtMultimedia 5.9
 
 Page {
-    id: root
-
-    //Ссылка на Device
     required property var device
-
     property bool playSate: false
     property bool ledSate: false
     property bool repeateSate: false
     property string mode: "0" //первый запуск popup закроется при изменении занчение mode
+
+    id: root
+    title: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel

@@ -5,7 +5,6 @@ SUBDIRS += \
 #    src/IOTV_Client \
     src/IOTV_HOSTS_PC \
 #    src/Tests \
-#    src/lib \
     src/IOTV_server
 
 DISTFILES += \

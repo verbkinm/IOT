@@ -1,11 +1,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.settings 1.1
 
 Page {
-    id: root
-
     //Ссылка на Device
     required property var device
+
+    id: root
+    title: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel
@@ -25,12 +27,12 @@ Page {
         Column {
             id: column
             width: parent.width
+            spacing: 15
+            topPadding: 15
         }
     }
 
     Component.onCompleted: {
-        title = device.name
-
         if (device.readChannelLength !== device.writeChannelLength)
         {
             console.error("error device id 1")

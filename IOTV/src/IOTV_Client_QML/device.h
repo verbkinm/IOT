@@ -13,6 +13,8 @@ class Device : public Base_Host
     Q_PROPERTY(int id READ getId CONSTANT)
     Q_PROPERTY(QString name READ getName CONSTANT)
     Q_PROPERTY(QString description READ getDescription CONSTANT)
+    Q_PROPERTY(QString aliasName READ aliasName WRITE setAliasName NOTIFY aliasNameChanged)
+
 
     Q_PROPERTY(int readChannelLength READ getReadChannelLength CONSTANT)
     Q_PROPERTY(int writeChannelLength READ getWriteChannelLength CONSTANT)
@@ -38,8 +40,13 @@ public:
 
     friend bool operator==(const Device &lhs, const Device &rhs);
 
+    const QString &aliasName() const;
+    void setAliasName(const QString &newAliasName);
+
 private:
     const QString _name;
+    QString _aliasName;
+
     bool _state;
 
     QTimer _timerRead, _timerState;
@@ -54,5 +61,6 @@ signals:
 //    void signalDataChanged(uint8_t channelNumber, QByteArray data);
     void stateChanged();
     void signalUpdate();
+    void aliasNameChanged();
 };
 

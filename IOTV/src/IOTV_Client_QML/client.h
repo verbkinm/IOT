@@ -1,11 +1,10 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QTimer>
-#include <QSettings>
 #include <QFileInfo>
 #include <QEvent>
 
@@ -17,27 +16,17 @@ class Client : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString addr READ address WRITE setAddress NOTIFY addressChanged)
-    Q_PROPERTY(quint16 port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(quint16 totalDevice READ countDevices NOTIFY countDeviceChanged)
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
     Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
-    Q_PROPERTY(bool autoConnect READ autoConnect WRITE setAutoConnect NOTIFY autoConnectChanged)
-
 public:
     Client(QObject *parent = nullptr);
     ~Client();
 
     qint64 writeData(const QByteArray &data);
 
-    const QString &address() const;
-    quint16 port() const;
-
     int countDevices() const;
     int countDeviceOnline() const;
-
-    void setAddress(const QString &address);
-    void setPort(quint64 port);
 
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
@@ -46,24 +35,17 @@ public:
 
     bool stateConnection() const;
 
-    bool autoConnect() const;
-    void setAutoConnect(bool newAutoConnect);
-
 private:
+    const int TIME_OUT = 5000;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    QTimer _timerDevList, _connectWait;
-
-    QString _address;
-    quint16 _port;
+    QTimer _timerDevList,
+            _connectWait; // после команды на соединение ожидаем, если в течение N времение ответа нет, отключаемся
 
     bool _stateConnection;
-    bool _autoConnect;
 
-    std::unordered_map<QString, Device> _devices;
-
-    QSettings _settingClient;
+    std::map<QString, Device> _devices;
 
     void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
     void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
@@ -74,12 +56,8 @@ private:
 
     void setStateConnection(bool newStateConnection);
 
-    void checkSettingsFileExist();
-    void readSettings();
-    void saveSettings();
-
 public slots:
-    void connectToHost();
+    void connectToHost(const QString &address, qint64 port);
     void disconnectFromHost();
 
     void slotConnected();
@@ -99,9 +77,6 @@ private slots:
 signals:
     void signalConnected();
     void signalDisconnected();
-
-    void addressChanged(QString);
-    void portChanged(quint64);
 
     void countDeviceChanged();
     void onlineDeviceChanged();

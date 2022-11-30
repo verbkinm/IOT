@@ -43,18 +43,21 @@ ApplicationWindow {
             visible: !homePage.visible
         }
 
-        RowLayout {
-            anchors.fill: parent
-            Label {
-                text: stackView.currentItem.title
-                font.pixelSize: 18
-                Layout.alignment: Qt.AlignCenter
-            }
+        Label {
+            width: parent.width
+            height: parent.height
+            text: stackView.currentItem.title
+            elide: Text.ElideRight
+            font.pixelSize: 18
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            leftPadding: pressBack.width + pressBack.anchors.leftMargin
+            rightPadding: pressBack.width + pressBack.anchors.leftMargin
         }
     }
 
     footer: ToolBar {
-        height: 50
+        height: overlayHeader.height
         id: overlayFooter
         RowLayout {
             anchors.fill: parent
@@ -105,6 +108,9 @@ ApplicationWindow {
                 name: "Настройки"
             }
             ListElement {
+                name: "О программе"
+            }
+            ListElement {
                 name: "Выход"
             }
         }
@@ -134,6 +140,12 @@ ApplicationWindow {
                                 stackView.push(clientPage)
                             }
                             else if (index === 2)
+                            {
+                                //                                about.visible = true
+                                about.open()
+                            }
+
+                            else if (index === 3)
                             {
                                 exit = true
                                 Qt.quit()
@@ -209,6 +221,69 @@ ApplicationWindow {
             anchors.centerIn: parent
             visible: true
             running: true
+        }
+    }
+
+    Popup {
+        id: about
+        objectName: "about"
+        anchors.centerIn: parent
+        width: parent.width
+        height: parent.height
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        visible: false
+
+        background: Rectangle{
+            opacity: 0.9
+
+            Label {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: "Клиент IOTV\n Версия " + Qt.application.version
+                font.pixelSize: 24
+                wrapMode: Text.Wrap
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: {
+                about.close()
+            }
+        }
+    }
+
+    Popup {
+        id: connectionError
+
+        width: parent.width
+        height: parent.height
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        visible: false
+
+        background: Rectangle {
+            color: Qt.rgba(255, 255, 255, 0.9)
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                connectionError.close()
+            }
+        }
+
+        Label {
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: "Ошибка соединения!"
+            font.pixelSize: 24
+            wrapMode: Text.Wrap
         }
     }
 
