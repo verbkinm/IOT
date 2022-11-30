@@ -1,7 +1,7 @@
 #include "iot_server.h"
 
 IOTV_Server::IOTV_Server()
-  : _id(4), _description("Облачко для любимой доченьки"),
+  : _id(4), _description("Облачко для Евы-королевы!"),
     _isPlaing(_readChannel[0]), _led(_readChannel[1]), _repeate(_readChannel[2]), _mode(0), _playStop(0)
 {
   std::memset(_readChannel, 0, READ_CHANNEL_LENGTH - 1);
