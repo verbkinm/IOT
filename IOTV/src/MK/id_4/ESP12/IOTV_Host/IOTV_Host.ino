@@ -3,7 +3,7 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
-#define BUFFSIZE 64
+#define BUFFSIZE 32
 
 #define PLAY_PIN D5
 #define LED_PIN D7
@@ -33,7 +33,8 @@ WiFiEventHandler stationDisconnectedHandler;
 void dataRecived();
 void debug();
 
-void setup() {
+void setup() 
+{
   stationConnectedHandler = WiFi.onStationModeConnected(&onStationConnected);
   stationDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationDisconnected);
 
@@ -45,7 +46,6 @@ void setup() {
   pinMode(MODE_2_PIN, INPUT);
   pinMode(MODE_3_PIN, INPUT);
 
-  // digitalWrite(PLAY_PIN, LOW);
   digitalWrite(LED_PIN, HIGH);
   digitalWrite(MODE_1_PIN, LOW);
   digitalWrite(MODE_2_PIN, LOW);
@@ -85,7 +85,7 @@ void loop()
 
   if (iot.repeate() && !iot.isPlaing())
   { 
-    delay(1000);
+    delay(3000);
     if (!isPlaying())
       iot.setPlayStop(1);
   }
@@ -124,7 +124,8 @@ void loop()
 
   
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) 
+  {
     client.flush();
     ptrBuf = recivedBuffer;
 
@@ -138,7 +139,8 @@ void loop()
   }
 }
 
-void dataRecived() {
+void dataRecived() 
+{
   uint16_t dataSize = 0;
   *ptrBuf = client.read();
   ptrBuf++;
@@ -146,49 +148,56 @@ void dataRecived() {
   if (ptrBuf >= (recivedBuffer + BUFFSIZE))
     ptrBuf = recivedBuffer;
 
-  while (ptrBuf != recivedBuffer) {
-    if (recivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE) {
+  while (ptrBuf != recivedBuffer) 
+  {
+    if (recivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE) 
+    {
       dataSize = Protocol_class::response_WAY(iot, transmitBuffer);
       client.write(transmitBuffer, dataSize);
       memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFFSIZE - 1);
       ptrBuf--;
       Serial.println("WAY");
       debug();
-    } else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE) {
+    } 
+    else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE) 
+    {
       dataSize = Protocol_class::response_READ(iot, recivedBuffer, ptrBuf, transmitBuffer);
       client.write(transmitBuffer, dataSize);
       memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFFSIZE - 1);
       ptrBuf--;
       Serial.println("READ");
       debug();
-    } else if (recivedBuffer[0] == Protocol_class::QUERY_PING_BYTE) {
+    } 
+    else if (recivedBuffer[0] == Protocol_class::QUERY_PING_BYTE) 
+    {
       dataSize = Protocol_class::response_Pong(transmitBuffer);
       client.write(transmitBuffer, dataSize);
       memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFFSIZE - 1);
       ptrBuf--;
       Serial.println("PING");
       debug();
-    } else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_WRITE_BYTE) {
+    } 
+    else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_WRITE_BYTE) 
+    {
       // лоакальный dataSize, так как response_WRITE может вернуть -1
       Serial.println("debug WRITE");
       Serial.println(recivedBuffer[0], HEX);
 
-      // for (int i = 0; i < 16; i++)
-      //   Serial.print(recivedBuffer[i], HEX);
-      // Serial.println();
-
       int dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
       Serial.print("dataSize = ");
       Serial.println(dataSize);
-      if (dataSize >= 0) {
+      if (dataSize >= 0) 
+      {
         client.write(transmitBuffer, 1);  // ответ на write = 1 байт
         memmove((void*)recivedBuffer, (void*)&recivedBuffer[dataSize + 3], BUFFSIZE - (dataSize + 3));
         ptrBuf -= dataSize + 3;
         Serial.println("WRITE");
         debug();
-      } else
+      } 
+      else
         break;
-    } else
+    } 
+    else
       ptrBuf = recivedBuffer;
 
     if (ptrBuf < recivedBuffer)
@@ -215,12 +224,14 @@ void debug() {
   // Serial.print(", Mode: " + iot.mode());
 }
 
-void onStationConnected(const WiFiEventStationModeConnected& evt) {
+void onStationConnected(const WiFiEventStationModeConnected& evt) 
+{
   Serial.print("Station connected: ");
   Serial.println(evt.ssid);
 }
 
-void onStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
+void onStationDisconnected(const WiFiEventStationModeDisconnected& evt) 
+{
   Serial.print("Station disconnected: ");
   Serial.println(evt.ssid);
   Serial.print("Code disconnected: ");
