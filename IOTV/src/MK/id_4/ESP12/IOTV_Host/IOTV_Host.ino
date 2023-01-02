@@ -3,10 +3,10 @@
 #include "IOTV_SH.h"
 #include "iot_server.h"
 
-#define BUFFSIZE 36
+#define BUFFSIZE 64
 
 #define PLAY_PIN D5
-#define LED_PIN D6
+#define LED_PIN D7
 #define MODE_1_PIN D1
 #define MODE_2_PIN D6
 #define MODE_3_PIN D2
@@ -65,8 +65,11 @@ void setup() {
   server.begin();
 }
 
-void loop() {
-  if (!client.connected()) {
+void loop() 
+{
+  iot.setPlaing(isPlaying());
+  if (!client.connected()) 
+  {
     client.flush();
     ptrBuf = recivedBuffer;
 
@@ -78,9 +81,11 @@ void loop() {
       dataRecived();
   }
 
-  if (iot.repeate())
+ iot.setPlaing(isPlaying());
+
+  if (iot.repeate() && !iot.isPlaing())
   { 
-    delay(3000);
+    delay(1000);
     if (!isPlaying())
       iot.setPlayStop(1);
   }
@@ -98,7 +103,6 @@ void loop() {
     digitalWrite(PLAY_PIN, LOW);
     pinMode(PLAY_PIN, INPUT);
 
-    iot.setPlaing(!tmp);
     iot.setPlayStop(0);
   } 
   else if (iot.mode() > 0 && iot.mode() < 4) 
@@ -115,8 +119,6 @@ void loop() {
     if ((iot.mode() != 3 && iot.isPlaing()) || (iot.mode() == 3))
       iot.setMode(0);
   }
-
-  iot.setPlaing(isPlaying());
   //!!!
   // digitalWrite(LED_PIN, iot.led());
 
@@ -171,9 +173,9 @@ void dataRecived() {
       Serial.println("debug WRITE");
       Serial.println(recivedBuffer[0], HEX);
 
-      for (int i = 0; i < 16; i++)
-        Serial.print(recivedBuffer[i], HEX);
-      Serial.println();
+      // for (int i = 0; i < 16; i++)
+      //   Serial.print(recivedBuffer[i], HEX);
+      // Serial.println();
 
       int dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
       Serial.print("dataSize = ");
@@ -198,13 +200,15 @@ void debug() {
   Serial.print("Play: ");
   Serial.print(iot.playStop());
   Serial.print(", isPlaying: ");
-  Serial.print(iot.isPlaing());
-  Serial.print(", Led: ");
+  Serial.print(isPlaying());
+  Serial.print(", Led: "); 
   Serial.print(iot.led());
   Serial.print(", Repeate: ");
   Serial.print(iot.repeate());
   Serial.print(", Mode: ");
   Serial.println(iot.mode());
+  Serial.print(", ADC: ");
+  Serial.println(analogRead(IS_PLAYING_PIN));
   // Serial.print("Play: " + iot.play());
   // Serial.print(", Led: " + iot.led());
   // Serial.print(", Repeate: " + iot.repeate());
@@ -235,7 +239,5 @@ bool isPlaying()
     delay(10);
   }
 
-  value /= 5;
-
-  return value < 600;
+  return (value / 5) > 20;
 }

@@ -5,6 +5,7 @@ std::mutex Log::_mutex;
 
 void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
 {
+
     if (writeFlags.testFlag(Write_Flag::FILE))
         writeToFile(fileName, data);
     if (writeFlags.testFlag(Write_Flag::STDOUT))
