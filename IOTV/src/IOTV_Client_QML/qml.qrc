@@ -52,6 +52,7 @@
         <file>Devices/Setting/MainSetting.qml</file>
         <file>Devices/Setting/Setting.qml</file>
         <file>Devices/Setting/Device/Device_1.qml</file>
+        <file>img/logo.png</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>
