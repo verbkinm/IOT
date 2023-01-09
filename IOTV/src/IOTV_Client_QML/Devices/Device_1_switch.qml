@@ -10,6 +10,7 @@ Rectangle {
     property bool switchOn: false
 
     id: root
+    objectName: device.aliasName
     height: 80
 
     color: Qt.rgba(0, 0, 0, 0)
@@ -147,6 +148,7 @@ Rectangle {
     Component.onCompleted: {
         if (setting.name.length === 0)
             setting.name = "Канал " + channel
+        console.log("Device 1_1 construct:", objectName)
     }
 
     Component.onDestruction: {

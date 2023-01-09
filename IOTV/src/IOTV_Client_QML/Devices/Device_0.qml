@@ -9,6 +9,7 @@ Page {
 
     id: root
     title: device.aliasName
+    objectName: device.aliasName
 
     Flickable {
         id: fl
@@ -100,6 +101,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Device 0 construct: ", objectName)
         //!!!
         name.text = Qt.binding(function (){ return "Имя устройства: " + device.name})
         aliasName.text = Qt.binding(function (){ return "Псевдоним: " + device.aliasName})

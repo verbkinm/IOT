@@ -8,6 +8,7 @@ Page {
 
     id: root
     title: device.aliasName
+    objectName: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel
@@ -209,6 +210,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Device 2 construct: ", objectName)
         //        if (device.readChannelLength < 2 || device.readChannelLength > 2)
         //            this.destroy();
 

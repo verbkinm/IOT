@@ -8,6 +8,7 @@ Page {
 
     id: root
     title: device.aliasName
+    objectName: device.aliasName
 
     Flickable {
         id: fl
@@ -32,6 +33,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Setting construct: ", objectName)
         var component = Qt.createComponent("Device/Device_" + device.id + ".qml");
         if (component.status === Component.Ready)
         {

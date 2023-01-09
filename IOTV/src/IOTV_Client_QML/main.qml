@@ -1,8 +1,7 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
-import Qt.labs.platform 1.1
 
 ApplicationWindow {
 
@@ -172,12 +171,12 @@ ApplicationWindow {
         initialItem: homePage
 
         onCurrentItemChanged: {
-            console.log(stackView.currentItem.objectName)
-            if (stackView.currentItem.objectName == homePage.objectName)
-            {
-                for (var i = stackView.children.length - 1; i > 1; i--)
-                    stackView.children[i].destroy()
-            }
+            console.log("stackView current item: ", stackView.currentItem.objectName)
+//            if (stackView.currentItem.objectName == homePage.objectName)
+//            {
+//                for (var i = stackView.children.length - 1; i > 1; i--)
+//                    stackView.children[i].destroy()
+//            }
         }
 
         Home {
@@ -224,76 +223,50 @@ ApplicationWindow {
         }
     }
 
-    Popup {
+    Dialog {
         id: about
-        objectName: "about"
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
         modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-        visible: false
+        parent: stackView
 
-        background: Rectangle{
-            opacity: 0.9
+        title: "О программе"
+        standardButtons: Dialog.Ok
 
-            Label {
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: "Клиент IOTV\n Версия " + Qt.application.version
-                font.pixelSize: 24
-                wrapMode: Text.Wrap
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-
-            onClicked: {
-                about.close()
-            }
-        }
-    }
-
-    Popup {
-        id: connectionError
-
-        width: parent.width
-        height: parent.height
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-        visible: false
-
-        background: Rectangle {
-            color: Qt.rgba(255, 255, 255, 0.9)
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                connectionError.close()
-            }
-        }
+        width: parent.width * 0.8
+        height: parent.height * 0.5
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
 
         Label {
             anchors.fill: parent
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            text: "Ошибка соединения!"
-            font.pixelSize: 24
+            text: "Клиент IOTV\n Версия " + Qt.application.version
+            font.pixelSize: 18
             wrapMode: Text.Wrap
         }
     }
 
-    onClosing: {
-        if (!exit)
-        {
-            close.accepted = false
-            appStack.pop()
+    Dialog {
+        id: connectionError
+        modal: true
+        parent: stackView
+
+        title: "Ошибка"
+        standardButtons: Dialog.Ok
+
+        width: parent.width * 0.8
+        height: parent.height * 0.5
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+
+        Label {
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: "Не удалось подключиться к серверу."
+            font.pixelSize: 18
+            wrapMode: Text.Wrap
         }
     }
-
 }
 

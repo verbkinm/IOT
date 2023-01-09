@@ -36,7 +36,9 @@ Rectangle {
         }
 
         onClicked: {
-            createComp("/Devices/Setting/Setting.qml", "_setting")
+            loaderItem.objectName = device.aliasName + "_setting"
+            loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
+            appStack.push(loaderItem)
         }
     }
 
@@ -58,7 +60,9 @@ Rectangle {
         }
 
         onClicked: {
-            createComp("/Devices/Device_0.qml", "_debug")
+            loaderItem.objectName = device.aliasName + "_debug"
+            loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
+            appStack.push(loaderItem)
         }
     }
 
@@ -79,69 +83,75 @@ Rectangle {
             source: "qrc:/img/info.png"
         }
         onClicked: {
-            popup.open()
-        }
-        Popup {
-            id: popup
-
-            parent: root
-            modal: true
-
-            x: Math.round((parent.width - width) / 2)
-            y: Math.round((parent.height - height) / 2)
-            width: root.width
-            height: root.height
-
-            background: Rectangle {
-                color: Qt.rgba(255, 255, 255, 0.9)
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    popup.close()
-                }
-            }
-
-            Label {
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: device.description
-                font.pixelSize: 24
-                wrapMode: Text.Wrap
-            }
+            dialogInfo.open()
         }
     }
 
-    function createComp(fileName, postfix)
-    {
-        var find = false
-        var pageObject
+    Item {
+        property string title: device.aliasName
 
-        for (var i = 0; i < appStack.children.length; i++)
-        {
-            if (appStack.children[i].objectName === name + postfix)
-            {
-                find = true
-                pageObject = appStack.children[i]
-                break
-            }
-        }
+        id: loaderItem
+        objectName: "debug"
 
-        if (find)
-        {
-            appStack.push(pageObject)
-            return
-        }
-
-        var component = Qt.createComponent(fileName);
-        if (component.status === Component.Ready)
-        {
-            var dev = device
-            var obj = component.createObject(appStack, {device: dev})
-            obj.objectName = name + postfix
-            appStack.push(obj);
+        Loader {
+            id: loaderDebug
+            anchors.fill: parent
+            source: ""
         }
     }
+
+
+    Dialog {
+        id: dialogInfo
+        parent: root
+        modal: true
+
+        title: "Описание"
+        standardButtons: Dialog.Ok
+
+        width: parent.width * 0.8
+        height: parent.height * 0.5
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+
+        Label {
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: device.description
+            font.pixelSize: 18
+            wrapMode: Text.Wrap
+        }
+    }
+
+//    function createComp(fileName, postfix)
+//    {
+//        var find = false
+//        var pageObject
+
+//        for (var i = 0; i < appStack.children.length; i++)
+//        {
+//            if (appStack.children[i].objectName === name + postfix)
+//            {
+//                find = true
+//                pageObject = appStack.children[i]
+//                break
+//            }
+//        }
+
+//        if (find)
+//        {
+//            appStack.push(pageObject)
+//            return
+//        }
+
+//        var component = Qt.createComponent(fileName);
+//        if (component.status === Component.Ready)
+//        {
+//            var dev = device
+//            var obj = component.createObject(appStack, {device: dev})
+//            obj.objectName = name + postfix
+//            appStack.push(obj);
+//        }
+//    }
 }

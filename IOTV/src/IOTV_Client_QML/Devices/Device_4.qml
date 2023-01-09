@@ -11,6 +11,7 @@ Page {
 
     id: root
     title: device.aliasName
+    objectName: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel
@@ -162,7 +163,11 @@ Page {
     }
 
     Component.onCompleted: {
-        title = device.name
+        console.log("Device 4 construct: ", objectName)
+    }
+
+    Component.onDestruction: {
+        console.log("Device 4 destruct: ", objectName)
     }
 
     Timer {
@@ -205,9 +210,7 @@ Page {
         }
     }
 
-    Component.onDestruction: {
-        console.log("Device 4 destruct: ", objectName)
-    }
+
 
     //    MediaPlayer {
     //        id: player

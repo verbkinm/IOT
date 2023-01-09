@@ -8,6 +8,7 @@ Page {
 
     id: root
     title: device.aliasName
+    objectName: device.aliasName
 
     header: DeviceHeader {
         id: headerPanel
@@ -33,6 +34,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Device 1 construct: ", objectName)
         if (device.readChannelLength !== device.writeChannelLength)
         {
             console.error("error device id 1")
@@ -45,7 +47,6 @@ Page {
             if (component.status === Component.Ready)
             {
                 var obj = component.createObject(column, {device: root.device, channel: i, checked: root.device.readData(i) === "true" ? true : false})
-                obj.objectName = objectName + "_channel_" + i
                 fl.contentHeight = device.readChannelLength * obj.height + header.height
             }
         }
