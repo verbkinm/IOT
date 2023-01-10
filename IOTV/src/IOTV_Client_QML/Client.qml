@@ -8,6 +8,10 @@ Page {
 
     property bool connection_attempt: false
 
+    function connectToHost() {
+        btn.clicked()
+    }
+
     Flickable {
         width: parent.width
         height: parent.height
@@ -95,6 +99,7 @@ Page {
                 font.pixelSize: 14
                 placeholderText: "Введите порт сервера"
                 placeholderTextColor: "#cccccc"
+                validator: IntValidator{bottom: 0}
 
                 enabled: !client.state
                 anchors{
@@ -121,10 +126,6 @@ Page {
 
                 enabled: !client.state
                 checked: settings.autoConnect
-
-//                onClicked: {
-//                    client.autoConnect = checked
-//                }
             }
 
             Button {
@@ -134,7 +135,10 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
                     if (client.state)
+                    {
+                        appStack.pop()
                         return "отключиться"
+                    }
                     else if (connection_attempt)
                         return "подключение..."
                     else
@@ -144,6 +148,17 @@ Page {
                 anchors.margins: 10
 
                 onClicked: {
+                    if (addr.text.length == 0)
+                    {
+                        addr.focus = true
+                        return
+                    }
+                    if (port.text.length == 0)
+                    {
+                        port.focus = true
+                        return
+                    }
+
                     if(connection_attempt)
                     {
                         client.disconnectFromHost()

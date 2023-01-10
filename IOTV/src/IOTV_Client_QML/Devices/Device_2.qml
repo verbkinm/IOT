@@ -78,7 +78,6 @@ Page {
                     anchors {
                         left: img_temperature.right
                         leftMargin: 20
-                        //                        right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
                 }
@@ -211,9 +210,6 @@ Page {
 
     Component.onCompleted: {
         console.log("Device 2 construct: ", objectName)
-        //        if (device.readChannelLength < 2 || device.readChannelLength > 2)
-        //            this.destroy();
-
         if (device.readChannelLength === 3)
             pressure.visible = true
     }

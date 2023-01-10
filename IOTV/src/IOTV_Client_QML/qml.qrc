@@ -8,7 +8,6 @@
         <file>Devices/Device_1.qml</file>
         <file>Devices/Device_3.qml</file>
         <file>img/info.png</file>
-        <file>_Info.qml</file>
         <file>img/id/2.png</file>
         <file>img/id/1.png</file>
         <file>Devices/ChannelItem.qml</file>
@@ -53,6 +52,7 @@
         <file>Devices/Setting/Setting.qml</file>
         <file>Devices/Setting/Device/Device_1.qml</file>
         <file>img/logo.png</file>
+        <file>DialogShared.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>

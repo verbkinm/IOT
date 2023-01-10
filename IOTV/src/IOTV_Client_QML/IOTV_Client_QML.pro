@@ -45,9 +45,6 @@ HEADERS += \
     ../lib/Protocols/protocols.h \
     ../lib/raw/raw.h
 
-#SUBDIRS += \
-#    lib/Base_Host/Base_Host.pro
-
 DISTFILES += \
     android/AndroidManifest.xml \
     android/build.gradle \
@@ -59,6 +56,11 @@ DISTFILES += \
     android/res/values/libs.xml
 
 contains(ANDROID_TARGET_ARCH,x86) {
+    ANDROID_PACKAGE_SOURCE_DIR = \
+        $$PWD/android
+}
+
+contains(ANDROID_TARGET_ARCH,arm64-v8a) {
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/android
 }

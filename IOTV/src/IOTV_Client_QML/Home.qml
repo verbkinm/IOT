@@ -22,19 +22,63 @@ Page {
         }
     }
 
-    Text {
-        text: qsTr("Подключения не установлено")
-        anchors.centerIn: parent
-        font.pixelSize: 18
-        visible: !client.state
+    Rectangle {
+        id: controlConnect
+        anchors.fill: parent
         z: 1
-        wrapMode: Text.Wrap
+        opacity: 1
+        visible: true
 
-        MouseArea {
-            anchors.fill: parent
+        Component.onCompleted: {
+            console.log(client.state, " ", state)
+        }
+
+        states: [
+            State {
+                name: "hide"; when: client.state
+                PropertyChanges { target: controlConnect; opacity: 0; visible: false }
+            },
+            State {
+                name: "show"; when: !(client.state)
+                PropertyChanges { target: controlConnect; opacity: 1; visible: true }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                to: "hide"
+                ParallelAnimation{
+                    PropertyAnimation { target: controlConnect; property: "visible"; from: true; to: false; duration: 500 }
+                    PropertyAnimation { target: controlConnect; property: "opacity"; from: 1; to: 0; duration: 500 }
+                }
+            },
+            Transition {
+                to: "show"
+                    PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
+                }
+        ]
+
+        Text {
+            id: txtConnection
+            text: qsTr("Соединение не установлено")
+            anchors.centerIn: parent
+            font.pixelSize: 18
+            wrapMode: Text.Wrap
+        }
+
+        Button {
+            id: btnConnect
+            width: 180
+            font.pixelSize: 18
+            text: "подключиться"
+
+            anchors.top: txtConnection.bottom
+            anchors.margins: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+
             onClicked: {
-                appStack.push(clientPage)
-                //                popupWait.open()
+                console.log("click")
+                clientPage.connectToHost()
             }
         }
     }
@@ -52,8 +96,22 @@ Page {
         }
 
         model: listModel
-        delegate: contactDelegate
-        //        spacing: 15
+        delegate: deviceDelegate
+
+        // Анимация появления элементов модели
+        populate: Transition {
+            NumberAnimation { properties: "x,y"; duration: 1000; easing.type: Easing.OutExpo }
+        }
+        // Анимация добавления элементов
+        add: Transition {
+            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
+            NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 100 }
+            NumberAnimation { properties: "x,y"; duration: 1000; easing.type: Easing.OutBounce}
+        }
+        // Удаление элемента
+        remove: Transition {
+            PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
+        }
     }
 
     ListModel {
@@ -64,7 +122,6 @@ Page {
         property string title
 
         id: loaderItem
-//        parent: appStack
 
         Loader {
             id: loaderDevice
@@ -74,7 +131,7 @@ Page {
     }
 
     Component {
-        id: contactDelegate
+        id: deviceDelegate
 
         Rectangle {
             id: componentRect
@@ -84,7 +141,7 @@ Page {
 
             border.width: 1
             border.color: Qt.rgba(0, 0, 0, 0.5)
-            radius: 15
+            radius: 5
 
             color: Qt.rgba(1, 0, 0, 0.1)
             ColorAnimation on color {
@@ -105,7 +162,7 @@ Page {
                 hoverEnabled: true
                 onClicked: {
                     loaderItem.objectName = loaderItem.title = client.deviceByName(model.name).aliasName
-                    loaderDevice.setSource(createDeviceBy(client.deviceByName(name).id), {device: client.deviceByName(name)})
+                    loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
                     appStack.push(loaderItem)
                 }
             }

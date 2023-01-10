@@ -10,9 +10,6 @@ Rectangle {
     width: parent.width
     height: 40
 
-//    border.width: 1
-//    border.color: "red"
-
     color: Qt.rgba(0, 0, 0, 0)
 
     Label {

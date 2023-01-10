@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import "../"    // DialogShared.qml
 
 Rectangle {
 
@@ -100,58 +101,12 @@ Rectangle {
         }
     }
 
-
-    Dialog {
+    DialogShared
+    {
         id: dialogInfo
-        parent: root
-        modal: true
-
+        parent: appStack
         title: "Описание"
         standardButtons: Dialog.Ok
-
-        width: parent.width * 0.8
-        height: parent.height * 0.5
-        x: Math.round((parent.width - width) / 2)
-        y: Math.round((parent.height - height) / 2)
-
-        Label {
-            anchors.fill: parent
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: device.description
-            font.pixelSize: 18
-            wrapMode: Text.Wrap
-        }
+        text: device.description
     }
-
-//    function createComp(fileName, postfix)
-//    {
-//        var find = false
-//        var pageObject
-
-//        for (var i = 0; i < appStack.children.length; i++)
-//        {
-//            if (appStack.children[i].objectName === name + postfix)
-//            {
-//                find = true
-//                pageObject = appStack.children[i]
-//                break
-//            }
-//        }
-
-//        if (find)
-//        {
-//            appStack.push(pageObject)
-//            return
-//        }
-
-//        var component = Qt.createComponent(fileName);
-//        if (component.status === Component.Ready)
-//        {
-//            var dev = device
-//            var obj = component.createObject(appStack, {device: dev})
-//            obj.objectName = name + postfix
-//            appStack.push(obj);
-//        }
-//    }
 }

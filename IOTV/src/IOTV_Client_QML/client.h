@@ -36,12 +36,13 @@ public:
     bool stateConnection() const;
 
 private:
-    const int TIME_OUT = 5000;
+    const int TIME_OUT;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
     QTimer _timerDevList,
-            _connectWait; // после команды на соединение ожидаем, если в течение N времение ответа нет, отключаемся
+            _connectWait, // после команды на соединение ожидаем, если в течение N времение ответа нет, отключаемся
+            _timerPing;
 
     bool _stateConnection;
 
@@ -62,6 +63,7 @@ public slots:
 
     void slotConnected();
     void slotDisconnected();
+    void slotStateChanged(QAbstractSocket::SocketState socketState);
 
 private slots:
     void slotReciveData();

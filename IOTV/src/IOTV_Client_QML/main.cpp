@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.4");
 
     QQmlApplicationEngine engine;
+    engine.addImportPath("qrc:/");
     Client client;
     engine.rootContext()->setContextProperty("client", &client);
 

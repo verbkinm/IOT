@@ -39,6 +39,7 @@ public:
     void setReadInterval(int interval);
 
     friend bool operator==(const Device &lhs, const Device &rhs);
+    friend bool operator!=(const Device &lhs, const Device &rhs); // для android версий
 
     const QString &aliasName() const;
     void setAliasName(const QString &newAliasName);

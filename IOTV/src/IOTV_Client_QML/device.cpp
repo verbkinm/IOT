@@ -105,6 +105,11 @@ bool operator==(const Device &lhs, const Device &rhs)
     return false;
 }
 
+bool operator!=(const Device &lhs, const Device &rhs)
+{
+    return !(lhs == rhs);
+}
+
 const QString &Device::aliasName() const
 {
     return _aliasName;

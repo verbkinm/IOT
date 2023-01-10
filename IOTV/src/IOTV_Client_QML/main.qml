@@ -4,19 +4,17 @@ import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 
 ApplicationWindow {
-
     id: window
     width: 360
     height: 520
     visible: true
     title: qsTr("IOTV Client")
-    minimumWidth: 360
-    minimumHeight: 520
+//    minimumWidth: 360
+//    minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
-    property bool exit: false
 
     property alias appStack: stackView
 
@@ -37,9 +35,8 @@ ApplicationWindow {
                 left: parent.left
             }
             onClicked: {
-                stackView.pop()
+                window.close()
             }
-            visible: !homePage.visible
         }
 
         Label {
@@ -135,19 +132,16 @@ ApplicationWindow {
                                 stackView.pop(homePage)
                             else if (index === 1 && stackView.currentItem != clientPage)
                             {
-                                //                                stackView.pop(homePage)
                                 stackView.push(clientPage)
                             }
                             else if (index === 2)
                             {
-                                //                                about.visible = true
                                 about.open()
                             }
 
                             else if (index === 3)
                             {
-                                exit = true
-                                Qt.quit()
+                                dialogExit.open()
                             }
 
                             drawer.visible = 0
@@ -172,11 +166,6 @@ ApplicationWindow {
 
         onCurrentItemChanged: {
             console.log("stackView current item: ", stackView.currentItem.objectName)
-//            if (stackView.currentItem.objectName == homePage.objectName)
-//            {
-//                for (var i = stackView.children.length - 1; i > 1; i--)
-//                    stackView.children[i].destroy()
-//            }
         }
 
         Home {
@@ -223,50 +212,43 @@ ApplicationWindow {
         }
     }
 
-    Dialog {
+    DialogShared {
         id: about
-        modal: true
         parent: stackView
-
-        title: "О программе"
         standardButtons: Dialog.Ok
+        title: "О программе"
+        text: "Клиент IOTV " + Qt.application.version
+    }
 
-        width: parent.width * 0.8
-        height: parent.height * 0.5
-        x: Math.round((parent.width - width) / 2)
-        y: Math.round((parent.height - height) / 2)
+    DialogShared {
+        id: connectionError
+        parent: stackView
+        standardButtons: Dialog.Ok
+        title: "Ошибка"
+        text: "Не удалось подключиться к серверу."
+    }
 
-        Label {
-            anchors.fill: parent
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: "Клиент IOTV\n Версия " + Qt.application.version
-            font.pixelSize: 18
-            wrapMode: Text.Wrap
+    DialogShared {
+        id: dialogExit
+        parent: stackView
+        standardButtons: Dialog.Yes | Dialog.No
+        text: "Вы действительно хотите выйти?"
+
+        onAccepted: {
+            Qt.exit(0)
         }
     }
 
-    Dialog {
-        id: connectionError
-        modal: true
-        parent: stackView
+    onClosing: {
+        close.accepted = false
+        if (appStack.currentItem == homePage)
+            dialogExit.open()
+        else
+            appStack.pop()
+    }
 
-        title: "Ошибка"
-        standardButtons: Dialog.Ok
-
-        width: parent.width * 0.8
-        height: parent.height * 0.5
-        x: Math.round((parent.width - width) / 2)
-        y: Math.round((parent.height - height) / 2)
-
-        Label {
-            anchors.fill: parent
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: "Не удалось подключиться к серверу."
-            font.pixelSize: 18
-            wrapMode: Text.Wrap
-        }
+    onVisibilityChanged: {
+        console.log(visibility)
     }
 }
 
