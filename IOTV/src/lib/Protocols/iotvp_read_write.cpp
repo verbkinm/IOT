@@ -1,19 +1,9 @@
 #include "iotvp_read_write.h"
 
 IOTVP_READ_WRITE::IOTVP_READ_WRITE() :
-    _channelNumber(0), _flags(0)
+    _channelNumber(0)
 {
 
-}
-
-const QString &IOTVP_READ_WRITE::name() const
-{
-    return _name;
-}
-
-void IOTVP_READ_WRITE::setName(const QString &newName)
-{
-    _name = newName;
 }
 
 uint8_t IOTVP_READ_WRITE::channelNumber() const
@@ -26,43 +16,32 @@ void IOTVP_READ_WRITE::setChannelNumber(uint8_t newChannelNumber)
     _channelNumber = newChannelNumber;
 }
 
-uint8_t IOTVP_READ_WRITE::flags() const
-{
-    return _flags;
-}
-
-void IOTVP_READ_WRITE::setFlags(uint8_t newFlags)
-{
-    _flags = newFlags;
-}
-
-const QByteArray &IOTVP_READ_WRITE::data() const
-{
-    return _data;
-}
-
 uint64_t IOTVP_READ_WRITE::size() const
 {
-    // Чтение / Запись данных (23 + N байт, N максимум 240) (документацию)
+    // Чтение / Запись данных (23 + N байт, N максимум 2^40) (документация)
     return 23 + nameSize() + dataSize();
-}
-
-void IOTVP_READ_WRITE::setData(const QByteArray &newData)
-{
-    _data = newData;
-}
-
-uint8_t IOTVP_READ_WRITE::nameSize() const
-{
-    return _name.size();
-}
-
-uint32_t IOTVP_READ_WRITE::dataSize() const
-{
-    return _data.size();
 }
 
 uint16_t IOTVP_READ_WRITE::checkSum() const
 {
     return nameSize() + channelNumber() + flags() + dataSize();
+}
+
+QByteArray IOTVP_READ_WRITE::toData() const
+{
+    QByteArray result(size(), 0);
+    result[0] = nameSize();
+    result[1] = channelNumber();
+    result[2] = flags();
+
+    auto dSize = dataSize();
+    std::memcpy(&result[3], &dSize, 4); // Размер пакета данных = 4 байта (документация)
+
+    auto chSum = checkSum();
+    std::memcpy(&result[7], &chSum, 16); // Контрольная сумма тела пакетах = 16 байта (документация)
+
+    std::memcpy(&result[7 + 16], name().toStdString().c_str(), nameSize());
+    std::memcpy(&result[7 + 16 + nameSize()], data().toStdString().c_str(), dataSize());
+
+    return result;
 }

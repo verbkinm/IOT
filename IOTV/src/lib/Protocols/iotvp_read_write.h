@@ -1,31 +1,20 @@
 #pragma once
 
-#include <QString>
+#include "iotvp_abstractreadwrite.h"
 
-class IOTVP_READ_WRITE
+class IOTVP_READ_WRITE : public IOTVP_AbstractReadWrite
 {
 public:
     IOTVP_READ_WRITE();
+    virtual ~IOTVP_READ_WRITE() = default;
 
-    uint8_t nameSize() const;
     uint8_t channelNumber() const;
-    uint8_t flags() const;
-    uint32_t dataSize() const;
-    uint16_t checkSum() const;
-    const QString &name() const;
-    const QByteArray &data() const;
-
-    uint64_t size() const;
+    virtual uint16_t checkSum() const override;
+    virtual uint64_t size() const override;
 
     void setChannelNumber(uint8_t newChannelNumber);
-    void setFlags(uint8_t newFlags);
-    void setData(const QByteArray &newData);
-    void setName(const QString &newName);
 
+    virtual QByteArray toData() const override;
 private:
-    QString _name;
     uint8_t _channelNumber;
-    uint8_t _flags;
-
-    QByteArray _data;
 };

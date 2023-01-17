@@ -4,6 +4,8 @@ QT += quick
 CONFIG += c++2a
 
 SOURCES += \
+        ../lib/Protocols/iotvp_abstractbody.cpp \
+        ../lib/Protocols/iotvp_abstractreadwrite.cpp \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
@@ -12,7 +14,6 @@ SOURCES += \
         ../lib/Protocols/IOTV_SC.cpp \
         ../lib/Protocols/IOTV_SH.cpp \
         ../lib/Protocols/iotvp_header.cpp \
-        ../lib/Protocols/iotvp_body.cpp \
         ../lib/raw/raw.cpp \
         ../lib/Protocols/iotvp_read_write.cpp \
         ../lib/Protocols/iotvp_state.cpp \
@@ -40,6 +41,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../lib/Protocols/iotvp_abstractbody.h \
+    ../lib/Protocols/iotvp_abstractreadwrite.h \
     client.h \
     device.h \
     ../lib/Base_Host/base_host.h \
@@ -48,7 +51,6 @@ HEADERS += \
     ../lib/Protocols/IOTV_SC.h \
     ../lib/Protocols/IOTV_SH.h \
     ../lib/Protocols/iotvp_header.h \
-    ../lib/Protocols/iotvp_body.h \
     ../lib/Protocols/protocols.h \
     ../lib/raw/raw.h \
     ../lib/Protocols/iotvp_read_write.h \
