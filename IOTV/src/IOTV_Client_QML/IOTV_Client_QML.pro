@@ -11,7 +11,12 @@ SOURCES += \
         ../lib/Log/log.cpp \
         ../lib/Protocols/IOTV_SC.cpp \
         ../lib/Protocols/IOTV_SH.cpp \
+        ../lib/Protocols/iotvp_header.cpp \
+        ../lib/Protocols/iotvp_body.cpp \
         ../lib/raw/raw.cpp \
+        ../lib/Protocols/iotvp_read_write.cpp \
+        ../lib/Protocols/iotvp_state.cpp \
+        ../lib/Protocols/iotvp_identification.cpp \
         main.cpp
 
 resources.prefix = /$${TARGET}
@@ -42,8 +47,13 @@ HEADERS += \
     ../lib/Log/log.h \
     ../lib/Protocols/IOTV_SC.h \
     ../lib/Protocols/IOTV_SH.h \
+    ../lib/Protocols/iotvp_header.h \
+    ../lib/Protocols/iotvp_body.h \
     ../lib/Protocols/protocols.h \
-    ../lib/raw/raw.h
+    ../lib/raw/raw.h \
+    ../lib/Protocols/iotvp_read_write.h \
+    ../lib/Protocols/iotvp_state.h \
+    ../lib/Protocols/iotvp_identification.h
 
 DISTFILES += \
     android/AndroidManifest.xml \
