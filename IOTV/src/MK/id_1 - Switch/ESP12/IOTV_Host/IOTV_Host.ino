@@ -1,7 +1,6 @@
 #include <ESP8266WiFi.h>
-#include "Adafruit_VL6180X.h"
+#include <hcsr04.h>
 
-// #define VL6180X_DEFAULT_I2C_ADDR 0x29
 
 #include "IOTV_SH.h"
 #include "iot_server.h"
@@ -9,16 +8,18 @@
 #define BUFFSIZE 32
 
 #define RELE_PIN D5
-const uint8 distance = 100;
+#define TRIG_PIN D1
+#define ECHO_PIN D2
 
-const char* ssid = "TP-Link_A6BE";
-const char* password = "41706831";
-const char* hostname = "ESP12-switchvl6180";
+const uint8 DISTANCE = 70;
+const char* SSID = "TP-Link_A6BE";
+const char* PASSWORD = "41706831";
+const char* HOSTNAME = "ESP12-switchvl6180";
 
 WiFiServer server(8888);
 WiFiClient client;
 
-Adafruit_VL6180X vl = Adafruit_VL6180X();
+HCSR04 hcsr04(TRIG_PIN, ECHO_PIN, 60, 1000); 
 
 IOTV_Server iot;
 char recivedBuffer[BUFFSIZE]{ 0 }, transmitBuffer[BUFFSIZE]{ 0 };
@@ -29,8 +30,8 @@ WiFiEventHandler stationDisconnectedHandler;
 
 void dataRecived();
 void debug();
-void vl6180_check();
-void setReleState();
+void HC_SR04_check();
+void switchRele();
 
 void setup() 
 {
@@ -44,36 +45,27 @@ void setup()
 
   Serial.begin(115200);
 
-  Serial.println("Adafruit VL6180x test!");
-  if (!vl.begin()) 
-  {
-    Serial.println("Failed to find sensor");
-    delay(500);
-    ESP.reset();
-  }
-  Serial.println("Sensor found!");
-
   WiFi.mode(WIFI_STA);
-  WiFi.setHostname(hostname); 
-  WiFi.begin(ssid, password);
+  WiFi.setHostname(HOSTNAME); 
+  WiFi.begin(SSID, PASSWORD);
 
   Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) 
   {
     Serial.print('.');
-    delay(500);
+    delay(300);
   }
 
   server.begin();
 
   //Сигнал нормальной работы
   pinMode(LED_BUILTIN, OUTPUT);
-  for (uint8 i = 0; i < 5; i++)
+  for (uint8 i = 0; i < 10; i++)
   {
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);
+    delay(100);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
+    delay(100);
   }
 }
 
@@ -94,7 +86,7 @@ void loop()
       dataRecived();
   }
 
-  vl6180_check();
+  HC_SR04_check();
 
   // Проверка подключения Wi-FI
   if (WiFi.status() != WL_CONNECTED) 
@@ -160,7 +152,7 @@ void dataRecived()
         ptrBuf -= dataSize + 3;
         Serial.println("WRITE");
         
-        setReleState();
+        switchRele();
       } 
       else
         break;
@@ -181,64 +173,39 @@ void debug()
   Serial.println(iot._readChannel[0]);
 }
 
-void vl6180_check()
+void HC_SR04_check()
 {
-  uint8_t range = vl.readRange();
-  uint8_t status = vl.readRangeStatus();
-
-  if (status == VL6180X_ERROR_NONE && range < distance) 
+  uint8_t range = hcsr04.distanceInMillimeters(); // -1 = 255
+  // Serial.println(range);
+  if (range < DISTANCE) 
   {
     Serial.println("Range start"); 
+    delay(10);
 
-    delay(100);
-
-    if (range < distance) 
+    range = hcsr04.distanceInMillimeters();
+    if (range < DISTANCE) 
     {
       iot._readChannel[0] = !iot._readChannel[0];
-      setReleState();
+      Serial.println("SWITCH");
+      switchRele();
 
       Serial.print("Range: "); 
       Serial.println(range);
 
-      while (vl.readRange() < distance)
-        delay(1);
+      while (range < DISTANCE)
+      {
+        range = hcsr04.distanceInMillimeters();
+        Serial.print("Loop, ");
+        Serial.println(range);
+        delay(50);
+      }
 
       delay(1000);
     }
   }
-
-  // Some error occurred, print it out!
-  
-  // if  ((status >= VL6180X_ERROR_SYSERR_1) && (status <= VL6180X_ERROR_SYSERR_5)) {
-  //   Serial.println("System error");
-  // }
-  // else if (status == VL6180X_ERROR_ECEFAIL) {
-  //   Serial.println("ECE failure");
-  // }
-  // else if (status == VL6180X_ERROR_NOCONVERGE) {
-  //   Serial.println("No convergence");
-  // }
-  // else if (status == VL6180X_ERROR_RANGEIGNORE) {
-  //   Serial.println("Ignoring range");
-  // }
-  // else if (status == VL6180X_ERROR_SNR) {
-  //   Serial.println("Signal/Noise error");
-  // }
-  // else if (status == VL6180X_ERROR_RAWUFLOW) {
-  //   Serial.println("Raw reading underflow");
-  // }
-  // else if (status == VL6180X_ERROR_RAWOFLOW) {
-  //   Serial.println("Raw reading overflow");
-  // }
-  // else if (status == VL6180X_ERROR_RANGEUFLOW) {
-  //   Serial.println("Range reading underflow");
-  // }
-  // else if (status == VL6180X_ERROR_RANGEOFLOW) {
-  //   Serial.println("Range reading overflow");
-  // }
 }
 
-void setReleState()
+void switchRele()
 {
   if (iot._readChannel[0])
     digitalWrite(RELE_PIN, HIGH);
@@ -250,8 +217,8 @@ void onStationConnected(const WiFiEventStationModeConnected& evt)
 {
   Serial.print("Station connected: ");
   Serial.println(evt.ssid);
-  Serial.print("hostname: ");
-  Serial.println(hostname);
+  Serial.print("HOSTNAME: ");
+  Serial.println(HOSTNAME);
 
   Serial.print("MAC: ");
   Serial.println(WiFi.macAddress());

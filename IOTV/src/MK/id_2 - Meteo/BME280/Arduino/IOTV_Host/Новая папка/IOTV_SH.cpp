@@ -59,14 +59,19 @@ int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, con
         return -1; //запрос пришел не полный
 
     uint8_t channelNumber = inData[0] >> 4;
-    
-    uint16_t dataWriteSize = (uint16_t(inData[1]) << 8) | inData[2]; 
+    uint16_t dataWriteSize = (uint16_t(inData[1]) << 8) | inData[2];
 
     if (realDataSize < (3 + dataWriteSize))
         return -1; //запрос пришел не полный
 
-    if ((channelNumber < WRITE_CHANNEL_LENGTH) && (dataWriteSize == sizeof(iotHost._readChannel[channelNumber])))
-        memcpy(&iotHost._readChannel[channelNumber], &inData[3], sizeof(iotHost._readChannel[channelNumber]));
+    char writeData[dataWriteSize];
+    memcpy(writeData, &inData[3], dataWriteSize);
+
+  // отличается от общих настроек
+    if ((channelNumber < WRITE_CHANNEL_LENGTH) && (dataWriteSize == 1))
+    {
+        memcpy(&iotHost._readChannel[channelNumber], writeData, sizeof(iotHost._readChannel[channelNumber]));
+    }
 
     outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_WRITE_BYTE;
 
