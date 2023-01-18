@@ -2,20 +2,26 @@
 
 #include "iotvp_abstractreadwrite.h"
 
-class IOTVP_STATE : public IOTVP_AbstractReadWrite
+class IOTVP_State : public IOTVP_AbstractReadWrite
 {
 public:
-    IOTVP_STATE();
+    IOTVP_State();
 
-    uint8_t state() const;
-    virtual uint16_t checkSum() const override;
+    enum class STATE : uint8_t
+    {
+        OFFLINE = 0,
+        ONLINE
+    };
+
+    STATE state() const;
+    virtual uint64_t checkSum() const override;
     virtual uint64_t size() const override;
-
-    void setState(uint8_t newState);
 
     virtual QByteArray toData() const override;
 
+    void setState(STATE newState);
+
 private:
-    uint8_t _state;
+    STATE _state;
 };
 

@@ -1,47 +1,53 @@
 #include "iotvp_state.h"
 
-IOTVP_STATE::IOTVP_STATE() :
-    _state(0)
+IOTVP_State::IOTVP_State() : _state(STATE::OFFLINE)
 {
-
+    _bodyType = BODY_TYPE::STATE;
 }
 
-uint8_t IOTVP_STATE::state() const
+IOTVP_State::STATE IOTVP_State::state() const
 {
     return _state;
 }
 
-uint16_t IOTVP_STATE::checkSum() const
+uint64_t IOTVP_State::checkSum() const
 {
-    return nameSize() + state() + flags() + dataSize();
+    return nameSize() + static_cast<uint8_t>(state()) + static_cast<uint8_t>(flags()) + dataSize();
 }
 
-uint64_t IOTVP_STATE::size() const
+uint64_t IOTVP_State::size() const
 {
-    // Состояние устройства (23 + N байт, N максимум 2^40) (документация)
-    return 23 + nameSize() + dataSize();
+    // Состояние устройства (15 + N байт, N максимум 2^40) (документация)
+    return 15 + nameSize() + dataSize();
 }
 
-void IOTVP_STATE::setState(uint8_t newState)
+void IOTVP_State::setState(STATE newState)
 {
     _state = newState;
 }
 
-QByteArray IOTVP_STATE::toData() const
+QByteArray IOTVP_State::toData() const
 {
     QByteArray result(size(), 0);
     result[0] = nameSize();
-    result[1] = state();
-    result[2] = flags();
+    result[1] = static_cast<uint8_t>(state());
+    result[2] = static_cast<uint8_t>(flags());
 
     auto dSize = dataSize();
-    std::memcpy(&result[3], &dSize, 4); // Размер пакета данных = 4 байта (документация)
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        dSize = qToBigEndian(dSize);
+    std::memcpy((void *)&result[3], &dSize, 4); // Размер пакета данных = 4 байта (документация)
 
     auto chSum = checkSum();
-    std::memcpy(&result[7], &chSum, 16); // Контрольная сумма тела пакетах = 16 байта (документация)
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        chSum = qToBigEndian(chSum);
+    std::memcpy(&result[7], &chSum, 8); // Контрольная сумма тела пакетах = 8 байта (документация)
 
-    std::memcpy(&result[7 + 16], name().toStdString().c_str(), nameSize());
-    std::memcpy(&result[7 + 16 + nameSize()], data().toStdString().c_str(), dataSize());
+    if (nameSize() > 0)
+        std::memcpy(&result[7 + 8], name().toStdString().c_str(), nameSize());
+
+    if (dataSize() > 0)
+        std::memcpy(&result[7 + 8 + nameSize()], data().toStdString().c_str(), dataSize());
 
     return result;
 }

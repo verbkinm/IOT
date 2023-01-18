@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QByteArray>
+
 #include "iotvp_abstractbody.h"
 
 class IOTVP_Header
@@ -36,9 +38,9 @@ public:
     APPOINTMRNT appointment() const;
     FLAGS flags() const;
     uint64_t bodySize() const;
-    uint16_t checkSum() const;
+    uint64_t checkSum() const;
 
-    IOTVP_AbstractBody *body() const;
+//    IOTVP_AbstractBody *body() const;
     uint64_t size() const;
 
     void setVersion(uint8_t newVersion);
@@ -46,7 +48,9 @@ public:
     void setAppointment(APPOINTMRNT newAppointment);
     void setFlags(FLAGS newFlags);
 
-    void setBody(IOTVP_AbstractBody *newBody);
+    void setBody(std::unique_ptr<IOTVP_AbstractBody> newBody);
+
+    QByteArray toData() const;
 
 private:
     uint8_t _version;
@@ -54,6 +58,6 @@ private:
     APPOINTMRNT _appointment;
     FLAGS _flags;
     uint64_t _size;
-    IOTVP_AbstractBody *_body;
+    std::unique_ptr<IOTVP_AbstractBody> _body;
 };
 

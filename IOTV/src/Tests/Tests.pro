@@ -1,6 +1,9 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    TEST_IOTV_SC \
-    TEST_IOTV_SH \
-    Test_Raw
+    IOTVP_Header \
+    IOTVP_ReadWrite \
+    IOTVP_Identification \
+    IOTVP_State
+    #    Test_Raw
+
