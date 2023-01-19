@@ -1,34 +1,28 @@
 #include "iotvp_header.h"
 
 IOTVP_Header::IOTVP_Header() :
-    _version(1), _type(TYPE::NONE), _appointment(APPOINTMRNT::NONE),
-    _flags(FLAGS::NONE), _body(nullptr)
+    _version(0), _type(TYPE::NONE), _assignment(ASSIGNMENT::NONE),
+    _flags(FLAGS::NONE)
 {
 
 }
 
-IOTVP_Header::~IOTVP_Header()
-{
-
-}
-
-uint64_t IOTVP_Header::bodySize() const
+uint64_t IOTVP_Header::dataSize() const
 {
     if (_body != nullptr)
-        return _body->size() + _body->dataSize();
+        return _body->size();
 
     return 0;
 }
 
 uint64_t IOTVP_Header::checkSum() const
 {
-    return version() + static_cast<uint8_t>(type()) + static_cast<uint8_t>(appointment()) + static_cast<uint8_t>(flags()) + bodySize();
+    return version() + static_cast<uint8_t>(type()) + static_cast<uint8_t>(assignment()) + static_cast<uint8_t>(flags()) + dataSize();
 }
 
 uint64_t IOTVP_Header::size() const
-{
-    // Заголовок протокола (20 байт + N байт, N максимум 248) (документация)
-    return 20 + bodySize();
+{  
+    return IOTVP_Abstract::HEADER_SIZE + dataSize();
 }
 
 uint8_t IOTVP_Header::version() const
@@ -53,15 +47,15 @@ void IOTVP_Header::setType(TYPE newType)
         _type = newType;
 }
 
-IOTVP_Header::APPOINTMRNT IOTVP_Header::appointment() const
+IOTVP_Header::ASSIGNMENT IOTVP_Header::assignment() const
 {
-    return _appointment;
+    return _assignment;
 }
 
-void IOTVP_Header::setAppointment(APPOINTMRNT newAppointment)
+void IOTVP_Header::setAssignment(ASSIGNMENT newAppointment)
 {
-    if (_appointment != newAppointment)
-        _appointment = newAppointment;
+    if (_assignment != newAppointment)
+        _assignment = newAppointment;
 }
 
 IOTVP_Header::FLAGS IOTVP_Header::flags() const
@@ -75,12 +69,7 @@ void IOTVP_Header::setFlags(FLAGS newFlags)
         _flags = newFlags;
 }
 
-//IOTVP_AbstractBody *IOTVP_Header::body() const
-//{
-//    return _body;
-//}
-
-void IOTVP_Header::setBody(std::unique_ptr<IOTVP_AbstractBody> newBody)
+void IOTVP_Header::setBody(std::unique_ptr<IOTVP_Abstract> newBody)
 {
     _body = std::move(newBody);
 }
@@ -90,10 +79,10 @@ QByteArray IOTVP_Header::toData() const
     QByteArray result(size(), 0);
     result[0] = version();
     result[1] = static_cast<uint8_t>(type());
-    result[2] = static_cast<uint8_t>(appointment());
+    result[2] = static_cast<uint8_t>(assignment());
     result[3] = static_cast<uint8_t>(flags());
 
-    auto bSize = bodySize();
+    auto bSize = dataSize();
     if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
         bSize = qToBigEndian(bSize);
 
@@ -110,3 +99,4 @@ QByteArray IOTVP_Header::toData() const
 
     return result;
 }
+

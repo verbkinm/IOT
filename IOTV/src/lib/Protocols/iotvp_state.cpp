@@ -17,8 +17,7 @@ uint64_t IOTVP_State::checkSum() const
 
 uint64_t IOTVP_State::size() const
 {
-    // Состояние устройства (15 + N байт, N максимум 2^40) (документация)
-    return 15 + nameSize() + dataSize();
+    return IOTVP_Abstract::STATE_SIZE + nameSize() + dataSize();
 }
 
 void IOTVP_State::setState(STATE newState)
@@ -36,7 +35,7 @@ QByteArray IOTVP_State::toData() const
     auto dSize = dataSize();
     if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
         dSize = qToBigEndian(dSize);
-    std::memcpy((void *)&result[3], &dSize, 4); // Размер пакета данных = 4 байта (документация)
+    std::memcpy(&result[3], &dSize, 4); // Размер пакета данных = 4 байта (документация)
 
     auto chSum = checkSum();
     if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)

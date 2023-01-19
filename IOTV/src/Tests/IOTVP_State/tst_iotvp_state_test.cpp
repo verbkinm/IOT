@@ -1,5 +1,6 @@
 #include <QtTest>
 
+#include "iotvp_creator.h"
 #include "iotvp_state.h"
 
 class IOTVP_State_Test : public QObject
@@ -18,6 +19,7 @@ private slots:
     void test_flags();
     void test_checkSum();
     void test_Pkgdata();
+    void test_createPkgFromData();
 };
 
 IOTVP_State_Test::IOTVP_State_Test()
@@ -79,7 +81,6 @@ void IOTVP_State_Test::test_checkSum()
 void IOTVP_State_Test::test_Pkgdata()
 {
     QCOMPARE(pkg.dataSize(), 0);
-
     {
         QByteArray data(255, 'A');
         pkg.setData(data);
@@ -93,7 +94,22 @@ void IOTVP_State_Test::test_Pkgdata()
     QCOMPARE(pkg.dataSize(), 512);
 }
 
+void IOTVP_State_Test::test_createPkgFromData()
+{
 
+    const char dataRaw[] =  {
+                                '\0',                                           // Длина имени
+                                '\0',                                           // Состояние устройства
+                                '\0',                                           // Флаги
+                                '\0', '\0', '\0', '\0',                         // Размер пакета данных
+                                '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'  // Контрольная сумма тела пакета
+                            };
+    QByteArray data(dataRaw, 15);
+    bool complete, error;
+    auto pair = IOTVP_Creator::createPkg(data, complete, error);
+
+
+}
 
 QTEST_APPLESS_MAIN(IOTVP_State_Test)
 

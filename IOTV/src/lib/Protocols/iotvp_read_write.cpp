@@ -18,8 +18,7 @@ void IOTVP_READ_WRITE::setChannelNumber(uint8_t newChannelNumber)
 
 uint64_t IOTVP_READ_WRITE::size() const
 {
-    // Чтение / Запись данных (15 + N байт, N максимум 2^40) (документация)
-    return 15 + nameSize() + dataSize();
+    return IOTVP_Abstract::READWRITE_SIZE + nameSize() + dataSize();
 }
 
 uint64_t IOTVP_READ_WRITE::checkSum() const

@@ -1,6 +1,6 @@
 #include "iotvp_abstractreadwrite.h"
 
-uint32_t IOTVP_AbstractReadWrite::dataSize() const
+uint64_t IOTVP_AbstractReadWrite::dataSize() const
 {
     return (_data.size() > std::numeric_limits<uint32_t>::max()) ? std::numeric_limits<uint32_t>::max() : _data.size();
 }

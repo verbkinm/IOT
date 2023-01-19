@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QByteArray>
+#include <QtEndian>
 
-#include "iotvp_abstractbody.h"
+#include "iotvp_abstract.h"
 
-class IOTVP_Header
+class IOTVP_Header : public IOTVP_Abstract
 {
 public:
     enum class TYPE : uint8_t
@@ -14,7 +15,7 @@ public:
         RESPONSE
     };
 
-    enum class APPOINTMRNT : uint8_t
+    enum class ASSIGNMENT : uint8_t
     {
         NONE = 0,
         IDENTIFICATION,
@@ -24,40 +25,33 @@ public:
         PING_PONG
     };
 
-    enum class FLAGS : uint8_t
-    {
-        NONE = 0,
-        ERROR = 0xFF
-    };
-
     IOTVP_Header();
-    ~IOTVP_Header();
+    virtual ~IOTVP_Header() = default;
 
     uint8_t version() const;
     TYPE type() const;
-    APPOINTMRNT appointment() const;
+    ASSIGNMENT assignment() const;
     FLAGS flags() const;
-    uint64_t bodySize() const;
-    uint64_t checkSum() const;
 
-//    IOTVP_AbstractBody *body() const;
-    uint64_t size() const;
+    virtual uint64_t dataSize() const override;
+    virtual uint64_t checkSum() const override;
+
+    virtual uint64_t size() const override;
 
     void setVersion(uint8_t newVersion);
     void setType(TYPE newType);
-    void setAppointment(APPOINTMRNT newAppointment);
+    void setAssignment(ASSIGNMENT newAppointment);
     void setFlags(FLAGS newFlags);
 
-    void setBody(std::unique_ptr<IOTVP_AbstractBody> newBody);
+    void setBody(std::unique_ptr<IOTVP_Abstract> newBody);
 
-    QByteArray toData() const;
+    virtual QByteArray toData() const override;
 
 private:
     uint8_t _version;
     TYPE _type;
-    APPOINTMRNT _appointment;
+    ASSIGNMENT _assignment;
     FLAGS _flags;
-    uint64_t _size;
-    std::unique_ptr<IOTVP_AbstractBody> _body;
+    std::unique_ptr<IOTVP_Abstract> _body;
 };
 

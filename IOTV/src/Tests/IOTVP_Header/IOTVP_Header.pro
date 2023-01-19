@@ -13,6 +13,7 @@ SOURCES +=  tst_iotvp_header_test.cpp \
             ../../lib/Protocols/iotvp_read_write.cpp \
             ../../lib/Protocols/iotvp_abstractreadwrite.cpp \
             ../../lib/Protocols/iotvp_state.cpp \
+            ../../lib/Protocols/iotvp_creator.cpp \
             ../../lib/raw/raw.cpp
 
 HEADERS += ../../lib/raw/raw.h

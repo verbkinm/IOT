@@ -24,7 +24,7 @@ public:
 
     virtual QByteArray toData() const override;
 
-    virtual uint32_t dataSize() const override;
+    virtual uint64_t dataSize() const override;
 
     const QList<Raw::DATA_TYPE> &readChannel() const;
     void setReadChannel(const QList<Raw::DATA_TYPE> &newReadChannel);

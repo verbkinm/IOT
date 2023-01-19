@@ -10,7 +10,10 @@ SOURCES +=  tst_iotvp_state_test.cpp \
             ../../lib/Protocols/iotvp_state.cpp \
             ../../lib/Protocols/iotvp_abstractbody.cpp \
             ../../lib/Protocols/iotvp_abstractreadwrite.cpp \
-#            ../../lib/Protocols/iotvp_read_write.cpp \
+            ../../lib/Protocols/iotvp_abstract.cpp \
+            ../../lib/Protocols/iotvp_creator.cpp \
+            ../../lib/Protocols/iotvp_read_write.cpp \
+            ../../lib/Protocols/iotvp_header.cpp \
 #            ../../lib/raw/raw.cpp
 
 #HEADERS +=  ../../lib/Protocols/iotvp_state.h \
@@ -20,4 +23,4 @@ SOURCES +=  tst_iotvp_state_test.cpp \
 #            ../../lib/raw/raw.h
 
 INCLUDEPATH +=  ../../lib/Protocols \
-#                ../../lib/raw
+                ../../lib/raw

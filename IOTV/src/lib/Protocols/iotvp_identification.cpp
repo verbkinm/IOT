@@ -87,12 +87,11 @@ QByteArray IOTVP_Identification::toData() const
 
 uint64_t IOTVP_Identification::size() const
 {
-    // Идентификация устройства (16 + N байт, N максимум 2^40) (документация)
-    return 16 + nameSize() + descriptionSize() + numberWriteChannel() + numberReadChannel();
+    return IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize() + descriptionSize() + numberWriteChannel() + numberReadChannel() + dataSize();
 }
 
 
-uint32_t IOTVP_Identification::dataSize() const
+uint64_t IOTVP_Identification::dataSize() const
 {
     return 0;
 }

@@ -23,5 +23,6 @@ public:
 
 private:
     STATE _state;
+
 };
 
