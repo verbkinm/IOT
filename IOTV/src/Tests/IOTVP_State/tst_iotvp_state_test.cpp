@@ -106,7 +106,7 @@ void IOTVP_State_Test::test_createPkgFromData()
                             };
     QByteArray data(dataRaw, 15);
     bool complete, error;
-    auto pair = IOTVP_Creator::createPkg(data, complete, error);
+    auto pair = IOTVP_Creator::createPkgs(data, complete, error);
 
 
 }

@@ -1,9 +1,9 @@
 #include "iotvp_abstractbody.h"
 
-IOTVP_AbstractBody::IOTVP_AbstractBody(BODY_TYPE type) : _bodyType(IOTVP_Abstract::BODY_TYPE::NONE),
+IOTVP_AbstractBody::IOTVP_AbstractBody(BODY_TYPE type) : _bodyType(type),
     _name("Non name"), _flags(FLAGS::NONE)
 {
-//    _bodyType = IOTVP_Abstract::BODY_TYPE::NONE;
+
 }
 
 uint8_t IOTVP_AbstractBody::nameSize() const

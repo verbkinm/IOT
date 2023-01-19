@@ -1,50 +1,40 @@
 #include "iotvp_creator.h"
 
 IOTVP_Creator::IOTVP_Creator(QByteArray &data) : _error(false), _complete(false),
-    _rawData(data), _expectedDataSize(0)
+    _expectedDataSize(0), _rawData(data)
 {
 
 }
 
-std::pair<std::unique_ptr<IOTVP_Header>,
-std::unique_ptr<IOTVP_AbstractBody> >
-IOTVP_Creator::createPkg()
+void IOTVP_Creator::createPkgs()
 {
     if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE) // Заголовок протокола (20 байт + N байт, N максимум 2^48) (документация)
     {
         _error = false;
         _complete = false;
-        return {};
+        return;
     }
 
     createHeader();
-    if (_error)
-        return {};
 
-    if (!bodyMustBe(_header->assignment()))
-    {
-        // Обрезаем по длине хедера
-        _rawData = _rawData.mid(_header->size());
-        return {std::move(_header), nullptr};
-    }
+    // Или ошибка и данные очистились, или данные тела протокола ещё не все пришли,
+    // или тело протокола для данного заголовка не предусмотрено
+    if (_error || (_expectedDataSize > 0) || _complete)
+        return;
 
     createBody();
-    if (_error)
-        return {};
-
-    if (!_complete)
-        return{};
-
-    return {std::move(_header), std::move(_body)};
+//    if (_error || (_expectedDataSize > 0) || _complete)
+//        return;
 }
 
-void IOTVP_Creator::createHeader() const
+void IOTVP_Creator::createHeader()
 {
     // Данные не полные.
     if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE) // Заголовок протокола (20 байт + N байт, N максимум 2^48) (документация)
     {
         _complete = false;
         _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE;
         return;
     }
 
@@ -68,6 +58,7 @@ void IOTVP_Creator::createHeader() const
     {
         _complete = false;
         _error = true;
+        _expectedDataSize = 0;
         _rawData.clear();
         return;
     }
@@ -77,6 +68,7 @@ void IOTVP_Creator::createHeader() const
     {
         _complete = false;
         _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + dataSize;
         return;
     }
 
@@ -85,14 +77,25 @@ void IOTVP_Creator::createHeader() const
     _header->setType(static_cast<IOTVP_Header::TYPE>(type));
     _header->setAssignment(static_cast<IOTVP_Header::ASSIGNMENT>(assigment));
     _header->setFlags(static_cast<IOTVP_Header::FLAGS>(flags));
+
+    if (!bodyMustBe(_header->assignment()))
+    {
+        // Обрезаем по длине хедера
+        _rawData = _rawData.mid(_header->size());
+        _error = false;
+        _complete = true;
+        _expectedDataSize = 0;
+        return;
+    }
 }
 
-void IOTVP_Creator::createBody() const
+void IOTVP_Creator::createBody()
 {
     switch (_header->assignment())
     {
         case IOTVP_Header::ASSIGNMENT::NONE :
         {
+            _error = true;
             break;
         }
         case IOTVP_Header::ASSIGNMENT::IDENTIFICATION :
@@ -137,6 +140,23 @@ bool IOTVP_Creator::bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const
         case IOTVP_Header::ASSIGNMENT::PING_PONG :
             return false;
     }
+
+    return false;
+}
+
+bool IOTVP_Creator::complete() const
+{
+    return _complete;
+}
+
+std::unique_ptr<IOTVP_Header> IOTVP_Creator::takeHeader()
+{
+    return std::move(_header);
+}
+
+std::unique_ptr<IOTVP_AbstractBody> IOTVP_Creator::takeBody()
+{
+    return std::move(_body);
 }
 
 uint64_t IOTVP_Creator::expectedDataSize() const

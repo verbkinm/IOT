@@ -12,28 +12,32 @@ public:
     IOTVP_Creator() = delete;
     IOTVP_Creator(QByteArray &data);
 
-    std::pair<std::unique_ptr<IOTVP_Header>, std::unique_ptr<IOTVP_AbstractBody> > createPkg();
+    void createPkgs();
 
     bool error() const;
+    bool complete() const;
 
     uint64_t expectedDataSize() const;
 
+    std::unique_ptr<IOTVP_Header> takeHeader();
+    std::unique_ptr<IOTVP_AbstractBody> takeBody();
+
 private:
-    void createHeader() const;
-    void createBody() const;
-    void createBodyIdentification() const ;
-    void createBodyState() const;
-    void createBodyReadWrite() const;
+    void createHeader();
+    void createBody();
+    void createBodyIdentification();
+    void createBodyState();
+    void createBodyReadWrite();
 
     bool bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const;
 
-    mutable bool _error, _complete;
+    bool _error, _complete;
+    uint64_t _expectedDataSize;
 
     QByteArray &_rawData;
 
-    mutable std::unique_ptr<IOTVP_Header> _header;
+    std::unique_ptr<IOTVP_Header> _header;
     std::unique_ptr<IOTVP_AbstractBody> _body;
 
-    uint64_t _expectedDataSize;
 };
 

@@ -68,7 +68,7 @@ void IOTVP_Header_Test::test_createPkgFromData()
 
     QByteArray data(dataRaw, 20);
     bool complete, error;
-    auto pair = IOTVP_Creator::createPkg(data, complete, error);
+    auto pair = IOTVP_Creator::createPkgs(data, complete, error);
 }
 
 QTEST_APPLESS_MAIN(IOTVP_Header_Test)
