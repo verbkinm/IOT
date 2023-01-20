@@ -18,9 +18,6 @@ public:
 
     void setName(const QString &newName);
     void setFlags(FLAGS newFlags);
-//    void setBodyType(BODY_TYPE newBodyType);
-
-//    virtual bool isValid() const = 0;
 
    const BODY_TYPE _bodyType;
 

@@ -5,6 +5,7 @@
 class IOTVP_AbstractReadWrite : public IOTVP_AbstractBody
 {
 public:
+    IOTVP_AbstractReadWrite(BODY_TYPE type);
     virtual ~IOTVP_AbstractReadWrite() = default;
 
     virtual uint64_t dataSize() const override;

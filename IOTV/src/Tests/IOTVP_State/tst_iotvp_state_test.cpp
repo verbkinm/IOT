@@ -105,10 +105,8 @@ void IOTVP_State_Test::test_createPkgFromData()
                                 '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'  // Контрольная сумма тела пакета
                             };
     QByteArray data(dataRaw, 15);
-    bool complete, error;
-    auto pair = IOTVP_Creator::createPkgs(data, complete, error);
 
-
+//    IOTVP_Creator::createPkgs(data);
 }
 
 QTEST_APPLESS_MAIN(IOTVP_State_Test)

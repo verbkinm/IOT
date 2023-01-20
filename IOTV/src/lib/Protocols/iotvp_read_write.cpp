@@ -1,9 +1,8 @@
 #include "iotvp_read_write.h"
 
-IOTVP_READ_WRITE::IOTVP_READ_WRITE() :
+IOTVP_READ_WRITE::IOTVP_READ_WRITE() : IOTVP_AbstractReadWrite(BODY_TYPE::READ_WRITE),
     _channelNumber(0)
 {
-    _bodyType = BODY_TYPE::READ_WRITE;
 }
 
 uint8_t IOTVP_READ_WRITE::channelNumber() const
@@ -14,6 +13,18 @@ uint8_t IOTVP_READ_WRITE::channelNumber() const
 void IOTVP_READ_WRITE::setChannelNumber(uint8_t newChannelNumber)
 {
     _channelNumber = newChannelNumber;
+}
+
+bool IOTVP_READ_WRITE::operator==(const IOTVP_Abstract &obj) const
+{
+    const IOTVP_READ_WRITE *ptr = dynamic_cast<const IOTVP_READ_WRITE*>(&obj);
+    if (ptr == nullptr)
+        return false;
+
+    return  ( (channelNumber() == ptr->channelNumber())
+            && (flags() == ptr->flags())
+            && (name() == ptr->name())
+            && (data() == ptr->data()) );
 }
 
 uint64_t IOTVP_READ_WRITE::size() const

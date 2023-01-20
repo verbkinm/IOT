@@ -1,9 +1,8 @@
 #include "iotvp_identification.h"
 
-IOTVP_Identification::IOTVP_Identification() :
+IOTVP_Identification::IOTVP_Identification() : IOTVP_AbstractBody(BODY_TYPE::IDENTIFICATION),
     _id(0), _description("None description")
 {
-    _bodyType = BODY_TYPE::IDENTIFICATION;
 }
 
 
@@ -116,4 +115,18 @@ void IOTVP_Identification::setWriteChannel(const QList<Raw::DATA_TYPE> &newWrite
 {
     if (_writeChannel != newWriteChannel)
         _writeChannel = (newWriteChannel.size() > std::numeric_limits<uint8_t>::max()) ? newWriteChannel.mid(0, std::numeric_limits<uint8_t>::max()) : newWriteChannel;
+}
+
+bool IOTVP_Identification::operator==(const IOTVP_Abstract &obj) const
+{
+    const IOTVP_Identification *ptr = dynamic_cast<const IOTVP_Identification*>(&obj);
+    if (ptr == nullptr)
+        return false;
+
+    return  ( (id() == ptr->id())
+              && (numberWriteChannel() == ptr->numberWriteChannel())
+              && (numberReadChannel() == ptr->numberReadChannel())
+              && (flags() == ptr->flags())
+              && (name() == ptr->name())
+              && (description() == ptr->description()) );
 }

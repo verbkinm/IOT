@@ -10,14 +10,14 @@ class IOTVP_Creator
 {
 public:
     IOTVP_Creator() = delete;
-    IOTVP_Creator(QByteArray &data);
+    IOTVP_Creator(const QByteArray &data);
 
     void createPkgs();
 
     bool error() const;
-    bool complete() const;
 
     uint64_t expectedDataSize() const;
+    uint64_t cutDataSize() const;
 
     std::unique_ptr<IOTVP_Header> takeHeader();
     std::unique_ptr<IOTVP_AbstractBody> takeBody();
@@ -31,10 +31,16 @@ private:
 
     bool bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const;
 
-    bool _error, _complete;
-    uint64_t _expectedDataSize;
+    bool _error;
+    uint64_t _expectedDataSize,
+    _cutDataSize,
+    // Для страховочной проверки
+    _headerCheckSumMustBe,
+    _headerDataSizeMustBe,
+    _bodyCheckSumMustBe,
+    _bodyDataSizeMustBe;
 
-    QByteArray &_rawData;
+    const QByteArray &_rawData;
 
     std::unique_ptr<IOTVP_Header> _header;
     std::unique_ptr<IOTVP_AbstractBody> _body;

@@ -33,5 +33,7 @@ public:
     virtual uint64_t size() const = 0;
 
     virtual QByteArray toData() const = 0;
+
+    virtual bool operator==(const IOTVP_Abstract &) const = 0;
 };
 

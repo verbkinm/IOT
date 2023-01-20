@@ -69,14 +69,19 @@ void IOTVP_Header::setFlags(FLAGS newFlags)
         _flags = newFlags;
 }
 
-void IOTVP_Header::setBody(std::unique_ptr<IOTVP_Abstract> newBody)
+void IOTVP_Header::setBody(std::unique_ptr<IOTVP_AbstractBody> newBody)
 {
     _body = std::move(newBody);
 }
 
+std::unique_ptr<IOTVP_AbstractBody> IOTVP_Header::takeBody()
+{
+    return std::move(_body);
+}
+
 QByteArray IOTVP_Header::toData() const
 {
-    QByteArray result(size(), 0);
+    QByteArray result(size() - dataSize(), 0);
     result[0] = version();
     result[1] = static_cast<uint8_t>(type());
     result[2] = static_cast<uint8_t>(assignment());
@@ -98,5 +103,18 @@ QByteArray IOTVP_Header::toData() const
         result.append(_body->toData());
 
     return result;
+}
+
+bool IOTVP_Header::operator==(const IOTVP_Abstract &obj) const
+{
+    const IOTVP_Header *ptr = dynamic_cast<const IOTVP_Header*>(&obj);
+    if (ptr == nullptr)
+        return false;
+
+    return  ( (version() == ptr->version())
+              && (type() == ptr->type())
+              && (assignment() == ptr->assignment())
+              && (flags() == ptr->flags())
+              && (_body.get() == ptr->_body.get()) );
 }
 

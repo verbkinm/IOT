@@ -1,30 +1,60 @@
 #include "iotvp_creator.h"
 
-IOTVP_Creator::IOTVP_Creator(QByteArray &data) : _error(false), _complete(false),
-    _expectedDataSize(0), _rawData(data)
+IOTVP_Creator::IOTVP_Creator(const QByteArray &data) : _error(false),
+    _expectedDataSize(0), _cutDataSize(0), _headerCheckSumMustBe(0), _headerDataSizeMustBe(0),
+    _bodyCheckSumMustBe(0), _bodyDataSizeMustBe(0),
+    _rawData(data)
 {
-
 }
 
 void IOTVP_Creator::createPkgs()
 {
     if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE) // Заголовок протокола (20 байт + N байт, N максимум 2^48) (документация)
     {
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE;
         _error = false;
-        _complete = false;
         return;
     }
 
     createHeader();
 
-    // Или ошибка и данные очистились, или данные тела протокола ещё не все пришли,
-    // или тело протокола для данного заголовка не предусмотрено
-    if (_error || (_expectedDataSize > 0) || _complete)
+    // Ошибка или данные тела протокола ещё не все пришли,
+    if (_error || (_expectedDataSize > 0))
+    {
+        _cutDataSize = 0;
         return;
+    }
+
+    // Тело протокола для данного заголовка не предусмотрено
+    if (!bodyMustBe(_header->assignment()))
+    {
+        _error = false;         // ошибок нет
+        _expectedDataSize = 0;  // пакет пришел полностью
+        _cutDataSize = IOTVP_Abstract::HEADER_SIZE; // пакет размером HEADER_SIZE байт
+        return;
+    }
 
     createBody();
-//    if (_error || (_expectedDataSize > 0) || _complete)
-//        return;
+
+    if ((_body == nullptr) && (_expectedDataSize == 0))
+    {
+        _error = true;
+        _expectedDataSize = 0;
+        _cutDataSize = 0;
+        return;
+    }
+
+    _header->setBody(std::move(_body));
+    if (!_error && (_expectedDataSize == 0))
+        _cutDataSize = _header->size();
+
+    if ( (_header->dataSize() != _headerDataSizeMustBe) || (_header->checkSum() != _headerCheckSumMustBe) )
+    {
+        _error = true;
+        _expectedDataSize = 0;
+        _cutDataSize = 0;
+    }
+    if ((_body->dataSize() != _bodyDataSizeMustBe) || (_body->checkSum() != _bodyCheckSumMustBe))
 }
 
 void IOTVP_Creator::createHeader()
@@ -32,7 +62,6 @@ void IOTVP_Creator::createHeader()
     // Данные не полные.
     if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE) // Заголовок протокола (20 байт + N байт, N максимум 2^48) (документация)
     {
-        _complete = false;
         _error = false;
         _expectedDataSize = IOTVP_Abstract::HEADER_SIZE;
         return;
@@ -43,30 +72,32 @@ void IOTVP_Creator::createHeader()
     const uint8_t assigment = _rawData[2];
     const uint8_t flags = _rawData[3];
 
+    QByteArray buf = _rawData.sliced(4, 8);
     uint64_t dataSize;
-    std::memcpy(&dataSize, &_rawData[4], 8);
+    std::memcpy(&dataSize, &buf[0], 8);
     if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
         dataSize = qToBigEndian(dataSize);
+    _headerDataSizeMustBe = dataSize;
 
+
+    buf = _rawData.sliced(12, 8);
     uint64_t chSum;
-    std::memcpy(&chSum, &_rawData[12], 8);
+    std::memcpy(&chSum, &buf[0], 8);
     if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
         chSum = qToBigEndian(chSum);
+    _headerCheckSumMustBe = chSum;
 
     uint64_t sum = version + type + assigment + flags + dataSize;
     if (sum != chSum)
     {
-        _complete = false;
         _error = true;
         _expectedDataSize = 0;
-        _rawData.clear();
         return;
     }
 
     // Данные тела протокола ещё не все пришли
     if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + dataSize))
     {
-        _complete = false;
         _error = false;
         _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + dataSize;
         return;
@@ -77,16 +108,6 @@ void IOTVP_Creator::createHeader()
     _header->setType(static_cast<IOTVP_Header::TYPE>(type));
     _header->setAssignment(static_cast<IOTVP_Header::ASSIGNMENT>(assigment));
     _header->setFlags(static_cast<IOTVP_Header::FLAGS>(flags));
-
-    if (!bodyMustBe(_header->assignment()))
-    {
-        // Обрезаем по длине хедера
-        _rawData = _rawData.mid(_header->size());
-        _error = false;
-        _complete = true;
-        _expectedDataSize = 0;
-        return;
-    }
 }
 
 void IOTVP_Creator::createBody()
@@ -94,8 +115,9 @@ void IOTVP_Creator::createBody()
     switch (_header->assignment())
     {
         case IOTVP_Header::ASSIGNMENT::NONE :
+        case IOTVP_Header::ASSIGNMENT::PING_PONG :
         {
-            _error = true;
+            Q_ASSERT(true);
             break;
         }
         case IOTVP_Header::ASSIGNMENT::IDENTIFICATION :
@@ -114,16 +136,6 @@ void IOTVP_Creator::createBody()
             createBodyReadWrite();
             break;
         }
-        case IOTVP_Header::ASSIGNMENT::PING_PONG :
-        {
-
-            break;
-        }
-    }
-
-    if (!_complete)
-    {
-        _error = false;
     }
 }
 
@@ -144,11 +156,6 @@ bool IOTVP_Creator::bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const
     return false;
 }
 
-bool IOTVP_Creator::complete() const
-{
-    return _complete;
-}
-
 std::unique_ptr<IOTVP_Header> IOTVP_Creator::takeHeader()
 {
     return std::move(_header);
@@ -164,22 +171,158 @@ uint64_t IOTVP_Creator::expectedDataSize() const
     return _expectedDataSize;
 }
 
+uint64_t IOTVP_Creator::cutDataSize() const
+{
+    return _cutDataSize;
+}
+
 bool IOTVP_Creator::error() const
 {
     return _error;
 }
 
-void IOTVP_Creator::createBodyIdentification() const
+void IOTVP_Creator::createBodyIdentification()
 {
 
 }
 
-void IOTVP_Creator::createBodyState() const
+void IOTVP_Creator::createBodyState()
 {
+    // Данные не полные.
+    if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE)
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE;
+        return;
+    }
 
+    const uint8_t nameSize = _rawData[IOTVP_Abstract::HEADER_SIZE + 0];
+    const uint8_t state = _rawData[IOTVP_Abstract::HEADER_SIZE + 1];
+    const uint8_t flags = _rawData[IOTVP_Abstract::HEADER_SIZE + 2];
+
+    QByteArray buf = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + 3, 4);
+    uint32_t dataSize;
+
+    std::memcpy(&dataSize, &buf[0], 4);
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        dataSize = qToBigEndian(dataSize);
+    _bodyDataSizeMustBe = dataSize;
+
+    buf = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + 7, 8);
+    uint64_t chSum;
+
+    std::memcpy(&chSum, &buf[0], 8);
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        chSum = qToBigEndian(chSum);
+    _bodyCheckSumMustBe = chSum;
+
+    uint64_t sum = nameSize + state + flags + dataSize;
+    if (sum != chSum)
+    {
+        _error = true;
+        _expectedDataSize = 0;
+        return;
+    }
+    if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE + nameSize + dataSize))
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE + nameSize + dataSize;
+        return;
+    }
+
+    QString name;
+    if (nameSize > 0)
+        name = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE, nameSize);
+
+    QByteArray data;
+    if (dataSize > 0)
+        data = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE + nameSize, dataSize);
+
+    //!!!
+    // Данные тела протокола ещё не все пришли
+    if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE + dataSize))
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::STATE_SIZE + dataSize;
+        return;
+    }
+
+    auto body = std::make_unique<IOTVP_State>();
+    body->setName(name);
+    body->setState(static_cast<IOTVP_State::STATE>(state));
+    body->setFlags(static_cast<IOTVP_State::FLAGS>(flags));
+    body->setData(data);
+
+    _body = std::move(body);
 }
 
-void IOTVP_Creator::createBodyReadWrite() const
+void IOTVP_Creator::createBodyReadWrite()
 {
+    // Данные не полные.
+    if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE)
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE;
+        return;
+    }
 
+    const uint8_t nameSize = _rawData[IOTVP_Abstract::HEADER_SIZE + 0];
+    const uint8_t channelNumber = _rawData[IOTVP_Abstract::HEADER_SIZE + 1];
+    const uint8_t flags = _rawData[IOTVP_Abstract::HEADER_SIZE + 2];
+
+    QByteArray buf = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + 3, 4);
+    uint32_t dataSize;
+
+    std::memcpy(&dataSize, &buf[0], 4);
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        dataSize = qToBigEndian(dataSize);
+    _bodyDataSizeMustBe = dataSize;
+
+    buf = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + 7, 8);
+    uint64_t chSum;
+
+    std::memcpy(&chSum, &buf[0], 8);
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        chSum = qToBigEndian(chSum);
+    _bodyCheckSumMustBe = chSum;
+
+    uint64_t sum = nameSize + channelNumber + flags + dataSize;
+    if (sum != chSum)
+    {
+        _error = true;
+        _expectedDataSize = 0;
+        return;
+    }
+
+    if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE + nameSize + dataSize))
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE + nameSize + dataSize;
+        return;
+    }
+
+    QString name;
+    if (nameSize > 0)
+        name = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE, nameSize);
+
+    QByteArray data;
+    if (dataSize > 0)
+        data = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE + nameSize, dataSize);
+
+    //!!!
+    // Данные тела протокола ещё не все пришли
+    if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE + dataSize))
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::READWRITE_SIZE + dataSize;
+        return;
+    }
+
+    auto body = std::make_unique<IOTVP_READ_WRITE>();
+    body->setName(name);
+    body->setChannelNumber(channelNumber);
+    body->setFlags(static_cast<IOTVP_State::FLAGS>(flags));
+    body->setData(data);
+
+    _body = std::move(body);
 }

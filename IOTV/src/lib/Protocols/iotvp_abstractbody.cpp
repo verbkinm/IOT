@@ -33,12 +33,6 @@ void IOTVP_AbstractBody::setFlags(IOTVP_AbstractBody::FLAGS newFlags)
         _flags = newFlags;
 }
 
-//void IOTVP_AbstractBody::setBodyType(BODY_TYPE newBodyType)
-//{
-//    if (_bodyType != newBodyType)
-//        _bodyType = newBodyType;
-//}
-
 IOTVP_AbstractBody::BODY_TYPE IOTVP_AbstractBody::bodyType() const
 {
     return _bodyType;

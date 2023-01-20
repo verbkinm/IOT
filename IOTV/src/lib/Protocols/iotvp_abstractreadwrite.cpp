@@ -1,5 +1,10 @@
 #include "iotvp_abstractreadwrite.h"
 
+IOTVP_AbstractReadWrite::IOTVP_AbstractReadWrite(BODY_TYPE type) : IOTVP_AbstractBody(type)
+{
+
+}
+
 uint64_t IOTVP_AbstractReadWrite::dataSize() const
 {
     return (_data.size() > std::numeric_limits<uint32_t>::max()) ? std::numeric_limits<uint32_t>::max() : _data.size();

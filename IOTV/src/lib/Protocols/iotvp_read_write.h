@@ -16,6 +16,8 @@ public:
 
     void setChannelNumber(uint8_t newChannelNumber);
 
+    bool operator==(const IOTVP_Abstract &obj) const override;
+
 private:
     uint8_t _channelNumber;
 };

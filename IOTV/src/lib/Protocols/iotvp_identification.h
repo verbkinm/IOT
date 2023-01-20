@@ -32,6 +32,8 @@ public:
     const QList<Raw::DATA_TYPE> &writeChannel() const;
     void setWriteChannel(const QList<Raw::DATA_TYPE> &newWriteChannel);
 
+    bool operator==(const IOTVP_Abstract &obj) const override;
+
 private:
     uint16_t _id;
     QString _description;

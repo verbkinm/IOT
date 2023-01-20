@@ -1,8 +1,7 @@
 #include "iotvp_state.h"
 
-IOTVP_State::IOTVP_State() : _state(STATE::OFFLINE)
+IOTVP_State::IOTVP_State() : IOTVP_AbstractReadWrite(BODY_TYPE::STATE), _state(STATE::OFFLINE)
 {
-    _bodyType = BODY_TYPE::STATE;
 }
 
 IOTVP_State::STATE IOTVP_State::state() const
@@ -23,6 +22,18 @@ uint64_t IOTVP_State::size() const
 void IOTVP_State::setState(STATE newState)
 {
     _state = newState;
+}
+
+bool IOTVP_State::operator==(const IOTVP_Abstract &obj) const
+{
+    const IOTVP_State *ptr = dynamic_cast<const IOTVP_State*>(&obj);
+    if (ptr == nullptr)
+        return false;
+
+    return  ( (state() == ptr->state())
+              && (flags() == ptr->flags())
+              && (name() == ptr->name())
+              && (data() == ptr->data()) );
 }
 
 QByteArray IOTVP_State::toData() const

@@ -3,7 +3,7 @@
 #include <QByteArray>
 #include <QtEndian>
 
-#include "iotvp_abstract.h"
+#include "iotvp_abstractbody.h"
 
 class IOTVP_Header : public IOTVP_Abstract
 {
@@ -42,16 +42,19 @@ public:
     void setType(TYPE newType);
     void setAssignment(ASSIGNMENT newAppointment);
     void setFlags(FLAGS newFlags);
-
-    void setBody(std::unique_ptr<IOTVP_Abstract> newBody);
+    void setBody(std::unique_ptr<IOTVP_AbstractBody> newBody);
+    std::unique_ptr<IOTVP_AbstractBody> takeBody();
 
     virtual QByteArray toData() const override;
+
+    bool operator==(const IOTVP_Abstract &obj) const override;
 
 private:
     uint8_t _version;
     TYPE _type;
     ASSIGNMENT _assignment;
     FLAGS _flags;
-    std::unique_ptr<IOTVP_Abstract> _body;
+    std::unique_ptr<IOTVP_AbstractBody> _body;
 };
+
 

@@ -21,8 +21,9 @@ public:
 
     void setState(STATE newState);
 
+    virtual bool operator==(const IOTVP_Abstract &obj) const override;
+
 private:
     STATE _state;
-
 };
 
