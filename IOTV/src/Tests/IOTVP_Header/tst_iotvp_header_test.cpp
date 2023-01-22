@@ -31,6 +31,8 @@ private slots:
     void test_bodyReadWithoutName();
     void test_bodyReadWithtName();
 
+    void test_bodyIdetification();
+
     void test_equally();
 };
 
@@ -181,6 +183,7 @@ void IOTVP_Header_Test::test_bodyStateNotFull()
 
     auto header = creator.takeHeader();
     QCOMPARE(header->toData() != data.sliced(0, 20), true);
+
 }
 
 void IOTVP_Header_Test::test_bodyStateWithoutName()
@@ -329,7 +332,7 @@ void IOTVP_Header_Test::test_bodyReadWithtName()
             1,                                           // Тип пакета - запрос
             3,                                           // Назначение пакета Read
             0,                                           // Флаги
-            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 15, // !!! Размер тела пакета меньше чем body.dataSize + body.nameSize
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 15, // !!! Размер тела пакета меньше чем body.size + body.nameSize + body.dataSize
             '\0', '\0', '\0', '\0', '\0', '\0', '\0', 21,  // Контрольная сумма тела пакета
 
             5,                                          // !!! Длина имени. То есть пакет body должен быть 15 (документация) + 5 (длина имени), а в header пришло, что размер тела заголовка равен 15, что на 5 меньше
@@ -345,16 +348,15 @@ void IOTVP_Header_Test::test_bodyReadWithtName()
         creator.createPkgs();
         QCOMPARE(creator.error(), true);
         QCOMPARE(creator.expectedDataSize(), 0);
-        QCOMPARE(creator.cutDataSize(), 40);
+        QCOMPARE(creator.cutDataSize(), 0);
 
         auto header = creator.takeHeader();
-        QByteArray d1 = header->toData();
-        QByteArray d2 = data;
         QCOMPARE(header->toData() != data.sliced(0, 20), true);
-        QCOMPARE(header->toData(), data);
+        QCOMPARE(header->toData().size(), data.size());
+        QCOMPARE(header->toData() != data, true);
 
         auto body = header->takeBody();
-        QCOMPARE(body->name().isEmpty(), true);
+        QCOMPARE(body->name(), "Name!");
     }
     {
         // Заголовок и тело ReadWrite - OK
@@ -363,9 +365,9 @@ void IOTVP_Header_Test::test_bodyReadWithtName()
             1,                                           // Тип пакета - запрос
             3,                                           // Назначение пакета Read
             0,                                           // Флаги
-            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 15, // Размер тела пакета
-            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 21,  // Контрольная сумма тела пакета
-
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 20, // Размер тела пакета
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 26,  // Контрольная сумма тела пакета
+            //*****************************************************************************
             5,                                          // Длина имени
             5,                                          // Номер канала
             '\0',                                       // Флаги
@@ -382,13 +384,93 @@ void IOTVP_Header_Test::test_bodyReadWithtName()
         QCOMPARE(creator.cutDataSize(), 40);
 
         auto header = creator.takeHeader();
-        QByteArray d1 = header->toData();
-        QByteArray d2 = data;
         QCOMPARE(header->toData() != data.sliced(0, 20), true);
         QCOMPARE(header->toData(), data);
 
         auto body = header->takeBody();
-        QCOMPARE(body->name().isEmpty(), true);
+        QCOMPARE(body->name(), "Name!");
+    }
+}
+
+void IOTVP_Header_Test::test_bodyIdetification()
+{
+    {
+        // Заголовок и тело Identification  - OK
+        const char dataRaw[] =  {
+            2,                                           // Версия протокола
+            1,                                           // Тип пакета - запрос
+            1,                                           // Назначение пакета Identification
+            0,                                           // Флаги
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 34, // Размер тела пакета
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 38,  // Контрольная сумма тела пакета
+            //*****************************************************************************
+            '\0',                                        // id
+            1,                                           // id
+            4,                                           // Длина имени
+            '\0',                                        // Длина описания устройства
+            11,                                          // Длина описания устройства
+            1,                                           // Кол-во каналов записи
+            2,                                           // Кол-во каналов чтения
+            0,                                           // Флаги
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 19,// Контрольная сумма тела пакета
+            'N', 'a', 'm', 'e',                          // Имя устройства
+            'D','e','s','c','r','i','p','t','i','o','n', // Описания устройства
+            '\0',                                        // Типы данных кля канала записи
+            6, 6                                         // Типы данных кля канала чтения
+        };
+
+        QByteArray data(dataRaw, 54);
+        IOTVP_Creator creator(data);
+        creator.createPkgs();
+        QCOMPARE(creator.error(), false);
+        QCOMPARE(creator.expectedDataSize(), 0);
+        QCOMPARE(creator.cutDataSize(), 54);
+
+        auto header = creator.takeHeader();
+        QCOMPARE(header->toData() != data.sliced(0, 20), true);
+        QCOMPARE(header->toData(), data);
+
+        auto body = header->takeBody();
+        QCOMPARE(body->name(), "Name");
+    }
+    {
+        // Заголовок и тело Identification - ERROR
+        const char dataRaw[] =  {
+            2,                                           // Версия протокола
+            1,                                           // Тип пакета - запрос
+            1,                                           // Назначение пакета Identification
+            0,                                           // Флаги
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 34,// Размер тела пакета
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 38,// Контрольная сумма тела пакета
+            //*****************************************************************************
+            '\0',                                        // id
+            1,                                           // id
+            4,                                           // Длина имени
+            '\0',                                        // Длина описания устройства
+            11,                                          // Длина описания устройства
+            1,                                           // Кол-во каналов записи
+            2,                                           // Кол-во каналов чтения
+            0,                                           // Флаги
+            '\0', '\0', '\0', '\0', '\0', '\0', '\0', 19,// Контрольная сумма тела пакета
+            'N', 'a', 'm', 'e',                          // Имя устройства
+            'D','e','s','c','r','i','p','t','i','o','n', // Описания устройства
+            '\0',                                        // Типы данных кля канала записи
+            6, 6                                         // Типы данных кля канала чтения
+        };
+
+        QByteArray data(dataRaw, 55); // 54
+        IOTVP_Creator creator(data);
+        creator.createPkgs();
+        QCOMPARE(creator.error(), false);
+        QCOMPARE(creator.expectedDataSize(), 0);
+        QCOMPARE(creator.cutDataSize(), 54);
+
+        auto header = creator.takeHeader();
+        QCOMPARE(header->toData() != data.sliced(0, 20), true);
+        QCOMPARE(header->toData() != data, true);
+
+        auto body = header->takeBody();
+        QCOMPARE(body->name(), "Name");
     }
 }
 

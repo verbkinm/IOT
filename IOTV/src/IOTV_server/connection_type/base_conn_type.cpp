@@ -28,25 +28,16 @@ qint64 Base_conn_type::write(const QByteArray &data)
     return -1;
 }
 
-void Base_conn_type::clearBufer()
+void Base_conn_type::clearDataBuffer()
 {
+    std::lock_guard lg(_hostBuffMutex);
     _host_buffer_data.clear();
 }
 
-//void Base_conn_type::connectToHost()
-//{
-
-//}
-
-//void Base_conn_type::disconnectFromHost()
-//{
-
-//}
-
-void Base_conn_type::trimBufferFromBegin(u_int8_t size)
+void Base_conn_type::setDataBuffer(QByteArray &data)
 {
     std::lock_guard lg(_hostBuffMutex);
-    _host_buffer_data = _host_buffer_data.mid(size);
+    _host_buffer_data = data;
 }
 
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)

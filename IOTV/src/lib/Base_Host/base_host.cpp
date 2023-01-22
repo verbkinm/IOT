@@ -1,6 +1,7 @@
 #include "base_host.h"
 
 Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent),
+    _expectedDataSize(0),
     _id(id), _description("None description")
 {
 
@@ -80,6 +81,17 @@ void Base_Host::setId(uint8_t id)
 void Base_Host::setDescription(const QString description)
 {
     _description = description;
+}
+
+void Base_Host::setState(STATE state)
+{
+    if (_state != state)
+        _state = state;
+}
+
+Base_Host::STATE Base_Host::state() const
+{
+    return _state;
 }
 
 uint8_t Base_Host::getId() const

@@ -44,3 +44,11 @@ public:
     static int response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData);
     static uint16_t response_Pong(char *outData);
 };
+
+const static uint64_t HEADER_SIZE = 20;         // Заголовок протокола (20 байт + N байт, N максимум 248) (документация)
+const static uint64_t IDENTIFICATION_SIZE = 16; // Идентификация устройства (16 + N байт, N максимум 2^40) (документация)
+const static uint64_t READWRITE_SIZE = 15;      // Чтение / Запись данных (15 + N байт, N максимум 2^40) (документация)
+
+
+
+

@@ -6,7 +6,8 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES +=  tst_test_raw.cpp
+SOURCES +=  tst_test_raw.cpp \
+            ../../lib/raw/raw.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/raw/ -lraw
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/raw/ -lrawd

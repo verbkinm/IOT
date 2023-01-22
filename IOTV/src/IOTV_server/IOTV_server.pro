@@ -9,6 +9,14 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../lib/Protocols/iotvp_abstract.cpp \
+    ../lib/Protocols/iotvp_abstractbody.cpp \
+    ../lib/Protocols/iotvp_abstractreadwrite.cpp \
+    ../lib/Protocols/iotvp_creator.cpp \
+    ../lib/Protocols/iotvp_header.cpp \
+    ../lib/Protocols/iotvp_identification.cpp \
+    ../lib/Protocols/iotvp_read_write.cpp \
+    ../lib/Protocols/iotvp_state.cpp \
     ConfigTypes.cpp \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
@@ -33,6 +41,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../lib/Protocols/iotvp_abstract.h \
+    ../lib/Protocols/iotvp_abstractbody.h \
+    ../lib/Protocols/iotvp_abstractreadwrite.h \
+    ../lib/Protocols/iotvp_creator.h \
+    ../lib/Protocols/iotvp_header.h \
+    ../lib/Protocols/iotvp_identification.h \
+    ../lib/Protocols/iotvp_read_write.h \
+    ../lib/Protocols/iotvp_state.h \
     ConfigTypes.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \

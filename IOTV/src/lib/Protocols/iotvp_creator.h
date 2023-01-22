@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iotvp_header.h"
-#include "iotvp_abstractbody.h"
 #include "iotvp_identification.h"
 #include "iotvp_state.h"
 #include "iotvp_read_write.h"
@@ -22,14 +21,14 @@ public:
     std::unique_ptr<IOTVP_Header> takeHeader();
     std::unique_ptr<IOTVP_AbstractBody> takeBody();
 
+    bool bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const;
+
 private:
     void createHeader();
     void createBody();
     void createBodyIdentification();
     void createBodyState();
     void createBodyReadWrite();
-
-    bool bodyMustBe(IOTVP_Header::ASSIGNMENT assigment) const;
 
     bool _error;
     uint64_t _expectedDataSize,
@@ -44,6 +43,5 @@ private:
 
     std::unique_ptr<IOTVP_Header> _header;
     std::unique_ptr<IOTVP_AbstractBody> _body;
-
 };
 

@@ -48,13 +48,16 @@ void IOTVP_Creator::createPkgs()
     if (!_error && (_expectedDataSize == 0))
         _cutDataSize = _header->size();
 
-    if ( (_header->dataSize() != _headerDataSizeMustBe) || (_header->checkSum() != _headerCheckSumMustBe) )
+    if (_expectedDataSize > 0)
+        return;
+
+    if ( (_header->dataSize() != _headerDataSizeMustBe) || (_header->checkSum() != _headerCheckSumMustBe)
+        || ( (_body != nullptr) && ((_body->dataSize() != _bodyDataSizeMustBe) || (_body->checkSum() != _bodyCheckSumMustBe)) ) )
     {
         _error = true;
         _expectedDataSize = 0;
         _cutDataSize = 0;
     }
-    if ((_body->dataSize() != _bodyDataSizeMustBe) || (_body->checkSum() != _bodyCheckSumMustBe))
 }
 
 void IOTVP_Creator::createHeader()
@@ -183,7 +186,70 @@ bool IOTVP_Creator::error() const
 
 void IOTVP_Creator::createBodyIdentification()
 {
+    // Данные не полные.
+    if (static_cast<uint64_t>(_rawData.size()) < IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE)
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE;
+        return;
+    }
 
+    const uint16_t id = (_rawData[IOTVP_Abstract::HEADER_SIZE + 0] << 8) | (_rawData[IOTVP_Abstract::HEADER_SIZE + 1]);
+    const uint8_t nameSize = _rawData[IOTVP_Abstract::HEADER_SIZE + 2];
+    const uint16_t desctiptionSize = (_rawData[IOTVP_Abstract::HEADER_SIZE + 3] << 8) | (_rawData[IOTVP_Abstract::HEADER_SIZE + 4]);
+    const uint8_t numberWriteChannel= _rawData[IOTVP_Abstract::HEADER_SIZE + 5];
+    const uint8_t numberReadChannel  = _rawData[IOTVP_Abstract::HEADER_SIZE + 6];
+    const uint8_t flags = _rawData[IOTVP_Abstract::HEADER_SIZE + 7];
+
+    _bodyDataSizeMustBe = 0;
+
+    QByteArray buf = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + 8, 8);
+    uint64_t chSum;
+
+    std::memcpy(&chSum, &buf[0], 8);
+    if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+        chSum = qToBigEndian(chSum);
+    _bodyCheckSumMustBe = chSum;
+
+    uint64_t sum = id + nameSize + desctiptionSize + numberWriteChannel + numberReadChannel + flags;
+    if (sum != chSum)
+    {
+        _error = true;
+        _expectedDataSize = 0;
+        return;
+    }
+    if (static_cast<uint64_t>(_rawData.size()) < (IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize + desctiptionSize + numberWriteChannel + numberReadChannel))
+    {
+        _error = false;
+        _expectedDataSize = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize + desctiptionSize + numberWriteChannel + numberReadChannel;
+        return;
+    }
+
+    QString name;
+    if (nameSize > 0)
+        name = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE, nameSize);
+
+    QString description;
+    if (desctiptionSize > 0)
+        description = _rawData.sliced(IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize, desctiptionSize);
+
+    QList<Raw::DATA_TYPE> writeChannel;
+    for (uint64_t i = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize + desctiptionSize, j = 0; j < numberWriteChannel; i++, j++)
+        writeChannel.push_back(static_cast<Raw::DATA_TYPE>(_rawData.at(i)));
+
+    QList<Raw::DATA_TYPE> readChannel;
+    for (uint64_t i = IOTVP_Abstract::HEADER_SIZE + IOTVP_Abstract::IDENTIFICATION_SIZE + nameSize + desctiptionSize + numberWriteChannel, j = 0; j < numberReadChannel; i++, j++)
+        readChannel.push_back(static_cast<Raw::DATA_TYPE>(_rawData.at(i)));
+
+    auto body = std::make_unique<IOTVP_Identification>();
+    body->setId(id);
+    body->setName(name);
+    body->setDescription(description);
+    body->setWriteChannel(std::move(writeChannel));
+    body->setReadChannel(std::move(readChannel));
+    body->setFlags(static_cast<IOTVP_Identification::FLAGS>(flags));
+
+    _body = std::move(body);
 }
 
 void IOTVP_Creator::createBodyState()

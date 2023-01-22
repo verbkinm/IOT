@@ -19,6 +19,7 @@ SOURCES +=  tst_iotvp_header_test.cpp \
 
 HEADERS +=  ../../lib/raw/raw.h \
             ../../lib/Protocols/iotvp_abstract.h
+            ../../lib/Protocols/iotvp_identification.h
 
 INCLUDEPATH +=  ../../lib/Protocols \
                 ../../lib/raw

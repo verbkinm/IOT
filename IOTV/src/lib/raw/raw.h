@@ -14,7 +14,7 @@ public:
     //Принята BigEndian последовательность
     enum class DATA_TYPE : uint8_t
     {
-        INT_8,
+        INT_8 = 0,
         INT_16,
         INT_32,
         INT_64,

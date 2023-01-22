@@ -25,6 +25,110 @@ void IOTV_Host::setOnline(bool state)
     _state_flags.setFlag(DeviceOnline, state);
 }
 
+void IOTV_Host::responceRequest(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_UNUSED(header);
+    // На данный момент устройства на кидают запросы!!!
+    Log::write("Запрос от устройств не предусмотрен!");
+}
+
+void IOTV_Host::responceResponce(std::unique_ptr<IOTVP_Header> header)
+{
+    switch (header->assignment())
+    {
+    case IOTVP_Header::ASSIGNMENT::IDENTIFICATION:
+        responceIdentification(std::move(header));
+        break;
+    case IOTVP_Header::ASSIGNMENT::STATE:
+        responceState(std::move(header));
+        break;
+    case IOTVP_Header::ASSIGNMENT::READ:
+        responceRead(std::move(header));
+        break;
+    case IOTVP_Header::ASSIGNMENT::WRITE:
+        responceWrite(std::move(header));
+        break;
+    case IOTVP_Header::ASSIGNMENT::PING_PONG:
+        responcePingPoing(std::move(header));
+        break;
+    default:
+        Log::write("Неизвестный тип назначения!");
+        break;
+    }
+}
+
+void IOTV_Host::responceIdentification(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_ASSERT(header != nullptr);
+
+    auto body = header->takeBody();
+
+    const IOTVP_Identification  *identification= dynamic_cast<const IOTVP_Identification *>(body.get());
+    Q_ASSERT(identification != nullptr);
+
+    this->setId(identification->id());
+    this->setDescription(identification->description());
+    this->removeAllSubChannel();
+
+    for (uint8_t i = 0; i < identification->numberReadChannel(); i++)
+        this->addReadSubChannel(identification->readChannel().at(i));
+
+    for (uint8_t i = 0; i < identification->numberWriteChannel(); i++)
+        this->addWriteSubChannel(identification->writeChannel().at(i));
+
+    _timerPing.start(TIMER_PING);
+    _reReadTimer.start();
+}
+
+void IOTV_Host::responceState(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_ASSERT(header != nullptr);
+
+    auto body = header->takeBody();
+
+    const IOTVP_State  *ptrState = dynamic_cast<const IOTVP_State *>(body.get());
+    Q_ASSERT(ptrState != nullptr);
+
+    this->setState(static_cast<Base_Host::STATE>(ptrState->state()));
+}
+
+void IOTV_Host::responceRead(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_ASSERT(header != nullptr);
+
+    auto body = header->takeBody();
+
+    const IOTVP_READ_WRITE  *read = dynamic_cast<const IOTVP_READ_WRITE *>(body.get());
+    Q_ASSERT(read != nullptr);
+
+    this->setReadChannelData(read->channelNumber(), read->data());
+
+    if(_logFile.isEmpty())
+        return;
+
+    Raw raw(this->getReadChannelType(read->channelNumber()), read->data());
+    Log::write("R:"
+               + QString::number(read->channelNumber())
+               + "="
+               + raw.strData().first,
+               Log::Write_Flag::FILE, _logFile);
+}
+
+void IOTV_Host::responceWrite(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_ASSERT(header != nullptr);
+    //Нет никакой реакции на ответ о записи
+
+}
+
+void IOTV_Host::responcePingPoing(std::unique_ptr<IOTVP_Header> header)
+{
+    Q_ASSERT(header != nullptr);
+
+    _timerPong.start(TIMER_PONG);
+    _timerPing.start(TIMER_PING);
+}
+
 bool IOTV_Host::isOnline() const
 {
     return _state_flags.testFlag(Flag::DeviceOnline);
@@ -59,39 +163,76 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data)
 
 void IOTV_Host::dataResived(QByteArray data)
 {
-    int dataSize = data.size();
+    if (static_cast<uint64_t>(data.size()) < _expectedDataSize)
+        return;
 
-    IOTV_SH::RESPONSE_PKG *pkg;
-    //!!! переделать логику с trimBufferFromBegin, возможно удалить его вовсе
-    while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
+    while(data.size() > 0)
     {
-        if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
-                ((pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR) && (data.size() == 0)))
+        IOTVP_Creator creator(data);
+        creator.createPkgs();
+
+        // Ошибка данных
+        if (creator.error())
         {
-            delete pkg;
-            return;
+            _expectedDataSize = 0;
+            _conn_type->clearDataBuffer();
+            break;
+        }
+        // Пакет данных не полный
+        if (creator.expectedDataSize() > 0)
+        {
+            _expectedDataSize = creator.expectedDataSize();
+            break;
         }
 
-        this->_conn_type->trimBufferFromBegin(dataSize - data.size());
+        // Обрезаем данные
+        data = data.mid(creator.cutDataSize()); // !!! sliced
+        _conn_type->setDataBuffer(data);
 
-        if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
-            response_WAY_recived(pkg);
-        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
-            response_PONG_recived(pkg);
-        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
-            response_READ_recived(pkg);
-        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
-            response_WRITE_recived(pkg);
-        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
-        {
-            this->_conn_type->trimBufferFromBegin(1);
-            data = data.mid(1);
-        }
-        else
-            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
-
-        delete pkg;
+        auto header = creator.takeHeader();
+        if (header->type() == IOTVP_Header::TYPE::REQUEST)
+            responceRequest(std::move(header));
+        else if (header->type() == IOTVP_Header::TYPE::RESPONSE)
+            responceResponce(std::move(header));
     }
+
+
+
+
+
+//    int dataSize = data.size();
+
+//    IOTV_SH::RESPONSE_PKG *pkg;
+//    //!!! переделать логику с trimBufferFromBegin, возможно удалить его вовсе
+//    while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
+//    {
+//        if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
+//                ((pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR) && (data.size() == 0)))
+//        {
+//            delete pkg;
+//            return;
+//        }
+
+//        this->_conn_type->clearDataBuffer(dataSize - data.size());
+
+//        if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
+//            response_WAY_recived(pkg);
+//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
+//            response_PONG_recived(pkg);
+//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
+//            response_READ_recived(pkg);
+//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
+//            response_WRITE_recived(pkg);
+//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
+//        {
+//            this->_conn_type->clearDataBuffer(1);
+//            data = data.mid(1);
+//        }
+//        else
+//            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
+
+//        delete pkg;
+//    }
 }
 
 QString IOTV_Host::getName() const
@@ -156,93 +297,93 @@ bool IOTV_Host::runInNewThread()
     return _thread.isRunning();
 }
 
-void IOTV_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
-{
-    if (pkg == nullptr)
-        return;
+//void IOTV_Host::response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+//{
+//    if (pkg == nullptr)
+//        return;
 
-    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WAY)
-    {
-        delete pkg;
-        return;
-    }
+//    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WAY)
+//    {
+//        delete pkg;
+//        return;
+//    }
 
-    const IOTV_SH::RESPONSE_WAY *wayPkg = static_cast<const IOTV_SH::RESPONSE_WAY*>(pkg);
+//    const IOTV_SH::RESPONSE_WAY *wayPkg = static_cast<const IOTV_SH::RESPONSE_WAY*>(pkg);
 
-    this->setId(wayPkg->id);
-    this->setDescription(wayPkg->description);
+//    this->setId(wayPkg->id);
+//    this->setDescription(wayPkg->description);
 
-    this->removeAllSubChannel();
+//    this->removeAllSubChannel();
 
-    for (uint8_t i = 0; i < wayPkg->readChannel.size(); i++)
-        this->addReadSubChannel({wayPkg->readChannel.at(i)});
+//    for (uint8_t i = 0; i < wayPkg->readChannel.size(); i++)
+//        this->addReadSubChannel({wayPkg->readChannel.at(i)});
 
-    for (uint8_t i = 0; i < wayPkg->writeChannel.size(); i++)
-        this->addWriteSubChannel({wayPkg->writeChannel.at(i)});
+//    for (uint8_t i = 0; i < wayPkg->writeChannel.size(); i++)
+//        this->addWriteSubChannel({wayPkg->writeChannel.at(i)});
 
-    _timerPing.start(TIMER_PING);
-    _reReadTimer.start();
-}
+//    _timerPing.start(TIMER_PING);
+//    _reReadTimer.start();
+//}
 
-void IOTV_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
-{
-    if (pkg == nullptr)
-        return;
+//void IOTV_Host::response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+//{
+//    if (pkg == nullptr)
+//        return;
 
-    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_READ)
-    {
-        delete pkg;
-        return;
-    }
+//    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_READ)
+//    {
+//        delete pkg;
+//        return;
+//    }
 
-    const IOTV_SH::RESPONSE_READ *readPkg = static_cast<const IOTV_SH::RESPONSE_READ *>(pkg);
+//    const IOTV_SH::RESPONSE_READ *readPkg = static_cast<const IOTV_SH::RESPONSE_READ *>(pkg);
 
-    this->setReadChannelData(readPkg->chanelNumber, readPkg->data);
+//    this->setReadChannelData(readPkg->chanelNumber, readPkg->data);
 
-    if(_logFile.isEmpty())
-        return;
+//    if(_logFile.isEmpty())
+//        return;
 
-    Raw raw(this->getReadChannelType(readPkg->chanelNumber), readPkg->data);
-    Log::write("R:"
-               + QString::number(readPkg->chanelNumber)
-               + "="
-               + raw.strData().first,
-               Log::Write_Flag::FILE, _logFile);
-}
+//    Raw raw(this->getReadChannelType(readPkg->chanelNumber), readPkg->data);
+//    Log::write("R:"
+//               + QString::number(readPkg->chanelNumber)
+//               + "="
+//               + raw.strData().first,
+//               Log::Write_Flag::FILE, _logFile);
+//}
 
-void IOTV_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
-{
-    if (pkg == nullptr)
-        return;
+//void IOTV_Host::response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+//{
+//    if (pkg == nullptr)
+//        return;
 
-    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WRITE)
-    {
-        delete pkg;
-        return;
-    }
-    //Нет никакой реакции на ответ о записи
-    Q_UNUSED(pkg)
-}
+//    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_WRITE)
+//    {
+//        delete pkg;
+//        return;
+//    }
+//    //Нет никакой реакции на ответ о записи
+//    Q_UNUSED(pkg)
+//}
 
-void IOTV_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
-{
-    if (pkg == nullptr)
-        return;
+//void IOTV_Host::response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg)
+//{
+//    if (pkg == nullptr)
+//        return;
 
-    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_PONG)
-    {
-        delete pkg;
-        return;
-    }
+//    if (pkg->type != IOTV_SH::Response_Type::RESPONSE_PONG)
+//    {
+//        delete pkg;
+//        return;
+//    }
 
-    const IOTV_SH::RESPONSE_PONG *pongPkg = static_cast<const IOTV_SH::RESPONSE_PONG *>(pkg);
+//    const IOTV_SH::RESPONSE_PONG *pongPkg = static_cast<const IOTV_SH::RESPONSE_PONG *>(pkg);
 
-    if (pongPkg->state)
-    {
-        _timerPong.start(TIMER_PONG);
-        _timerPing.start(TIMER_PING);
-    }
-}
+//    if (pongPkg->state)
+//    {
+//        _timerPong.start(TIMER_PONG);
+//        _timerPing.start(TIMER_PING);
+//    }
+//}
 
 const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 {
@@ -265,7 +406,7 @@ void IOTV_Host::slotDisconnected()
     _timerPong.stop();
     _reReadTimer.stop();
 
-    _conn_type->clearBufer();
+    _conn_type->clearDataBuffer();
 }
 
 void IOTV_Host::slotReReadTimeOut()

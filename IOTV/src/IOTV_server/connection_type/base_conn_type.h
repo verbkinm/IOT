@@ -34,8 +34,8 @@ public:
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 
-    void clearBufer();
-    void trimBufferFromBegin(u_int8_t size);
+    void clearDataBuffer();
+    void setDataBuffer(QByteArray &data);
 
     static QString ConnTypeToString(Conn_type conn_type);
 

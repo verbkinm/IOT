@@ -14,7 +14,8 @@ SOURCES +=  tst_iotvp_state_test.cpp \
             ../../lib/Protocols/iotvp_creator.cpp \
             ../../lib/Protocols/iotvp_read_write.cpp \
             ../../lib/Protocols/iotvp_header.cpp \
-#            ../../lib/raw/raw.cpp
+            ../../lib/Protocols/iotvp_identification.cpp \
+            ../../lib/raw/raw.cpp
 
 #HEADERS +=  ../../lib/Protocols/iotvp_state.h \
 #            ../../lib/Protocols/iotvp_abstractbody.h \

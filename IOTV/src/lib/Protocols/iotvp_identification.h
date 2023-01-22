@@ -17,6 +17,7 @@ public:
 
     const QString &description() const;
 
+    //!Установка ID
     void setId(uint16_t newId);
     void setDescription(const QString &newDescription);
 

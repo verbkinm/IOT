@@ -10,6 +10,10 @@ CONFIG -= app_bundle
 
 SOURCES += \
         Protocols/IOTV_SH.cpp \
+        Protocols/header.c \
+        Protocols/identification.c \
+        Protocols/read_write.c \
+        Protocols/state.c \
         iot_server.cpp \
         main.cpp
 
@@ -20,4 +24,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     Protocols/IOTV_SH.h \
+    Protocols/header.h \
+    Protocols/identification.h \
+    Protocols/read_write.h \
+    Protocols/state.h \
     iot_server.h

@@ -42,10 +42,20 @@ private:
 
     void setOnline(bool state);
 
-    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+    void responceRequest(std::unique_ptr<IOTVP_Header> header);
+    void responceResponce(std::unique_ptr<IOTVP_Header> header);
+
+    void responceIdentification(std::unique_ptr<IOTVP_Header> header);
+    void responceState(std::unique_ptr<IOTVP_Header> header);
+    void responceRead(std::unique_ptr<IOTVP_Header> header);
+    void responceWrite(std::unique_ptr<IOTVP_Header> header);
+    void responcePingPoing(std::unique_ptr<IOTVP_Header> header);
+
+//!!!
+//    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+//    void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+//    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+//    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
 
     static constexpr uint16_t TIMER_PING = 10000;
     static constexpr uint16_t TIMER_PONG = 15000;

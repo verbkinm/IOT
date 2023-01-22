@@ -1,11 +1,18 @@
 #pragma once
 
+#include "iotvp_creator.h"
 #include "channel.h"
 #include "IOTV_SH.h"
 
 class Base_Host : public QObject
 {
 public:
+    enum class STATE : uint8_t
+    {
+        OFFLINE = 0,
+        ONLINE
+    };
+
     Base_Host(uint8_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
 
@@ -22,7 +29,11 @@ public:
 
     QByteArray getReadChannelData(uint8_t channelNumber) const;
 
+    STATE state() const;
+
 protected:
+    uint64_t _expectedDataSize;
+
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
 
@@ -41,11 +52,15 @@ protected:
 
     virtual bool isOnline() const = 0;
 
+    void setState(STATE state);
+
 private:
     uint8_t _id;
     QString _description;
 
     Channel _readChannel;
     Channel _writeChannel;
+
+    STATE _state;
 };
 
