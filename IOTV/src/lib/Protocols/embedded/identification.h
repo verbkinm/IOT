@@ -16,18 +16,18 @@ struct Identification
         Identification_FLAGS_ERROR = 0xFF
     } flags;
 
-    uint16_t id;
-    uint8_t nameSize;
-    uint16_t descriptionSize;
+    const uint16_t id;
+    const uint8_t nameSize;
+    const uint16_t descriptionSize;
 
-    uint8_t numberWriteChannel;
-    uint8_t numberReadChannel;
+    const uint8_t numberWriteChannel;
+    const uint8_t numberReadChannel;
 
-    char *name;
-    char *description;
+    const char *name;
+    const char *description;
 
-    uint8_t *writeChannelType;
-    uint8_t *readChannelType;
+    const uint8_t *writeChannelType;
+    const uint8_t *readChannelType;
 };
 
 uint64_t identificationCheckSum(const struct Identification *);

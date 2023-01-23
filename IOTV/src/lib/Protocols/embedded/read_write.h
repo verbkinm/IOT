@@ -13,15 +13,15 @@ struct Read_Write
     {
         ReadWrite_FLAGS_NONE = 0,
         ReadWrite_FLAGS_ERROR = 0xFF
-    } flags;
+    } const flags;
 
-    uint8_t nameSize;
-    uint8_t channelNumber;
+    const uint8_t nameSize;
+    const uint8_t channelNumber;
 
-    uint64_t dataSize;
+    const uint64_t dataSize;
 
-    char *name;
-    uint8_t *data;
+    const char *name;
+    const uint8_t *data;
 };
 
 uint64_t readWriteCheckSum(const struct Read_Write *);

@@ -4,16 +4,32 @@
 
 #define READ_CHANNEL_LENGTH 3
 #define WRITE_CHANNEL_LENGTH 3
-class IOTV_Server
+
+enum DATA_TYPE
 {
-public:
-    IOTV_Server();
+    DATA_TYPE_INT_8,
+    DATA_TYPE_INT_16,
+    DATA_TYPE_INT_32,
+    DATA_TYPE_INT_64,
 
-    const uint8_t _id;
-    const char *_description;
+    DATA_TYPE_FLOAT_32,
+    DATA_TYPE_DOUBLE_64, // на МК double 32-битный может быть
 
-    bool _readChannel[READ_CHANNEL_LENGTH];
-    Protocol_class::DATA_TYPE _readChannelType[READ_CHANNEL_LENGTH];
+    DATA_TYPE_BOOL,
+    DATA_TYPE_STRING,
 
-    Protocol_class::DATA_TYPE _writeChannelType[WRITE_CHANNEL_LENGTH];
+    DATA_TYPE_RAW,
+    DATA_TYPE_NONE
+};
+
+struct IOTV_Server
+{
+    const uint8_t id;
+    const char *name;
+    const char *description;
+
+    bool readChannel[READ_CHANNEL_LENGTH];
+    enum DATA_TYPE readChannelType[READ_CHANNEL_LENGTH];
+
+    enum DATA_TYPE writeChannelType[WRITE_CHANNEL_LENGTH];
 };

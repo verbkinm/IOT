@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include "creatorpkgs.h"
 
 static const uint64_t IDENTIFICATION_SIZE = 16;
 
@@ -12,7 +14,7 @@ struct Identification
     {
         Identification_FLAGS_NONE = 0,
         Identification_FLAGS_ERROR = 0xFF
-    } const flags;
+    } flags;
 
     const uint16_t id;
     const uint8_t nameSize;
@@ -21,13 +23,16 @@ struct Identification
     const uint8_t numberWriteChannel;
     const uint8_t numberReadChannel;
 
-    //!!!
-    char* const name;
-    char* const description;
+    const char *name;
+    const char *description;
+
+    const uint8_t *writeChannelType;
+    const uint8_t *readChannelType;
 };
 
 uint64_t identificationCheckSum(const struct Identification *);
 uint64_t identificationSize(const struct Identification *);
+uint64_t identificationToData(struct Identification *body, char *outData, uint64_t outDataSize);
 
 #endif // IDENTIFICATION_H
 

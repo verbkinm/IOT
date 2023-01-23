@@ -1,85 +1,118 @@
 #include "IOTV_SH.h"
-#include "iot_server.h"
 
-uint16_t Protocol_class::response_WAY(const IOTV_Server &iotHost, char *outData)
+uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot)
 {
-    uint16_t descriptionLength = strlen(iotHost._description);
-    uint8_t channelRead = READ_CHANNEL_LENGTH;
-    uint8_t channelWrite = WRITE_CHANNEL_LENGTH;
-    uint16_t dataSize = 5 + descriptionLength + channelRead + channelWrite;
-
-    outData[0] = RESPONSE_WAY_BYTE;
-    outData[1] = iotHost._id;
-    outData[2] = strlen(iotHost._description) << 8;
-    outData[3] = strlen(iotHost._description);
-
-    outData[4] = (channelRead << 4) | channelWrite;
-
-    memcpy(&outData[5], iotHost._description, descriptionLength);
-
-    memcpy(&outData[5 + descriptionLength], iotHost._readChannelType, channelRead);
-    memcpy(&outData[5 + descriptionLength + channelRead], iotHost._writeChannelType, channelWrite);
-
-    return dataSize;
-}
-
-uint16_t Protocol_class::response_READ(const IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
-{
-    uint16_t realDataSize = ptrInData - inData;
-
-    if (realDataSize < 1)
+    if (outData == NULL || iot == NULL)
         return 0;
 
-    uint8_t channelNumber = inData[0] >> 4;
+    struct Identification ident = {
+        .flags = Identification::Identification_FLAGS_NONE,
+        .id = iot->id,
+        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .descriptionSize = static_cast<uint16_t>(strlen(iot->description)),
+        .numberWriteChannel = WRITE_CHANNEL_LENGTH,
+        .numberReadChannel = READ_CHANNEL_LENGTH,
+        .name = iot->name,
+        .description = iot->description,
+        .writeChannelType = (const uint8_t *)iot->writeChannelType,
+        .readChannelType = (const uint8_t *)iot->readChannelType
+    };
 
-    uint16_t dataSize = 3,
-            valueSize = 0;
-    char *arr = 0;
+    struct Header header = {
+        .type = Header::HEADER_TYPE_RESPONSE,
+        .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = HEADER_SIZE + identificationSize(&ident),
+        .identification = &ident,
+        .readWrite = NULL,
+        .state = NULL
+    };
 
-    if ( channelNumber <= (READ_CHANNEL_LENGTH - 1) )
-    {
-        auto value = iotHost._readChannel[channelNumber];
-        arr = reinterpret_cast<char*>(&value);
-        valueSize = sizeof(value);
-        dataSize += valueSize;
-    }
-
-    outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_READ_BYTE;
-    outData[1] = valueSize << 8;
-    outData[2] = valueSize;
-
-    memcpy(&outData[3], arr, valueSize);
-
-    return dataSize;
+    return headerToData(&header, outData, dataSize);
 }
 
-int Protocol_class::response_WRITE(IOTV_Server &iotHost, const char *inData, const char *ptrInData, char *outData)
+uint64_t responsePingData(char* outData, uint64_t dataSize)
 {
-    uint16_t realDataSize = ptrInData - inData;
+    if (outData == NULL)
+        return 0;
 
-    if (realDataSize < 3)
-        return -1; //не запрос пришел полный
+    struct Header header = {
+        .type = Header::HEADER_TYPE_RESPONSE,
+        .assignment = Header::HEADER_ASSIGNMENT_PING_PONG,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = 0,
+        .identification = NULL,
+        .readWrite = NULL,
+        .state = NULL
+    };
 
-    uint8_t channelNumber = inData[0] >> 4;
-
-    uint16_t dataWriteSize = (uint16_t(inData[1]) << 8) | inData[2];
-
-    if (realDataSize < (3 + dataWriteSize))
-        return -1; //не запрос пришел полный
-
-    char writeData[dataWriteSize];
-    memcpy(writeData, &inData[3], dataWriteSize);
-
-    if ((dataWriteSize != 0) && (channelNumber <= (WRITE_CHANNEL_LENGTH - 1)))
-        memcpy(&iotHost._readChannel[channelNumber], writeData, sizeof(iotHost._readChannel[channelNumber]));
-
-    outData[0] = (channelNumber << 4) | Protocol_class::RESPONSE_WRITE_BYTE;
-
-    return dataWriteSize;
+    return headerToData(&header, outData, dataSize);
 }
 
-uint16_t Protocol_class::response_Pong(char *outData)
+uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const Header *head)
 {
-    outData[0] = Protocol_class::RESPONSE_PONG_BYTE;
-    return 1;
+    if (outData == NULL || iot == NULL || head == NULL)
+        return 0;
+
+    if (head->readWrite == NULL)
+        return 0;
+
+    struct Read_Write readWrite = {
+        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .channelNumber = head->readWrite->channelNumber,
+        .dataSize = sizeof(iot->readChannel[0]),
+        .name = iot->name,
+        .data = (const uint8_t *)&iot->readChannel[head->readWrite->channelNumber]
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_RESPONSE,
+        .assignment = Header::HEADER_ASSIGNMENT_READ,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = HEADER_SIZE + readWriteSize(&readWrite),
+        .identification = NULL,
+        .readWrite = &readWrite,
+        .state = NULL
+    };
+
+    return headerToData(&header, outData, dataSize);
+}
+
+uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server *iot, const Header *head)
+{
+    if (outData == NULL || iot == NULL || head == NULL)
+        return 0;
+
+    if (head->readWrite == NULL)
+        return 0;
+
+    struct Read_Write readWrite = {
+        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .channelNumber = head->readWrite->channelNumber,
+        .dataSize = 0,
+        .name = iot->name,
+        .data = NULL
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_RESPONSE,
+        .assignment = Header::HEADER_ASSIGNMENT_WRITE,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = HEADER_SIZE + readWriteSize(&readWrite),
+        .identification = NULL,
+        .readWrite = &readWrite,
+        .state = NULL
+    };
+
+    //!!! Для каждого устройства своё настраивать?
+    iot->readChannel[header.readWrite->channelNumber] = *head->readWrite->data;
+
+
+    return headerToData(&header, outData, dataSize);
 }

@@ -1,6 +1,10 @@
 #include <QtTest>
 
+#include <QTcpServer>
+#include <QTcpSocket>
+
 #include "creatorpkgs.h"
+#include "iot_server.h"
 
 class IOTVP_Header_Embedded_Test : public QObject
 {
@@ -10,9 +14,24 @@ public:
     IOTVP_Header_Embedded_Test();
     ~IOTVP_Header_Embedded_Test();
 
-    bool error = false;
-    uint64_t expectedSize = 0;
+    QTcpServer *server = nullptr;
+    QTcpSocket *socket = nullptr;
+
+    IOTV_Server iot = {
+        .id = 1,
+        .name = "Demo name",
+        .description = "Switch",
+        .readChannel = {false, false, true},
+        .readChannelType = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL},
+        .writeChannelType = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL}
+    };
+
+    char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
+    uint64_t realBufSize = 0;
+
+    uint64_t expextedDataSize = HEADER_SIZE;
     uint64_t cutDataSize = 0;
+    bool error = false; dfghgjhftdrf
 
 private slots:
     void test_headerOk();

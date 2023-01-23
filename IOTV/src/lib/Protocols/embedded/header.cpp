@@ -15,7 +15,7 @@ uint64_t headerDataSize(const struct Header *header)
         return 0;
 
     if (header->identification != NULL)
-        return HEADER_SIZE + IDENTIFICATION_SIZE;
+        return HEADER_SIZE + identificationSize(header->identification);
     if (header->readWrite != NULL)
         return HEADER_SIZE + readWriteSize(header->readWrite);
     if (header->state != NULL)

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "creatorpkgs.h"
 
 static const uint64_t READ_WRITE_SIZE = 15;
 
@@ -19,13 +20,12 @@ struct Read_Write
 
     const uint64_t dataSize;
 
-    //!!!
-    char* const name;
-    uint8_t* const data;
+    const char *name;
+    const uint8_t *data;
 };
 
 uint64_t readWriteCheckSum(const struct Read_Write *);
 uint64_t readWriteSize(const struct Read_Write *);
-
+uint64_t readWriteToData(struct Read_Write *body, char *outData, uint64_t outDataSize);
 
 #endif // READ_WRITE_H

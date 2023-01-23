@@ -15,7 +15,7 @@ uint64_t identificationSize(const struct Identification *body)
     if (body == NULL)
         return 0;
 
-    return IDENTIFICATION_SIZE ;
+    return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
 }
 
 uint64_t identificationToData(struct Identification *body, char *outData, uint64_t outDataSize)
@@ -34,9 +34,6 @@ uint64_t identificationToData(struct Identification *body, char *outData, uint64
     outData[5] = body->numberWriteChannel;
     outData[6] = body->numberReadChannel;
     outData[7] = body->flags;
-
-    if (outDataSize < identificationSize(body) + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel)
-        return 0;
 
     uint64_t chSum =  body->id + body->nameSize + body->descriptionSize
             + body->numberWriteChannel + body->numberReadChannel + body->flags;

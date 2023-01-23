@@ -9,6 +9,7 @@
 #include "identification.h"
 #include "read_write.h"
 #include "state.h"
+#include "creatorpkgs.h"
 
 static const uint64_t HEADER_SIZE = 20;
 
@@ -19,7 +20,7 @@ struct Header
         HEADER_TYPE_NONE = 0,
         HEADER_TYPE_REQUEST,
         HEADER_TYPE_RESPONSE
-    } const type;
+    } type;
 
     enum Header_ASSIGNMENT
     {
@@ -29,28 +30,24 @@ struct Header
         HEADER_ASSIGNMENT_READ,
         HEADER_ASSIGNMENT_WRITE,
         HEADER_ASSIGNMENT_PING_PONG
-    } const assignment;
+    } assignment;
 
     enum Header_FLAGS
     {
         HEADER_FLAGS_NONE = 0,
         HEADER_FLAGS_ERROR = 0xFF
-    } const flags;
+    } flags;
 
-    const uint8_t version;
-    const uint64_t dataSize;
+    uint8_t version;
+    uint64_t dataSize;
 
-    const struct Identification *identification;
-    const struct Read_Write *readWrite;
-    const struct States *state;
+    struct Identification *identification;
+    struct Read_Write *readWrite;
+    struct State *state;
 };
 
 uint64_t headerDataSize(const struct Header *header);
 uint64_t headercheckSum(const struct Header *header);
-struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *ok,
-                          uint64_t *expectedDataSize, uint64_t *cutDataSize);
-
-bool isLittleEndian();
-void dataReverse(void* data, uint64_t size);
+uint64_t headerToData(struct Header *header, char *outData, uint64_t outDataSize);
 
 #endif // HEADER_H

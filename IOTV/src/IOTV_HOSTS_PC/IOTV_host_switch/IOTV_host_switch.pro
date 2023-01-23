@@ -10,11 +10,11 @@ CONFIG -= app_bundle
 
 SOURCES += \
         Protocols/IOTV_SH.cpp \
-        Protocols/header.c \
-        Protocols/identification.c \
-        Protocols/read_write.c \
-        Protocols/state.c \
-        iot_server.cpp \
+        Protocols/embedded/creatorpkgs.cpp \
+        Protocols/embedded/header.cpp \
+        Protocols/embedded/identification.cpp \
+        Protocols/embedded/read_write.cpp \
+        Protocols/embedded/state.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -24,8 +24,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     Protocols/IOTV_SH.h \
-    Protocols/header.h \
-    Protocols/identification.h \
-    Protocols/read_write.h \
-    Protocols/state.h \
+    Protocols/embedded/creatorpkgs.h \
+    Protocols/embedded/header.h \
+    Protocols/embedded/identification.h \
+    Protocols/embedded/read_write.h \
+    Protocols/embedded/state.h \
     iot_server.h
