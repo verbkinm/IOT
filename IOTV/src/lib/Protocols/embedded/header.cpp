@@ -15,16 +15,16 @@ uint64_t headerDataSize(const struct Header *header)
         return 0;
 
     if (header->identification != NULL)
-        return HEADER_SIZE + identificationSize(header->identification);
+        return identificationSize(header->identification);
     if (header->readWrite != NULL)
-        return HEADER_SIZE + readWriteSize(header->readWrite);
+        return readWriteSize(header->readWrite);
     if (header->state != NULL)
-        return HEADER_SIZE + stateSize(header->state);
+        return stateSize(header->state);
 
     return 0;
 }
 
-uint64_t headerSize(struct Header *header)
+uint64_t headerSize(const struct Header *header)
 {
     if (header == NULL)
         return 0;
@@ -32,7 +32,7 @@ uint64_t headerSize(struct Header *header)
     return HEADER_SIZE + headerDataSize(header);
 }
 
-uint64_t headerToData(struct Header *header, char *outData, uint64_t outDataSize)
+uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize)
 {
     if ( (header == NULL) || (outData == NULL) )
         return 0;
@@ -65,4 +65,19 @@ uint64_t headerToData(struct Header *header, char *outData, uint64_t outDataSize
         result += stateToData(header->state, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
 
     return result;
+}
+
+void clearHeader(struct Header *header)
+{
+    if (header == NULL)
+        return;
+
+    if (header->identification != NULL)
+        clearIdentification((Identification *)header->identification);
+    if (header->readWrite != NULL)
+        clearReadWrite((Read_Write *)header->readWrite);
+    if (header->state != NULL)
+        clearState((State *)header->state);
+
+    free(header);
 }

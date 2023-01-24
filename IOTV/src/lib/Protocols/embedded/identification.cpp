@@ -18,7 +18,7 @@ uint64_t identificationSize(const struct Identification *body)
     return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
 }
 
-uint64_t identificationToData(struct Identification *body, char *outData, uint64_t outDataSize)
+uint64_t identificationToData(const struct Identification *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -49,4 +49,21 @@ uint64_t identificationToData(struct Identification *body, char *outData, uint64
     memcpy(&outData[IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel], body->readChannelType, body->numberReadChannel);
 
     return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
+}
+
+void clearIdentification(struct Identification *ident)
+{
+    if (ident == NULL)
+        return;
+
+    if (ident->name != NULL)
+        free((void *)ident->name);
+    if (ident->description != NULL)
+        free((void *)ident->description);
+    if (ident->writeChannelType != NULL)
+        free((void *)ident->writeChannelType);
+    if (ident->readChannelType != NULL)
+        free((void *)ident->readChannelType);
+
+    free(ident);
 }

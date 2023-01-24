@@ -13,23 +13,24 @@ struct State
     {
         STATE_FLAGS_NONE = 0,
         STATE_FLAGS_ERROR = 0xFF
-    } flags;
+    } const flags;
 
     enum State_STATE
     {
         State_STATE_OFFLINE = 0,
         State_STATE_ONLINE
-    } state;
+    } const state;
 
-    uint8_t nameSize;
-    uint64_t dataSize;
+    const uint8_t nameSize;
+    const uint64_t dataSize;
 
-    char *name;
-    uint8_t *data;
+    const char *name;
+    const uint8_t *data;
 };
 
 uint64_t stateCheckSum(const struct State *);
 uint64_t stateSize(const struct State *);
-uint64_t stateToData(struct State *body, char *outData, uint64_t outDataSize);
+uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSize);
+void clearState(struct State *state);
 
 #endif // STATE_H

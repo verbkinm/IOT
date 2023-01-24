@@ -26,6 +26,7 @@ struct Read_Write
 
 uint64_t readWriteCheckSum(const struct Read_Write *);
 uint64_t readWriteSize(const struct Read_Write *);
-uint64_t readWriteToData(struct Read_Write *body, char *outData, uint64_t outDataSize);
+uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t outDataSize);
+void clearReadWrite(struct Read_Write *readWrite);
 
 #endif // READ_WRITE_H

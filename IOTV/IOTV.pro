@@ -9,3 +9,4 @@ SUBDIRS += \
 
 DISTFILES += \
     IOTV_Client.supp
+

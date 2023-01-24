@@ -17,7 +17,7 @@ uint64_t stateSize(const struct State *body)
     return STATE_SIZE + body->nameSize + body->dataSize;
 }
 
-uint64_t stateToData(struct State *body, char *outData, uint64_t outDataSize)
+uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -46,4 +46,17 @@ uint64_t stateToData(struct State *body, char *outData, uint64_t outDataSize)
     memcpy(&outData[STATE_SIZE + body->nameSize], body->data, body->dataSize);
 
     return STATE_SIZE + body->nameSize + body->dataSize;
+}
+
+void clearState(struct State *state)
+{
+    if (state == NULL)
+        return;
+
+    if (state->name != NULL)
+        free((void *)state->name);
+    if (state->data != NULL)
+        free((void *)state->data);
+
+    free(state);
 }

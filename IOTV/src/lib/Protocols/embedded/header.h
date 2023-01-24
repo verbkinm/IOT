@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "identification.h"
-#include "read_write.h"
-#include "state.h"
 #include "creatorpkgs.h"
 
 static const uint64_t HEADER_SIZE = 20;
@@ -20,7 +17,7 @@ struct Header
         HEADER_TYPE_NONE = 0,
         HEADER_TYPE_REQUEST,
         HEADER_TYPE_RESPONSE
-    } type;
+    } const type;
 
     enum Header_ASSIGNMENT
     {
@@ -30,24 +27,26 @@ struct Header
         HEADER_ASSIGNMENT_READ,
         HEADER_ASSIGNMENT_WRITE,
         HEADER_ASSIGNMENT_PING_PONG
-    } assignment;
+    } const assignment;
 
     enum Header_FLAGS
     {
         HEADER_FLAGS_NONE = 0,
         HEADER_FLAGS_ERROR = 0xFF
-    } flags;
+    } const flags;
 
-    uint8_t version;
-    uint64_t dataSize;
+    const uint8_t version;
+    const uint64_t dataSize;
 
-    struct Identification *identification;
-    struct Read_Write *readWrite;
-    struct State *state;
+    const struct Identification *identification;
+    const struct Read_Write *readWrite;
+    const struct State *state;
 };
 
+uint64_t headerSize(const struct Header *header);
 uint64_t headerDataSize(const struct Header *header);
-uint64_t headercheckSum(const struct Header *header);
-uint64_t headerToData(struct Header *header, char *outData, uint64_t outDataSize);
+uint64_t headerCheckSum(const struct Header *header);
+uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize);
+void clearHeader(struct Header *header);
 
 #endif // HEADER_H

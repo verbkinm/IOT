@@ -51,7 +51,7 @@ uint64_t responsePingData(char* outData, uint64_t dataSize)
     return headerToData(&header, outData, dataSize);
 }
 
-uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const Header *head)
+uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const struct Header *head)
 {
     if (outData == NULL || iot == NULL || head == NULL)
         return 0;
@@ -82,7 +82,7 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
     return headerToData(&header, outData, dataSize);
 }
 
-uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server *iot, const Header *head)
+uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server *iot, const struct Header *head)
 {
     if (outData == NULL || iot == NULL || head == NULL)
         return 0;

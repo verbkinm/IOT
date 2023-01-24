@@ -17,7 +17,7 @@ uint64_t readWriteSize(const struct Read_Write *body)
     return READ_WRITE_SIZE + body->nameSize + body->dataSize;
 }
 
-uint64_t readWriteToData(struct Read_Write *body, char *outData, uint64_t outDataSize)
+uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -46,4 +46,17 @@ uint64_t readWriteToData(struct Read_Write *body, char *outData, uint64_t outDat
     memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
 
     return READ_WRITE_SIZE + body->nameSize + body->dataSize;
+}
+
+void clearReadWrite(struct Read_Write *readWrite)
+{
+    if (readWrite == NULL)
+        return;
+
+    if (readWrite->name != NULL)
+        free((void *)readWrite->name);
+    if (readWrite->data != NULL)
+        free((void *)readWrite->data);
+
+    free(readWrite);
 }

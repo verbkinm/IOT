@@ -14,8 +14,8 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
         .numberReadChannel = READ_CHANNEL_LENGTH,
         .name = iot->name,
         .description = iot->description,
-        .writeChannelType = (const uint8_t *)iot->writeChannelType,
-        .readChannelType = (const uint8_t *)iot->readChannelType
+        .writeChannelType = (const uint8_t *)&iot->writeChannelType,
+        .readChannelType = (const uint8_t *)&iot->readChannelType
     };
 
     struct Header header = {
@@ -51,7 +51,7 @@ uint64_t responsePingData(char* outData, uint64_t dataSize)
     return headerToData(&header, outData, dataSize);
 }
 
-uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const Header *head)
+uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const struct Header *head)
 {
     if (outData == NULL || iot == NULL || head == NULL)
         return 0;
@@ -112,7 +112,6 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server 
 
     //!!! Для каждого устройства своё настраивать?
     iot->readChannel[header.readWrite->channelNumber] = *head->readWrite->data;
-
 
     return headerToData(&header, outData, dataSize);
 }
