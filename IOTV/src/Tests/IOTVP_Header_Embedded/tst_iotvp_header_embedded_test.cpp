@@ -299,7 +299,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentofocation()
         .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
         .flags = Header::HEADER_FLAGS_NONE,
         .version = 2,
-        .dataSize = HEADER_SIZE + identificationSize(&ident),
+        .dataSize = identificationSize(&ident),
         .identification = &ident,
         .readWrite = NULL,
         .state = NULL
