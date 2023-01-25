@@ -13,6 +13,17 @@ SOURCES +=  tst_iotvp_header_embedded_test.cpp \
             ../../lib/Protocols/embedded/read_write.cpp \
             ../../lib/Protocols/embedded/state.cpp \
             ../../lib/Protocols/embedded/IOTV_SH.cpp \
+\
+            ../../lib/Protocols/iotvp_creator.cpp\
+            ../../lib/Protocols/iotvp_header.cpp\
+            ../../lib/Protocols/iotvp_identification.cpp\
+            ../../lib/Protocols/iotvp_state.cpp\
+            ../../lib/Protocols/iotvp_read_write.cpp\
+            ../../lib/Protocols/iotvp_abstractreadwrite.cpp\
+            ../../lib/Protocols/iotvp_abstractbody.cpp\
+            ../../lib/Protocols/iotvp_abstract.cpp\
+
+
 
 HEADERS +=  ../../lib/Protocols/embedded/creatorpkgs.h \
             ../../lib/Protocols/embedded/header.h \
@@ -23,5 +34,7 @@ HEADERS +=  ../../lib/Protocols/embedded/creatorpkgs.h \
             ../../lib/Protocols/embedded/iotv_server.h \
 
 INCLUDEPATH +=  ../../lib/Protocols/embedded \
+                ../../lib/Protocols/ \
+                ../../lib/raw/
 
 

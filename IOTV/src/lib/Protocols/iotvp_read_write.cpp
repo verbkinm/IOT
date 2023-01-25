@@ -60,7 +60,14 @@ QByteArray IOTVP_READ_WRITE::toData() const
         std::memcpy(&result[7 + 8], name().toStdString().c_str(), nameSize());
 
     if (dataSize() > 0)
+    {
+//        auto rawData = data();
+//        if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+//            rawData = qToBigEndian(rawData);
         std::memcpy(&result[7 + 8 + nameSize()], data().toStdString().c_str(), dataSize());
+    }
+
+
 
     return result;
 }

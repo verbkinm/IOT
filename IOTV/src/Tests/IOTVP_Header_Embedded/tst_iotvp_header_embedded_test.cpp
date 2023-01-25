@@ -1,8 +1,12 @@
 #include <QtTest>
+#include <QtEndian>
+#include <QtCore>
 
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 #include "iotv_server.h"
+
+#include "iotvp_creator.h"
 
 class IOTVP_Header_Embedded_Test : public QObject
 {
@@ -41,6 +45,8 @@ private slots:
     void test_dataTransmitIdentification();
     void test_dataTransmitRead();
     void test_dataTransmitWrite();
+
+    void timeCompare();
 };
 
 IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
@@ -140,7 +146,7 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
     char outData[HEADER_SIZE];
     headerToData(header, outData, HEADER_SIZE);
 
-    for (int i = 0; i < HEADER_SIZE; ++i)
+    for (uint i = 0; i < HEADER_SIZE; ++i)
         QCOMPARE(outData[i], dataRaw[i]);
 }
 
@@ -446,6 +452,56 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
     QCOMPARE(realBufSize, 0);
     QCOMPARE(cutDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6 + 4); // осталось от test_dataRecivedWrite 45 = HEADER_SIZE + Wite_SIZE + nameSize + data (4)
     QCOMPARE(expextedDataSize, 0);
+}
+
+void IOTVP_Header_Embedded_Test::timeCompare()
+{
+    // Запрос записи
+    uint8_t dataRaw[] =  {
+        2,                                          // Версия протокола
+        Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+        Header::HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
+        Header::HEADER_FLAGS_NONE,                  // Флаги
+        0, 0, 0, 0, 0, 0, 0, 25,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
+        0, 0, 0, 0, 0, 0, 0, 32,                    // Контрольная сумма тела пакета    32
+        6,                                          // Длина имени устройства
+        1,                                          // Номер канала
+        0,                                          // Флаги
+        0, 0, 0, 4,                                 // Размер данных
+        0, 0, 0, 0, 0, 0, 0, 11,                    // Контрольная сумма
+        'D', 'e', 'v', 'i', 'c', 'e',               // Имя устройства
+        0, 0, 0, 123                                // Данные
+    };
+
+    auto start = std::chrono::system_clock::now();
+
+    realBufSize = 0;
+    error = false;
+    expextedDataSize = 0;
+    cutDataSize = 0;
+
+    for (int x = 0; x < 100'000; ++x)
+    {
+        // в transmitBuffer будет ответ на Write по окончанию цикла
+        for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6 + 4; ++i) // 6 - имя устройства, 4 - данные
+            dataRecived(dataRaw[i]);
+    }
+
+    qDebug() << "IOTVP Embedded protocol - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
+
+    QByteArray rawData(reinterpret_cast<char*>(dataRaw), HEADER_SIZE + READ_WRITE_SIZE + 6 + 4);
+
+    start = std::chrono::system_clock::now();
+
+    for (int x = 0; x < 100'000; ++x)
+    {
+        IOTVP_Creator creator(rawData);
+        creator.createPkgs();
+        auto header = creator.takeHeader();
+//        auto transmit = header->toData();
+    }
+
+    qDebug() << "IOTVP protocol - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
 }
 
 QTEST_APPLESS_MAIN(IOTVP_Header_Embedded_Test)
