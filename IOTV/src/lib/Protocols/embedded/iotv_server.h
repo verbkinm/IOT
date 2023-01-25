@@ -12,7 +12,7 @@ struct IOTV_Server
     const char *name;
     const char *description;
 
-    bool readChannel[READ_CHANNEL_LENGTH];
+    uint32_t readChannel[READ_CHANNEL_LENGTH];
     uint8_t readChannelType[READ_CHANNEL_LENGTH];
 
     uint8_t writeChannelType[WRITE_CHANNEL_LENGTH];

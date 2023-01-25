@@ -84,19 +84,22 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
 
 uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server *iot, const Header *head)
 {
-    if (outData == NULL || iot == NULL || head == NULL)
+    if (outData == NULL || iot == NULL || head == NULL || head->readWrite == NULL)
         return 0;
 
-    if (head->readWrite == NULL)
-        return 0;
+    //!!! Для каждого устройства своё настраивать?
+    memmove(&iot->readChannel[head->readWrite->channelNumber], head->readWrite->data, sizeof(iot->readChannel[0]));
+//    if (isLittleEndian())
+//        dataReverse(&iot->readChannel[head->readWrite->channelNumber], sizeof(iot->readChannel[0]));
+//    iot->readChannel[head->readWrite->channelNumber] = *head->readWrite->data;
 
     struct Read_Write readWrite = {
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = static_cast<uint8_t>(strlen(iot->name)),
         .channelNumber = head->readWrite->channelNumber,
-        .dataSize = 0,
+        .dataSize = sizeof(iot->readChannel[0]),
         .name = iot->name,
-        .data = NULL
+        .data = (const uint8_t *)&iot->readChannel[head->readWrite->channelNumber]
     };
 
     struct Header header = {
@@ -109,9 +112,6 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server 
         .readWrite = &readWrite,
         .state = NULL
     };
-
-    //!!! Для каждого устройства своё настраивать?
-    iot->readChannel[header.readWrite->channelNumber] = *head->readWrite->data;
 
     return headerToData(&header, outData, dataSize);
 }

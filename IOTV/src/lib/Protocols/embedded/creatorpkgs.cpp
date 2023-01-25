@@ -22,6 +22,8 @@ struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *error,
         else if (header->assignment == Header::HEADER_ASSIGNMENT_READ || header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
             header->readWrite = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
 
+        // Если cutDataSize > 0, то пакет body сформирован
+        // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
         if ( (*error == true) || (*cutDataSize != header->dataSize) )
         {
             *cutDataSize = 0;
@@ -29,15 +31,6 @@ struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *error,
             return header;
         }
 
-        // Если cutDataSize > 0, то пакет body сформирован
-        // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
-//        if ( (*cutDataSize > 0) && (*cutDataSize != header->dataSize) )
-//        {
-//                *error = true;
-//                *cutDataSize = 0;
-//                *expectedDataSize = 0;
-//                return header;
-//        }
         *cutDataSize += HEADER_SIZE;
     }
 
@@ -225,7 +218,7 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
     uint8_t devState = data[1];
     uint8_t flags = data[2];
 
-    uint64_t dataSize = 0;
+    uint32_t dataSize = 0;
     memcpy(&dataSize, &data[3], 4); // Размер данных пакета (документация)
     if (isLittleEndian())
         dataReverse(&dataSize, sizeof(dataSize));
@@ -295,7 +288,7 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     uint8_t channelNumber = data[1];
     uint8_t flags = data[2];
 
-    uint64_t dataSize = 0;
+    uint32_t dataSize = 0;
     memcpy(&dataSize, &data[3], 4); // Размер данных пакета (документация)
     if (isLittleEndian())
         dataReverse(&dataSize, sizeof(dataSize));
@@ -337,7 +330,11 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     if (nameSize > 0)
         memcpy((void *)readWrite.name, &data[READ_WRITE_SIZE], nameSize);
     if (dataSize > 0)
+    {
         memcpy((void *)readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
+        if (isLittleEndian())
+            dataReverse((void *)readWrite.data, dataSize);
+    }
 
     memmove(readWriteReslut, &readWrite, sizeof(struct Read_Write));
     *cutDataSize = readWriteSize(readWriteReslut);
