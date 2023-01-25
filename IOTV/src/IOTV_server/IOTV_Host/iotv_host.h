@@ -11,6 +11,7 @@
 #include "connection_type/file_conn_type.h"
 #include "base_host.h"
 #include "ConfigTypes.h"
+//#include "IOTV_SC.h"
 
 class IOTV_Host : public Base_Host
 {

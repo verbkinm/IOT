@@ -3,7 +3,7 @@
 #include "base_conn_type.h"
 #include <QUdpSocket>
 #include "log.h"
-#include "IOTV_SH.h"
+//#include "IOTV_SH.h"
 
 class Udp_conn_type : public Base_conn_type
 {

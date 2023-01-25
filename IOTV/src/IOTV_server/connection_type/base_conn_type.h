@@ -3,7 +3,7 @@
 #include <QTimer>
 
 #include "log.h"
-#include "IOTV_SH.h"
+//#include "IOTV_SH.h"
 
 class Base_conn_type : public QObject
 {

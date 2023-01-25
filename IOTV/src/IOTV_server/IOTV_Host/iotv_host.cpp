@@ -139,6 +139,7 @@ qint64 IOTV_Host::read(uint8_t channelNumber)
     if(!isOnline())
         return -1;
 
+    IOTVP_Creator creator();
     return  writeToRemoteHost(IOTV_SH::query_READ(channelNumber));
 }
 
