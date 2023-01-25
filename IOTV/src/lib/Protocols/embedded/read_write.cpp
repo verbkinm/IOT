@@ -29,10 +29,10 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
     outData[1] = body->channelNumber;
     outData[2] = body->flags;
 
-    if (outDataSize < readWriteSize(body) + body->nameSize + body->dataSize)
+    if (outDataSize < readWriteSize(body))
         return 0;
 
-    uint64_t dataSize =  body->dataSize;
+    uint32_t dataSize =  body->dataSize;
     if (isLittleEndian())
         dataReverse(&dataSize, sizeof(dataSize));
     memcpy(&outData[3], &dataSize, 4);
@@ -59,4 +59,5 @@ void clearReadWrite(struct Read_Write *readWrite)
         free((void *)readWrite->data);
 
     free(readWrite);
+    readWrite = NULL;
 }

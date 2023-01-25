@@ -66,4 +66,5 @@ void clearIdentification(struct Identification *ident)
         free((void *)ident->readChannelType);
 
     free(ident);
+    ident = NULL;
 }

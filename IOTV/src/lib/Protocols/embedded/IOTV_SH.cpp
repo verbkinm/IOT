@@ -23,7 +23,7 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
         .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
         .flags = Header::HEADER_FLAGS_NONE,
         .version = 2,
-        .dataSize = HEADER_SIZE + identificationSize(&ident),
+        .dataSize = identificationSize(&ident),
         .identification = &ident,
         .readWrite = NULL,
         .state = NULL
@@ -73,7 +73,7 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
         .assignment = Header::HEADER_ASSIGNMENT_READ,
         .flags = Header::HEADER_FLAGS_NONE,
         .version = 2,
-        .dataSize = HEADER_SIZE + readWriteSize(&readWrite),
+        .dataSize = readWriteSize(&readWrite),
         .identification = NULL,
         .readWrite = &readWrite,
         .state = NULL
@@ -104,7 +104,7 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server 
         .assignment = Header::HEADER_ASSIGNMENT_WRITE,
         .flags = Header::HEADER_FLAGS_NONE,
         .version = 2,
-        .dataSize = HEADER_SIZE + readWriteSize(&readWrite),
+        .dataSize = readWriteSize(&readWrite),
         .identification = NULL,
         .readWrite = &readWrite,
         .state = NULL

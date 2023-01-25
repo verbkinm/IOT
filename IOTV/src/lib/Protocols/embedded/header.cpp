@@ -80,4 +80,5 @@ void clearHeader(struct Header *header)
         clearState((State *)header->state);
 
     free(header);
+    header = NULL;
 }

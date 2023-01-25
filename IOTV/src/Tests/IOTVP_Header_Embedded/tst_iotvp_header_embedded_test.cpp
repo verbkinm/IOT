@@ -14,9 +14,9 @@ public:
 
     IOTV_Server iot = {
         .id = 1,
-        .name = "Demo name",
+        .name = "Device",
         .description = "Switch",
-        .readChannel = {false, false, true},
+        .readChannel = {false, true, true},
         .readChannelType = {DATA_TYPE_INT_16, DATA_TYPE_BOOL, DATA_TYPE_BOOL},
         .writeChannelType = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL}
     };
@@ -33,11 +33,11 @@ public:
 private slots:
     void test_headerOk();
     void test_dataRecivedPing();
-    void test_dataRecivedIdentofocation();
+    void test_dataRecivedIdentefication();
     void test_dataRecivedRead();
 
     void test_DataTransmitPing();
-    void test_dataTransmitIdentofocation();
+    void test_dataTransmitIdentification();
     void test_dataTransmitRead();
 
 };
@@ -178,7 +178,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedPing()
     QCOMPARE(error, false);
 }
 
-void IOTVP_Header_Embedded_Test::test_dataRecivedIdentofocation()
+void IOTVP_Header_Embedded_Test::test_dataRecivedIdentefication()
 {
     realBufSize = 0;
     error = false;
@@ -227,7 +227,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
         Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
         Header::HEADER_ASSIGNMENT_READ,             // Назначение пакета Indetification
         Header::HEADER_FLAGS_NONE,                  // Флаги
-        0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21
+        0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21 = READ_SIZE + nameSize
         0, 0, 0, 0, 0, 0, 0, 27,                    // Контрольная сумма тела пакета    27
         6,                                          // Длина имени устройства
         1,                                          // Номер канала
@@ -251,7 +251,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
     }
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 41);
+    QCOMPARE(realBufSize, 0);
     QCOMPARE(cutDataSize, 41);
 }
 
@@ -277,9 +277,9 @@ void IOTVP_Header_Embedded_Test::test_DataTransmitPing()
         QCOMPARE(outData[i], transmitBuffer[i]);
 }
 
-void IOTVP_Header_Embedded_Test::test_dataTransmitIdentofocation()
+void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
 {
-    test_dataRecivedIdentofocation();
+    test_dataRecivedIdentefication();
 
     struct Identification ident = {
         .flags = Identification::Identification_FLAGS_NONE,
@@ -320,9 +320,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = static_cast<uint8_t>(strlen(iot.name)),
         .channelNumber = 1,
-        .dataSize = 0,
+        .dataSize = sizeof(iot.readChannel[0]),
         .name = iot.name,
-        .data = NULL
+        .data = (const uint8_t *)&iot.readChannel[1]
     };
 
     struct Header header = {
@@ -330,14 +330,13 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
         .assignment = Header::HEADER_ASSIGNMENT_READ,
         .flags = Header::HEADER_FLAGS_NONE,
         .version = 2,
-        .dataSize = HEADER_SIZE + readWriteSize(&readWrite),
+        .dataSize = readWriteSize(&readWrite),
         .identification = NULL,
         .readWrite = &readWrite,
         .state = NULL
     };
 
     char outData[headerSize(&header)];
-
     headerToData(&header, outData, headerSize(&header));
 
     for (uint i = 0; i < headerSize(&header); ++i)

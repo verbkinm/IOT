@@ -22,16 +22,23 @@ struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *error,
         else if (header->assignment == Header::HEADER_ASSIGNMENT_READ || header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
             header->readWrite = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
 
-        if (*cutDataSize > 0)
+        if ( (*error == true) || (*cutDataSize != header->dataSize) )
         {
-            if (*cutDataSize != header->dataSize)
-            {
-                *error = true;
-                return header;
-            }
-            *cutDataSize += HEADER_SIZE;
+            *cutDataSize = 0;
+            *expectedDataSize = 0;
+            return header;
         }
-        *expectedDataSize += HEADER_SIZE;
+
+        // Если cutDataSize > 0, то пакет body сформирован
+        // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
+//        if ( (*cutDataSize > 0) && (*cutDataSize != header->dataSize) )
+//        {
+//                *error = true;
+//                *cutDataSize = 0;
+//                *expectedDataSize = 0;
+//                return header;
+//        }
+        *cutDataSize += HEADER_SIZE;
     }
 
     return header;
@@ -258,9 +265,9 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
     };
 
     if (nameSize > 0)
-        memcpy(&state.name, &data[STATE_SIZE], nameSize);
+        memcpy((void *)state.name, &data[STATE_SIZE], nameSize);
     if (dataSize > 0)
-        memcpy(&state.data, &data[STATE_SIZE + nameSize], dataSize);
+        memcpy((void *)state.data, &data[STATE_SIZE + nameSize], dataSize);
 
     memmove(stateResult, &state, sizeof(struct State));
     *cutDataSize = stateSize(stateResult);
@@ -328,9 +335,9 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     };
 
     if (nameSize > 0)
-        memcpy(&readWrite.name, &data[READ_WRITE_SIZE], nameSize);
+        memcpy((void *)readWrite.name, &data[READ_WRITE_SIZE], nameSize);
     if (dataSize > 0)
-        memcpy(&readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
+        memcpy((void *)readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
 
     memmove(readWriteReslut, &readWrite, sizeof(struct Read_Write));
     *cutDataSize = readWriteSize(readWriteReslut);

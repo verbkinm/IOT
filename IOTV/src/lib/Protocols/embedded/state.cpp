@@ -32,7 +32,7 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     if (outDataSize < stateSize(body) + body->nameSize + body->dataSize)
         return 0;
 
-    uint64_t dataSize =  body->dataSize;
+    uint32_t dataSize =  body->dataSize;
     if (isLittleEndian())
         dataReverse(&dataSize, sizeof(dataSize));
     memcpy(&outData[3], &dataSize, 4);
@@ -59,4 +59,5 @@ void clearState(struct State *state)
         free((void *)state->data);
 
     free(state);
+    state = NULL;
 }
