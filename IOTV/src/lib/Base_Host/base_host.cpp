@@ -1,7 +1,6 @@
 #include "base_host.h"
 
 Base_Host::Base_Host(uint8_t id, QObject *parent) : QObject(parent),
-    _expectedDataSize(0),
     _id(id), _description("None description")
 {
 

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "iotvp_creator.h"
 #include "channel.h"
-//#include "IOTV_SH.h"
+#include "creatorpkgs.h"
 
 class Base_Host : public QObject
 {
@@ -32,8 +31,6 @@ public:
     STATE state() const;
 
 protected:
-    uint64_t _expectedDataSize;
-
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
 
@@ -62,5 +59,6 @@ private:
     Channel _writeChannel;
 
     STATE _state;
+
 };
 

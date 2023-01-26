@@ -39,6 +39,9 @@ public:
 
     static QString ConnTypeToString(Conn_type conn_type);
 
+    uint64_t transmitBuffer[BUFSIZ];
+    uint64_t expectedDataSize;
+
 protected:
     const QString _name;
     QString _address;

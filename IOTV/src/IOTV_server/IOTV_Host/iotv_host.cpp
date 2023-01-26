@@ -167,6 +167,8 @@ void IOTV_Host::dataResived(QByteArray data)
     if (static_cast<uint64_t>(data.size()) < _expectedDataSize)
         return;
 
+
+
     while(data.size() > 0)
     {
         IOTVP_Creator creator(data);
@@ -197,43 +199,102 @@ void IOTV_Host::dataResived(QByteArray data)
             responceResponce(std::move(header));
     }
 
+    bool error = false;
+    uint64_t cutDataSize = 0;
+
+    while (data.size() > 0)
+    {
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(data.data()), data.size(), &error, &_conn_type->expectedDataSize, &cutDataSize);
+
+        if (error == true)
+        {
+            _conn_type->clearDataBuffer();
+            //            data.clear();
+            _conn_type->expectedDataSize = 0;
+            //        cutDataSize = 0;
+            clearHeader(header);
+            break;
+        }
+
+        if (_conn_type->expectedDataSize > 0)
+        {
+            clearHeader(header);
+            break;
+        }
+
+        if (header->type == Header::HEADER_TYPE_REQUEST)
+        {
+//            IOTV_Server iot = {
+
+//            }
+            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+            {
+                uint64_t size = responseIdentificationData(_conn_type->transmitBuffer, BUFSIZ, &iot);
+//                _socket->write(_conn_type->transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            {
+                /* uint64_t size = */responseReadData(_conn_type->transmitBuffer, BUFSIZ, &iot, header);
+                //            socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            {
+                /* uint64_t size = */responseWriteData(_conn_type->transmitBuffer, BUFSIZ, &iot, header);
+                //            socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            {
+                /*uint64_t size = */responsePingData(_conn_type->transmitBuffer, BUFSIZ);
+                //            socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            {
+                /*uint64_t size = */responseStateData(_conn_type->transmitBuffer, BUFSIZ, &iot, header);
+                //            socket->write(transmitBuffer, size);
+            }
+        }
+
+        //!!!
+        memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
+        realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
+
+        clearHeader(header);
+    }
 
 
+    //    int dataSize = data.size();
 
+    //    IOTV_SH::RESPONSE_PKG *pkg;
+    //    //!!! переделать логику с trimBufferFromBegin, возможно удалить его вовсе
+    //    while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
+    //    {
+    //        if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
+    //                ((pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR) && (data.size() == 0)))
+    //        {
+    //            delete pkg;
+    //            return;
+    //        }
 
-//    int dataSize = data.size();
+    //        this->_conn_type->clearDataBuffer(dataSize - data.size());
 
-//    IOTV_SH::RESPONSE_PKG *pkg;
-//    //!!! переделать логику с trimBufferFromBegin, возможно удалить его вовсе
-//    while ((pkg = IOTV_SH::accumPacket(data)) != nullptr)
-//    {
-//        if ((pkg->type == IOTV_SH::Response_Type::RESPONSE_INCOMPLETE) ||
-//                ((pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR) && (data.size() == 0)))
-//        {
-//            delete pkg;
-//            return;
-//        }
+    //        if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
+    //            response_WAY_recived(pkg);
+    //        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
+    //            response_PONG_recived(pkg);
+    //        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
+    //            response_READ_recived(pkg);
+    //        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
+    //            response_WRITE_recived(pkg);
+    //        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
+    //        {
+    //            this->_conn_type->clearDataBuffer(1);
+    //            data = data.mid(1);
+    //        }
+    //        else
+    //            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
 
-//        this->_conn_type->clearDataBuffer(dataSize - data.size());
-
-//        if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WAY)
-//            response_WAY_recived(pkg);
-//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_PONG)
-//            response_PONG_recived(pkg);
-//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_READ)
-//            response_READ_recived(pkg);
-//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_WRITE)
-//            response_WRITE_recived(pkg);
-//        else if (pkg->type == IOTV_SH::Response_Type::RESPONSE_ERROR)
-//        {
-//            this->_conn_type->clearDataBuffer(1);
-//            data = data.mid(1);
-//        }
-//        else
-//            Log::write(_conn_type->getName() + " WARRNING: received data UNKNOW: " + data.toHex(':'));
-
-//        delete pkg;
-//    }
+    //        delete pkg;
+    //    }
 }
 
 QString IOTV_Host::getName() const

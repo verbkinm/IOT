@@ -21,7 +21,7 @@ struct Read_Write
     const uint64_t dataSize;
 
     const char *name;
-    const uint8_t *data;
+    const char *data;
 };
 
 uint64_t readWriteCheckSum(const struct Read_Write *);

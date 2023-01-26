@@ -1,4 +1,5 @@
 #include "iotvp_header.h"
+#include <cstring>
 
 IOTVP_Header::IOTVP_Header() :
     _version(0), _type(TYPE::NONE), _assignment(ASSIGNMENT::NONE),

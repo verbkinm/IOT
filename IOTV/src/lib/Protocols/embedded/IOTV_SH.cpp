@@ -10,12 +10,12 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
         .id = iot->id,
         .nameSize = static_cast<uint8_t>(strlen(iot->name)),
         .descriptionSize = static_cast<uint16_t>(strlen(iot->description)),
-        .numberWriteChannel = WRITE_CHANNEL_LENGTH,
-        .numberReadChannel = READ_CHANNEL_LENGTH,
+        .numberWriteChannel = iot->numberWriteChannel,
+        .numberReadChannel = iot->numberReadChannel,
         .name = iot->name,
         .description = iot->description,
-        .writeChannelType = (const uint8_t *)&iot->writeChannelType,
-        .readChannelType = (const uint8_t *)&iot->readChannelType
+        .writeChannelType = iot->writeChannelType,
+        .readChannelType = iot->readChannelType
     };
 
     struct Header header = {
@@ -63,9 +63,9 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = static_cast<uint8_t>(strlen(iot->name)),
         .channelNumber = head->readWrite->channelNumber,
-        .dataSize = sizeof(iot->readChannel[0]),
+        .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
         .name = iot->name,
-        .data = (const uint8_t *)&iot->readChannel[head->readWrite->channelNumber]
+        .data = iot->readChannel[head->readWrite->channelNumber].data
     };
 
     struct Header header = {
@@ -88,18 +88,16 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server 
         return 0;
 
     //!!! Для каждого устройства своё настраивать?
-    memmove(&iot->readChannel[head->readWrite->channelNumber], head->readWrite->data, sizeof(iot->readChannel[0]));
-//    if (isLittleEndian())
-//        dataReverse(&iot->readChannel[head->readWrite->channelNumber], sizeof(iot->readChannel[0]));
-//    iot->readChannel[head->readWrite->channelNumber] = *head->readWrite->data;
+    memmove(&iot->readChannel[head->readWrite->channelNumber].data, head->readWrite->data,
+            iot->readChannel[head->readWrite->channelNumber].dataSize);
 
     struct Read_Write readWrite = {
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = static_cast<uint8_t>(strlen(iot->name)),
         .channelNumber = head->readWrite->channelNumber,
-        .dataSize = sizeof(iot->readChannel[0]),
+        .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
         .name = iot->name,
-        .data = (const uint8_t *)&iot->readChannel[head->readWrite->channelNumber]
+        .data = iot->readChannel[head->readWrite->channelNumber].data
     };
 
     struct Header header = {

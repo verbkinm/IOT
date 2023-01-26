@@ -342,7 +342,7 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
         .channelNumber = channelNumber,
         .dataSize = dataSize,
         .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,   //!! не обрабатывается случай, если память не выделилась
-        .data = (dataSize > 0) ? (uint8_t *)malloc(dataSize) : NULL //!! не обрабатывается случай, если память не выделилась
+        .data = (dataSize > 0) ? (char *)malloc(dataSize) : NULL //!! не обрабатывается случай, если память не выделилась
     };
 
     if (nameSize > 0)
