@@ -115,3 +115,34 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server 
 
     return headerToData(&header, outData, dataSize);
 }
+
+uint64_t responseStateData(char* outData, uint64_t dataSize, const struct IOTV_Server *iot, const struct Header *head)
+{
+    if (outData == NULL || iot == NULL || head == NULL)
+        return 0;
+
+    if (head->state == NULL)
+        return 0;
+
+    struct State state = {
+        .flags = State::STATE_FLAGS_NONE,
+        .state = static_cast<State::State_STATE>(iot->state),
+        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .dataSize = 0,
+        .name = iot->name,
+        .data = NULL
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_RESPONSE,
+        .assignment = Header::HEADER_ASSIGNMENT_STATE,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = stateSize(&state),
+        .identification = NULL,
+        .readWrite = NULL,
+        .state = &state
+    };
+
+    return headerToData(&header, outData, dataSize);
+}

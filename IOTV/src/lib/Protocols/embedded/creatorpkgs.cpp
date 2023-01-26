@@ -176,10 +176,10 @@ struct Identification* createIdentification(uint8_t * const data, uint64_t dataS
         .descriptionSize = descriptionSize,
         .numberWriteChannel= numberWriteChannel,
         .numberReadChannel= numberReadChannel,
-        .name = (nameSize > 0) ? (const char*)malloc(nameSize) : NULL,                              //!! не обрабатывается случай, если память не выделилась
-        .description = (descriptionSize > 0) ? (const char*)malloc(descriptionSize) : NULL,                //!! не обрабатывается случай, если память не выделилась
-        .writeChannelType = (numberWriteChannel > 0) ? (const uint8_t *)malloc(numberWriteChannel) : NULL,    //!! не обрабатывается случай, если память не выделилась
-        .readChannelType = (numberReadChannel > 0) ? (const uint8_t *)malloc(numberReadChannel) : NULL,      //!! не обрабатывается случай, если память не выделилась
+        .name = (nameSize > 0) ? (const char*)malloc(nameSize) : NULL,
+        .description = (descriptionSize > 0) ? (const char*)malloc(descriptionSize) : NULL,
+        .writeChannelType = (numberWriteChannel > 0) ? (const uint8_t *)malloc(numberWriteChannel) : NULL,
+        .readChannelType = (numberReadChannel > 0) ? (const uint8_t *)malloc(numberReadChannel) : NULL,
     };
 
     if (nameSize > 0)
@@ -192,6 +192,16 @@ struct Identification* createIdentification(uint8_t * const data, uint64_t dataS
         memcpy((void *)identification.readChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel], numberReadChannel);
 
     memmove(identificationResult, &identification, sizeof(struct Identification));
+
+    if ( ((nameSize > 0) && (identificationResult->name == NULL))
+         || ((descriptionSize > 0) && (identificationResult->description == NULL))
+         || ( (numberWriteChannel > 0) && (identificationResult->writeChannelType == NULL))
+         || ( (numberReadChannel > 0) && (identificationResult->readChannelType == NULL)) )
+    {
+        *error = true;
+        clearIdentification(identificationResult);
+        return NULL;
+    }
 
     *cutDataSize = identificationSize(identificationResult);
 
@@ -253,8 +263,8 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
         .state = static_cast<State::State_STATE>(devState),
         .nameSize = nameSize,
         .dataSize = dataSize,
-        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,   //!! не обрабатывается случай, если память не выделилась
-        .data = (dataSize > 0) ? (uint8_t *)malloc(dataSize) : NULL //!! не обрабатывается случай, если память не выделилась
+        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
+        .data = (dataSize > 0) ? (uint8_t *)malloc(dataSize) : NULL
     };
 
     if (nameSize > 0)
@@ -263,6 +273,14 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
         memcpy((void *)state.data, &data[STATE_SIZE + nameSize], dataSize);
 
     memmove(stateResult, &state, sizeof(struct State));
+
+    if ( ((nameSize > 0) && (stateResult->name == NULL)) || ((dataSize > 0) && (stateResult->data == NULL)) )
+    {
+        *error = true;
+        clearState(stateResult);
+        return NULL;
+    }
+
     *cutDataSize = stateSize(stateResult);
 
     return stateResult;
@@ -337,6 +355,14 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     }
 
     memmove(readWriteReslut, &readWrite, sizeof(struct Read_Write));
+
+    if ( ((nameSize > 0) && (readWriteReslut->name == NULL)) || ((dataSize > 0) && (readWriteReslut->data == NULL)) )
+    {
+        *error = true;
+        clearReadWrite(readWriteReslut);
+        return NULL;
+    }
+
     *cutDataSize = readWriteSize(readWriteReslut);
 
     return readWriteReslut;

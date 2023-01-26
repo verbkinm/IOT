@@ -29,7 +29,7 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     outData[1] = body->state;
     outData[2] = body->flags;
 
-    if (outDataSize < stateSize(body) + body->nameSize + body->dataSize)
+    if (outDataSize < stateSize(body))
         return 0;
 
     uint32_t dataSize =  body->dataSize;
@@ -44,6 +44,8 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
 
     memcpy(&outData[STATE_SIZE], body->name, body->nameSize);
     memcpy(&outData[STATE_SIZE + body->nameSize], body->data, body->dataSize);
+    if (isLittleEndian())
+        dataReverse(&outData[STATE_SIZE + body->nameSize], body->dataSize);
 
     return STATE_SIZE + body->nameSize + body->dataSize;
 }

@@ -16,6 +16,8 @@ struct IOTV_Server
     uint8_t readChannelType[READ_CHANNEL_LENGTH];
 
     uint8_t writeChannelType[WRITE_CHANNEL_LENGTH];
+
+    uint8_t state;
 };
 
 #endif // IOTV_SERVER_H
