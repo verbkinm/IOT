@@ -1,6 +1,6 @@
 #include "iotv_server.h"
 
-int8_t dataSizeonDataType(enum DATA_TYPE type)
+int8_t dataSizeonDataType(uint8_t type)
 {
     switch (type)
     {
@@ -29,12 +29,24 @@ void clearIOTV_Server(struct IOTV_Server *iot)
     if (iot == NULL)
         return;
 
-    if (iot->readChannel != NULL)
-        free(iot->readChannel);
     if (iot->name != NULL)
         free((void *)iot->name);
     if (iot->description != NULL)
         free((void *)iot->description);
+
+    if (iot->readChannel != NULL)
+    {
+        for (uint8_t i = 0; iot->numberReadChannel; ++i)
+        {
+            if (iot->readChannel[i].data != NULL)
+                free(iot->readChannel[i].data);
+        }
+        free(iot->readChannel);
+    }
+    if (iot->readChannelType != NULL)
+        free(iot->readChannelType);
+    if (iot->writeChannelType != NULL)
+        free(iot->writeChannelType);
 
     free(iot);
 }

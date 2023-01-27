@@ -25,7 +25,7 @@ void TCP_conn_type::setPort(quint16 port)
     _tcpPort = port;
 }
 
-qint64 TCP_conn_type::write(const QByteArray &data)
+qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
     Log::write(_name +
                ": data transmit to " +
@@ -36,7 +36,10 @@ qint64 TCP_conn_type::write(const QByteArray &data)
                data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT);
 
-    return _tcpSocket.write(data);
+    if (size == -1)
+        return _tcpSocket.write(data);
+
+    return _tcpSocket.write(data.data(), size);
 }
 
 void TCP_conn_type::connectToHost()

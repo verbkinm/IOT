@@ -41,8 +41,13 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
         dataReverse(&chSum, sizeof(chSum));
     memcpy(&outData[7], &chSum, 8);
 
-    memcpy(&outData[READ_WRITE_SIZE], body->name, body->nameSize);
-    memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
+    //!!! нужна ли проверка на 0?
+    if (body->nameSize > 0)
+        memcpy(&outData[READ_WRITE_SIZE], body->name, body->nameSize);
+    //!!! нужна ли проверка на 0?
+    if (body->dataSize > 0)
+        memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
+
     if (isLittleEndian())
         dataReverse(&outData[READ_WRITE_SIZE + body->nameSize], body->dataSize);
 

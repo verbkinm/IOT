@@ -67,6 +67,11 @@ void Base_Host::setWriteChannel(const Channel &newWriteChannel)
     _writeChannel = newWriteChannel;
 }
 
+Raw Base_Host::getReadChannelRawData(uint8_t channelNumber) const
+{
+    _readChannel.getRawData(channelNumber);
+}
+
 void Base_Host::setReadChannel(const Channel &newReadChannel)
 {
     _readChannel = newReadChannel;

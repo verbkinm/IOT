@@ -13,6 +13,7 @@ SOURCES +=  tst_iotvp_header_embedded_test.cpp \
             ../../lib/Protocols/embedded/read_write.cpp \
             ../../lib/Protocols/embedded/state.cpp \
             ../../lib/Protocols/embedded/IOTV_SH.cpp \
+            ../../lib/Protocols/embedded/iotv_server.cpp \
 \
 #            ../../lib/Protocols/iotvp_creator.cpp\
 #            ../../lib/Protocols/iotvp_header.cpp\
@@ -35,6 +36,7 @@ HEADERS +=  ../../lib/Protocols/embedded/creatorpkgs.h \
 
 INCLUDEPATH +=  ../../lib/Protocols/embedded \
 #                ../../lib/Protocols/ \
-                ../../lib/raw/
+                ../../lib/raw/ \
+                ../../IOTV_server/IOTV_Host/ \
 
 

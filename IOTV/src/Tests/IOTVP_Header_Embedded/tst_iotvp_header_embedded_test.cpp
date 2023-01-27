@@ -24,7 +24,7 @@ public:
         .name = "Device",
         .description = "Description",
         .numberReadChannel = 3,
-        .readChannel = (struct Raw*)malloc(sizeof(struct Raw) * 3),
+        .readChannel = NULL,
         .readChannelType = readType,
         .numberWriteChannel = 2,
         .writeChannelType = writeType,
@@ -54,26 +54,30 @@ private slots:
     void test_dataTransmitWrite();
     void test_dataTransmitState();
 
+
+
     void timeCompare();
 };
 
 IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
 {
+    iot.readChannel = (struct Raw*)malloc(sizeof(struct Raw) * 3);
+
     iot.readChannel[0].dataSize = 2;
     iot.readChannel[1].dataSize = 2;
     iot.readChannel[2].dataSize = 2;
 
     iot.readChannel[0].data = (char *)malloc(iot.readChannel[0].dataSize);
-    int16_t value = 256;
-    memcpy(&iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
+    int16_t value = 257;
+    memcpy(iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
 
     iot.readChannel[1].data = (char *)malloc(iot.readChannel[1].dataSize);
-    value = 256;
-    memcpy(&iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
+//    value = 256;
+    memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
 
     iot.readChannel[2].data = (char *)malloc(iot.readChannel[2].dataSize);
-    value = 256;
-    memcpy(&iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
+//    value = 256;
+    memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
 }
 
 IOTVP_Header_Embedded_Test::~IOTVP_Header_Embedded_Test()
@@ -470,12 +474,12 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
                 .id = iot.id,
                 .nameSize = static_cast<uint8_t>(strlen(iot.name)),
                 .descriptionSize = static_cast<uint16_t>(strlen(iot.description)),
-                .numberWriteChannel = WRITE_CHANNEL_LENGTH,
-                .numberReadChannel = READ_CHANNEL_LENGTH,
+                .numberWriteChannel = iot.numberWriteChannel,
+                .numberReadChannel = iot.numberReadChannel,
                 .name = iot.name,
                 .description = iot.description,
-                .writeChannelType = (const uint8_t *)&iot.writeChannelType,
-                .readChannelType = (const uint8_t *)&iot.readChannelType
+                .writeChannelType = iot.writeChannelType,
+                .readChannelType = iot.readChannelType
     };
 
     struct Header header = {

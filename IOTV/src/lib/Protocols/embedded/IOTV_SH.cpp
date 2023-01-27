@@ -144,3 +144,111 @@ uint64_t responseStateData(char* outData, uint64_t dataSize, const struct IOTV_S
 
     return headerToData(&header, outData, dataSize);
 }
+
+uint64_t queryIdentificationData(char* outData, uint64_t dataSize)
+{
+    if (outData == NULL)
+        return 0;
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_REQUEST,
+        .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = 0,
+        .identification = NULL,
+        .readWrite = NULL,
+        .state = NULL
+    };
+
+    return headerToData(&header, outData, dataSize);
+}
+
+uint64_t queryPingData(char* outData, uint64_t dataSize)
+{
+
+}
+
+uint64_t queryWriteData(char* outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize)
+{
+    if (outData == NULL || dataToWrite == NULL)
+        return 0;
+
+    struct Read_Write readWrite = {
+        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .nameSize = static_cast<uint8_t>(strlen(name)),
+        .channelNumber = channelNumber,
+        .dataSize = dataWriteSize,
+        .name = name,
+        .data = dataToWrite
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_REQUEST,
+        .assignment = Header::HEADER_ASSIGNMENT_WRITE,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .identification = NULL,
+        .readWrite = &readWrite,
+        .state = NULL
+    };
+
+    return headerToData(&header, outData, outDataSize);
+}
+
+uint64_t queryReadData(char* outData, uint64_t outDataSize, const char *name, uint8_t channelNumber)
+{
+    if (outData == NULL)
+        return 0;
+
+    struct Read_Write readWrite = {
+        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .nameSize = static_cast<uint8_t>(strlen(name)),
+        .channelNumber = channelNumber,
+        .dataSize = 0,
+        .name = name,
+        .data = NULL
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_REQUEST,
+        .assignment = Header::HEADER_ASSIGNMENT_READ,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .identification = NULL,
+        .readWrite = &readWrite,
+        .state = NULL
+    };
+
+    return headerToData(&header, outData, outDataSize);
+}
+
+uint64_t queryStateData(char* outData, uint64_t outDataSize, const char *name)
+{
+    if (outData == NULL)
+        return 0;
+
+    struct State state = {
+        .flags = State::STATE_FLAGS_NONE,
+        .state = State::State_STATE_OFFLINE,
+        .nameSize = static_cast<uint8_t>(strlen(name)),
+        .dataSize = 0,
+        .name = name,
+        .data = NULL
+    };
+
+    struct Header header = {
+        .type = Header::HEADER_TYPE_REQUEST,
+        .assignment = Header::HEADER_ASSIGNMENT_STATE,
+        .flags = Header::HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = stateSize(&state),
+        .identification = NULL,
+        .readWrite = NULL,
+        .state = &state
+    };
+
+    return headerToData(&header, outData, outDataSize);
+}

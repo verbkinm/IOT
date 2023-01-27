@@ -35,7 +35,7 @@ public:
 private:
     qint64 read(uint8_t channelNumber);
     void dataResived(QByteArray data);
-    qint64 writeToRemoteHost(const QByteArray &data);
+    qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
     void connectToHost();
 
@@ -43,14 +43,13 @@ private:
 
     void setOnline(bool state);
 
-    void responceRequest(std::unique_ptr<IOTVP_Header> header);
-    void responceResponce(std::unique_ptr<IOTVP_Header> header);
+    void responceIdentification(struct IOTV_Server *iot);
+    void responceState(struct IOTV_Server *iot);
+    void responceRead(const struct Header* header);
+    void responceWrite(struct IOTV_Server *iot);
+    void responcePingPoing(struct IOTV_Server *iot);
 
-    void responceIdentification(std::unique_ptr<IOTVP_Header> header);
-    void responceState(std::unique_ptr<IOTVP_Header> header);
-    void responceRead(std::unique_ptr<IOTVP_Header> header);
-    void responceWrite(std::unique_ptr<IOTVP_Header> header);
-    void responcePingPoing(std::unique_ptr<IOTVP_Header> header);
+    IOTV_Server *convert() const;
 
 //!!!
 //    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
@@ -64,12 +63,14 @@ private:
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
 
-    QTimer _reReadTimer, _timerPing, _timerPong;
+    QTimer _timerReRead, _timerPing, _timerPong;
 
     std::unordered_map<QString, QString>  _settingsData;
 
     QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange, _mutexWrite;
+
+    uint64_t _expectedDataSize;
 
     enum Flag
     {

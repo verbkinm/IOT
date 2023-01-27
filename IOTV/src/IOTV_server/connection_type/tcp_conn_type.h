@@ -15,7 +15,7 @@ public:
     quint16 getPort() const;
     void setPort(quint16 port);
 
-    virtual qint64 write(const QByteArray &data) override;
+    virtual qint64 write(const QByteArray &data, qint64 size = -1) override;
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 

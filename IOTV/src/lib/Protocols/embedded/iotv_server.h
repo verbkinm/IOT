@@ -24,7 +24,7 @@ enum DATA_TYPE
     DATA_TYPE_NONE
 };
 
-struct Raw {
+struct RawEmbedded {
     uint32_t dataSize;
     char *data;
 };
@@ -36,16 +36,16 @@ struct IOTV_Server
     const char *description;
 
     const uint8_t numberReadChannel;
-    struct Raw *readChannel;
-    const uint8_t *readChannelType;
+    struct RawEmbedded *readChannel;
+    uint8_t * const readChannelType;
 
     const uint8_t numberWriteChannel;
-    const uint8_t *writeChannelType;
+    uint8_t * const writeChannelType;
 
     uint8_t state;
 };
 
-int8_t dataSizeonDataType(enum DATA_TYPE type);
+int8_t dataSizeonDataType(uint8_t type);
 void clearIOTV_Server(struct IOTV_Server *iot);
 
 #endif // IOTV_SERVER_H

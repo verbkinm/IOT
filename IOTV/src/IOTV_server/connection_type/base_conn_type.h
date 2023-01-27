@@ -4,6 +4,8 @@
 
 #include "log.h"
 //#include "IOTV_SH.h"
+#include "raw.h"
+#include "creatorpkgs.h"
 
 class Base_conn_type : public QObject
 {
@@ -30,7 +32,7 @@ public:
 
     void setAddress(const QString &address);
 
-    virtual qint64 write(const QByteArray &data);
+    virtual qint64 write(const QByteArray &data, qint64 size = -1);
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 
@@ -39,8 +41,7 @@ public:
 
     static QString ConnTypeToString(Conn_type conn_type);
 
-    uint64_t transmitBuffer[BUFSIZ];
-    uint64_t expectedDataSize;
+//    char transmitBuffer[BUFSIZ];
 
 protected:
     const QString _name;

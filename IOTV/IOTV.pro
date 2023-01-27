@@ -4,8 +4,8 @@ SUBDIRS += \
 #    src/IOTV_Client_QML \
 #    src/IOTV_Client \
 #    src/IOTV_HOSTS_PC \
-    src/Tests \
-#    src/IOTV_server
+#    src/Tests \
+    src/IOTV_server
 
 DISTFILES += \
     IOTV_Client.supp
@@ -23,5 +23,4 @@ message(Translation files: $$[QT_INSTALL_TRANSLATIONS])
 message(Settings: $$[QT_INSTALL_CONFIGURATION])
 message(Examples: $$[QT_INSTALL_EXAMPLES])
 
-SOURCES += \
-    src/lib/Protocols/embedded/iotv_server.cpp
+

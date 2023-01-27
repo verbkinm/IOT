@@ -78,6 +78,19 @@ QByteArray Channel::getData(uint8_t channelNumber) const
     }
 }
 
+Raw Channel::getRawData(uint8_t channelNumber) const
+{
+    try
+    {
+        return _data.at(channelNumber);
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        return {};
+    }
+}
+
 Raw::DATA_TYPE Channel::getType(uint8_t channelNumber) const
 {
     try

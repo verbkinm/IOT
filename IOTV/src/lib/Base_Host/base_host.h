@@ -2,6 +2,7 @@
 
 #include "channel.h"
 #include "creatorpkgs.h"
+#include "IOTV_SH.h"
 
 class Base_Host : public QObject
 {
@@ -38,6 +39,8 @@ protected:
 
     void setReadChannel(const Channel &newReadChannel);
     void setWriteChannel(const Channel &newWriteChannel);
+
+    Raw getReadChannelRawData(uint8_t channelNumber) const;
 
     void addWriteSubChannel(const Raw &data);
     void addReadSubChannel(const Raw &data);

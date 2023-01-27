@@ -2,7 +2,7 @@
 #include <QDebug>
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
-    expectedDataSize(0), _name(name),
+    _name(name),
     _address("none address")
 {
     _reconnectTimer.setParent(parent);
@@ -23,9 +23,11 @@ void Base_conn_type::setAddress(const QString &address)
     _address = address;
 }
 
-qint64 Base_conn_type::write(const QByteArray &data)
+qint64 Base_conn_type::write(const QByteArray &data, qint64 size)
 {
     Q_UNUSED(data);
+    Q_UNUSED(size)
+
     return -1;
 }
 
