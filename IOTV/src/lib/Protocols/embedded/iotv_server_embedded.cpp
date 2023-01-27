@@ -1,4 +1,4 @@
-#include "iotv_server.h"
+#include "iotv_server_embedded.h"
 
 int8_t dataSizeonDataType(uint8_t type)
 {
@@ -24,7 +24,7 @@ int8_t dataSizeonDataType(uint8_t type)
     }
 }
 
-void clearIOTV_Server(struct IOTV_Server *iot)
+void clearIOTV_Server(struct IOTV_Server_embedded *iot)
 {
     if (iot == NULL)
         return;

@@ -26,7 +26,7 @@ void IOTV_Host::setOnline(bool state)
     _state_flags.setFlag(DeviceOnline, state);
 }
 
-void IOTV_Host::responceIdentification(struct IOTV_Server *iot)
+void IOTV_Host::responceIdentification(struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 
@@ -54,7 +54,7 @@ void IOTV_Host::responceIdentification(struct IOTV_Server *iot)
     _timerReRead.start();
 }
 
-void IOTV_Host::responceState(struct IOTV_Server *iot)
+void IOTV_Host::responceState(struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 //    if (iot == nullptr)
@@ -82,13 +82,13 @@ void IOTV_Host::responceRead(const struct Header *header)
                Log::Write_Flag::FILE, _logFile);
 }
 
-void IOTV_Host::responceWrite(struct IOTV_Server *iot)
+void IOTV_Host::responceWrite(struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPoing(struct IOTV_Server *iot)
+void IOTV_Host::responcePingPoing(struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 
@@ -96,25 +96,27 @@ void IOTV_Host::responcePingPoing(struct IOTV_Server *iot)
     _timerPing.start(TIMER_PING);
 }
 
-IOTV_Server *IOTV_Host::convert() const
+struct IOTV_Server_embedded *IOTV_Host::convert() const
 {
-    struct IOTV_Server iot = {
+    struct IOTV_Server_embedded iot = {
         .id = getId(),
-        .name = (const char *)malloc(getName().toStdString().size()),
+        .name = (const char *)malloc(getName().toStdString().size()), //!!! нет проверки при не удаче выделить память
         .description = (const char *)malloc(getDescription().toStdString().size()),
         .numberReadChannel = getReadChannelLength(),
-        .readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * getReadChannelLength()),
-        .readChannelType = (uint8_t *)malloc(getReadChannelLength()),
+        .readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * getReadChannelLength()), //!!! нет проверки при не удаче выделить память
+        .readChannelType = (uint8_t *)malloc(getReadChannelLength()), //!!! нет проверки при не удаче выделить память
         .numberWriteChannel = getWriteChannelLength(),
-        .writeChannelType = (uint8_t *)malloc(getWriteChannelLength()),
+        .writeChannelType = (uint8_t *)malloc(getWriteChannelLength()), //!!! нет проверки при не удаче выделить память
         .state = (uint8_t)state()
     };
     //!!! временные данные нормально отработают?
-    memcpy(&iot.name, getName().toStdString().c_str(), getName().toStdString().size());
-    memcpy(&iot.description, getDescription().toStdString().c_str(), getDescription().toStdString().size());
+    memcpy((void *)iot.name, getName().toStdString().c_str(), getName().toStdString().size());
+    memcpy((void *)iot.description, getDescription().toStdString().c_str(), getDescription().toStdString().size());
 
     for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
     {
+        iot.readChannel[i].data = (char *)malloc(getReadChannelData(i).size());
+        Q_ASSERT(iot.readChannel[i].data != NULL);
         iot.readChannel[i].dataSize = getReadChannelData(i).size();
         memcpy(iot.readChannel[i].data, getReadChannelData(i).data(), iot.readChannel[i].dataSize);
         iot.readChannelType[i] = (uint8_t)getReadChannelType(i);
@@ -123,8 +125,9 @@ IOTV_Server *IOTV_Host::convert() const
     for (uint8_t i = 0; i < iot.numberWriteChannel; ++i)
         iot.writeChannelType[i] = (uint8_t)getWriteChannelType(i);
 
-    struct IOTV_Server *iotResult = (struct IOTV_Server *)malloc(sizeof(struct IOTV_Server));
-    memcpy(iotResult, &iot, sizeof(IOTV_Server));
+    struct IOTV_Server_embedded *iotResult = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
+     Q_ASSERT(iotResult != NULL);
+    memcpy(iotResult, &iot, sizeof(IOTV_Server_embedded));
 
     return iotResult;
 }
@@ -198,7 +201,7 @@ void IOTV_Host::dataResived(QByteArray data)
 
         if (header->type == Header::HEADER_TYPE_RESPONSE)
         {
-            struct IOTV_Server *iot = convert();
+            struct IOTV_Server_embedded *iot = convert();
 
             if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
                 responceIdentification(iot);

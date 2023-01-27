@@ -43,19 +43,13 @@ private:
 
     void setOnline(bool state);
 
-    void responceIdentification(struct IOTV_Server *iot);
-    void responceState(struct IOTV_Server *iot);
+    void responceIdentification(struct IOTV_Server_embedded *iot);
+    void responceState(struct IOTV_Server_embedded *iot);
     void responceRead(const struct Header* header);
-    void responceWrite(struct IOTV_Server *iot);
-    void responcePingPoing(struct IOTV_Server *iot);
+    void responceWrite(struct IOTV_Server_embedded *iot);
+    void responcePingPoing(struct IOTV_Server_embedded *iot);
 
-    IOTV_Server *convert() const;
-
-//!!!
-//    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-//    void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-//    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-//    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
+    struct IOTV_Server_embedded *convert() const;
 
     static constexpr uint16_t TIMER_PING = 10000;
     static constexpr uint16_t TIMER_PONG = 15000;

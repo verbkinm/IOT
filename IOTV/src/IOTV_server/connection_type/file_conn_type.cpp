@@ -6,8 +6,11 @@ File_conn_type::File_conn_type(const QString &name, const QString& fileName, QOb
     connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
 }
 
-qint64 File_conn_type::write(const QByteArray &data)
+qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 {
+    Q_UNUSED(data);
+    Q_UNUSED(size);
+    return -1;
 //    Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
 //    if((data.size() == 1) && (data[0] == IOTV_SH::QUERY_WAY_BYTE))

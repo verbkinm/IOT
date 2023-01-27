@@ -1,5 +1,5 @@
-#ifndef IOTV_SERVER_H
-#define IOTV_SERVER_H
+#ifndef IOTV_SERVER_EMBEDDED_H
+#define IOTV_SERVER_EMBEDDED_H
 
 #define READ_CHANNEL_LENGTH 3
 #define WRITE_CHANNEL_LENGTH 3
@@ -29,11 +29,11 @@ struct RawEmbedded {
     char *data;
 };
 
-struct IOTV_Server
+struct IOTV_Server_embedded
 {
     const uint8_t id;
-    const char *name;
-    const char *description;
+    const char * const name;
+    const char * const description;
 
     const uint8_t numberReadChannel;
     struct RawEmbedded *readChannel;
@@ -46,6 +46,6 @@ struct IOTV_Server
 };
 
 int8_t dataSizeonDataType(uint8_t type);
-void clearIOTV_Server(struct IOTV_Server *iot);
+void clearIOTV_Server(struct IOTV_Server_embedded *iot);
 
-#endif // IOTV_SERVER_H
+#endif // IOTV_SERVER_EMBEDDED_H

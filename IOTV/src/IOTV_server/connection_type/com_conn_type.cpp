@@ -134,10 +134,10 @@ void COM_conn_type::slotHandleError(QSerialPort::SerialPortError error)
 }
 
 
-qint64 COM_conn_type::write(const QByteArray &data)
+qint64 COM_conn_type::write(const QByteArray &data, qint64 size)
 {
     Log::write(_name + ": data transmit to " + _address + " -> " + data.toHex(':'));
-    return _serialPort.write(data);
+    return _serialPort.write(data.data(), size);
 }
 
 void COM_conn_type::disconnectFromHost()

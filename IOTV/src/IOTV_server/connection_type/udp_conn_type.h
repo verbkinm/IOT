@@ -12,7 +12,7 @@ public:
      Udp_conn_type(const QString& name, const QString& address, quint16 port, QObject *parent);
 
 public:
-     virtual qint64 write(const QByteArray &data) override;
+     virtual qint64 write(const QByteArray &data, qint64 size = -1) override;
      virtual void connectToHost() override;
      virtual void disconnectFromHost() override;
 };

@@ -9,6 +9,7 @@
 
 #include "log.h"
 #include "IOTV_Host/iotv_host.h"
+#include "IOTV_SC.h"
 #include "creatorpkgs.h"
 
 class IOTV_Client : public QObject
