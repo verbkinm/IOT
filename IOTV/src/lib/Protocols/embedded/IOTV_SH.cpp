@@ -34,8 +34,7 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
 
 uint64_t responsePingData(char* outData, uint64_t dataSize)
 {
-    if (outData == NULL)
-        return 0;
+    assert(outData != NULL);
 
     struct Header header = {
         .type = Header::HEADER_TYPE_RESPONSE,
@@ -53,11 +52,10 @@ uint64_t responsePingData(char* outData, uint64_t dataSize)
 
 uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot, const struct Header *head)
 {
-    if (outData == NULL || iot == NULL || head == NULL)
-        return 0;
-
-    if (head->readWrite == NULL)
-        return 0;
+    assert(outData != NULL);
+    assert(iot != NULL);
+    assert(head != NULL);
+    assert(head->readWrite != NULL);
 
     struct Read_Write readWrite = {
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
@@ -84,10 +82,15 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
 
 uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server_embedded *iot, const Header *head)
 {
-    if (outData == NULL || iot == NULL || head == NULL || head->readWrite == NULL)
-        return 0;
+    assert(outData != NULL);
+    assert(iot != NULL);
+    assert(head != NULL);
+    assert(head->readWrite != NULL);
 
     //!!! Для каждого устройства своё настраивать?
+    assert(iot->readChannel != NULL);
+    assert(iot->readChannel[head->readWrite->channelNumber].data != NULL);
+
     memmove(&iot->readChannel[head->readWrite->channelNumber].data, head->readWrite->data,
             iot->readChannel[head->readWrite->channelNumber].dataSize);
 
@@ -114,12 +117,9 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server_
     return headerToData(&header, outData, dataSize);
 }
 
-uint64_t responseStateData(char* outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot, const struct Header *head)
+uint64_t responseStateData(char* outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot)
 {
-    if (outData == NULL || iot == NULL || head == NULL)
-        return 0;
-
-    if (head->state == NULL)
+    if (outData == NULL || iot == NULL)
         return 0;
 
     struct State state = {

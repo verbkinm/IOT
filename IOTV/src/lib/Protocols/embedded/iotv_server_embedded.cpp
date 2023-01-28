@@ -36,7 +36,7 @@ void clearIOTV_Server(struct IOTV_Server_embedded *iot)
 
     if (iot->readChannel != NULL)
     {
-        for (uint8_t i = 0; iot->numberReadChannel; ++i)
+        for (uint8_t i = 0; i < iot->numberReadChannel; ++i)
         {
             if (iot->readChannel[i].data != NULL)
                 free(iot->readChannel[i].data);

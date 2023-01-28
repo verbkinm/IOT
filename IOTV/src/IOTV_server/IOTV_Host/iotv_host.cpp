@@ -26,27 +26,28 @@ void IOTV_Host::setOnline(bool state)
     _state_flags.setFlag(DeviceOnline, state);
 }
 
-void IOTV_Host::responceIdentification(struct IOTV_Server_embedded *iot)
+void IOTV_Host::responceIdentification(const struct Header *header)
 {
-    Q_ASSERT(iot != nullptr);
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->identification != NULL);
 
-    this->setId(iot->id);
+    this->setId(header->identification->id);
     // На данный момент имя константное и считывается с файла настроек
 //    this->setNname
-    this->setDescription(iot->description);
+    this->setDescription(header->identification->description);
     this->removeAllSubChannel();
 
-    for (uint8_t i = 0; i < iot->numberReadChannel; i++)
+    for (uint8_t i = 0; i < header->identification->numberReadChannel; i++)
     {
-        Q_ASSERT(iot->readChannelType == nullptr);
-        Raw rawData(static_cast<Raw::DATA_TYPE>(iot->readChannelType[i]));
+        Q_ASSERT(header->identification->readChannelType != NULL);
+        Raw rawData(static_cast<Raw::DATA_TYPE>(header->identification->readChannelType[i]));
         this->addReadSubChannel(rawData);
     }
 
-    for (uint8_t i = 0; i < iot->numberWriteChannel; i++)
+    for (uint8_t i = 0; i < header->identification->numberWriteChannel; i++)
     {
-        Q_ASSERT(iot->writeChannelType == nullptr);
-        Raw rawData(static_cast<Raw::DATA_TYPE>(iot->writeChannelType[i]));
+        Q_ASSERT(header->identification->writeChannelType != NULL);
+        Raw rawData(static_cast<Raw::DATA_TYPE>(header->identification->writeChannelType[i]));
         this->addWriteSubChannel(rawData);
     }
 
@@ -96,42 +97,6 @@ void IOTV_Host::responcePingPoing(struct IOTV_Server_embedded *iot)
     _timerPing.start(TIMER_PING);
 }
 
-struct IOTV_Server_embedded *IOTV_Host::convert() const
-{
-    struct IOTV_Server_embedded iot = {
-        .id = getId(),
-        .name = (const char *)malloc(getName().toStdString().size()), //!!! нет проверки при не удаче выделить память
-        .description = (const char *)malloc(getDescription().toStdString().size()),
-        .numberReadChannel = getReadChannelLength(),
-        .readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * getReadChannelLength()), //!!! нет проверки при не удаче выделить память
-        .readChannelType = (uint8_t *)malloc(getReadChannelLength()), //!!! нет проверки при не удаче выделить память
-        .numberWriteChannel = getWriteChannelLength(),
-        .writeChannelType = (uint8_t *)malloc(getWriteChannelLength()), //!!! нет проверки при не удаче выделить память
-        .state = (uint8_t)state()
-    };
-    //!!! временные данные нормально отработают?
-    memcpy((void *)iot.name, getName().toStdString().c_str(), getName().toStdString().size());
-    memcpy((void *)iot.description, getDescription().toStdString().c_str(), getDescription().toStdString().size());
-
-    for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
-    {
-        iot.readChannel[i].data = (char *)malloc(getReadChannelData(i).size());
-        Q_ASSERT(iot.readChannel[i].data != NULL);
-        iot.readChannel[i].dataSize = getReadChannelData(i).size();
-        memcpy(iot.readChannel[i].data, getReadChannelData(i).data(), iot.readChannel[i].dataSize);
-        iot.readChannelType[i] = (uint8_t)getReadChannelType(i);
-    }
-
-    for (uint8_t i = 0; i < iot.numberWriteChannel; ++i)
-        iot.writeChannelType[i] = (uint8_t)getWriteChannelType(i);
-
-    struct IOTV_Server_embedded *iotResult = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
-     Q_ASSERT(iotResult != NULL);
-    memcpy(iotResult, &iot, sizeof(IOTV_Server_embedded));
-
-    return iotResult;
-}
-
 bool IOTV_Host::isOnline() const
 {
     return _state_flags.testFlag(Flag::DeviceOnline);
@@ -145,9 +110,7 @@ qint64 IOTV_Host::read(uint8_t channelNumber)
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber);
 
-    QByteArray transmitData(outData, size);
-
-    return writeToRemoteHost(transmitData);
+    return writeToRemoteHost(outData, size);
 }
 
 qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
@@ -158,9 +121,7 @@ qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
     char outData[BUFSIZ];
     auto size = queryWriteData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, data.data(), data.size());
 
-    QByteArray transmitData(outData, size);
-
-    return writeToRemoteHost(transmitData);
+    return writeToRemoteHost(outData, size);
 }
 
 QByteArray IOTV_Host::readData(uint8_t channelNumber) const
@@ -204,7 +165,7 @@ void IOTV_Host::dataResived(QByteArray data)
             struct IOTV_Server_embedded *iot = convert();
 
             if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
-                responceIdentification(iot);
+                responceIdentification(header);
             else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
                 responceRead(header);
             else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
@@ -304,8 +265,7 @@ void IOTV_Host::slotConnected()
     char outData[BUFSIZ];
     auto size = queryIdentificationData(outData, BUFSIZ);
 
-    QByteArray transmitData(outData, size);
-    writeToRemoteHost(transmitData);
+    writeToRemoteHost(outData, size);
 
     _timerPong.start(TIMER_PONG);
 }
@@ -332,8 +292,7 @@ void IOTV_Host::slotPingTimeOut()
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);
 
-    QByteArray transmitData(outData, size);
-    writeToRemoteHost(transmitData);
+    writeToRemoteHost(outData, size);
 }
 
 void IOTV_Host::slotReconnectTimeOut()

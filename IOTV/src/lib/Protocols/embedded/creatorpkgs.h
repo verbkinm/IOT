@@ -24,7 +24,7 @@ struct Read_Write* createReadWrite(uint8_t *const data, uint64_t size, bool *err
                                    uint64_t *expectedDataSize, uint64_t *cutDataSize);
 
 // Проверка для header c заданным assigment, должно ли быть тело пакета
-bool bodyMustBe(uint8_t assigment);
+bool bodyMustBe(uint8_t type, uint8_t assigment);
 
 bool isLittleEndian();
 void dataReverse(void* data, uint64_t size);

@@ -31,6 +31,8 @@ public:
 
     STATE state() const;
 
+    struct IOTV_Server_embedded *convert() const;
+
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);

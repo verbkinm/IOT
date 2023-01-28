@@ -7,7 +7,7 @@ struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *error,
     if (header == NULL)
         return NULL;
 
-    if (bodyMustBe(header->assignment))
+    if (bodyMustBe(header->type, header->assignment))
     {
         if (header->dataSize == 0)
         {
@@ -16,7 +16,7 @@ struct Header* createPkgs(uint8_t* const data, uint64_t size, bool *error,
         }
 
         if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
-            header->identification = createIdentification(data, size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->identification = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == Header::HEADER_ASSIGNMENT_STATE)
             header->state = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == Header::HEADER_ASSIGNMENT_READ || header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
@@ -368,15 +368,28 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     return readWriteReslut;
 }
 
-bool bodyMustBe(uint8_t assigment)
+bool bodyMustBe(uint8_t type, uint8_t assigment)
 {
-    switch (assigment)
+    if (type == (uint8_t)Header::HEADER_TYPE_RESPONSE)
     {
-//    case Header::HEADER_ASSIGNMENT_IDENTIFICATION :
-        case Header::HEADER_ASSIGNMENT_STATE :
-        case Header::HEADER_ASSIGNMENT_READ :
-        case Header::HEADER_ASSIGNMENT_WRITE :
+        switch (assigment)
+        {
+            case Header::HEADER_ASSIGNMENT_IDENTIFICATION :
+            case Header::HEADER_ASSIGNMENT_STATE :
+            case Header::HEADER_ASSIGNMENT_READ :
+            case Header::HEADER_ASSIGNMENT_WRITE :
             return true;
+        }
+    }
+    else if (type == (uint8_t)Header::HEADER_TYPE_REQUEST)
+    {
+        switch (assigment)
+        {
+            case Header::HEADER_ASSIGNMENT_STATE :
+            case Header::HEADER_ASSIGNMENT_READ :
+            case Header::HEADER_ASSIGNMENT_WRITE :
+            return true;
+        }
     }
 
     return false;
