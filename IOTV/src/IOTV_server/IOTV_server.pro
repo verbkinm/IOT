@@ -16,6 +16,7 @@ SOURCES += \
     ../lib/Protocols/embedded/iotv_server_embedded.cpp \
     ../lib/Protocols/embedded/read_write.cpp \
     ../lib/Protocols/embedded/state.cpp \
+    ../lib/Protocols/embedded/iotvp_print.cpp \
     ConfigTypes.cpp \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
@@ -31,7 +32,6 @@ SOURCES += \
         ../lib/Base_Host/base_host.cpp \
         ../lib/Base_Host/channel.cpp \
         ../lib/Log/log.cpp \
-        ../lib/Protocols/IOTV_SC.cpp \
         ../lib/raw/raw.cpp \
 
 # Default rules for deployment.
@@ -47,6 +47,7 @@ HEADERS += \
     ../lib/Protocols/embedded/iotv_server_embedded.h \
     ../lib/Protocols/embedded/read_write.h \
     ../lib/Protocols/embedded/state.h \
+    ../lib/Protocols/embedded/iotvp_print.h \
     ConfigTypes.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
@@ -60,8 +61,6 @@ HEADERS += \
     ../lib/Base_Host/base_host.h \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
-    ../lib/Protocols/IOTV_SC.h \
-    ../lib/Protocols/protocols.h \
     ../lib/raw/raw.h
 
 INCLUDEPATH += ../lib/Base_Host \

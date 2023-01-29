@@ -110,7 +110,7 @@ qint64 IOTV_Host::read(uint8_t channelNumber)
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber);
 
-    return writeToRemoteHost(outData, size);
+    return writeToRemoteHost({outData, static_cast<qsizetype>(size)});
 }
 
 qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
@@ -121,7 +121,7 @@ qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
     char outData[BUFSIZ];
     auto size = queryWriteData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, data.data(), data.size());
 
-    return writeToRemoteHost(outData, size);
+    return writeToRemoteHost({outData, static_cast<qsizetype>(size)});
 }
 
 QByteArray IOTV_Host::readData(uint8_t channelNumber) const
@@ -132,7 +132,7 @@ QByteArray IOTV_Host::readData(uint8_t channelNumber) const
 qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 {
     std::lock_guard lg(_mutexWrite);
-        return _conn_type->write(data, size);
+    return _conn_type->write(data, size);
 }
 
 void IOTV_Host::dataResived(QByteArray data)
@@ -174,6 +174,8 @@ void IOTV_Host::dataResived(QByteArray data)
                 responcePingPoing(iot);
             else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
                 responceState(iot);
+
+//            printHeader(header);
 
             clearIOTV_Server(iot);
         }
@@ -265,7 +267,7 @@ void IOTV_Host::slotConnected()
     char outData[BUFSIZ];
     auto size = queryIdentificationData(outData, BUFSIZ);
 
-    writeToRemoteHost(outData, size);
+    writeToRemoteHost({outData, static_cast<qsizetype>(size)});
 
     _timerPong.start(TIMER_PONG);
 }
@@ -279,6 +281,7 @@ void IOTV_Host::slotDisconnected()
     _timerReRead.stop();
 
     _conn_type->clearDataBuffer();
+    _expectedDataSize = 0;
 }
 
 void IOTV_Host::slotReReadTimeOut()
@@ -292,7 +295,7 @@ void IOTV_Host::slotPingTimeOut()
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);
 
-    writeToRemoteHost(outData, size);
+    writeToRemoteHost({outData, static_cast<qsizetype>(size)});
 }
 
 void IOTV_Host::slotReconnectTimeOut()

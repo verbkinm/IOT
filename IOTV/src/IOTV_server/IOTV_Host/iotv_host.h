@@ -13,6 +13,8 @@
 #include "ConfigTypes.h"
 #include "IOTV_SH.h"
 
+#include "iotvp_print.h"
+
 class IOTV_Host : public Base_Host
 {
     Q_OBJECT

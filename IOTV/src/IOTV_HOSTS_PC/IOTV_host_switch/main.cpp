@@ -41,6 +41,8 @@ void slotDataRecived()
 {
     buffer += socket->readAll();
 
+    qDebug() << buffer.toHex(':') << '\n';
+
     if ((uint64_t)buffer.size() < expextedDataSize)
         return;
 
@@ -108,6 +110,11 @@ void slotDisconnected()
     QString strOut = "disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
     std::cout << strOut.toStdString() << std::endl;
+
+    buffer.clear();
+    error = false;
+    cutDataSize = 0;
+    expextedDataSize = 0;
 }
 
 //для ПК

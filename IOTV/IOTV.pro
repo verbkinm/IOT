@@ -1,11 +1,11 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-#    src/IOTV_Client_QML \
+    src/IOTV_Client_QML \
 #    src/IOTV_Client \
-    src/IOTV_HOSTS_PC \
+#    src/IOTV_HOSTS_PC \
 #    src/Tests \
-    src/IOTV_server
+#    src/IOTV_server
 
 DISTFILES += \
     IOTV_Client.supp
@@ -22,5 +22,3 @@ message(Data files: $$[QT_INSTALL_DATA])
 message(Translation files: $$[QT_INSTALL_TRANSLATIONS])
 message(Settings: $$[QT_INSTALL_CONFIGURATION])
 message(Examples: $$[QT_INSTALL_EXAMPLES])
-
-
