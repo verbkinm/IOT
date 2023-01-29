@@ -57,13 +57,25 @@ void clearIdentification(struct Identification *ident)
         return;
 
     if (ident->name != NULL)
+    {
         free((void *)ident->name);
+        ident->name = NULL;
+    }
     if (ident->description != NULL)
+    {
         free((void *)ident->description);
+        ident->description = NULL;
+    }
     if (ident->writeChannelType != NULL)
+    {
         free((void *)ident->writeChannelType);
+        ident->writeChannelType = NULL;
+    }
     if (ident->readChannelType != NULL)
+    {
         free((void *)ident->readChannelType);
+        ident->readChannelType = NULL;
+    }
 
     free(ident);
     ident = NULL;

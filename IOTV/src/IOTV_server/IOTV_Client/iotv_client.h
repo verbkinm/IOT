@@ -40,6 +40,7 @@ private:
 
     uint64_t _expectedDataSize;
 
+    // Пришел запрос от клиента
     void queryIdentification();
     void queryState(const struct Header* header);
     void queryRead(const struct Header* header);

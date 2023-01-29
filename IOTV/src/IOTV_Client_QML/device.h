@@ -3,7 +3,9 @@
 #include <QTimer>
 
 #include "base_host.h"
-#include "IOTV_SC.h"
+#include "IOTV_SH.h"
+#include "raw.h"
+#include "iotv_server_embedded.h"
 
 class Device : public Base_Host
 {
@@ -21,8 +23,8 @@ class Device : public Base_Host
 
 public:
     Device() = default;
-    Device(const IOTV_SC::DEV_PKG &dev, QObject *parent = nullptr);
-    void update(const IOTV_SC::DEV_PKG &pkg);
+    Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
+    void update(const struct IOTV_Server_embedded *dev);
 
     virtual QString getName() const override;
 
@@ -48,7 +50,7 @@ private:
     const QString _name;
     QString _aliasName;
 
-    bool _state;
+//    bool _state;
 
     QTimer _timerRead, _timerState;
     uint _timerReadInterval, _timerStateInterval;

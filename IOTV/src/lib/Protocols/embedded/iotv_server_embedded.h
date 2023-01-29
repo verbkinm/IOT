@@ -31,7 +31,7 @@ struct RawEmbedded {
 
 struct IOTV_Server_embedded
 {
-    const uint8_t id;
+    const uint16_t id;
     const char * const name;
     const char * const description;
 

@@ -20,4 +20,6 @@ uint64_t queryWriteData(char* outData, uint64_t outDataSize, const char *name, u
 uint64_t queryReadData(char* outData, uint64_t outDataSize, const char *name, uint8_t channelNumber);
 uint64_t queryStateData(char* outData, uint64_t outDataSize, const char *name);
 
+struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header);
+
 #endif //IOTVP_SH

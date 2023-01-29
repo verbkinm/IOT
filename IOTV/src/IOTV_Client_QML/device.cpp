@@ -1,19 +1,22 @@
 #include "device.h"
-#include "raw.h"
 
-Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
-    : Base_Host{dev.id, parent}, _name{dev.name}, _state{false},
+Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
+    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{dev->name},
       _timerReadInterval{1000}, _timerStateInterval{1000}
 {
+    Q_ASSERT(dev != nullptr);
+//    Q_ASSERT(dev->readChannelType != nullptr);
+//    Q_ASSERT(dev->writeChannelType != nullptr);
+
     _timerRead.setParent(this);
     _timerState.setParent(this);
-    this->setDescription(dev.description);
+    this->setDescription(dev->description);
 
-    for (const auto &type : dev.readChannel)
-        this->addReadSubChannel({type});
+    for (int i = 0; i < dev->numberReadChannel; ++i)
+        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
 
-    for (const auto &type : dev.writeChannel)
-        this->addWriteSubChannel({type});
+    for (int i = 0; i < dev->numberWriteChannel; ++i)
+        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
 
     connect(&_timerRead, &QTimer::timeout, this, &Device::signalQueryRead, Qt::QueuedConnection);
     connect(&_timerState, &QTimer::timeout, this, &Device::signalQueryState, Qt::QueuedConnection);
@@ -25,18 +28,22 @@ Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
     _timerState.start();
 }
 
-void Device::update(const IOTV_SC::DEV_PKG &pkg)
+void Device::update(const IOTV_Server_embedded *dev)
 {
-    this->setId(pkg.id);
-    this->setDescription(pkg.description);
+    Q_ASSERT(dev != nullptr);
+//    Q_ASSERT(dev->readChannelType != nullptr);
+//    Q_ASSERT(dev->writeChannelType != nullptr);
+
+    this->setId(dev->id);
+    this->setDescription(dev->description);
 
     this->removeAllSubChannel();
 
-    for (const auto &type : pkg.readChannel)
-        this->addReadSubChannel({type});
+    for (int i = 0; i < dev->numberReadChannel; ++i)
+        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
 
-    for (const auto &type : pkg.writeChannel)
-        this->addWriteSubChannel({type});
+    for (int i = 0; i < dev->numberWriteChannel; ++i)
+        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
 
     emit signalUpdate();
 }
@@ -48,7 +55,7 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    return _state;
+    return state();
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)

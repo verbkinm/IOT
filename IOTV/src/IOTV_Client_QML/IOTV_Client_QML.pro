@@ -4,20 +4,20 @@ QT += quick
 CONFIG += c++2a
 
 SOURCES += \
-        ../lib/Protocols/iotvp_abstractbody.cpp \
-        ../lib/Protocols/iotvp_abstractreadwrite.cpp \
+        ../lib/Protocols/embedded/IOTV_SH.cpp \
+        ../lib/Protocols/embedded/creatorpkgs.cpp \
+        ../lib/Protocols/embedded/header.cpp \
+        ../lib/Protocols/embedded/identification.cpp \
+        ../lib/Protocols/embedded/iotv_server_embedded.cpp \
+        ../lib/Protocols/embedded/iotvp_print.cpp \
+        ../lib/Protocols/embedded/read_write.cpp \
+        ../lib/Protocols/embedded/state.cpp \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
         ../lib/Base_Host/channel.cpp \
         ../lib/Log/log.cpp \
-        ../lib/Protocols/IOTV_SC.cpp \
-        ../lib/Protocols/IOTV_SH.cpp \
-        ../lib/Protocols/iotvp_header.cpp \
         ../lib/raw/raw.cpp \
-        ../lib/Protocols/iotvp_read_write.cpp \
-        ../lib/Protocols/iotvp_state.cpp \
-        ../lib/Protocols/iotvp_identification.cpp \
         main.cpp
 
 resources.prefix = /$${TARGET}
@@ -26,7 +26,7 @@ RESOURCES += \
 
 INCLUDEPATH += ../lib/Base_Host \
             ../lib/Log \
-            ../lib/Protocols \
+            ../lib/Protocols/embedded \
             ../lib/raw
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -41,21 +41,20 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ../lib/Protocols/iotvp_abstractbody.h \
-    ../lib/Protocols/iotvp_abstractreadwrite.h \
+    ../lib/Protocols/embedded/IOTV_SH.h \
+    ../lib/Protocols/embedded/creatorpkgs.h \
+    ../lib/Protocols/embedded/header.h \
+    ../lib/Protocols/embedded/identification.h \
+    ../lib/Protocols/embedded/iotv_server_embedded.h \
+    ../lib/Protocols/embedded/iotvp_print.h \
+    ../lib/Protocols/embedded/read_write.h \
+    ../lib/Protocols/embedded/state.h \
     client.h \
     device.h \
     ../lib/Base_Host/base_host.h \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
-    ../lib/Protocols/IOTV_SC.h \
-    ../lib/Protocols/IOTV_SH.h \
-    ../lib/Protocols/iotvp_header.h \
-    ../lib/Protocols/protocols.h \
     ../lib/raw/raw.h \
-    ../lib/Protocols/iotvp_read_write.h \
-    ../lib/Protocols/iotvp_state.h \
-    ../lib/Protocols/iotvp_identification.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

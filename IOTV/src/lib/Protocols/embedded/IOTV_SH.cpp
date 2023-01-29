@@ -266,3 +266,48 @@ uint64_t queryStateData(char* outData, uint64_t outDataSize, const char *name)
 
     return headerToData(&header, outData, outDataSize);
 }
+
+struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header)
+{
+    assert(header != NULL);
+    assert(header->identification != NULL);
+//    assert(header->identification->readChannelType != NULL);
+//    assert(header->identification->writeChannelType != NULL);
+
+    auto nameSize = strlen(header->identification->name);
+    auto descriptionSize = strlen(header->identification->description);
+
+    auto numberWriteChannel = header->identification->numberWriteChannel;
+    auto numberReadChannel = header->identification->numberReadChannel;
+
+    struct IOTV_Server_embedded iot = {
+        .id = header->identification->id,
+        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
+        .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
+        .numberReadChannel = numberReadChannel,
+        .readChannel = (numberReadChannel > 0) ? (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * numberReadChannel) : NULL, //! Нет проверки, если не ошибка выделения
+        .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL, //! Нет проверки, если не ошибка выделения
+        .numberWriteChannel = header->identification->numberWriteChannel,
+        .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL, //! Нет проверки, если не ошибка выделения
+        .state = false
+    };
+
+    if (nameSize > 0)
+        memcpy((void *)iot.name, header->identification->name, nameSize);
+    if (descriptionSize > 0)
+        memcpy((void *)iot.description, header->identification->description, descriptionSize);
+
+    for (int i = 0; i < numberReadChannel; ++i)
+    {
+        iot.readChannel[i].dataSize = dataSizeonDataType(header->identification->readChannelType[i]);
+        iot.readChannel[i].data = (char *)malloc(iot.readChannel[i].dataSize);
+        iot.readChannelType[i] = header->identification->readChannelType[i];
+        iot.writeChannelType[i] = header->identification->writeChannelType[i];
+    }
+
+    struct IOTV_Server_embedded *ptrIot = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
+    memcpy(ptrIot, &iot, sizeof(struct IOTV_Server_embedded));
+
+    return ptrIot;
+}
+

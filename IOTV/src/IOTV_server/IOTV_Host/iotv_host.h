@@ -46,10 +46,10 @@ private:
     void setOnline(bool state);
 
     void responceIdentification(const struct Header *header);
-    void responceState(struct IOTV_Server_embedded *iot);
+    void responceState(const struct IOTV_Server_embedded *iot);
     void responceRead(const struct Header* header);
-    void responceWrite(struct IOTV_Server_embedded *iot);
-    void responcePingPoing(struct IOTV_Server_embedded *iot);
+    void responceWrite(const struct IOTV_Server_embedded *iot) const;
+    void responcePingPoing(const struct IOTV_Server_embedded *iot);
 
     static constexpr uint16_t TIMER_PING = 10000;
     static constexpr uint16_t TIMER_PONG = 15000;

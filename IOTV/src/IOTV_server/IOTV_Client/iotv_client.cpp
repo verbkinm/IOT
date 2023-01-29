@@ -48,7 +48,7 @@ void IOTV_Client::queryIdentification()
         struct IOTV_Server_embedded *iot = host.convert();
         auto size = responseIdentificationData(outData, BUFSIZ, iot);
 
-        write(outData, size);
+        write({outData, static_cast<qsizetype>(size)}, size);
 
         clearIOTV_Server(iot);
     }
@@ -85,7 +85,7 @@ void IOTV_Client::queryState(const Header *header)
 
         size = responseStateData(outData, BUFSIZ, iot);
 
-        write(outData, size);
+        write({outData, static_cast<qsizetype>(size)}, size);
         clearIOTV_Server(iot);
     }
 }
@@ -97,7 +97,8 @@ void IOTV_Client::queryRead(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
-        return strcmp(iotv_host.getName().toStdString().c_str(), header->state->name) == 0;
+        return memcmp(iotv_host.getName().toStdString().c_str(), header->readWrite->name, iotv_host.getName().toStdString().size());
+//        return strcmp(iotv_host.getName().toStdString().c_str(), header->readWrite->name) == 0;
     });
 
     if (it != _hosts.end())
@@ -109,7 +110,7 @@ void IOTV_Client::queryRead(const Header *header)
 
         size = responseReadData(outData, BUFSIZ, iot, header);
 
-        write(outData, size);
+        write({outData, static_cast<qsizetype>(size)});
 
         clearIOTV_Server(iot);
     }
@@ -154,7 +155,7 @@ void IOTV_Client::queryPingPoing()
 
     size = responsePingData(outData, BUFSIZ);
 
-    write(outData, size);
+    write({outData, static_cast<qsizetype>(size)});
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const

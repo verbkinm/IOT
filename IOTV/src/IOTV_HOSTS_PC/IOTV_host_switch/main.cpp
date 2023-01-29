@@ -86,6 +86,11 @@ void slotDataRecived()
                 uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
                 socket->write(transmitBuffer, size);
             }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            {
+                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
+                socket->write(transmitBuffer, size);
+            }
         }
 
         buffer = buffer.mid(cutDataSize);

@@ -13,10 +13,10 @@ public:
         ONLINE
     };
 
-    Base_Host(uint8_t id = 0, QObject *parent = nullptr);
+    Base_Host(uint16_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
 
-    uint8_t getId() const;
+    uint16_t getId() const;
     QString getDescription() const;
 
     virtual QString getName() const = 0;
@@ -49,7 +49,7 @@ protected:
 
     void removeAllSubChannel();
 
-    void setId(uint8_t id);
+    void setId(uint16_t id);
     void setDescription(const QString description);
 
     virtual bool isOnline() const = 0;
@@ -57,7 +57,7 @@ protected:
     void setState(STATE state);
 
 private:
-    uint8_t _id;
+    uint16_t _id;
     QString _description;
 
     Channel _readChannel;

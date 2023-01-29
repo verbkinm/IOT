@@ -55,7 +55,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     _timerReRead.start();
 }
 
-void IOTV_Host::responceState(struct IOTV_Server_embedded *iot)
+void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 //    if (iot == nullptr)
@@ -83,13 +83,13 @@ void IOTV_Host::responceRead(const struct Header *header)
                Log::Write_Flag::FILE, _logFile);
 }
 
-void IOTV_Host::responceWrite(struct IOTV_Server_embedded *iot)
+void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
 {
     Q_ASSERT(iot != nullptr);
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPoing(struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 
@@ -263,6 +263,7 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 void IOTV_Host::slotConnected()
 {
     setOnline(true);
+    setState(static_cast<STATE>(State::State_STATE::State_STATE_ONLINE));
 
     char outData[BUFSIZ];
     auto size = queryIdentificationData(outData, BUFSIZ);
