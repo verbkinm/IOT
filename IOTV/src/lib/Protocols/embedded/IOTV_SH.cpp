@@ -305,8 +305,10 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
         iot.readChannel[i].dataSize = dataSizeonDataType(header->identification->readChannelType[i]);
         iot.readChannel[i].data = (char *)malloc(iot.readChannel[i].dataSize);
         iot.readChannelType[i] = header->identification->readChannelType[i];
-        iot.writeChannelType[i] = header->identification->writeChannelType[i];
     }
+
+    for (int i = 0; i < numberWriteChannel; ++i)
+        iot.writeChannelType[i] = header->identification->writeChannelType[i];
 
     struct IOTV_Server_embedded *ptrIot = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
     memcpy(ptrIot, &iot, sizeof(struct IOTV_Server_embedded));

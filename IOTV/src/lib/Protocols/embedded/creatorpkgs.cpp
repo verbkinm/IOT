@@ -55,8 +55,8 @@ struct Header* createHeader(uint8_t* data, uint64_t size, bool *error,
 
     uint64_t bodySize = 0;
     memcpy(&bodySize, &data[4], 8); // Размер тела пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&bodySize, sizeof(bodySize));
+//    if (isLittleEndian())
+//        dataReverse(&bodySize, sizeof(bodySize));
 
     if (size < (HEADER_SIZE + bodySize))
     {
@@ -67,8 +67,8 @@ struct Header* createHeader(uint8_t* data, uint64_t size, bool *error,
     uint64_t sum = data[0] + data[1] + data[2] + data[3] + bodySize;
     uint64_t chSum = 0;
     memcpy(&chSum, &data[12], 8); // Размер контрольной суммы пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
 
     if (sum != chSum)
     {
@@ -94,7 +94,7 @@ struct Header* createHeader(uint8_t* data, uint64_t size, bool *error,
         .state = NULL
     };
 
-    memmove(headerResult, &header, sizeof(Header));
+    memcpy(headerResult, &header, sizeof(Header));
     *cutDataSize = HEADER_SIZE;
 
     return headerResult;
@@ -147,8 +147,8 @@ struct Identification* createIdentification(uint8_t * const data, uint64_t dataS
     uint64_t sum = id + nameSize + descriptionSize + numberWriteChannel + numberReadChannel + flags;
     uint64_t chSum = 0;
     memcpy(&chSum, &data[8], 8); // Размер контрольной суммы пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
 
     if (sum != chSum)
     {
@@ -191,7 +191,7 @@ struct Identification* createIdentification(uint8_t * const data, uint64_t dataS
     if (numberReadChannel > 0)
         memcpy((void *)identification.readChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel], numberReadChannel);
 
-    memmove(identificationResult, &identification, sizeof(struct Identification));
+    memcpy(identificationResult, &identification, sizeof(struct Identification));
 
     if ( ((nameSize > 0) && (identificationResult->name == NULL))
          || ((descriptionSize > 0) && (identificationResult->description == NULL))
@@ -230,8 +230,8 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
 
     uint32_t dataSize = 0;
     memcpy(&dataSize, &data[3], 4); // Размер данных пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&dataSize, sizeof(dataSize));
+//    if (isLittleEndian())
+//        dataReverse(&dataSize, sizeof(dataSize));
 
     if (size < (STATE_SIZE + nameSize + dataSize))
     {
@@ -242,8 +242,8 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
     uint64_t sum = nameSize + devState + flags + dataSize;
     uint64_t chSum = 0;
     memcpy(&chSum, &data[7], 8); // Размер контрольной суммы пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
 
     if (sum != chSum)
     {
@@ -272,7 +272,7 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error,
     if (dataSize > 0)
         memcpy((void *)state.data, &data[STATE_SIZE + nameSize], dataSize);
 
-    memmove(stateResult, &state, sizeof(struct State));
+    memcpy(stateResult, &state, sizeof(struct State));
 
     if ( ((nameSize > 0) && (stateResult->name == NULL)) || ((dataSize > 0) && (stateResult->data == NULL)) )
     {
@@ -308,8 +308,8 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
 
     uint32_t dataSize = 0;
     memcpy(&dataSize, &data[3], 4); // Размер данных пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&dataSize, sizeof(dataSize));
+//    if (isLittleEndian())
+//        dataReverse(&dataSize, sizeof(dataSize));
 
     if (size < (READ_WRITE_SIZE + nameSize + dataSize))
     {
@@ -320,8 +320,8 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     uint64_t sum = nameSize + channelNumber + flags + dataSize;
     uint64_t chSum = 0;
     memcpy(&chSum, &data[7], 8); // Размер контрольной суммы пакета (документация)
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
 
     if (sum != chSum)
     {
@@ -350,11 +350,11 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     if (dataSize > 0)
     {
         memcpy((void *)readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
-        if (isLittleEndian())
-            dataReverse((void *)readWrite.data, dataSize);
+//        if (isLittleEndian())
+//            dataReverse((void *)readWrite.data, dataSize);
     }
 
-    memmove(readWriteReslut, &readWrite, sizeof(struct Read_Write));
+    memcpy(readWriteReslut, &readWrite, sizeof(struct Read_Write));
 
     if ( ((nameSize > 0) && (readWriteReslut->name == NULL)) || ((dataSize > 0) && (readWriteReslut->data == NULL)) )
     {

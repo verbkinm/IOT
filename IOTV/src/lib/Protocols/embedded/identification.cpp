@@ -38,8 +38,8 @@ uint64_t identificationToData(const struct Identification *body, char *outData, 
     uint64_t chSum =  body->id + body->nameSize + body->descriptionSize
             + body->numberWriteChannel + body->numberReadChannel + body->flags;
 
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
     memcpy(&outData[8], &chSum, 8);
 
     memcpy(&outData[IDENTIFICATION_SIZE], body->name, body->nameSize);

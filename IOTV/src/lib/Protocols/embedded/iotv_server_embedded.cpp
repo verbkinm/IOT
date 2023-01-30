@@ -11,15 +11,37 @@ int8_t dataSizeonDataType(uint8_t type)
         return 2;
     case DATA_TYPE_INT_32:
     case DATA_TYPE_FLOAT_32:
-        return 3;
+        return 4;
     case DATA_TYPE_INT_64:
     case DATA_TYPE_DOUBLE_64:
-        return 4;
+        return 8;
     case DATA_TYPE_STRING:
     case DATA_TYPE_RAW:
     case DATA_TYPE_NONE:
     default:
         return 0;
+        break;
+    }
+}
+
+bool byteOrderReversebleData(uint8_t type)
+{
+    switch (type)
+    {
+    case DATA_TYPE_INT_16:
+    case DATA_TYPE_INT_32:
+    case DATA_TYPE_INT_64:
+        return true;
+    case DATA_TYPE_BOOL:
+    case DATA_TYPE_INT_8:
+    case DATA_TYPE_FLOAT_32:
+    case DATA_TYPE_DOUBLE_64:
+    case DATA_TYPE_STRING:
+    case DATA_TYPE_RAW:
+    case DATA_TYPE_NONE:
+        return false;
+    default:
+        return false;
         break;
     }
 }
@@ -50,3 +72,4 @@ void clearIOTV_Server(struct IOTV_Server_embedded *iot)
 
     free(iot);
 }
+

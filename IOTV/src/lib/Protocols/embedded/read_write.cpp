@@ -32,13 +32,13 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
         return 0;
 
     uint32_t dataSize =  body->dataSize;
-    if (isLittleEndian())
-        dataReverse(&dataSize, sizeof(dataSize));
+//    if (isLittleEndian())
+//        dataReverse(&dataSize, sizeof(dataSize));
     memcpy(&outData[3], &dataSize, 4);
 
     uint64_t chSum =  body->nameSize + body->channelNumber + body->flags + body->dataSize;
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
     memcpy(&outData[7], &chSum, 8);
 
     //!!! нужна ли проверка на 0?
@@ -48,8 +48,8 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
     if (body->dataSize > 0)
         memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
 
-    if (isLittleEndian())
-        dataReverse(&outData[READ_WRITE_SIZE + body->nameSize], body->dataSize);
+//    if (isLittleEndian())
+//        dataReverse(&outData[READ_WRITE_SIZE + body->nameSize], body->dataSize);
 
     return READ_WRITE_SIZE + body->nameSize + body->dataSize;
 }

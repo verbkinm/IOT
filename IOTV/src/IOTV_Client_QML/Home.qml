@@ -232,6 +232,7 @@ Page {
         target: client
         function onCountDeviceChanged()
         {
+            listModel.clear()
             for( var i = 0; i < target.totalDevice; i++)
             {
                 var device = target.devList()[i];

@@ -61,11 +61,6 @@ private:
     void responceWrite(const struct Header *header) const;
     void responcePingPoing(const struct Header *header);
 
-//    void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
-//    void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
-//    void response_READ(IOTV_SC::RESPONSE_PKG *pkg);
-//    void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const;
-
     void write(const QByteArray &data);
 
     void setStateConnection(bool newStateConnection);

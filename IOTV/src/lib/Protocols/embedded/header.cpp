@@ -48,13 +48,13 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
     outData[3] = header->flags;
 
     uint64_t dataSize = header->dataSize;
-    if (isLittleEndian())
-        dataReverse(&dataSize, sizeof(dataSize));
+//    if (isLittleEndian())
+//        dataReverse(&dataSize, sizeof(dataSize));
     memcpy(&outData[4], &dataSize, 8);
 
     uint64_t chSum = header->version + header->type + header->assignment + header->flags + header->dataSize;
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
     memcpy(&outData[12], &chSum, 8);
 
     if (header->identification != NULL)

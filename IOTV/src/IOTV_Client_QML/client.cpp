@@ -71,82 +71,6 @@ QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) co
     return _devices.at(deviceName).getReadChannelData(channelNumber);
 }
 
-//void Client::response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg)
-//{
-//    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST))
-//        return;
-
-//    auto *responsePkg = static_cast<IOTV_SC::RESPONSE_DEV_LIST_PKG*>(pkg);
-
-//    for (const auto &dev : responsePkg->devs)
-//    {
-//        auto result = _devices.emplace(dev.name, dev);
-//        if (result.second)
-//        {
-//            result.first->second.setParent(this);
-//            connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
-//            connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
-//            connect(&result.first->second, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
-//        }
-//        else
-//        {
-//            Device &oldDev = result.first->second;
-//            auto d = Device(dev);
-//            if (oldDev != d)
-//                oldDev.update(dev);
-
-////            QString str = QString(Q_FUNC_INFO) + " " + dev.name + " can't create new device";
-////            Log::write(str, Log::Write_Flag::STDOUT);
-//        }
-//    }
-//}
-
-//void Client::response_STATE(IOTV_SC::RESPONSE_PKG *pkg)
-//{
-//    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Response_Type::RESPONSE_STATE))
-//        return;
-
-//    auto *responsePkg = static_cast<IOTV_SC::RESPONSE_STATE_PKG*>(pkg);
-
-//    if (!_devices.contains(responsePkg->name))
-//    {
-//        //        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
-//        //        Log::write(str, Log::Write_Flag::FILE_STDOUT);
-//        return;
-//    }
-
-//    int count = countDeviceOnline();
-//    _devices[responsePkg->name].setState(responsePkg->state);
-
-//    if (count != countDeviceOnline())
-//        emit onlineDeviceChanged();
-//}
-
-//void Client::response_READ(IOTV_SC::RESPONSE_PKG *pkg)
-//{
-//    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Response_Type::RESPONSE_READ))
-//        return;
-
-//    auto *responsePkg = static_cast<IOTV_SC::RESPONSE_READ_PKG*>(pkg);
-
-//    if (!_devices.contains(responsePkg->name))
-//    {
-//        //        QString str = QString(Q_FUNC_INFO) + " " + responsePkg->name + " not found in device list!";
-//        //        Log::write(str, Log::Write_Flag::FILE_STDOUT);
-//        return;
-//    }
-
-//    _devices[responsePkg->name].setData(responsePkg->channelNumber, responsePkg->data);
-//}
-
-//void Client::response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const
-//{
-//    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Response_Type::RESPONSE_WRITE))
-//        return;
-
-//    //Нет никакой реакции на ответ о записи
-//}
-
 void Client::write(const QByteArray &data)
 {
     if (data.isEmpty())
@@ -255,7 +179,7 @@ void Client::responceIdentification(const Header *header)
     Q_ASSERT(header != NULL);
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
-    QString name = QByteArray(header->identification->name, header->identification->nameSize);
+    QString name = QByteArray{header->identification->name, header->identification->nameSize};
 
     if (!_devices.contains(name))
     {
@@ -291,7 +215,6 @@ void Client::responceState(const struct Header *header)
     if (_devices[name].state() != header->state->state)
     {
         _devices[name].setState(header->state->state);
-        emit stateConnectionChanged();
     }
 }
 
@@ -306,8 +229,8 @@ void Client::responceRead(const struct Header *header)
         return;
 
     QByteArray data;
-    if (isLittleEndian())
-        dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
+//    if (isLittleEndian() && byteOrderReversebleData(static_cast<uint8_t>(_devices[name].getReadChannelType(header->readWrite->channelNumber))))
+//        dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
     data.append(QByteArray{header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
 
     _devices[name].setData(header->readWrite->channelNumber, data);

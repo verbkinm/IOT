@@ -142,8 +142,9 @@ void IOTV_Client::queryWrite(const Header *header)
 
         // Сервер принял данные от клиента и перевернул,
         // Возвращаем их в исходное состояние и отправляем на устройство
-        if (isLittleEndian())
-            dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
+        //!!!
+//        if (isLittleEndian())
+//            dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
 
         emit it->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
 

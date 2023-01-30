@@ -49,6 +49,7 @@ struct IOTV_Server_embedded
 };
 
 int8_t dataSizeonDataType(uint8_t type);
+bool byteOrderReversebleData(uint8_t type);
 void clearIOTV_Server(struct IOTV_Server_embedded *iot);
 
 #endif // IOTV_SERVER_EMBEDDED_H

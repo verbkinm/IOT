@@ -33,19 +33,19 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
         return 0;
 
     uint32_t dataSize =  body->dataSize;
-    if (isLittleEndian())
-        dataReverse(&dataSize, sizeof(dataSize));
+//    if (isLittleEndian())
+//        dataReverse(&dataSize, sizeof(dataSize));
     memcpy(&outData[3], &dataSize, 4);
 
     uint64_t chSum =  body->nameSize + body->state + body->flags + body->dataSize;
-    if (isLittleEndian())
-        dataReverse(&chSum, sizeof(chSum));
+//    if (isLittleEndian())
+//        dataReverse(&chSum, sizeof(chSum));
     memcpy(&outData[7], &chSum, 8);
 
     memcpy(&outData[STATE_SIZE], body->name, body->nameSize);
     memcpy(&outData[STATE_SIZE + body->nameSize], body->data, body->dataSize);
-    if (isLittleEndian())
-        dataReverse(&outData[STATE_SIZE + body->nameSize], body->dataSize);
+//    if (isLittleEndian())
+//        dataReverse(&outData[STATE_SIZE + body->nameSize], body->dataSize);
 
     return STATE_SIZE + body->nameSize + body->dataSize;
 }

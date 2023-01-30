@@ -99,6 +99,9 @@ void Device::setState(bool newState)
     if (_state == static_cast<State::State_STATE>(newState))
         return;
 
+    if (newState == false)
+        newState = false;
+
     _state = static_cast<State::State_STATE>(newState);
     emit stateChanged();
 }
