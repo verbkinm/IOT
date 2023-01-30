@@ -214,7 +214,7 @@ void Client::queryIdentification()
     char outData[BUFSIZ];
     auto size = queryIdentificationData(outData, BUFSIZ);
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::queryState(const QString &name)
@@ -222,7 +222,7 @@ void Client::queryState(const QString &name)
     char outData[BUFSIZ];
     auto size = queryStateData(outData, BUFSIZ, name.toStdString().c_str());
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::queryRead(const QString &name, uint8_t channelNumber)
@@ -230,7 +230,7 @@ void Client::queryRead(const QString &name, uint8_t channelNumber)
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber);
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data)
@@ -239,7 +239,7 @@ void Client::queryWrite(const QString &name, uint8_t channelNumber, const QByteA
     auto size = queryWriteData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber,
                                data.data(), data.size());
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::queryPingPoing()
@@ -247,7 +247,7 @@ void Client::queryPingPoing()
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::responceIdentification(const Header *header)
@@ -255,11 +255,11 @@ void Client::responceIdentification(const Header *header)
     Q_ASSERT(header != NULL);
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
+    QString name = QByteArray(header->identification->name, header->identification->nameSize);
 
-    if (!_devices.contains(header->identification->name))
+    if (!_devices.contains(name))
     {
         Device dev(iot);
-        QString name = header->identification->name;
 
         auto result = _devices.emplace(name, iot);
         result.first->second.setParent(this);
@@ -269,7 +269,7 @@ void Client::responceIdentification(const Header *header)
     }
     else
     {
-        /*Device &oldDev = */_devices[header->identification->name].update(iot);
+        /*Device &oldDev = */_devices[name].update(iot);
 //        auto d = Device(iot);
 //        if (oldDev != d)
 //            oldDev.update(iot);
@@ -283,10 +283,16 @@ void Client::responceState(const struct Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->state != NULL);
 
-    if (!_devices.contains(header->state->name))
+    QString name = QByteArray(header->state->name, header->state->nameSize);
+
+    if (!_devices.contains(name))
         return;
 
-    _devices[header->state->name].setState(header->state->state);
+    if (_devices[name].state() != header->state->state)
+    {
+        _devices[name].setState(header->state->state);
+        emit stateConnectionChanged();
+    }
 }
 
 void Client::responceRead(const struct Header *header)
@@ -294,11 +300,17 @@ void Client::responceRead(const struct Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->readWrite != NULL);
 
-    if (!_devices.contains(header->readWrite->name))
+    QString name = QByteArray(header->readWrite->name, header->readWrite->nameSize);
+
+    if (!_devices.contains(name))
         return;
 
-    QByteArray data(header->readWrite->data, header->readWrite->dataSize);
-    _devices[header->readWrite->name].setData(header->readWrite->channelNumber, data);
+    QByteArray data;
+    if (isLittleEndian())
+        dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
+    data.append(QByteArray{header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
+
+    _devices[name].setData(header->readWrite->channelNumber, data);
 }
 
 void Client::responceWrite(const struct Header *header) const

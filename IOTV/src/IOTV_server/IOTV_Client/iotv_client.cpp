@@ -48,7 +48,7 @@ void IOTV_Client::queryIdentification()
         struct IOTV_Server_embedded *iot = host.convert();
         auto size = responseIdentificationData(outData, BUFSIZ, iot);
 
-        write({outData, static_cast<qsizetype>(size)}, size);
+        write({outData, static_cast<int>(size)}, size);
 
         clearIOTV_Server(iot);
     }
@@ -61,7 +61,7 @@ void IOTV_Client::queryState(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
-        return strcmp(iotv_host.getName().toStdString().c_str(), header->state->name) == 0;
+        return iotv_host.getName() == QByteArray{header->state->name, header->state->nameSize};
     });
 
     if (it != _hosts.end())
@@ -85,7 +85,7 @@ void IOTV_Client::queryState(const Header *header)
 
         size = responseStateData(outData, BUFSIZ, iot);
 
-        write({outData, static_cast<qsizetype>(size)}, size);
+        write({outData, static_cast<int>(size)}, size);
         clearIOTV_Server(iot);
     }
 }
@@ -97,8 +97,7 @@ void IOTV_Client::queryRead(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
-        return memcmp(iotv_host.getName().toStdString().c_str(), header->readWrite->name, iotv_host.getName().toStdString().size());
-//        return strcmp(iotv_host.getName().toStdString().c_str(), header->readWrite->name) == 0;
+        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
     });
 
     if (it != _hosts.end())
@@ -110,7 +109,7 @@ void IOTV_Client::queryRead(const Header *header)
 
         size = responseReadData(outData, BUFSIZ, iot, header);
 
-        write({outData, static_cast<qsizetype>(size)});
+        write({outData, static_cast<int>(size)}, size);
 
         clearIOTV_Server(iot);
     }
@@ -123,10 +122,10 @@ void IOTV_Client::queryWrite(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
     {
-        return strcmp(iotv_host.getName().toStdString().c_str(), header->state->name) == 0;
+        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
     });
 
-    if (it != _hosts.end())
+    if (it != _hosts.end() && it->state() != State::State_STATE_OFFLINE)
     {
         auto iot = it->convert();
 
@@ -134,15 +133,19 @@ void IOTV_Client::queryWrite(const Header *header)
         char outData[BUFSIZ];
 
         size = responseWriteData(outData, BUFSIZ, iot, header);
+        // Ответ клиенту о записи
+        write({outData, static_cast<int>(size)}, size);
 
-        QByteArray writeData(header->readWrite->data, header->readWrite->dataSize);
-        // Послать данные на устройство
-        it->write(header->readWrite->channelNumber, writeData);
+        // !!! Послать данные на устройство напрямую нельзя - разные потоки
+        // write(rawData, size);
 
-        QByteArray rawData(outData, size);
-//        write(rawData, size);
 
-        emit it->signalQueryWrite(header->readWrite->channelNumber, rawData);
+        // Сервер принял данные от клиента и перевернул,
+        // Возвращаем их в исходное состояние и отправляем на устройство
+        if (isLittleEndian())
+            dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
+
+        emit it->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
 
         clearIOTV_Server(iot);
     }
@@ -155,7 +158,7 @@ void IOTV_Client::queryPingPoing()
 
     size = responsePingData(outData, BUFSIZ);
 
-    write({outData, static_cast<qsizetype>(size)});
+    write({outData, static_cast<int>(size)}, size);
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const
@@ -194,6 +197,10 @@ void IOTV_Client::slotReadData()
 {
     _silenceTimer.start();
     recivedBuff += _socket->readAll();
+
+    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
+               + QString::number(socket()->peerPort())
+               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
     bool error = false;
     uint64_t cutDataSize = 0;
@@ -241,10 +248,6 @@ void IOTV_Client::slotReadData()
 
         clearHeader(header);
     }
-
-    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
-               + QString::number(socket()->peerPort())
-               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
     //    IOTV_SC::Server_RX::QUERY_PKG *pkg;
     //    while ((pkg = IOTV_SC::Server_RX::accumPacket(recivedBuff)) != nullptr)

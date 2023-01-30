@@ -8,8 +8,8 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
     struct Identification ident = {
         .flags = Identification::Identification_FLAGS_NONE,
         .id = iot->id,
-        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
-        .descriptionSize = static_cast<uint16_t>(strlen(iot->description)),
+        .nameSize = iot->nameSize,
+        .descriptionSize = iot->descriptionSize,
         .numberWriteChannel = iot->numberWriteChannel,
         .numberReadChannel = iot->numberReadChannel,
         .name = iot->name,
@@ -59,7 +59,7 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
 
     struct Read_Write readWrite = {
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
-        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .nameSize = iot->nameSize,
         .channelNumber = head->readWrite->channelNumber,
         .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
         .name = iot->name,
@@ -91,12 +91,13 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server_
     assert(iot->readChannel != NULL);
     assert(iot->readChannel[head->readWrite->channelNumber].data != NULL);
 
-    memmove(&iot->readChannel[head->readWrite->channelNumber].data, head->readWrite->data,
-            iot->readChannel[head->readWrite->channelNumber].dataSize);
+    if (head->readWrite->dataSize > 0)
+        memcpy(iot->readChannel[head->readWrite->channelNumber].data, head->readWrite->data,
+                iot->readChannel[head->readWrite->channelNumber].dataSize);
 
     struct Read_Write readWrite = {
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
-        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .nameSize = iot->nameSize,
         .channelNumber = head->readWrite->channelNumber,
         .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
         .name = iot->name,
@@ -125,7 +126,7 @@ uint64_t responseStateData(char* outData, uint64_t dataSize, const struct IOTV_S
     struct State state = {
         .flags = State::STATE_FLAGS_NONE,
         .state = static_cast<State::State_STATE>(iot->state),
-        .nameSize = static_cast<uint8_t>(strlen(iot->name)),
+        .nameSize = iot->nameSize,
         .dataSize = 0,
         .name = iot->name,
         .data = NULL
@@ -274,8 +275,8 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
 //    assert(header->identification->readChannelType != NULL);
 //    assert(header->identification->writeChannelType != NULL);
 
-    auto nameSize = strlen(header->identification->name);
-    auto descriptionSize = strlen(header->identification->description);
+    auto nameSize = header->identification->nameSize;
+    auto descriptionSize = header->identification->descriptionSize;
 
     auto numberWriteChannel = header->identification->numberWriteChannel;
     auto numberReadChannel = header->identification->numberReadChannel;
@@ -289,7 +290,9 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
         .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL, //! Нет проверки, если не ошибка выделения
         .numberWriteChannel = header->identification->numberWriteChannel,
         .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL, //! Нет проверки, если не ошибка выделения
-        .state = false
+        .state = false,
+        .nameSize = nameSize,
+        .descriptionSize = descriptionSize
     };
 
     if (nameSize > 0)

@@ -1,7 +1,7 @@
 #include "device.h"
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
-    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{dev->name},
+    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}},
       _timerReadInterval{1000}, _timerStateInterval{1000}
 {
     Q_ASSERT(dev != nullptr);
@@ -10,7 +10,7 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
 
     _timerRead.setParent(this);
     _timerState.setParent(this);
-    this->setDescription(dev->description);
+    this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
     for (int i = 0; i < dev->numberReadChannel; ++i)
         this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
@@ -35,7 +35,7 @@ void Device::update(const IOTV_Server_embedded *dev)
 //    Q_ASSERT(dev->writeChannelType != nullptr);
 
     this->setId(dev->id);
-    this->setDescription(dev->description);
+    this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
     this->removeAllSubChannel();
 
@@ -55,7 +55,10 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    return state();
+    if (_state == State::State_STATE_ONLINE)
+        return true;
+
+    return false;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
@@ -65,6 +68,9 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 
 void Device::setDataFromString(int channelNumber, QString data)
 {
+    if (data.isEmpty())
+        return;
+
     emit signalQueryWrite(channelNumber, Raw::strToByteArray(data, getWriteChannelType(channelNumber)));
 }
 
@@ -90,10 +96,10 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
-    if (_state == newState)
+    if (_state == static_cast<State::State_STATE>(newState))
         return;
 
-    _state = newState;
+    _state = static_cast<State::State_STATE>(newState);
     emit stateChanged();
 }
 

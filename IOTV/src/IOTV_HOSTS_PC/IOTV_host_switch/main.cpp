@@ -19,8 +19,8 @@ uint64_t cutDataSize = 0;
 bool error = false;
 
 
-uint8_t readType[3] = {DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_16};
-uint8_t writeType[3] = {DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_16};
+uint8_t readType[3] = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL};
+uint8_t writeType[3] = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL};
 
 QByteArray buffer;
 
@@ -31,9 +31,11 @@ struct IOTV_Server_embedded iot = {
     .numberReadChannel = 3,
     .readChannel = NULL,
     .readChannelType = readType,
-    .numberWriteChannel = 2,
+    .numberWriteChannel = 3,
     .writeChannelType = writeType,
-    .state = 1
+    .state = 1,
+    .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+    .descriptionSize = static_cast<uint8_t>(strlen(iot.description)),
 };
 
 
@@ -140,9 +142,9 @@ int main(int argc, char *argv[])
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
 
-    iot.readChannel[0].dataSize = 2;
-    iot.readChannel[1].dataSize = 2;
-    iot.readChannel[2].dataSize = 2;
+    iot.readChannel[0].dataSize = dataSizeonDataType(readType[0]);
+    iot.readChannel[1].dataSize = dataSizeonDataType(readType[1]);
+    iot.readChannel[2].dataSize = dataSizeonDataType(readType[2]);
 
     iot.readChannel[0].data = (char *)malloc(iot.readChannel[0].dataSize);
     int16_t value = 257;

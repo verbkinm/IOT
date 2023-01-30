@@ -82,13 +82,13 @@ void Base_Host::setDescription(const QString description)
     _description = description;
 }
 
-void Base_Host::setState(STATE state)
-{
-    if (_state != state)
-        _state = state;
-}
+//void Base_Host::setState(State::State_STATE state)
+//{
+//    if (_state != state)
+//        _state = state;
+//}
 
-Base_Host::STATE Base_Host::state() const
+State::State_STATE Base_Host::state() const
 {
     return _state;
 }
@@ -106,20 +106,22 @@ QString Base_Host::getDescription() const
 struct IOTV_Server_embedded *Base_Host::convert() const
 {
     auto nameSize = getName().toLocal8Bit().size();
-    auto descriptionSize = strlen(getDescription().toStdString().c_str());
+    auto descriptionSize = getDescription().toLocal8Bit().size();
     auto numberReadChannel = getReadChannelLength();
     auto numberWriteChannel = getWriteChannelLength();
 
     struct IOTV_Server_embedded iot = {
         .id = getId(),
-        .name = (nameSize > 0) ? (const char * const)malloc(nameSize) : NULL, //!!! нет проверки при не удаче выделить память
-        .description = (descriptionSize > 0) ? (const char * const)malloc(descriptionSize) : NULL,
+        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL, //!!! нет проверки при не удаче выделить память
+        .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
         .numberReadChannel = getReadChannelLength(),
         .readChannel = (numberReadChannel > 0) ? (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * numberReadChannel) : NULL, //!!! нет проверки при не удаче выделить память
         .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL, //!!! нет проверки при не удаче выделить память
         .numberWriteChannel = numberWriteChannel,
         .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL, //!!! нет проверки при не удаче выделить память
-        .state = (uint8_t)state()
+        .state = (uint8_t)state(),
+        .nameSize = static_cast<uint8_t>(nameSize),
+        .descriptionSize = static_cast<uint16_t>(descriptionSize)
     };
     //!!! временные данные нормально отработают?
     if (nameSize > 0)
@@ -129,11 +131,21 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
     {
-        iot.readChannel[i].data = (char *)malloc(getReadChannelData(i).size());
-        Q_ASSERT(iot.readChannel[i].data != NULL);
-        iot.readChannel[i].dataSize = getReadChannelData(i).size();
-        memcpy(iot.readChannel[i].data, getReadChannelData(i).data(), iot.readChannel[i].dataSize);
-        iot.readChannelType[i] = (uint8_t)getReadChannelType(i);
+        auto dataSize = dataSizeonDataType(static_cast<uint8_t>(getReadChannelType(i)));
+        auto byteArr = getReadChannelData(i);
+        if (numberReadChannel > 0) // что бы не ругался компилятор
+        {
+            iot.readChannel[i].data = (char *)malloc(dataSize);
+            Q_ASSERT(iot.readChannel[i].data != NULL);
+            iot.readChannel[i].dataSize = dataSize;
+
+            if (byteArr.size() == dataSize)
+                memcpy(iot.readChannel[i].data, byteArr.data(), dataSize);
+            else
+                memset(iot.readChannel[i].data, 0, dataSize);
+
+            iot.readChannelType[i] = (uint8_t)getReadChannelType(i);
+        }
     }
 
     for (uint8_t i = 0; i < iot.numberWriteChannel; ++i)

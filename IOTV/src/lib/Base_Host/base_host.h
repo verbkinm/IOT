@@ -7,12 +7,6 @@
 class Base_Host : public QObject
 {
 public:
-    enum class STATE : uint8_t
-    {
-        OFFLINE = 0,
-        ONLINE
-    };
-
     Base_Host(uint16_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
 
@@ -29,7 +23,7 @@ public:
 
     QByteArray getReadChannelData(uint8_t channelNumber) const;
 
-    STATE state() const;
+    State::State_STATE state() const;
 
     struct IOTV_Server_embedded *convert() const;
 
@@ -42,8 +36,6 @@ protected:
     void setReadChannel(const Channel &newReadChannel);
     void setWriteChannel(const Channel &newWriteChannel);
 
-    Raw getReadChannelRawData(uint8_t channelNumber) const;
-
     void addWriteSubChannel(const Raw &data);
     void addReadSubChannel(const Raw &data);
 
@@ -54,7 +46,9 @@ protected:
 
     virtual bool isOnline() const = 0;
 
-    void setState(STATE state);
+//    void setState(State::State_STATE state);
+
+    State::State_STATE _state;
 
 private:
     uint16_t _id;
@@ -63,7 +57,6 @@ private:
     Channel _readChannel;
     Channel _writeChannel;
 
-    STATE _state;
-
+//    State::State_STATE _state;
 };
 

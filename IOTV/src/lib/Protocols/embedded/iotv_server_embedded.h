@@ -43,6 +43,9 @@ struct IOTV_Server_embedded
     uint8_t * const writeChannelType;
 
     uint8_t state;
+
+    const uint8_t nameSize;
+    const uint16_t descriptionSize;
 };
 
 int8_t dataSizeonDataType(uint8_t type);
