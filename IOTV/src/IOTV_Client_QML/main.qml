@@ -247,8 +247,8 @@ ApplicationWindow {
             appStack.pop()
     }
 
-    onVisibilityChanged: {
-        console.log(visibility)
-    }
+//    onVisibilityChanged: {
+//        console.log(visibility)
+//    }
 }
 

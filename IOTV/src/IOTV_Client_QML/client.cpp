@@ -1,14 +1,11 @@
 #include "client.h"
 
 Client::Client(QObject *parent): QObject{parent},
-    TIME_OUT(5000),
     _stateConnection{false},
     _expectedDataSize(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-    _timerDevList.setParent(this);
-    _connectWait.setParent(this);
     _timerPing.setParent(this);
 
     connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
@@ -17,12 +14,9 @@ Client::Client(QObject *parent): QObject{parent},
 
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
-    connect(&_timerDevList, &QTimer::timeout, this, &Client::slotQueryDevList, Qt::QueuedConnection);
-    connect(&_connectWait, &QTimer::timeout, this, &Client::slotConnectWait, Qt::QueuedConnection);
     connect(&_timerPing, &QTimer::timeout, this, &Client::disconnectFromHost, Qt::QueuedConnection);
 
-    _timerDevList.start(TIME_OUT);
-    _timerPing.start(TIME_OUT * 2);
+    _timerPing.start(TIME_OUT);
 }
 
 Client::~Client()
@@ -34,13 +28,11 @@ void Client::connectToHost(const QString &address, qint64 port)
 {
     disconnectFromHost();
     _socket.connectToHost(address, port);
-    _connectWait.start(TIME_OUT);
 }
 
 void Client::disconnectFromHost()
 {
     _socket.abort();
-    //        _socket.disconnectFromHost();
 }
 
 qint64 Client::writeData(const QByteArray &data)
@@ -71,14 +63,13 @@ QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) co
 
 void Client::write(const QByteArray &data)
 {
+    //!!! нужно ли делать проверку на пустоту?
     if (!data.isEmpty())
         _socket.write(data);
 }
 
 void Client::slotConnected()
 {
-    _connectWait.stop();
-
     queryIdentification();
 
     setStateConnection(true);
@@ -112,7 +103,11 @@ QList<QObject *> Client::devList()
 
 QObject *Client::deviceByName(QString name)
 {
-    return &_devices.find(name)->second;
+    auto it = _devices.find(name);
+    if (it == _devices.end())
+        return nullptr;
+
+    return &it->second;
 }
 
 bool Client::stateConnection() const
@@ -164,28 +159,25 @@ void Client::queryPingPoing()
 void Client::responceIdentification(const Header *header)
 {
     Q_ASSERT(header != NULL);
+    Q_ASSERT(header->identification != NULL);
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
-    QString name = QByteArray{header->identification->name, header->identification->nameSize};
+    QString name(QByteArray{header->identification->name, header->identification->nameSize});
 
     if (!_devices.contains(name))
     {
         auto result = _devices.emplace(name, iot);
         if (result.second)
         {
-            result.first->second.setParent(this);
-            connect(&result.first->second, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
-            connect(&result.first->second, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
-            connect(&result.first->second, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
+            Device &device = result.first->second;
+            device.setParent(this);
+            connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
         }
     }
     else
-    {
-        /*Device &oldDev = */_devices[name].update(iot);
-        //        auto d = Device(iot);
-        //        if (oldDev != d)
-        //            oldDev.update(iot);
-    }
+        _devices[name].update(iot);
 
     clearIOTV_Server(iot);
 }
@@ -195,7 +187,7 @@ void Client::responceState(const struct Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->state != NULL);
 
-    QString name = QByteArray(header->state->name, header->state->nameSize);
+    QString name(QByteArray{header->state->name, header->state->nameSize});
 
     if (!_devices.contains(name))
         return;
@@ -203,7 +195,7 @@ void Client::responceState(const struct Header *header)
     if (_devices[name].state() != header->state->state)
     {
         _devices[name].setState(header->state->state);
-//        emit _devices[name].stad
+        emit onlineDeviceChanged();
     }
 }
 
@@ -212,28 +204,27 @@ void Client::responceRead(const struct Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->readWrite != NULL);
 
-    QString name = QByteArray(header->readWrite->name, header->readWrite->nameSize);
+    QString name(QByteArray{header->readWrite->name, header->readWrite->nameSize});
 
     if (!_devices.contains(name))
         return;
 
-    QByteArray data;
-    //    if (isLittleEndian() && byteOrderReversebleData(static_cast<uint8_t>(_devices[name].getReadChannelType(header->readWrite->channelNumber))))
-    //        dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
-    data.append(QByteArray{header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
-
-    _devices[name].setData(header->readWrite->channelNumber, data);
+    _devices[name].setData(header->readWrite->channelNumber,
+                           {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
 }
 
 void Client::responceWrite(const struct Header *header) const
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->readWrite != NULL);
+
+    // Нет реакции на ответ о записи
 }
 
 void Client::responcePingPoing(const struct Header *header)
 {
     Q_ASSERT(header != NULL);
+    // Нет реакции на ответ ping
 }
 
 void Client::setStateConnection(bool newStateConnection)
@@ -255,7 +246,8 @@ void Client::slotReciveData()
 
     while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(),
+                                           &error, &_expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -295,77 +287,13 @@ void Client::slotReciveData()
         }
         else if(header->type == Header::HEADER_TYPE_REQUEST)
         {
-            // На данный момент от сервера не должно приходить ответов
-            Log::write("Ответ от сервера не предусмотрен!");
+            // На данный момент от сервера не должно приходить запросов
+            Log::write("Запрос от сервера не предусмотрен!");
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);
         clearHeader(header);
     }
-
-
-
-    //    Log::write("Data recive from " +
-    //               _socket.peerAddress().toString() +
-    //               ':' +
-    //               QString::number(_socket.peerPort()) +
-    //               " <- " +
-    //               _recivedBuff.toHex(':'),
-    //               Log::Write_Flag::FILE_STDOUT);
-
-    //    IOTV_SC::RESPONSE_PKG *pkg;
-    //    while ((pkg = IOTV_SC::Client_RX::accumPacket(_recivedBuff)) != nullptr)
-    //    {
-    //        if (pkg->type == IOTV_SC::Response_Type::RESPONSE_INCOMPLETE)
-    //        {
-    //            delete pkg;
-    //            break;
-    //        }
-
-    //        if (pkg->type == IOTV_SC::Response_Type::RESPONSE_ERROR)
-    //        {
-    //            if (_recivedBuff.size() > 0)
-    //            {
-    //                //                Log::write("WARRNING: received data from " +
-    //                //                           _socket.peerName() +
-    //                //                           _socket.peerAddress().toString() +
-    //                //                           ':' +
-    //                //                           QString::number(_socket.peerPort()) +
-    //                //                           "UNKNOW: " +
-    //                //                           _recivedBuff.toHex(':'),
-    //                //                           Log::Write_Flag::FILE_STDOUT);
-    //                _recivedBuff.clear();
-    //            }
-    //            delete pkg;
-    //            break;
-    //        }
-
-    //        if (pkg->type == IOTV_SC::Response_Type::RESPONSE_DEVICE_LIST)
-    //        {
-    //            size_t count = _devices.size();
-
-    //            response_DEV_LIST(pkg);
-
-    //            if (count != _devices.size())
-    //                emit countDeviceChanged();
-    //        }
-    //        else if (pkg->type == IOTV_SC::Response_Type::RESPONSE_STATE)
-    //            response_STATE(pkg);
-    //        else if (pkg->type == IOTV_SC::Response_Type::RESPONSE_READ)
-    //            response_READ(pkg);
-    //        else if (pkg->type == IOTV_SC::Response_Type::RESPONSE_WRITE)
-    //            response_WRITE(pkg);
-    //        else
-    //        {
-    //            //иных вариантов быть не должно!
-    //            //            Log::write(QString(Q_FUNC_INFO) +
-    //            //                       "Unknow pkg.type = " +
-    //            //                       QString::number(int(pkg->type)),
-    //            //                       Log::Write_Flag::FILE_STDERR);
-    //            exit(-1);
-    //        }
-    //        delete pkg;
-    //    }
 }
 
 void Client::slotQueryRead()
@@ -375,7 +303,7 @@ void Client::slotQueryRead()
     if ( (dev == nullptr) || !dev->isOnline())
         return;
 
-    for (uint8_t i = 0; i < dev->getReadChannelLength(); i++)
+    for (uint8_t i = 0; i < dev->getReadChannelLength(); ++i)
         queryRead(dev->getName(), i);
 
 }
@@ -386,12 +314,6 @@ void Client::slotQueryState()
 
     if (dev == nullptr)
         return;
-
-    if (_socket.state() != QAbstractSocket::ConnectedState)
-    {
-        dev->setState(false);
-        return;
-    }
 
     queryState(dev->getName());
 }
@@ -416,11 +338,9 @@ void Client::slotError(QAbstractSocket::SocketError error)
     Q_UNUSED(error);
 }
 
+//!!!
 void Client::slotConnectWait()
 {
     emit signalConnectWait();
-    _connectWait.stop();
     disconnectFromHost();
-
-
 }

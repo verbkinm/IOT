@@ -49,7 +49,9 @@ Page {
                 width: fl.width
                 rightPadding: 10
             }
-            Label {id:state}
+            Label {
+                id:state
+            }
         }
 
         Label {

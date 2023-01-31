@@ -95,6 +95,7 @@ Page {
                 height: addr.height
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                layer.textureMirroring: ShaderEffectSource.MirrorVertically
                 antialiasing: true
                 font.pixelSize: 14
                 placeholderText: "Введите порт сервера"

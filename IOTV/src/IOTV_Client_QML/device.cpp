@@ -36,6 +36,7 @@ void Device::update(const IOTV_Server_embedded *dev)
 
     this->setId(dev->id);
     this->setDescription(QByteArray{dev->description, dev->descriptionSize});
+    this->setState(dev->state);
 
     this->removeAllSubChannel();
 

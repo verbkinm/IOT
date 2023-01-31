@@ -36,17 +36,16 @@ public:
     bool stateConnection() const;
 
 private:
-    const int TIME_OUT;
+    static constexpr int TIME_OUT = 5000;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    QTimer _timerDevList,
-            _connectWait, // после команды на соединение ожидаем, если в течение N времение ответа нет, отключаемся
-            _timerPing;
+    QTimer _timerPing;                      // "Пингуем" сервер
 
-    bool _stateConnection;
+    bool _stateConnection;                  // Состояние подключения к серверу.
     uint64_t _expectedDataSize;
 
+    //!!! unorder_map
     std::map<QString, Device> _devices;
 
     void queryIdentification();
