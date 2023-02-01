@@ -14,7 +14,7 @@ Client::Client(QObject *parent): QObject{parent},
 
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
-    connect(&_timerPing, &QTimer::timeout, this, &Client::disconnectFromHost, Qt::QueuedConnection);
+    connect(&_timerPing, &QTimer::timeout, this, &Client::queryPingPoing, Qt::QueuedConnection);
 
     _timerPing.start(TIME_OUT);
 }
@@ -81,8 +81,10 @@ void Client::slotDisconnected()
     _devices.clear();
 
     setStateConnection(false);
+    //!!! Не нужно сообщать про количество устройств, так как они обнулятся
     emit countDeviceChanged();
     emit onlineDeviceChanged();
+
     emit signalDisconnected();
 }
 
@@ -339,8 +341,8 @@ void Client::slotError(QAbstractSocket::SocketError error)
 }
 
 //!!!
-void Client::slotConnectWait()
-{
-    emit signalConnectWait();
-    disconnectFromHost();
-}
+//void Client::slotConnectWait()
+//{
+//    emit signalConnectWait();
+//    disconnectFromHost();
+//}

@@ -197,7 +197,7 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
-        visible: clientPage.connection_attempt
+        visible: false//clientPage.connection_attempt
 
         background: Rectangle{
             opacity: 0.3

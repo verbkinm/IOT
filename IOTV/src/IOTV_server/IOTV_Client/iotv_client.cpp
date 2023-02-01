@@ -2,7 +2,6 @@
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObject *parent) : QObject(parent),
     _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts),
-    _silenceInterval(60000),
     _expectedDataSize(0)
 {
     _socket->setParent(this);
@@ -43,6 +42,14 @@ const QTcpSocket *IOTV_Client::socket() const
 void IOTV_Client::queryIdentification()
 {
     char outData[BUFSIZ];
+
+    if (_hosts.size() == 0)
+    {
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL);
+        write({outData, static_cast<int>(size)}, size);
+        return;
+    }
+
     for (const auto &host : _hosts)
     {
         struct IOTV_Server_embedded *iot = host.convert();

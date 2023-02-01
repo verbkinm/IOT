@@ -6,7 +6,7 @@ Page {
     id: root
     title: "Настройки подключения"
 
-    property bool connection_attempt: false
+//    property bool connection_attempt: false
 
     function connectToHost() {
         btn.clicked()
@@ -136,12 +136,7 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
                     if (client.state)
-                    {
-                        appStack.pop()
                         return "отключиться"
-                    }
-                    else if (connection_attempt)
-                        return "подключение..."
                     else
                         return "подключиться"
                 }
@@ -160,17 +155,8 @@ Page {
                         return
                     }
 
-                    if(connection_attempt)
-                    {
-                        client.disconnectFromHost()
-                        connection_attempt = false;
-                        autoConnect.enabled = true
-                    }
-                    else if(!client.state)
-                    {
+                    if(!client.state)
                         client.connectToHost(addr.text, port.text)
-                        connection_attempt = true;
-                    }
                     else
                         client.disconnectFromHost()
                 }
@@ -186,23 +172,23 @@ Page {
         property alias autoConnect: autoConnect.checked
     }
 
-    Connections {
-        target: client
-        function onSignalConnected() {
-            connection_attempt = false
-        }
-        function onSignalDisconnected() {
-            connection_attempt = false
-        }
-        function onSignalConnectWait() {
-            connection_attempt = false;
-            connectionError.open()
-        }
-    }
+//    Connections {
+//        target: client
+//        function onSignalConnected() {
+//            connection_attempt = false
+//        }
+//        function onSignalDisconnected() {
+//            connection_attempt = false
+//        }
+//        function onSignalConnectWait() {
+//            connection_attempt = false;
+//            connectionError.open()
+//        }
+//    }
 
     Component.onCompleted: {
-        connection_attempt = settings.autoConnect
-        if (connection_attempt)
+//        connection_attempt = settings.autoConnect
+        if (settings.autoConnect)
             client.connectToHost(addr.text, port.text)
     }
 

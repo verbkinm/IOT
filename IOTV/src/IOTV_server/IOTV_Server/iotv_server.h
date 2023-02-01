@@ -46,6 +46,8 @@ private:
 
     QByteArray _server_buffer_data;
 
+    static constexpr uint _maxClientCount = 5;
+
 private slots:
     void slotNewConnection();
     void slotDisconnected();

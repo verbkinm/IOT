@@ -81,7 +81,7 @@ private slots:
     void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotError(QAbstractSocket::SocketError error);
-    void slotConnectWait();
+//    void slotConnectWait();
 
 signals:
     void signalConnected();
@@ -91,5 +91,5 @@ signals:
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
-    void signalConnectWait();
+//    void signalConnectWait();
 };

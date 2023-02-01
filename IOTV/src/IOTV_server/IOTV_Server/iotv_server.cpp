@@ -169,6 +169,13 @@ void IOTV_Server::slotNewConnection()
 
     connect(&_iot_clients.back(), &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected);
     clientOnlineFile();
+
+    if (_iot_clients.size() > _maxClientCount)
+    {
+        //!!!
+        socket->disconnectFromHost();
+        emit _iot_clients.back().signalDisconnected();
+    }
 }
 
 void IOTV_Server::slotDisconnected()

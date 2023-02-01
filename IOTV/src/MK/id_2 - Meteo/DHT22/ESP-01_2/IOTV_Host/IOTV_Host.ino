@@ -8,8 +8,10 @@
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
-const char* ssid = "TP-Link_A6BE";
-const char* password = "41706831";
+// const char* ssid = "TP-Link_A6BE";
+// const char* password = "41706831";
+const char* ssid = "vm";
+const char* password = "12345678";
 
 WiFiServer server(8888);
 WiFiClient client;
@@ -26,7 +28,7 @@ const uint8_t NUMBER_READ_CHANNEL = 2;
 uint8_t readType[NUMBER_READ_CHANNEL] = {DATA_TYPE_FLOAT_32, DATA_TYPE_FLOAT_32};
 
 struct IOTV_Server_embedded iot = {
-    .id = 1,
+    .id = 2,
     .name = "ESP-OLD",
     .description = "ESP-01 и DHT-22",
     .numberReadChannel = NUMBER_READ_CHANNEL,

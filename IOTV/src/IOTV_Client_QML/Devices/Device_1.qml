@@ -35,11 +35,11 @@ Page {
 
     Component.onCompleted: {
         console.log("Device 1 construct: ", objectName)
-        if (device.readChannelLength !== device.writeChannelLength)
-        {
-            console.error("error device id 1")
-            return
-        }
+//        if (device.readChannelLength !== device.writeChannelLength)
+//        {
+//            console.error("error device id 1")
+//            return
+//        }
 
         for (var i = 0; i < device.readChannelLength; i++)
         {

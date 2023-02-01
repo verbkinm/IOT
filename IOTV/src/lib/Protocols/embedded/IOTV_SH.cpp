@@ -2,8 +2,24 @@
 
 uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot)
 {
-    if (outData == NULL || iot == NULL)
+    if (outData == NULL)
         return 0;
+
+    if (iot == NULL)
+    {
+        struct Header header = {
+            .type = Header::HEADER_TYPE_RESPONSE,
+            .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
+            .flags = Header::HEADER_FLAGS_NONE,
+            .version = 2,
+            .dataSize = 0,
+            .identification = NULL,
+            .readWrite = NULL,
+            .state = NULL
+        };
+
+        return headerToData(&header, outData, dataSize);
+    }
 
     struct Identification ident = {
         .flags = Identification::Identification_FLAGS_NONE,
