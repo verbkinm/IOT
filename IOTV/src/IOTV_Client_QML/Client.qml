@@ -6,8 +6,13 @@ Page {
     id: root
     title: "Настройки подключения"
 
-//    property bool connection_attempt: false
+    readonly property string stateConnected: "Connected"
+    readonly property string stateConnecting: "Connecting"
+    readonly property string stateDisconnected: "Disconnected"
 
+    state: stateDisconnected
+
+    // вызывается из Home.qml
     function connectToHost() {
         btn.clicked()
     }
@@ -23,6 +28,7 @@ Page {
         }
 
         GroupBox {
+            id: groupBox
             title: "Подключение к серверу"
             font.pixelSize: 14
             height: 255
@@ -84,7 +90,6 @@ Page {
                     margins: 10
                     rightMargin: 20
                 }
-                enabled: !client.state
                 text: settings.address
                 onTextChanged: settings.address = text
             }
@@ -102,7 +107,6 @@ Page {
                 placeholderTextColor: "#cccccc"
                 validator: IntValidator{bottom: 0}
 
-                enabled: !client.state
                 anchors{
                     top: addr.bottom
                     left: label2.right
@@ -125,7 +129,6 @@ Page {
                 }
                 font.pixelSize: 14
 
-                enabled: !client.state
                 checked: settings.autoConnect
             }
 
@@ -134,12 +137,6 @@ Page {
                 width: 180
                 font.pixelSize: 18
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: {
-                    if (client.state)
-                        return "отключиться"
-                    else
-                        return "подключиться"
-                }
                 anchors.top: autoConnect.bottom
                 anchors.margins: 10
 
@@ -164,6 +161,33 @@ Page {
         }
     }
 
+    states: [
+        State {
+            name: stateConnected
+            when: client.state
+//            PropertyChanges { target: groupBox; enabled: false}
+            PropertyChanges { target: addr; enabled: false}
+            PropertyChanges { target: port; enabled: false}
+            PropertyChanges { target: autoConnect; enabled: false}
+            PropertyChanges { target: btn; text: "отключиться"}
+            PropertyChanges { target: popupWait; visible: false}
+        },
+        State {
+            name: stateConnecting
+            PropertyChanges { target: popupWait; visible: true}
+        },
+        State {
+            name: stateDisconnected
+            when: !client.state
+//            PropertyChanges { target: groupBox; enabled: true}
+            PropertyChanges { target: addr; enabled: true}
+            PropertyChanges { target: port; enabled: true}
+            PropertyChanges { target: autoConnect; enabled: true}
+            PropertyChanges { target: btn; text: "подключиться"}
+            PropertyChanges { target: popupWait; visible: false}
+        }
+    ]
+
     Settings {
         id: settings
         category: "Client"
@@ -172,22 +196,14 @@ Page {
         property alias autoConnect: autoConnect.checked
     }
 
-//    Connections {
-//        target: client
-//        function onSignalConnected() {
-//            connection_attempt = false
-//        }
-//        function onSignalDisconnected() {
-//            connection_attempt = false
-//        }
-//        function onSignalConnectWait() {
-//            connection_attempt = false;
-//            connectionError.open()
-//        }
-//    }
+    Connections {
+        target: client
+        function onSignalConnecting() { state = stateConnecting }
+        function onSignalDisconnected() { state = stateDisconnected }
+    }
 
     Component.onCompleted: {
-//        connection_attempt = settings.autoConnect
+        //        connection_attempt = settings.autoConnect
         if (settings.autoConnect)
             client.connectToHost(addr.text, port.text)
     }

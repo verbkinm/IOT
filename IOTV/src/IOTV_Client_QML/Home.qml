@@ -16,7 +16,8 @@ Page {
             anchors.left: parent.left
             anchors.margins: 5
             font.pixelSize: 12
-            text: "Состояние: " + (client.state ? "подключено" : "отключено") +
+            text: "Состояние: " +
+                  (client.state ? "подключено" : "отключено") +
                   ", кол-во устройств: (" + client.onlineDevice + "/" + client.totalDevice + ")"
             wrapMode: Text.Wrap
         }
@@ -35,11 +36,11 @@ Page {
 
         states: [
             State {
-                name: "hide"; when: client.state
+                name: "hide"; when: (client != null) ? client.state : ""
                 PropertyChanges { target: controlConnect; opacity: 0; visible: false }
             },
             State {
-                name: "show"; when: !(client.state)
+                name: "show"; when:  (client != null) ? !client.state : ""
                 PropertyChanges { target: controlConnect; opacity: 1; visible: true }
             }
         ]
@@ -54,8 +55,8 @@ Page {
             },
             Transition {
                 to: "show"
-                    PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
-                }
+                PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
+            }
         ]
 
         Text {
@@ -183,7 +184,7 @@ Page {
 
             Label {
                 id: devName
-                text: client.deviceByName(model.name).aliasName
+                text: (client != null) ? (client.deviceByName(model.name).aliasName) : ""
                 font.pixelSize: 16
                 anchors {
                     left: parent.left
@@ -243,7 +244,10 @@ Page {
                 listModel.append(object)
             }
         }
-        function onSignalDisconnected() {listModel.clear()}
+        function onSignalDisconnected() {
+            listModel.clear()
+            loaderDevice.setSource("")
+        }
     }
 
     function createDeviceBy(id)

@@ -23,7 +23,7 @@ public:
     Client(QObject *parent = nullptr);
     ~Client();
 
-    qint64 writeData(const QByteArray &data);
+//    qint64 writeData(const QByteArray &data);
 
     int countDevices() const;
     int countDeviceOnline() const;
@@ -85,11 +85,13 @@ private slots:
 
 signals:
     void signalConnected();
+    void signalConnecting();
     void signalDisconnected();
 
     void countDeviceChanged();
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
+    void slotPing();
 //    void signalConnectWait();
 };

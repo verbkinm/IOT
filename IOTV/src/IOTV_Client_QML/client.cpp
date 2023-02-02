@@ -15,8 +15,6 @@ Client::Client(QObject *parent): QObject{parent},
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
     connect(&_timerPing, &QTimer::timeout, this, &Client::queryPingPoing, Qt::QueuedConnection);
-
-    _timerPing.start(TIME_OUT);
 }
 
 Client::~Client()
@@ -35,10 +33,10 @@ void Client::disconnectFromHost()
     _socket.abort();
 }
 
-qint64 Client::writeData(const QByteArray &data)
-{
-    return _socket.write(data);
-}
+//qint64 Client::writeData(const QByteArray &data)
+//{
+//    return _socket.write(data);
+//}
 
 int Client::countDevices() const
 {
@@ -63,34 +61,42 @@ QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) co
 
 void Client::write(const QByteArray &data)
 {
-    //!!! нужно ли делать проверку на пустоту?
-    if (!data.isEmpty())
-        _socket.write(data);
+    if (!stateConnection())
+        return;
+
+    _socket.write(data);
 }
 
 void Client::slotConnected()
 {
-    queryIdentification();
+    _timerPing.start(TIME_OUT);
 
     setStateConnection(true);
     emit signalConnected();
+
+    queryIdentification();
 }
 
 void Client::slotDisconnected()
 {
+    _timerPing.stop();
+
     _devices.clear();
 
     setStateConnection(false);
     //!!! Не нужно сообщать про количество устройств, так как они обнулятся
     emit countDeviceChanged();
     emit onlineDeviceChanged();
-
-    emit signalDisconnected();
 }
 
 void Client::slotStateChanged(QAbstractSocket::SocketState socketState)
 {
     qDebug() << socketState;
+
+    if (socketState == QAbstractSocket::UnconnectedState)
+        emit signalDisconnected();
+    else if (socketState == QAbstractSocket::ConnectingState)
+        emit signalConnecting();
 }
 
 QList<QObject *> Client::devList()
