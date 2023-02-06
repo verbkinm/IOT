@@ -58,6 +58,7 @@ private:
     QByteArray stringToByteArray();
 
 signals:
+    void signalIdentification();
     void signalQueryRead();
     void signalQueryState();
     void signalQueryWrite(int channelNumber, QByteArray data);

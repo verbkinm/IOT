@@ -5,8 +5,6 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
       _timerReadInterval{1000}, _timerStateInterval{1000}
 {
     Q_ASSERT(dev != nullptr);
-//    Q_ASSERT(dev->readChannelType != nullptr);
-//    Q_ASSERT(dev->writeChannelType != nullptr);
 
     _timerRead.setParent(this);
     _timerState.setParent(this);
@@ -31,12 +29,9 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
 void Device::update(const IOTV_Server_embedded *dev)
 {
     Q_ASSERT(dev != nullptr);
-//    Q_ASSERT(dev->readChannelType != nullptr);
-//    Q_ASSERT(dev->writeChannelType != nullptr);
 
     this->setId(dev->id);
     this->setDescription(QByteArray{dev->description, dev->descriptionSize});
-//    this->setState(dev->state);
 
     this->removeAllSubChannel();
 
@@ -97,11 +92,19 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
+    if (getId() == 0)
+    {
+        emit signalIdentification();
+//        return;
+    }
+
     if (_state == static_cast<State::State_STATE>(newState))
         return;
 
     _state = static_cast<State::State_STATE>(newState);
     emit stateChanged();
+
+
 }
 
 bool operator==(const Device &lhs, const Device &rhs)

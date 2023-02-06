@@ -212,6 +212,8 @@ Page {
         console.log("Device 2 construct: ", objectName)
         if (device.readChannelLength === 3)
             pressure.visible = true
+
+        timer.triggered()
     }
 
     Component.onDestruction: {

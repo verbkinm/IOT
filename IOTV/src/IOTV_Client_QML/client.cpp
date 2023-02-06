@@ -171,7 +171,7 @@ void Client::responceIdentification(const Header *header)
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
     QString name(QByteArray{header->identification->name, header->identification->nameSize});
-!!!
+
     if (!_devices.contains(name))
     {
         auto result = _devices.emplace(name, iot);
@@ -179,6 +179,7 @@ void Client::responceIdentification(const Header *header)
         {
             Device &device = result.first->second;
             device.setParent(this);
+            connect(&device, &Device::signalIdentification, this, &Client::slotQueryIdentification, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
@@ -200,10 +201,6 @@ void Client::responceState(const struct Header *header)
     if (!_devices.contains(name))
         return;
 
-    // Если id = 0, ещё не было полученно сведений об устройстве
-    if (_devices[name].getId() == 0)
-        slotQueryDevList();
-
     if (_devices[name].state() != header->state->state)
     {
         _devices[name].setState(header->state->state);
@@ -220,10 +217,6 @@ void Client::responceRead(const struct Header *header)
 
     if (!_devices.contains(name))
         return;
-
-    // Если id = 0, ещё не было полученно сведений об устройстве
-    if (_devices[name].getId() == 0)
-        slotQueryDevList();
 
     _devices[name].setData(header->readWrite->channelNumber,
                            {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
@@ -251,18 +244,6 @@ void Client::setStateConnection(bool newStateConnection)
     _stateConnection = newStateConnection;
     emit stateConnectionChanged();
 }
-
-//bool Client::ifDevIdZeroQueryIdentification(const QString &name)
-//{
-//    // Если id = 0, ещё не было полученно сведений об устройстве
-//    if (_devices[name].getId() == 0)
-//    {
-//        slotQueryDevList();
-//        return true;
-//    }
-
-//    return false;
-//}
 
 void Client::slotReciveData()
 {
@@ -356,7 +337,7 @@ void Client::slotQueryWrite(int channelNumber, QByteArray data)
     queryWrite(dev->getName(), channelNumber, data);
 }
 
-void Client::slotQueryDevList()
+void Client::slotQueryIdentification()
 {
     queryIdentification();
 }
@@ -365,10 +346,3 @@ void Client::slotError(QAbstractSocket::SocketError error)
 {
     Q_UNUSED(error);
 }
-
-//!!!
-//void Client::slotConnectWait()
-//{
-//    emit signalConnectWait();
-//    disconnectFromHost();
-//}
