@@ -64,6 +64,8 @@ private:
 
     void setStateConnection(bool newStateConnection);
 
+//    bool ifDevIdZeroQueryIdentification(const QString &name);
+
 public slots:
     void connectToHost(const QString &address, qint64 port);
     void disconnectFromHost();

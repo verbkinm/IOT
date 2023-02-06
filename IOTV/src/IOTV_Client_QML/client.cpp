@@ -171,7 +171,7 @@ void Client::responceIdentification(const Header *header)
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
     QString name(QByteArray{header->identification->name, header->identification->nameSize});
-
+!!!
     if (!_devices.contains(name))
     {
         auto result = _devices.emplace(name, iot);
@@ -200,6 +200,10 @@ void Client::responceState(const struct Header *header)
     if (!_devices.contains(name))
         return;
 
+    // Если id = 0, ещё не было полученно сведений об устройстве
+    if (_devices[name].getId() == 0)
+        slotQueryDevList();
+
     if (_devices[name].state() != header->state->state)
     {
         _devices[name].setState(header->state->state);
@@ -216,6 +220,10 @@ void Client::responceRead(const struct Header *header)
 
     if (!_devices.contains(name))
         return;
+
+    // Если id = 0, ещё не было полученно сведений об устройстве
+    if (_devices[name].getId() == 0)
+        slotQueryDevList();
 
     _devices[name].setData(header->readWrite->channelNumber,
                            {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
@@ -243,6 +251,18 @@ void Client::setStateConnection(bool newStateConnection)
     _stateConnection = newStateConnection;
     emit stateConnectionChanged();
 }
+
+//bool Client::ifDevIdZeroQueryIdentification(const QString &name)
+//{
+//    // Если id = 0, ещё не было полученно сведений об устройстве
+//    if (_devices[name].getId() == 0)
+//    {
+//        slotQueryDevList();
+//        return true;
+//    }
+
+//    return false;
+//}
 
 void Client::slotReciveData()
 {

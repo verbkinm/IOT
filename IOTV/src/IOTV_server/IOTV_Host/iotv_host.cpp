@@ -34,7 +34,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     this->setId(header->identification->id);
     // На данный момент имя константное и считывается с файла настроек
 //    this->setNname
-    this->setDescription(header->identification->description);
+    this->setDescription(QByteArray{header->identification->description, header->identification->descriptionSize});
     this->removeAllSubChannel();
 
     for (uint8_t i = 0; i < header->identification->numberReadChannel; i++)

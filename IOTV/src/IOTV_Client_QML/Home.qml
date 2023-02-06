@@ -244,9 +244,16 @@ Page {
                 listModel.append(object)
             }
         }
+
+//        function onOnlineDeviceChanged()
+//        {
+//            onCountDeviceChanged()
+//        }
+
         function onSignalDisconnected() {
             listModel.clear()
             loaderDevice.setSource("")
+            appStack.pop(homePage)
         }
     }
 

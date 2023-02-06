@@ -42,17 +42,24 @@ struct IOTV_Server_embedded iot = {
 };
 
 void dataRecived(char ch);
+void connectToWifi();
+
+WiFiEventHandler stationConnectedHandler;
+WiFiEventHandler stationDisconnectedHandler;
 
 void setup() 
 {
+    // Wi-Fi Handlers
+  stationConnectedHandler = WiFi.onStationModeConnected(&onStationConnected);
+  stationDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationDisconnected);
+
   Serial.begin(115200);
   dht.begin();
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) 
-    delay(500);
+  connectToWifi();
 
   server.begin();
 
@@ -75,23 +82,16 @@ void loop()
       dataRecived(client.read());
   }
 
+  if (WiFi.status() != WL_CONNECTED) 
+    connectToWifi();
+
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
 
   memcpy(iot.readChannel[0].data, &temp, iot.readChannel[0].dataSize);
   memcpy(iot.readChannel[1].data, &hum, iot.readChannel[1].dataSize);
 
-  if (WiFi.status() != WL_CONNECTED) 
-  {
-    client.flush();
-    realBufSize = 0;
-    expextedDataSize = 0;
-    cutDataSize = 0;
-
-    while (WiFi.status() != WL_CONNECTED) 
-      delay(500);
-  }
-
+  delay(100);
   // while(isnan(iotServer._readChannel[0].f) ||  isnan(iotServer._readChannel[1].f))
   // {
   //   delay(2000);
@@ -163,4 +163,30 @@ void dataRecived(char ch)
     expextedDataSize = 0;
     cutDataSize = 0;
   }
+}
+
+void onStationConnected(const WiFiEventStationModeConnected& evt) 
+{
+  // Serial.print("Station connected: ");
+  // Serial.println(evt.ssid);
+}
+
+void onStationDisconnected(const WiFiEventStationModeDisconnected& evt) 
+{
+  // Serial.print("Station disconnected: ");
+  // Serial.println(evt.ssid);
+  // Serial.print("Code disconnected: ");
+  // Serial.println(evt.reason);
+
+  client.flush();
+  realBufSize = 0;
+  expextedDataSize = 0;
+  cutDataSize = 0;
+}
+
+void connectToWifi()
+{
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED) 
+    delay(500);
 }

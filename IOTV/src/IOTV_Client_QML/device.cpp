@@ -36,7 +36,7 @@ void Device::update(const IOTV_Server_embedded *dev)
 
     this->setId(dev->id);
     this->setDescription(QByteArray{dev->description, dev->descriptionSize});
-    this->setState(dev->state);
+//    this->setState(dev->state);
 
     this->removeAllSubChannel();
 
@@ -99,9 +99,6 @@ void Device::setState(bool newState)
 {
     if (_state == static_cast<State::State_STATE>(newState))
         return;
-
-    if (newState == false)
-        newState = false;
 
     _state = static_cast<State::State_STATE>(newState);
     emit stateChanged();
