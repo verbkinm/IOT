@@ -41,8 +41,6 @@ public:
 
     static QString ConnTypeToString(Conn_type conn_type);
 
-//    char transmitBuffer[BUFSIZ];
-
 protected:
     const QString _name;
     QString _address;
