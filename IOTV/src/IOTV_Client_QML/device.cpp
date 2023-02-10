@@ -1,8 +1,7 @@
 #include "device.h"
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
-    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}},
-      _timerReadInterval{1000}, _timerStateInterval{1000}
+    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}}
 {
     Q_ASSERT(dev != nullptr);
 
@@ -16,11 +15,11 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     for (int i = 0; i < dev->numberWriteChannel; ++i)
         this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
 
-    connect(&_timerRead, &QTimer::timeout, this, &Device::signalQueryRead, Qt::QueuedConnection);
-    connect(&_timerState, &QTimer::timeout, this, &Device::signalQueryState, Qt::QueuedConnection);
+    connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut, Qt::QueuedConnection);
+    connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut, Qt::QueuedConnection);
 
-    _timerRead.setInterval(_timerReadInterval);
-    _timerState.setInterval(_timerStateInterval);
+    _timerRead.setInterval(1000);
+    _timerState.setInterval(TIMER_STATE_INTERVAL);
 
     _timerRead.start();
     _timerState.start();
@@ -51,10 +50,7 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    if (_state == State::State_STATE_ONLINE)
-        return true;
-
-    return false;
+    return _state == State::State_STATE_ONLINE;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
@@ -92,19 +88,11 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
-    if (getId() == 0)
-    {
-        emit signalIdentification();
-//        return;
-    }
-
     if (_state == static_cast<State::State_STATE>(newState))
         return;
 
     _state = static_cast<State::State_STATE>(newState);
-    emit stateChanged();
-
-
+    emit signalStateChanged();
 }
 
 bool operator==(const Device &lhs, const Device &rhs)
@@ -137,5 +125,27 @@ void Device::setAliasName(const QString &newAliasName)
     if (_aliasName == newAliasName)
         return;
     _aliasName = newAliasName;
-    emit aliasNameChanged();
+    emit signalAliasNameChanged();
+}
+
+void Device::slotTimerReadTimeOut()
+{
+    if (getId() == 0)
+    {
+        emit signalQueryIdentification();
+        return;
+    }
+
+    emit signalQueryRead();
+}
+
+void Device::slotTimerStateTimeOut()
+{
+    if (getId() == 0)
+    {
+        emit signalQueryIdentification();
+        return;
+    }
+
+    emit signalQueryState();
 }

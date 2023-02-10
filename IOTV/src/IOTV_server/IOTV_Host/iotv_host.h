@@ -25,9 +25,6 @@ public:
 
     QString getName() const override;
 
-    !!!
-    virtual bool isOnline() const override;
-
     qint64 write(uint8_t channelNumber, const QByteArray &data);
     QByteArray readData(uint8_t channelNumber) const;
 
@@ -37,15 +34,9 @@ public:
 
 private:
     qint64 read(uint8_t channelNumber);
-    void dataResived(QByteArray data);
     qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
-    !!!
-    void connectToHost();
-
     void setConnectionType();
-    !!!
-    void setOnline(bool state);
 
     void responceIdentification(const struct Header *header);
     void responceState(const struct IOTV_Server_embedded *iot);
@@ -53,48 +44,26 @@ private:
     void responceWrite(const struct IOTV_Server_embedded *iot) const;
     void responcePingPoing(const struct IOTV_Server_embedded *iot);
 
-    static constexpr uint16_t TIMER_PING = 10000;
-    static constexpr uint16_t TIMER_PONG = 15000;
-
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
-                         !!!         !!!
-    QTimer _timerReRead, _timerPing, _timerPong;
+    QTimer _timerReRead, _timerState, _timerDeviceUnavailable;
 
     std::unordered_map<QString, QString>  _settingsData;
 
     QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange, _mutexWrite;
 
-    uint64_t _expectedDataSize;
-
-    enum Flag
-    {
-        DeviceRegistered = 0x01,
-        DeviceOnline = 0x02
-    };
-
-public:
-    Q_DECLARE_FLAGS(Flags, Flag)
-
-private:
-    Flags _state_flags;
-
 private slots:
-    !!!
-    void slotConnected();
-    !!!
-    void slotDisconnected();
+    void slotDataResived(QByteArray data);
 
     void slotReReadTimeOut();
-    !!!
-    void slotPingTimeOut();
-    !!!
-    void slotReconnectTimeOut();
+    void slotStateTimeOut();
+    void slotDeviceUnavailableTimeOut();
 
     void slotNewThreadStart();
     void slotThreadStop();
 
+    // Используетеся для записи данных полученых от клиентов из других потоков
     void slotQueryWrite(int channelNumber, QByteArray data);
 
 signals:
@@ -102,7 +71,6 @@ signals:
 
     void signalStopThread();
 
+    // Используетеся для записи данных полученых от клиентов из других потоков
     void signalQueryWrite(int channelNumber, QByteArray data);
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(IOTV_Host::Flags)

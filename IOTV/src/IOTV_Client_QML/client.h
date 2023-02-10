@@ -36,11 +36,11 @@ public:
     bool stateConnection() const;
 
 private:
-    static constexpr int TIME_OUT = 5000;
+//    static constexpr int TIME_OUT = 5000;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    QTimer _timerPing;                      // "Пингуем" сервер
+//    QTimer _timerServerUnavailable;                      // "Пингуем" сервер
 
     bool _stateConnection;                  // Состояние подключения к серверу.
     uint64_t _expectedDataSize;

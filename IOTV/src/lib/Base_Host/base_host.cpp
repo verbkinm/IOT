@@ -82,12 +82,6 @@ void Base_Host::setDescription(const QString description)
     _description = description;
 }
 
-//void Base_Host::setState(State::State_STATE state)
-//{
-//    if (_state != state)
-//        _state = state;
-//}
-
 State::State_STATE Base_Host::state() const
 {
     return _state;

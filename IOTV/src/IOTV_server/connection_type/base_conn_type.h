@@ -3,7 +3,6 @@
 #include <QTimer>
 
 #include "log.h"
-//#include "IOTV_SH.h"
 #include "raw.h"
 #include "creatorpkgs.h"
 
@@ -24,7 +23,6 @@ public:
     };
 
     static constexpr int BUFFER_MAX_SIZE = 256;
-    static constexpr int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
 
     QString getName() const;
     QString getAddress() const;
@@ -41,12 +39,13 @@ public:
 
     static QString ConnTypeToString(Conn_type conn_type);
 
+    uint64_t expectedDataSize;
+
 protected:
     const QString _name;
     QString _address;
     QString _logFile;
     Conn_type _type;
-    QTimer _reconnectTimer;
     QByteArray _host_buffer_data;
 
     std::mutex _hostBuffMutex;

@@ -6,7 +6,7 @@ COM_conn_type::COM_conn_type(const QString& name, QObject *parent) : Base_conn_t
 
     connect(&_serialPort, &QSerialPort::errorOccurred, this, &COM_conn_type::slotHandleError);
     connect(&_serialPort, &QSerialPort::readyRead, this, &COM_conn_type::slotReadData);
-    connect(&_reconnectTimer, &QTimer::timeout, this, &COM_conn_type::connectToHost);
+//    connect(&_reconnectTimer, &QTimer::timeout, this, &COM_conn_type::connectToHost);
 }
 
 void COM_conn_type::connectToHost()
@@ -14,10 +14,10 @@ void COM_conn_type::connectToHost()
     if (!_serialPort.open(QIODevice::ReadWrite))
     {
         Log::write(_name + " Error open port");
-        _reconnectTimer.start(DEFAULT_INTERVAL);
+//        _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
-    _reconnectTimer.stop();
+//    _reconnectTimer.stop();
     Log::write(_name + ": connected to " + _address);
     emit signalConnected();
 }
@@ -146,7 +146,7 @@ void COM_conn_type::disconnectFromHost()
         _serialPort.close();
 
     emit signalDisconnected();
-    _reconnectTimer.start(DEFAULT_INTERVAL);
+//    _reconnectTimer.start(DEFAULT_INTERVAL);
 }
 
 QByteArray COM_conn_type::readAll()

@@ -6,7 +6,7 @@ Client::Client(QObject *parent): QObject{parent},
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-    _timerPing.setParent(this);
+//    _timerServerUnavailable.setParent(this);
 
     connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
     connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected, Qt::QueuedConnection);
@@ -14,7 +14,9 @@ Client::Client(QObject *parent): QObject{parent},
 
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
-    connect(&_timerPing, &QTimer::timeout, this, &Client::queryPingPoing, Qt::QueuedConnection);
+//    connect(&_timerServerUnavailable, &QTimer::timeout, this, &Client::disconnectFromHost, Qt::QueuedConnection);
+
+//    _timerServerUnavailable.start(TIME_OUT);
 }
 
 Client::~Client()
@@ -64,23 +66,21 @@ void Client::write(const QByteArray &data)
     if (!stateConnection())
         return;
 
+
+
     _socket.write(data);
 }
 
 void Client::slotConnected()
 {
-    _timerPing.start(TIME_OUT);
-
     setStateConnection(true);
     emit signalConnected();
 
-    queryIdentification();
+    slotQueryIdentification();
 }
 
 void Client::slotDisconnected()
 {
-    _timerPing.stop();
-
     _devices.clear();
 
     setStateConnection(false);
@@ -120,7 +120,7 @@ QObject *Client::deviceByName(QString name)
 
 bool Client::stateConnection() const
 {
-    return _stateConnection;
+    return _socket.state() == QAbstractSocket::ConnectedState;
 }
 
 void Client::queryIdentification()
@@ -179,7 +179,7 @@ void Client::responceIdentification(const Header *header)
         {
             Device &device = result.first->second;
             device.setParent(this);
-            connect(&device, &Device::signalIdentification, this, &Client::slotQueryIdentification, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryIdentification, this, &Client::slotQueryIdentification, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
             connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
@@ -247,7 +247,7 @@ void Client::setStateConnection(bool newStateConnection)
 
 void Client::slotReciveData()
 {
-    _timerPing.start();
+//    _timerServerUnavailable.start();
     _recivedBuff += _socket.readAll();
 
     bool error = false;

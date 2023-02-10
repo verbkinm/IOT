@@ -1,29 +1,36 @@
 #include "iotv_host.h"
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread()),
-    _expectedDataSize(0)
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread())
 {
-    _timerPing.setParent(this);
-    _timerPong.setParent(this);
+    _timerState.setParent(this);
     _timerReRead.setParent(this);
+    _timerDeviceUnavailable.setParent(this);
+
+    auto interval = _settingsData[hostField::interval].toUInt();
+    _timerReRead.setInterval(interval < 1000 ? 1000 : interval);
+    _timerState.setInterval(TIMER_STATE_INTERVAL);
+    _timerDeviceUnavailable.setInterval(TIMER_UNAVAILABLE_INTERVAL);
 
     connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
 
+    // Используетеся для записи данных полученых от клиентов из других потоков
     connect(this, &IOTV_Host::signalQueryWrite, this, &IOTV_Host::slotQueryWrite, Qt::QueuedConnection);
+
+    connect(&_timerState, &QTimer::timeout, this, &IOTV_Host::slotStateTimeOut, Qt::QueuedConnection);
+    connect(&_timerReRead, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
+    connect(&_timerDeviceUnavailable, &QTimer::timeout, this, &IOTV_Host::slotDeviceUnavailableTimeOut, Qt::QueuedConnection);
+
+    _timerState.start();
+    _timerDeviceUnavailable.start();
+    _timerReRead.start();
 }
 
 IOTV_Host::~IOTV_Host()
 {
     emit signalStopThread();
     _thread.wait();
-}
-
-void IOTV_Host::setOnline(bool state)
-{
-    std::lock_guard lg(_mutexParametersChange);
-    _state_flags.setFlag(DeviceOnline, state);
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)
@@ -33,7 +40,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
 
     this->setId(header->identification->id);
     // На данный момент имя константное и считывается с файла настроек
-//    this->setNname
+    //    this->setNname
     this->setDescription(QByteArray{header->identification->description, header->identification->descriptionSize});
     this->removeAllSubChannel();
 
@@ -50,16 +57,12 @@ void IOTV_Host::responceIdentification(const struct Header *header)
         Raw rawData(static_cast<Raw::DATA_TYPE>(header->identification->writeChannelType[i]));
         this->addWriteSubChannel(rawData);
     }
-
-    _timerPing.start(TIMER_PING);
-    _timerReRead.start();
 }
 
 void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 
-    !!!
     _state = static_cast<State::State_STATE>(iot->state);
 }
 
@@ -91,21 +94,10 @@ void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
 void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
-
-    _timerPong.start(TIMER_PONG);
-    _timerPing.start(TIMER_PING);
-}
-
-bool IOTV_Host::isOnline() const
-{
-    return _state_flags.testFlag(Flag::DeviceOnline);
 }
 
 qint64 IOTV_Host::read(uint8_t channelNumber)
 {
-    if(!isOnline())
-        return -1;
-
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber);
 
@@ -114,7 +106,7 @@ qint64 IOTV_Host::read(uint8_t channelNumber)
 
 qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
 {
-    if(!isOnline() || (channelNumber >= this->getWriteChannelLength()))
+    if((channelNumber >= this->getWriteChannelLength()))
         return -1;
 
     char outData[BUFSIZ];
@@ -131,29 +123,40 @@ QByteArray IOTV_Host::readData(uint8_t channelNumber) const
 qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 {
     std::lock_guard lg(_mutexWrite);
+
+    // Перехват любой отправки данных, если id ещё не установлен
+    if (getId() == 0)
+    {
+        char outData[BUFSIZ];
+        auto size = queryIdentificationData(outData, BUFSIZ);
+        return _conn_type->write({outData, static_cast<int>(size)}, size);
+    }
+
     return _conn_type->write(data, size);
 }
 
-void IOTV_Host::dataResived(QByteArray data)
+void IOTV_Host::slotDataResived(QByteArray data)
 {
+    _timerDeviceUnavailable.start();
+
     bool error = false;
     uint64_t cutDataSize = 0;
 
     while (data.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(data.data()), data.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(data.data()), data.size(), &error, &_conn_type->expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
             _conn_type->clearDataBuffer();
-            _expectedDataSize = 0;
+            _conn_type->expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_expectedDataSize > 0)
+        if (_conn_type->expectedDataSize > 0)
         {
             clearHeader(header);
             break;
@@ -172,9 +175,12 @@ void IOTV_Host::dataResived(QByteArray data)
             else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
                 responcePingPoing(iot);
             else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            {
+                iot->state = header->state->state;
                 responceState(iot);
+            }
 
-//            printHeader(header);
+            //            printHeader(header);
 
             clearIOTV_Server(iot);
         }
@@ -200,11 +206,6 @@ QString IOTV_Host::getName() const
     return {};
 }
 
-void IOTV_Host::connectToHost()
-{
-    _conn_type->connectToHost();
-}
-
 //!!!
 void IOTV_Host::setConnectionType()
 {
@@ -215,6 +216,7 @@ void IOTV_Host::setConnectionType()
                 _settingsData[hostField::address],
                 _settingsData[hostField::port].toUInt(),
                 this);
+        _conn_type->connectToHost();
     }
     else if (connType == connectionType::UDP)
         //!!!
@@ -237,9 +239,10 @@ void IOTV_Host::setConnectionType()
     else if (connType == connectionType::FILE)
         _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
 
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::dataResived, Qt::QueuedConnection);
+    //    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
+    //    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
+
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
 }
 
 bool IOTV_Host::runInNewThread()
@@ -259,64 +262,40 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
     return _settingsData;
 }
 
-void IOTV_Host::slotConnected()
-{
-    setOnline(true);
-    _state = State::State_STATE::State_STATE_ONLINE;
-
-    char outData[BUFSIZ];
-    auto size = queryIdentificationData(outData, BUFSIZ);
-
-    writeToRemoteHost({outData, static_cast<int>(size)}, size);
-
-    _timerPong.start(TIMER_PONG);
-}
-
-void IOTV_Host::slotDisconnected()
-{
-    setOnline(false);
-    _state = State::State_STATE::State_STATE_OFFLINE;
-
-    _timerPing.stop();
-    _timerPong.stop();
-    _timerReRead.stop();
-
-    _conn_type->clearDataBuffer();
-    _expectedDataSize = 0;
-}
-
 void IOTV_Host::slotReReadTimeOut()
 {
     for (int i = 0; i < getReadChannelLength(); i++)
         read(i);
 }
 
-void IOTV_Host::slotPingTimeOut()
+void IOTV_Host::slotStateTimeOut()
 {
-    char outData[BUFSIZ];
-    auto size = queryPingData(outData, BUFSIZ);
+    // Если таймер сработал, значит к этому времени не пришел ответ о состоянии устройства
+    // Значит устройство не доступно
+    if (_state == State::State_STATE_ONLINE)
+        _state = State::State_STATE_OFFLINE;
 
+    char outData[BUFSIZ];
+    auto size = queryStateData(outData, BUFSIZ, getName().toStdString().c_str());
     writeToRemoteHost({outData, static_cast<int>(size)}, size);
 }
 
-void IOTV_Host::slotReconnectTimeOut()
+void IOTV_Host::slotDeviceUnavailableTimeOut()
 {
-    _conn_type->disconnectFromHost();
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
 }
 
 void IOTV_Host::slotNewThreadStart()
 {
-    connect(&_timerPing, &QTimer::timeout, this, &IOTV_Host::slotPingTimeOut, Qt::QueuedConnection);
-    connect(&_timerPong, &QTimer::timeout, this, &IOTV_Host::slotReconnectTimeOut, Qt::QueuedConnection);
-    connect(&_timerReRead, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
-
-    auto interval = _settingsData[hostField::interval].toUInt();
-    _timerReRead.setInterval(interval < 1000 ? 1000 : interval);
+    //    connect(&_timerState, &QTimer::timeout, this, &IOTV_Host::slotPingStateTimeOut, Qt::QueuedConnection);
+    //    connect(&_timerPong, &QTimer::timeout, this, &IOTV_Host::slotDeviceNotAvailable, Qt::QueuedConnection);
+    //    connect(&_timerReRead, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
 
     setConnectionType();
 
-    connectToHost();
+    // Посылаем запрос queryIdentification
+    // Так как id ещё равен 0, любой запрос на запись будет подменён на queryIdentification
+    writeToRemoteHost({});
 }
 
 void IOTV_Host::slotThreadStop()
@@ -326,8 +305,7 @@ void IOTV_Host::slotThreadStop()
 
     this->moveToThread(_parentThread);
 
-    _timerPing.moveToThread(_parentThread);
-    _timerPong.moveToThread(_parentThread);
+    _timerState.moveToThread(_parentThread);
     _timerReRead.moveToThread(_parentThread);
 
     _thread.exit();

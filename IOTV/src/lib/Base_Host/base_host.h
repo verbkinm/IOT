@@ -27,6 +27,9 @@ public:
 
     struct IOTV_Server_embedded *convert() const;
 
+    static constexpr uint16_t TIMER_STATE_INTERVAL = 3000;
+    static constexpr uint16_t TIMER_UNAVAILABLE_INTERVAL = TIMER_STATE_INTERVAL * 2;
+
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
@@ -44,10 +47,6 @@ protected:
     void setId(uint16_t id);
     void setDescription(const QString description);
 
-    virtual bool isOnline() const = 0;
-
-//    void setState(State::State_STATE state);
-
     State::State_STATE _state;
 
 private:
@@ -56,7 +55,5 @@ private:
 
     Channel _readChannel;
     Channel _writeChannel;
-
-//    State::State_STATE _state;
 };
 

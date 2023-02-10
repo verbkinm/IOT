@@ -19,13 +19,15 @@ public:
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 
+    static constexpr int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+
 protected:
     virtual QByteArray readAll() override;
 
 private:
     QTcpSocket _tcpSocket;
     quint16 _tcpPort;
-
+    QTimer _reconnectTimer;
 
 private slots:
     void slotNewConnection();

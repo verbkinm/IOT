@@ -11,12 +11,11 @@ class Device : public Base_Host
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool state READ isOnline NOTIFY stateChanged)
+    Q_PROPERTY(bool state READ isOnline NOTIFY signalStateChanged)
     Q_PROPERTY(int id READ getId CONSTANT)
     Q_PROPERTY(QString name READ getName CONSTANT)
     Q_PROPERTY(QString description READ getDescription CONSTANT)
-    Q_PROPERTY(QString aliasName READ aliasName WRITE setAliasName NOTIFY aliasNameChanged)
-
+    Q_PROPERTY(QString aliasName READ aliasName WRITE setAliasName NOTIFY signalAliasNameChanged)
 
     Q_PROPERTY(int readChannelLength READ getReadChannelLength CONSTANT)
     Q_PROPERTY(int writeChannelLength READ getWriteChannelLength CONSTANT)
@@ -28,7 +27,7 @@ public:
 
     virtual QString getName() const override;
 
-    virtual bool isOnline() const override;
+    bool isOnline() const;
     void setState(bool newState);
 
     bool setData(uint8_t channelNumber, const QByteArray &data);
@@ -50,21 +49,22 @@ private:
     const QString _name;
     QString _aliasName;
 
-//    bool _state;
-
     QTimer _timerRead, _timerState;
-    uint _timerReadInterval, _timerStateInterval;
 
     QByteArray stringToByteArray();
 
 signals:
-    void signalIdentification();
+    void signalQueryIdentification();
     void signalQueryRead();
     void signalQueryState();
     void signalQueryWrite(int channelNumber, QByteArray data);
-//    void signalDataChanged(uint8_t channelNumber, QByteArray data);
-    void stateChanged();
+
+    void signalStateChanged();
     void signalUpdate();
-    void aliasNameChanged();
+    void signalAliasNameChanged();
+
+private slots:
+    void slotTimerReadTimeOut();
+    void slotTimerStateTimeOut();
 };
 

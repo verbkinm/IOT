@@ -86,7 +86,7 @@ void IOTV_Server::startTCPServer()
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
         Log::write(str, Log::Write_Flag::FILE_STDERR, _logFile);
-        _reconnectTimer.start(Base_conn_type::DEFAULT_INTERVAL);
+        _reconnectTimer.start(TCP_conn_type::DEFAULT_INTERVAL);
     }
     else
     {

@@ -3,7 +3,7 @@
 File_conn_type::File_conn_type(const QString &name, const QString& fileName, QObject *parent) : Base_conn_type(name, parent), _file(fileName)
 {
     _type = Conn_type::FILE;
-    connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
+//    connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
 }
 
 qint64 File_conn_type::write(const QByteArray &data, qint64 size)
@@ -103,11 +103,11 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 
 void File_conn_type::connectToHost()
 {
-    _reconnectTimer.stop();
+//    _reconnectTimer.stop();
     if(!_file.open(QIODevice::ReadWrite))
     {
         Log::write(_name + ": can't open file to read write " + QFileInfo(_file).absoluteFilePath());
-        _reconnectTimer.start(DEFAULT_INTERVAL);
+//        _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
     _file.close();
@@ -119,7 +119,7 @@ void File_conn_type::connectToHost()
 void File_conn_type::disconnectFromHost()
 {
     Log::write(_name + ": close file " + QFileInfo(_file).absoluteFilePath());
-    _reconnectTimer.start(DEFAULT_INTERVAL);
+//    _reconnectTimer.start(DEFAULT_INTERVAL);
 
     emit signalDisconnected();
 }
