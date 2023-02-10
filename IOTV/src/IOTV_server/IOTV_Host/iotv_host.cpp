@@ -59,6 +59,7 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
 
+    !!!
     _state = static_cast<State::State_STATE>(iot->state);
 }
 

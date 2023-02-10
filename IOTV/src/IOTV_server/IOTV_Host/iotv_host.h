@@ -25,6 +25,7 @@ public:
 
     QString getName() const override;
 
+    !!!
     virtual bool isOnline() const override;
 
     qint64 write(uint8_t channelNumber, const QByteArray &data);
@@ -39,10 +40,11 @@ private:
     void dataResived(QByteArray data);
     qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
+    !!!
     void connectToHost();
 
     void setConnectionType();
-
+    !!!
     void setOnline(bool state);
 
     void responceIdentification(const struct Header *header);
@@ -56,7 +58,7 @@ private:
 
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
-
+                         !!!         !!!
     QTimer _timerReRead, _timerPing, _timerPong;
 
     std::unordered_map<QString, QString>  _settingsData;
@@ -79,11 +81,15 @@ private:
     Flags _state_flags;
 
 private slots:
+    !!!
     void slotConnected();
+    !!!
     void slotDisconnected();
 
     void slotReReadTimeOut();
+    !!!
     void slotPingTimeOut();
+    !!!
     void slotReconnectTimeOut();
 
     void slotNewThreadStart();
