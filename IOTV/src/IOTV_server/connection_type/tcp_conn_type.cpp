@@ -16,6 +16,8 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
+
+    _reconnectTimer.start();
 }
 
 quint16 TCP_conn_type::getPort() const
@@ -50,7 +52,6 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 
 void TCP_conn_type::connectToHost()
 {
-    _reconnectTimer.start();
     _tcpSocket.abort();
     _tcpSocket.connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }

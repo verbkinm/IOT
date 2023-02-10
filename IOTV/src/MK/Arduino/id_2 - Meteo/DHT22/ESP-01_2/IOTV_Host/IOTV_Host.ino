@@ -8,10 +8,10 @@
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
-// const char* ssid = "TP-Link_A6BE";
-// const char* password = "41706831";
-const char* ssid = "vm";
-const char* password = "12345678";
+const char* ssid = "TP-Link_A6BE";
+const char* password = "41706831";
+// const char* ssid = "vm";
+// const char* password = "12345678";
 
 WiFiServer server(8888);
 WiFiClient client;
@@ -20,7 +20,7 @@ DHT dht(DHTPIN, DHTTYPE);
 char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
 
-uint64_t expextedDataSize = 0;
+uint64_t expextedDataSize = 20;
 uint64_t cutDataSize = 0;
 bool error = false;
 
@@ -77,35 +77,38 @@ void loop()
 {
   if(!client.connected())
   {
-    clearData();
+    //clearData();
     client = server.available();
   }
   else 
   {
-    if(client.available())
+    while(client.available())
+    {
       dataRecived(client.read());
+
+      float temp = dht.readTemperature();
+      float hum = dht.readHumidity();
+
+      memcpy(iot.readChannel[0].data, &temp, iot.readChannel[0].dataSize);
+      memcpy(iot.readChannel[1].data, &hum, iot.readChannel[1].dataSize);
+    }
   }
 
   if (WiFi.status() != WL_CONNECTED) 
     connectToWifi();
-
-  float temp = dht.readTemperature();
-  float hum = dht.readHumidity();
-
-  memcpy(iot.readChannel[0].data, &temp, iot.readChannel[0].dataSize);
-  memcpy(iot.readChannel[1].data, &hum, iot.readChannel[1].dataSize);
-
-  delay(100);
-  // while(isnan(iotServer._readChannel[0].f) ||  isnan(iotServer._readChannel[1].f))
-  // {
-  //   delay(2000);
-  //   iotServer._readChannel[0].f = dht.readTemperature();
-  //   iotServer._readChannel[1].f = dht.readHumidity();
-  // }
 }
 
 void dataRecived(char ch)
 {
+    //страховка
+  if (realBufSize >= BUFSIZ)
+  {
+    realBufSize = 0;
+    expextedDataSize = 0;
+    cutDataSize = 0;
+    return;
+  }
+
   recivedBuffer[realBufSize] = ch;
   ++realBufSize;
 
@@ -114,80 +117,73 @@ void dataRecived(char ch)
 
     while (realBufSize > 0)
     {
-        struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+      struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
 
-        if (error == true)
+      if (error == true)
+      {
+          realBufSize = 0;
+          expextedDataSize = 0;
+          cutDataSize = 0;
+          return;
+      }
+
+      if (expextedDataSize > 0)
+          return;
+
+      if (header->type == Header::HEADER_TYPE_REQUEST)
+      {
+        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
         {
-            realBufSize = 0;
-            expextedDataSize = 0;
-            cutDataSize = 0;
-            return;
+          uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+          client.write(transmitBuffer, size);
         }
-
-        if (expextedDataSize > 0)
-            return;
-
-        if (header->type == Header::HEADER_TYPE_REQUEST)
+        else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
         {
-            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
-            {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
-                client.write(transmitBuffer, size);
-            }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
-            {
-                uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
-                client.write(transmitBuffer, size);
-            }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
-            {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
-                client.write(transmitBuffer, size);
-            }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
-            {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
-                client.write(transmitBuffer, size);
-            }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
-            {
-                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
-                client.write(transmitBuffer, size);
-            }
+          uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
+          client.write(transmitBuffer, size);
         }
+        else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+        {
+          uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+          client.write(transmitBuffer, size);
+        }
+        else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+        {
+          uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
+          client.write(transmitBuffer, size);
+        }
+        else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+        {
+          uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
+          client.write(transmitBuffer, size);
+        }
+      }
 
       memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
       realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
+      // realBufSize = 0;
     }
-
-  //страховка
-  if (realBufSize >= BUFSIZ)
-  {
-    realBufSize = 0;
-    expextedDataSize = 0;
-    cutDataSize = 0;
-  }
 }
 
 void onStationConnected(const WiFiEventStationModeConnected& evt) 
 {
-  // Serial.print("Station connected: ");
-  // Serial.println(evt.ssid);
+  Serial.print("Station connected: ");
+  Serial.println(evt.ssid);
 }
 
 void onStationDisconnected(const WiFiEventStationModeDisconnected& evt) 
 {
-  // Serial.print("Station disconnected: ");
-  // Serial.println(evt.ssid);
-  // Serial.print("Code disconnected: ");
-  // Serial.println(evt.reason);
+  Serial.print("Station disconnected: ");
+  Serial.println(evt.ssid);
+  Serial.print("Code disconnected: ");
+  Serial.println(evt.reason);
 
   clearData();
 }
 
 void connectToWifi()
 {
-  Serial.print("Connecting");
+  Serial.println("Connecting");
   while (WiFi.status() != WL_CONNECTED) 
     delay(500);
 }

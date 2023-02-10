@@ -217,6 +217,7 @@ void IOTV_Host::setConnectionType()
                 _settingsData[hostField::port].toUInt(),
                 this);
         _conn_type->connectToHost();
+
     }
     else if (connType == connectionType::UDP)
         //!!!
@@ -243,6 +244,7 @@ void IOTV_Host::setConnectionType()
     //    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
 
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
+    connect(this, &IOTV_Host::signalDeviceUnavailableTimeOut, _conn_type.get(), &Base_conn_type::disconnectFromHost, Qt::QueuedConnection);
 }
 
 bool IOTV_Host::runInNewThread()
@@ -283,6 +285,7 @@ void IOTV_Host::slotStateTimeOut()
 void IOTV_Host::slotDeviceUnavailableTimeOut()
 {
     Log::write(_conn_type->getName() + " WARRNING: ping timeout");
+    emit signalDeviceUnavailableTimeOut();
 }
 
 void IOTV_Host::slotNewThreadStart()

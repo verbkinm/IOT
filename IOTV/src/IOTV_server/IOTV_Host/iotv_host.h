@@ -67,6 +67,7 @@ private slots:
     void slotQueryWrite(int channelNumber, QByteArray data);
 
 signals:
+    void signalDeviceUnavailableTimeOut();
     void signalDataRiceved();
 
     void signalStopThread();

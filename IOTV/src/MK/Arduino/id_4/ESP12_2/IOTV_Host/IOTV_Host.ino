@@ -13,10 +13,10 @@
 
 int8_t modeArr[3] = { MODE_1_PIN, MODE_2_PIN, MODE_3_PIN };
 
-// const char* ssid = "TP-Link_A6BE";
-// const char* password = "41706831";
-const char* ssid = "vm";
-const char* password = "12345678";
+const char* ssid = "TP-Link_A6BE";
+const char* password = "41706831";
+// const char* ssid = "vm";
+// const char* password = "12345678";
 
 WiFiServer server(8888);
 WiFiClient client;
