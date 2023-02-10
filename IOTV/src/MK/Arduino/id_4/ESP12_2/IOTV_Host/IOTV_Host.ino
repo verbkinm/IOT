@@ -13,8 +13,10 @@
 
 int8_t modeArr[3] = { MODE_1_PIN, MODE_2_PIN, MODE_3_PIN };
 
-const char* ssid = "TP-Link_A6BE";
-const char* password = "41706831";
+// const char* ssid = "TP-Link_A6BE";
+// const char* password = "41706831";
+const char* ssid = "vm";
+const char* password = "12345678";
 
 WiFiServer server(8888);
 WiFiClient client;
@@ -185,8 +187,8 @@ void loop()
     }
   }
 
-  // delay(500);
-  // debug();
+  delay(500);
+  debug();
 }
 
 void dataRecived(char ch)
@@ -299,11 +301,11 @@ void connectToWifi()
 void debug() 
 {
   Serial.print("CH0 (ADC): ");
-  Serial.println(*(int16_t *)iot.readChannel[ADC].data);
-  Serial.print("CH1, (Repeate): ");
+  Serial.print(*(int16_t *)iot.readChannel[ADC].data);
+  Serial.print("; CH1, (Repeate): ");
   Serial.print(*(bool *)iot.readChannel[REPEATE].data);
-  Serial.print("CH2 (Mode): ");
-  Serial.println(*(int8_t *)iot.readChannel[MODE].data);
-  Serial.print("CH3 (Trigger): ");
+  Serial.print("; CH2 (Mode): ");
+  Serial.print(*(int8_t *)iot.readChannel[MODE].data);
+  Serial.print("; CH3 (Trigger): ");
   Serial.println(*(bool *)iot.readChannel[TRIGGER].data);
 }

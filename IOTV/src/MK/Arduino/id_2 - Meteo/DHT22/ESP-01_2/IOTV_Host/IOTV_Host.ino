@@ -43,6 +43,7 @@ struct IOTV_Server_embedded iot = {
 
 void dataRecived(char ch);
 void connectToWifi();
+void clearData();
 
 WiFiEventHandler stationConnectedHandler;
 WiFiEventHandler stationDisconnectedHandler;
@@ -74,8 +75,11 @@ void setup()
 
 void loop() 
 {
-  if(!client.connected()) 
+  if(!client.connected())
+  {
+    clearData();
     client = server.available();
+  }
   else 
   {
     if(client.available())
@@ -178,10 +182,7 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
   // Serial.print("Code disconnected: ");
   // Serial.println(evt.reason);
 
-  client.flush();
-  realBufSize = 0;
-  expextedDataSize = 0;
-  cutDataSize = 0;
+  clearData();
 }
 
 void connectToWifi()
@@ -189,4 +190,12 @@ void connectToWifi()
   Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) 
     delay(500);
+}
+
+void clearData()
+{
+  client.flush();
+  realBufSize = 0;
+  expextedDataSize = 0;
+  cutDataSize = 0;
 }
