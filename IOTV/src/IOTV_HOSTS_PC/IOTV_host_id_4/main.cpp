@@ -1,81 +1,126 @@
 #include <QCoreApplication>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QTimer>
 
 #include <iostream>
 
-#include "Protocols/IOTV_SH.h"
-#include "iot_server.h"
+#include "creatorpkgs.h"
+#include "IOTV_SH.h"
+#include "iotv_server_embedded.h"
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
 
-IOTV_Server iot;
+char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
+uint64_t realBufSize = 0;
 
-char recivedBuffer[BUFSIZ] {0}, transmitBuffer[BUFSIZ] {0};
-char* ptrBuf = recivedBuffer;
+uint64_t expextedDataSize = HEADER_SIZE;
+uint64_t cutDataSize = 0;
+bool error = false;
 
-void debug()
-{
-    qDebug() << "Play: " << iot.play()
-             << ", Led: " << iot.led()
-             << ", Repeate: " << iot.repeate()
-             << ", Mode: " << iot.mode();
-}
+
+#define ADC 0
+#define REPEATE 1
+#define MODE 2
+#define TRIGGER 3
+#define ADC_BORDER 20 // граничное значение ADC для определения воспроизведения музыки
+
+const uint8_t NUMBER_READ_CHANNEL = 4;
+const uint8_t NUMBER_WRITE_CHANNEL = NUMBER_READ_CHANNEL;
+
+const uint8_t readType[NUMBER_READ_CHANNEL] = {
+                                                DATA_TYPE_INT_16,
+                                                DATA_TYPE_BOOL,
+                                                DATA_TYPE_INT_8,
+                                                DATA_TYPE_BOOL
+                                              };
+struct IOTV_Server_embedded iot = {
+    .id = 4,
+    .name = "Cloud",
+    .description = "Облачко - музыкальный ночник для Евы-Королевы",
+    .numberReadChannel = NUMBER_READ_CHANNEL,
+    .readChannel = NULL,
+    .readChannelType = (uint8_t *)readType,
+    .numberWriteChannel = NUMBER_WRITE_CHANNEL,
+    .writeChannelType = (uint8_t *)readType,
+    .state = 1,
+    .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+    .descriptionSize = static_cast<uint8_t>(strlen(iot.description)),
+};
+
+QByteArray buffer;
 
 void slotDataRecived()
 {
-    uint16_t dataSize = 0;
-    uint64_t recvSize = socket->read(ptrBuf, BUFSIZ); //!!!
-    ptrBuf += recvSize;
+    buffer += socket->readAll();
 
-//    if (ptrBuf > recivedBuffer + BUFSIZ - 1)
-//        ptrBuf = recivedBuffer;
+    qDebug() << buffer.toHex(':') << '\n';
 
-    while(ptrBuf != recivedBuffer)
+    if ((uint64_t)buffer.size() < expextedDataSize)
+        return;
+
+    while (buffer.size() > 0)
     {
-        if (recivedBuffer[0] == Protocol_class::QUERY_WAY_BYTE)
-        {
-            dataSize = Protocol_class::response_WAY(iot, transmitBuffer);
-            socket->write(transmitBuffer, dataSize);
-            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
-            ptrBuf--;
-        }
-        else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_READ_BYTE)
-        {
-            dataSize = Protocol_class::response_READ(iot, recivedBuffer, ptrBuf, transmitBuffer);
+        memcpy(recivedBuffer, buffer.data(), buffer.size());
 
-            socket->write(transmitBuffer, dataSize);
-            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
-            ptrBuf--;
-        }
-        else if (recivedBuffer[0] == Protocol_class::QUERY_PING_BYTE)
+        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
+
+        if (error == true)
         {
-            dataSize = Protocol_class::response_Pong(transmitBuffer);
-            socket->write(transmitBuffer, dataSize);
-            memmove((void*)recivedBuffer, (void*)&recivedBuffer[1], BUFSIZ - 1);
-            ptrBuf--;
+            realBufSize = 0;
+            expextedDataSize = 0;
+            cutDataSize = 0;
+            buffer.clear();
+            return;
         }
-        else if ((recivedBuffer[0] & 0x0F) == Protocol_class::QUERY_WRITE_BYTE)
+
+        if (expextedDataSize > 0)
+            return;
+
+        if (header->type == Header::HEADER_TYPE_REQUEST)
         {
-            //локальный dataSize
-            int dataSize = Protocol_class::response_WRITE(iot, recivedBuffer, ptrBuf, transmitBuffer);
-            if (dataSize >= 0)
+            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                socket->write(transmitBuffer, 1); // ответ на write = 1 байт
-                memmove((void*)recivedBuffer, (void*)&recivedBuffer[dataSize + 3], BUFSIZ - (dataSize + 3));
-                ptrBuf -= dataSize + 3;
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+                socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            {
+                uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
+                socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            {
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+                socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            {
+                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
+                socket->write(transmitBuffer, size);
+            }
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            {
+                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
+                socket->write(transmitBuffer, size);
             }
         }
-        else
-            ptrBuf = recivedBuffer;
 
-        if (ptrBuf < recivedBuffer)
-            ptrBuf = recivedBuffer;
-
-        debug();
+        buffer = buffer.mid(cutDataSize);
     }
+
+    //    //!!!
+    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
+    //    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
+
+    //    //страховка
+    //    if (realBufSize >= BUFSIZ)
+    //    {
+    //        realBufSize = 0;
+    //        expextedDataSize = 0;
+    //        cutDataSize = 0;
+    //    }
+
 }
 //для ПК
 void slotDisconnected()
@@ -83,6 +128,11 @@ void slotDisconnected()
     QString strOut = "disconnected from " + socket->peerAddress().toString()
             + ":" + QString::number(socket->peerPort());
     std::cout << strOut.toStdString() << std::endl;
+
+    buffer.clear();
+    error = false;
+    cutDataSize = 0;
+    expextedDataSize = 0;
 }
 
 //для ПК
@@ -100,9 +150,15 @@ void slotNewConnection()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QTimer timer;
-    timer.setInterval(5000);
-    timer.start();
+
+    // Выделения памяти для iot структуры
+    iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
+
+    for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
+    {
+      iot.readChannel[i].dataSize = dataSizeonDataType(readType[i]);
+      iot.readChannel[i].data = (char *)calloc(iot.readChannel[i].dataSize, sizeof(char));
+    }
 
     server = new QTcpServer;
 
@@ -110,12 +166,8 @@ int main(int argc, char *argv[])
         slotNewConnection();
     });
 
-//    QObject::connect(&timer, &QTimer::timeout, [&](){
-//       iot.setPlay(!iot.play());
-//    });
-
-    server->listen(QHostAddress("127.0.0.1"), 2025);
-    std::cout << "Start service on 127.0.0.1:2025" << std::endl;
+    server->listen(QHostAddress("127.0.0.1"), 2024);
+    std::cout << "Start service on 127.0.0.1:2024" << std::endl;
 
     return a.exec();
 }

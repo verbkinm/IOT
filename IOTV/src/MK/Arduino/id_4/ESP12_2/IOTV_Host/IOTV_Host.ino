@@ -4,6 +4,8 @@
 #include <IOTV_SH.h>
 #include <iotv_server_embedded.h>
 
+#define BUFSIZ 256  // по умолчанию, после компиляции, BUFSIZ = 128
+
 #define PLAY_PIN D5
 // #define LED_PIN D7
 #define MODE_1_PIN D1
@@ -47,7 +49,7 @@ bool error = false;
 const uint8_t NUMBER_READ_CHANNEL = 4;
 const uint8_t NUMBER_WRITE_CHANNEL = NUMBER_READ_CHANNEL;
 
-const uint8_t readType[NUMBER_READ_CHANNEL] = { 
+uint8_t readType[NUMBER_READ_CHANNEL] = { 
                                                 DATA_TYPE_INT_16, 
                                                 DATA_TYPE_BOOL, 
                                                 DATA_TYPE_INT_8, 
@@ -71,7 +73,7 @@ struct IOTV_Server_embedded iot = {
 //**************************************************
 
 void dataRecived(char ch);
-uint8_t avrADC();
+int16_t avrADC();
 void connectToWifi();
 void debug();
 
@@ -115,6 +117,11 @@ void setup()
     iot.readChannel[i].dataSize = dataSizeonDataType(readType[i]);
     iot.readChannel[i].data = (char *)calloc(iot.readChannel[i].dataSize, sizeof(char));
   }
+
+  if (isLittleEndian())
+    Serial.println("LE");
+  else
+    Serial.println("BE");
 }
 
 void loop() 
@@ -127,14 +134,14 @@ void loop()
   }
   else 
   {
-    if(client.available())
+    while(client.available())
       dataRecived(client.read());
   }
 
   if (WiFi.status() != WL_CONNECTED) 
     connectToWifi();
 
-  // Записываем сренее значение ADC в канал чтения ADC
+  // Записываем среднее значение ADC в канал чтения ADC
   int16_t resADC = avrADC();
   memcpy(iot.readChannel[ADC].data, &resADC, iot.readChannel[ADC].dataSize);
 
@@ -187,72 +194,77 @@ void loop()
     }
   }
 
-  delay(500);
-  debug();
+  // delay(500);
+  // debug();
+  // Serial.printf("realBufSize = %lld\n", realBufSize);
+  // Serial.printf("expextedDataSize = %lld\n", expextedDataSize);
+  // Serial.printf("cutDataSize = %lld\n", cutDataSize);
 }
 
 void dataRecived(char ch)
-{
-  recivedBuffer[realBufSize] = ch;
-  ++realBufSize;
-
-  if (realBufSize < expextedDataSize)
-        return;
-
-    while (realBufSize > 0)
-    {
-      struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
-
-      if (error == true)
-      {
-        realBufSize = 0;
-        expextedDataSize = 0;
-        cutDataSize = 0;
-        return;
-      }
-
-      if (expextedDataSize > 0)
-        return;
-
-      if (header->type == Header::HEADER_TYPE_REQUEST)
-      {
-        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
-        {
-          uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
-          client.write(transmitBuffer, size);
-        }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
-        {
-          uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
-          client.write(transmitBuffer, size);
-        }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
-        {
-          uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
-          client.write(transmitBuffer, size);
-        }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
-        {
-          uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
-          client.write(transmitBuffer, size);
-        }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
-        {
-          uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
-          client.write(transmitBuffer, size);
-        }
-      }
-
-      memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
-      realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
-    }
-
+{  
   //страховка
   if (realBufSize >= BUFSIZ)
   {
     realBufSize = 0;
     expextedDataSize = 0;
     cutDataSize = 0;
+  }
+
+  recivedBuffer[realBufSize] = ch;
+  ++realBufSize;
+
+  if (realBufSize < expextedDataSize)
+        return;
+
+  while (realBufSize > 0)
+  {
+    struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+
+    if (error == true)
+    {
+      realBufSize = 0;
+      expextedDataSize = 0;
+      cutDataSize = 0;
+      return;
+    }
+
+    if (expextedDataSize > 0)
+      return;
+
+    if (header->type == Header::HEADER_TYPE_REQUEST)
+    {
+      if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+      {
+        uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+        client.write(transmitBuffer, size);
+      }
+      else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+      {
+        uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
+        client.write(transmitBuffer, size);
+      }
+      else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+      {
+        uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+        client.write(transmitBuffer, size);
+      }
+      else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+      {
+        uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
+        client.write(transmitBuffer, size);
+      }
+      else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+      {
+        uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
+        client.write(transmitBuffer, size);
+      }
+    }
+
+    memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
+    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
+
+    clearHeader(header);
   }
 }
 
@@ -275,9 +287,9 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
   cutDataSize = 0;
 }
 
-uint8_t avrADC()
+int16_t avrADC()
 {
-  int value = 0;
+  int16_t value = 0;
   for (uint8_t i = 0; i < 5; i++)
   {
     value += analogRead(IS_PLAYING_PIN);

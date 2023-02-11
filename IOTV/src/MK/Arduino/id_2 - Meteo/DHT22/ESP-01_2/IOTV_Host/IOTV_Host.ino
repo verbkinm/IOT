@@ -8,6 +8,8 @@
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
+#define BUFSIZ 256  // по умолчанию, после компиляции, BUFSIZ = 128
+
 const char* ssid = "TP-Link_A6BE";
 const char* password = "41706831";
 // const char* ssid = "vm";
@@ -62,6 +64,7 @@ void setup()
 
   connectToWifi();
 
+  // TCP сервер - старт
   server.begin();
 
   iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
@@ -162,6 +165,8 @@ void dataRecived(char ch)
       memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
       realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
       // realBufSize = 0;
+
+      clearHeader(header);
     }
 }
 
