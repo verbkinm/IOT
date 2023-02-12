@@ -1,16 +1,17 @@
 #include "iotv_host.h"
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread())
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread()),
+    _counterState(0), _counterPing(0)
 {
     _timerState.setParent(this);
     _timerReRead.setParent(this);
-    _timerDeviceUnavailable.setParent(this);
+    _timerPing.setParent(this);
 
     auto interval = _settingsData[hostField::interval].toUInt();
     _timerReRead.setInterval(interval < 1000 ? 1000 : interval);
     _timerState.setInterval(TIMER_STATE_INTERVAL);
-    _timerDeviceUnavailable.setInterval(TIMER_UNAVAILABLE_INTERVAL);
+    _timerPing.setInterval(TIMER_PING_INTERVAL);
 
     connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
@@ -20,11 +21,11 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
 
     connect(&_timerState, &QTimer::timeout, this, &IOTV_Host::slotStateTimeOut, Qt::QueuedConnection);
     connect(&_timerReRead, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
-    connect(&_timerDeviceUnavailable, &QTimer::timeout, this, &IOTV_Host::slotDeviceUnavailableTimeOut, Qt::QueuedConnection);
+    connect(&_timerPing, &QTimer::timeout, this, &IOTV_Host::slotPingTimeOut, Qt::QueuedConnection);
 
-    _timerState.start();
-    _timerDeviceUnavailable.start();
     _timerReRead.start();
+    _timerState.start();
+    _timerPing.start();
 }
 
 IOTV_Host::~IOTV_Host()
@@ -62,8 +63,8 @@ void IOTV_Host::responceIdentification(const struct Header *header)
 void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
-
     _state = static_cast<State::State_STATE>(iot->state);
+    _counterState = 0;
 }
 
 void IOTV_Host::responceRead(const struct Header *header)
@@ -94,6 +95,7 @@ void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
 void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
+    _counterPing = 0;
 }
 
 qint64 IOTV_Host::read(uint8_t channelNumber)
@@ -137,8 +139,6 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-    _timerDeviceUnavailable.start();
-
     bool error = false;
     uint64_t cutDataSize = 0;
 
@@ -244,7 +244,7 @@ void IOTV_Host::setConnectionType()
     //    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
 
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
-    connect(this, &IOTV_Host::signalDeviceUnavailableTimeOut, _conn_type.get(), &Base_conn_type::disconnectFromHost, Qt::QueuedConnection);
+    connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 }
 
 bool IOTV_Host::runInNewThread()
@@ -272,20 +272,33 @@ void IOTV_Host::slotReReadTimeOut()
 
 void IOTV_Host::slotStateTimeOut()
 {
-    // Если таймер сработал, значит к этому времени не пришел ответ о состоянии устройства
-    // Значит устройство не доступно
-    if (_state == State::State_STATE_ONLINE)
-        _state = State::State_STATE_OFFLINE;
+    _counterState++;
 
     char outData[BUFSIZ];
     auto size = queryStateData(outData, BUFSIZ, getName().toStdString().c_str());
     writeToRemoteHost({outData, static_cast<int>(size)}, size);
+
+    if (_counterState > COUNTER_STATE_COUNT)
+    {
+        _state = State::State_STATE_OFFLINE;
+        _counterState = 0;
+    }
 }
 
-void IOTV_Host::slotDeviceUnavailableTimeOut()
+void IOTV_Host::slotPingTimeOut()
 {
-    Log::write(_conn_type->getName() + " WARRNING: ping timeout");
-    emit signalDeviceUnavailableTimeOut();
+    _counterPing++;
+
+    char outData[BUFSIZ];
+    auto size = queryPingData(outData, BUFSIZ);
+    writeToRemoteHost({outData, static_cast<int>(size)}, size);
+
+    if (_counterPing > COUNTER_PING_COUNT)
+    {
+        Log::write(_conn_type->getName() + " WARRNING: ping timeout");
+        emit signalDevicePingTimeOut();
+        _counterPing = 0;
+    }
 }
 
 void IOTV_Host::slotNewThreadStart()

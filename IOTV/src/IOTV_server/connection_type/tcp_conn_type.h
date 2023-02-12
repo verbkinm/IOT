@@ -19,7 +19,7 @@ public:
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 
-    static constexpr int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+    static constexpr int DEFAULT_INTERVAL = 1000; // таймер неудавшегося подключения
 
 protected:
     virtual QByteArray readAll() override;

@@ -46,19 +46,26 @@ private:
 
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
-    QTimer _timerReRead, _timerState, _timerDeviceUnavailable;
+    QTimer _timerReRead, _timerState, _timerPing;
 
     std::unordered_map<QString, QString>  _settingsData;
 
     QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange, _mutexWrite;
 
+    // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
+    static constexpr int COUNTER_STATE_COUNT = 3;
+    int _counterState;
+
+    static constexpr int COUNTER_PING_COUNT = 3;
+    int _counterPing;
+
 private slots:
     void slotDataResived(QByteArray data);
 
     void slotReReadTimeOut();
     void slotStateTimeOut();
-    void slotDeviceUnavailableTimeOut();
+    void slotPingTimeOut();
 
     void slotNewThreadStart();
     void slotThreadStop();
@@ -67,7 +74,7 @@ private slots:
     void slotQueryWrite(int channelNumber, QByteArray data);
 
 signals:
-    void signalDeviceUnavailableTimeOut();
+    void signalDevicePingTimeOut();
     void signalDataRiceved();
 
     void signalStopThread();

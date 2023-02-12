@@ -76,6 +76,7 @@ void dataRecived(char ch);
 int16_t avrADC();
 void connectToWifi();
 void debug();
+void clearData();
 
 WiFiEventHandler stationConnectedHandler;
 WiFiEventHandler stationDisconnectedHandler;
@@ -91,6 +92,8 @@ void setup()
   pinMode(MODE_1_PIN, INPUT);
   pinMode(MODE_2_PIN, INPUT);
   pinMode(MODE_3_PIN, INPUT);
+
+  pinMode(LED_BUILTIN, OUTPUT);
 
   digitalWrite(MODE_1_PIN, LOW);
   digitalWrite(MODE_2_PIN, LOW);
@@ -118,16 +121,21 @@ void setup()
     iot.readChannel[i].data = (char *)calloc(iot.readChannel[i].dataSize, sizeof(char));
   }
 
-  if (isLittleEndian())
-    Serial.println("LE");
-  else
-    Serial.println("BE");
+  // Сигнализируем о нормальном запуске МК
+  for (uint8_t i = 0; i < 10; i++)
+  {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+  }
 }
 
 void loop() 
 {
   if(!client.connected()) 
   {
+    clearData();
     client = server.available();
     if (client)
       Serial.println("Connected client: " + client.remoteIP().toString() + ":" + client.remotePort());
@@ -281,10 +289,7 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
   Serial.print("Code disconnected: ");
   Serial.println(evt.reason);
 
-  client.flush();
-  realBufSize = 0;
-  expextedDataSize = 0;
-  cutDataSize = 0;
+  clearData();
 }
 
 int16_t avrADC()
@@ -320,4 +325,12 @@ void debug()
   Serial.print(*(int8_t *)iot.readChannel[MODE].data);
   Serial.print("; CH3 (Trigger): ");
   Serial.println(*(bool *)iot.readChannel[TRIGGER].data);
+}
+
+void clearData()
+{
+  client.flush();
+  realBufSize = 0;
+  expextedDataSize = 0;
+  cutDataSize = 0;
 }

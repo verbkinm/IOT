@@ -28,7 +28,7 @@ public:
     struct IOTV_Server_embedded *convert() const;
 
     static constexpr uint16_t TIMER_STATE_INTERVAL = 3000;
-    static constexpr uint16_t TIMER_UNAVAILABLE_INTERVAL = TIMER_STATE_INTERVAL * 2;
+    static constexpr uint16_t TIMER_PING_INTERVAL = 1000;
 
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
