@@ -36,3 +36,5 @@ build*
 
 #qt user project file 
 *.pro.user
+
+MakeFile
