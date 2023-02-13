@@ -1,12 +1,14 @@
 #pragma once
 
 #include <mutex>
-#include <iostream>
 
+#include <QDebug>
 #include <QString>
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
+
+#include "ConfigTypes.h"
 
 class Log
 {
@@ -21,7 +23,7 @@ public:
     };
      Q_DECLARE_FLAGS(Write_Flags, Write_Flag)
 
-    static void write(const QString& data, Write_Flags writeFlags = Write_Flag::STDOUT, const QString &fileName = "default.log");
+    static void write(const QString& data, Write_Flags writeFlags, const QString &fileName);
 
 private:
     static void writeToFile(const QString &fileName, const QString &data);

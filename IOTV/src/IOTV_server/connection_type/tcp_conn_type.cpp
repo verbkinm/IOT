@@ -5,7 +5,7 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     _tcpPort(port)
 {
     _reconnectTimer.setParent(parent);
-    _reconnectTimer.setInterval(DEFAULT_INTERVAL);
+    _reconnectTimer.setInterval(SERVER_RECONNECT_INTERVAL);
 
     _address = address;
     _type = Conn_type::TCP;
@@ -42,7 +42,8 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
                QString::number(_tcpSocket.peerPort()) +
                " -> " +
                data.toHex(':'),
-               Log::Write_Flag::FILE_STDOUT);
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
 
     if (size == -1)
         return _tcpSocket.write(data);
@@ -53,7 +54,8 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 void TCP_conn_type::connectToHost()
 {
     _tcpSocket.abort();
-    Log::write(_name + ": try to connect...", Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": try to connect...", Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
     _tcpSocket.connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
 
@@ -73,7 +75,9 @@ void TCP_conn_type::slotNewConnection()
 {
 //    _reconnectTimer.stop();
     Log::write(_name + ": connected to " + _tcpSocket.peerAddress().toString()
-               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
+               + ":" + QString::number(_tcpSocket.peerPort()),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
 
     connect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
     connect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
@@ -87,7 +91,9 @@ void TCP_conn_type::slotSocketDisconnected()
     expectedDataSize = 0;
 
     Log::write(_name + ": disconnected from " + _tcpSocket.peerAddress().toString()
-               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
+               + ":" + QString::number(_tcpSocket.peerPort()),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
 
     disconnect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
     disconnect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
@@ -174,5 +180,7 @@ void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write("Error! " + _name + ": " + strErr, Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": " + strErr,
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
 }

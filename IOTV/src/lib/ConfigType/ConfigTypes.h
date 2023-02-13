@@ -18,3 +18,10 @@ struct connectionType
     static const QString COM;
     static const QString UDP;
 };
+
+struct ServerLog
+{
+    static QString TCP_LOG ;
+    static QString CLIENT_ONLINE_LOG;
+    static QString DEFAULT_LOG;
+};

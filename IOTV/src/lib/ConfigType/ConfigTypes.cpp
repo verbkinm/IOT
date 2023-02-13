@@ -12,3 +12,6 @@ const QString connectionType::FILE = "FILE";
 const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
 
+QString ServerLog::TCP_LOG = "server.log";
+QString ServerLog::CLIENT_ONLINE_LOG = "client_online.log";
+QString ServerLog::DEFAULT_LOG = "default.log";

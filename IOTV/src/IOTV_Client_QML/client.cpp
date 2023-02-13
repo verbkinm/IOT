@@ -289,7 +289,7 @@ void Client::slotReciveData()
         else if(header->type == Header::HEADER_TYPE_REQUEST)
         {
             // На данный момент от сервера не должно приходить запросов
-            Log::write("Запрос от сервера не предусмотрен!");
+            Log::write("Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);

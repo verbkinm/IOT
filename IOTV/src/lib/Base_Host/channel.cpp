@@ -17,7 +17,9 @@ bool Channel::removeSubchannel(uint8_t channelNumber)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return false;
     }
 }
@@ -36,12 +38,16 @@ bool Channel::setData(uint8_t channelNumber, const Raw &data)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return false;
     }
     catch (std::invalid_argument &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return false;
     }
 }
@@ -55,12 +61,16 @@ bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return false;
     }
     catch (std::invalid_argument &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return false;
     }
 }
@@ -73,7 +83,9 @@ QByteArray Channel::getData(uint8_t channelNumber) const
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return {};
     }
 }
@@ -86,7 +98,9 @@ Raw Channel::getRawData(uint8_t channelNumber) const
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return {};
     }
 }
@@ -99,7 +113,9 @@ Raw::DATA_TYPE Channel::getType(uint8_t channelNumber) const
     }
     catch (std::out_of_range &ex)
     {
-        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO), Log::Write_Flag::FILE_STDERR);
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG);
         return Raw::DATA_TYPE::NONE;
     }
 }

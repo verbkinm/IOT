@@ -187,7 +187,9 @@ void IOTV_Host::slotDataResived(QByteArray data)
         else if(header->type == Header::HEADER_TYPE_REQUEST)
         {
             // На данный момент устройства нe посылают запросы!!!
-            Log::write("Запрос от устройств не предусмотрен!");
+            Log::write("Запрос от устройств не предусмотрен!",
+                       Log::Write_Flag::FILE_STDOUT,
+                       ServerLog::DEFAULT_LOG);
         }
 
         data = data.mid(cutDataSize);
@@ -295,7 +297,9 @@ void IOTV_Host::slotPingTimeOut()
 
     if (_counterPing > COUNTER_PING_COUNT)
     {
-        Log::write(_conn_type->getName() + " WARRNING: ping timeout");
+        Log::write(_conn_type->getName() + " WARRNING: ping timeout",
+                   Log::Write_Flag::FILE_STDOUT,
+                    ServerLog::DEFAULT_LOG);
         emit signalDevicePingTimeOut();
         _counterPing = 0;
     }

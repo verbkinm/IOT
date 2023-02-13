@@ -4,7 +4,7 @@
 
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
-#include "iotv_server.h"
+#include "iotv_server_embedded.h"
 
 //#include "iotvp_creator.h"
 
@@ -19,7 +19,7 @@ public:
     uint8_t readType[3] = {DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_16};
     uint8_t writeType[3] = {DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_16};
 
-    struct IOTV_Server iot = {
+    struct IOTV_Server_embedded iot = {
         .id = 1,
         .name = "Device",
         .description = "Description",
@@ -28,7 +28,9 @@ public:
         .readChannelType = readType,
         .numberWriteChannel = 2,
         .writeChannelType = writeType,
-        .state = 1
+        .state = 1,
+        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+        .descriptionSize = static_cast<uint16_t>(strlen(iot.description))
     };
 
     char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
@@ -61,7 +63,7 @@ private slots:
 
 IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
 {
-    iot.readChannel = (struct Raw*)malloc(sizeof(struct Raw) * 3);
+    iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
 
     iot.readChannel[0].dataSize = 2;
     iot.readChannel[1].dataSize = 2;
@@ -131,7 +133,7 @@ void IOTVP_Header_Embedded_Test::dataRecived(char ch)
         }
         else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
         {
-            /*uint64_t size = */responseStateData(transmitBuffer, BUFSIZ, &iot, header);
+            /*uint64_t size = */responseStateData(transmitBuffer, BUFSIZ, &iot);
             //            socket->write(transmitBuffer, size);
         }
     }
@@ -159,8 +161,8 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
         1,                                           // Тип пакета - запрос
         5,                                           // Назначение пакета PING
         1,                                           // Флаги
-        '\0', '\0', '\0', '\0', '\0', '\0', '\0', 0, // Размер тела пакета
-        '\0', '\0', '\0', '\0', '\0', '\0', '\0', 9  // Контрольная сумма тела пакета
+        0, 0, 0, 0, 0, 0, 0, 0,                      // Размер тела пакета
+        9, 0, 0, 0, 0, 0, 0, 0                       // Контрольная сумма тела пакета
     };
 
     const struct Header *header = createHeader(dataRaw, HEADER_SIZE, &error, &expextedDataSize, &cutDataSize);
@@ -194,8 +196,8 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedPing()
         1,                                           // Тип пакета - запрос
         5,                                           // Назначение пакета PING
         1,                                           // Флаги
-        '\0', '\0', '\0', '\0', '\0', '\0', '\0', 0, // Размер тела пакета
-        '\0', '\0', '\0', '\0', '\0', '\0', '\0', 9  // Контрольная сумма тела пакета
+        0, 0, 0, 0, 0, 0, 0, 0,                      // Размер тела пакета
+        9, 0, 0, 0, 0, 0, 0, 0                       // Контрольная сумма тела пакета
     };
 
     // в transmitBuffer будет ответ на Ping по окончанию цикла
@@ -231,7 +233,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedIdentefication()
         Header::HEADER_ASSIGNMENT_IDENTIFICATION,   // Назначение пакета Indetification
         Header::HEADER_FLAGS_ERROR,                 // Флаги
         0, 0, 0, 0, 0, 0, 0, 0,                     // Размер тела пакета
-        0, 0, 0, 0, 0, 0, 1, 3                      // Контрольная сумма тела пакета  - 259
+        3, 1, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета  - 259
     };
 
     // в transmitBuffer будет ответ на Identification по окончанию цикла
@@ -266,13 +268,13 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
         Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
         Header::HEADER_ASSIGNMENT_READ,             // Назначение пакета Read
         Header::HEADER_FLAGS_NONE,                  // Флаги
-        0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21 = READ_SIZE + nameSize
-        0, 0, 0, 0, 0, 0, 0, 27,                    // Контрольная сумма тела пакета    27
+        21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = READ_SIZE + nameSize
+        27, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
         6,                                          // Длина имени устройства
         1,                                          // Номер канала
         0,                                          // Флаги
         0, 0, 0, 0,                                 // Размер данных
-        0, 0, 0, 0, 0, 0, 0, 7,                     // Контрольная сумма
+        7, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
         'D', 'e', 'v', 'i', 'c', 'e'                // Имя устройства
     };
 
@@ -310,15 +312,15 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
         Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
         Header::HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
         Header::HEADER_FLAGS_NONE,                  // Флаги
-        0, 0, 0, 0, 0, 0, 0, 25,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
-        0, 0, 0, 0, 0, 0, 0, 32,                    // Контрольная сумма тела пакета    32
+        25, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
+        32, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    32
         6,                                          // Длина имени устройства
         1,                                          // Номер канала
         0,                                          // Флаги
-        0, 0, 0, 4,                                 // Размер данных
-        0, 0, 0, 0, 0, 0, 0, 11,                    // Контрольная сумма
+        4, 0, 0, 0,                                 // Размер данных
+        11, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма
         'D', 'e', 'v', 'i', 'c', 'e',               // Имя устройства
-        0, 0, 0, 123                                // Данные
+        123, 0, 0, 0                                // Данные
     };
 
     // в transmitBuffer будет ответ на Write по окончанию цикла
@@ -357,13 +359,13 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
             Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
             Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
             Header::HEADER_FLAGS_NONE,                  // Флаги
-            0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            0, 0, 0, 0, 0, 0, 0, 26,                    // Контрольная сумма тела пакета    27
+            21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
+            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
             0, 0, 0, 0,                                 // Размер данных
-            0, 0, 0, 0, 0, 0, 0, 6,                     // Контрольная сумма
+            6, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
             'D', 'e', 'v', 'i', 'c', 'e'                // Имя устройства
         };
 
@@ -397,25 +399,25 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
             Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
             Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
             Header::HEADER_FLAGS_NONE,                  // Флаги
-            0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            0, 0, 0, 0, 0, 0, 0, 26,                    // Контрольная сумма тела пакета    27
+            21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
+            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
             0, 0, 0, 0,                                 // Размер данных
-            0, 0, 0, 0, 0, 0, 0, 6,                     // Контрольная сумма
+            6, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
             'D', 'e', 'v', 'i', 'c', 'e',                // Имя устройства
             2,                                          // Версия протокола
             Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
             Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
             Header::HEADER_FLAGS_NONE,                  // Флаги
-            0, 0, 0, 0, 0, 0, 0, 21,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            0, 0, 0, 0, 0, 0, 0, 26,                    // Контрольная сумма тела пакета    27
+            21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
+            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
             0, 0, 0, 0,                                 // Размер данных
-            0, 0, 0, 0, 0, 0, 0, 6,                     // Контрольная сумма
+            6, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
             'D', 'e', 'v', 'i', 'c', 'e',                // Имя устройства
         };
 

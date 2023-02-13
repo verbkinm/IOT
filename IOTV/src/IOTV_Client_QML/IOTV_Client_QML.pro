@@ -4,6 +4,7 @@ QT += quick
 CONFIG += c++2a
 
 SOURCES += \
+        ../lib/ConfigType/ConfigTypes.cpp \
         ../lib/Protocols/embedded/IOTV_SH.cpp \
         ../lib/Protocols/embedded/creatorpkgs.cpp \
         ../lib/Protocols/embedded/header.cpp \
@@ -27,7 +28,8 @@ RESOURCES += \
 INCLUDEPATH += ../lib/Base_Host \
             ../lib/Log \
             ../lib/Protocols/embedded \
-            ../lib/raw
+            ../lib/raw \
+            ../lib/ConfigType
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -41,6 +43,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../lib/ConfigType/ConfigTypes.h \
     ../lib/Protocols/embedded/IOTV_SH.h \
     ../lib/Protocols/embedded/creatorpkgs.h \
     ../lib/Protocols/embedded/header.h \

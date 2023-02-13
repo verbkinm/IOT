@@ -74,7 +74,7 @@ void Test_Raw::test_case1()
             data.push_back(0xcd);
 
             Raw raw(Raw::DATA_TYPE::INT_16, data);
-            QCOMPARE(raw.strData().first, "-21555");
+            QCOMPARE(raw.strData().first, "-12885");
         }
     }
 

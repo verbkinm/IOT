@@ -173,7 +173,8 @@ void IOTV_Client::write(const QByteArray &data, qint64 size) const
 {
     Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
                + QString::number(_socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
     _socket->write(data.data(), size);
 }
 
@@ -208,7 +209,8 @@ void IOTV_Client::slotReadData()
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
                + QString::number(socket()->peerPort())
-               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG);
 
     bool error = false;
     uint64_t cutDataSize = 0;
@@ -236,7 +238,9 @@ void IOTV_Client::slotReadData()
         if (header->type == Header::HEADER_TYPE_RESPONSE)
         {
             // На данный момент от клиент не должно приходить ответов
-            Log::write("Ответ от клиента не предусмотрен!");
+            Log::write("Ответ от клиента не предусмотрен!",
+                       Log::Write_Flag::FILE_STDOUT,
+                       ServerLog::DEFAULT_LOG);
         }
         else if(header->type == Header::HEADER_TYPE_REQUEST)
         {
@@ -256,53 +260,6 @@ void IOTV_Client::slotReadData()
 
         clearHeader(header);
     }
-
-    //    IOTV_SC::Server_RX::QUERY_PKG *pkg;
-    //    while ((pkg = IOTV_SC::Server_RX::accumPacket(recivedBuff)) != nullptr)
-    //    {
-    //        if (pkg->type == IOTV_SC::Query_Type::QUERY_INCOMPLETE)
-    //        {
-    //            delete pkg;
-    //            break;
-    //        }
-
-    //        if (pkg->type == IOTV_SC::Query_Type::QUERY_ERROR)
-    //        {
-    //            if (recivedBuff.size() > 0)
-    //            {
-    //                Log::write("WARRNING: received data from " +
-    //                           _socket->peerName() +
-    //                           _socket->peerAddress().toString() +
-    //                           ":" +
-    //                           QString::number(_socket->peerPort()) +
-    //                           "UNKNOW: " +
-    //                           recivedBuff.toHex(':'),
-    //                           Log::Write_Flag::FILE_STDOUT);
-    //                recivedBuff.clear();
-    //            }
-    //            delete pkg;
-    //            break;
-    //        }
-
-    //        if (pkg->type == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
-    //            query_DEV_LIST_recived(pkg);
-    //        else if (pkg->type == IOTV_SC::Query_Type::QUERY_STATE)
-    //            query_STATE_recived(pkg);
-    //        else if (pkg->type == IOTV_SC::Query_Type::QUERY_READ)
-    //            query_READ_recived(pkg);
-    //        else if (pkg->type == IOTV_SC::Query_Type::QUERY_WRITE)
-    //            query_WRITE_recived(pkg);
-    //        else
-    //        {
-    //            //иных вариантов быть не должно!
-    //            Log::write(QString(Q_FUNC_INFO) +
-    //                       "Unknow pkg.type = " +
-    //                       QString::number(int(pkg->type)),
-    //                       Log::Write_Flag::FILE_STDERR);
-    //            exit(-1);
-    //        }
-    //        delete pkg;
-    //    }
 }
 
 bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)

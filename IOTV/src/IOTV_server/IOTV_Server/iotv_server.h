@@ -9,9 +9,8 @@
 #include <list>
 #include <fstream>
 
-#include "ConfigTypes.h"
-
 #include "IOTV_Host/iotv_host.h"
+#include "log.h"
 
 class IOTV_Client;
 
@@ -40,7 +39,6 @@ private:
     const QString _programVersion;
     QString _address;
     quint16 _port;
-    QString _logFile;
 
     QTimer _reconnectTimer;
 

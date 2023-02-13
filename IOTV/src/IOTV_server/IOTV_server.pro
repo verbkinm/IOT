@@ -9,6 +9,7 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../lib/ConfigType/ConfigTypes.cpp \
     ../lib/Protocols/embedded/IOTV_SH.cpp \
     ../lib/Protocols/embedded/creatorpkgs.cpp \
     ../lib/Protocols/embedded/header.cpp \
@@ -17,7 +18,6 @@ SOURCES += \
     ../lib/Protocols/embedded/read_write.cpp \
     ../lib/Protocols/embedded/state.cpp \
     ../lib/Protocols/embedded/iotvp_print.cpp \
-    ConfigTypes.cpp \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
@@ -40,6 +40,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../lib/ConfigType/ConfigTypes.h \
     ../lib/Protocols/embedded/IOTV_SH.h \
     ../lib/Protocols/embedded/creatorpkgs.h \
     ../lib/Protocols/embedded/header.h \
@@ -48,7 +49,6 @@ HEADERS += \
     ../lib/Protocols/embedded/read_write.h \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/iotvp_print.h \
-    ConfigTypes.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
     IOTV_Client/iotv_client.h \
@@ -67,4 +67,5 @@ INCLUDEPATH += ../lib/Base_Host \
             ../lib/Log \
             ../lib/Protocols/embedded \
             ../lib/Protocols/ \
-            ../lib/raw
+            ../lib/raw \
+            ../lib/ConfigType
