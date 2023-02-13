@@ -73,6 +73,8 @@ private slots:
     // Используетеся для записи данных полученых от клиентов из других потоков
     void slotQueryWrite(int channelNumber, QByteArray data);
 
+    void slotConnected();
+
 signals:
     void signalDevicePingTimeOut();
     void signalDataRiceved();

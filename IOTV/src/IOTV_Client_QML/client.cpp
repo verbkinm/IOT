@@ -1,7 +1,7 @@
 #include "client.h"
 
 Client::Client(QObject *parent): QObject{parent},
-    _stateConnection{false},
+//    _stateConnection{false},
     _expectedDataSize(0)
 {
     _socket.setParent(this);
@@ -35,11 +35,6 @@ void Client::disconnectFromHost()
     _socket.abort();
 }
 
-//qint64 Client::writeData(const QByteArray &data)
-//{
-//    return _socket.write(data);
-//}
-
 int Client::countDevices() const
 {
     return _devices.size();
@@ -66,27 +61,24 @@ void Client::write(const QByteArray &data)
     if (!stateConnection())
         return;
 
-
-
     _socket.write(data);
 }
 
 void Client::slotConnected()
 {
-    setStateConnection(true);
     emit signalConnected();
+    emit stateConnectionChanged();
 
-    slotQueryIdentification();
+    slotQueryIdentification();    
 }
 
 void Client::slotDisconnected()
 {
     _devices.clear();
 
-    setStateConnection(false);
-    //!!! Не нужно сообщать про количество устройств, так как они обнулятся
     emit countDeviceChanged();
     emit onlineDeviceChanged();
+    emit stateConnectionChanged();
 }
 
 void Client::slotStateChanged(QAbstractSocket::SocketState socketState)
@@ -236,14 +228,14 @@ void Client::responcePingPoing(const struct Header *header)
     // Нет реакции на ответ ping
 }
 
-void Client::setStateConnection(bool newStateConnection)
-{
-    if (_stateConnection == newStateConnection)
-        return;
+//void Client::setStateConnection(bool newStateConnection)
+//{
+//    if (_stateConnection == newStateConnection)
+//        return;
 
-    _stateConnection = newStateConnection;
-    emit stateConnectionChanged();
-}
+//    _stateConnection = newStateConnection;
+//    emit stateConnectionChanged();
+//}
 
 void Client::slotReciveData()
 {

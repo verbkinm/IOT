@@ -240,9 +240,9 @@ void IOTV_Host::setConnectionType()
     else if (connType == connectionType::FILE)
         _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
 
-    //    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     //    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
 
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 }
@@ -321,6 +321,7 @@ void IOTV_Host::slotThreadStop()
 
     this->moveToThread(_parentThread);
 
+    _timerPing.moveToThread(_parentThread);
     _timerState.moveToThread(_parentThread);
     _timerReRead.moveToThread(_parentThread);
 
@@ -330,4 +331,14 @@ void IOTV_Host::slotThreadStop()
 void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
 {
     write(channelNumber, data);
+}
+
+void IOTV_Host::slotConnected()
+{
+    _timerReRead.start();
+    _timerState.start();
+    _timerPing.start();
+
+    _counterPing = 0;
+    _counterState = 0;
 }

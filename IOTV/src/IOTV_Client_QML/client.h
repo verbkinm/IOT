@@ -42,7 +42,7 @@ private:
 
 //    QTimer _timerServerUnavailable;                      // "Пингуем" сервер
 
-    bool _stateConnection;                  // Состояние подключения к серверу.
+//    bool _stateConnection;                  // Состояние подключения к серверу.
     uint64_t _expectedDataSize;
 
     //!!! unorder_map
@@ -62,7 +62,7 @@ private:
 
     void write(const QByteArray &data);
 
-    void setStateConnection(bool newStateConnection);
+//    void setStateConnection(bool newStateConnection);
 
 public slots:
     void connectToHost(const QString &address, qint64 port);

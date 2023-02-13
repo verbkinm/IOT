@@ -22,7 +22,7 @@ public:
         FILE
     };
 
-    static constexpr int BUFFER_MAX_SIZE = 256;
+    static constexpr int BUFFER_MAX_SIZE = BUFSIZ;
 
     QString getName() const;
     QString getAddress() const;
