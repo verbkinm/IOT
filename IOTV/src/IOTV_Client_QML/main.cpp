@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setOrganizationName("VMS");
     app.setApplicationName("IOTV_Client");
-    app.setApplicationVersion("0.5");
+    app.setApplicationVersion("0.6");
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");

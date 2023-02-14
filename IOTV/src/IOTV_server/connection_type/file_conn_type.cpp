@@ -108,7 +108,7 @@ void File_conn_type::connectToHost()
     {
         Log::write(_name + ": can't open file to read write " + QFileInfo(_file).absoluteFilePath(),
                    Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
 //        _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
@@ -116,7 +116,7 @@ void File_conn_type::connectToHost()
 
     Log::write(_name + ": file " + QFileInfo(_file).absoluteFilePath() + " is open.",
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
     emit signalConnected();
 }
 
@@ -124,7 +124,7 @@ void File_conn_type::disconnectFromHost()
 {
     Log::write(_name + ": close file " + QFileInfo(_file).absoluteFilePath(),
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
 //    _reconnectTimer.start(DEFAULT_INTERVAL);
 
     emit signalDisconnected();

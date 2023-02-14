@@ -3,16 +3,18 @@
 #include <QSettings>
 #include <QTcpServer>
 #include <QFileInfo>
+#include <QDir>
 #include <QTimer>
 #include <QThread>
+#include <QCoreApplication>
 
 #include <list>
 #include <fstream>
 
 #include "IOTV_Host/iotv_host.h"
-#include "log.h"
+#include "IOTV_Client/iotv_client.h"
 
-class IOTV_Client;
+#include "log.h"
 
 class IOTV_Server : public QTcpServer
 {
@@ -42,9 +44,7 @@ private:
 
     QTimer _reconnectTimer;
 
-    QByteArray _server_buffer_data;
-
-    static constexpr uint _maxClientCount = 5;
+    uint _maxClientCount;
 
 private slots:
     void slotNewConnection();

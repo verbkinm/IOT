@@ -77,9 +77,9 @@ uint64_t responseReadData(char* outData, uint64_t dataSize, const struct IOTV_Se
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = iot->nameSize,
         .channelNumber = head->readWrite->channelNumber,
-        .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
+        .dataSize = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].dataSize : 0,
         .name = iot->name,
-        .data = iot->readChannel[head->readWrite->channelNumber].data
+        .data = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].data : NULL
     };
 
     struct Header header = {
@@ -103,7 +103,7 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server_
     assert(head != NULL);
     assert(head->readWrite != NULL);
 
-    //!!! Для каждого устройства своё настраивать?
+    //!!! нарушение безопастности. Можно "ложить" приложение удалённо
     assert(iot->readChannel != NULL);
     assert(iot->readChannel[head->readWrite->channelNumber].data != NULL);
 
@@ -115,9 +115,9 @@ uint64_t responseWriteData(char* outData, uint64_t dataSize, struct IOTV_Server_
         .flags = Read_Write::ReadWrite_FLAGS_NONE,
         .nameSize = iot->nameSize,
         .channelNumber = head->readWrite->channelNumber,
-        .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
+        .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize, //!!! нет проверки на NULL
         .name = iot->name,
-        .data = iot->readChannel[head->readWrite->channelNumber].data
+        .data = iot->readChannel[head->readWrite->channelNumber].data          //!!! нет проверки на NULL
     };
 
     struct Header header = {

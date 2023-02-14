@@ -69,14 +69,14 @@ void Base_conn_type::slotReadData()
     _host_buffer_data += readAll();
     Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
         Log::write(_name + ": buffer cleared!",
                    Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return;
     }
 

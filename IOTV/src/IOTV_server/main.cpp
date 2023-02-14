@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     Log::write("Start program IOTV_Server " + QString(programVersion),
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     Wrapper wrapper;
 

@@ -174,7 +174,7 @@ void IOTV_Client::write(const QByteArray &data, qint64 size) const
     Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
                + QString::number(_socket->peerPort())
                + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
     _socket->write(data.data(), size);
 }
 
@@ -210,7 +210,7 @@ void IOTV_Client::slotReadData()
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
                + QString::number(socket()->peerPort())
                + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
     uint64_t cutDataSize = 0;
@@ -240,7 +240,7 @@ void IOTV_Client::slotReadData()
             // На данный момент от клиент не должно приходить ответов
             Log::write("Ответ от клиента не предусмотрен!",
                        Log::Write_Flag::FILE_STDOUT,
-                       ServerLog::DEFAULT_LOG);
+                       ServerLog::DEFAULT_LOG_FILENAME);
         }
         else if(header->type == Header::HEADER_TYPE_REQUEST)
         {

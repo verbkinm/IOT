@@ -21,7 +21,11 @@ struct connectionType
 
 struct ServerLog
 {
-    static QString TCP_LOG ;
-    static QString CLIENT_ONLINE_LOG;
-    static QString DEFAULT_LOG;
+    static QString TCP_LOG_FILENAME ;
+    static QString CLIENT_ONLINE_LOG_FILENAME;
+    static QString DEFAULT_LOG_FILENAME;
+
+    static const QString TCP_LOG;
+    static const QString CLIENT_ONLINE_LOG;
+    static const QString DEFAULT_LOG;
 };

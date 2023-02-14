@@ -12,6 +12,10 @@ const QString connectionType::FILE = "FILE";
 const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
 
-QString ServerLog::TCP_LOG = "server.log";
-QString ServerLog::CLIENT_ONLINE_LOG = "client_online.log";
-QString ServerLog::DEFAULT_LOG = "default.log";
+QString ServerLog::TCP_LOG_FILENAME = "tcp_server.log";
+QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
+QString ServerLog::DEFAULT_LOG_FILENAME = "default.log";
+
+const QString ServerLog::TCP_LOG = "tcp_log";
+const QString ServerLog::CLIENT_ONLINE_LOG = "client_log";
+const QString ServerLog::DEFAULT_LOG = "default_log";

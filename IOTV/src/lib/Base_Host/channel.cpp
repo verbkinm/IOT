@@ -19,7 +19,7 @@ bool Channel::removeSubchannel(uint8_t channelNumber)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return false;
     }
 }
@@ -40,14 +40,14 @@ bool Channel::setData(uint8_t channelNumber, const Raw &data)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return false;
     }
     catch (std::invalid_argument &ex)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return false;
     }
 }
@@ -63,14 +63,14 @@ bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return false;
     }
     catch (std::invalid_argument &ex)
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return false;
     }
 }
@@ -85,7 +85,7 @@ QByteArray Channel::getData(uint8_t channelNumber) const
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return {};
     }
 }
@@ -100,7 +100,7 @@ Raw Channel::getRawData(uint8_t channelNumber) const
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return {};
     }
 }
@@ -115,7 +115,7 @@ Raw::DATA_TYPE Channel::getType(uint8_t channelNumber) const
     {
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return Raw::DATA_TYPE::NONE;
     }
 }
