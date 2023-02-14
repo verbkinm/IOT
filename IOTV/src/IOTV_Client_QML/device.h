@@ -63,6 +63,8 @@ signals:
     void signalUpdate();
     void signalAliasNameChanged();
 
+    void signalDataChanged(int channel);
+
 private slots:
     void slotTimerReadTimeOut();
     void slotTimerStateTimeOut();

@@ -32,13 +32,16 @@ void Device::update(const IOTV_Server_embedded *dev)
     this->setId(dev->id);
     this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
-    this->removeAllSubChannel();
+    if (this->getReadChannelLength() != dev->numberReadChannel)
+    {
+        this->removeAllSubChannel();
 
-    for (int i = 0; i < dev->numberReadChannel; ++i)
-        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
+        for (int i = 0; i < dev->numberReadChannel; ++i)
+            this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
 
-    for (int i = 0; i < dev->numberWriteChannel; ++i)
-        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+        for (int i = 0; i < dev->numberWriteChannel; ++i)
+            this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+    }
 
     emit signalUpdate();
 }
@@ -55,7 +58,13 @@ bool Device::isOnline() const
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-    return this->setReadChannelData(channelNumber, data);
+    if (this->setReadChannelData(channelNumber, data))
+    {
+        emit signalDataChanged(channelNumber);
+        return true;
+    }
+
+    return false;
 }
 
 void Device::setDataFromString(int channelNumber, QString data)
@@ -88,8 +97,8 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
-    if (_state == static_cast<State::State_STATE>(newState))
-        return;
+    //    if (_state == static_cast<State::State_STATE>(newState))
+    //        return;
 
     _state = static_cast<State::State_STATE>(newState);
     emit signalStateChanged();

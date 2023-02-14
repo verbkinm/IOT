@@ -220,16 +220,10 @@ Page {
         console.log("Device 2 destruct: ", objectName)
     }
 
-    BusyRect {
-        visible: !device.state
-    }
-
-    Timer {
-        id: timer
-        interval: 1000
-        repeat: true
-        running: true
-        onTriggered: {
+    Connections {
+        target: device
+        function onSignalDataChanged(channel) {
+            console.log("data changed ch:", channel)
             var t = device.readData(0)
             if (t > 0)
                 t = "+" + t
@@ -244,8 +238,39 @@ Page {
                 var p = device.readData(2)
                 lbl_pressure.text = p.slice(0, p.length - 2)
             }
+        }
+    }
+
+
+    BusyRect {
+        visible: !device.state
+    }
+
+    Timer {
+        id: timer
+        interval: 1000
+        repeat: false
+        running: true
+        onTriggered: {
+//            var t = device.readData(0)
+//            if (t > 0)
+//                t = "+" + t
+
+//            lbl_temperature.text = t.slice(0, t.length - 2) + " °C"
+
+//            var h = device.readData(1)
+//            lbl_humidity.text = h.slice(0, h.length - 2) + " %"
+
+//            if (device.readChannelLength === 3)
+//            {
+//                var p = device.readData(2)
+//                lbl_pressure.text = p.slice(0, p.length - 2)
+//            }
 
             fl.contentHeight = column.height + 50
+
+//            console.log("lbl_temperature.text ", lbl_temperature.text, " ", t)
+//            console.log("lbl_humidity.text ", lbl_humidity.text, " ", h)
         }
     }
 }

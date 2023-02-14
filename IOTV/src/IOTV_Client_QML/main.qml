@@ -244,7 +244,10 @@ ApplicationWindow {
         if (appStack.currentItem == homePage)
             dialogExit.open()
         else
+        {
             appStack.pop()
+            //!!! home loader clear
+        }
     }
 
 //    onVisibilityChanged: {

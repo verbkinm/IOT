@@ -137,6 +137,18 @@ Page {
         Rectangle {
             id: componentRect
 
+            states: [
+                State {
+                    name: "online"
+                    when: client.deviceByName(model.name).state
+                    PropertyChanges { target: componentRect; color: Qt.rgba(0, 1, 0, 0.1)}
+                },
+                State {
+                    name: "offline"
+                    when: !client.deviceByName(model.name).state
+                    PropertyChanges { target: componentRect; color: Qt.rgba(1, 0, 0, 0.1)}
+                }
+            ]
             width: 120
             height: 120
 
@@ -145,18 +157,18 @@ Page {
             radius: 5
 
             color: Qt.rgba(1, 0, 0, 0.1)
-            ColorAnimation on color {
-                id: animColorOffline
-                to:  Qt.rgba(1, 0, 0, 0.1)
-                duration: 1000
-                running : false
-            }
-            ColorAnimation on color {
-                id: animColorOnline
-                to: Qt.rgba(0, 1, 0, 0.1)
-                duration: 1000
-                running: false
-            }
+//            ColorAnimation on color {
+//                id: animColorOffline
+//                to:  Qt.rgba(1, 0, 0, 0.1)
+//                duration: 1000
+//                running : false
+//            }
+//            ColorAnimation on color {
+//                id: animColorOnline
+//                to: Qt.rgba(0, 1, 0, 0.1)
+//                duration: 1000
+//                running: false
+//            }
 
             MouseArea {
                 anchors.fill: parent
@@ -216,12 +228,12 @@ Page {
 
             Connections {
                 target: client.deviceByName(name)
-                function onStateChanged() {
-                    if (target.state)
-                        animColorOnline.running = true
-                    else
-                        animColorOffline.running = true
-                }
+//                function onStateChanged() {
+//                    if (target.state)
+//                        animColorOnline.running = true
+//                    else
+//                        animColorOffline.running = true
+//                }
                 function onSignalUpdate() {
                     model.source = imageById(target.id)
                 }

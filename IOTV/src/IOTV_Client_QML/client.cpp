@@ -331,6 +331,7 @@ void Client::slotQueryWrite(int channelNumber, QByteArray data)
 
 void Client::slotQueryIdentification()
 {
+    Device *dev = qobject_cast<Device*>(sender());
     queryIdentification();
 }
 
