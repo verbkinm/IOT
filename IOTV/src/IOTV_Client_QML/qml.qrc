@@ -54,6 +54,7 @@
         <file>img/logo.png</file>
         <file>DialogShared.qml</file>
         <file>Notification.qml</file>
+        <file>Home_Connector.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>

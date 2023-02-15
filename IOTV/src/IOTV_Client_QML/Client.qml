@@ -12,11 +12,6 @@ Page {
 
     state: stateDisconnected
 
-    // вызывается из Home.qml
-    function connectToHost() {
-        btn.clicked()
-    }
-
     Flickable {
         width: parent.width
         height: parent.height
@@ -164,8 +159,6 @@ Page {
     states: [
         State {
             name: stateConnected
-            when: client.state
-//            PropertyChanges { target: groupBox; enabled: false}
             PropertyChanges { target: addr; enabled: false}
             PropertyChanges { target: port; enabled: false}
             PropertyChanges { target: autoConnect; enabled: false}
@@ -178,8 +171,6 @@ Page {
         },
         State {
             name: stateDisconnected
-            when: !client.state
-//            PropertyChanges { target: groupBox; enabled: true}
             PropertyChanges { target: addr; enabled: true}
             PropertyChanges { target: port; enabled: true}
             PropertyChanges { target: autoConnect; enabled: true}
@@ -198,12 +189,15 @@ Page {
 
     Connections {
         target: client
-        function onSignalConnecting() {
-//            state = stateConnecting
+        function onSignalConnected() {
+            state = stateConnected
             loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение установлено"})
         }
+        function onSignalConnecting() {
+            state = stateConnecting
+        }
         function onSignalDisconnected() {
-//            state = stateDisconnected
+            state = stateDisconnected
             loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение сброшено"})
         }
     }
@@ -216,5 +210,10 @@ Page {
 
     Component.onDestruction: {
         console.log("Client page destruct: ", objectName)
+    }
+
+    // вызывается из Home.qml
+    function connectToHost() {
+        btn.clicked()
     }
 }

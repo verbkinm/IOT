@@ -23,68 +23,9 @@ Page {
         }
     }
 
-    Rectangle {
-        id: controlConnect
-        anchors.fill: parent
-        z: 1
-        opacity: 1
-        visible: true
+    Home_Connector {}
 
-        Component.onCompleted: {
-            console.log(client.state, " ", state)
-        }
-
-        states: [
-            State {
-                name: "hide"; when: (client != null) ? client.state : ""
-                PropertyChanges { target: controlConnect; opacity: 0; visible: false }
-            },
-            State {
-                name: "show"; when:  (client != null) ? !client.state : ""
-                PropertyChanges { target: controlConnect; opacity: 1; visible: true }
-            }
-        ]
-
-        transitions: [
-            Transition {
-                to: "hide"
-                ParallelAnimation{
-                    PropertyAnimation { target: controlConnect; property: "visible"; from: true; to: false; duration: 500 }
-                    PropertyAnimation { target: controlConnect; property: "opacity"; from: 1; to: 0; duration: 500 }
-                }
-            },
-            Transition {
-                to: "show"
-                PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
-            }
-        ]
-
-        Text {
-            id: txtConnection
-            text: qsTr("Соединение не установлено")
-            anchors.centerIn: parent
-            font.pixelSize: 18
-            wrapMode: Text.Wrap
-        }
-
-        Button {
-            id: btnConnect
-            width: 180
-            font.pixelSize: 18
-            text: "подключиться"
-
-            anchors.top: txtConnection.bottom
-            anchors.margins: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            onClicked: {
-                console.log("click")
-                clientPage.connectToHost()
-            }
-        }
-    }
-
-    GridView /*ListView*/{
+    GridView {
         id: listView
         cellHeight: 130
         cellWidth: 130
@@ -119,16 +60,10 @@ Page {
         id: listModel
     }
 
-    Item {
+    Loader {
         property string title
-
-        id: loaderItem
-
-        Loader {
-            id: loaderDevice
-            anchors.fill: parent
-            source: ""
-        }
+        id: loaderDevice
+        source: ""
     }
 
     Component {
@@ -157,26 +92,26 @@ Page {
             radius: 5
 
             color: Qt.rgba(1, 0, 0, 0.1)
-//            ColorAnimation on color {
-//                id: animColorOffline
-//                to:  Qt.rgba(1, 0, 0, 0.1)
-//                duration: 1000
-//                running : false
-//            }
-//            ColorAnimation on color {
-//                id: animColorOnline
-//                to: Qt.rgba(0, 1, 0, 0.1)
-//                duration: 1000
-//                running: false
-//            }
+            //            ColorAnimation on color {
+            //                id: animColorOffline
+            //                to:  Qt.rgba(1, 0, 0, 0.1)
+            //                duration: 1000
+            //                running : false
+            //            }
+            //            ColorAnimation on color {
+            //                id: animColorOnline
+            //                to: Qt.rgba(0, 1, 0, 0.1)
+            //                duration: 1000
+            //                running: false
+            //            }
 
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    loaderItem.objectName = loaderItem.title = client.deviceByName(model.name).aliasName
                     loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
-                    appStack.push(loaderItem)
+                    loaderDevice.title = loaderDevice.objectName = client.deviceByName(model.name).aliasName
+                    appStack.push(loaderDevice)
                 }
             }
 
@@ -228,12 +163,12 @@ Page {
 
             Connections {
                 target: client.deviceByName(name)
-//                function onStateChanged() {
-//                    if (target.state)
-//                        animColorOnline.running = true
-//                    else
-//                        animColorOffline.running = true
-//                }
+                //                function onStateChanged() {
+                //                    if (target.state)
+                //                        animColorOnline.running = true
+                //                    else
+                //                        animColorOffline.running = true
+                //                }
                 function onSignalUpdate() {
                     model.source = imageById(target.id)
                 }
@@ -257,16 +192,21 @@ Page {
             }
         }
 
-//        function onOnlineDeviceChanged()
-//        {
-//            onCountDeviceChanged()
-//        }
+        //        function onOnlineDeviceChanged()
+        //        {
+        //            onCountDeviceChanged()
+        //        }
 
         function onSignalDisconnected() {
             listModel.clear()
             loaderDevice.setSource("")
-            if (appStack.currentItem != clientPage)
-                appStack.pop(homePage)
+
+            //!!!
+            var flag = appStack.currentItem == clientPage
+//            if (appStack.currentItem != clientPage)
+            appStack.pop(homePage)
+            if (flag)
+                appStack.push(clientPage)
         }
     }
 
