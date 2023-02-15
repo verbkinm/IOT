@@ -29,21 +29,23 @@ void Device::update(const IOTV_Server_embedded *dev)
 {
     Q_ASSERT(dev != nullptr);
 
-    this->setId(dev->id);
-    this->setDescription(QByteArray{dev->description, dev->descriptionSize});
-
-    if (this->getReadChannelLength() != dev->numberReadChannel)
+    if (this->getId() == 0)
     {
-        this->removeAllSubChannel();
+        this->setId(dev->id);
+        this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
-        for (int i = 0; i < dev->numberReadChannel; ++i)
-            this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
+        if (this->getReadChannelLength() != dev->numberReadChannel)
+        {
+            this->removeAllSubChannel();
 
-        for (int i = 0; i < dev->numberWriteChannel; ++i)
-            this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+            for (int i = 0; i < dev->numberReadChannel; ++i)
+                this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
+
+            for (int i = 0; i < dev->numberWriteChannel; ++i)
+                this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+        }
+        emit signalUpdate();
     }
-
-    emit signalUpdate();
 }
 
 QString Device::getName() const

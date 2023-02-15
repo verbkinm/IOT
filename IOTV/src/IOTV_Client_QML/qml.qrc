@@ -53,6 +53,7 @@
         <file>Devices/Setting/Device/Device_1.qml</file>
         <file>img/logo.png</file>
         <file>DialogShared.qml</file>
+        <file>Notification.qml</file>
     </qresource>
     <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>

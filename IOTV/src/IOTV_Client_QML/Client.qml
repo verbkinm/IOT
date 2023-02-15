@@ -198,8 +198,14 @@ Page {
 
     Connections {
         target: client
-        function onSignalConnecting() { state = stateConnecting }
-        function onSignalDisconnected() { state = stateDisconnected }
+        function onSignalConnecting() {
+//            state = stateConnecting
+            loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение установлено"})
+        }
+        function onSignalDisconnected() {
+//            state = stateDisconnected
+            loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение сброшено"})
+        }
     }
 
     Component.onCompleted: {

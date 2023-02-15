@@ -9,8 +9,9 @@ ApplicationWindow {
     height: 520
     visible: true
     title: qsTr("IOTV Client")
-//    minimumWidth: 360
-//    minimumHeight: 520
+
+    //    minimumWidth: 360
+    //    minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
@@ -55,6 +56,7 @@ ApplicationWindow {
     footer: ToolBar {
         height: overlayHeader.height
         id: overlayFooter
+
         RowLayout {
             anchors.fill: parent
             ToolButton {
@@ -197,7 +199,7 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
-        visible: false//clientPage.connection_attempt
+        visible: false
 
         background: Rectangle{
             opacity: 0.3
@@ -221,14 +223,6 @@ ApplicationWindow {
     }
 
     DialogShared {
-        id: connectionError
-        parent: stackView
-        standardButtons: Dialog.Ok
-        title: "Ошибка"
-        text: "Не удалось подключиться к серверу."
-    }
-
-    DialogShared {
         id: dialogExit
         parent: stackView
         standardButtons: Dialog.Yes | Dialog.No
@@ -238,6 +232,12 @@ ApplicationWindow {
             Qt.exit(0)
         }
     }
+
+    Loader {
+        id: loaderNotification
+        source: ""
+    }
+
 
     onClosing: {
         close.accepted = false
@@ -249,9 +249,5 @@ ApplicationWindow {
             //!!! home loader clear
         }
     }
-
-//    onVisibilityChanged: {
-//        console.log(visibility)
-//    }
 }
 

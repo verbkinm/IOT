@@ -1,22 +1,20 @@
 #include "client.h"
 
 Client::Client(QObject *parent): QObject{parent},
-//    _stateConnection{false},
-    _expectedDataSize(0)
+    _expectedDataSize(0), _counterPing(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-//    _timerServerUnavailable.setParent(this);
+
+    _timerPing.setParent(this);
+    _timerPing.setInterval(Base_Host::TIMER_PING_INTERVAL);
 
     connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
     connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected, Qt::QueuedConnection);
     connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData, Qt::QueuedConnection);
-
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
-//    connect(&_timerServerUnavailable, &QTimer::timeout, this, &Client::disconnectFromHost, Qt::QueuedConnection);
-
-//    _timerServerUnavailable.start(TIME_OUT);
+    connect(&_timerPing, &QTimer::timeout, this, &Client::queryPing);
 }
 
 Client::~Client()
@@ -28,11 +26,14 @@ void Client::connectToHost(const QString &address, qint64 port)
 {
     disconnectFromHost();
     _socket.connectToHost(address, port);
+    _timerPing.start();
 }
 
 void Client::disconnectFromHost()
 {
     _socket.abort();
+    _timerPing.stop();
+    _counterPing = 0;
 }
 
 int Client::countDevices() const
@@ -56,12 +57,12 @@ QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) co
     return _devices.at(deviceName).getReadChannelData(channelNumber);
 }
 
-void Client::write(const QByteArray &data)
+qint64 Client::write(const QByteArray &data)
 {
     if (!stateConnection())
-        return;
+        return -1;
 
-    _socket.write(data);
+    return _socket.write(data);
 }
 
 void Client::slotConnected()
@@ -148,12 +149,21 @@ void Client::queryWrite(const QString &name, uint8_t channelNumber, const QByteA
     write({outData, static_cast<int>(size)});
 }
 
-void Client::queryPingPoing()
+void Client::queryPing()
 {
+    _counterPing++;
+
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);
 
     write({outData, static_cast<int>(size)});
+
+    if (_counterPing > COUNTER_PING_COUNT)
+    {
+        Log::write(" WARRNING: ping timeout",
+                   Log::Write_Flag::STDOUT, "");
+        disconnectFromHost();
+    }
 }
 
 void Client::responceIdentification(const Header *header)
@@ -225,21 +235,11 @@ void Client::responceWrite(const struct Header *header) const
 void Client::responcePingPoing(const struct Header *header)
 {
     Q_ASSERT(header != NULL);
-    // Нет реакции на ответ ping
+    _counterPing = 0;
 }
-
-//void Client::setStateConnection(bool newStateConnection)
-//{
-//    if (_stateConnection == newStateConnection)
-//        return;
-
-//    _stateConnection = newStateConnection;
-//    emit stateConnectionChanged();
-//}
 
 void Client::slotReciveData()
 {
-//    _timerServerUnavailable.start();
     _recivedBuff += _socket.readAll();
 
     bool error = false;
@@ -331,7 +331,7 @@ void Client::slotQueryWrite(int channelNumber, QByteArray data)
 
 void Client::slotQueryIdentification()
 {
-    Device *dev = qobject_cast<Device*>(sender());
+//    Device *dev = qobject_cast<Device*>(sender());
     queryIdentification();
 }
 

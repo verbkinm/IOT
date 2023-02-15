@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
         slotNewConnection();
     });
 
-    server->listen(QHostAddress("127.0.0.1"), 2024);
-    std::cout << "Start service on 127.0.0.1:2024" << std::endl;
+    server->listen(QHostAddress("127.0.0.1"), 2027);
+    std::cout << "Start service on 127.0.0.1:2027" << std::endl;
 
     return a.exec();
 }

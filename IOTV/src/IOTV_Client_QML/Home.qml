@@ -265,7 +265,8 @@ Page {
         function onSignalDisconnected() {
             listModel.clear()
             loaderDevice.setSource("")
-            appStack.pop(homePage)
+            if (appStack.currentItem != clientPage)
+                appStack.pop(homePage)
         }
     }
 

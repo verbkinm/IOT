@@ -23,8 +23,6 @@ public:
     Client(QObject *parent = nullptr);
     ~Client();
 
-//    qint64 writeData(const QByteArray &data);
-
     int countDevices() const;
     int countDeviceOnline() const;
 
@@ -36,14 +34,15 @@ public:
     bool stateConnection() const;
 
 private:
-//    static constexpr int TIME_OUT = 5000;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-//    QTimer _timerServerUnavailable;                      // "Пингуем" сервер
-
-//    bool _stateConnection;                  // Состояние подключения к серверу.
     uint64_t _expectedDataSize;
+
+    QTimer _timerPing;
+    // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается
+    static constexpr int COUNTER_PING_COUNT = 3;
+    int _counterPing;
 
     //!!! unorder_map
     std::map<QString, Device> _devices;
@@ -52,7 +51,7 @@ private:
     void queryState(const QString &name);
     void queryRead(const QString &name, uint8_t channelNumber);
     void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
-    void queryPingPoing();
+    void queryPing();
 
     void responceIdentification(const struct Header *header);
     void responceState(const struct Header *header);
@@ -60,9 +59,7 @@ private:
     void responceWrite(const struct Header *header) const;
     void responcePingPoing(const struct Header *header);
 
-    void write(const QByteArray &data);
-
-//    void setStateConnection(bool newStateConnection);
+    qint64 write(const QByteArray &data);
 
 public slots:
     void connectToHost(const QString &address, qint64 port);
@@ -81,7 +78,6 @@ private slots:
     void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotError(QAbstractSocket::SocketError error);
-//    void slotConnectWait();
 
 signals:
     void signalConnected();
@@ -92,6 +88,4 @@ signals:
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
-    void slotPing();
-//    void signalConnectWait();
 };
