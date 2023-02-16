@@ -28,18 +28,9 @@ Rectangle {
         text: "Example text"
     }
 
-    Timer {
-        id: timer
-        repeat: false
-        running: false
-        interval: 1000
-        onTriggered: {
-            anim.running = true
-        }
-    }
-
     NumberAnimation on opacity {
         id: anim
+        easing.type: Easing.InQuad
         to: 0
         running: true
         duration: 2000
@@ -60,6 +51,5 @@ Rectangle {
     {
         console.log("open")
         opacity = 1
-        timer.start()
     }
 }

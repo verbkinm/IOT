@@ -1,9 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>Client.qml</file>
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>Home.qml</file>
         <file>Devices/Device_0.qml</file>
         <file>Devices/Device_1.qml</file>
         <file>Devices/Device_3.qml</file>
@@ -54,8 +52,10 @@
         <file>img/logo.png</file>
         <file>DialogShared.qml</file>
         <file>Notification.qml</file>
-        <file>Home_Connector.qml</file>
+        <file>Home/DeviceComponent.qml</file>
+        <file>Home/Home.qml</file>
+        <file>Home/Home_Connector.qml</file>
+        <file>Client/Client.qml</file>
     </qresource>
-    <qresource prefix="/pages"/>
     <qresource prefix="/audio"/>
 </RCC>

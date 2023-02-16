@@ -24,8 +24,6 @@ Page {
 
         GroupBox {
             id: groupBox
-            title: "Подключение к серверу"
-            font.pixelSize: 14
             height: 255
             anchors
             {
@@ -191,14 +189,14 @@ Page {
         target: client
         function onSignalConnected() {
             state = stateConnected
-            loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение установлено"})
+            loaderNotification.setSource("qrc:/Notification.qml", {parent: stackView, text: "cоединение установлено"})
         }
         function onSignalConnecting() {
             state = stateConnecting
         }
         function onSignalDisconnected() {
             state = stateDisconnected
-            loaderNotification.setSource("Notification.qml", {parent: stackView, text: "cоединение сброшено"})
+            loaderNotification.setSource("qrc:/Notification.qml", {parent: stackView, text: "cоединение сброшено"})
         }
     }
 

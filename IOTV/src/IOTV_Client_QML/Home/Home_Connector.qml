@@ -10,31 +10,36 @@ Rectangle {
     opacity: 1
     visible: true
 
+    readonly property string stateHide: "hide"
+    readonly property string stateShow: "show"
+
     Component.onCompleted: {
         console.log(client.state, " ", state)
     }
 
     states: [
         State {
-            name: "hide"; when: (client != null) ? client.state : ""
+            name: stateHide
+            when: (client != null) ? client.state : ""
             PropertyChanges { target: controlConnect; opacity: 0; visible: false }
         },
         State {
-            name: "show"; when:  (client != null) ? !client.state : ""
+            name: stateShow
+            when:  (client != null) ? !client.state : ""
             PropertyChanges { target: controlConnect; opacity: 1; visible: true }
         }
     ]
 
     transitions: [
         Transition {
-            to: "hide"
+            to: stateHide
             ParallelAnimation{
                 PropertyAnimation { target: controlConnect; property: "visible"; from: true; to: false; duration: 500 }
                 PropertyAnimation { target: controlConnect; property: "opacity"; from: 1; to: 0; duration: 500 }
             }
         },
         Transition {
-            to: "show"
+            to: stateShow
             PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
         }
     ]

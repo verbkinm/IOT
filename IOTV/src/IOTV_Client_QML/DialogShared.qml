@@ -6,6 +6,7 @@ Dialog {
 
     id: dialog
     modal: true
+    visible: false
 
 //    width: parent.width * 0.8
 //    height: parent.height < 300 ? 250 : parent.height * 0.5

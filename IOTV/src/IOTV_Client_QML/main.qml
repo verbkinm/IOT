@@ -3,6 +3,9 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
 
+import "Home" as HomePageModule
+import "Client" as ClientPageModule
+
 ApplicationWindow {
     id: window
     width: 360
@@ -10,8 +13,8 @@ ApplicationWindow {
     visible: true
     title: qsTr("IOTV Client")
 
-    //    minimumWidth: 360
-    //    minimumHeight: 520
+    minimumWidth: 360
+    minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
@@ -138,12 +141,17 @@ ApplicationWindow {
                             }
                             else if (index === 2)
                             {
-                                about.open()
+                                loaderDialog.setSource("DialogShared.qml",
+                                                       {parent: stackView,
+                                                           visible: true,
+                                                           standardButtons: Dialog.Ok,
+                                                           title: "О программе",
+                                                           text: "Клиент IOTV " + Qt.application.version})
                             }
 
                             else if (index === 3)
                             {
-                                dialogExit.open()
+//                                dialogExit.open()
                             }
 
                             drawer.visible = 0
@@ -166,19 +174,21 @@ ApplicationWindow {
         anchors.fill: parent
         initialItem: homePage
 
-        onCurrentItemChanged: {
-            console.log("stackView current item: ", stackView.currentItem.objectName)
-        }
-
-        Home {
+        HomePageModule.Home {
             id: homePage
             objectName: "Home"
         }
 
-        Client {
+        ClientPageModule.Client {
             id: clientPage
             objectName: "Client"
             visible: false
+        }
+
+        onCurrentItemChanged: {
+            console.log("stackView current item: ", stackView.currentItem.objectName)
+            if (appStack.currentItem == homePage)
+                homePage.loaderClear()
         }
     }
 
@@ -214,40 +224,46 @@ ApplicationWindow {
         }
     }
 
-    DialogShared {
-        id: about
-        parent: stackView
-        standardButtons: Dialog.Ok
-        title: "О программе"
-        text: "Клиент IOTV " + Qt.application.version
+    Loader {
+        id: loaderDialog
+        source: ""
     }
 
-    DialogShared {
-        id: dialogExit
-        parent: stackView
-        standardButtons: Dialog.Yes | Dialog.No
-        text: "Вы действительно хотите выйти?"
 
-        onAccepted: {
-            Qt.exit(0)
-        }
-    }
+//    DialogShared {
+//        id: dialogExit
+//        parent: stackView
+//        standardButtons: Dialog.Yes | Dialog.No
+//        text: "Вы действительно хотите выйти?"
+
+//        onAccepted: {
+//            Qt.exit(0)
+//        }
+//    }
 
     Loader {
         id: loaderNotification
         source: ""
     }
 
-
     onClosing: {
         close.accepted = false
         if (appStack.currentItem == homePage)
-            dialogExit.open()
-        else
         {
-            appStack.pop()
-            //!!! home loader clear
+//            dialogExit.open()
+            var obj = loaderDialog.setSource("qrc:/DialogShared.qml",
+                                   {parent: appStack,
+                                       visible: true,
+                                       standardButtons: Dialog.Yes | Dialog.No,
+                                       text: "Вы действительно хотите выйти?"})
+            while(!loaderDialog.Ready)
+                1
+
+            if (loaderDialog.Ready)
+                obj.accept.connect = function(){ Qt.exit(0) }
         }
+        else
+            appStack.pop()
     }
 }
 

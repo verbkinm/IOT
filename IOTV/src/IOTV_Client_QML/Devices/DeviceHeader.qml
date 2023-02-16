@@ -1,9 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import "../"    // DialogShared.qml
 
 Rectangle {
-
     height: 64
 
     Text {
@@ -84,7 +82,12 @@ Rectangle {
             source: "qrc:/img/info.png"
         }
         onClicked: {
-            dialogInfo.open()
+            loaderDialog.setSource("qrc:/DialogShared.qml",
+                                   {parent: appStack,
+                                       visible: true,
+                                       title: "Описание",
+                                       standardButtons: Dialog.Ok,
+                                       text: device.description})
         }
     }
 
@@ -99,14 +102,5 @@ Rectangle {
             anchors.fill: parent
             source: ""
         }
-    }
-
-    DialogShared
-    {
-        id: dialogInfo
-        parent: appStack
-        title: "Описание"
-        standardButtons: Dialog.Ok
-        text: device.description
     }
 }
