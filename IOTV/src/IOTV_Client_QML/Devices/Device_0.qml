@@ -7,7 +7,7 @@ Page {
 
     id: root
     title: device.aliasName
-    objectName: device.aliasName
+    objectName: device.aliasName + "_debug"
 
     Flickable {
         id: fl

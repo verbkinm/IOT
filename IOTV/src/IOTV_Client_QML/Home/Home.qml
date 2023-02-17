@@ -8,10 +8,9 @@ Page {
     footer: Item {
         height: 20
         width: parent.width
-        id: footerItem
 
-        Text {
-            anchors.left: parent.left
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.margins: 5
             font.pixelSize: 12
             text: "Состояние: " +

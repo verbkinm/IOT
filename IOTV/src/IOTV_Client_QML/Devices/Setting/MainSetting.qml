@@ -48,6 +48,7 @@ Rectangle {
 
         onNameChanged: {
             client.deviceByName(deviceName).aliasName = this.name
+            sync()
         }
     }
 }

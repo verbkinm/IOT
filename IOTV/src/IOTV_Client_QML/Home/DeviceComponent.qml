@@ -21,7 +21,7 @@ Rectangle {
         anchors.fill: parent
         onClicked: {
             loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
-            loaderDevice.title = loaderDevice.objectName = client.deviceByName(model.name).aliasName
+            loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
             appStack.push(loaderDevice)
         }
     }
@@ -103,9 +103,9 @@ Rectangle {
     function createDeviceBy(id)
     {
         if (id === 1)
-            return "/Devices/Device_1.qml"
+            return "/Devices/Device_1/Device_1.qml"
         else if (id === 2)
-            return "/Devices/Device_2.qml"
+            return "/Devices/Device_2/Device_2.qml"
         else if (id === 4)
             return "/Devices/Device_4.qml"
         else

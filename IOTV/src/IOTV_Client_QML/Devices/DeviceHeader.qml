@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 
 Rectangle {
     height: 64
+    color: Qt.rgba(0, 0, 0, 0)
 
     Text {
         text: device.state ? "online" : "offline"
@@ -35,9 +36,9 @@ Rectangle {
         }
 
         onClicked: {
-            loaderItem.objectName = device.aliasName + "_setting"
+            loaderDebug.objectName = device.aliasName + "_setting"
             loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
-            appStack.push(loaderItem)
+            appStack.push(loaderDebug)
         }
     }
 
@@ -59,9 +60,9 @@ Rectangle {
         }
 
         onClicked: {
-            loaderItem.objectName = device.aliasName + "_debug"
+            loaderDebug.objectName = device.aliasName + "_debug"
             loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
-            appStack.push(loaderItem)
+            appStack.push(loaderDebug)
         }
     }
 
@@ -83,24 +84,19 @@ Rectangle {
         }
         onClicked: {
             loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                   {parent: appStack,
-                                       visible: true,
-                                       title: "Описание",
-                                       standardButtons: Dialog.Ok,
-                                       text: device.description})
+                                     {parent: appStack,
+                                         visible: true,
+                                         title: "Описание",
+                                         standardButtons: Dialog.Ok,
+                                         text: device.description})
         }
     }
 
-    Item {
+    Loader {
         property string title: device.aliasName
 
-        id: loaderItem
+        id: loaderDebug
         objectName: "debug"
-
-        Loader {
-            id: loaderDebug
-            anchors.fill: parent
-            source: ""
-        }
+        source: ""
     }
 }
