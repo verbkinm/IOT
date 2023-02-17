@@ -1,21 +1,14 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.1
 
 Rectangle {
     id: controlConnect
     anchors.fill: parent
-    z: 1
     opacity: 1
     visible: true
 
     readonly property string stateHide: "hide"
     readonly property string stateShow: "show"
-
-    Component.onCompleted: {
-        console.log(client.state, " ", state)
-    }
 
     states: [
         State {
@@ -52,19 +45,18 @@ Rectangle {
         wrapMode: Text.Wrap
     }
 
+    // Дублирует clientPage.btn
     Button {
-        id: btnConnect
-        width: 180
-        font.pixelSize: 18
-        text: "подключиться"
+        width: clientPage.btn.width
+        font.pixelSize: clientPage.btn.font.pixelSize
+        text: clientPage.btn.text
 
         anchors.top: txtConnection.bottom
         anchors.margins: 10
         anchors.horizontalCenter: parent.horizontalCenter
 
         onClicked: {
-            console.log("click")
-            clientPage.connectToHost()
+            clientPage.btn.clicked()
         }
     }
 }

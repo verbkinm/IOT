@@ -2,13 +2,12 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property alias text: txtField.text
+    property alias textField: txtField
     property int number: 0
     property alias type: typeName.text
     property alias button: btn
 
     height: 50
-    width: parent.width
 
     Label {
         id: lb1
@@ -46,10 +45,9 @@ Item {
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
         font.pixelSize: 12
-        readOnly: true
 
         text: ""
-        placeholderText: "Чтение данных..."
+        placeholderText: "Введите данные..."
         placeholderTextColor: "#ccc"
         anchors {
             left: typeName.right
@@ -70,19 +68,12 @@ Item {
         font.pixelSize: 12
         icon {
             color: "transparent"
-            source: "qrc:/img/copy.png"
         }
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 10
-        }
-
-        onClicked: {
-            txtField.selectAll()
-            txtField.copy()
-            txtField.deselect()
         }
     }
 }

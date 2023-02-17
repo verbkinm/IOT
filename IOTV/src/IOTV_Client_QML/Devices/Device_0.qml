@@ -1,11 +1,9 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.1
 
 Page {
     //Ссылка на Device
-    required property var device
+    required property QtObject device
 
     id: root
     title: device.aliasName
@@ -15,19 +13,11 @@ Page {
         id: fl
         width: root.width
         height: root.height
-        //        contentHeight: childrenRect.height
+        contentHeight: column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
             visible: active
-//            PropertyAnimation {
-//                target: scroll
-//                properties: "visible"
-//                from: true
-//                to: false
-//                duration: 5000
-//                running: true
-//            }
         }
 
         Column {
@@ -35,22 +25,31 @@ Page {
             padding: 10
             spacing: 10
 
-            Label {id:name}
             Label {
-                id:aliasName
+                id:name
+                text: "Имя устройства: " + device.name
+            }
+            Label {
+                id: aliasName
                 width: fl.width
                 wrapMode: Text.Wrap
                 maximumLineCount: 3
+                text: "Псевдоним: " + device.aliasName
             }
-            Label {id:devId}
+            Label {
+                id: devId
+                text :"ID устройства: " + device.id
+            }
             Label {
                 id:description
                 wrapMode: Text.Wrap
                 width: fl.width
                 rightPadding: 10
+                text: "Описание: " + device.description
             }
             Label {
                 id:state
+                text: "Состояние: " + (device.state ? "онлайн" : "офлайн")
             }
         }
 
@@ -74,6 +73,39 @@ Page {
                 left: parent.left
                 right: parent.right
                 topMargin: 10
+            }
+
+            Repeater {
+                id: repeaterRead
+                model: device.readChannelLength
+
+                ChannelItem {
+                    number: model.index
+                    type: device.readDataType(model.index)
+                    width: columnRead.width
+                    textField.text: device.readData(model.index)
+                    textField.readOnly: true
+
+                    button.icon.source: "qrc:/img/copy.png"
+
+                    button.onClicked: {
+                        textField.selectAll()
+                        textField.copy()
+                        textField.deselect()
+
+                        loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "скопировано в буфер"})
+                    }
+
+                    Connections {
+                        target: device
+                        function onSignalDataChanged(channel) {
+                            if (channel !== model.index)
+                                return
+
+                            textField.text = device.readData(model.index)
+                        }
+                    }
+                }
             }
         }
 
@@ -99,57 +131,30 @@ Page {
                 right: parent.right
                 topMargin: 10
             }
+
+            Repeater {
+                id: repeaterWrite
+                model: device.writeChannelLength
+
+                ChannelItem {
+                    number: model.index
+                    type: device.writeDataType(model.index)
+                    width: columnWrite.width
+
+                    button.icon.source: "qrc:/img/send.png"
+                    button.onClicked: {
+                        device.setDataFromString(model.index, textField.text)
+                    }
+                }
+            }
         }
     }
 
     Component.onCompleted: {
         console.log("Device 0 construct: ", objectName)
-        //!!!
-        name.text = Qt.binding(function (){ return "Имя устройства: " + device.name})
-        aliasName.text = Qt.binding(function (){ return "Псевдоним: " + device.aliasName})
-        devId.text = Qt.binding(function (){ return "ID устройства: " + device.id})
-        description.text = Qt.binding(function (){ return "Описание: " + device.description})
-        state.text = Qt.binding(function (){ return "Состояние: " + (device.state ? "онлайн" : "офлайн")})
-
-        for (var i = 0; i < device.readChannelLength; i++)
-        {
-            var component = Qt.createComponent("ChannelItem.qml");
-            if (component.status === Component.Ready)
-            {
-                var obj = component.createObject(columnRead, {number: i, type: device.readDataType(i)})
-                obj.width = Qt.binding(function(){return columnRead.width})
-                obj.text = device.readData(i)
-            }
-        }
-
-        for (i = 0; i < device.writeChannelLength; i++)
-        {
-            component = Qt.createComponent("ChannelItemWrite.qml");
-            if (component.status === Component.Ready)
-            {
-                obj = component.createObject(columnWrite, {number: i, type: device.writeDataType(i), _device: device})
-                obj.width = Qt.binding(function(){return columnWrite.width})
-            }
-        }
-        timer.start()
     }
 
     Component.onDestruction: {
         console.log("Device 0 destruct: ", objectName)
-    }
-
-    Timer {
-        id: timer
-        interval: 500
-        repeat: true
-        running: false
-        onTriggered: {
-            var children = columnRead.children
-            for (var i = 0; i < children.length; i++)
-                children[i].text = device.readData(i)
-
-            //!!!
-            fl.contentHeight = column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
-        }
     }
 }

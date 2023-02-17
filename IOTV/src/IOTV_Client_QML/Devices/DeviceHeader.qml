@@ -82,7 +82,7 @@ Rectangle {
             source: "qrc:/img/info.png"
         }
         onClicked: {
-            loaderDialog.setSource("qrc:/DialogShared.qml",
+            loaderMainItem.setSource("qrc:/DialogShared.qml",
                                    {parent: appStack,
                                        visible: true,
                                        title: "Описание",

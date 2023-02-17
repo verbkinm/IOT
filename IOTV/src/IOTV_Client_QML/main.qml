@@ -86,87 +86,9 @@ ApplicationWindow {
         }
     }
 
-    Drawer {
+    MainMenu {
         id: drawer
-
         y: overlayHeader.height
-        width: window.width / 2
-        height: window.height - overlayHeader.height
-
-        modal: inPortrait
-        interactive: inPortrait
-        position: inPortrait ? 0 : 1
-        visible: !inPortrait
-
-
-        ListModel {
-            id: listModel
-
-            ListElement {
-                name: "Главная"
-            }
-            ListElement {
-                name: "Настройки"
-            }
-            ListElement {
-                name: "О программе"
-            }
-            ListElement {
-                name: "Выход"
-            }
-        }
-
-        Component {
-            id: delegate
-            Item {
-                width: parent.width; height: 30
-                Rectangle {
-                    anchors.fill: parent
-                    color: "transparent"
-
-                    MouseArea{
-                        anchors.fill: parent
-                        anchors.centerIn: parent
-                        Text {
-                            anchors.centerIn: parent
-                            text: name;
-                            font.pointSize: 12
-                        }
-                        onClicked: {
-                            if (index === 0)
-                                stackView.pop(homePage)
-                            else if (index === 1 && stackView.currentItem != clientPage)
-                            {
-                                stackView.push(clientPage)
-                            }
-                            else if (index === 2)
-                            {
-                                loaderDialog.setSource("DialogShared.qml",
-                                                       {parent: stackView,
-                                                           visible: true,
-                                                           standardButtons: Dialog.Ok,
-                                                           title: "О программе",
-                                                           text: "Клиент IOTV " + Qt.application.version})
-                            }
-
-                            else if (index === 3)
-                            {
-//                                dialogExit.open()
-                            }
-
-                            drawer.visible = 0
-                        }
-                    }
-                }
-            }
-        }
-
-        ListView {
-            id: listView
-            anchors.fill: parent
-            model: listModel
-            delegate: delegate
-        }
     }
 
     StackView {
@@ -188,80 +110,39 @@ ApplicationWindow {
         onCurrentItemChanged: {
             console.log("stackView current item: ", stackView.currentItem.objectName)
             if (appStack.currentItem == homePage)
-                homePage.loaderClear()
+                loaderDevice.source = ""
         }
     }
 
-    Connections {
-        target: client
-        function onSignalDisconnected() {
-            if (!client.state && (stackView.currentItem != clientPage && stackView.currentItem != homePage))
-                stackView.pop(homePage)
-        }
-    }
-
-    Popup {
-        id: popupWait
-        objectName: "Popup"
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
+    DialogShared {
+        id: dialogExit
+        parent: stackView
+        standardButtons: Dialog.Yes | Dialog.No
+        text: "Вы действительно хотите выйти?"
         visible: false
 
-        background: Rectangle{
-            opacity: 0.3
-        }
-
-        BusyIndicator {
-            id: indicator
-            antialiasing: true
-            anchors.centerIn: parent
-            visible: true
-            running: true
+        onAccepted: {
+            Qt.exit(0)
         }
     }
 
+    // Загружаются DialogShared и Notification со всей программы
     Loader {
-        id: loaderDialog
+        id: loaderMainItem
         source: ""
     }
 
-
-//    DialogShared {
-//        id: dialogExit
-//        parent: stackView
-//        standardButtons: Dialog.Yes | Dialog.No
-//        text: "Вы действительно хотите выйти?"
-
-//        onAccepted: {
-//            Qt.exit(0)
-//        }
-//    }
-
+    // Загружаются устройства
     Loader {
-        id: loaderNotification
+        property string title
+        id: loaderDevice
         source: ""
     }
 
     onClosing: {
         close.accepted = false
         if (appStack.currentItem == homePage)
-        {
-//            dialogExit.open()
-            var obj = loaderDialog.setSource("qrc:/DialogShared.qml",
-                                   {parent: appStack,
-                                       visible: true,
-                                       standardButtons: Dialog.Yes | Dialog.No,
-                                       text: "Вы действительно хотите выйти?"})
-            while(!loaderDialog.Ready)
-                1
-
-            if (loaderDialog.Ready)
-                obj.accept.connect = function(){ Qt.exit(0) }
-        }
+            dialogExit.open()
         else
             appStack.pop()
     }

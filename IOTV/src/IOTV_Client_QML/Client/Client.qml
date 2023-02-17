@@ -10,6 +10,8 @@ Page {
     readonly property string stateConnecting: "Connecting"
     readonly property string stateDisconnected: "Disconnected"
 
+    property alias btn: btn_connect
+
     state: stateDisconnected
 
     Flickable {
@@ -126,7 +128,7 @@ Page {
             }
 
             Button {
-                id: btn
+                id: btn_connect
                 width: 180
                 font.pixelSize: 18
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -160,20 +162,20 @@ Page {
             PropertyChanges { target: addr; enabled: false}
             PropertyChanges { target: port; enabled: false}
             PropertyChanges { target: autoConnect; enabled: false}
-            PropertyChanges { target: btn; text: "отключиться"}
-            PropertyChanges { target: popupWait; visible: false}
+            PropertyChanges { target: btn_connect; text: "отключиться"}
+            PropertyChanges { target: loaderMainItem; source: ""}
         },
         State {
             name: stateConnecting
-            PropertyChanges { target: popupWait; visible: true}
+            PropertyChanges { target: btn_connect; text: "подключение..."}
         },
         State {
             name: stateDisconnected
             PropertyChanges { target: addr; enabled: true}
             PropertyChanges { target: port; enabled: true}
             PropertyChanges { target: autoConnect; enabled: true}
-            PropertyChanges { target: btn; text: "подключиться"}
-            PropertyChanges { target: popupWait; visible: false}
+            PropertyChanges { target: btn_connect; text: "подключиться"}
+            PropertyChanges { target: loaderMainItem; source: ""}
         }
     ]
 
@@ -189,14 +191,15 @@ Page {
         target: client
         function onSignalConnected() {
             state = stateConnected
-            loaderNotification.setSource("qrc:/Notification.qml", {parent: stackView, text: "cоединение установлено"})
+            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение установлено"})
         }
         function onSignalConnecting() {
             state = stateConnecting
+            loaderMainItem.setSource("qrc:/PopupWait.qml", {parent: appStack})
         }
         function onSignalDisconnected() {
             state = stateDisconnected
-            loaderNotification.setSource("qrc:/Notification.qml", {parent: stackView, text: "cоединение сброшено"})
+            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение сброшено"})
         }
     }
 
@@ -212,6 +215,6 @@ Page {
 
     // вызывается из Home.qml
     function connectToHost() {
-        btn.clicked()
+        btn_connect.clicked()
     }
 }

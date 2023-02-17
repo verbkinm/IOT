@@ -1,7 +1,5 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -23,78 +21,30 @@ Page {
         }
     }
 
-    Home_Connector {}
-
-    GridView {
-        id: listView
-        cellHeight: 130
-        cellWidth: 130
-
-        anchors {
-            fill: parent
-            leftMargin: parent.width * 0.1
-            rightMargin: parent.width * 0.1
-            topMargin: 15
-        }
-
-        model: ListModel { id: listModel }
-        delegate: DeviceComponent { id: componentRect }
-
-        // Анимация появления элементов модели
-        populate: Transition {
-            NumberAnimation { properties: "x,y"; duration: 1000; easing.type: Easing.OutExpo }
-        }
-        // Анимация добавления элементов
-        add: Transition {
-            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
-            NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 100 }
-            NumberAnimation { properties: "x,y"; duration: 1000; easing.type: Easing.OutBounce}
-        }
-        // Удаление элемента
-        remove: Transition {
-            PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
-        }
-    }
-
     Loader {
-        property string title
-        id: loaderDevice
-        source: ""
+        id: loaderHome
+        anchors.fill: parent
+        source: "Home_Connector.qml"
     }
 
     Connections {
         target: client
-        function onCountDeviceChanged()
+        function onSignalConnected()
         {
-            listModel.clear()
-            for( var i = 0; i < target.totalDevice; i++)
-            {
-                var device = target.devList()[i];
-                var object = {
-                    name: device.name,
-                    source: imageById(device.id)
-                }
-                listModel.append(object)
-            }
+            loaderHome.setSource("DeviceListView.qml")
         }
-
         function onSignalDisconnected()
         {
-            listModel.clear()
-            loaderDevice.setSource("")
+            loaderHome.setSource("Home_Connector.qml")
 
             //!!!
-            if (appStack.currentItem == homePage)
-                appStack.pop(homePage)
-            else if (appStack.currentItem == clientPage)
-            {
-                appStack.pop(homePage)
+            var flag = appStack.currentItem == clientPage
+            appStack.pop(homePage)
+
+            if (flag)
                 appStack.push(clientPage)
-            }
         }
     }
-
-
 
     function imageById(id)
     {
@@ -108,10 +58,5 @@ Page {
             return "qrc:/img/id/4.png"
         else
             return "qrc:/img/id/0.png"
-    }
-
-    function loaderClear()
-    {
-        loaderDevice.setSource("")
     }
 }

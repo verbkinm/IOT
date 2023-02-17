@@ -9,7 +9,6 @@
         <file>img/id/2.png</file>
         <file>img/id/1.png</file>
         <file>Devices/ChannelItem.qml</file>
-        <file>Devices/ChannelItemWrite.qml</file>
         <file>img/debug.png</file>
         <file>Devices/Device_1_switch.qml</file>
         <file>Devices/Device_4.qml</file>
@@ -56,6 +55,9 @@
         <file>Home/Home.qml</file>
         <file>Home/Home_Connector.qml</file>
         <file>Client/Client.qml</file>
+        <file>MainMenu.qml</file>
+        <file>PopupWait.qml</file>
+        <file>Home/DeviceListView.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>
