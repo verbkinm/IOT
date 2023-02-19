@@ -10,6 +10,7 @@ Rectangle {
     height: 80
 
     color: Qt.rgba(0, 0, 0, 0)
+    border.width: 1
 
     Image {
         id: img

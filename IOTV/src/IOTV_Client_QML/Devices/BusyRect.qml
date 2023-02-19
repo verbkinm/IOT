@@ -5,7 +5,9 @@ Rectangle {
     width: parent.width
     height: parent.height
     z: 1
-    color: Qt.rgba(1, 1, 1, 0.5)
+    color: Qt.rgba(0, 0, 0, 0.1)
+
+    radius: 5
 
     MouseArea {
         anchors.fill: parent

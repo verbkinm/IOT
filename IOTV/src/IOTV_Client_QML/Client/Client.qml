@@ -136,12 +136,12 @@ Page {
                 anchors.margins: 10
 
                 onClicked: {
-                    if (addr.text.length == 0)
+                    if (!addr.text.length)
                     {
                         addr.focus = true
                         return
                     }
-                    if (port.text.length == 0)
+                    if (!port.text.length)
                     {
                         port.focus = true
                         return

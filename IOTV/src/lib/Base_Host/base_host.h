@@ -27,6 +27,7 @@ public:
 
     struct IOTV_Server_embedded *convert() const;
 
+    static constexpr uint16_t TIMER_READ_INTERVAL = 1000;
     static constexpr uint16_t TIMER_STATE_INTERVAL = 1000;
     static constexpr uint16_t TIMER_PING_INTERVAL = 1000;
 

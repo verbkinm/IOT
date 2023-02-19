@@ -7,8 +7,7 @@ Dialog {
     id: dialog
     modal: true
 
-//    width: parent.width * 0.8
-//    height: parent.height < 300 ? 250 : parent.height * 0.5
+    width: parent.width * 0.8
 
     x: Math.round((parent.width - width) / 2)
     y: Math.round((parent.height - height) / 2)
@@ -16,7 +15,7 @@ Dialog {
     Label {
         id: lbl
         anchors.fill: parent
-        horizontalAlignment: Text.AlignHCenter
+//        horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: 18
         wrapMode: Text.Wrap

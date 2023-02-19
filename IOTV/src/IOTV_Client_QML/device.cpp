@@ -18,7 +18,7 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut, Qt::QueuedConnection);
     connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut, Qt::QueuedConnection);
 
-    _timerRead.setInterval(1000);
+    _timerRead.setInterval(TIMER_READ_INTERVAL);
     _timerState.setInterval(TIMER_STATE_INTERVAL);
 
     _timerRead.start();
@@ -60,7 +60,7 @@ bool Device::isOnline() const
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-    if (this->setReadChannelData(channelNumber, data))
+    if (data != getReadChannelData(channelNumber) && this->setReadChannelData(channelNumber, data))
     {
         emit signalDataChanged(channelNumber);
         return true;

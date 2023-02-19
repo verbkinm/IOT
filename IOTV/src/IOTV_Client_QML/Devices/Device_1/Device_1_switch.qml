@@ -5,14 +5,12 @@ import Qt.labs.settings 1.1
 import "qrc:/Devices/" as Devices
 
 Rectangle {
-    //Ссылка на Device
-//    required property var device
-    required property int channel
-    property alias checked: button.checked
-    property bool switchOn: false
+    property int channel
+    property alias btn: button
+    property alias rec: rectangle
+    property alias desciptionLabel: userDescription
 
     id: root
-//    objectName: device.aliasName
     height: 80
 
     color: Qt.rgba(0, 0, 0, 0)
@@ -23,49 +21,31 @@ Rectangle {
     }
 
     Rectangle {
+        id: rectangle
         height: parent.height
         width: parent.width * 0.8
 
+        color: Qt.rgba(0, 0, 0, 0)
+        border.width: 1
+        border.color: Qt.rgba(0, 0, 0, 0.1)
+        radius: 5
+
         anchors {
             horizontalCenter: parent.horizontalCenter
-        }
-
-        border.color: "grey"
-        border.width: 1
-        radius: 15
-
-        gradient: Gradient {
-            GradientStop {
-                position: 0.00;
-                color: "#e0d9d9";
-            }
-            GradientStop {
-                position: 1.00;
-                color: "#ffffff";
-            }
         }
 
         Switch{
             id: button
             height: 80
 
-            checked: switchOn
             anchors{
                 left: parent.left
                 leftMargin: 30
                 verticalCenter: parent.verticalCenter
             }
 
-            onToggled: {
-                var state = button.checked ? "true" : "false"
-                button.checked = !button.checked
-
-//                if (switchOn)
-//                    device.setDataFromString(channel, "false")
-//                else
-//                    device.setDataFromString(channel, "true")
-
-                clickButton()
+            onPositionChanged: {
+                popup.visible = false
             }
         }
 
@@ -73,6 +53,7 @@ Rectangle {
             id: userDescription
 
             height: button.height
+            text: "uesr description"
             wrapMode: Text.WordWrap
             elide: Text.ElideRight
             maximumLineCount: 2
@@ -94,52 +75,16 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     button.toggle()
-                    button.toggled()
+                    button.clicked()
                 }
             }
         }
 
         Devices.BusyRect {
             id: popup
-
-//            Component.onCompleted: {
-//                if (!device.state)
-//                    close()
-//            }
+            visible: false
         }
     }
-
-//    Timer {
-//        id: timer
-//        interval: 500
-//        repeat: true
-//        running: true
-//        onTriggered: {
-//            if (!device.state)
-//                return
-
-//            var btnCheck = device.readData(channel) === "true" ? true : false
-//            if (btnCheck !== switchOn)
-//            {
-//                popup.open()
-//                popupTimer.start()
-//            }
-//            else
-//                button.checked = switchOn
-
-//            switchOn = btnCheck
-//        }
-//    }
-
-//    Timer {
-//        id: popupTimer
-//        interval: timer.interval * 1.25
-//        running: true
-//        repeat: false
-//        onTriggered: {
-//            popup.close()
-//        }
-//    }
 
     Settings {
         id: setting
@@ -157,10 +102,11 @@ Rectangle {
         console.log("Device 1_1 destruct:", objectName)
     }
 
-    function clickButton()
-    {
-        //        player.source = "qrc:/audio/click.mp3"
-        //        player.play()
+    function wait() {
         popup.open()
+    }
+
+    function notWait() {
+        popup.close()
     }
 }
