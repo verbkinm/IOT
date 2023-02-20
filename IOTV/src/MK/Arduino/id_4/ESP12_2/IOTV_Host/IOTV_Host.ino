@@ -44,7 +44,7 @@ bool error = false;
 #define REPEATE 1
 #define MODE 2
 #define TRIGGER 3
-#define ADC_BORDER 20 // граничное значение ADC для определения воспроизведения музыки
+#define ADC_BORDER 50 // граничное значение ADC для определения воспроизведения музыки
 
 const uint8_t NUMBER_READ_CHANNEL = 4;
 const uint8_t NUMBER_WRITE_CHANNEL = NUMBER_READ_CHANNEL;
@@ -278,8 +278,12 @@ void dataRecived(char ch)
 
 void onStationConnected(const WiFiEventStationModeConnected& evt) 
 {
-  Serial.print("Station connected: ");
+  Serial.print("\nStation connected: ");
   Serial.println(evt.ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
 }
 
 void onStationDisconnected(const WiFiEventStationModeDisconnected& evt) 
@@ -288,6 +292,7 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
   Serial.println(evt.ssid);
   Serial.print("Code disconnected: ");
   Serial.println(evt.reason);
+
 
   clearData();
 }
