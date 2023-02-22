@@ -9,8 +9,10 @@ Rectangle {
     width: parent.width * 0.8
     height: 80
 
-    color: Qt.rgba(0, 0, 0, 0)
+    border.color: Qt.rgba(0, 0, 0, 0.1)
     border.width: 1
+
+    anchors.horizontalCenter: parent.horizontalCenter
 
     Image {
         id: img

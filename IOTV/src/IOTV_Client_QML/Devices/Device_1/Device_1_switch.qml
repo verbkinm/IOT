@@ -53,7 +53,7 @@ Rectangle {
             id: userDescription
 
             height: button.height
-            text: "uesr description"
+            text: "Канал " + channel
             wrapMode: Text.WordWrap
             elide: Text.ElideRight
             maximumLineCount: 2

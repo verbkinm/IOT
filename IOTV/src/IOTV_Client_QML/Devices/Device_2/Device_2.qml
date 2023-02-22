@@ -15,6 +15,8 @@ Page {
         id: headerPanel
     }
 
+//    clip: true
+
     Flickable {
         id: fl
         width: root.width
