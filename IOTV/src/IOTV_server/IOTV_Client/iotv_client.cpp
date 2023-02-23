@@ -56,7 +56,6 @@ void IOTV_Client::queryIdentification()
         auto size = responseIdentificationData(outData, BUFSIZ, iot);
 
         write({outData, static_cast<int>(size)}, size);
-
         clearIOTV_Server(iot);
     }
 }
@@ -71,30 +70,18 @@ void IOTV_Client::queryState(const Header *header)
         return iotv_host.getName() == QByteArray{header->state->name, header->state->nameSize};
     });
 
-    if (it != _hosts.end())
-    {
-        //        struct IOTV_Server_embedded iot = {
-        //            .id = 0,
-        //                    .name = header->state->name,
-        //                    .description = NULL,
-        //                    .numberReadChannel = 0,
-        //                    .readChannel = NULL,
-        //                    .readChannelType = NULL,
-        //                    .numberWriteChannel = 0,
-        //                    .writeChannelType = NULL,
-        //                    .state = it->isOnline()
-        //        };
+    if (it == _hosts.end())
+        return;
 
-        //!!! Для чего создавать полноценный iot, если нужно только имя и состояние?
-        auto iot = it->convert();
-        uint64_t size;
-        char outData[BUFSIZ];
+    //!!! Для чего создавать полноценный iot, если нужно только имя и состояние?
+    auto iot = it->convert();
+    uint64_t size;
+    char outData[BUFSIZ];
 
-        size = responseStateData(outData, BUFSIZ, iot);
+    size = responseStateData(outData, BUFSIZ, iot);
 
-        write({outData, static_cast<int>(size)}, size);
-        clearIOTV_Server(iot);
-    }
+    write({outData, static_cast<int>(size)}, size);
+    clearIOTV_Server(iot);
 }
 
 void IOTV_Client::queryRead(const Header *header)

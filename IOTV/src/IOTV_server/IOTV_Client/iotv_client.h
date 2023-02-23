@@ -6,10 +6,10 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QThread>
+#include <QTimer>
 
 #include "log.h"
 #include "IOTV_Host/iotv_host.h"
-//#include "IOTV_SC.h"
 #include "IOTV_SH.h"
 #include "creatorpkgs.h"
 

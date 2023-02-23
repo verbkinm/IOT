@@ -5,8 +5,12 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts")
 {
     checkSettingsFileExist();
-    readSettings();
+
+    readServerSettings();
     startTCPServer();
+
+    readHostSetting();
+
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }
 
@@ -15,19 +19,17 @@ IOTV_Server::~IOTV_Server()
     while (isListening())
     {
         close();
-        QThread::sleep(1);
+        QThread::usleep(10);
     }
     Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
 }
 
 QStringList IOTV_Server::getFileSettingNames() const
 {
-    QStringList list;
-    list << _settingsServer.fileName() << _settingsHosts.fileName();
-    return list;
+    return {_settingsServer.fileName(), _settingsHosts.fileName()};
 }
 
-void IOTV_Server::readSettings()
+void IOTV_Server::readServerSettings()
 {       
     _settingsServer.beginGroup("Server");
     _address = _settingsServer.value("address", "127.0.0.1").toString();
@@ -37,7 +39,10 @@ void IOTV_Server::readSettings()
     ServerLog::CLIENT_ONLINE_LOG_FILENAME = _settingsServer.value(ServerLog::CLIENT_ONLINE_LOG, ServerLog::CLIENT_ONLINE_LOG_FILENAME).toString();
     ServerLog::DEFAULT_LOG_FILENAME = _settingsServer.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
     _settingsServer.endGroup();
+}
 
+void IOTV_Server::readHostSetting()
+{
     for (const auto &group : _settingsHosts.childGroups())
     {
         _settingsHosts.beginGroup(group);
@@ -120,9 +125,9 @@ void IOTV_Server::clientOnlineFile() const
         file << socket->peerName().toStdString()
              << ": "
              << socket->peerAddress().toString().toStdString()
-             << ":"
+             << ':'
              << std::to_string(socket->peerPort())
-             << "\n";
+             << '\n';
     }
 
     file.close();
@@ -133,9 +138,9 @@ void IOTV_Server::checkSettingsFileExist()
     if (!QFileInfo::exists(_settingsServer.fileName()))
     {
         _settingsServer.beginGroup("Server");
-        _settingsServer.setValue("address", "127.0.0.1");
-        _settingsServer.setValue("port", 2022);
-        _settingsServer.setValue("max_client", _maxClientCount);
+        _settingsServer.setValue(serverField::address, "127.0.0.1");
+        _settingsServer.setValue(serverField::port, 2022);
+        _settingsServer.setValue(serverField::maxClient , _maxClientCount);
         _settingsServer.setValue(ServerLog::TCP_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::TCP_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
@@ -145,11 +150,11 @@ void IOTV_Server::checkSettingsFileExist()
     if (!QFileInfo::exists(_settingsHosts.fileName()))
     {
         _settingsHosts.beginGroup("Default");
-        _settingsHosts.setValue("connection_type", "TCP");
-        _settingsHosts.setValue("address", "127.0.0.1");
-        _settingsHosts.setValue("port", 2021);
-        _settingsHosts.setValue("interval", 0);
-        _settingsHosts.setValue("log_file", QFileInfo({QCoreApplication::applicationDirPath()}, "default.log").absoluteFilePath());
+        _settingsHosts.setValue(hostField::connection_type, connectionType::TCP);
+        _settingsHosts.setValue(hostField::address, "127.0.0.1");
+        _settingsHosts.setValue(hostField::port, 2021);
+        _settingsHosts.setValue(hostField::interval, 0);
+        _settingsHosts.setValue(hostField::logFile, QFileInfo({QCoreApplication::applicationDirPath()}, "default.log").absoluteFilePath());
         _settingsHosts.endGroup();
         _settingsHosts.sync();
     }
@@ -176,7 +181,7 @@ void IOTV_Server::slotNewConnection()
 
     if (_iot_clients.size() >= _maxClientCount)
     {
-        Log::write("Warnning: exceeded the maximum clientlimit. Client disconnected.",
+        Log::write("Warnning: exceeded the maximum client limit. Client disconnected.",
                     Log::Write_Flag::FILE_STDOUT,
                     ServerLog::TCP_LOG_FILENAME);
         socket->disconnectFromHost();

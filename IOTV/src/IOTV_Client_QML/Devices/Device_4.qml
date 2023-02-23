@@ -13,7 +13,7 @@ Page {
     property string mode: "-1" //первый запуск popup закроется при изменении занчение mode
     property bool triggerState: false
 
-    readonly property int adc_border: 20
+    readonly property int adc_border: 50
     readonly property string stateActive: "active"
     readonly property string stateUnactive: "unactive"
     readonly property string stateOnline: "online"

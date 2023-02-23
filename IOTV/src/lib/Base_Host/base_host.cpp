@@ -117,7 +117,7 @@ struct IOTV_Server_embedded *Base_Host::convert() const
         .nameSize = static_cast<uint8_t>(nameSize),
         .descriptionSize = static_cast<uint16_t>(descriptionSize)
     };
-    //!!! временные данные нормально отработают?
+
     if (nameSize > 0)
         memcpy((void *)iot.name, getName().toLocal8Bit(), nameSize);
     if (descriptionSize > 0)
