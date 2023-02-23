@@ -1,23 +1,24 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.3
-import Qt.labs.platform 1.1
+
+import "Home" as HomePageModule
+import "Client" as ClientPageModule
 
 ApplicationWindow {
-
     id: window
     width: 360
     height: 520
     visible: true
     title: qsTr("IOTV Client")
+
     minimumWidth: 360
     minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
     //! [orientation]
-    property bool exit: false
 
     property alias appStack: stackView
 
@@ -38,24 +39,27 @@ ApplicationWindow {
                 left: parent.left
             }
             onClicked: {
-                stackView.pop()
+                window.close()
             }
-            visible: !homePage.visible
         }
 
-        RowLayout {
-            anchors.fill: parent
-            Label {
-                text: stackView.currentItem.title
-                font.pixelSize: 18
-                Layout.alignment: Qt.AlignCenter
-            }
+        Label {
+            width: parent.width
+            height: parent.height
+            text: stackView.currentItem.title
+            elide: Text.ElideRight
+            font.pixelSize: 18
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            leftPadding: pressBack.width + pressBack.anchors.leftMargin
+            rightPadding: pressBack.width + pressBack.anchors.leftMargin
         }
     }
 
     footer: ToolBar {
-        height: 50
+        height: overlayHeader.height
         id: overlayFooter
+
         RowLayout {
             anchors.fill: parent
             ToolButton {
@@ -82,85 +86,9 @@ ApplicationWindow {
         }
     }
 
-    Drawer {
+    MainMenu {
         id: drawer
-
         y: overlayHeader.height
-        width: window.width / 2
-        height: window.height - overlayHeader.height
-
-        modal: inPortrait
-        interactive: inPortrait
-        position: inPortrait ? 0 : 1
-        visible: !inPortrait
-
-
-        ListModel {
-            id: listModel
-
-            ListElement {
-                name: "Главная"
-            }
-            ListElement {
-                name: "Настройки"
-            }
-            ListElement {
-                name: "О программе"
-            }
-            ListElement {
-                name: "Выход"
-            }
-        }
-
-        Component {
-            id: delegate
-            Item {
-                width: parent.width; height: 30
-                Rectangle {
-                    anchors.fill: parent
-                    color: "transparent"
-
-                    MouseArea{
-                        anchors.fill: parent
-                        anchors.centerIn: parent
-                        Text {
-                            anchors.centerIn: parent
-                            text: name;
-                            font.pointSize: 12
-                        }
-                        onClicked: {
-                            if (index === 0)
-                                stackView.pop(homePage)
-                            else if (index === 1 && stackView.currentItem != clientPage)
-                            {
-                                //                                stackView.pop(homePage)
-                                stackView.push(clientPage)
-                            }
-                            else if (index === 2)
-                            {
-                                //                                about.visible = true
-                                about.open()
-                            }
-
-                            else if (index === 3)
-                            {
-                                exit = true
-                                Qt.quit()
-                            }
-
-                            drawer.visible = 0
-                        }
-                    }
-                }
-            }
-        }
-
-        ListView {
-            id: listView
-            anchors.fill: parent
-            model: listModel
-            delegate: delegate
-        }
     }
 
     StackView {
@@ -168,129 +96,55 @@ ApplicationWindow {
         anchors.fill: parent
         initialItem: homePage
 
-        onCurrentItemChanged: {
-            console.log(stackView.currentItem.objectName)
-            if (stackView.currentItem.objectName == homePage.objectName)
-            {
-                for (var i = stackView.children.length - 1; i > 1; i--)
-                    stackView.children[i].destroy()
-            }
-        }
-
-        Home {
+        HomePageModule.Home {
             id: homePage
             objectName: "Home"
         }
 
-        Client {
+        ClientPageModule.Client {
             id: clientPage
             objectName: "Client"
             visible: false
         }
-    }
 
-    Connections {
-        target: client
-        function onSignalDisconnected() {
-            if (!client.state && (stackView.currentItem != clientPage && stackView.currentItem != homePage))
-                stackView.pop(homePage)
+        onCurrentItemChanged: {
+            console.log("stackView current item: ", stackView.currentItem.objectName)
+            if (appStack.currentItem == homePage)
+                loaderDevice.source = ""
         }
     }
 
-    Popup {
-        id: popupWait
-        objectName: "Popup"
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-        visible: clientPage.connection_attempt
-
-        background: Rectangle{
-            opacity: 0.3
-        }
-
-        BusyIndicator {
-            id: indicator
-            antialiasing: true
-            anchors.centerIn: parent
-            visible: true
-            running: true
-        }
-    }
-
-    Popup {
-        id: about
-        objectName: "about"
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
+    DialogShared {
+        id: dialogExit
+        parent: stackView
+        standardButtons: Dialog.Yes | Dialog.No
+        text: "Вы действительно хотите выйти?"
         visible: false
 
-        background: Rectangle{
-            opacity: 0.9
-
-            Label {
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: "Клиент IOTV\n Версия 0.2 "
-                font.pixelSize: 24
-                wrapMode: Text.Wrap
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-
-            onClicked: {
-                about.close()
-            }
+        onAccepted: {
+            Qt.exit(0)
         }
     }
 
-    Popup {
-        id: connectionError
+    // Загружаются DialogShared и Notification со всей программы
+    Loader {
+        id: loaderMainItem
+        source: ""
+    }
 
-        width: parent.width
-        height: parent.height
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-        visible: false
-
-        background: Rectangle {
-            color: Qt.rgba(255, 255, 255, 0.9)
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                connectionError.close()
-            }
-        }
-
-        Label {
-            anchors.fill: parent
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: "Ошибка соединения!"
-            font.pixelSize: 24
-            wrapMode: Text.Wrap
-        }
+    // Загружаются устройства
+    Loader {
+        property string title
+        id: loaderDevice
+        source: ""
     }
 
     onClosing: {
-        if (!exit)
-        {
-            close.accepted = false
+        close.accepted = false
+        if (appStack.currentItem == homePage)
+            dialogExit.open()
+        else
             appStack.pop()
-        }
     }
-
 }
 

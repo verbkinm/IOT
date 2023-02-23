@@ -10,7 +10,10 @@
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
 #include "base_host.h"
-#include "ConfigTypes.h"
+//#include "ConfigTypes.h"
+#include "IOTV_SH.h"
+
+#include "iotvp_print.h"
 
 class IOTV_Host : public Base_Host
 {
@@ -22,8 +25,6 @@ public:
 
     QString getName() const override;
 
-    virtual bool isOnline() const override;
-
     qint64 write(uint8_t channelNumber, const QByteArray &data);
     QByteArray readData(uint8_t channelNumber) const;
 
@@ -33,64 +34,53 @@ public:
 
 private:
     qint64 read(uint8_t channelNumber);
-    void dataResived(QByteArray data);
-    qint64 writeToRemoteHost(const QByteArray &data);
-
-    void connectToHost();
+    qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
     void setConnectionType();
 
-    void setOnline(bool state);
-
-    void response_WAY_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_READ_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_WRITE_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-    void response_PONG_recived(const IOTV_SH::RESPONSE_PKG *pkg);
-
-    static constexpr uint16_t TIMER_PING = 10000;
-    static constexpr uint16_t TIMER_PONG = 15000;
+    void responceIdentification(const struct Header *header);
+    void responceState(const struct IOTV_Server_embedded *iot);
+    void responceRead(const struct Header* header);
+    void responceWrite(const struct IOTV_Server_embedded *iot) const;
+    void responcePingPoing(const struct IOTV_Server_embedded *iot);
 
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;
-
-    QTimer _reReadTimer, _timerPing, _timerPong;
+    QTimer _timerReRead, _timerState, _timerPing;
 
     std::unordered_map<QString, QString>  _settingsData;
 
     QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange, _mutexWrite;
 
-    enum Flag
-    {
-        DeviceRegistered = 0x01,
-        DeviceOnline = 0x02
-    };
+    // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
+    static constexpr int COUNTER_STATE_COUNT = 3;
+    int _counterState;
 
-public:
-    Q_DECLARE_FLAGS(Flags, Flag)
-
-private:
-    Flags _state_flags;
+    static constexpr int COUNTER_PING_COUNT = 3;
+    int _counterPing;
 
 private slots:
-    void slotConnected();
-    void slotDisconnected();
+    void slotDataResived(QByteArray data);
 
     void slotReReadTimeOut();
+    void slotStateTimeOut();
     void slotPingTimeOut();
-    void slotReconnectTimeOut();
 
     void slotNewThreadStart();
     void slotThreadStop();
 
+    // Используетеся для записи данных полученых от клиентов из других потоков
     void slotQueryWrite(int channelNumber, QByteArray data);
 
+    void slotConnected();
+
 signals:
+    void signalDevicePingTimeOut();
     void signalDataRiceved();
 
     void signalStopThread();
 
+    // Используетеся для записи данных полученых от клиентов из других потоков
     void signalQueryWrite(int channelNumber, QByteArray data);
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(IOTV_Host::Flags)

@@ -1,15 +1,16 @@
 #pragma once
 
 #include "channel.h"
+#include "creatorpkgs.h"
 #include "IOTV_SH.h"
 
 class Base_Host : public QObject
 {
 public:
-    Base_Host(uint8_t id = 0, QObject *parent = nullptr);
+    Base_Host(uint16_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
 
-    uint8_t getId() const;
+    uint16_t getId() const;
     QString getDescription() const;
 
     virtual QString getName() const = 0;
@@ -21,6 +22,14 @@ public:
     Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
 
     QByteArray getReadChannelData(uint8_t channelNumber) const;
+
+    State::State_STATE state() const;
+
+    struct IOTV_Server_embedded *convert() const;
+
+    static constexpr uint16_t TIMER_READ_INTERVAL = 1000;
+    static constexpr uint16_t TIMER_STATE_INTERVAL = 1000;
+    static constexpr uint16_t TIMER_PING_INTERVAL = 1000;
 
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
@@ -36,13 +45,13 @@ protected:
 
     void removeAllSubChannel();
 
-    void setId(uint8_t id);
+    void setId(uint16_t id);
     void setDescription(const QString description);
 
-    virtual bool isOnline() const = 0;
+    State::State_STATE _state;
 
 private:
-    uint8_t _id;
+    uint16_t _id;
     QString _description;
 
     Channel _readChannel;

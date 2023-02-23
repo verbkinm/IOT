@@ -2,8 +2,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 Rectangle {
-
     height: 64
+    color: Qt.rgba(0, 0, 0, 0)
 
     Text {
         text: device.state ? "online" : "offline"
@@ -34,6 +34,12 @@ Rectangle {
             color: "transparent"
             source: "qrc:/img/settings.png"
         }
+
+        onClicked: {
+            loaderDebug.objectName = device.aliasName + "_setting"
+            loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
+            appStack.push(loaderDebug)
+        }
     }
 
     Button {
@@ -54,33 +60,9 @@ Rectangle {
         }
 
         onClicked: {
-            var find = false
-            var pageObject
-
-            for (var i = 0; i < appStack.children.length; i++)
-            {
-                if (appStack.children[i].objectName === name + "_debug")
-                {
-                    find = true
-                    pageObject = appStack.children[i]
-                    break
-                }
-            }
-
-            if (find)
-            {
-                appStack.push(pageObject)
-                return
-            }
-
-            var component = Qt.createComponent("/Devices/Device_0.qml");
-            if (component.status === Component.Ready)
-            {
-                var dev = device
-                var obj = component.createObject(appStack, {device: dev})
-                obj.objectName = name + "_debug"
-                appStack.push(obj);
-            }
+            loaderDebug.objectName = device.aliasName + "_debug"
+            loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
+            appStack.push(loaderDebug)
         }
     }
 
@@ -101,38 +83,20 @@ Rectangle {
             source: "qrc:/img/info.png"
         }
         onClicked: {
-            popup.open()
+            loaderMainItem.setSource("qrc:/DialogShared.qml",
+                                     {parent: appStack,
+                                         visible: true,
+                                         title: "Описание",
+                                         standardButtons: Dialog.Ok,
+                                         text: device.description})
         }
-        Popup {
-            id: popup
+    }
 
-            parent: root
-            modal: true
+    Loader {
+        property string title: device.aliasName
 
-            x: Math.round((parent.width - width) / 2)
-            y: Math.round((parent.height - height) / 2)
-            width: root.width
-            height: root.height
-
-            background: Rectangle {
-                color: Qt.rgba(255, 255, 255, 0.9)
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    popup.close()
-                }
-            }
-
-            Label {
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: device.description
-                font.pixelSize: 24
-                wrapMode: Text.Wrap
-            }
-        }
+        id: loaderDebug
+        objectName: "debug"
+        source: ""
     }
 }

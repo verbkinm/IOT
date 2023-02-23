@@ -4,6 +4,9 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     Base_conn_type(name, parent),
     _tcpPort(port)
 {
+    _reconnectTimer.setParent(parent);
+    _reconnectTimer.setInterval(SERVER_RECONNECT_INTERVAL);
+
     _address = address;
     _type = Conn_type::TCP;
     _tcpSocket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -12,7 +15,9 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     connect(&_tcpSocket, &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
     connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 
-    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
+//    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
+
+//    _reconnectTimer.start();
 }
 
 quint16 TCP_conn_type::getPort() const
@@ -25,8 +30,11 @@ void TCP_conn_type::setPort(quint16 port)
     _tcpPort = port;
 }
 
-qint64 TCP_conn_type::write(const QByteArray &data)
+qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
+    if (_tcpSocket.state() != QAbstractSocket::ConnectedState)
+        return 0;
+
     Log::write(_name +
                ": data transmit to " +
                _tcpSocket.peerAddress().toString() +
@@ -34,20 +42,28 @@ qint64 TCP_conn_type::write(const QByteArray &data)
                QString::number(_tcpSocket.peerPort()) +
                " -> " +
                data.toHex(':'),
-               Log::Write_Flag::FILE_STDOUT);
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
-    return _tcpSocket.write(data);
+    if (size == -1)
+        return _tcpSocket.write(data);
+
+    return _tcpSocket.write(data.data(), size);
 }
 
 void TCP_conn_type::connectToHost()
 {
-    _reconnectTimer.start(DEFAULT_INTERVAL);
+    _tcpSocket.abort();
+    Log::write(_name + ": try to connect...", Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
     _tcpSocket.connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
 
 void TCP_conn_type::disconnectFromHost()
 {
-    _tcpSocket.disconnectFromHost();
+
+    _tcpSocket.abort();//disconnectFromHost();
+//    _reconnectTimer.start();
 }
 
 QByteArray TCP_conn_type::readAll()
@@ -57,9 +73,11 @@ QByteArray TCP_conn_type::readAll()
 
 void TCP_conn_type::slotNewConnection()
 {
-    _reconnectTimer.stop();
+//    _reconnectTimer.stop();
     Log::write(_name + ": connected to " + _tcpSocket.peerAddress().toString()
-               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
+               + ":" + QString::number(_tcpSocket.peerPort()),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     connect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
     connect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
@@ -69,14 +87,19 @@ void TCP_conn_type::slotNewConnection()
 
 void TCP_conn_type::slotSocketDisconnected()
 {
+    clearDataBuffer();
+    expectedDataSize = 0;
+
     Log::write(_name + ": disconnected from " + _tcpSocket.peerAddress().toString()
-               + ":" + QString::number(_tcpSocket.peerPort()), Log::Write_Flag::FILE_STDOUT);
+               + ":" + QString::number(_tcpSocket.peerPort()),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     disconnect(&_tcpSocket, &QTcpSocket::readyRead, this, &TCP_conn_type::slotReadData);
     disconnect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalDisconnected();
-    _reconnectTimer.start(DEFAULT_INTERVAL);
+//    _reconnectTimer.start();
 }
 
 void TCP_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState socketState)
@@ -157,5 +180,7 @@ void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write("Error! " + _name + ": " + strErr, Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": " + strErr,
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 }

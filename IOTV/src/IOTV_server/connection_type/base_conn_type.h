@@ -2,8 +2,10 @@
 
 #include <QTimer>
 
+//#include "ConfigTypes.h"
 #include "log.h"
-#include "IOTV_SH.h"
+#include "raw.h"
+#include "creatorpkgs.h"
 
 class Base_conn_type : public QObject
 {
@@ -21,8 +23,7 @@ public:
         FILE
     };
 
-    static constexpr int BUFFER_MAX_SIZE = 256;
-    static constexpr int DEFAULT_INTERVAL = 10000; // таймер неудавшегося подключения
+    static constexpr int BUFFER_MAX_SIZE = BUFSIZ;
 
     QString getName() const;
     QString getAddress() const;
@@ -30,21 +31,22 @@ public:
 
     void setAddress(const QString &address);
 
-    virtual qint64 write(const QByteArray &data);
+    virtual qint64 write(const QByteArray &data, qint64 size = -1);
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 
-    void clearBufer();
-    void trimBufferFromBegin(u_int8_t size);
+    void clearDataBuffer();
+    void setDataBuffer(QByteArray &data);
 
     static QString ConnTypeToString(Conn_type conn_type);
+
+    uint64_t expectedDataSize;
 
 protected:
     const QString _name;
     QString _address;
     QString _logFile;
     Conn_type _type;
-    QTimer _reconnectTimer;
     QByteArray _host_buffer_data;
 
     std::mutex _hostBuffMutex;

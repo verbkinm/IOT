@@ -1,5 +1,4 @@
 #include "iotv_server.h"
-#include "IOTV_Client/iotv_client.h"
 
 IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
@@ -8,18 +7,17 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     checkSettingsFileExist();
     readSettings();
     startTCPServer();
-
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }
 
 IOTV_Server::~IOTV_Server()
 {
-    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, _logFile);
     while (isListening())
     {
         close();
         QThread::sleep(1);
     }
+    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
 }
 
 QStringList IOTV_Server::getFileSettingNames() const
@@ -34,7 +32,10 @@ void IOTV_Server::readSettings()
     _settingsServer.beginGroup("Server");
     _address = _settingsServer.value("address", "127.0.0.1").toString();
     _port = _settingsServer.value("port", 2022).toUInt();
-    _logFile = _settingsServer.value("log_file", "server.log").toString();
+    _maxClientCount = _settingsServer.value("max_client", 5).toUInt();
+    ServerLog::TCP_LOG_FILENAME = _settingsServer.value(ServerLog::TCP_LOG, ServerLog::TCP_LOG_FILENAME).toString();
+    ServerLog::CLIENT_ONLINE_LOG_FILENAME = _settingsServer.value(ServerLog::CLIENT_ONLINE_LOG, ServerLog::CLIENT_ONLINE_LOG_FILENAME).toString();
+    ServerLog::DEFAULT_LOG_FILENAME = _settingsServer.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
     _settingsServer.endGroup();
 
     for (const auto &group : _settingsHosts.childGroups())
@@ -47,7 +48,7 @@ void IOTV_Server::readSettings()
         setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, "TCP").toString();
         setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
-        setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, "").toString();
+        setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, setting[hostField::name] + ".log").toString();
 
         if (setting[hostField::connection_type] == connectionType::TCP)
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
@@ -62,15 +63,20 @@ void IOTV_Server::readSettings()
 
         if (it != _iot_hosts.end())
         {
-            Log::write(QString(Q_FUNC_INFO) + ", Error: Double host name in config file - " + setting[hostField::name], Log::Write_Flag::FILE_STDOUT);
-            std::cout << std::endl;
+            Log::write(QString(Q_FUNC_INFO) +
+                        ", Error: Double host name in config file - " + setting[hostField::name],
+                        Log::Write_Flag::FILE_STDERR,
+                        ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
         }
 
         _iot_hosts.emplace_back(setting);
         if (!_iot_hosts.back().runInNewThread())
         {
-            Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Host in new thread", Log::Write_Flag::FILE_STDOUT);
+            Log::write(QString(Q_FUNC_INFO) +
+                       " Error: Can't run IOT_Host in new thread",
+                       Log::Write_Flag::FILE_STDOUT,
+                       ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
         }
 
@@ -85,24 +91,26 @@ void IOTV_Server::startTCPServer()
     if (!listen(QHostAddress(_address), _port))
     {
         QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Write_Flag::FILE_STDERR, _logFile);
-        _reconnectTimer.start(Base_conn_type::DEFAULT_INTERVAL);
+        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
+        _reconnectTimer.start(TCP_conn_type::SERVER_RECONNECT_INTERVAL);
     }
     else
     {
         _reconnectTimer.stop();
         QString str = "Start TCP server, " + _address + ":" + QString::number(_port);
-        Log::write(str, Log::Write_Flag::FILE_STDOUT, _logFile);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
     }
 }
 
 void IOTV_Server::clientOnlineFile() const
 {
-    std::ofstream file("client_online.log", std::ios::trunc);
+    std::ofstream file(ServerLog::CLIENT_ONLINE_LOG_FILENAME.toStdString().c_str(), std::ios::trunc);
 
     if (!file.is_open())
     {
-        Log::write("Can't open client_online.log", Log::Write_Flag::FILE_STDERR);
+        Log::write("Can't open " + ServerLog::CLIENT_ONLINE_LOG_FILENAME,
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return;
     }
 
@@ -127,7 +135,10 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsServer.beginGroup("Server");
         _settingsServer.setValue("address", "127.0.0.1");
         _settingsServer.setValue("port", 2022);
-        _settingsServer.setValue("log_file", "server.log");
+        _settingsServer.setValue("max_client", _maxClientCount);
+        _settingsServer.setValue(ServerLog::TCP_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::TCP_LOG_FILENAME).absoluteFilePath());
+        _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
+        _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
         _settingsServer.endGroup();
         _settingsServer.sync();
     }
@@ -138,7 +149,7 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsHosts.setValue("address", "127.0.0.1");
         _settingsHosts.setValue("port", 2021);
         _settingsHosts.setValue("interval", 0);
-        _settingsHosts.setValue("log_file", "default.log");
+        _settingsHosts.setValue("log_file", QFileInfo({QCoreApplication::applicationDirPath()}, "default.log").absoluteFilePath());
         _settingsHosts.endGroup();
         _settingsHosts.sync();
     }
@@ -150,22 +161,37 @@ void IOTV_Server::slotNewConnection()
 
     if (!socket)
     {
-        Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ", Log::Write_Flag::FILE_STDOUT, "New_connection.log");
+        Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return;
-    }
-
-    _iot_clients.emplace_back(socket, _iot_hosts);
-    if (!_iot_clients.back().runInNewThread())
-    {
-        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ", Log::Write_Flag::FILE_STDOUT);
-        exit(1);
     }
 
     Log::write("Client new connection: "
                + socket->peerAddress().toString()
                + ":"
                + QString::number(socket->peerPort()),
-               Log::Write_Flag::FILE_STDOUT, _logFile);
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::TCP_LOG_FILENAME);
+
+    if (_iot_clients.size() >= _maxClientCount)
+    {
+        Log::write("Warnning: exceeded the maximum clientlimit. Client disconnected.",
+                    Log::Write_Flag::FILE_STDOUT,
+                    ServerLog::TCP_LOG_FILENAME);
+        socket->disconnectFromHost();
+        socket->deleteLater();
+        return;
+    }
+
+    _iot_clients.emplace_back(socket, _iot_hosts);
+    if (!_iot_clients.back().runInNewThread())
+    {
+        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        exit(1);
+    }
 
     connect(&_iot_clients.back(), &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected);
     clientOnlineFile();
@@ -174,11 +200,15 @@ void IOTV_Server::slotNewConnection()
 void IOTV_Server::slotDisconnected()
 {
     IOTV_Client* client = qobject_cast<IOTV_Client*>(sender());
+    if (client == nullptr)
+        return;
 
     QString strOut = "Client disconnected";
-    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, _logFile);
+    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
 
     _iot_clients.remove(*client);
+
+    clientOnlineFile();
 }
 
 void IOTV_Server::slotError(QAbstractSocket::SocketError error)
@@ -239,7 +269,9 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(this->objectName() + ": " + strErr, Log::Write_Flag::FILE_STDERR, _logFile);
+    Log::write(this->objectName() + ": " + strErr,
+               Log::Write_Flag::FILE_STDERR,
+               ServerLog::TCP_LOG_FILENAME);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();

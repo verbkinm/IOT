@@ -1,6 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    TEST_IOTV_SC \
-    TEST_IOTV_SH \
+    IOTVP_Header_Embedded \
     Test_Raw

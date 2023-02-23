@@ -2,9 +2,10 @@
 #include <QDebug>
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
+    expectedDataSize(0),
     _name(name), _address("none address")
 {
-    _reconnectTimer.setParent(parent);
+
 }
 
 Base_conn_type::Conn_type Base_conn_type::getConnectionType() const
@@ -22,31 +23,24 @@ void Base_conn_type::setAddress(const QString &address)
     _address = address;
 }
 
-qint64 Base_conn_type::write(const QByteArray &data)
+qint64 Base_conn_type::write(const QByteArray &data, qint64 size)
 {
     Q_UNUSED(data);
+    Q_UNUSED(size)
+
     return -1;
 }
 
-void Base_conn_type::clearBufer()
+void Base_conn_type::clearDataBuffer()
 {
+    std::lock_guard lg(_hostBuffMutex);
     _host_buffer_data.clear();
 }
 
-//void Base_conn_type::connectToHost()
-//{
-
-//}
-
-//void Base_conn_type::disconnectFromHost()
-//{
-
-//}
-
-void Base_conn_type::trimBufferFromBegin(u_int8_t size)
+void Base_conn_type::setDataBuffer(QByteArray &data)
 {
     std::lock_guard lg(_hostBuffMutex);
-    _host_buffer_data = _host_buffer_data.mid(size);
+    _host_buffer_data = data;
 }
 
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
@@ -73,12 +67,16 @@ void Base_conn_type::slotReadData()
     std::lock_guard lg(_hostBuffMutex);
 
     _host_buffer_data += readAll();
-    Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+    Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
     {
         _host_buffer_data.clear();
-        Log::write(_name + ": buffer cleared!", Log::Write_Flag::FILE_STDOUT);
+        Log::write(_name + ": buffer cleared!",
+                   Log::Write_Flag::FILE_STDOUT,
+                   ServerLog::DEFAULT_LOG_FILENAME);
         return;
     }
 

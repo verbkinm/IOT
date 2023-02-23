@@ -9,7 +9,9 @@
 
 #include "log.h"
 #include "IOTV_Host/iotv_host.h"
-#include "IOTV_SC.h"
+//#include "IOTV_SC.h"
+#include "IOTV_SH.h"
+#include "creatorpkgs.h"
 
 class IOTV_Client : public QObject
 {
@@ -34,14 +36,18 @@ private:
 
     QTimer _silenceTimer;
 
-    const uint _silenceInterval;
+    static constexpr uint _silenceInterval = 6000;
 
-    void query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
-    void query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
-    void query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const;
-    void query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg);
+    uint64_t _expectedDataSize;
 
-    void write(const QByteArray &data) const;
+    // Пришел запрос от клиента
+    void queryIdentification();
+    void queryState(const struct Header* header);
+    void queryRead(const struct Header* header);
+    void queryWrite(const struct Header* header);
+    void queryPingPoing();
+
+    void write(const QByteArray &data, qint64 size = -1) const;
 
 private slots:
     void slotDisconnected();

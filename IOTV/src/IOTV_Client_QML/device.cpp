@@ -1,44 +1,51 @@
 #include "device.h"
-#include "raw.h"
 
-Device::Device(const IOTV_SC::DEV_PKG &dev, QObject *parent)
-    : Base_Host{dev.id, parent}, _name{dev.name}, _state{false},
-      _timerReadInterval{1000}, _timerStateInterval{1000}
+Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
+    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}}
 {
+    Q_ASSERT(dev != nullptr);
+
     _timerRead.setParent(this);
     _timerState.setParent(this);
-    this->setDescription(dev.description);
+    this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
-    for (const auto &type : dev.readChannel)
-        this->addReadSubChannel({type});
+    for (int i = 0; i < dev->numberReadChannel; ++i)
+        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
 
-    for (const auto &type : dev.writeChannel)
-        this->addWriteSubChannel({type});
+    for (int i = 0; i < dev->numberWriteChannel; ++i)
+        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
 
-    connect(&_timerRead, &QTimer::timeout, this, &Device::signalQueryRead, Qt::QueuedConnection);
-    connect(&_timerState, &QTimer::timeout, this, &Device::signalQueryState, Qt::QueuedConnection);
+    connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut, Qt::QueuedConnection);
+    connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut, Qt::QueuedConnection);
 
-    _timerRead.setInterval(_timerReadInterval);
-    _timerState.setInterval(_timerStateInterval);
+    _timerRead.setInterval(TIMER_READ_INTERVAL);
+    _timerState.setInterval(TIMER_STATE_INTERVAL);
 
     _timerRead.start();
     _timerState.start();
 }
 
-void Device::update(const IOTV_SC::DEV_PKG &pkg)
+void Device::update(const IOTV_Server_embedded *dev)
 {
-    this->setId(pkg.id);
-    this->setDescription(pkg.description);
+    Q_ASSERT(dev != nullptr);
 
-    this->removeAllSubChannel();
+    if (this->getId() == 0)
+    {
+        this->setId(dev->id);
+        this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
-    for (const auto &type : pkg.readChannel)
-        this->addReadSubChannel({type});
+        if (this->getReadChannelLength() != dev->numberReadChannel)
+        {
+            this->removeAllSubChannel();
 
-    for (const auto &type : pkg.writeChannel)
-        this->addWriteSubChannel({type});
+            for (int i = 0; i < dev->numberReadChannel; ++i)
+                this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
 
-    emit signalUpdate();
+            for (int i = 0; i < dev->numberWriteChannel; ++i)
+                this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+        }
+        emit signalUpdate();
+    }
 }
 
 QString Device::getName() const
@@ -48,16 +55,25 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    return _state;
+    return _state == State::State_STATE_ONLINE;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-    return this->setReadChannelData(channelNumber, data);
+    if (data != getReadChannelData(channelNumber) && this->setReadChannelData(channelNumber, data))
+    {
+        emit signalDataChanged(channelNumber);
+        return true;
+    }
+
+    return false;
 }
 
 void Device::setDataFromString(int channelNumber, QString data)
 {
+    if (data.isEmpty())
+        return;
+
     emit signalQueryWrite(channelNumber, Raw::strToByteArray(data, getWriteChannelType(channelNumber)));
 }
 
@@ -83,11 +99,11 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
-    if (_state == newState)
-        return;
+    //    if (_state == static_cast<State::State_STATE>(newState))
+    //        return;
 
-    _state = newState;
-    emit stateChanged();
+    _state = static_cast<State::State_STATE>(newState);
+    emit signalStateChanged();
 }
 
 bool operator==(const Device &lhs, const Device &rhs)
@@ -103,4 +119,44 @@ bool operator==(const Device &lhs, const Device &rhs)
         return true;
     }
     return false;
+}
+
+bool operator!=(const Device &lhs, const Device &rhs)
+{
+    return !(lhs == rhs);
+}
+
+const QString &Device::aliasName() const
+{
+    return _aliasName;
+}
+
+void Device::setAliasName(const QString &newAliasName)
+{
+    if (_aliasName == newAliasName)
+        return;
+    _aliasName = newAliasName;
+    emit signalAliasNameChanged();
+}
+
+void Device::slotTimerReadTimeOut()
+{
+    if (getId() == 0)
+    {
+        emit signalQueryIdentification();
+        return;
+    }
+
+    emit signalQueryRead();
+}
+
+void Device::slotTimerStateTimeOut()
+{
+    if (getId() == 0)
+    {
+        emit signalQueryIdentification();
+        return;
+    }
+
+    emit signalQueryState();
 }

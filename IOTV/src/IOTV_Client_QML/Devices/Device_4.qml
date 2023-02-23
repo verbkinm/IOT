@@ -4,14 +4,52 @@ import QtQuick.Controls 2.2
 
 Page {
     id: root
+    title: device.aliasName
+    objectName: device.aliasName
 
-    //Ссылка на Device
     required property var device
-
-    property bool playSate: false
-    property bool ledSate: false
+    property int adc_value: 0
     property bool repeateSate: false
-    property string mode: "0" //первый запуск popup закроется при изменении занчение mode
+    property string mode: "-1" //первый запуск popup закроется при изменении занчение mode
+    property bool triggerState: false
+
+    readonly property int adc_border: 20
+    readonly property string stateActive: "active"
+    readonly property string stateUnactive: "unactive"
+    readonly property string stateOnline: "online"
+    readonly property string stateOffline: "offline"
+
+    state: stateOffline
+
+    onStateChanged: {
+        console.log(state)
+    }
+
+    states: [
+        State {
+            name: stateActive
+            when: adc_value > adc_border
+            PropertyChanges { target: img; source: "qrc:/img/cloud_on.png"}
+            PropertyChanges { target: play; icon.source: "qrc:/img/pause.png"}
+        },
+        State {
+            name: stateUnactive
+            when: adc_value <= adc_border
+            PropertyChanges { target: img; source: "qrc:/img/cloud_off.png"}
+            PropertyChanges { target: play; icon.source: "qrc:/img/play.png"}
+//            PropertyChanges { target: popup; visible: false}
+        }/*,
+        State {
+            name: stateOnline
+            when: device.state
+            PropertyChanges { target: popup; visible: false}
+        },
+        State {
+            name: stateOffline
+            when: !device.state
+            PropertyChanges { target: popup; visible: true}
+        }*/
+    ]
 
     header: DeviceHeader {
         id: headerPanel
@@ -35,7 +73,7 @@ Page {
 
         Image {
             id: img
-            source: playSate ? "qrc:/img/cloud_on.png" : "qrc:/img/cloud_off.png"
+            source: "qrc:/img/cloud_off.png"
             width: parent.width - (parent.width * 100 / 10)
             fillMode: Image.PreserveAspectFit
 
@@ -49,8 +87,8 @@ Page {
                 hoverEnabled: true
                 anchors.fill: parent
                 onClicked: {
-                    clickButton()
-                    device.setDataFromString(0, "true")
+//                    clickButton()
+                    device.setDataFromString(3, "true")
                 }
             }
         }
@@ -70,32 +108,16 @@ Page {
                 display: AbstractButton.IconOnly
                 icon {
                     color: "transparent"
-                    source: playSate ? "qrc:/img/pause.png" : "qrc:/img/play.png"
+                    source: "qrc:/img/play.png"
                 }
                 font.pixelSize: 18
 
                 onClicked: {
-                    clickButton()
-                    device.setDataFromString(0, "true")
+//                    clickButton()
+                    device.setDataFromString(3, "true")
                 }
             }
-            Button {
-                id: led
-                width: play.width
-                height: play.height
-                display: AbstractButton.IconOnly
-                icon {
-                    color: "transparent"
-                    source: ledSate ? "qrc:/img/lamp_on.png" : "qrc:/img/lamp_off.png"
-                }
-                onClicked: {
-                    clickButton()
-                    if (ledSate)
-                        device.setDataFromString(1, "false")
-                    else
-                        device.setDataFromString(1, "true")
-                }
-            }
+
             Button {
                 id: autorepeate
                 width: play.width
@@ -106,11 +128,11 @@ Page {
                     source: repeateSate ? "qrc:/img/repeate_on.png" : "qrc:/img/repeate_off.png"
                 }
                 onClicked: {
-                    clickButton()
+//                    clickButton()
                     if (repeateSate)
-                        device.setDataFromString(2, "false")
+                        device.setDataFromString(1, "false")
                     else
-                        device.setDataFromString(2, "true")
+                        device.setDataFromString(1, "true")
                 }
             }
             Button {
@@ -124,9 +146,9 @@ Page {
                 }
                 font.pixelSize: 18
                 onClicked: {
-                    popup.open()
-                    popupTimer.start()
-                    device.setDataFromString(3, "1")
+//                    popup.open()
+//                    popupTimer.start()
+                    device.setDataFromString(2, "0")
                 }
             }
             Button {
@@ -139,9 +161,9 @@ Page {
                     source: "qrc:/img/note.png"
                 }
                 onClicked: {
-                    popup.open()
-                    popupTimer.start()
-                    device.setDataFromString(3, "2")
+//                    popup.open()
+//                    popupTimer.start()
+                    device.setDataFromString(2, "1")
                 }
             }
             Button {
@@ -154,16 +176,20 @@ Page {
                     source: "qrc:/img/tree.png"
                 }
                 onClicked: {
-                    popup.open()
-                    popupTimer.start()
-                    device.setDataFromString(3, "3")
+//                    popup.open()
+//                    popupTimer.start()
+                    device.setDataFromString(2, "2")
                 }
             }
         }
     }
 
     Component.onCompleted: {
-        title = device.name
+        console.log("Device 4 construct: ", objectName)
+    }
+
+    Component.onDestruction: {
+        console.log("Device 4 destruct: ", objectName)
     }
 
     Timer {
@@ -172,43 +198,38 @@ Page {
         repeat: true
         running: true
         onTriggered: {
-            var pS = device.readData(0) === "true" ? true : false
-            var lS = device.readData(1) === "true" ? true : false
-            var rS = device.readData(2) === "true" ? true : false
+//            if (adc > ADC_border || rS !== repeateSate)
+//            {
+//                popup.open()
+//                popupTimer.start()
+//            }
 
-            if (pS !== playSate || lS !== ledSate || rS !== repeateSate)
-            {
-                popup.open()
-                popupTimer.start()
-            }
+//            if (!device.state)
+//            {
+//                popupTimer.stop()
+//                popup.open()
+//            }
 
-            if (!device.state)
-            {
-                popupTimer.stop()
-                popup.open()
-            }
-
-            playSate = pS
-            ledSate = lS
-            repeateSate = rS
+            adc_value = device.readData(0)
+            repeateSate = device.readData(1) === "true" ? true : false
+            mode = device.readData(2)
+            triggerState = device.readData(3) === "true" ? true : false
 
             fl.contentHeight = img.height + row.height + headerPanel.height
         }
     }
 
-    Timer {
-        id: popupTimer
-        interval: 500
-        running: false
-        repeat: false
-        onTriggered: {
-            popup.close()
-        }
-    }
+//    Timer {
+//        id: popupTimer
+//        interval: 500
+//        running: false
+//        repeat: false
+//        onTriggered: {
+//            popup.close()
+//        }
+//    }
 
-    Component.onDestruction: {
-        console.log("Device 4 destruct: ", objectName)
-    }
+
 
     //    MediaPlayer {
     //        id: player
@@ -221,23 +242,24 @@ Page {
 
     BusyRect {
         id: popup
+        visible: !device.state
     }
 
-    Connections {
-        target: device
-        function onStateChanged() {
-            if (!device.state)
-                popup.open()
-            else
-                popup.close()
-        }
-    }
+//    Connections {
+//        target: device
+//        function onStateChanged() {
+//            if (!device.state)
+//                popup.open()
+//            else
+//                popup.close()
+//        }
+//    }
 
     function clickButton()
     {
         //        player.source = "qrc:/audio/click.mp3"
         //        player.play()
-        popup.open()
+//        popup.open()
     }
 }
 

@@ -20,7 +20,7 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 
     if (!file.open(QFile::Append | QFile::Text))
     {
-        std::cerr << "Error write to file " << fileName.toStdString() << '\n';
+        qWarning() << "Error write to file " << fileName.toStdString().c_str();
         return;
     }
 
@@ -34,11 +34,11 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 void Log::writeToStdOut(const QString &data)
 {
     std::lock_guard lg(_mutex);
-    std::cout << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
+    qDebug() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str() << data.toStdString().c_str();
 }
 
 void Log::writeToStdErr(const QString &data)
 {
     std::lock_guard lg(_mutex);
-    std::cerr << QDateTime::currentDateTime().toString(_FORMAT).toStdString() << data.toStdString() << '\n';;
+    qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str() << data.toStdString().c_str();
 }

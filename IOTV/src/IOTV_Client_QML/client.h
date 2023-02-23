@@ -9,7 +9,7 @@
 #include <QEvent>
 
 #include "log.h"
-#include "IOTV_SC.h"
+#include "IOTV_SH.h"
 #include "device.h"
 
 class Client : public QObject
@@ -23,8 +23,6 @@ public:
     Client(QObject *parent = nullptr);
     ~Client();
 
-    qint64 writeData(const QByteArray &data);
-
     int countDevices() const;
     int countDeviceOnline() const;
 
@@ -36,25 +34,32 @@ public:
     bool stateConnection() const;
 
 private:
-    const int TIME_OUT = 5000;
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    QTimer _timerDevList,
-            _connectWait; // после команды на соединение ожидаем, если в течение N времение ответа нет, отключаемся
+    uint64_t _expectedDataSize;
 
-    bool _stateConnection;
+    QTimer _timerPing;
+    // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается
+    static constexpr int COUNTER_PING_COUNT = 3;
+    int _counterPing;
 
+    //!!! unorder_map
     std::map<QString, Device> _devices;
 
-    void response_DEV_LIST(IOTV_SC::RESPONSE_PKG *pkg);
-    void response_STATE(IOTV_SC::RESPONSE_PKG *pkg);
-    void response_READ(IOTV_SC::RESPONSE_PKG *pkg);
-    void response_WRITE(IOTV_SC::RESPONSE_PKG *pkg) const;
+    void queryIdentification();
+    void queryState(const QString &name);
+    void queryRead(const QString &name, uint8_t channelNumber);
+    void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
+    void queryPing();
 
-    void write(const QByteArray &data);
+    void responceIdentification(const struct Header *header);
+    void responceState(const struct Header *header);
+    void responceRead(const struct Header* header);
+    void responceWrite(const struct Header *header) const;
+    void responcePingPoing(const struct Header *header);
 
-    void setStateConnection(bool newStateConnection);
+    qint64 write(const QByteArray &data);
 
 public slots:
     void connectToHost(const QString &address, qint64 port);
@@ -62,25 +67,25 @@ public slots:
 
     void slotConnected();
     void slotDisconnected();
+    void slotStateChanged(QAbstractSocket::SocketState socketState);
 
 private slots:
     void slotReciveData();
 
-    void slotQueryDevList();
+    void slotQueryIdentification();
     void slotQueryRead();
     void slotQueryState();
     void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotError(QAbstractSocket::SocketError error);
-    void slotConnectWait();
 
 signals:
     void signalConnected();
+    void signalConnecting();
     void signalDisconnected();
 
     void countDeviceChanged();
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
-    void signalConnectWait();
 };

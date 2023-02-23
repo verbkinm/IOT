@@ -2,7 +2,7 @@
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObject *parent) : QObject(parent),
     _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts),
-    _silenceInterval(60000)
+    _expectedDataSize(0)
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
@@ -39,108 +39,143 @@ const QTcpSocket *IOTV_Client::socket() const
     return _socket;
 }
 
-void IOTV_Client::query_DEV_LIST_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
+void IOTV_Client::queryIdentification()
 {
-    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_DEVICE_LIST))
-        return;
+    char outData[BUFSIZ];
 
-    IOTV_SC::RESPONSE_DEV_LIST_PKG responseDevListPkg;
-    responseDevListPkg.devs.reserve(_hosts.size());
+    if (_hosts.size() == 0)
+    {
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL);
+        write({outData, static_cast<int>(size)}, size);
+        return;
+    }
+
     for (const auto &host : _hosts)
     {
-        IOTV_SC::DEV_PKG dev;
-        dev.id = host.getId();
-        dev.name = host.getName();
-        dev.description = host.getDescription();
+        struct IOTV_Server_embedded *iot = host.convert();
+        auto size = responseIdentificationData(outData, BUFSIZ, iot);
 
-        dev.readChannel.resize(host.getReadChannelLength());
-        for (uint8_t i = 0; i < host.getReadChannelLength(); i++)
-            dev.readChannel.at(i) = host.getReadChannelType(i);
+        write({outData, static_cast<int>(size)}, size);
 
-        dev.writeChannel.resize(host.getWriteChannelLength());
-        for (uint8_t i = 0; i < host.getWriteChannelLength(); i++)
-            dev.writeChannel.at(i) = host.getWriteChannelType(i);
-
-        responseDevListPkg.devs.push_back(dev);
-    }
-
-    write(IOTV_SC::Server_TX::response_DEV_LIST(responseDevListPkg));
-}
-
-void IOTV_Client::query_STATE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
-{
-    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_STATE))
-        return;
-
-    auto queryStatePkg = static_cast<IOTV_SC::Server_RX::QUERY_STATE_PKG*>(pkg);
-    IOTV_SC::RESPONSE_STATE_PKG responseStatePkg;
-    responseStatePkg.name = queryStatePkg->name;
-
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
-    {
-        return iotv_host.getName() == queryStatePkg->name;
-    });
-
-    if (it != _hosts.end())
-        responseStatePkg.state = it->isOnline();
-    else
-        responseStatePkg.state = false;
-
-    write(IOTV_SC::Server_TX::response_STATE(responseStatePkg));
-}
-
-void IOTV_Client::query_READ_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg) const
-{
-    if ((pkg == nullptr) || (pkg->type != IOTV_SC::Query_Type::QUERY_READ))
-        return;
-
-    auto queryReadPkg = static_cast<IOTV_SC::Server_RX::QUERY_READ_PKG*>(pkg);
-    IOTV_SC::RESPONSE_READ_PKG responseReadPkg;
-    responseReadPkg.name = queryReadPkg->name;
-    responseReadPkg.channelNumber = queryReadPkg->channelNumber;
-
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
-    {
-        return iotv_host.getName() == queryReadPkg->name;
-    });
-
-    if (it != _hosts.end())
-        responseReadPkg.data = it->readData(responseReadPkg.channelNumber);
-
-    write(IOTV_SC::Server_TX::response_READ(responseReadPkg));
-}
-
-void IOTV_Client::query_WRITE_recived(IOTV_SC::Server_RX::QUERY_PKG *pkg)
-{
-    if (pkg == nullptr)
-        return;
-
-    if (pkg->type != IOTV_SC::Query_Type::QUERY_WRITE)
-        return;
-
-    auto queryWritePkg = static_cast<IOTV_SC::Server_RX::QUERY_WRITE_PKG*>(pkg);
-    IOTV_SC::RESPONSE_WRITE_PKG responseWritePkg;
-    responseWritePkg.name = queryWritePkg->name;
-    responseWritePkg.channelNumber = queryWritePkg->channelNumber;
-
-    write(IOTV_SC::Server_TX::response_WRITE(responseWritePkg));
-
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
-    {
-        return iotv_host.getName() == queryWritePkg->name;
-    });
-
-    if (it != _hosts.end()) {
-        emit it->signalQueryWrite(queryWritePkg->channelNumber, queryWritePkg->data);
+        clearIOTV_Server(iot);
     }
 }
 
-void IOTV_Client::write(const QByteArray &data) const
+void IOTV_Client::queryState(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->state != NULL);
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == QByteArray{header->state->name, header->state->nameSize};
+    });
+
+    if (it != _hosts.end())
+    {
+        //        struct IOTV_Server_embedded iot = {
+        //            .id = 0,
+        //                    .name = header->state->name,
+        //                    .description = NULL,
+        //                    .numberReadChannel = 0,
+        //                    .readChannel = NULL,
+        //                    .readChannelType = NULL,
+        //                    .numberWriteChannel = 0,
+        //                    .writeChannelType = NULL,
+        //                    .state = it->isOnline()
+        //        };
+
+        //!!! Для чего создавать полноценный iot, если нужно только имя и состояние?
+        auto iot = it->convert();
+        uint64_t size;
+        char outData[BUFSIZ];
+
+        size = responseStateData(outData, BUFSIZ, iot);
+
+        write({outData, static_cast<int>(size)}, size);
+        clearIOTV_Server(iot);
+    }
+}
+
+void IOTV_Client::queryRead(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->readWrite != NULL);
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+    });
+
+    if (it != _hosts.end())
+    {
+        auto iot = it->convert();
+
+        uint64_t size;
+        char outData[BUFSIZ];
+
+        size = responseReadData(outData, BUFSIZ, iot, header);
+
+        write({outData, static_cast<int>(size)}, size);
+
+        clearIOTV_Server(iot);
+    }
+}
+
+void IOTV_Client::queryWrite(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->readWrite != NULL);
+
+    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    {
+        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+    });
+
+    if (it != _hosts.end() && it->state() != State::State_STATE_OFFLINE)
+    {
+        auto iot = it->convert();
+
+        uint64_t size;
+        char outData[BUFSIZ];
+
+        size = responseWriteData(outData, BUFSIZ, iot, header);
+        // Ответ клиенту о записи
+        write({outData, static_cast<int>(size)}, size);
+
+        // !!! Послать данные на устройство напрямую нельзя - разные потоки
+        // write(rawData, size);
+
+
+        // Сервер принял данные от клиента и перевернул,
+        // Возвращаем их в исходное состояние и отправляем на устройство
+        //!!!
+//        if (isLittleEndian())
+//            dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
+
+        emit it->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
+
+        clearIOTV_Server(iot);
+    }
+}
+
+void IOTV_Client::queryPingPoing()
+{
+    uint64_t size;
+    char outData[BUFSIZ];
+
+    size = responsePingData(outData, BUFSIZ);
+
+    write({outData, static_cast<int>(size)}, size);
+}
+
+void IOTV_Client::write(const QByteArray &data, qint64 size) const
 {
     Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
                + QString::number(_socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
-    _socket->write(data);
+               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
+    _socket->write(data.data(), size);
 }
 
 void IOTV_Client::slotDisconnected()
@@ -174,53 +209,56 @@ void IOTV_Client::slotReadData()
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
                + QString::number(socket()->peerPort())
-               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT);
+               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
-    IOTV_SC::Server_RX::QUERY_PKG *pkg;
-    while ((pkg = IOTV_SC::Server_RX::accumPacket(recivedBuff)) != nullptr)
+    bool error = false;
+    uint64_t cutDataSize = 0;
+
+    while (recivedBuff.size() > 0)
     {
-        if (pkg->type == IOTV_SC::Query_Type::QUERY_INCOMPLETE)
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(recivedBuff.data()), recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
+
+        if (error == true)
         {
-            delete pkg;
+            recivedBuff.clear();
+            _expectedDataSize = 0;
+            cutDataSize = 0;
+            clearHeader(header);
             break;
         }
 
-        if (pkg->type == IOTV_SC::Query_Type::QUERY_ERROR)
+        // Пакет не ещё полный
+        if (_expectedDataSize > 0)
         {
-            if (recivedBuff.size() > 0)
-            {
-                Log::write("WARRNING: received data from " +
-                           _socket->peerName() +
-                           _socket->peerAddress().toString() +
-                           ":" +
-                           QString::number(_socket->peerPort()) +
-                           "UNKNOW: " +
-                           recivedBuff.toHex(':'),
-                           Log::Write_Flag::FILE_STDOUT);
-                recivedBuff.clear();
-            }
-            delete pkg;
+            clearHeader(header);
             break;
         }
 
-        if (pkg->type == IOTV_SC::Query_Type::QUERY_DEVICE_LIST)
-            query_DEV_LIST_recived(pkg);
-        else if (pkg->type == IOTV_SC::Query_Type::QUERY_STATE)
-            query_STATE_recived(pkg);
-        else if (pkg->type == IOTV_SC::Query_Type::QUERY_READ)
-            query_READ_recived(pkg);
-        else if (pkg->type == IOTV_SC::Query_Type::QUERY_WRITE)
-            query_WRITE_recived(pkg);
-        else
+        if (header->type == Header::HEADER_TYPE_RESPONSE)
         {
-            //иных вариантов быть не должно!
-            Log::write(QString(Q_FUNC_INFO) +
-                       "Unknow pkg.type = " +
-                       QString::number(int(pkg->type)),
-                       Log::Write_Flag::FILE_STDERR);
-            exit(-1);
+            // На данный момент от клиент не должно приходить ответов
+            Log::write("Ответ от клиента не предусмотрен!",
+                       Log::Write_Flag::FILE_STDOUT,
+                       ServerLog::DEFAULT_LOG_FILENAME);
         }
-        delete pkg;
+        else if(header->type == Header::HEADER_TYPE_REQUEST)
+        {
+            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+                queryIdentification();
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+                queryRead(header);
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+                queryWrite(header);
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+                queryPingPoing();
+            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+                queryState(header);
+        }
+
+        recivedBuff = recivedBuff.mid(cutDataSize);
+
+        clearHeader(header);
     }
 }
 

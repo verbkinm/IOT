@@ -40,14 +40,14 @@ std::pair<QString, QString> Raw::strData() const
         result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const int8_t*>(_data.data())), "INT_8");
         break;
     case DATA_TYPE::INT_16:
-        result = std::make_pair<QString, QString>(QString::number(qToBigEndian(*reinterpret_cast<const int16_t*>(_data.data()))), "INT_16");
+        result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const int16_t*>(_data.data())), "INT_16");
         break;
     case DATA_TYPE::INT_32:
-        result = std::make_pair<QString, QString>(QString::number(qToBigEndian(*reinterpret_cast<const int32_t*>(_data.data()))), "INT_32");
+        result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const int32_t*>(_data.data())), "INT_32");
         break;
     case DATA_TYPE::INT_64:
         //qToBigEndian c int64_t не отрабатывает правильно
-        result = std::make_pair<QString, QString>(QString::number(qToBigEndian(*reinterpret_cast<const qint64*>(_data.data()))), "INT_64");
+        result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const qint64*>(_data.data())), "INT_64");
         break;
     case DATA_TYPE::FLOAT_32:
         result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const float*>(_data.data()), 'l', 4), "FLOAT_32");
