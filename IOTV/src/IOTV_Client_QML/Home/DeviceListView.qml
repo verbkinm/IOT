@@ -31,6 +31,19 @@ GridView {
         PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
     }
 
+    Component.onCompleted: {
+        listModel.clear()
+        for( var i = 0; i < client.totalDevice; i++)
+        {
+            var device = client.devList()[i];
+            var object = {
+                name: device.name,
+                source: imageById(device.id)
+            }
+            listModel.append(object)
+        }
+    }
+
     Connections {
         target: client
         function onCountDeviceChanged()

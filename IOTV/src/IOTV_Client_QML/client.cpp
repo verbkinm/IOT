@@ -76,6 +76,8 @@ void Client::slotConnected()
 void Client::slotDisconnected()
 {
     _devices.clear();
+    _expectedDataSize = 0;
+    _recivedBuff.clear();
 
     emit countDeviceChanged();
     emit onlineDeviceChanged();
