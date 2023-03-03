@@ -30,7 +30,7 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
 
 IOTV_Host::~IOTV_Host()
 {
-    emit signalStopThread();
+    emit    signalStopThread();
     _thread.wait();
 }
 
@@ -41,22 +41,20 @@ void IOTV_Host::responceIdentification(const struct Header *header)
 
     this->setId(header->identification->id);
     // На данный момент имя константное и считывается с файла настроек
-    //    this->setNname
+    // this->setNname
     this->setDescription(QByteArray{header->identification->description, header->identification->descriptionSize});
     this->removeAllSubChannel();
 
     for (uint8_t i = 0; i < header->identification->numberReadChannel; i++)
     {
         Q_ASSERT(header->identification->readChannelType != NULL);
-        Raw rawData(static_cast<Raw::DATA_TYPE>(header->identification->readChannelType[i]));
-        this->addReadSubChannel(rawData);
+        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(header->identification->readChannelType[i]));
     }
 
     for (uint8_t i = 0; i < header->identification->numberWriteChannel; i++)
     {
         Q_ASSERT(header->identification->writeChannelType != NULL);
-        Raw rawData(static_cast<Raw::DATA_TYPE>(header->identification->writeChannelType[i]));
-        this->addWriteSubChannel(rawData);
+        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(header->identification->writeChannelType[i]));
     }
 }
 
@@ -164,7 +162,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
 
         if (header->type == Header::HEADER_TYPE_RESPONSE)
         {
-            struct IOTV_Server_embedded *iot = convert();
+            auto *iot = convert();
 
             if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
                 responceIdentification(header);
@@ -179,9 +177,6 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 iot->state = header->state->state;
                 responceState(iot);
             }
-
-            //            printHeader(header);
-
             clearIOTV_Server(iot);
         }
         else if(header->type == Header::HEADER_TYPE_REQUEST)
@@ -191,12 +186,9 @@ void IOTV_Host::slotDataResived(QByteArray data)
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
-
         data = data.mid(cutDataSize);
-
         clearHeader(header);
     }
-
     _conn_type->setDataBuffer(data);
 }
 
@@ -219,7 +211,6 @@ void IOTV_Host::setConnectionType()
                 _settingsData[hostField::port].toUInt(),
                 this);
         _conn_type->connectToHost();
-
     }
     else if (connType == connectionType::UDP)
         //!!!
@@ -242,8 +233,7 @@ void IOTV_Host::setConnectionType()
     else if (connType == connectionType::FILE)
         _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
 
-    //    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::slotDisconnected, Qt::QueuedConnection);
-
+    //!!!
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
@@ -307,15 +297,11 @@ void IOTV_Host::slotPingTimeOut()
 
 void IOTV_Host::slotNewThreadStart()
 {
-    //    connect(&_timerState, &QTimer::timeout, this, &IOTV_Host::slotPingStateTimeOut, Qt::QueuedConnection);
-    //    connect(&_timerPong, &QTimer::timeout, this, &IOTV_Host::slotDeviceNotAvailable, Qt::QueuedConnection);
-    //    connect(&_timerReRead, &QTimer::timeout, this, &IOTV_Host::slotReReadTimeOut, Qt::QueuedConnection);
-
     setConnectionType();
 
     // Посылаем запрос queryIdentification
     // Так как id ещё равен 0, любой запрос на запись будет подменён на queryIdentification
-    writeToRemoteHost({});
+//    writeToRemoteHost({});
 }
 
 void IOTV_Host::slotThreadStop()
@@ -324,10 +310,6 @@ void IOTV_Host::slotThreadStop()
         return;
 
     this->moveToThread(_parentThread);
-
-    _timerPing.moveToThread(_parentThread);
-    _timerState.moveToThread(_parentThread);
-    _timerReRead.moveToThread(_parentThread);
 
     _thread.exit();
 }

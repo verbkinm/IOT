@@ -45,7 +45,7 @@ void MainWindow::printHeaderData(const Header *header)
 
 void MainWindow::printIdentificationData(const Identification *body)
 {
-    Q_ASSERT(body != nullptr);
+//    Q_ASSERT(body != nullptr);
     QString result;
 
     result += "\tID:\t\t" + QString::number(body->id) + "\n";

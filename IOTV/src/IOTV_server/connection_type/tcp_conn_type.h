@@ -2,6 +2,7 @@
 
 #include <QTcpSocket>
 #include <QHostAddress>
+#include <QTimer>
 
 #include "base_conn_type.h"
 #include "log.h"

@@ -13,7 +13,6 @@
 
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
-
 #include "log.h"
 
 class IOTV_Server : public QTcpServer
@@ -27,18 +26,17 @@ public:
 
 private:
     void checkSettingsFileExist();
-    void readSettings();
+    void readServerSettings();
+    void readHostSetting();
     void startTCPServer();
 
     void clientOnlineFile() const;
 
-    //!!! unordered_set
     std::list<IOTV_Host> _iot_hosts;
     std::list<IOTV_Client> _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
 
-    const QString _programVersion;
     QString _address;
     quint16 _port;
 

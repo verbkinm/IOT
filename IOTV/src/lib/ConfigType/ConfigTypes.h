@@ -19,6 +19,13 @@ struct connectionType
     static const QString UDP;
 };
 
+struct serverField
+{
+    static const QString address;
+    static const QString port;
+    static const QString maxClient;
+};
+
 struct ServerLog
 {
     static QString TCP_LOG_FILENAME ;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QTimer>
-
 //#include "ConfigTypes.h"
 #include "log.h"
 #include "raw.h"

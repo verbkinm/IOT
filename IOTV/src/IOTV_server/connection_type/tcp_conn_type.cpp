@@ -9,15 +9,13 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
 
     _address = address;
     _type = Conn_type::TCP;
+
+    _tcpSocket.setParent(parent);
     _tcpSocket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
     connect(&_tcpSocket, &QAbstractSocket::connected, this, &TCP_conn_type::slotNewConnection, Qt::QueuedConnection);
     connect(&_tcpSocket, &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
     connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
-
-//    connect(&_reconnectTimer, &QTimer::timeout, this, &TCP_conn_type::connectToHost, Qt::QueuedConnection);
-
-//    _reconnectTimer.start();
 }
 
 quint16 TCP_conn_type::getPort() const
