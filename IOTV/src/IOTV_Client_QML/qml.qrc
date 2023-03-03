@@ -59,6 +59,8 @@
         <file>Devices/Device_2/Device_2_Item.qml</file>
         <file>Devices/Device_1/Device_1.qml</file>
         <file>Devices/Device_1/Device_1_switch.qml</file>
+        <file>img/cloud_led.png</file>
+        <file>img/cloud.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

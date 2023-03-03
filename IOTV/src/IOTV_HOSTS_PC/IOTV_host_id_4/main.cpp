@@ -23,7 +23,7 @@ bool error = false;
 #define REPEATE 1
 #define MODE 2
 #define TRIGGER 3
-#define ADC_BORDER 20 // граничное значение ADC для определения воспроизведения музыки
+#define ADC_BORDER 50 // граничное значение ADC для определения воспроизведения музыки
 
 const uint8_t NUMBER_READ_CHANNEL = 4;
 const uint8_t NUMBER_WRITE_CHANNEL = NUMBER_READ_CHANNEL;
@@ -159,6 +159,8 @@ int main(int argc, char *argv[])
       iot.readChannel[i].dataSize = dataSizeonDataType(readType[i]);
       iot.readChannel[i].data = (char *)calloc(iot.readChannel[i].dataSize, sizeof(char));
     }
+
+    *iot.readChannel[0].data = 121;
 
     server = new QTcpServer;
 
