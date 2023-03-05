@@ -1,121 +1,63 @@
-#include <ESP8266WiFi.h>
+#include <Wire.h>
+#include "Adafruit_VL6180X.h"
 
-#include "IOTV_SH.h"
-#include "iot_server.h"
+#define RELE_PIN 10
 
-#define RELE_PIN 2
-#define TOUCH_PIN 1
+volatile bool releState = false;
+const uint8_t DISTANCE = 150;
 
-volatile bool releState = true;
-
-const char* ssid = "TP-Link_A6BE";
-const char* password = "41706831";
-
-WiFiServer server(8888);
-WiFiClient client;
-
-IOT_Server iotServer;
-
-Array<char> arr;
-
-void response(Array<char> &data);
-void ArrayToUARTS(Array<char> &data);
+Adafruit_VL6180X vl = Adafruit_VL6180X();
 
 void setup() 
 {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-//  while (WiFi.status() != WL_CONNECTED) 
-    delay(2000);
-
-  server.begin();
+  Serial.begin(115200);
+  vl.begin();
 
   pinMode(RELE_PIN, OUTPUT); 
-  pinMode(TOUCH_PIN, INPUT); 
+  pinMode(LED_BUILTIN, OUTPUT);
 
-  digitalWrite(RELE_PIN, HIGH);
+  // digitalWrite(RELE_PIN, HIGH);
+
+  // Сигнализируем о нормальном запуске МК
+  for (uint8_t i = 0; i < 10; i++)
+  {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+  }
 }
 
 void loop() 
 {
-  if(!client.connected()) 
-    client = server.available();
-  else 
-  {
-    if(client.available())
-    {
-      arr.push_back(client.read());
-      response(arr);
-    }
-  }
+  Serial.write(releState);
 
-  if(!digitalRead(TOUCH_PIN))
+  uint8_t range = vl.readRange();
+  uint8_t status = vl.readRangeStatus();
+
+  if (status == VL6180X_ERROR_NONE) 
   {
-    delay(200);
-    if(!digitalRead(TOUCH_PIN))
+    delay(100);
+    range = vl.readRange();
+    if (range < DISTANCE)
     {
       releState = !releState;
       digitalWrite(RELE_PIN, releState);
+      while (vl.readRange() < DISTANCE);
     }
-    while(!digitalRead(TOUCH_PIN))
-      delay(100);
+    delay(500);
   }
 
-  iotServer._readChannel[0].b = !releState;  
-  digitalWrite(RELE_PIN, releState);
+  if (Serial.available())
+  {
+    int newState = Serial.read();
+    if (newState != -1)
+    {
+        releState = newState;
+        digitalWrite(RELE_PIN, releState);
+    }
+  }
+
+  // delay(100);
 }
 
-void response(Array<char> &data)
-{    
-    Protocol_class::query_type dataType;
-    Array<char> dataTmp(data);
-    
-    if(data.size())
-      dataType = Protocol_class::checkQueryData(data);
-    else
-      return;
-
-    if(dataType == Protocol_class::query_type::ERROR)
-    {
-      data.clear();
-      return;
-    }
-  
-    if(dataType == Protocol_class::query_type::QUERY_WAY)
-    {
-      Protocol_class::response_WAY(iotServer, dataTmp);
-      ArrayToUARTS(dataTmp);
-      data.remove(0, 1);
-    }
-    else if(dataType == Protocol_class::query_type::QUERY_READ)
-    {
-      Protocol_class::response_READ(iotServer, dataTmp);
-      ArrayToUARTS(dataTmp);
-      data.remove(0, 1);
-    }
-    else if(dataType == Protocol_class::query_type::QUERY_PING)
-    {
-      Protocol_class::response_PONG(dataTmp);
-      ArrayToUARTS(dataTmp);
-      data.remove(0, 1);
-    }
-    else if((dataType == Protocol_class::query_type::QUERY_WRITE) && (dataTmp.size() >= 3))
-    {
-      uint16_t len = (dataTmp.at(1) << 8 | dataTmp.at(2));
-      if(dataTmp.size() < (3 + len))
-        return;
-        
-      Protocol_class::response_WRITE(iotServer, dataTmp);
-      if(iotServer._readChannel[0].b == releState)
-        releState = !releState;
-        
-      data.remove(0, 3 + len);
-    }
-}
-
-void ArrayToUARTS(Array<char> &data)
-{
-  for(int i = 0; i < data.size(); i++)
-    client.write(data[i]); 
-}

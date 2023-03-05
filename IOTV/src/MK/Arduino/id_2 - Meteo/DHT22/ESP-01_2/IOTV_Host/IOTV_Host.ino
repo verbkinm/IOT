@@ -56,9 +56,6 @@ void setup()
   stationConnectedHandler = WiFi.onStationModeConnected(&onStationConnected);
   stationDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationDisconnected);
 
-  // Настройка портов ввода/вывода
-  // pinMode(LED_BUILTIN, OUTPUT);
-
   Serial.begin(115200);
   dht.begin();
 
@@ -78,7 +75,9 @@ void setup()
     iot.readChannel[i].data = (char *)malloc(iot.readChannel[i].dataSize);
   }
 
-  // Сигнализируем о нормальном запуске МК
+  // // Настройка портов ввода/вывода
+  // pinMode(LED_BUILTIN, OUTPUT);
+  // //Сигнализируем о нормальном запуске МК
   // for (uint8_t i = 0; i < 10; i++)
   // {
   //   digitalWrite(LED_BUILTIN, HIGH);
@@ -106,6 +105,8 @@ void loop()
 
       memcpy(iot.readChannel[0].data, &temp, iot.readChannel[0].dataSize);
       memcpy(iot.readChannel[1].data, &hum, iot.readChannel[1].dataSize);
+
+      delay(100);
     }
   }
 

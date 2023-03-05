@@ -208,7 +208,7 @@ void MainWindow::slotConvert()
         counterHeader++;
         printHeaderData(header);
 
-        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION && header->type == Header::HEADER_TYPE_RESPONSE)
         {
             ui->convertText->appendPlainText("\tIDENTIFICATION\n");
             counterIdentification++;

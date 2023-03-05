@@ -1,4 +1,5 @@
 #include <ESP8266WiFi.h>
+#include <EEPROM.h>
 
 #include <creatorpkgs.h>
 #include <IOTV_SH.h>
@@ -129,6 +130,10 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
     delay(100);
   }
+
+  //EEPROM
+  EEPROM.begin(1);
+  *(bool *)(iot.readChannel[REPEATE].data) = EEPROM.read(0);
 }
 
 void loop() 
@@ -256,6 +261,12 @@ void dataRecived(char ch)
       {
         uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
         client.write(transmitBuffer, size);
+        // Запись в EEPROM состояния повтора
+        if (header->readWrite->channelNumber == REPEATE)
+        {
+          EEPROM.put(0, *(bool *)(iot.readChannel[REPEATE].data));
+          EEPROM.commit();
+        }
       }
       else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
       {

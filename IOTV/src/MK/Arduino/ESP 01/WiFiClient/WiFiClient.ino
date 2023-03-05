@@ -10,6 +10,8 @@ WiFiClient client;
 WiFiEventHandler stationConnectedHandler;
 WiFiEventHandler stationDisconnectedHandler;
 
+void connectToWifi();
+
 void setup() 
 {
   Serial.begin(115200);
@@ -19,9 +21,9 @@ void setup()
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  WiFi.setHostname(HOSTNAME);
 
-  while (WiFi.status() != WL_CONNECTED) 
-    delay(500);
+  connectToWifi();
 
   // pinMode(LED_BUILTIN, OUTPUT);
   // for (uint8 i = 0; i < 10; i++)
@@ -41,19 +43,15 @@ void loop()
     client = server.available();
   else 
   {
-    if(client.available())
+    while(client.available())
       Serial.write(client.read());
-    if(Serial.available())
+
+    while(Serial.available())
       client.write(Serial.read());
   }
 
-  // Проверка подключения Wi-FI
   if (WiFi.status() != WL_CONNECTED) 
-  {
-    client.flush();
-    while (WiFi.status() != WL_CONNECTED) 
-      delay(500);
-  }
+    connectToWifi();
 }
 
 void onStationConnected(const WiFiEventStationModeConnected& evt) 
@@ -75,4 +73,10 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
   // Serial.println(evt.reason);
 
   client.flush();
+}
+
+void connectToWifi()
+{
+  while (WiFi.status() != WL_CONNECTED) 
+    delay(500);
 }
