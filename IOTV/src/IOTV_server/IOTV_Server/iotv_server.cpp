@@ -16,9 +16,29 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
 
 IOTV_Server::~IOTV_Server()
 {
+    for(auto &[_, thread] : _iot_clients)
+    {
+        thread->exit();
+        thread->wait();
+        thread->deleteLater();
+    }
+
+    _iot_clients.clear();
+
+    for(auto &[_, thread] : _iot_hosts)
+    {
+        thread->exit();
+        thread->wait();
+        thread->deleteLater();
+    }
+
+    _iot_hosts.clear();
+
+
     while (isListening())
     {
         close();
+
         QThread::usleep(10);
     }
     Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
@@ -62,8 +82,8 @@ void IOTV_Server::readHostSetting()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        auto it = std::ranges::find_if(_iot_hosts, [&setting](const IOTV_Host &host){
-            return host.settingsData().at(hostField::name) == setting[hostField::name];
+        auto it = std::ranges::find_if(_iot_hosts, [&setting](const auto &pair){
+            return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
         });
 
         if (it != _iot_hosts.end())
@@ -75,8 +95,13 @@ void IOTV_Server::readHostSetting()
             exit(1);
         }
 
-        _iot_hosts.emplace_back(setting);
-        if (!_iot_hosts.back().runInNewThread())
+        QThread *th = new QThread(this);
+        IOTV_Host *host = new IOTV_Host(setting, th);
+        th->start();
+
+        _iot_hosts[host] = th;
+
+        if (!th->isRunning())
         {
             Log::write(QString(Q_FUNC_INFO) +
                        " Error: Can't run IOT_Host in new thread",
@@ -121,7 +146,7 @@ void IOTV_Server::clientOnlineFile() const
 
     for(const auto &client : _iot_clients)
     {
-        const QTcpSocket *socket = client.socket();
+        const QTcpSocket *socket = client.first->socket();
         file << socket->peerName().toStdString()
              << ": "
              << socket->peerAddress().toString().toStdString()
@@ -189,8 +214,13 @@ void IOTV_Server::slotNewConnection()
         return;
     }
 
-    _iot_clients.emplace_back(socket, _iot_hosts);
-    if (!_iot_clients.back().runInNewThread())
+    QThread *th = new QThread(this);
+    IOTV_Client *client = new IOTV_Client(socket, _iot_hosts, th);
+    th->start();
+
+    _iot_clients[client] = th;
+
+    if (!th->isRunning())
     {
         Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
                    Log::Write_Flag::FILE_STDERR,
@@ -198,7 +228,7 @@ void IOTV_Server::slotNewConnection()
         exit(1);
     }
 
-    connect(&_iot_clients.back(), &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected);
+    connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected, Qt::QueuedConnection);
     clientOnlineFile();
 }
 
@@ -211,7 +241,10 @@ void IOTV_Server::slotDisconnected()
     QString strOut = "Client disconnected";
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
 
-    _iot_clients.remove(*client);
+    _iot_clients[client]->exit();
+    _iot_clients[client]->wait();
+    _iot_clients[client]->deleteLater();
+    _iot_clients.erase(client);
 
     clientOnlineFile();
 }

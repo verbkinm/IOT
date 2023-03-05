@@ -10,6 +10,7 @@
 
 #include <list>
 #include <fstream>
+#include <unordered_map>
 
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
@@ -32,8 +33,8 @@ private:
 
     void clientOnlineFile() const;
 
-    std::list<IOTV_Host> _iot_hosts;
-    std::list<IOTV_Client> _iot_clients;
+    std::unordered_map<IOTV_Host* , QThread*> _iot_hosts;
+    std::unordered_map<IOTV_Client*, QThread*> _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
 

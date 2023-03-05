@@ -1,7 +1,7 @@
 #include "iotv_host.h"
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), _parentThread(QThread::currentThread()),
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), /*_parentThread(QThread::currentThread()),*/
     _counterState(0), _counterPing(0)
 {
     _timerState.setParent(this);
@@ -13,9 +13,6 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
     _timerState.setInterval(TIMER_STATE_INTERVAL);
     _timerPing.setInterval(TIMER_PING_INTERVAL);
 
-    connect(&_thread, &QThread::started, this, &IOTV_Host::slotNewThreadStart, Qt::QueuedConnection);
-    connect(this, &IOTV_Host::signalStopThread, this, &IOTV_Host::slotThreadStop, Qt::QueuedConnection);
-
     // Используетеся для записи данных полученых от клиентов из других потоков
     connect(this, &IOTV_Host::signalQueryWrite, this, &IOTV_Host::slotQueryWrite, Qt::QueuedConnection);
 
@@ -26,12 +23,13 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
+
+    setConnectionType();
 }
 
 IOTV_Host::~IOTV_Host()
 {
-    emit    signalStopThread();
-    _thread.wait();
+
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)
@@ -239,18 +237,6 @@ void IOTV_Host::setConnectionType()
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 }
 
-bool IOTV_Host::runInNewThread()
-{
-    if (_parentThread == &_thread)
-        return false;
-
-    this->moveToThread(&_thread);
-
-    _thread.start();
-
-    return _thread.isRunning();
-}
-
 const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 {
     return _settingsData;
@@ -293,25 +279,6 @@ void IOTV_Host::slotPingTimeOut()
         emit signalDevicePingTimeOut();
         _counterPing = 0;
     }
-}
-
-void IOTV_Host::slotNewThreadStart()
-{
-    setConnectionType();
-
-    // Посылаем запрос queryIdentification
-    // Так как id ещё равен 0, любой запрос на запись будет подменён на queryIdentification
-//    writeToRemoteHost({});
-}
-
-void IOTV_Host::slotThreadStop()
-{
-    if (_parentThread == nullptr)
-        return;
-
-    this->moveToThread(_parentThread);
-
-    _thread.exit();
 }
 
 void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)

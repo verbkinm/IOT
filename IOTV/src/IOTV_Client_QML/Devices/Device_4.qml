@@ -28,39 +28,17 @@ Page {
         State {
             name: stateActive
             when: adc_value > adc_border && device.state
-            //            PropertyChanges { target: img; source: "qrc:/img/cloud_on.png"}
             PropertyChanges { target: play; icon.source: "qrc:/img/pause.png"}
             PropertyChanges { target: anim_led; running: true}
         },
         State {
             name: stateUnactive
             when: (adc_value <= adc_border) || !device.state
-            //            PropertyChanges { target: img; source: "qrc:/img/cloud_off.png"}
             PropertyChanges { target: play; icon.source: "qrc:/img/play.png"}
             PropertyChanges { target: anim_led; running: false}
-            //            PropertyChanges { target: anim; running: false }
+            PropertyChanges { target: img_led; opacity: 0}
         }
     ]
-
-    //    transitions: [
-    //        Transition {
-    //            to: stateActive
-    ////            reversible: true
-    //            SequentialAnimation{
-    ////                alwaysRunToEnd: true
-    //                id: anim
-    //                loops: Animation.Infinite
-    //                PropertyAnimation { target: img; property: "rotation"; to: 15; duration: 2500; easing.type: Easing.InSine }
-    //                PropertyAnimation { target: img; property: "rotation"; to: 0; duration: 2500; easing.type: Easing.Linear }
-    //                PropertyAnimation { target: img; property: "rotation"; to: -15; duration: 2500; easing.type: Easing.Linear }
-    //                PropertyAnimation { target: img; property: "rotation"; to: 0; duration: 2500; easing.type: Easing.InSine }
-    //            }
-    //        },
-    //        Transition {
-    //            to: stateUnactive
-    //            PropertyAnimation { target: img; property: "rotation"; to: 0; duration: 5000;  }
-    //        }
-    //    ]
 
     header: DeviceHeader {
         id: headerPanel
@@ -97,7 +75,6 @@ Page {
             SequentialAnimation {
                 id: anim_led
                 loops: Animation.Infinite
-                alwaysRunToEnd: true
                 ParallelAnimation {
                     PropertyAnimation {target: img_led; property: "opacity"; to: 0.7; easing.type: Easing.Linear; duration: 3000; }
                     PropertyAnimation {target: img_led; property: "width"; to: img.width; easing.type: Easing.Linear; duration: 3000; }

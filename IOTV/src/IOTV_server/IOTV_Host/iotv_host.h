@@ -3,8 +3,6 @@
 #include <memory>
 #include <mutex>
 
-#include <QThread>
-
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/udp_conn_type.h"
 #include "connection_type/com_conn_type.h"
@@ -19,7 +17,7 @@ class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
-    IOTV_Host() = default;
+//    IOTV_Host() = default;
     IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
     ~IOTV_Host();
 
@@ -27,8 +25,6 @@ public:
 
     qint64 write(uint8_t channelNumber, const QByteArray &data);
     QByteArray readData(uint8_t channelNumber) const;
-
-    bool runInNewThread();
 
     const std::unordered_map<QString, QString> &settingsData() const;
 
@@ -50,7 +46,6 @@ private:
 
     std::unordered_map<QString, QString>  _settingsData;
 
-    QThread _thread, *_parentThread;
     std::mutex _mutexParametersChange, _mutexWrite;
 
     // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
@@ -67,9 +62,6 @@ private slots:
     void slotStateTimeOut();
     void slotPingTimeOut();
 
-    void slotNewThreadStart();
-    void slotThreadStop();
-
     // Используетеся для записи данных полученых от клиентов из других потоков
     void slotQueryWrite(int channelNumber, QByteArray data);
 
@@ -78,8 +70,6 @@ private slots:
 signals:
     void signalDevicePingTimeOut();
     void signalDataRiceved();
-
-    void signalStopThread();
 
     // Используетеся для записи данных полученых от клиентов из других потоков
     void signalQueryWrite(int channelNumber, QByteArray data);

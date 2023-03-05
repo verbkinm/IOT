@@ -1,16 +1,15 @@
 #include "iotv_client.h"
 
-IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObject *parent) : QObject(parent),
-    _parentThread(QThread::currentThread()), _socket(socket), _hosts(hosts),
+IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
+     _socket(socket), _hosts(hosts),
     _expectedDataSize(0)
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
 
-    connect(&_thread, &QThread::started, this, &IOTV_Client::slotNewThreadStart, Qt::QueuedConnection);
-    connect(this, &IOTV_Client::signalStopThread, this, &IOTV_Client::slotThreadStop, Qt::QueuedConnection);
-
-    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
+    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost, Qt::QueuedConnection);
+    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData, Qt::QueuedConnection);
+    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected, Qt::QueuedConnection);
 
     _silenceTimer.setInterval(_silenceInterval);
     _silenceTimer.start();
@@ -18,20 +17,6 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, std::list<IOTV_Host> &hosts, QObjec
 
 IOTV_Client::~IOTV_Client()
 {
-    emit signalStopThread();
-    _thread.wait();
-}
-
-bool IOTV_Client::runInNewThread()
-{
-    if (_parentThread == &_thread)
-        return false;
-
-    this->moveToThread(&_thread);
-
-    _thread.start();
-
-    return _thread.isRunning();
 }
 
 const QTcpSocket *IOTV_Client::socket() const
@@ -52,7 +37,7 @@ void IOTV_Client::queryIdentification()
 
     for (const auto &host : _hosts)
     {
-        struct IOTV_Server_embedded *iot = host.convert();
+        struct IOTV_Server_embedded *iot = host.first->convert();
         auto size = responseIdentificationData(outData, BUFSIZ, iot);
 
         write({outData, static_cast<int>(size)}, size);
@@ -65,16 +50,16 @@ void IOTV_Client::queryState(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->state != NULL);
 
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.getName() == QByteArray{header->state->name, header->state->nameSize};
+        return iotv_host.first->getName() == QByteArray{header->state->name, header->state->nameSize};
     });
 
     if (it == _hosts.end())
         return;
 
     //!!! Для чего создавать полноценный iot, если нужно только имя и состояние?
-    auto iot = it->convert();
+    auto iot = it->first->convert();
     uint64_t size;
     char outData[BUFSIZ];
 
@@ -89,14 +74,14 @@ void IOTV_Client::queryRead(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->readWrite != NULL);
 
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+        return iotv_host.first->getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
     });
 
     if (it != _hosts.end())
     {
-        auto iot = it->convert();
+        auto iot = it->first->convert();
 
         uint64_t size;
         char outData[BUFSIZ];
@@ -114,14 +99,14 @@ void IOTV_Client::queryWrite(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->readWrite != NULL);
 
-    auto it = std::ranges::find_if(_hosts, [&](const IOTV_Host &iotv_host)
+    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+        return iotv_host.first->getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
     });
 
-    if (it != _hosts.end() && it->state() != State::State_STATE_OFFLINE)
+    if (it != _hosts.end() && it->first->state() != State::State_STATE_OFFLINE)
     {
-        auto iot = it->convert();
+        auto iot = it->first->convert();
 
         uint64_t size;
         char outData[BUFSIZ];
@@ -131,16 +116,7 @@ void IOTV_Client::queryWrite(const Header *header)
         write({outData, static_cast<int>(size)}, size);
 
         // !!! Послать данные на устройство напрямую нельзя - разные потоки
-        // write(rawData, size);
-
-
-        // Сервер принял данные от клиента и перевернул,
-        // Возвращаем их в исходное состояние и отправляем на устройство
-        //!!!
-//        if (isLittleEndian())
-//            dataReverse((void *)header->readWrite->data, header->readWrite->dataSize);
-
-        emit it->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
+        emit it->first->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
 
         clearIOTV_Server(iot);
     }
@@ -168,25 +144,6 @@ void IOTV_Client::write(const QByteArray &data, qint64 size) const
 void IOTV_Client::slotDisconnected()
 {
     emit signalDisconnected();
-}
-
-void IOTV_Client::slotNewThreadStart()
-{
-    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
-    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
-}
-
-void IOTV_Client::slotThreadStop()
-{
-    if (_socket != nullptr)
-        delete _socket;
-
-    if (_parentThread == nullptr)
-        return;
-
-    this->moveToThread(_parentThread);
-
-    _thread.exit();
 }
 
 void IOTV_Client::slotReadData()

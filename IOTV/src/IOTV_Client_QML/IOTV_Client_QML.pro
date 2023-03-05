@@ -59,15 +59,7 @@ HEADERS += \
     ../lib/Log/log.h \
     ../lib/raw/raw.h \
 
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/build.gradle \
-    android/gradle.properties \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew \
-    android/gradlew.bat \
-    android/res/values/libs.xml
+
 
 contains(ANDROID_TARGET_ARCH,x86) {
     ANDROID_PACKAGE_SOURCE_DIR = \
@@ -78,3 +70,13 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/android
 }
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle.properties \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
+    android/gradlew.bat \
+    android/res/values/libs.xml
