@@ -34,6 +34,8 @@ uint64_t expextedDataSize = 0;
 uint64_t cutDataSize = 0;
 bool error = false;
 
+uint8_t repeateCounter = 0;
+
 /*
 Каналы чтения/записи:
 0 - ADC. Запись в этот канал ничего не делает
@@ -195,7 +197,6 @@ void loop()
   // Если установлен флаг повтора и мелодия не воспроизводится
   else if (*(bool *)iot.readChannel[REPEATE].data && (*(int16_t *)iot.readChannel[ADC].data < ADC_BORDER)) // iot.readChannel[ADC].data > ADC_BORDER) - идёт воспроизведение
   {
-    static uint8_t repeateCounter;
     ++repeateCounter;
     // Делаем задержку 
     delay(1000);
@@ -206,6 +207,10 @@ void loop()
       repeateCounter = 0;
     }
   }
+
+  // Исключаем ошибочный repeate при небольших паузах в мелодиях
+  if (*(bool *)iot.readChannel[REPEATE].data && (*(int16_t *)iot.readChannel[ADC].data >= ADC_BORDER))
+    repeateCounter = 0;
 
   // delay(500);
   // debug();
@@ -311,13 +316,13 @@ void onStationDisconnected(const WiFiEventStationModeDisconnected& evt)
 int16_t avrADC()
 {
   int16_t value = 0;
-  for (uint8_t i = 0; i < 5; i++)
+  for (uint8_t i = 0; i < 10; i++)
   {
     value += analogRead(IS_PLAYING_PIN);
-    delay(10);
+    delay(50);
   }
 
-  return (value / 5);
+  return (value / 10);
 }
 
 void connectToWifi()

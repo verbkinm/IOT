@@ -8,6 +8,11 @@ const uint8_t DISTANCE = 150;
 
 Adafruit_VL6180X vl = Adafruit_VL6180X();
 
+// ISR(UART_RX__vect)
+// {
+//   char byte = UDR0;
+// }
+
 void setup() 
 {
   Serial.begin(115200);
@@ -15,8 +20,6 @@ void setup()
 
   pinMode(RELE_PIN, OUTPUT); 
   pinMode(LED_BUILTIN, OUTPUT);
-
-  // digitalWrite(RELE_PIN, HIGH);
 
   // Сигнализируем о нормальном запуске МК
   for (uint8_t i = 0; i < 10; i++)
@@ -26,6 +29,7 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
     delay(100);
   }
+  interrupts();
 }
 
 void loop() 
@@ -43,7 +47,12 @@ void loop()
     {
       releState = !releState;
       digitalWrite(RELE_PIN, releState);
-      while (vl.readRange() < DISTANCE);
+      uint16_t counter = 0;
+      while (vl.readRange() < DISTANCE)
+      {
+        if (++counter > 1000) // чтобы избежать зависания в цикле. Для ATmega168 (16 МГц) ~ 6 сек. По хорошому испоьлзовать таймер!
+          break;
+      }
     }
     delay(500);
   }
@@ -60,4 +69,3 @@ void loop()
 
   // delay(100);
 }
-

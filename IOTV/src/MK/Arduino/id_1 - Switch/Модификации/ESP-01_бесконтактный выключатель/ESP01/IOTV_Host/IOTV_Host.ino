@@ -83,11 +83,6 @@ void setup()
 
 void loop() 
 {
-  // Запросы:
-  // -1 - запрос состояния реле
-  // 0 - выключить реле
-  // 1 - включить реле
-
   if (Serial.available())
   {
     char releState = Serial.read();
@@ -99,8 +94,6 @@ void loop()
   {
     clearData();
     client = server.available();
-    // if (client)
-      // Serial.println("Connected client: " + client.remoteIP().toString() + ":" + client.remotePort());
   }
   else 
   {
@@ -158,9 +151,14 @@ void dataRecived(char ch)
       }
       else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
       {
+
+        bool oldState = *(bool *)iot.readChannel[0].data; 
+
         uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
         client.write(transmitBuffer, size);
-        // *(bool*)iot.readChannel[0].data = *(bool*)header->readWrite->data;
+
+        *(bool *)iot.readChannel[0].data = oldState; // Не изменяем данные состояния реле, пока они не придут по UART
+
         Serial.write(*(bool*)header->readWrite->data);
       }
       else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
