@@ -33,6 +33,8 @@ static uint8_t VL6180X_readReg(uint16_t reg);
 
 void VL6180X_init(void)
 {
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+
 	int i2c_master_port = I2C_MASTER_NUM;
 
 	i2c_config_t conf = {
@@ -171,11 +173,12 @@ uint8_t VL6180X_simpleRange(void)
 	static uint8_t counter = 0;
 	while ((VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO) & 0x04) == 0)
 	{
-		ESP_LOGE(TAG, "\t Wait RESULT__INTERRUPT_STATUS_GPIO: %d", VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO ));
+//		ESP_LOGE(TAG, "\t Wait RESULT__INTERRUPT_STATUS_GPIO: %d", VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO ));
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter > 25)
 			errorLoopBlink(RESULT__INTERRUPT_STATUS_GPIO_LOOP);
 	}
+	counter = 0;
 
 	// 4
 	uint8_t range = VL6180X_readReg(RESULT__RANGE_VAL);

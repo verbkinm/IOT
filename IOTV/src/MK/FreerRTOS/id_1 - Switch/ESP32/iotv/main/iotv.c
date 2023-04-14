@@ -21,12 +21,12 @@
 
 extern QueueHandle_t xQueueInData, xQueueOutData;
 
+uint64_t realBufSize = 0;
+uint64_t expextedDataSize = 20;
+
 static const char *TAG = "iotv";
 
 static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
-static uint64_t realBufSize = 0;
-
-static uint64_t expextedDataSize = 20;
 static uint64_t cutDataSize = 0;
 static bool error = false;
 
@@ -161,7 +161,6 @@ void Vl6180X_Task(void *pvParameters)
 	const uint8_t DISTANCE = 150;
 
 	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
-//	gpio_set_level(RELE_PIN, *releState);
 
 	VL6180X_init();
 
