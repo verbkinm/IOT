@@ -23,7 +23,7 @@ public:
 
     QByteArray getReadChannelData(uint8_t channelNumber) const;
 
-    State::State_STATE state() const;
+    State_STATE state() const;
 
     struct IOTV_Server_embedded *convert() const;
 
@@ -48,7 +48,7 @@ protected:
     void setId(uint16_t id);
     void setDescription(const QString description);
 
-    State::State_STATE _state;
+    State_STATE _state;
 
 private:
     uint16_t _id;

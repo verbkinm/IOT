@@ -27,9 +27,9 @@ public:
     void printStateData(const State *body);
 
 
-    QString headerType(Header::Header_TYPE type) const;
-    QString headerAssignment(Header::Header_ASSIGNMENT assignment) const;
-    QString staetType(State::State_STATE state) const;
+    QString headerType(Header_TYPE type) const;
+    QString headerAssignment(Header_ASSIGNMENT assignment) const;
+    QString staetType(State_STATE state) const;
 
 private slots:
     void on_action_triggered();

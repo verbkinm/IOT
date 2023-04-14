@@ -82,7 +82,7 @@ void Base_Host::setDescription(const QString description)
     _description = description;
 }
 
-State::State_STATE Base_Host::state() const
+State_STATE Base_Host::state() const
 {
     return _state;
 }
@@ -147,7 +147,7 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     struct IOTV_Server_embedded *iotResult = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
     Q_ASSERT(iotResult != NULL);
-    memcpy(iotResult, &iot, sizeof(IOTV_Server_embedded));
+    memcpy((void *)iotResult, &iot, sizeof(IOTV_Server_embedded));
 
     return iotResult;
 }

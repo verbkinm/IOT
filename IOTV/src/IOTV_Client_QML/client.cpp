@@ -268,27 +268,27 @@ void Client::slotReciveData()
             break;
         }
 
-        if (header->type == Header::HEADER_TYPE_RESPONSE)
+        if (header->type == HEADER_TYPE_RESPONSE)
         {
-            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
                 size_t count = _devices.size();
                 responceIdentification(header);
                 if (count != _devices.size())
                     emit countDeviceChanged();
             }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            else if(header->assignment == HEADER_ASSIGNMENT_READ)
                 responceRead(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 responcePingPoing(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
                 responceState(header);
 
             //            printHeader(header);
         }
-        else if(header->type == Header::HEADER_TYPE_REQUEST)
+        else if(header->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент от сервера не должно приходить запросов
             Log::write("Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");

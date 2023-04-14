@@ -107,43 +107,43 @@ void MainWindow::printStateData(const State *body)
     ui->convertText->appendPlainText(result);
 }
 
-QString MainWindow::headerType(Header::Header_TYPE type) const
+QString MainWindow::headerType(Header_TYPE type) const
 {
     switch(type)
     {
-    case Header::HEADER_TYPE_REQUEST:
+    case HEADER_TYPE_REQUEST:
         return "Запрос";
-    case Header::HEADER_TYPE_RESPONSE:
+    case HEADER_TYPE_RESPONSE:
         return "Ответ";
     default:
         return "NONE";
     }
 }
 
-QString MainWindow::headerAssignment(Header::Header_ASSIGNMENT assignment) const
+QString MainWindow::headerAssignment(Header_ASSIGNMENT assignment) const
 {
     switch(assignment)
     {
-    case Header::HEADER_ASSIGNMENT_IDENTIFICATION:
+    case HEADER_ASSIGNMENT_IDENTIFICATION:
         return "Идентификация";
-    case Header::HEADER_ASSIGNMENT_STATE:
+    case HEADER_ASSIGNMENT_STATE:
         return "Состояние";
-    case Header::HEADER_ASSIGNMENT_READ:
+    case HEADER_ASSIGNMENT_READ:
         return "Чтение";
-    case Header::HEADER_ASSIGNMENT_WRITE:
+    case HEADER_ASSIGNMENT_WRITE:
         return "Запись";
-    case Header::HEADER_ASSIGNMENT_PING_PONG:
+    case HEADER_ASSIGNMENT_PING_PONG:
         return "Пинг";
     default:
         return "NONE";
     }
 }
 
-QString MainWindow::staetType(State::State_STATE state) const
+QString MainWindow::staetType(State_STATE state) const
 {
     switch(state)
     {
-    case State::State_STATE_ONLINE:
+    case State_STATE_ONLINE:
         return "Online";
     default:
         return "Offline";
@@ -208,19 +208,19 @@ void MainWindow::slotConvert()
         counterHeader++;
         printHeaderData(header);
 
-        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION && header->type == Header::HEADER_TYPE_RESPONSE)
+        if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION && header->type == HEADER_TYPE_RESPONSE)
         {
             ui->convertText->appendPlainText("\tIDENTIFICATION\n");
             counterIdentification++;
             printIdentificationData(header->identification);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_READ || header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+        else if(header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
         {
             ui->convertText->appendPlainText("\tREAD_WRITE\n");
             counterReadWrite++;
             printReadWriteData(header->readWrite);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+        else if(header->assignment == HEADER_ASSIGNMENT_STATE)
         {
             ui->convertText->appendPlainText("\tSTATE\n");
             counterState++;

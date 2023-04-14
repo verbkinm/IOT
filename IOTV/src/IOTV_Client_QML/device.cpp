@@ -55,7 +55,7 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    return _state == State::State_STATE_ONLINE;
+    return _state == State_STATE_ONLINE;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
@@ -102,7 +102,7 @@ void Device::setState(bool newState)
     //    if (_state == static_cast<State::State_STATE>(newState))
     //        return;
 
-    _state = static_cast<State::State_STATE>(newState);
+    _state = static_cast<State_STATE>(newState);
     emit signalStateChanged();
 }
 

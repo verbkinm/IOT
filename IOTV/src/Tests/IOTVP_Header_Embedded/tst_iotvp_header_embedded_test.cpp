@@ -6,8 +6,6 @@
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
 
-//#include "iotvp_creator.h"
-
 class IOTVP_Header_Embedded_Test : public QObject
 {
     Q_OBJECT
@@ -55,8 +53,6 @@ private slots:
     void test_dataTransmitRead();
     void test_dataTransmitWrite();
     void test_dataTransmitState();
-
-
 
     void timeCompare();
 };
@@ -109,29 +105,29 @@ void IOTVP_Header_Embedded_Test::dataRecived(char ch)
     if (expextedDataSize > 0)
         return;
 
-    if (header->type == Header::HEADER_TYPE_REQUEST)
+    if (header->type == HEADER_TYPE_REQUEST)
     {
-        if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+        if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
         {
             /* uint64_t size = */responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
             //            socket->write(transmitBuffer, size);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+        else if(header->assignment == HEADER_ASSIGNMENT_READ)
         {
             /* uint64_t size = */responseReadData(transmitBuffer, BUFSIZ, &iot, header);
             //            socket->write(transmitBuffer, size);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+        else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
         {
             /* uint64_t size = */responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
             //            socket->write(transmitBuffer, size);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+        else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
         {
             /*uint64_t size = */responsePingData(transmitBuffer, BUFSIZ);
             //            socket->write(transmitBuffer, size);
         }
-        else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+        else if(header->assignment == HEADER_ASSIGNMENT_STATE)
         {
             /*uint64_t size = */responseStateData(transmitBuffer, BUFSIZ, &iot);
             //            socket->write(transmitBuffer, size);
@@ -169,8 +165,8 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
     QCOMPARE(error, false);
     QCOMPARE(expextedDataSize, 0);
     QCOMPARE(cutDataSize, HEADER_SIZE);
-    QCOMPARE(header->type, Header::HEADER_TYPE_REQUEST);
-    QCOMPARE(header->assignment, Header::HEADER_ASSIGNMENT_PING_PONG);
+    QCOMPARE(header->type, HEADER_TYPE_REQUEST);
+    QCOMPARE(header->assignment, HEADER_ASSIGNMENT_PING_PONG);
     QCOMPARE(header->flags, 1);
     QCOMPARE(header->dataSize, 0);
     QCOMPARE(headerCheckSum(header), 9);
@@ -229,9 +225,9 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedIdentefication()
     // Цельный заголовок без ошибок и без тела пакета
     uint8_t dataRaw[] =  {
         2,                                          // Версия протокола
-        Header::HEADER_TYPE_REQUEST             ,   // Тип пакета - запрос
-        Header::HEADER_ASSIGNMENT_IDENTIFICATION,   // Назначение пакета Indetification
-        Header::HEADER_FLAGS_ERROR,                 // Флаги
+        HEADER_TYPE_REQUEST             ,   // Тип пакета - запрос
+        HEADER_ASSIGNMENT_IDENTIFICATION,   // Назначение пакета Indetification
+        HEADER_FLAGS_ERROR,                 // Флаги
         0, 0, 0, 0, 0, 0, 0, 0,                     // Размер тела пакета
         3, 1, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета  - 259
     };
@@ -265,9 +261,9 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
     // Запрос чтения
     uint8_t dataRaw[] =  {
         2,                                          // Версия протокола
-        Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-        Header::HEADER_ASSIGNMENT_READ,             // Назначение пакета Read
-        Header::HEADER_FLAGS_NONE,                  // Флаги
+        HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+        HEADER_ASSIGNMENT_READ,             // Назначение пакета Read
+        HEADER_FLAGS_NONE,                  // Флаги
         21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = READ_SIZE + nameSize
         27, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
         6,                                          // Длина имени устройства
@@ -309,9 +305,9 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
     // Запрос записи
     uint8_t dataRaw[] =  {
         2,                                          // Версия протокола
-        Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-        Header::HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
-        Header::HEADER_FLAGS_NONE,                  // Флаги
+        HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+        HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
+        HEADER_FLAGS_NONE,                  // Флаги
         25, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
         32, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    32
         6,                                          // Длина имени устройства
@@ -356,9 +352,9 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         // Запрос чтения
         uint8_t dataRaw[] =  {
             2,                                          // Версия протокола
-            Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            Header::HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
+            HEADER_FLAGS_NONE,                  // Флаги
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
             26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
@@ -384,7 +380,7 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         QCOMPARE(cutDataSize, 41);
         QCOMPARE(expextedDataSize, 0);
 
-        QCOMPARE(iot.state, State::State_STATE_ONLINE); //вызывается второй раз из теста write
+        QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
     }
 
     {
@@ -396,9 +392,9 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         // Запрос чтения
         uint8_t dataRaw[] =  {
             2,                                          // Версия протокола
-            Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            Header::HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
+            HEADER_FLAGS_NONE,                  // Флаги
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
             26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
@@ -408,9 +404,9 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
             6, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
             'D', 'e', 'v', 'i', 'c', 'e',                // Имя устройства
             2,                                          // Версия протокола
-            Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            Header::HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            Header::HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
+            HEADER_FLAGS_NONE,                  // Флаги
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
             26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
             6,                                          // Длина имени устройства
@@ -436,7 +432,7 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         QCOMPARE(cutDataSize, 41);
         QCOMPARE(expextedDataSize, 0);
 
-        QCOMPARE(iot.state, State::State_STATE_ONLINE); //вызывается второй раз из теста write
+        QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
     }
 }
 
@@ -445,9 +441,9 @@ void IOTVP_Header_Embedded_Test::test_DataTransmitPing()
     test_dataRecivedPing();
     // Заголовок ответ на PING
     struct Header header = {
-        .type = Header::HEADER_TYPE_RESPONSE,
-                .assignment = Header::HEADER_ASSIGNMENT_PING_PONG,
-                .flags = Header::HEADER_FLAGS_NONE,
+        .type = HEADER_TYPE_RESPONSE,
+                .assignment = HEADER_ASSIGNMENT_PING_PONG,
+                .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = 0,
                 .identification = NULL,
@@ -472,7 +468,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
     test_dataRecivedIdentefication();
 
     struct Identification ident = {
-        .flags = Identification::Identification_FLAGS_NONE,
+        .flags = Identification_FLAGS_NONE,
                 .id = iot.id,
                 .nameSize = static_cast<uint8_t>(strlen(iot.name)),
                 .descriptionSize = static_cast<uint16_t>(strlen(iot.description)),
@@ -485,9 +481,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
     };
 
     struct Header header = {
-        .type = Header::HEADER_TYPE_RESPONSE,
-                .assignment = Header::HEADER_ASSIGNMENT_IDENTIFICATION,
-                .flags = Header::HEADER_FLAGS_NONE,
+        .type = HEADER_TYPE_RESPONSE,
+                .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
+                .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = identificationSize(&ident),
                 .identification = &ident,
@@ -514,7 +510,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
     test_dataRecivedRead();
 
     struct Read_Write readWrite = {
-        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .flags = ReadWrite_FLAGS_NONE,
                 .nameSize = static_cast<uint8_t>(strlen(iot.name)),
                 .channelNumber = 1,
                 .dataSize = iot.readChannel[1].dataSize,
@@ -523,9 +519,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
     };
 
     struct Header header = {
-        .type = Header::HEADER_TYPE_RESPONSE,
-                .assignment = Header::HEADER_ASSIGNMENT_READ,
-                .flags = Header::HEADER_FLAGS_NONE,
+        .type = HEADER_TYPE_RESPONSE,
+                .assignment = HEADER_ASSIGNMENT_READ,
+                .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
                 .identification = NULL,
@@ -551,7 +547,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
     test_dataRecivedWrite();
 
     struct Read_Write readWrite = {
-        .flags = Read_Write::ReadWrite_FLAGS_NONE,
+        .flags = ReadWrite_FLAGS_NONE,
                 .nameSize = static_cast<uint8_t>(strlen(iot.name)),
                 .channelNumber = 1,
                 .dataSize = iot.readChannel[1].dataSize,
@@ -560,9 +556,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
     };
 
     struct Header header = {
-        .type = Header::HEADER_TYPE_RESPONSE,
-                .assignment = Header::HEADER_ASSIGNMENT_WRITE,
-                .flags = Header::HEADER_FLAGS_NONE,
+        .type = HEADER_TYPE_RESPONSE,
+                .assignment = HEADER_ASSIGNMENT_WRITE,
+                .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
                 .identification = NULL,
@@ -588,8 +584,8 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
     test_dataReciveState();
 
     struct State state = {
-        .flags = State::STATE_FLAGS_NONE,
-                .state = static_cast<State::State_STATE>(iot.state),
+        .flags = STATE_FLAGS_NONE,
+                .state = static_cast<State_STATE>(iot.state),
                 .nameSize = static_cast<uint8_t>(strlen(iot.name)),
                 .dataSize = 0,
                 .name = iot.name,
@@ -597,9 +593,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
     };
 
     struct Header header = {
-        .type = Header::HEADER_TYPE_RESPONSE,
-                .assignment = Header::HEADER_ASSIGNMENT_STATE,
-                .flags = Header::HEADER_FLAGS_NONE,
+        .type = HEADER_TYPE_RESPONSE,
+                .assignment = HEADER_ASSIGNMENT_STATE,
+                .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = stateSize(&state),
                 .identification = NULL,
@@ -621,12 +617,13 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
 
 void IOTVP_Header_Embedded_Test::timeCompare()
 {
+    // Сравнение скороси выполнения разных версий кода
 //    // Запрос записи
 //    uint8_t dataRaw[] =  {
 //        2,                                          // Версия протокола
-//        Header::HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-//        Header::HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
-//        Header::HEADER_FLAGS_NONE,                  // Флаги
+//        HEADER_TYPE_REQUEST,                // Тип пакета - запрос
+//        HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
+//        HEADER_FLAGS_NONE,                  // Флаги
 //        0, 0, 0, 0, 0, 0, 0, 25,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
 //        0, 0, 0, 0, 0, 0, 0, 32,                    // Контрольная сумма тела пакета    32
 //        6,                                          // Длина имени устройства

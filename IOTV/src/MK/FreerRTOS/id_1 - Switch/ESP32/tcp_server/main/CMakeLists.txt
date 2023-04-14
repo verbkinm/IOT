@@ -1,0 +1,11 @@
+idf_component_register(SRCS "tcp_server.c"
+						"iotv.c"
+						"VL6180X_Simple.c"
+						"Protocols/embedded/creatorpkgs.c"
+						"Protocols/embedded/header.c"
+						"Protocols/embedded/identification.c"
+						"Protocols/embedded/iotv_server_embedded.c"
+						"Protocols/embedded/IOTV_SH.c"
+						"Protocols/embedded/read_write.c"
+						"Protocols/embedded/state.c"
+                    INCLUDE_DIRS ".")

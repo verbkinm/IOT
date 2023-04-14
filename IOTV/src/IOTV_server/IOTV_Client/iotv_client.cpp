@@ -104,7 +104,7 @@ void IOTV_Client::queryWrite(const Header *header)
         return iotv_host.first->getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
     });
 
-    if (it != _hosts.end() && it->first->state() != State::State_STATE_OFFLINE)
+    if (it != _hosts.end() && it->first->state() != State_STATE_OFFLINE)
     {
         auto iot = it->first->convert();
 
@@ -179,24 +179,24 @@ void IOTV_Client::slotReadData()
             break;
         }
 
-        if (header->type == Header::HEADER_TYPE_RESPONSE)
+        if (header->type == HEADER_TYPE_RESPONSE)
         {
             // На данный момент от клиент не должно приходить ответов
             Log::write("Ответ от клиента не предусмотрен!",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
-        else if(header->type == Header::HEADER_TYPE_REQUEST)
+        else if(header->type == HEADER_TYPE_REQUEST)
         {
-            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
                 queryIdentification();
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            else if(header->assignment == HEADER_ASSIGNMENT_READ)
                 queryRead(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
                 queryWrite(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 queryPingPoing();
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
                 queryState(header);
         }
 

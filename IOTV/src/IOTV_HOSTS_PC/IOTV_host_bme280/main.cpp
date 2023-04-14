@@ -66,29 +66,29 @@ void slotDataRecived()
         if (expextedDataSize > 0)
             return;
 
-        if (header->type == Header::HEADER_TYPE_REQUEST)
+        if (header->type == HEADER_TYPE_REQUEST)
         {
-            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
                 uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
                 socket->write(transmitBuffer, size);
             }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            else if(header->assignment == HEADER_ASSIGNMENT_READ)
             {
                 uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->write(transmitBuffer, size);
             }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
                 uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->write(transmitBuffer, size);
             }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
                 uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
                 socket->write(transmitBuffer, size);
             }
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
             {
                 uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
                 socket->write(transmitBuffer, size);

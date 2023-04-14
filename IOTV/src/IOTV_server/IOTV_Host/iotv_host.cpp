@@ -9,7 +9,7 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
     _timerPing.setParent(this);
 
     auto interval = _settingsData[hostField::interval].toUInt();
-    _timerReRead.setInterval(interval < 1000 ? 1000 : interval);
+    _timerReRead.setInterval(interval < 100 ? 100 : interval);
     _timerState.setInterval(TIMER_STATE_INTERVAL);
     _timerPing.setInterval(TIMER_PING_INTERVAL);
 
@@ -59,7 +59,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
 void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
-    _state = static_cast<State::State_STATE>(iot->state);
+    _state = static_cast<State_STATE>(iot->state);
     _counterState = 0;
 }
 
@@ -158,26 +158,26 @@ void IOTV_Host::slotDataResived(QByteArray data)
             break;
         }
 
-        if (header->type == Header::HEADER_TYPE_RESPONSE)
+        if (header->type == HEADER_TYPE_RESPONSE)
         {
             auto *iot = convert();
 
-            if (header->assignment == Header::HEADER_ASSIGNMENT_IDENTIFICATION)
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
                 responceIdentification(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_READ)
+            else if(header->assignment == HEADER_ASSIGNMENT_READ)
                 responceRead(header);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_WRITE)
+            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(iot);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_PING_PONG)
+            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 responcePingPoing(iot);
-            else if(header->assignment == Header::HEADER_ASSIGNMENT_STATE)
+            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
             {
                 iot->state = header->state->state;
                 responceState(iot);
             }
             clearIOTV_Server(iot);
         }
-        else if(header->type == Header::HEADER_TYPE_REQUEST)
+        else if(header->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент устройства нe посылают запросы!!!
             Log::write("Запрос от устройств не предусмотрен!",
@@ -258,7 +258,7 @@ void IOTV_Host::slotStateTimeOut()
 
     if (_counterState > COUNTER_STATE_COUNT)
     {
-        _state = State::State_STATE_OFFLINE;
+        _state = State_STATE_OFFLINE;
         _counterState = 0;
     }
 }
