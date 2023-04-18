@@ -12,5 +12,6 @@
 
 void iotvTask(void *pvParameters);
 void Vl6180X_Task(void *pvParameters);
+void BME280_Task(void *pvParameters);
 
 #endif /* MAIN_IOTV_H_ */

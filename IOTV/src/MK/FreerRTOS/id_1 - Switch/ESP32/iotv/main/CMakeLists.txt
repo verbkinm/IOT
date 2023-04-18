@@ -1,6 +1,8 @@
 idf_component_register(SRCS "main.c"
 						"iotv.c"
+						"BME280.c"
 						"VL6180X_Simple.c"
+						"errorBlink.c"
 						"Protocols/embedded/creatorpkgs.c"
 						"Protocols/embedded/header.c"
 						"Protocols/embedded/identification.c"

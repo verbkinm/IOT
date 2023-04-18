@@ -9,15 +9,18 @@
 #include "freertos/queue.h"
 #include "esp_log.h"
 #include <stdint.h>
+#include "nvs.h"
 
 #include "Protocols/embedded/creatorpkgs.h"
 #include "Protocols/embedded/IOTV_SH.h"
 #include "Protocols/embedded/iotv_server_embedded.h"
 
 #include "iotv.h"
+#include "BME280.h"
 #include "VL6180X_Simple.h"
 
-#define RELE_PIN GPIO_NUM_2
+#define RELE_PIN 					GPIO_NUM_2
+#define BORDER_DISTANCE_DEFAULT 	150
 
 extern QueueHandle_t xQueueInData, xQueueOutData;
 
@@ -30,27 +33,43 @@ static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
 static uint64_t cutDataSize = 0;
 static bool error = false;
 
-static uint8_t readType[1] = {DATA_TYPE_BOOL};
+static uint8_t readType[7] = {
+		DATA_TYPE_BOOL,			// состояние реле
+		DATA_TYPE_INT_16, 		// порог срабатывания реле
+		DATA_TYPE_INT_16,		// расстояние
+		DATA_TYPE_FLOAT_32,	// освещённость
+		DATA_TYPE_FLOAT_32,	// температура
+		DATA_TYPE_FLOAT_32,	// влажность
+		DATA_TYPE_FLOAT_32		// давление
+};
+
+static uint8_t writeType[2] = {
+		DATA_TYPE_BOOL,			// состояние реле
+		DATA_TYPE_INT_16 		// порого срабатывания реле
+};
 
 static struct IOTV_Server_embedded iot = {
-		.id = 1,
-		.name = "vl6180",
-		.description = "ESP-01 + vl6180 + rele",
-		.numberReadChannel = 1,
+		.id = 5,
+		.name = "vl6180x+bme280+relay",
+		.description = "ESP-32 id-5",
+		.numberReadChannel = 7,
 		.readChannel = NULL,
 		.readChannelType = readType,
-		.numberWriteChannel = 1,
-		.writeChannelType = readType,
+		.numberWriteChannel = 2,
+		.writeChannelType = writeType,
 		.state = 1,
-		.nameSize = 6,
-		.descriptionSize = 22,
+		.nameSize = 20,
+		.descriptionSize = 11,
 };
 
 static void dataRecived(const struct DataPkg *pkg);
+static int16_t readBorderDistanceFromNVS();
+static void writeBorderDistanceToNVS(int16_t value);
 
 void iotvTask(void *pvParameters)
 {
 	ESP_LOGW(TAG, "iotv task created");
+
 
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
@@ -81,6 +100,7 @@ static void dataRecived(const struct DataPkg *pkg)
 		realBufSize = 0;
 		expextedDataSize = 0;
 		cutDataSize = 0;
+		ESP_LOGE(TAG, "Buffer overlow");
 		return;
 	}
 
@@ -125,6 +145,13 @@ static void dataRecived(const struct DataPkg *pkg)
 			else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
 				pkg.size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
+
+				if (header->readWrite->channelNumber == 0)
+					gpio_set_level(RELE_PIN, *iot.readChannel[0].data);
+				else if (header->readWrite->channelNumber == 1)
+					writeBorderDistanceToNVS(*(int16_t *)iot.readChannel[1].data);
+
+
 				pkg.data = malloc(pkg.size);
 				memcpy(pkg.data, transmitBuffer, pkg.size);
 				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
@@ -152,13 +179,57 @@ static void dataRecived(const struct DataPkg *pkg)
 	}
 }
 
+static int16_t readBorderDistanceFromNVS()
+{
+	int16_t borderDistance = BORDER_DISTANCE_DEFAULT; // значение по умолчанию
+
+	// Open
+	nvs_handle_t my_handle;
+	if (nvs_open("VL6180X", NVS_READONLY, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "Error nvs_open");
+		return borderDistance;
+	}
+
+	// Read
+	if (nvs_get_i16(my_handle, "borderDistance", &borderDistance) != ESP_OK)
+		ESP_LOGE(TAG, "Error nvs_get_i16");
+
+	nvs_close(my_handle);
+	return borderDistance;
+}
+
+static void writeBorderDistanceToNVS(int16_t value)
+{
+	// Open
+	nvs_handle_t my_handle;
+	if (nvs_open("VL6180X", NVS_READWRITE, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "writeBorderDistanceToNVS open failed");
+		return;
+	}
+
+	// Write
+	if (nvs_set_i16(my_handle, "borderDistance", value) != ESP_OK)
+		ESP_LOGE(TAG, "writeBorderDistanceToNVS write failed");
+
+	// Commit written value.
+	if (nvs_commit(my_handle) != ESP_OK)
+		ESP_LOGE(TAG, "writeBorderDistanceToNVS commit failed");
+
+	// Close
+	nvs_close(my_handle);
+}
+
 void Vl6180X_Task(void *pvParameters)
 {
 	ESP_LOGW(TAG, "Vl6180X task created");
 
 	char *releState;
 	releState = iot.readChannel[0].data;
-	const uint8_t DISTANCE = 150;
+
+	int16_t *DISTANCE = (int16_t *)iot.readChannel[1].data;
+	*DISTANCE = readBorderDistanceFromNVS();
 
 	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
 
@@ -166,20 +237,14 @@ void Vl6180X_Task(void *pvParameters)
 
 	while(true)
 	{
-		if (gpio_get_level(RELE_PIN) != *releState)
-		{
-			gpio_set_level(RELE_PIN, *releState);
-			vTaskDelay(500 / portTICK_PERIOD_MS);
-		}
-
-		if (VL6180X_simpleRange() < DISTANCE)
+		if ((VL6180X_simpleRange() < *DISTANCE) && (VL6180X_simpleRange() != 0))
 		{
 			*releState ^= 1;
 			gpio_set_level(RELE_PIN, *releState);
 			printf("Rele state: %s, StateRange: %d\n", *releState ? "ON" : "OFF", VL6180X_simpleRange());
 
 			uint16_t counter = 0;
-			while (VL6180X_simpleRange() < DISTANCE)
+			while (VL6180X_simpleRange() < *DISTANCE)
 			{
 				vTaskDelay(70 / portTICK_PERIOD_MS);
 				if (++counter >= 14)
@@ -188,6 +253,19 @@ void Vl6180X_Task(void *pvParameters)
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 		}
 		vTaskDelay(70 / portTICK_PERIOD_MS);
+	}
+}
+
+void BME280_Task(void *pvParameters)
+{
+	ESP_LOGW(TAG, "BME280 task created");
+
+	BME280_init();
+
+	while(true)
+	{
+		BME280_readValues((double *)iot.readChannel[4].data, (double *)iot.readChannel[6].data, (double *)iot.readChannel[5].data);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
 

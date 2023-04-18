@@ -17,19 +17,11 @@
 
 #define VL6180X_ADDR                 0x29
 
-static const char *failStr[] = {"I2C_INIT_FAIL", "I2C_DEINIT_FAIL", "I2C_WRITE_FAIL", "I2C_READ_FAIL", "RESULT__INTERRUPT_STATUS_GPIO_LOOP"};
-
-#define I2C_INIT_FAIL						1
-#define I2C_DEINIT_FAIL						2
-#define I2C_WRITE_FAIL						3
-#define I2C_READ_FAIL						4
-#define RESULT__INTERRUPT_STATUS_GPIO_LOOP 	5
-
 static const char *TAG = "VL6180X_Simple";
 
-static void errorLoopBlink(uint8_t value);
 static void VL6180X_writeReg(uint16_t reg, uint8_t value);
 static uint8_t VL6180X_readReg(uint16_t reg);
+static bool VL6180X_init_state = false;
 
 void VL6180X_init(void)
 {
@@ -49,19 +41,37 @@ void VL6180X_init(void)
 	i2c_param_config(i2c_master_port, &conf);
 
 	if (i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0) != ESP_OK)
-		errorLoopBlink(I2C_INIT_FAIL);
-
-	ESP_LOGI(TAG, "I2C initialized successfully");
+	{
+		errorLoopBlink(TAG, I2C_INIT_FAIL);
+		return;
+	}
 
 	vTaskDelay(500 / portTICK_PERIOD_MS);
 
 	// 1
+	uint8_t counter = 0;
+	while (VL6180X_readReg(IDENTIFICATION__MODEL_ID) != 0xB4) // default value
+	{
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+		if (++counter > 3)
+			return;
+	}
+
+	counter = 0;
 	while (VL6180X_readReg(SYSTEM__FRESH_OUT_OF_RESET) != 0) //!! != 1
 	{
 		ESP_LOGI(TAG, "\t SYSTEM__FRESH_OUT_OF_RESET: %d", VL6180X_readReg(SYSTEM__FRESH_OUT_OF_RESET ));
 		VL6180X_writeReg(SYSTEM__FRESH_OUT_OF_RESET, 0x00);
-		vTaskDelay(100 / portTICK_PERIOD_MS);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+		if (++counter > 3)
+		{
+			errorLoopBlink(TAG, SYSTEM__FRESH_OUT_OF_RESET_LOOP);
+			return;
+		}
 	}
+
+	VL6180X_init_state = true;
+	ESP_LOGI(TAG, "I2C initialized successfully");
 
 	// 2
 	VL6180X_writeReg(0x207, 0x01);
@@ -129,20 +139,22 @@ void VL6180X_init(void)
 void VL6180X_deinit(void)
 {
 	if (i2c_driver_delete(I2C_MASTER_NUM) != ESP_OK)
-		errorLoopBlink(I2C_DEINIT_FAIL);
+		errorLoopBlink(TAG, I2C_DEINIT_FAIL);
 	ESP_LOGI(TAG, "I2C de-initialized successfully");
 }
 
 // Writes an 8-bit register
 static void VL6180X_writeReg(uint16_t reg, uint8_t value)
 {
+	ESP_LOGI(TAG, "init %d", VL6180X_init_state);
+
 	uint8_t data_write[3];
 	data_write[0] = (reg >> 8); // MSB of register address
 	data_write[1] = reg; // LSB of register address
 	data_write[2] = value;
 
 	if (i2c_master_write_to_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 3, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
-		errorLoopBlink(I2C_WRITE_FAIL);
+		errorLoopBlink(TAG, I2C_WRITE_FAIL);
 }
 
 // Reads an 8-bit register
@@ -155,30 +167,44 @@ static uint8_t VL6180X_readReg(uint16_t reg)
 	data_write[1] = reg; // LSB of register address
 
 	if (i2c_master_write_read_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 2, data_read, 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
-		errorLoopBlink(I2C_READ_FAIL);
+		errorLoopBlink(TAG, I2C_READ_FAIL);
 
 	return data_read[0];
 }
 
 uint8_t VL6180X_simpleRange(void)
 {
+	if (VL6180X_init_state == false)
+		return 0;
+
+	uint8_t counter = 0;
+
 	// 1
 	while ((VL6180X_readReg(RESULT__RANGE_STATUS) & 0x01) != 1)
+	{
 		vTaskDelay(10 / portTICK_PERIOD_MS);
+		if (++counter > 25)
+		{
+			errorLoopBlink(TAG, RESULT__RANGE_STATUS_LOOP);
+			break;
+		}
+	}
 
 	// 2
 	VL6180X_writeReg(SYSRANGE__START, 0x01);
 
 	// 3
-	static uint8_t counter = 0;
+	counter = 0;
 	while ((VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO) & 0x04) == 0)
 	{
-//		ESP_LOGE(TAG, "\t Wait RESULT__INTERRUPT_STATUS_GPIO: %d", VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO ));
+		//		ESP_LOGE(TAG, "\t Wait RESULT__INTERRUPT_STATUS_GPIO: %d", VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO ));
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter > 25)
-			errorLoopBlink(RESULT__INTERRUPT_STATUS_GPIO_LOOP);
+		{
+			errorLoopBlink(TAG, RESULT__INTERRUPT_STATUS_GPIO_LOOP);
+			break;
+		}
 	}
-	counter = 0;
 
 	// 4
 	uint8_t range = VL6180X_readReg(RESULT__RANGE_VAL);
@@ -187,21 +213,4 @@ uint8_t VL6180X_simpleRange(void)
 	VL6180X_writeReg(SYSTEM__INTERRUPT_CLEAR, 0x07);
 
 	return range;
-}
-
-static void errorLoopBlink(uint8_t value)
-{
-	gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-
-	for (uint8_t counter = 0; counter < value; ++counter)
-	{
-		gpio_set_level(GPIO_NUM_2, 1);
-		vTaskDelay(200 / portTICK_PERIOD_MS);
-		gpio_set_level(GPIO_NUM_2, 0);
-		vTaskDelay(200 / portTICK_PERIOD_MS);
-	}
-
-	ESP_LOGE(TAG, "FAIL: %s", failStr[value - 1]);
-	ESP_LOGE(TAG, "Rebooting...");
-	esp_restart();
 }

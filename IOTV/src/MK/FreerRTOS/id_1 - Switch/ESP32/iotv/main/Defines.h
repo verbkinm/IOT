@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#define BUFSIZE 256  // по умолчанию, после компиляции, BUFSIZ = 128
+#define BUFSIZE 1024  // по умолчанию, после компиляции, BUFSIZ = 128
 
 struct DataPkg
 {

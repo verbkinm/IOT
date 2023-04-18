@@ -16,6 +16,8 @@
 #include "freertos/event_groups.h"
 
 #include "iotv.h"
+#include "BME280.h"
+#include "VL6180X_Simple.h"
 
 #define PORT                        CONFIG_EXAMPLE_PORT
 #define KEEPALIVE_IDLE              CONFIG_EXAMPLE_KEEPALIVE_IDLE
@@ -47,6 +49,13 @@ static void writeData(void *pvParameters)
 	{
 		if (xQueueReceive(xQueueOutData, (void *)&pkg, portMAX_DELAY) == pdPASS)
 		{
+			//			printf("Data send -> ");
+			//			for (int i = 0; i < pkg.size; ++i)
+			//			{
+			//				printf("%02x:", pkg.data[i]);
+			//			}
+			//			printf("\n");
+
 			if (send(*(int *)pvParameters, pkg.data, pkg.size, 0) < 0)
 			{
 				ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
@@ -60,6 +69,9 @@ static void writeData(void *pvParameters)
 			//			esp_restart();
 		}
 	}
+
+	realBufSize = 0;
+	expextedDataSize = 0;
 
 	vTaskDelete(NULL);
 	xHandleWriteData = NULL;
@@ -90,6 +102,13 @@ static void do_retransmit(const int sock)
 		}
 		else
 		{
+			//			printf("Data recive <- ");
+			//			for (int i = 0; i < len; ++i)
+			//			{
+			//				printf("%02x:", rx_buffer[i]);
+			//			}
+			//			printf("\n");
+
 			pkg.data = malloc(len);
 			memcpy(pkg.data, rx_buffer, len);
 			pkg.size = len;
@@ -248,8 +267,8 @@ void wifi_init_sta(void)
 			.sta = {
 					.ssid = CONFIG_EXAMPLE_WIFI_SSID,
 					.password = CONFIG_EXAMPLE_WIFI_PASSWORD,
-					 .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-					 .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
+					.threshold.authmode = WIFI_AUTH_WPA2_PSK,
+					.sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
 			},
 	};
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
@@ -289,8 +308,8 @@ void app_main(void)
 	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
 	wifi_init_sta();
 
-	xQueueInData = xQueueCreate(10, sizeof(struct DataPkg));
-	xQueueOutData = xQueueCreate(10, sizeof(struct DataPkg));
+	xQueueInData = xQueueCreate(100, sizeof(struct DataPkg));
+	xQueueOutData = xQueueCreate(100, sizeof(struct DataPkg));
 
 	if (xQueueInData == NULL  || xQueueOutData == NULL)
 	{
@@ -298,17 +317,26 @@ void app_main(void)
 		esp_restart();
 	}
 
-	xTaskCreate(iotvTask, "iotvTask", 2048, NULL, 1, NULL);
+	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 1, NULL);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 
-	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 2048, NULL, 2, NULL);
+	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 4096, NULL, 2, NULL);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	xTaskCreate(BME280_Task, "BME280_Task", 4096, NULL, 2, NULL);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
 	xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, 1, NULL);
 
-//	while(true)
-//	{
-//		printf("Heap - %d Bytes\n", (int)esp_get_free_heap_size());
-//		vTaskDelay(1000 / portTICK_PERIOD_MS);
-//	}
+	//	BME280_init();
+	//
+	//	double t, h, p;
+	//	while(true)
+	//	{
+	//		BME280_readValues(&t, &p, &h);
+	//		printf("Temperature - %.2f \nHumidity - %.2f\nPressure  - %.2f\n", t, h, p);
+	//		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	//	}
+	//
+	//	BME280_deinit();
 }
 
 

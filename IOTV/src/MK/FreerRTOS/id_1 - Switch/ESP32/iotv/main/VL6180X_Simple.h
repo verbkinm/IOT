@@ -11,7 +11,9 @@
 #include "esp_log.h"
 #include "driver/i2c.h"
 
-enum regAddr
+#include "errorBlink.h"
+
+enum
 {
 	IDENTIFICATION__MODEL_ID              = 0x000,
 	IDENTIFICATION__MODEL_REV_MAJOR       = 0x001,

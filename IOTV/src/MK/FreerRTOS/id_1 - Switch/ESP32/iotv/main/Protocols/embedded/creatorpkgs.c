@@ -19,7 +19,7 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
             header->identification = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             header->state = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
-        else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment ==HEADER_ASSIGNMENT_WRITE)
+        else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
             header->readWrite = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
 
         // Если cutDataSize > 0, то пакет body сформирован
