@@ -7,14 +7,6 @@
 
 #include "VL6180X_Simple.h"
 
-#define I2C_MASTER_SCL_IO           CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           CONFIG_I2C_MASTER_SDA      /*!< GPIO number used for I2C master data  */
-#define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
-#define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
-#define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_TIMEOUT_MS       1000
-
 #define VL6180X_ADDR                 0x29
 
 static const char *TAG = "VL6180X_Simple";
@@ -25,35 +17,12 @@ static bool VL6180X_init_state = false;
 
 void VL6180X_init(void)
 {
-	vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	int i2c_master_port = I2C_MASTER_NUM;
-
-	i2c_config_t conf = {
-			.mode = I2C_MODE_MASTER,
-			.sda_io_num = I2C_MASTER_SDA_IO,
-			.scl_io_num = I2C_MASTER_SCL_IO,
-			.sda_pullup_en = GPIO_PULLUP_ENABLE,
-			.scl_pullup_en = GPIO_PULLUP_ENABLE,
-			.master.clk_speed = I2C_MASTER_FREQ_HZ,
-	};
-
-	i2c_param_config(i2c_master_port, &conf);
-
-	if (i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0) != ESP_OK)
-	{
-		errorLoopBlink(TAG, I2C_INIT_FAIL);
-		return;
-	}
-
-	vTaskDelay(500 / portTICK_PERIOD_MS);
-
 	// 1
 	uint8_t counter = 0;
 	while (VL6180X_readReg(IDENTIFICATION__MODEL_ID) != 0xB4) // default value
 	{
 		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 3)
+		if (++counter >= 3)
 			return;
 	}
 
@@ -62,8 +31,8 @@ void VL6180X_init(void)
 	{
 		ESP_LOGI(TAG, "\t SYSTEM__FRESH_OUT_OF_RESET: %d", VL6180X_readReg(SYSTEM__FRESH_OUT_OF_RESET ));
 		VL6180X_writeReg(SYSTEM__FRESH_OUT_OF_RESET, 0x00);
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 3)
+		vTaskDelay(500 / portTICK_PERIOD_MS);
+		if (++counter >= 3)
 		{
 			errorLoopBlink(TAG, SYSTEM__FRESH_OUT_OF_RESET_LOOP);
 			return;
@@ -183,7 +152,7 @@ uint8_t VL6180X_simpleRange(void)
 	while ((VL6180X_readReg(RESULT__RANGE_STATUS) & 0x01) != 1)
 	{
 		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 25)
+		if (++counter >= 25)
 		{
 			errorLoopBlink(TAG, RESULT__RANGE_STATUS_LOOP);
 			break;
@@ -199,7 +168,7 @@ uint8_t VL6180X_simpleRange(void)
 	{
 		//		ESP_LOGE(TAG, "\t Wait RESULT__INTERRUPT_STATUS_GPIO: %d", VL6180X_readReg(RESULT__INTERRUPT_STATUS_GPIO ));
 		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 25)
+		if (++counter >= 25)
 		{
 			errorLoopBlink(TAG, RESULT__INTERRUPT_STATUS_GPIO_LOOP);
 			break;

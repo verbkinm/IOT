@@ -15,6 +15,7 @@
 #include <lwip/netdb.h>
 #include "freertos/event_groups.h"
 
+#include "i2c.h"
 #include "iotv.h"
 #include "BME280.h"
 #include "VL6180X_Simple.h"
@@ -316,6 +317,8 @@ void app_main(void)
 		ESP_LOGE(TAG, "Queue was not created and must not be used");
 		esp_restart();
 	}
+
+	i2c_init();
 
 	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 1, NULL);
 	vTaskDelay(100 / portTICK_PERIOD_MS);

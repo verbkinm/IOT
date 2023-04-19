@@ -10,8 +10,10 @@
 
 #include "esp_log.h"
 #include "driver/i2c.h"
+#include "math.h"
 
-#include "errorBlink.h"
+#include "LedSignals.h"
+#include "i2c.h"
 
 enum
 {

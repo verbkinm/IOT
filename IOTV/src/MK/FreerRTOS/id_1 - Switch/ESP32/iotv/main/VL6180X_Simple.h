@@ -11,7 +11,8 @@
 #include "esp_log.h"
 #include "driver/i2c.h"
 
-#include "errorBlink.h"
+#include "i2c.h"
+#include "LedSignals.h"
 
 enum
 {

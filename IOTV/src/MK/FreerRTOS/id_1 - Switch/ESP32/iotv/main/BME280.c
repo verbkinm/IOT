@@ -7,14 +7,6 @@
 
 #include "BME280.h"
 
-#define I2C_MASTER_SCL_IO           CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           CONFIG_I2C_MASTER_SDA      /*!< GPIO number used for I2C master data  */
-#define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
-#define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
-#define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_TIMEOUT_MS       1000
-
 #define BME280_ADDR                 0x76
 
 static const char *TAG = "BME280";
@@ -30,36 +22,12 @@ static double BME280_humidity(void);
 
 void BME280_init(void)
 {
-	vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	int i2c_master_port = I2C_MASTER_NUM;
-
-	i2c_config_t conf = {
-			.mode = I2C_MODE_MASTER,
-			.sda_io_num = I2C_MASTER_SDA_IO,
-			.scl_io_num = I2C_MASTER_SCL_IO,
-			.sda_pullup_en = GPIO_PULLUP_ENABLE,
-			.scl_pullup_en = GPIO_PULLUP_ENABLE,
-			.master.clk_speed = I2C_MASTER_FREQ_HZ,
-	};
-
-	i2c_param_config(i2c_master_port, &conf);
-
-	if (i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0) != ESP_OK)
-	{
-		errorLoopBlink(TAG, I2C_INIT_FAIL);
-		return;
-	}
-
-	vTaskDelay(500 / portTICK_PERIOD_MS);
-
 	// 1
 	int counter = 0;
 	while (BME280_readReg(ID) != 0x60) // default value
 	{
-		ESP_LOGI(TAG, "\t ID: %d", BME280_readReg(ID));
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 3)
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+		if (++counter >= 3)
 			return;
 	}
 
@@ -104,9 +72,10 @@ void BME280_readValues(double *temp, double *press, double *hum)
 {
 	if (BME280_init_state == false)
 	{
-		*temp = 0;
-		*press = 0;
-		*hum = 0;
+
+		*temp = infinity();
+		*press = infinity();
+		*hum = infinity();
 		return;
 	}
 
@@ -120,13 +89,12 @@ void BME280_readValues(double *temp, double *press, double *hum)
 
 static double BME280_temperature(void)
 {
-	// 1
 	uint8_t counter = 0;
 	while ((BME280_readReg(_STATUS) & 0b1001) != 0)
 	{
 		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter > 10)
-			break;
+		if (++counter >= 10)
+			return infinity();
 	}
 
 	uint8_t msb = BME280_readReg(TEMP_MSB);

@@ -37,10 +37,10 @@ static uint8_t readType[7] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
 		DATA_TYPE_INT_16,		// расстояние
-		DATA_TYPE_FLOAT_32,	// освещённость
-		DATA_TYPE_FLOAT_32,	// температура
-		DATA_TYPE_FLOAT_32,	// влажность
-		DATA_TYPE_FLOAT_32		// давление
+		DATA_TYPE_DOUBLE_64,	// освещённость
+		DATA_TYPE_DOUBLE_64,	// температура
+		DATA_TYPE_DOUBLE_64,	// влажность
+		DATA_TYPE_DOUBLE_64		// давление
 };
 
 static uint8_t writeType[2] = {
@@ -265,6 +265,7 @@ void BME280_Task(void *pvParameters)
 	while(true)
 	{
 		BME280_readValues((double *)iot.readChannel[4].data, (double *)iot.readChannel[6].data, (double *)iot.readChannel[5].data);
+		ESP_LOGI(TAG, "BME280_readValues. %f, %f, %f", *(double *)iot.readChannel[4].data, *(double *)iot.readChannel[6].data, *(double *)iot.readChannel[5].data);
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
