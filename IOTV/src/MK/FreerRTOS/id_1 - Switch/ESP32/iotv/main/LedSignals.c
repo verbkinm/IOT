@@ -7,6 +7,8 @@
 
 #include "LedSignals.h"
 
+extern QueueHandle_t xQueueLedSignals;
+static const char *TAG = "LedSignals";
 static const char *failStr[] = {
 		"I2C_INIT_FAIL",
 		"I2C_DEINIT_FAIL",
@@ -19,11 +21,24 @@ static const char *failStr[] = {
 
 static SemaphoreHandle_t xSemaphore = NULL;
 
-void errorLoopBlink(const char* TAG, uint8_t value)
-{
-	if (xSemaphore == NULL)
-		xSemaphore = xSemaphoreCreateMutex();
+static void errorLoopBlink(const char* errorTag, uint8_t value);
 
+void LedSignals_Task(void *pvParameters)
+{
+	ESP_LOGW("LedSignals", "LedSignals task created");
+
+	xSemaphore = xSemaphoreCreateMutex();
+	struct LedSignalPkg pkg = {NULL, 0};
+
+	while (true)
+	{
+		xQueueReceive(xQueueLedSignals, (void *)&pkg, portMAX_DELAY);
+		errorLoopBlink(pkg.TAG, pkg.errorNumber);
+	}
+}
+
+static void errorLoopBlink(const char* errorTag, uint8_t value)
+{
 	if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
 	{
 		gpio_set_direction(LED_ERROR, GPIO_MODE_INPUT_OUTPUT);
@@ -38,14 +53,14 @@ void errorLoopBlink(const char* TAG, uint8_t value)
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 
 		if ((value > 0) && (value < SYSTEM__FRESH_OUT_OF_RESET_LOOP)) // SYSTEM__FRESH_OUT_OF_RESET_LOOP - крайний элемент
-			ESP_LOGE(TAG, "FAIL: %s", failStr[value - 1]);
+			ESP_LOGE(TAG, "%s FAIL: %s", errorTag, failStr[value - 1]);
 
 		xSemaphoreGive( xSemaphore );
 	}
 }
 
-void ledSignal(gpio_num_t gpio, bool state)
-{
-	gpio_set_direction(gpio, GPIO_MODE_OUTPUT);
-	gpio_set_level(gpio, state);
-}
+//void ledSignal(gpio_num_t gpio, bool state)
+//{
+//	gpio_set_direction(gpio, GPIO_MODE_OUTPUT);
+//	gpio_set_level(gpio, state);
+//}

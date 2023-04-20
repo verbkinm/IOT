@@ -237,22 +237,28 @@ void Vl6180X_Task(void *pvParameters)
 
 	while(true)
 	{
-		if ((VL6180X_simpleRange() < *DISTANCE) && (VL6180X_simpleRange() != 0))
-		{
-			*releState ^= 1;
-			gpio_set_level(RELE_PIN, *releState);
-			printf("Rele state: %s, StateRange: %d\n", *releState ? "ON" : "OFF", VL6180X_simpleRange());
+//		uint8_t range = VL6180X_simpleRange();
+//		*(int16_t *)iot.readChannel[2].data = range;
+//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
 
-			uint16_t counter = 0;
-			while (VL6180X_simpleRange() < *DISTANCE)
-			{
-				vTaskDelay(70 / portTICK_PERIOD_MS);
-				if (++counter >= 14)
-					break;
-			}
-			vTaskDelay(500 / portTICK_PERIOD_MS);
-		}
-		vTaskDelay(70 / portTICK_PERIOD_MS);
+		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
+
+//		if (range < *DISTANCE)
+//		{
+//			*releState ^= 1;
+//			gpio_set_level(RELE_PIN, *releState);
+//			printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), range);
+//
+//			uint16_t counter = 0;
+//			while (VL6180X_simpleRange() < *DISTANCE)
+//			{
+//				vTaskDelay(70 / portTICK_PERIOD_MS);
+//				if (++counter >= 14)
+//					break;
+//			}
+//			vTaskDelay(500 / portTICK_PERIOD_MS);
+//		}
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
 

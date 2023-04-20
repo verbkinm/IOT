@@ -9,6 +9,8 @@
 #include "driver/i2c.h"
 #include "LedSignals.h"
 
+extern QueueHandle_t xQueueLedSignals;
+
 static const char *TAG = "i2c";
 
 void i2c_init(void)
@@ -27,6 +29,9 @@ void i2c_init(void)
 	i2c_param_config(i2c_master_port, &conf);
 
 	if (i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0) != ESP_OK)
-		errorLoopBlink(TAG, I2C_INIT_FAIL);
+	{
+		struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
+		xQueueSend(xQueueLedSignals, (void *)&pkg, portMAX_DELAY);
+	}
 }
 

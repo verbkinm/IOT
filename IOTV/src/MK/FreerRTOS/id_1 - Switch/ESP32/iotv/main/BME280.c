@@ -9,9 +9,11 @@
 
 #define BME280_ADDR                 0x76
 
+extern QueueHandle_t xQueueLedSignals;
+
 static const char *TAG = "BME280";
 static int32_t _t_fine;
-static bool BME280_init_state = false;
+static bool BME280_state = false;
 
 static void BME280_writeReg(uint8_t reg, uint8_t value);
 static uint8_t BME280_readReg(uint8_t reg);
@@ -22,16 +24,21 @@ static double BME280_humidity(void);
 
 void BME280_init(void)
 {
+	vTaskDelay(500 / portTICK_PERIOD_MS);
 	// 1
 	int counter = 0;
 	while (BME280_readReg(ID) != 0x60) // default value
 	{
-		vTaskDelay(100 / portTICK_PERIOD_MS);
+		vTaskDelay(500 / portTICK_PERIOD_MS);
 		if (++counter >= 3)
+		{
+			struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
+			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
 			return;
+		}
 	}
 
-	BME280_init_state = true;
+	BME280_state = true;
 	ESP_LOGI(TAG, "I2C initialized successfully");
 
 	// 2
@@ -45,7 +52,10 @@ void BME280_init(void)
 void BME280_deinit(void)
 {
 	if (i2c_driver_delete(I2C_MASTER_NUM) != ESP_OK)
-		errorLoopBlink(TAG, I2C_DEINIT_FAIL);
+	{
+		struct LedSignalPkg pkg = {TAG, I2C_DEINIT_FAIL};
+		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
+	}
 	ESP_LOGI(TAG, "I2C de-initialized successfully");
 }
 
@@ -53,8 +63,15 @@ void BME280_deinit(void)
 static void BME280_writeReg(uint8_t reg, uint8_t value)
 {
 	uint8_t data_write[2] = { reg, value };
+
 	if (i2c_master_write_to_device(I2C_MASTER_NUM, BME280_ADDR, data_write, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
-		errorLoopBlink(TAG, I2C_WRITE_FAIL);
+	{
+		BME280_state = false;
+		struct LedSignalPkg pkg = {TAG, I2C_WRITE_FAIL};
+		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
+	}
+	else
+		BME280_state = true;
 }
 
 // Reads an 8-bit register
@@ -63,24 +80,32 @@ static uint8_t BME280_readReg(uint8_t reg)
 	uint8_t data_read;
 
 	if (i2c_master_write_read_device(I2C_MASTER_NUM, BME280_ADDR, &reg, 1, &data_read, 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
-		errorLoopBlink(TAG, I2C_READ_FAIL);
+	{
+		BME280_state = false;
+		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
+	}
+	else
+		BME280_state = true;
 
 	return data_read;
 }
 
 void BME280_readValues(double *temp, double *press, double *hum)
 {
-	if (BME280_init_state == false)
-	{
+	if (temp == NULL || press == NULL || hum == NULL)
+		return;
 
+	if (BME280_state == false)
+		BME280_init();
+
+	if (BME280_state == false)
+	{
 		*temp = infinity();
 		*press = infinity();
 		*hum = infinity();
 		return;
 	}
-
-	if (temp == NULL || press == NULL || hum == NULL)
-		return;
 
 	*temp = BME280_temperature();
 	*press = BME280_pressure();
@@ -93,7 +118,7 @@ static double BME280_temperature(void)
 	while ((BME280_readReg(_STATUS) & 0b1001) != 0)
 	{
 		vTaskDelay(10 / portTICK_PERIOD_MS);
-		if (++counter >= 10)
+		if (++counter >= 25)
 			return infinity();
 	}
 

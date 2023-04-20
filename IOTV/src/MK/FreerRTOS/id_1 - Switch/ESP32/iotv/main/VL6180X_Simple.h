@@ -54,7 +54,11 @@ enum
 	SYSALS__THRESH_LOW                    = 0x03C,
 	SYSALS__INTERMEASUREMENT_PERIOD       = 0x03E,
 	SYSALS__ANALOGUE_GAIN                 = 0x03F,
-	SYSALS__INTEGRATION_PERIOD            = 0x040,
+
+	///! Integration period for ALS mode, high byte
+	SYSALS__INTEGRATION_PERIOD_H          = 0x040,
+	///! Integration period for ALS mode, low byte
+	SYSALS__INTEGRATION_PERIOD_L          = 0x041,
 
 	RESULT__RANGE_STATUS                  = 0x04D,
 	RESULT__ALS_STATUS                    = 0x04E,
@@ -88,6 +92,15 @@ enum
 	INTERLEAVED_MODE__ENABLE              = 0x2A3,
 };
 
+#define VL6180X_ALS_GAIN_1 		0x06    ///< 1x gain
+#define VL6180X_ALS_GAIN_1_25 	0x05 ///< 1.25x gain
+#define VL6180X_ALS_GAIN_1_67 	0x04 ///< 1.67x gain
+#define VL6180X_ALS_GAIN_2_5 	0x03  ///< 2.5x gain
+#define VL6180X_ALS_GAIN_5 		0x02    ///< 5x gain
+#define VL6180X_ALS_GAIN_10 	0x01   ///< 10x gain
+#define VL6180X_ALS_GAIN_20 	0x00   ///< 20x gain
+#define VL6180X_ALS_GAIN_40 	0x07   ///< 40x gain
+
 void VL6180X_init(void);
 void VL6180X_deinit(void);
 
@@ -95,5 +108,6 @@ void VL6180X_deinit(void);
 //uint8_t VL6180X_readReg(uint16_t reg);
 
 uint8_t VL6180X_simpleRange(void);
+uint16_t VL6180X_simpleALS(uint8_t gain);
 
 #endif /* MAIN_VL6180X_SIMPLE_H_ */

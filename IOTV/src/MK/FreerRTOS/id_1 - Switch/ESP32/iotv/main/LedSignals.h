@@ -18,6 +18,7 @@
 #define LED_TCP								GPIO_NUM_2
 #define LED_ERROR							GPIO_NUM_2
 
+// Номер ошибки
 #define I2C_INIT_FAIL						1
 #define I2C_DEINIT_FAIL						2
 #define I2C_WRITE_FAIL						3
@@ -29,7 +30,12 @@
 #define WIFI_CONNECT						1
 #define	TCP_CONNECT							2
 
-void errorLoopBlink(const char* TAG, uint8_t value);
-void ledSignal(gpio_num_t gpio, bool sate);
+struct LedSignalPkg {
+	const char *TAG;
+	int errorNumber;
+};
+
+void LedSignals_Task(void *pvParameters);
+//void ledSignal(gpio_num_t gpio, bool sate);
 
 #endif /* MAIN_LEDSIGNALS_H_ */
