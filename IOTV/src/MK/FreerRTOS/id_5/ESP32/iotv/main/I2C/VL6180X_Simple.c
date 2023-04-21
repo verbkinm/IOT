@@ -1,22 +1,13 @@
-/*
- * VL6180X_Simple.c
- *
- *  Created on: 11 апр. 2023 г.
- *      Author: user
- */
-
 #include "VL6180X_Simple.h"
-
-#define VL6180X_ADDR                 0x29
 
 extern QueueHandle_t xQueueLedSignals;
 
 static const char *TAG = "VL6180X_Simple";
+static bool VL6180X_state = false;
 
 static void VL6180X_writeReg(uint16_t reg, uint8_t value);
 static uint8_t VL6180X_readReg(uint16_t reg);
 static uint16_t VL6180X_readReg16(uint16_t reg);
-static bool VL6180X_state = false;
 
 void VL6180X_init(void)
 {

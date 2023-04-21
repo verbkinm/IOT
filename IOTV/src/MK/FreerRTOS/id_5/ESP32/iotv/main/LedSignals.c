@@ -1,14 +1,9 @@
-/*
- * errorBlink.c
- *
- *  Created on: 18 апр. 2023 г.
- *      Author: user
- */
-
 #include "LedSignals.h"
 
 extern QueueHandle_t xQueueLedSignals;
+
 static const char *TAG = "LedSignals";
+
 static const char *failStr[] = {
 		"I2C_INIT_FAIL",
 		"I2C_DEINIT_FAIL",
@@ -21,11 +16,12 @@ static const char *failStr[] = {
 
 static SemaphoreHandle_t xSemaphore = NULL;
 
-static void errorLoopBlink(const char* errorTag, uint8_t value);
+static void errorBlink(const char* errorTag, uint8_t value);
+static void LedGPIO_State(gpio_port_t gpio_num, bool state);
 
 void LedSignals_Task(void *pvParameters)
 {
-	ESP_LOGW("LedSignals", "LedSignals task created");
+	ESP_LOGW(TAG, "LedSignals task created");
 
 	xSemaphore = xSemaphoreCreateMutex();
 	struct LedSignalPkg pkg = {NULL, 0};
@@ -33,11 +29,11 @@ void LedSignals_Task(void *pvParameters)
 	while (true)
 	{
 		xQueueReceive(xQueueLedSignals, (void *)&pkg, portMAX_DELAY);
-		errorLoopBlink(pkg.TAG, pkg.errorNumber);
+		errorBlink(pkg.TAG, pkg.errorNumber);
 	}
 }
 
-static void errorLoopBlink(const char* errorTag, uint8_t value)
+static void errorBlink(const char* errorTag, uint8_t value)
 {
 	if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
 	{
@@ -59,8 +55,20 @@ static void errorLoopBlink(const char* errorTag, uint8_t value)
 	}
 }
 
-//void ledSignal(gpio_num_t gpio, bool state)
-//{
-//	gpio_set_direction(gpio, GPIO_MODE_OUTPUT);
-//	gpio_set_level(gpio, state);
-//}
+static void LedGPIO_State(gpio_port_t gpio_num, bool state)
+{
+	gpio_set_direction(gpio_num, GPIO_MODE_INPUT_OUTPUT);
+	gpio_set_level(gpio_num, state);
+}
+
+void LedSignals_setWifiState(bool state)
+{
+	ESP_LOGW(TAG, "wifi state: %d", state);
+	LedGPIO_State(LED_WIFI, state);
+}
+
+void LedSignals_setTCPState(bool state)
+{
+	ESP_LOGW(TAG, "tcp session state: %d", state);
+	LedGPIO_State(LED_TCP, state);
+}

@@ -1,13 +1,4 @@
-/*
- * i2c.c
- *
- *  Created on: 19 апр. 2023 г.
- *      Author: user
- */
 #include "i2c.h"
-#include "esp_log.h"
-#include "driver/i2c.h"
-#include "LedSignals.h"
 
 extern QueueHandle_t xQueueLedSignals;
 

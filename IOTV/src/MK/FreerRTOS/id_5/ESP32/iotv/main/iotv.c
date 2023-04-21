@@ -1,31 +1,9 @@
-/*
- * iotv.cpp
- *
- *  Created on: 13 апр. 2023 г.
- *      Author: user
- */
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "esp_log.h"
-#include <stdint.h>
-#include "nvs.h"
-
-#include "Protocols/embedded/creatorpkgs.h"
-#include "Protocols/embedded/IOTV_SH.h"
-#include "Protocols/embedded/iotv_server_embedded.h"
-
 #include "iotv.h"
-#include "BME280.h"
-#include "VL6180X_Simple.h"
-
-#define RELE_PIN 					GPIO_NUM_2
-#define BORDER_DISTANCE_DEFAULT 	150
 
 extern QueueHandle_t xQueueInData, xQueueOutData;
 
-uint64_t realBufSize = 0;
-uint64_t expextedDataSize = 20;
+extern uint64_t realBufSize;
+extern uint64_t expextedDataSize;
 
 static const char *TAG = "iotv";
 
@@ -45,7 +23,7 @@ static uint8_t readType[7] = {
 
 static uint8_t writeType[2] = {
 		DATA_TYPE_BOOL,			// состояние реле
-		DATA_TYPE_INT_16 		// порого срабатывания реле
+		DATA_TYPE_INT_16 		// порог срабатывания реле
 };
 
 static struct IOTV_Server_embedded iot = {
@@ -69,7 +47,6 @@ static void writeBorderDistanceToNVS(int16_t value);
 void iotvTask(void *pvParameters)
 {
 	ESP_LOGW(TAG, "iotv task created");
-
 
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
@@ -147,7 +124,13 @@ static void dataRecived(const struct DataPkg *pkg)
 				pkg.size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
 
 				if (header->readWrite->channelNumber == 0)
+				{
 					gpio_set_level(RELE_PIN, *iot.readChannel[0].data);
+					if (*iot.readChannel[0].data != gpio_get_level(RELE_PIN))
+						ESP_LOGE(TAG, "Can't switch relay");
+					else
+						printf("Rele state: %s, remote switch\n", (*iot.readChannel[0].data ? "ON" : "OFF"));
+				}
 				else if (header->readWrite->channelNumber == 1)
 					writeBorderDistanceToNVS(*(int16_t *)iot.readChannel[1].data);
 
@@ -237,28 +220,34 @@ void Vl6180X_Task(void *pvParameters)
 
 	while(true)
 	{
-//		uint8_t range = VL6180X_simpleRange();
-//		*(int16_t *)iot.readChannel[2].data = range;
-//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
+		uint8_t range = VL6180X_simpleRange();
+		*(int16_t *)iot.readChannel[2].data = range;
+		//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
 
-		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
+		//		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
 
-//		if (range < *DISTANCE)
-//		{
-//			*releState ^= 1;
-//			gpio_set_level(RELE_PIN, *releState);
-//			printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), range);
-//
-//			uint16_t counter = 0;
-//			while (VL6180X_simpleRange() < *DISTANCE)
-//			{
-//				vTaskDelay(70 / portTICK_PERIOD_MS);
-//				if (++counter >= 14)
-//					break;
-//			}
-//			vTaskDelay(500 / portTICK_PERIOD_MS);
-//		}
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		if (range < *DISTANCE)
+		{
+			gpio_set_level(RELE_PIN, !(*releState));
+			if (*releState != gpio_get_level(RELE_PIN))
+			{
+				*releState ^= 1;
+				printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), range);
+			}
+			else
+				ESP_LOGE(TAG, "Can't switch relay");
+
+
+			uint16_t counter = 0;
+			while (VL6180X_simpleRange() < *DISTANCE)
+			{
+				vTaskDelay(70 / portTICK_PERIOD_MS);
+				if (++counter >= 14)
+					break;
+			}
+			vTaskDelay(500 / portTICK_PERIOD_MS);
+		}
+		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 }
 
@@ -271,7 +260,7 @@ void BME280_Task(void *pvParameters)
 	while(true)
 	{
 		BME280_readValues((double *)iot.readChannel[4].data, (double *)iot.readChannel[6].data, (double *)iot.readChannel[5].data);
-		ESP_LOGI(TAG, "BME280_readValues. %f, %f, %f", *(double *)iot.readChannel[4].data, *(double *)iot.readChannel[6].data, *(double *)iot.readChannel[5].data);
+		//		ESP_LOGI(TAG, "BME280_readValues. %f, %f, %f", *(double *)iot.readChannel[4].data, *(double *)iot.readChannel[6].data, *(double *)iot.readChannel[5].data);
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }

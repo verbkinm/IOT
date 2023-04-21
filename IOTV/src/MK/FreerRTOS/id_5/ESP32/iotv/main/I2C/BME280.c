@@ -1,13 +1,4 @@
-/*
- * VL6180X_Simple.c
- *
- *  Created on: 11 апр. 2023 г.
- *      Author: user
- */
-
 #include "BME280.h"
-
-#define BME280_ADDR                 0x76
 
 extern QueueHandle_t xQueueLedSignals;
 
