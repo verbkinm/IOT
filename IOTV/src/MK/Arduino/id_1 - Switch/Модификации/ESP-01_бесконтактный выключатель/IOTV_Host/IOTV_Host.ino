@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include "Adafruit_VL6180X.h"
 
 #define RELE_PIN 10
@@ -7,11 +6,6 @@ volatile bool releState = false;
 const uint8_t DISTANCE = 150;
 
 Adafruit_VL6180X vl = Adafruit_VL6180X();
-
-// ISR(UART_RX__vect)
-// {
-//   char byte = UDR0;
-// }
 
 void setup() 
 {
@@ -29,7 +23,6 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
     delay(100);
   }
-  // interrupts();
 }
 
 void loop() 
@@ -50,7 +43,7 @@ void loop()
       uint16_t counter = 0;
       while (vl.readRange() < DISTANCE)
       {
-        if (++counter > 1000) // чтобы избежать зависания в цикле. Для ATmega168 (16 МГц) ~ 6 сек. По хорошому испоьлзовать таймер!
+        if (++counter > 500) // чтобы избежать зависания в цикле. Для ATmega168 (16 МГц) ~ 6 сек Для ATmega328 (8 МГц) ~ 3 сек. По хорошому испоьлзовать таймер!
           break;
       }
     }
