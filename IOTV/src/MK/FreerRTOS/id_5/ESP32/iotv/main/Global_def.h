@@ -41,6 +41,7 @@
 #define RESULT__INTERRUPT_STATUS_GPIO_LOOP 	5
 #define RESULT__RANGE_STATUS_LOOP			6
 #define SYSTEM__FRESH_OUT_OF_RESET_LOOP		7
+#define OLED_INIT_FAIL						8
 
 // VL6180X
 #define VL6180X_ALS_GAIN_1 					0x06    ///< 1x gain
@@ -52,9 +53,19 @@
 #define VL6180X_ALS_GAIN_20 				0x00   ///< 20x gain
 #define VL6180X_ALS_GAIN_40 				0x07   ///< 40x gain
 
+// OLED
+#define OLED_PIN_NUM_RST           			-1
+#define OLED_LCD_H_RES              		128
+#define OLED_LCD_V_RES              		64
+#define OLED_LCD_CMD_BITS           		8
+#define OLED_LCD_PARAM_BITS         		8
+
+#define OLED_LVGL_TICK_PERIOD_MS    		2
+
 // Адреса i2c устройств
 #define BME280_ADDR                			0x76
 #define VL6180X_ADDR                 		0x29
+#define OLED_ADDR							0x3C
 
 // Регистры BME280
 enum

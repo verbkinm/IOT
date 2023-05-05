@@ -22,7 +22,7 @@ void i2c_init(void)
 	if (i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0) != ESP_OK)
 	{
 		struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, portMAX_DELAY);
+		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 	}
 }
 

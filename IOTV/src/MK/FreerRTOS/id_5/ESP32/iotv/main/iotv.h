@@ -14,9 +14,11 @@
 
 #include "I2C/BME280.h"
 #include "I2C/VL6180X_Simple.h"
+#include "I2C/oled.h"
 
 void iotvTask(void *pvParameters);
 void Vl6180X_Task(void *pvParameters);
 void BME280_Task(void *pvParameters);
+void OLED_Task(void *pvParameters);
 
 #endif /* MAIN_IOTV_H_ */

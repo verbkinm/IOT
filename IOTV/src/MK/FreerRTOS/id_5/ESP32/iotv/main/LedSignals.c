@@ -11,7 +11,8 @@ static const char *failStr[] = {
 		"I2C_READ_FAIL",
 		"RESULT__INTERRUPT_STATUS_GPIO_LOOP",
 		"RESULT__RANGE_STATUS_LOOP",
-		"SYSTEM__FRESH_OUT_OF_RESET_LOOP"
+		"SYSTEM__FRESH_OUT_OF_RESET_LOOP",
+		"OLED_INIT_FAIL"
 };
 
 static SemaphoreHandle_t xSemaphore = NULL;
@@ -48,7 +49,7 @@ static void errorBlink(const char* errorTag, uint8_t value)
 		}
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 
-		if ((value > 0) && (value < SYSTEM__FRESH_OUT_OF_RESET_LOOP)) // SYSTEM__FRESH_OUT_OF_RESET_LOOP - крайний элемент
+		if ((value > 0) && (value < OLED_INIT_FAIL)) // OLED_INIT_FAIL - крайний элемент
 			ESP_LOGE(TAG, "%s FAIL: %s", errorTag, failStr[value - 1]);
 
 		xSemaphoreGive( xSemaphore );

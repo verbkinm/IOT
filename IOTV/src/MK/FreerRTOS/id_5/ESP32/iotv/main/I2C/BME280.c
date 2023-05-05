@@ -24,7 +24,7 @@ void BME280_init(void)
 		if (++counter >= 3)
 		{
 			struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
+			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 			return;
 		}
 	}

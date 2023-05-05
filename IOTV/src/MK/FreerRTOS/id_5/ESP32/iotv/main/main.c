@@ -47,11 +47,15 @@ void app_main(void)
 	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 1, NULL);
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 
+	xTaskCreate(OLED_Task, "oledTask", 4096, NULL, 2, NULL);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+
 	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 4096, NULL, 2, NULL);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
+
 	xTaskCreate(BME280_Task, "BME280_Task", 4096, NULL, 2, NULL);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
+
 	xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, 1, NULL);
 }
-
 

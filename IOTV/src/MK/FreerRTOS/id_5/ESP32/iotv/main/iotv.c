@@ -6,6 +6,7 @@ extern uint64_t realBufSize;
 extern uint64_t expextedDataSize;
 
 static const char *TAG = "iotv";
+static bool oled_page_lock = false;
 
 static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
 static uint64_t cutDataSize = 0;
@@ -220,26 +221,27 @@ void Vl6180X_Task(void *pvParameters)
 
 	while(true)
 	{
-		uint8_t range = VL6180X_simpleRange();
-		*(int16_t *)iot.readChannel[2].data = range;
+		int16_t *range = (int16_t *)iot.readChannel[2].data;
+		*range = VL6180X_simpleRange();
 		//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
 
 		//		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
 
-		if (range < *DISTANCE)
+		if (*range < *DISTANCE)
 		{
+			oled_page_lock = true;
+
 			gpio_set_level(RELE_PIN, !(*releState));
 			if (*releState != gpio_get_level(RELE_PIN))
 			{
 				*releState ^= 1;
-				printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), range);
+				printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), *range);
 			}
 			else
 				ESP_LOGE(TAG, "Can't switch relay");
 
-
 			uint16_t counter = 0;
-			while (VL6180X_simpleRange() < *DISTANCE)
+			while ((*range = VL6180X_simpleRange()) < *DISTANCE)
 			{
 				vTaskDelay(70 / portTICK_PERIOD_MS);
 				if (++counter >= 14)
@@ -247,6 +249,9 @@ void Vl6180X_Task(void *pvParameters)
 			}
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 		}
+		else
+			oled_page_lock = false;
+
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 }
@@ -264,4 +269,33 @@ void BME280_Task(void *pvParameters)
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
+
+void OLED_Task(void *pvParameters)
+{
+	ESP_LOGW(TAG, "OLED task created");
+
+	OLED_init();
+
+	int counter = 0;
+
+	while(true)
+	{
+		if (oled_page_lock)
+		{
+			counter = 300;
+			OLED_Draw_Distance(*(int16_t *)iot.readChannel[2].data);
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+		}
+		else
+		{
+			if (++counter > 300)
+			{
+				OLED_Draw_Page(*(double *)iot.readChannel[4].data, *(double *)iot.readChannel[5].data, *(double *)iot.readChannel[6].data);
+				counter = 0;
+			}
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+		}
+	}
+}
+
 
