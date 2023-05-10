@@ -81,8 +81,8 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 			.nameSize = iot->nameSize,
 			.channelNumber = head->readWrite->channelNumber,
 			.dataSize = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].dataSize : 0,
-					.name = iot->name,
-					.data = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].data : NULL
+			.name = iot->name,
+			.data = (iot->readChannel[head->readWrite->channelNumber].data != NULL) ? iot->readChannel[head->readWrite->channelNumber].data : NULL
 	};
 
 	struct Header header = {

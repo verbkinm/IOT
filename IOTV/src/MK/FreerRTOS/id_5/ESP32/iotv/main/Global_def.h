@@ -24,6 +24,12 @@
 #define I2C_MASTER_RX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_TIMEOUT_MS      			1000
 
+// Адреса i2c устройств
+#define BME280_ADDR                			0x76
+#define VL6180X_ADDR                 		0x29
+#define OLED_ADDR							0x3C
+#define DS3231_ADDR							0x68
+
 // Led Signals
 #define LED_WIFI							GPIO_NUM_5
 #define LED_TCP								GPIO_NUM_4
@@ -45,13 +51,13 @@
 
 // VL6180X
 #define VL6180X_ALS_GAIN_1 					0x06    ///< 1x gain
-#define VL6180X_ALS_GAIN_1_25 				0x05 ///< 1.25x gain
-#define VL6180X_ALS_GAIN_1_67 				0x04 ///< 1.67x gain
-#define VL6180X_ALS_GAIN_2_5 				0x03  ///< 2.5x gain
+#define VL6180X_ALS_GAIN_1_25 				0x05 	///< 1.25x gain
+#define VL6180X_ALS_GAIN_1_67 				0x04 	///< 1.67x gain
+#define VL6180X_ALS_GAIN_2_5 				0x03  	///< 2.5x gain
 #define VL6180X_ALS_GAIN_5 					0x02    ///< 5x gain
-#define VL6180X_ALS_GAIN_10 				0x01   ///< 10x gain
-#define VL6180X_ALS_GAIN_20 				0x00   ///< 20x gain
-#define VL6180X_ALS_GAIN_40 				0x07   ///< 40x gain
+#define VL6180X_ALS_GAIN_10 				0x01   	///< 10x gain
+#define VL6180X_ALS_GAIN_20 				0x00   	///< 20x gain
+#define VL6180X_ALS_GAIN_40 				0x07   	///< 40x gain
 
 // OLED
 #define OLED_PIN_NUM_RST           			-1
@@ -61,11 +67,6 @@
 #define OLED_LCD_PARAM_BITS         		8
 
 #define OLED_LVGL_TICK_PERIOD_MS    		2
-
-// Адреса i2c устройств
-#define BME280_ADDR                			0x76
-#define VL6180X_ADDR                 		0x29
-#define OLED_ADDR							0x3C
 
 // Регистры BME280
 enum

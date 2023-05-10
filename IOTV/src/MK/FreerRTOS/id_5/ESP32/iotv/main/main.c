@@ -9,8 +9,10 @@
 #include "iotv.h"
 #include "I2C/BME280.h"
 #include "I2C/VL6180X_Simple.h"
+#include "I2C/DS3231.h"
 #include "Net/Tcp.h"
 #include "Net/WIFI.h"
+
 
 extern QueueHandle_t xQueueInData, xQueueOutData, xQueueLedSignals;
 
@@ -56,6 +58,34 @@ void app_main(void)
 	xTaskCreate(BME280_Task, "BME280_Task", 4096, NULL, 2, NULL);
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
+	xTaskCreate(DS3231_Task, "DS3132_Task", 4096, NULL, 2, NULL);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
+
 	xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, 1, NULL);
+//
+//	struct DateTime dt = {
+//		.seconds = 50,
+//		.minutes = 59,
+//		.hour = 23,
+//		.dayWeek = 1,
+//		.date = 10,
+//		.month = 5,
+//		.year = 23
+//	};
+//
+//	DS3231_SetDataTime(&dt);
+//
+//	while(1)
+//	{
+//		struct DateTime dt = DS3231_DataTime();
+//		printf("Year - 20%02d\n"
+//				"Month - %02d\n"
+//				"date - %02d\n"
+//				"hour - %02d\n"
+//				"minutes - %02d\n"
+//				"seconds - %02d\n\n",
+//				dt.year, dt.month, dt.date, dt.hour, dt.minutes, dt.seconds);
+//		vTaskDelay(1000 / portTICK_PERIOD_MS);
+//	}
 }
 

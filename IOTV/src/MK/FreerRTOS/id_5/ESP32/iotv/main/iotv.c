@@ -12,29 +12,61 @@ static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
 static uint64_t cutDataSize = 0;
 static bool error = false;
 
-static uint8_t readType[7] = {
+#define CH_RELAY_STATE 	0
+#define CH_BORDER		1
+#define CH_SEC			2
+#define CH_MIN			3
+#define	CH_HOUR			4
+#define	CH_DAY			5
+#define CH_DATE			6
+#define CH_MONTH		7
+#define CH_YEAR			8
+#define CH_RANGE		9
+#define CH_LUX			10
+#define CH_TEMP			11
+#define CH_HUM			12
+#define CH_PRES			13
+
+static uint8_t readType[14] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
-		DATA_TYPE_INT_16,		// расстояние
+
+		DATA_TYPE_INT_8, 		// секунды
+		DATA_TYPE_INT_8,		// минуты
+		DATA_TYPE_INT_8,		// часы
+		DATA_TYPE_INT_8,		// день недели
+		DATA_TYPE_INT_8,		// день месяца
+		DATA_TYPE_INT_8,		// месяц
+		DATA_TYPE_INT_8,		// год
+
+		DATA_TYPE_INT_16,		// текущее расстояние
 		DATA_TYPE_DOUBLE_64,	// освещённость
 		DATA_TYPE_DOUBLE_64,	// температура
 		DATA_TYPE_DOUBLE_64,	// влажность
 		DATA_TYPE_DOUBLE_64		// давление
 };
 
-static uint8_t writeType[2] = {
+static uint8_t writeType[9] = {
 		DATA_TYPE_BOOL,			// состояние реле
-		DATA_TYPE_INT_16 		// порог срабатывания реле
+		DATA_TYPE_INT_16, 		// порог срабатывания реле
+
+		DATA_TYPE_INT_8, 		// секунды
+		DATA_TYPE_INT_8,		// минуты
+		DATA_TYPE_INT_8,		// часы
+		DATA_TYPE_INT_8,		// день недели
+		DATA_TYPE_INT_8,		// день месяца
+		DATA_TYPE_INT_8,		// месяц
+		DATA_TYPE_INT_8			// год
 };
 
 static struct IOTV_Server_embedded iot = {
 		.id = 5,
 		.name = "vl6180x+bme280+relay",
 		.description = "ESP-32 id-5",
-		.numberReadChannel = 7,
+		.numberReadChannel = 14,
 		.readChannel = NULL,
 		.readChannelType = readType,
-		.numberWriteChannel = 2,
+		.numberWriteChannel = 9,
 		.writeChannelType = writeType,
 		.state = 1,
 		.nameSize = 20,
@@ -124,16 +156,29 @@ static void dataRecived(const struct DataPkg *pkg)
 			{
 				pkg.size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
 
-				if (header->readWrite->channelNumber == 0)
+				if (header->readWrite->channelNumber == CH_RELAY_STATE)
 				{
-					gpio_set_level(RELE_PIN, *iot.readChannel[0].data);
-					if (*iot.readChannel[0].data != gpio_get_level(RELE_PIN))
+					gpio_set_level(RELE_PIN, *iot.readChannel[CH_RELAY_STATE].data);
+					if (*iot.readChannel[CH_RELAY_STATE].data != gpio_get_level(RELE_PIN))
 						ESP_LOGE(TAG, "Can't switch relay");
 					else
-						printf("Rele state: %s, remote switch\n", (*iot.readChannel[0].data ? "ON" : "OFF"));
+						printf("Rele state: %s, remote switch\n", (*iot.readChannel[CH_RELAY_STATE].data ? "ON" : "OFF"));
 				}
-				else if (header->readWrite->channelNumber == 1)
-					writeBorderDistanceToNVS(*(int16_t *)iot.readChannel[1].data);
+				else if (header->readWrite->channelNumber == CH_BORDER)
+				{
+					int16_t border = *(int16_t *)iot.readChannel[CH_BORDER].data;
+					printf("Data in border: %d\n", border);
+
+					writeBorderDistanceToNVS(border);
+				}
+				else if(header->readWrite->channelNumber >= CH_SEC && header->readWrite->channelNumber <= CH_YEAR)
+				{
+					struct DateTime dt;
+					for (uint8_t i = DS3231_REG_SEC, j = CH_SEC; i <= DS3231_REG_YEAR; ++i, ++j)
+						((uint8_t *)&dt)[i] = *(uint8_t *)iot.readChannel[j].data;
+
+					DS3231_SetDataTime(&dt);
+				}
 
 
 				pkg.data = malloc(pkg.size);
@@ -210,10 +255,10 @@ void Vl6180X_Task(void *pvParameters)
 	ESP_LOGW(TAG, "Vl6180X task created");
 
 	char *releState;
-	releState = iot.readChannel[0].data;
+	releState = iot.readChannel[CH_RELAY_STATE].data;
 
-	int16_t *DISTANCE = (int16_t *)iot.readChannel[1].data;
-	*DISTANCE = readBorderDistanceFromNVS();
+	int16_t *border = (int16_t *)iot.readChannel[CH_BORDER].data;
+	*border = readBorderDistanceFromNVS();
 
 	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
 
@@ -221,13 +266,13 @@ void Vl6180X_Task(void *pvParameters)
 
 	while(true)
 	{
-		int16_t *range = (int16_t *)iot.readChannel[2].data;
+		int16_t *range = (int16_t *)iot.readChannel[CH_RANGE].data;
 		*range = VL6180X_simpleRange();
 		//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
 
 		//		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
 
-		if (*range < *DISTANCE)
+		if (*range < *border)
 		{
 			oled_page_lock = true;
 
@@ -241,7 +286,7 @@ void Vl6180X_Task(void *pvParameters)
 				ESP_LOGE(TAG, "Can't switch relay");
 
 			uint16_t counter = 0;
-			while ((*range = VL6180X_simpleRange()) < *DISTANCE)
+			while ((*range = VL6180X_simpleRange()) < *border)
 			{
 				vTaskDelay(70 / portTICK_PERIOD_MS);
 				if (++counter >= 14)
@@ -264,8 +309,24 @@ void BME280_Task(void *pvParameters)
 
 	while(true)
 	{
-		BME280_readValues((double *)iot.readChannel[4].data, (double *)iot.readChannel[6].data, (double *)iot.readChannel[5].data);
-		//		ESP_LOGI(TAG, "BME280_readValues. %f, %f, %f", *(double *)iot.readChannel[4].data, *(double *)iot.readChannel[6].data, *(double *)iot.readChannel[5].data);
+		BME280_readValues((double *)iot.readChannel[CH_TEMP].data, (double *)iot.readChannel[CH_PRES].data, (double *)iot.readChannel[CH_HUM].data);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
+}
+
+void DS3231_Task(void *pvParameters)
+{
+	ESP_LOGW(TAG, "DS3231 task created");
+
+	struct DateTime dt;
+
+	while(true)
+	{
+		dt = DS3231_DataTime();
+
+		for (uint8_t i = CH_SEC, j = 0; i < CH_RANGE; ++i, ++j)
+			*(uint8_t *)iot.readChannel[i].data = (uint8_t)(((uint8_t *)&dt)[j]);
+
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
@@ -283,14 +344,14 @@ void OLED_Task(void *pvParameters)
 		if (oled_page_lock)
 		{
 			counter = 300;
-			OLED_Draw_Distance(*(int16_t *)iot.readChannel[2].data);
+			OLED_Draw_Distance(*(int16_t *)iot.readChannel[CH_RANGE].data);
 			vTaskDelay(10 / portTICK_PERIOD_MS);
 		}
 		else
 		{
 			if (++counter > 300)
 			{
-				OLED_Draw_Page(*(double *)iot.readChannel[4].data, *(double *)iot.readChannel[5].data, *(double *)iot.readChannel[6].data);
+				OLED_Draw_Page(*(double *)iot.readChannel[CH_TEMP].data, *(double *)iot.readChannel[CH_HUM].data, *(double *)iot.readChannel[CH_PRES].data);
 				counter = 0;
 			}
 			vTaskDelay(10 / portTICK_PERIOD_MS);
