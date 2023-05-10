@@ -46,7 +46,6 @@ std::pair<QString, QString> Raw::strData() const
         result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const int32_t*>(_data.data())), "INT_32");
         break;
     case DATA_TYPE::INT_64:
-        //qToBigEndian c int64_t не отрабатывает правильно
         result = std::make_pair<QString, QString>(QString::number(*reinterpret_cast<const qint64*>(_data.data())), "INT_64");
         break;
     case DATA_TYPE::FLOAT_32:
@@ -116,8 +115,8 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_32 error";
             return {};
         }
-        //        if (Q_BYTE_ORDER != Q_BIG_ENDIAN)
-        //            data = qToBigEndian(data);
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            data = qToLittleEndian(data);
 
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
@@ -131,8 +130,8 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             qDebug() << "Convert to INT_64 error";
             return {};
         }
-        //        if (Q_BYTE_ORDER != Q_BIG_ENDIAN)
-        //            data = qToBigEndian(data);
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            data = qToLittleEndian(data);
 
         char *ptr = reinterpret_cast<char*>(&data);
         for (uint i = 0; i < sizeof(data); i++)
