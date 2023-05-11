@@ -108,6 +108,8 @@ Rectangle {
             return "/Devices/Device_2/Device_2.qml"
         else if (id === 4)
             return "/Devices/Device_4.qml"
+        else if (id === 5)
+            return "/Devices/Device_5/Device_5.qml"
         else
             return "/Devices/Device_0.qml"
     }

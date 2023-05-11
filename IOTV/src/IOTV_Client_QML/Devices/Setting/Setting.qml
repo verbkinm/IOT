@@ -2,6 +2,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
+import "qrc:/Devices/" as Devices
+
 Page {    
     //Ссылка на Device
     required property var device
@@ -30,6 +32,11 @@ Page {
                 deviceName: device.name
             }
         }
+    }
+
+    Devices.BusyRect {
+        id: busyRect
+        visible: !device.state
     }
 
     Component.onCompleted: {
