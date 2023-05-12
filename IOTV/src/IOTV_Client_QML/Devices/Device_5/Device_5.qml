@@ -5,6 +5,7 @@ import QtQuick.Window 2.2
 import "qrc:/Devices/" as Devices
 import "qrc:/Devices/Device_1" as Devices_1
 import "qrc:/Devices/Device_2" as Devices_2
+import "qrc:/Devices/BaseItem" as BaseItem
 
 
 Page {
@@ -79,26 +80,17 @@ Page {
                 }
             }
 
-            //Температура
-            Devices_2.Device_2_Item {
-                id: temperature
-                source: "qrc:/img/id_1/temperature.png"
-                text: "0.00 °C"
+            BaseItem.MeteoBlock {
+                id: meteoBlock
+                width: parent.width
+                height: 300
+
+                device: root.device
+                channelTemperature: 11
+                channelHumidity: 12
+                channelPressure: 13
             }
 
-            //Влажность
-            Devices_2.Device_2_Item {
-                id: humidity
-                source: "qrc:/img/id_1/humidity.png"
-                text: "0.00 %"
-            }
-
-            //Давление
-            Devices_2.Device_2_Item {
-                id: pressure
-                source: "qrc:/img/id_1/pressure.png"
-                text: "0.00 "//"мм рт.ст."
-            }
         }
     }
 
@@ -118,24 +110,6 @@ Page {
                 btn_id5.btn.checked = device.readData(0) === "true"
                 anim.start()
                 timer.stop()
-            }
-            else if (channel === 11)
-            {
-                var t = device.readData(11)
-                if (t > 0)
-                    t = "+" + t
-
-                temperature.text = t.slice(0, t.length - 2) + " °C"
-            }
-            else if (channel === 12)
-            {
-                var h = device.readData(12)
-                humidity.text = h.slice(0, h.length - 2) + " %"
-            }
-            else if (channel === 13)
-            {
-                var p = device.readData(13)
-                pressure.text = p.slice(0, p.length - 2) + " мм рт.ст."
             }
         }
     }

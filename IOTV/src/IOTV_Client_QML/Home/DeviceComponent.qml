@@ -14,7 +14,7 @@ Rectangle {
     height: 120
 
     border.width: 1
-    border.color: Qt.rgba(0, 0, 0, 0.5)
+    border.color: Qt.rgba(0, 0, 0, 0.1)
     radius: 5
 
     MouseArea {

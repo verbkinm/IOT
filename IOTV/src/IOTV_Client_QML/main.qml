@@ -9,7 +9,7 @@ import "Client" as ClientPageModule
 ApplicationWindow {
     id: window
     width: 360
-    height: 520
+    height: 640
     visible: true
     title: qsTr("IOTV Client")
 

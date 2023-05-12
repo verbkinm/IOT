@@ -1,6 +1,6 @@
 #include "log.h"
 
-const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss - ";
+const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss:zzz - ";
 std::mutex Log::_mutex;
 
 void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)

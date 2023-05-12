@@ -12,8 +12,8 @@ Rectangle {
 
     color: Qt.rgba(0, 0, 0, 0)
 
-//    border.width: 1
-//    border.color: "green"
+    //    border.width: 1
+    //    border.color: "green"
 
     Column {
         width: parent.width
@@ -23,8 +23,8 @@ Rectangle {
         {
             color: Qt.rgba(0, 0, 0, 0)
 
-//            border.width: 1
-//            border.color: "red"
+            //            border.width: 1
+            //            border.color: "red"
 
             width: parent.width
             height: 40
@@ -65,8 +65,8 @@ Rectangle {
 
             color: Qt.rgba(0, 0, 0, 0)
 
-//            border.color: "yellow"
-//            border.width: 1
+            //            border.color: "yellow"
+            //            border.width: 1
 
             Label {
                 text: "Дата, время:"
@@ -88,8 +88,8 @@ Rectangle {
 
             color: Qt.rgba(0, 0, 0, 0)
 
-//            border.color: "red"
-//            border.width: 1
+            //            border.color: "red"
+            //            border.width: 1
 
             FontMetrics {
                 id: fontMetrics
@@ -154,17 +154,17 @@ Rectangle {
                 height: parent.height / 3
 
                 color: Qt.rgba(0, 0, 0, 0)
-//                border.color: "blue"
-//                border.width: 1
+                //                border.color: "blue"
+                //                border.width: 1
 
                 anchors {
                     centerIn: parent
                 }
 
             }
-//            MouseArea {
-//                anchors.fill: parent
-//            }
+            MouseArea {
+                anchors.fill: parent
+            }
         }
 
         Rectangle {
@@ -173,8 +173,8 @@ Rectangle {
 
             color: Qt.rgba(0, 0, 0, 0)
 
-//            border.color: "green"
-//            border.width: 1
+            //            border.color: "green"
+            //            border.width: 1
 
             Tumbler {
                 id: dayTumbler
@@ -213,15 +213,21 @@ Rectangle {
                 anchors {
                     left: monthTumbler.right
                 }
-                onCurrentIndexChanged: {
-                    console.log(currentIndex)
-                }
+                //                onCurrentIndexChanged: {
+                //                    device.setDataFromString(8, currentIndex + 2000)
+                //                    console.log(currentIndex)
+                //                }
+            }
+            MouseArea {
+                anchors.fill: parent
             }
         }
 
         Button {
             id: btnSystemDateTime
-            text: "Установить системное время"
+            text: "Установить\nсистемное время"
+
+            anchors.horizontalCenter: parent.horizontalCenter
 
             onClicked: {
                 var dt = new Date();

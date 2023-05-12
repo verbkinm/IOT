@@ -41,7 +41,7 @@ private:
 
     QTimer _timerPing;
     // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается
-    static constexpr int COUNTER_PING_COUNT = 3;
+    static constexpr int COUNTER_PING_COUNT = 5;
     int _counterPing;
 
     //!!! unorder_map

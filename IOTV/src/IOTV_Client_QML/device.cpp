@@ -60,13 +60,12 @@ bool Device::isOnline() const
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
 {
-    if (data != getReadChannelData(channelNumber) && this->setReadChannelData(channelNumber, data))
-    {
-        emit signalDataChanged(channelNumber);
-        return true;
-    }
+    if (data == getReadChannelData(channelNumber))
+        return false;
 
-    return false;
+    this->setReadChannelData(channelNumber, data);
+    emit signalDataChanged(channelNumber);
+    return true;
 }
 
 void Device::setDataFromString(int channelNumber, QString data)
