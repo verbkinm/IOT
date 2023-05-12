@@ -26,8 +26,8 @@ static void writeData(void *pvParameters)
 			ESP_LOGE(TAG, "xQueueReceive( xQueueOutData, pkg, ( TickType_t ) 10 ) != pdPASS");
 	}
 
-	realBufSize = 0;
-	expextedDataSize = 0;
+//	realBufSize = 0;
+//	expextedDataSize = 0;
 
 	vTaskDelete(NULL);
 	xHandleWriteData = NULL;
@@ -156,6 +156,9 @@ void tcp_server_task(void *pvParameters)
 		shutdown(sock, SHUT_RDWR); //0
 		close(sock);
 		LedSignals_setTCPState(false);
+
+		realBufSize = 0;
+		expextedDataSize = 0;
 	}
 
 	CLEAN_UP:

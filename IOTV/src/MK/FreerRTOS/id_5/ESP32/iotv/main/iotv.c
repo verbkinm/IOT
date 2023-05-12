@@ -156,22 +156,54 @@ static void dataRecived(const struct DataPkg *pkg)
 			{
 				pkg.size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
 
-				if (header->readWrite->channelNumber == CH_RELAY_STATE)
+				if (pkg.size > 0)
 				{
-					gpio_set_level(RELE_PIN, *iot.readChannel[CH_RELAY_STATE].data);
-					if (*iot.readChannel[CH_RELAY_STATE].data != gpio_get_level(RELE_PIN))
-						ESP_LOGE(TAG, "Can't switch relay");
-					else
-						printf("Rele state: %s, remote switch\n", (*iot.readChannel[CH_RELAY_STATE].data ? "ON" : "OFF"));
-				}
-				else if (header->readWrite->channelNumber == CH_BORDER)
-				{
-					int16_t border = *(int16_t *)iot.readChannel[CH_BORDER].data;
-					printf("Data in border: %d\n", border);
+					uint8_t channelNumber = header->readWrite->channelNumber;
+					int16_t *val = (int16_t *)iot.readChannel[channelNumber].data;
+					switch (channelNumber)
+					{
+					case CH_RELAY_STATE:
+						uint8_t *rele_state = (uint8_t *)iot.readChannel[CH_RELAY_STATE].data;
+						gpio_set_level(RELE_PIN, *rele_state);
+						if (*rele_state != gpio_get_level(RELE_PIN))
+						{
+							ESP_LOGE(TAG, "Can't switch relay");
+							*rele_state ^= *rele_state;
+						}
+						else
+							printf("Rele state: %s, remote switch\n", (*rele_state ? "ON" : "OFF"));
 
-					writeBorderDistanceToNVS(border);
+						break;
+					case CH_BORDER:
+						*val = inRange(*val, 0, 255);
+						printf("Data in border: %d\n", *val);
+						writeBorderDistanceToNVS(*val);
+						break;
+					case CH_SEC:
+					case CH_MIN:
+						*val = inRange(*val, 0, 59);
+						break;
+					case CH_HOUR:
+						*val = inRange(*val, 0, 23);
+						break;
+					case CH_DAY:
+						*val = inRange(*val, 1, 7);
+						break;
+					case CH_DATE:
+						*val = inRange(*val, 1, 31);
+						break;
+					case CH_MONTH:
+						*val = inRange(*val, 1, 12);
+						break;
+					case CH_YEAR:
+						*val = inRange(*val, 0, 99);
+						break;
+					default:
+						break;
+					}
 				}
-				else if(header->readWrite->channelNumber >= CH_SEC && header->readWrite->channelNumber <= CH_YEAR)
+
+				if(header->readWrite->channelNumber >= CH_SEC && header->readWrite->channelNumber <= CH_YEAR)
 				{
 					struct DateTime dt;
 					for (uint8_t i = DS3231_REG_SEC, j = CH_SEC; i <= DS3231_REG_YEAR; ++i, ++j)

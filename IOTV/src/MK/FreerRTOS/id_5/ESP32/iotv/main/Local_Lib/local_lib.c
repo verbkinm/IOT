@@ -16,3 +16,13 @@ uint8_t decToBcd(uint8_t val)
 {
 	return( (val / 10 * 16) + (val % 10) );
 }
+
+double inRange(double val, double min, double max)
+{
+	if (val < min)
+		return min;
+	else if (val > max)
+		return max;
+
+	return val;
+}

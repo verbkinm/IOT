@@ -8,7 +8,7 @@
 #define KEEPALIVE_IDLE              		CONFIG_EXAMPLE_KEEPALIVE_IDLE
 #define KEEPALIVE_INTERVAL          		CONFIG_EXAMPLE_KEEPALIVE_INTERVAL
 #define KEEPALIVE_COUNT             		CONFIG_EXAMPLE_KEEPALIVE_COUNT
-#define BUFSIZE 							1024  // по умолчанию, после компиляции, BUFSIZ = 128
+#define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
 // WIFI event
 #define WIFI_CONNECTED_BIT					BIT0
