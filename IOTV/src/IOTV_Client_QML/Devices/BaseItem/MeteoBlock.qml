@@ -64,8 +64,8 @@ Item {
 
     function pressureValue()
     {
-        var p = device.readData(channelPressure)
-        return p.slice(0, p.length - 2) + " м.р.с."
+        var p = Number(device.readData(channelPressure)) * 7.50062 * 0.001
+        return  p.toFixed(2) + " м.р.с."
     }
 
     Connections {

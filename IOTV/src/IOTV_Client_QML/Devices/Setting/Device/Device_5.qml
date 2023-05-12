@@ -64,6 +64,57 @@ Rectangle {
             height: 20
 
             color: Qt.rgba(0, 0, 0, 0)
+            Label {
+                text: "Порог срабатывания:"
+                font.pixelSize: 14
+                elide: Text.ElideRight
+
+                anchors{
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: 15
+                }
+            }
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 20
+            color: Qt.rgba(0, 0, 0, 0)
+
+            Slider {
+                id: sliderBorder
+                from: 0
+                to: 255
+                value: parseFloat(device.readData(1))
+                width: 240
+                anchors{
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: 15
+                }
+                onValueChanged: {
+                    device.setDataFromString(1, parseInt(value).toString())
+                }
+            }
+
+            Label {
+                id: valueBorder
+                text: parseInt(sliderBorder.value).toString()
+
+                anchors{
+                    left: sliderBorder.right
+//                    verticalCenter: parent.verticalCenter
+                    leftMargin: 15
+                }
+            }
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 20
+
+            color: Qt.rgba(0, 0, 0, 0)
 
             //            border.color: "yellow"
             //            border.width: 1
@@ -213,10 +264,6 @@ Rectangle {
                 anchors {
                     left: monthTumbler.right
                 }
-                //                onCurrentIndexChanged: {
-                //                    device.setDataFromString(8, currentIndex + 2000)
-                //                    console.log(currentIndex)
-                //                }
             }
             MouseArea {
                 anchors.fill: parent
@@ -254,7 +301,12 @@ Rectangle {
     Connections {
         target: device
         function onSignalDataChanged(channel) {
-            if (channel === 2)
+            if (channel === 1)
+            {
+                if (!sliderBorder.pressed)
+                    sliderBorder.value = parseFloat(device.readData(1))
+            }
+            else if (channel === 2)
                 secondsTumbler.currentIndex = Number(device.readData(2))
             else if (channel === 3)
                 minutesTumbler.currentIndex = Number(device.readData(3))
