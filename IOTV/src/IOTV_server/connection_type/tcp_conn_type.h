@@ -13,8 +13,8 @@ class TCP_conn_type : public Base_conn_type
 public:
     TCP_conn_type(const QString& name, const QString& address, quint16 port, QObject *parent);
 
-    quint16 getPort() const;
-    void setPort(quint16 port);
+//    quint16 getPort() const;
+//    void setPort(quint16 port);
 
     virtual qint64 write(const QByteArray &data, qint64 size = -1) override;
     virtual void connectToHost() override;

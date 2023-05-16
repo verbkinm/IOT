@@ -187,6 +187,8 @@ void IOTV_Host::slotDataResived(QByteArray data)
         data = data.mid(cutDataSize);
         clearHeader(header);
     }
+
+    //!!! !!!
     _conn_type->setDataBuffer(data);
 }
 
@@ -211,8 +213,13 @@ void IOTV_Host::setConnectionType()
         _conn_type->connectToHost();
     }
     else if (connType == connectionType::UDP)
-        //!!!
-        ;
+    {
+        _conn_type = std::make_unique<Udp_conn_type>(_settingsData[hostField::name],
+                _settingsData[hostField::address],
+                _settingsData[hostField::port].toUInt(),
+                this);
+        _conn_type->connectToHost();
+    }
     else if (connType == connectionType::COM)
     {
         _conn_type = std::make_unique<COM_conn_type>(_settingsData["name"], this);

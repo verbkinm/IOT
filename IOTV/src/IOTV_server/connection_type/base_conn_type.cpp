@@ -66,7 +66,11 @@ void Base_conn_type::slotReadData()
 {
     std::lock_guard lg(_hostBuffMutex);
 
-    _host_buffer_data += readAll();
+    QByteArray inData = readAll();
+//    if (inData.length() < 1)
+//        return;
+
+    _host_buffer_data.append(inData);
     Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);

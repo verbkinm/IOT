@@ -75,7 +75,7 @@ void IOTV_Server::readHostSetting()
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
         setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, setting[hostField::name] + ".log").toString();
 
-        if (setting[hostField::connection_type] == connectionType::TCP)
+        if (setting[hostField::connection_type] == connectionType::TCP || setting[hostField::connection_type] == connectionType::UDP)
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
         //!!!

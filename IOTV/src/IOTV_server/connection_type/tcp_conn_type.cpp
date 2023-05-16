@@ -18,15 +18,15 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 }
 
-quint16 TCP_conn_type::getPort() const
-{
-    return _tcpPort;
-}
+//quint16 TCP_conn_type::getPort() const
+//{
+//    return _tcpPort;
+//}
 
-void TCP_conn_type::setPort(quint16 port)
-{
-    _tcpPort = port;
-}
+//void TCP_conn_type::setPort(quint16 port)
+//{
+//    _tcpPort = port;
+//}
 
 qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
@@ -97,7 +97,6 @@ void TCP_conn_type::slotSocketDisconnected()
     disconnect(&_tcpSocket,  &QTcpSocket::disconnected, this, &TCP_conn_type::slotSocketDisconnected);
 
     emit signalDisconnected();
-//    _reconnectTimer.start();
 }
 
 void TCP_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState socketState)
