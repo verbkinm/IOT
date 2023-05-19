@@ -59,7 +59,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
 void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
-    _state = static_cast<State_STATE>(iot->state);
+    setState(static_cast<State_STATE>(iot->state));
     _counterState = 0;
 }
 
@@ -68,8 +68,10 @@ void IOTV_Host::responceRead(const struct Header *header)
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->readWrite != nullptr);
 
+    uint8_t channelNumber = header->readWrite->channelNumber;
+
     QByteArray data(header->readWrite->data, header->readWrite->dataSize);
-    this->setReadChannelData(header->readWrite->channelNumber, data);
+    this->setReadChannelData(channelNumber, data);
 
     if(_logFile.isEmpty())
         return;
@@ -210,7 +212,6 @@ void IOTV_Host::setConnectionType()
                 _settingsData[hostField::address],
                 _settingsData[hostField::port].toUInt(),
                 this);
-        _conn_type->connectToHost();
     }
     else if (connType == connectionType::UDP)
     {
@@ -218,7 +219,6 @@ void IOTV_Host::setConnectionType()
                 _settingsData[hostField::address],
                 _settingsData[hostField::port].toUInt(),
                 this);
-        _conn_type->connectToHost();
     }
     else if (connType == connectionType::COM)
     {
@@ -242,6 +242,12 @@ void IOTV_Host::setConnectionType()
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
+
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::signalConnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::signalDisconnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::signalDataRiceved);
+
+    _conn_type->connectToHost();
 }
 
 const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
@@ -265,7 +271,7 @@ void IOTV_Host::slotStateTimeOut()
 
     if (_counterState > COUNTER_STATE_COUNT)
     {
-        _state = State_STATE_OFFLINE;
+        setState(State_STATE_OFFLINE);
         _counterState = 0;
     }
 }

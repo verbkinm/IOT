@@ -89,14 +89,15 @@ void IOTV_Server::readHostSetting()
         if (it != _iot_hosts.end())
         {
             Log::write(QString(Q_FUNC_INFO) +
-                        ", Error: Double host name in config file - " + setting[hostField::name],
-                        Log::Write_Flag::FILE_STDERR,
-                        ServerLog::DEFAULT_LOG_FILENAME);
+                       ", Error: Double host name in config file - " + setting[hostField::name],
+                    Log::Write_Flag::FILE_STDERR,
+                    ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
         }
 
         QThread *th = new QThread(this);
         IOTV_Host *host = new IOTV_Host(setting, th);
+
         th->start();
 
         _iot_hosts[host] = th;
@@ -112,6 +113,39 @@ void IOTV_Server::readHostSetting()
 
         _settingsHosts.endGroup();
     }
+
+    // TESTING
+    {
+        Base_Host *ptrHost = _iot_hosts.begin()->first;
+        IOTV_Event_Connect *iotv_event = new IOTV_Event_Connect(ptrHost);
+
+        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Подключено");
+        _eventManager.bind(iotv_event, actionMSG);
+    }
+    {
+        Base_Host *ptrHost = _iot_hosts.begin()->first;
+        IOTV_Event_Disconnect *iotv_event = new IOTV_Event_Disconnect(ptrHost);
+
+        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Отключено");
+        _eventManager.bind(iotv_event, actionMSG);
+    }
+//    {
+//        Base_Host *ptrHost = _iot_hosts.begin()->first;
+//        IOTV_Event_Data *iotv_event = new IOTV_Event_Data;
+//        iotv_event->setEventSubType(static_cast<uint8_t>(IOTV_Event_Data::EVENT_SUB_TYPE::RX));
+//        iotv_event->setCompare(IOTV_Event::COMPARE::EQUAL);
+//        iotv_event->setHost(ptrHost);
+//        iotv_event->setData(Raw(Raw::DATA_TYPE::BOOL, {1, 0}));
+//        iotv_event->setChannelNumber(0);
+//        iotv_event->bindEventAndHost();
+
+//        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX;
+//        actionTX->setHost(ptrHost);
+//        actionTX->setChannelNumber(1);
+//        actionTX->setData({1, 0});
+
+//        _eventManager.bind(iotv_event, actionTX);
+//    }
 }
 
 void IOTV_Server::startTCPServer()
@@ -207,8 +241,8 @@ void IOTV_Server::slotNewConnection()
     if (_iot_clients.size() >= _maxClientCount)
     {
         Log::write("Warnning: exceeded the maximum client limit. Client disconnected.",
-                    Log::Write_Flag::FILE_STDOUT,
-                    ServerLog::TCP_LOG_FILENAME);
+                   Log::Write_Flag::FILE_STDOUT,
+                   ServerLog::TCP_LOG_FILENAME);
         socket->disconnectFromHost();
         socket->deleteLater();
         return;
@@ -313,4 +347,13 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();
+}
+
+void IOTV_Server::slotTest()
+{
+    IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
+    if (host == nullptr)
+        return;
+
+    qDebug() << "!!!!!!!!!!!connected " << host->getName();
 }

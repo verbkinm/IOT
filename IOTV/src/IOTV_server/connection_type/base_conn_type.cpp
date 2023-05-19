@@ -23,13 +23,13 @@ void Base_conn_type::setAddress(const QString &address)
     _address = address;
 }
 
-qint64 Base_conn_type::write(const QByteArray &data, qint64 size)
-{
-    Q_UNUSED(data);
-    Q_UNUSED(size)
+//qint64 Base_conn_type::write(const QByteArray &data, qint64 size)
+//{
+//    Q_UNUSED(data);
+//    Q_UNUSED(size)
 
-    return -1;
-}
+//    return -1;
+//}
 
 void Base_conn_type::clearDataBuffer()
 {

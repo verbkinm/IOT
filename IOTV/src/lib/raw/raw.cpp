@@ -206,5 +206,30 @@ void Raw::setType(DATA_TYPE newType)
 
 bool operator==(const Raw &lhs, const Raw &rhs)
 {
-    return (lhs.type() == rhs.type() && lhs.data() == rhs.data());
+    return (lhs.data() == rhs.data());
+}
+
+bool operator!=(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.data() != rhs.data());
+}
+
+bool operator>(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.strData().first > rhs.strData().first);
+}
+
+bool operator<(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.strData().first < rhs.strData().first);
+}
+
+bool operator>=(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.strData().first >= rhs.strData().first);
+}
+
+bool operator<=(const Raw &lhs, const Raw &rhs)
+{
+    return (lhs.strData().first <= rhs.strData().first);
 }

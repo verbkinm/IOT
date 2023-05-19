@@ -75,7 +75,7 @@ bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
     }
 }
 
-QByteArray Channel::getData(uint8_t channelNumber) const
+const QByteArray &Channel::getData(uint8_t channelNumber) const
 {
     try
     {
@@ -86,11 +86,13 @@ QByteArray Channel::getData(uint8_t channelNumber) const
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
-        return {};
+
+        static const QByteArray cap;
+        return cap;
     }
 }
 
-Raw Channel::getRawData(uint8_t channelNumber) const
+const Raw &Channel::getRawData(uint8_t channelNumber) const
 {
     try
     {
@@ -101,7 +103,9 @@ Raw Channel::getRawData(uint8_t channelNumber) const
         Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
-        return {};
+
+        static const Raw cap;
+        return cap;
     }
 }
 

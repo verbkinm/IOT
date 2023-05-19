@@ -2,7 +2,6 @@
 #define IOTVP_SH
 
 #include "header.h"
-
 #include "iotv_server_embedded.h"
 
 // Ответы на запросы. Ответы сразу в сырые данные.

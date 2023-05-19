@@ -10,6 +10,15 @@ CONFIG -= app_bundle
 
 SOURCES += \
     ../lib/ConfigType/ConfigTypes.cpp \
+    ../lib/Events/actions/iotv_action.cpp \
+    ../lib/Events/actions/iotv_action_data_tx.cpp \
+    ../lib/Events/actions/iotv_action_msg.cpp \
+    ../lib/Events/events/iotv_event.cpp \
+    ../lib/Events/events/iotv_event_connect.cpp \
+    ../lib/Events/events/iotv_event_data.cpp \
+    ../lib/Events/events/iotv_event_disconnect.cpp \
+    ../lib/Events/events/iotv_event_state.cpp \
+    ../lib/Events/iotv_event_manager.cpp \
     ../lib/Protocols/embedded/IOTV_SH.cpp \
     ../lib/Protocols/embedded/creatorpkgs.cpp \
     ../lib/Protocols/embedded/header.cpp \
@@ -34,13 +43,17 @@ SOURCES += \
         ../lib/Log/log.cpp \
         ../lib/raw/raw.cpp \
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
+    ../lib/Events/actions/iotv_action.h \
+    ../lib/Events/actions/iotv_action_data_tx.h \
+    ../lib/Events/actions/iotv_action_msg.h \
+    ../lib/Events/events/iotv_event.h \
+    ../lib/Events/events/iotv_event_connect.h \
+    ../lib/Events/events/iotv_event_data.h \
+    ../lib/Events/events/iotv_event_disconnect.h \
+    ../lib/Events/events/iotv_event_state.h \
+    ../lib/Events/iotv_event_manager.h \
     ../lib/Protocols/embedded/IOTV_SH.h \
     ../lib/Protocols/embedded/creatorpkgs.h \
     ../lib/Protocols/embedded/header.h \
@@ -68,4 +81,10 @@ INCLUDEPATH += ../lib/Base_Host \
             ../lib/Protocols/embedded \
             ../lib/Protocols/ \
             ../lib/raw \
-            ../lib/ConfigType
+            ../lib/ConfigType \
+            ../lib/Events
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target

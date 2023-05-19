@@ -69,8 +69,7 @@ private slots:
 
 signals:
     void signalDevicePingTimeOut();
-    void signalDataRiceved();
 
-    // Используетеся для записи данных полученых от клиентов из других потоков
-    void signalQueryWrite(int channelNumber, QByteArray data);
+//    // Используетеся для записи данных полученых от клиентов из других потоков
+//    void signalQueryWrite(int channelNumber, QByteArray data);
 };

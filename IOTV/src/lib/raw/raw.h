@@ -10,8 +10,6 @@
 class Raw
 {
 public:
-
-    //Принята BigEndian последовательность
     enum class DATA_TYPE : uint8_t
     {
         INT_8 = 0,
@@ -34,6 +32,11 @@ public:
     Raw(DATA_TYPE type, const QByteArray &data);
 
     friend bool operator==(const Raw &lhs, const Raw &rhs);
+    friend bool operator!=(const Raw &lhs, const Raw &rhs);
+    friend bool operator>(const Raw &lhs, const Raw &rhs);
+    friend bool operator<(const Raw &lhs, const Raw &rhs);
+    friend bool operator>=(const Raw &lhs, const Raw &rhs);
+    friend bool operator<=(const Raw &lhs, const Raw &rhs);
 
     uint16_t size() const;
 

@@ -29,6 +29,7 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
 
 bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
+    emit signalDataRX(channelNumber, this->getReadChannelDataRaw(channelNumber));
     return _readChannel.setData(channelNumber, data);
 }
 
@@ -42,9 +43,14 @@ Raw::DATA_TYPE Base_Host::getReadChannelType(uint8_t channelNumber) const
     return _readChannel.getType(channelNumber);
 }
 
-QByteArray Base_Host::getReadChannelData(uint8_t channelNumber) const
+const QByteArray &Base_Host::getReadChannelData(uint8_t channelNumber) const
 {
     return _readChannel.getData(channelNumber);
+}
+
+const Raw &Base_Host::getReadChannelDataRaw(uint8_t channelNumber) const
+{
+    return _readChannel.getRawData(channelNumber);
 }
 
 Raw::DATA_TYPE Base_Host::getWriteChannelType(uint8_t channelNumber) const
@@ -80,6 +86,26 @@ void Base_Host::setId(uint16_t id)
 void Base_Host::setDescription(const QString description)
 {
     _description = description;
+}
+
+void Base_Host::setState(State_STATE newState)
+{
+    if (newState != State_STATE_ONLINE && newState != State_STATE_OFFLINE)
+    {
+        emit signalStateUnknow(newState);
+        return;
+    }
+
+    if (_state != newState)
+    {
+        _state = newState;
+        emit signalStateChanged(_state);
+
+        if (_state == State_STATE_ONLINE)
+            emit signalStateOnline();
+        else if (_state == State_STATE_OFFLINE)
+            emit signalStateOffline();
+    }
 }
 
 State_STATE Base_Host::state() const

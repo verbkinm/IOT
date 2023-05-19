@@ -16,6 +16,8 @@
 #include "IOTV_Client/iotv_client.h"
 #include "log.h"
 
+#include "iotv_event_manager.h"
+
 class IOTV_Server : public QTcpServer
 {
     Q_OBJECT
@@ -45,9 +47,14 @@ private:
 
     uint _maxClientCount;
 
+    IOTV_Event_Manager _eventManager;
+
 private slots:
     void slotNewConnection();
     void slotDisconnected();
 
     void slotError(QAbstractSocket::SocketError error);
+
+
+    void slotTest();
 };

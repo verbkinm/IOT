@@ -15,8 +15,8 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     for (int i = 0; i < dev->numberWriteChannel; ++i)
         this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
 
-    connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut, Qt::QueuedConnection);
-    connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut, Qt::QueuedConnection);
+    connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut);
+    connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut);
 
     _timerRead.setInterval(TIMER_READ_INTERVAL);
     _timerState.setInterval(TIMER_STATE_INTERVAL);

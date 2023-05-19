@@ -1,11 +1,14 @@
 #pragma once
 
+#include <QObject>
+
 #include "channel.h"
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 
 class Base_Host : public QObject
 {
+    Q_OBJECT
 public:
     Base_Host(uint16_t id = 0, QObject *parent = nullptr);
     virtual ~Base_Host() = default;
@@ -21,8 +24,10 @@ public:
     Raw::DATA_TYPE getReadChannelType(uint8_t channelNumber) const;
     Raw::DATA_TYPE getWriteChannelType(uint8_t channelNumber) const;
 
-    QByteArray getReadChannelData(uint8_t channelNumber) const;
+    const QByteArray &getReadChannelData(uint8_t channelNumber) const;
+    const Raw &getReadChannelDataRaw(uint8_t channelNumber) const;
 
+    void setState(State_STATE newState);
     State_STATE state() const;
 
     struct IOTV_Server_embedded *convert() const;
@@ -48,13 +53,28 @@ protected:
     void setId(uint16_t id);
     void setDescription(const QString description);
 
-    State_STATE _state;
-
 private:
     uint16_t _id;
     QString _description;
 
     Channel _readChannel;
     Channel _writeChannel;
+
+    State_STATE _state;
+
+signals:
+    void signalConnected();
+    void signalDisconnected();
+
+    void signalStateOnline();
+    void signalStateOffline();
+    void signalStateChanged(State_STATE);
+    void signalStateUnknow(State_STATE);
+
+    void signalDataRiceved(QByteArray);
+    void signalDataRX(uint8_t channleNumber, Raw raw);
+    void signalDataTX(uint8_t channleNumber, Raw raw);
+    // Используетеся для записи данных полученых от клиентов из других потоков
+    void signalQueryWrite(int channelNumber, QByteArray data);
 };
 

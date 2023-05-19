@@ -9,10 +9,10 @@ Client::Client(QObject *parent): QObject{parent},
     _timerPing.setParent(this);
     _timerPing.setInterval(Base_Host::TIMER_PING_INTERVAL);
 
-    connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
-    connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected, Qt::QueuedConnection);
-    connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData, Qt::QueuedConnection);
-    connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
+    connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected);
+    connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected);
+    connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData);
+    connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged);
 
     connect(&_timerPing, &QTimer::timeout, this, &Client::queryPing);
 }
@@ -183,10 +183,10 @@ void Client::responceIdentification(const Header *header)
         {
             Device &device = result.first->second;
             device.setParent(this);
-            connect(&device, &Device::signalQueryIdentification, this, &Client::slotQueryIdentification, Qt::QueuedConnection);
-            connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
-            connect(&device, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
-            connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryIdentification, this, &Client::slotQueryIdentification);
+            connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead);
+            connect(&device, &Device::signalQueryState, this, &Client::slotQueryState);
+            connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite);
         }
     }
     else
