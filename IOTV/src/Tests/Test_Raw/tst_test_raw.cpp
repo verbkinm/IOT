@@ -19,6 +19,7 @@ private:
 
 private slots:
     void test_case1();
+    void test_case2();
 
 };
 
@@ -165,6 +166,156 @@ void Test_Raw::test_case1()
         QCOMPARE(raw.strData().first, value);
     }
 
+}
+
+void Test_Raw::test_case2()
+{
+    {
+        int arg1 = 10;
+        int arg2 = 0;
+
+        Raw lhs(static_cast<int8_t>(arg1));
+        Raw rhs(static_cast<int8_t>(arg2));
+
+        QCOMPARE(lhs.size(), 1);
+        QCOMPARE(lhs.strData().first, QString::number(arg1));
+        QCOMPARE(rhs.strData().first, QString::number(arg2));
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        QCOMPARE(lhs + rhs, Raw(static_cast<int8_t>(arg1 + arg2)));
+        QCOMPARE(lhs - rhs, Raw(static_cast<int8_t>(arg1 - arg2)));
+        QCOMPARE(lhs * rhs, Raw(static_cast<int8_t>(arg1 * arg2)));
+        QCOMPARE(lhs / rhs, Raw());
+    }
+
+    {
+        int64_t arg1 = 6532;
+        int64_t arg2 = 0;
+
+        Raw lhs(static_cast<int64_t>(arg1));
+        Raw rhs(static_cast<int64_t>(arg2));
+
+        QCOMPARE(lhs.size(), sizeof(int64_t));
+        QCOMPARE(lhs.strData().first, QString::number(arg1));
+        QCOMPARE(rhs.strData().first, QString::number(arg2));
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        QCOMPARE(lhs + rhs, Raw(static_cast<int64_t>(arg1 + arg2)));
+        QCOMPARE(lhs - rhs, Raw(static_cast<int64_t>(arg1 - arg2)));
+        QCOMPARE(lhs * rhs, Raw(static_cast<int64_t>(arg1 * arg2)));
+        QCOMPARE(lhs / rhs, Raw());
+    }
+
+    {
+        double arg1 = 6532.369595;
+        double arg2 = 0.0;
+
+        Raw lhs(static_cast<double>(arg1));
+        Raw rhs(static_cast<double>(arg2));
+
+        QCOMPARE(lhs.size(), sizeof(double));
+        QCOMPARE(lhs.strData().first, QString::number(arg1, 'g', 8));
+        QCOMPARE(rhs.strData().first, "0.0000");//QString::number(arg2));
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        QCOMPARE(lhs + rhs, Raw(static_cast<double>(arg1 + arg2)));
+        QCOMPARE(lhs - rhs, Raw(static_cast<double>(arg1 - arg2)));
+        QCOMPARE(lhs * rhs, Raw(static_cast<double>(arg1 * arg2)));
+        QCOMPARE(lhs / rhs, Raw());
+    }
+
+    {
+        QString arg1 = "string3";
+        QString arg2 = "string2";
+
+        Raw lhs(arg1);
+        Raw rhs(arg2);
+
+        QCOMPARE(lhs.size(), arg1.toStdString().size());
+        QCOMPARE(lhs.strData().first, arg1);
+        QCOMPARE(rhs.strData().first, arg2);
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        Raw raw = (lhs + rhs);
+        Raw raw2 (arg1 + arg2);
+        QCOMPARE(lhs + rhs, Raw(arg1 + arg2));
+        QCOMPARE(lhs - rhs, Raw());
+        QCOMPARE(lhs * rhs, Raw());
+        QCOMPARE(lhs / rhs, Raw());
+    }
+
+    // Разные типы
+    {
+        int8_t arg1 = 123;
+        int64_t arg2 = -32;
+
+        Raw lhs(arg1);
+        Raw rhs(arg2);
+
+        QCOMPARE(lhs.size(), sizeof(arg1));
+        QCOMPARE(lhs.strData().first, QString::number(arg1));
+        QCOMPARE(rhs.strData().first, QString::number(arg2));
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        QCOMPARE(lhs + rhs, Raw(static_cast<double>(arg1 + arg2)));
+        QCOMPARE(lhs - rhs, Raw(static_cast<double>(arg1 - arg2)));
+        QCOMPARE(lhs * rhs, Raw(static_cast<double>(arg1 * arg2)));
+        QCOMPARE(lhs / rhs, Raw(static_cast<double>(arg1) / arg2));
+    }
+
+    {
+        int8_t arg1 = 1;
+        double arg2 = -12.32;
+
+        Raw lhs(arg1);
+        Raw rhs(arg2);
+
+        QCOMPARE(lhs.size(), sizeof(arg1));
+        QCOMPARE(lhs.strData().first, QString::number(arg1));
+        QCOMPARE(rhs.strData().first, "-12.3200");
+
+        QCOMPARE(lhs == rhs, false);
+        QCOMPARE(lhs != rhs, true);
+        QCOMPARE(lhs < rhs, false);
+        QCOMPARE(lhs > rhs, true);
+        QCOMPARE(lhs <= rhs, false);
+        QCOMPARE(lhs >= rhs, true);
+
+        QCOMPARE(lhs + rhs, Raw(static_cast<double>(arg1 + arg2)));
+        QCOMPARE(lhs - rhs, Raw(static_cast<double>(arg1 - arg2)));
+        QCOMPARE(lhs * rhs, Raw(static_cast<double>(arg1 * arg2)));
+        QCOMPARE(lhs / rhs, Raw(static_cast<double>(arg1 / arg2)));
+    }
 }
 
 QTEST_APPLESS_MAIN(Test_Raw)
