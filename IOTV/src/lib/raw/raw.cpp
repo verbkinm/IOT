@@ -94,11 +94,36 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data) : _type(type), _data(data)
 
 bool Raw::isZeroOnly() const
 {
+    if (!isValid())
+        return false;
+
     for (auto el : _data)
     {
         if (el != 0)
             return false;
     }
+
+    return true;
+}
+
+bool Raw::isValid() const
+{
+    if (type() == DATA_TYPE::BOOL || type() == DATA_TYPE::INT_8)
+        return _data.size() == sizeof(int8_t);
+    if (type() == DATA_TYPE::INT_16)
+        return _data.size() == sizeof(int16_t);
+    if (type() == DATA_TYPE::INT_32)
+        return _data.size() == sizeof(int32_t);
+    if (type() == DATA_TYPE::INT_64)
+        return _data.size() == sizeof(int64_t);
+
+    if (type() == DATA_TYPE::FLOAT_32)
+        return _data.size() == sizeof(float);
+    if (type() == DATA_TYPE::DOUBLE_64)
+        return _data.size() == sizeof(double);
+
+    if (type() == DATA_TYPE::NONE)
+        return false;
 
     return true;
 }
@@ -334,6 +359,10 @@ void Raw::setType(DATA_TYPE newType)
 template <typename C>
 bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
 {
+    if ((!lhs.noneType() || !rhs.noneType() ) &&
+            (!lhs.isValid() || !rhs.isValid()))
+        return false;
+
     if (lhs.type() == rhs.type())
     {
         if (lhs.type() == Raw::DATA_TYPE::BOOL)
@@ -435,93 +464,110 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
 template <typename T>
 Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
 {
+    if (!lhs.isValid() || !rhs.isValid())
+        return {};
+
     if (lhs.type() == rhs.type())
     {
-        if (lhs.type() == Raw::DATA_TYPE::BOOL)
+        if ((lhs.intType() || lhs.realType() || lhs.boolType()) && (rhs.intType() || rhs.realType() || rhs.boolType()))
         {
-            bool lhsArg = lhs.data().at(0);
-            bool rhsArg = rhs.data().at(0);
+            bool ok1, ok2;
+            double lhsArg = lhs.strData().first.toDouble(&ok1);
+            double rhsArg = rhs.strData().first.toDouble(&ok2);
 
-            return op(lhsArg, rhsArg);
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::INT_8)
-        {
-            int8_t lhsArg = lhs.data().at(0);
-            int8_t rhsArg = rhs.data().at(0);
-            int8_t result = op(lhsArg, rhsArg);
-
-            return {result};
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::INT_16)
-        {
-            int16_t lhsArg, rhsArg;
-
-            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
-            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
-
-            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            {
-                lhsArg = qToLittleEndian(lhsArg);
-                rhsArg = qToLittleEndian(rhsArg);
-            }
-            int16_t result = op(lhsArg, rhsArg);
-
-            return {result};
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::INT_32)
-        {
-            int32_t lhsArg, rhsArg;
-
-            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
-            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
-
-            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            {
-                lhsArg = qToLittleEndian(lhsArg);
-                rhsArg = qToLittleEndian(rhsArg);
-            }
-            int32_t result = op(lhsArg, rhsArg);
-
-            return {result};
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::INT_64)
-        {
-            int64_t lhsArg, rhsArg;
-
-            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
-            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
-
-            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            {
-                lhsArg = qToLittleEndian(lhsArg);
-                rhsArg = qToLittleEndian(rhsArg);
-            }
-            int64_t result = op(lhsArg, rhsArg);
-
-            return {result};
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::FLOAT_32)
-        {
-            float lhsArg, rhsArg;
-
-            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
-            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
-
-            float result = op(lhsArg, rhsArg);
-
-            return {result};
-        }
-        else if (lhs.type() == Raw::DATA_TYPE::DOUBLE_64)
-        {
-            double lhsArg, rhsArg;
-
-            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
-            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+            if (!ok1 || !ok2)
+                return {};
 
             double result = op(lhsArg, rhsArg);
-
-            return {result};
+            return result;
         }
+
+
+//        if (lhs.type() == Raw::DATA_TYPE::BOOL)
+//        {
+//            bool lhsArg = lhs.data().at(0);
+//            bool rhsArg = rhs.data().at(0);
+
+//            return op(lhsArg, rhsArg);
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::INT_8)
+//        {
+//            int8_t lhsArg = lhs.data().at(0);
+//            int8_t rhsArg = rhs.data().at(0);
+//            int8_t result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::INT_16)
+//        {
+//            int16_t lhsArg, rhsArg;
+
+//            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
+//            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+
+//            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+//            {
+//                lhsArg = qToLittleEndian(lhsArg);
+//                rhsArg = qToLittleEndian(rhsArg);
+//            }
+//            int16_t result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::INT_32)
+//        {
+//            int32_t lhsArg, rhsArg;
+
+//            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
+//            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+
+//            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+//            {
+//                lhsArg = qToLittleEndian(lhsArg);
+//                rhsArg = qToLittleEndian(rhsArg);
+//            }
+//            int32_t result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::INT_64)
+//        {
+//            int64_t lhsArg, rhsArg;
+
+//            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
+//            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+
+//            if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+//            {
+//                lhsArg = qToLittleEndian(lhsArg);
+//                rhsArg = qToLittleEndian(rhsArg);
+//            }
+//            int64_t result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::FLOAT_32)
+//        {
+//            float lhsArg, rhsArg;
+
+//            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
+//            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+
+//            float result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
+//        else if (lhs.type() == Raw::DATA_TYPE::DOUBLE_64)
+//        {
+//            double lhsArg, rhsArg;
+
+//            std::memcpy(&lhsArg, lhs.data().data(), lhs.data().size());
+//            std::memcpy(&rhsArg, rhs.data().data(), rhs.data().size());
+
+//            double result = op(lhsArg, rhsArg);
+
+//            return {result};
+//        }
         else if (lhs.type() == Raw::DATA_TYPE::STRING || lhs.type() == Raw::DATA_TYPE::RAW || lhs.type() == Raw::DATA_TYPE::NONE)
         {
             if (typeid(op) == typeid(std::plus<>))

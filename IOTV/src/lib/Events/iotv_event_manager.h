@@ -10,6 +10,7 @@
 #include "events/iotv_event_data.h"
 
 #include "actions/iotv_action_data_tx.h"
+#include "actions/iotv_action_data_tx_ref.h"
 #include "actions/iotv_action_msg.h"
 
 class IOTV_Event_Manager : public QObject

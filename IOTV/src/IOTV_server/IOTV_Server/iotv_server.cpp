@@ -115,6 +115,7 @@ void IOTV_Server::readHostSetting()
     }
 
     // TESTING
+    // Подключение
     {
         Base_Host *ptrHost = _iot_hosts.begin()->first;
         IOTV_Event_Connect *iotv_event = new IOTV_Event_Connect(ptrHost);
@@ -122,6 +123,7 @@ void IOTV_Server::readHostSetting()
         IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Подключено");
         _eventManager.bind(iotv_event, actionMSG);
     }
+    // Отключение
     {
         Base_Host *ptrHost = _iot_hosts.begin()->first;
         IOTV_Event_Disconnect *iotv_event = new IOTV_Event_Disconnect(ptrHost);
@@ -129,23 +131,23 @@ void IOTV_Server::readHostSetting()
         IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Отключено");
         _eventManager.bind(iotv_event, actionMSG);
     }
-//    {
-//        Base_Host *ptrHost = _iot_hosts.begin()->first;
-//        IOTV_Event_Data *iotv_event = new IOTV_Event_Data;
-//        iotv_event->setEventSubType(static_cast<uint8_t>(IOTV_Event_Data::EVENT_SUB_TYPE::RX));
-//        iotv_event->setCompare(IOTV_Event::COMPARE::EQUAL);
-//        iotv_event->setHost(ptrHost);
-//        iotv_event->setData(Raw(Raw::DATA_TYPE::BOOL, {1, 0}));
-//        iotv_event->setChannelNumber(0);
-//        iotv_event->bindEventAndHost();
 
-//        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX;
-//        actionTX->setHost(ptrHost);
-//        actionTX->setChannelNumber(1);
-//        actionTX->setData({1, 0});
+    // Данные
+    {
+        Base_Host *ptrHost = _iot_hosts.begin()->first;
+        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, std::equal_to<Raw>(), ptrHost, 0, Raw(true));
 
-//        _eventManager.bind(iotv_event, actionTX);
-//    }
+        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX(ptrHost, 1, Raw(true).data());
+        _eventManager.bind(iotv_event, actionTX);
+    }
+    {
+        Base_Host *ptrHost = _iot_hosts.begin()->first;
+        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, [](const Raw &lhs, const Raw &rhs){return true;}, ptrHost, 0, Raw());
+
+        IOTV_Action_Data_TX_Ref *actionTX_Ref = new IOTV_Action_Data_TX_Ref(ptrHost, 2, ptrHost, 0);
+        _eventManager.bind(iotv_event, actionTX_Ref);
+
+    }
 }
 
 void IOTV_Server::startTCPServer()

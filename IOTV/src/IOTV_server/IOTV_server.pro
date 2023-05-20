@@ -12,6 +12,7 @@ SOURCES += \
     ../lib/ConfigType/ConfigTypes.cpp \
     ../lib/Events/actions/iotv_action.cpp \
     ../lib/Events/actions/iotv_action_data_tx.cpp \
+    ../lib/Events/actions/iotv_action_data_tx_ref.cpp \
     ../lib/Events/actions/iotv_action_msg.cpp \
     ../lib/Events/events/iotv_event.cpp \
     ../lib/Events/events/iotv_event_connect.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
     ../lib/Events/actions/iotv_action.h \
     ../lib/Events/actions/iotv_action_data_tx.h \
+    ../lib/Events/actions/iotv_action_data_tx_ref.h \
     ../lib/Events/actions/iotv_action_msg.h \
     ../lib/Events/events/iotv_event.h \
     ../lib/Events/events/iotv_event_connect.h \

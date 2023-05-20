@@ -45,7 +45,12 @@ public:
     Raw(DATA_TYPE type);
     Raw(DATA_TYPE type, const QByteArray &data);
 
+    //! Массив данных полностью состоит их нулей
     bool isZeroOnly() const;
+
+    //! Длина данных соответствует типу. String и Raw всегда истинны
+    bool isValid() const;
+
     inline bool boolType() const;
     inline bool intType() const;
     inline bool realType() const;

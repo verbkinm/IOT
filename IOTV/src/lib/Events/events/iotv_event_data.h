@@ -10,10 +10,12 @@ public:
     {
         NONE = 0,
         RX,
-        TX
+        TX,
+        ANY
     };
 
-    IOTV_Event_Data(const DATA_DIRECTION &direction, const Base_Host *host,
+    IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<bool(Raw, Raw)> compare,
+                    const Base_Host *host,
                     uint8_t channelNumber, const Raw &raw,
                     QObject *parent = nullptr);
 
@@ -24,7 +26,9 @@ private:
     uint8_t _channelNumber;
     Raw _raw;
 
+    std::function<bool(Raw, Raw)> _compare;
+
 private slots:
-    void slotCheckData(uint8_t channleNumber, Raw raw);
+    void slotCheckData(uint8_t channleNumber, Raw rhs);
 };
 
