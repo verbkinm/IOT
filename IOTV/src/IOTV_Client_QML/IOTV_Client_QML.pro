@@ -33,7 +33,6 @@ SOURCES += \
 
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
-    ../lib/ConfigType/ConfigTypes.h \
     ../lib/Events/actions/iotv_action.h \
     ../lib/Events/actions/iotv_action_data_tx.h \
     ../lib/Events/actions/iotv_action_data_tx_ref.h \
