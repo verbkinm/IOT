@@ -7,9 +7,9 @@ IOTV_Event_State::IOTV_Event_State(STATE_TYPE state, const Base_Host *host, QObj
         return;
 
     if (state == STATE_TYPE::ONLINE)
-        connect(host, &Base_Host::signalStateChanged, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalStateOnline, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
     else if (state == STATE_TYPE::OFFLINE)
-        connect(host, &Base_Host::signalStateChanged, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalStateOffline, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
     else if (state == STATE_TYPE::SWITCH)
         connect(host, &Base_Host::signalStateChanged, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
 }

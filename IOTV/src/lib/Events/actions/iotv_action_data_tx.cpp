@@ -13,7 +13,8 @@ IOTV_Action_Data_TX::IOTV_Action_Data_TX(Base_Host *host,
 
 void IOTV_Action_Data_TX::exec()
 {
-    emit _host->signalQueryWrite(_channelNumber, _data);
+    if (isValid())
+        emit _host->signalQueryWrite(_channelNumber, _data);
 }
 
 bool IOTV_Action_Data_TX::isValid() const

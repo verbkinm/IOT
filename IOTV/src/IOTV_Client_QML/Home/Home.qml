@@ -45,6 +45,14 @@ Page {
         }
     }
 
+    Component.onCompleted: {
+        console.log("Home page construct: ", objectName)
+    }
+
+    Component.onDestruction: {
+        console.log("Home page destruct: ", objectName)
+    }
+
     function imageById(id)
     {
         if (id === 1)

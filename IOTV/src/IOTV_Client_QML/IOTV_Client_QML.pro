@@ -5,9 +5,16 @@ CONFIG += c++2a
 
 SOURCES += \
         ../lib/ConfigType/ConfigTypes.cpp \
-        ../lib/Events/iotv_action.cpp \
-        ../lib/Events/iotv_action_data_tx.cpp \
-        ../lib/Events/iotv_event_data.cpp \
+        ../lib/Events/actions/iotv_action.cpp \
+        ../lib/Events/actions/iotv_action_data_tx.cpp \
+        ../lib/Events/actions/iotv_action_data_tx_ref.cpp \
+        ../lib/Events/actions/iotv_action_msg.cpp \
+        ../lib/Events/events/iotv_event.cpp \
+        ../lib/Events/events/iotv_event_connect.cpp \
+        ../lib/Events/events/iotv_event_data.cpp \
+        ../lib/Events/events/iotv_event_disconnect.cpp \
+        ../lib/Events/events/iotv_event_state.cpp \
+        ../lib/Events/iotv_event_manager.cpp \
         ../lib/Protocols/embedded/IOTV_SH.cpp \
         ../lib/Protocols/embedded/creatorpkgs.cpp \
         ../lib/Protocols/embedded/header.cpp \
@@ -22,16 +29,21 @@ SOURCES += \
         ../lib/Base_Host/channel.cpp \
         ../lib/Log/log.cpp \
         ../lib/raw/raw.cpp \
-        ../lib/Events/iotv_event.cpp \
-        ../lib/Events/iotv_event_connect.cpp \
-        ../lib/Events/iotv_event_state.cpp \
         main.cpp
 
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
-    ../lib/Events/iotv_action.h \
-    ../lib/Events/iotv_action_data_tx.h \
-    ../lib/Events/iotv_event_data.h \
+    ../lib/ConfigType/ConfigTypes.h \
+    ../lib/Events/actions/iotv_action.h \
+    ../lib/Events/actions/iotv_action_data_tx.h \
+    ../lib/Events/actions/iotv_action_data_tx_ref.h \
+    ../lib/Events/actions/iotv_action_msg.h \
+    ../lib/Events/events/iotv_event.h \
+    ../lib/Events/events/iotv_event_connect.h \
+    ../lib/Events/events/iotv_event_data.h \
+    ../lib/Events/events/iotv_event_disconnect.h \
+    ../lib/Events/events/iotv_event_state.h \
+    ../lib/Events/iotv_event_manager.h \
     ../lib/Protocols/embedded/IOTV_SH.h \
     ../lib/Protocols/embedded/creatorpkgs.h \
     ../lib/Protocols/embedded/header.h \
@@ -46,9 +58,6 @@ HEADERS += \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
     ../lib/raw/raw.h \
-    ../lib/Events/iotv_event.h \
-    ../lib/Events/iotv_event_connect.h \
-    ../lib/Events/iotv_event_state.h \
 
 resources.prefix = /$${TARGET}
 RESOURCES += \

@@ -55,7 +55,7 @@ QString Device::getName() const
 
 bool Device::isOnline() const
 {
-    return _state == State_STATE_ONLINE;
+    return state() == State_STATE_ONLINE;
 }
 
 bool Device::setData(uint8_t channelNumber, const QByteArray &data)
@@ -98,11 +98,12 @@ void Device::setReadInterval(int interval)
 
 void Device::setState(bool newState)
 {
-    //    if (_state == static_cast<State::State_STATE>(newState))
-    //        return;
+    Base_Host *host = this;
+    host->setState(static_cast<State_STATE>(newState));
 
-    _state = static_cast<State_STATE>(newState);
-    emit signalStateChanged();
+    //!!!
+    if (state() == static_cast<State_STATE>(newState))
+        emit signalStateChanged();
 }
 
 bool operator==(const Device &lhs, const Device &rhs)

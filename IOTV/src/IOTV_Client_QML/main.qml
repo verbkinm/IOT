@@ -5,6 +5,7 @@ import QtQuick.Window 2.15
 
 import "Home" as HomePageModule
 import "Client" as ClientPageModule
+import "Events" as EventsPageModule
 
 ApplicationWindow {
     id: window
@@ -56,36 +57,6 @@ ApplicationWindow {
         }
     }
 
-    footer: ToolBar {
-        height: overlayHeader.height
-        id: overlayFooter
-
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                icon {
-                    color: "transparent"
-                    source: "qrc:/img/home.png"
-                }
-                onClicked: {
-                    drawer.visible = false
-                    stackView.pop(homePage)
-                }
-                Layout.alignment: Qt.AlignCenter
-            }
-            ToolButton {
-                icon {
-                    color: "transparent"
-                    source: "qrc:/img/menu.png"
-                }
-                onClicked: {
-                    drawer.visible = !drawer.visible
-                }
-                Layout.alignment: Qt.AlignCenter
-            }
-        }
-    }
-
     MainMenu {
         id: drawer
         y: overlayHeader.height
@@ -101,6 +72,12 @@ ApplicationWindow {
             objectName: "Home"
         }
 
+        EventsPageModule.Events {
+            id: eventsPage
+            objectName: "Events"
+            visible: false
+        }
+
         ClientPageModule.Client {
             id: clientPage
             objectName: "Client"
@@ -111,6 +88,59 @@ ApplicationWindow {
             console.log("stackView current item: ", stackView.currentItem.objectName)
             if (appStack.currentItem == homePage)
                 loaderDevice.source = ""
+        }
+    }
+
+    footer: ToolBar {
+        height: overlayHeader.height
+        id: overlayFooter
+
+        RowLayout {
+            anchors.fill: parent
+
+            ToolButton {
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/home.png"
+                }
+                onClicked: {
+                    appStack.pop(homePage)
+                }
+                Layout.alignment: Qt.AlignCenter
+            }
+
+            ToolButton {
+                text: "E"
+//                icon {
+//                    color: "transparent"
+//                    source: "qrc:/img/home.png"
+//                }
+                onClicked: {
+                    if (appStack.currentItem != homePage)
+                        appStack.replace(eventsPage)
+                    else
+                        appStack.push(eventsPage)
+
+//                    appStack.push(eventsPage)
+                    console.log("event page")
+                }
+                Layout.alignment: Qt.AlignCenter
+            }
+
+            ToolButton {
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/menu.png"
+                }
+                onClicked: {
+                    if (appStack.currentItem != homePage)
+                        appStack.replace(clientPage)
+                    else
+                        appStack.push(clientPage)
+
+                }
+                Layout.alignment: Qt.AlignCenter
+            }
         }
     }
 

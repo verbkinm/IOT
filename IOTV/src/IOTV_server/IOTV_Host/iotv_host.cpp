@@ -243,9 +243,9 @@ void IOTV_Host::setConnectionType()
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::signalConnected);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::signalDisconnected);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::signalDataRiceved);
+//    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::signalConnected);
+//    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::signalDisconnected);
+//    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::signalDataRiceved);
 
     _conn_type->connectToHost();
 }

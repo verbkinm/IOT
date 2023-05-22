@@ -14,6 +14,9 @@ IOTV_Action_Data_TX_Ref::IOTV_Action_Data_TX_Ref(Base_Host *dstHost, uint8_t dst
 
 void IOTV_Action_Data_TX_Ref::exec()
 {
+    if (!isValid())
+        return;
+
     Raw raw = _srcHost->getReadChannelDataRaw(_srcChannelNumber);
     if (raw.isValid())
         emit _dstHost->signalQueryWrite(_dstChannelNumber, raw.data());
@@ -21,7 +24,7 @@ void IOTV_Action_Data_TX_Ref::exec()
 
 bool IOTV_Action_Data_TX_Ref::isValid() const
 {
-    if (type() == IOTV_Action::ACTION_TYPE::NONE || _dstHost == nullptr)
+    if (type() == IOTV_Action::ACTION_TYPE::NONE || _dstHost == nullptr || _srcHost == nullptr)
         return false;
 
     return true;

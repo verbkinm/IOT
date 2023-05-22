@@ -204,6 +204,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Client page construct: ", objectName)
         //        connection_attempt = settings.autoConnect
         if (settings.autoConnect)
             client.connectToHost(addr.text, port.text)
