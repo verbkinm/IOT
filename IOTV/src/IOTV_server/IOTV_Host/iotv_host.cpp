@@ -96,12 +96,17 @@ void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
     _counterPing = 0;
 }
 
-qint64 IOTV_Host::read(uint8_t channelNumber)
+qint64 IOTV_Host::read(uint8_t channelNumber, ReadWrite_FLAGS flags)
 {
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber);
+    auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, flags);
 
     return writeToRemoteHost({outData, static_cast<int>(size)}, size);
+}
+
+qint64 IOTV_Host::readAll()
+{
+    return read(0, ReadWrite_FLAGS_IGNORE_CH);
 }
 
 qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
@@ -257,8 +262,10 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 
 void IOTV_Host::slotReReadTimeOut()
 {
-    for (int i = 0; i < getReadChannelLength(); i++)
-        read(i);
+    readAll();
+
+//    for (int i = 0; i < getReadChannelLength(); i++)
+//        read(i);
 }
 
 void IOTV_Host::slotStateTimeOut()

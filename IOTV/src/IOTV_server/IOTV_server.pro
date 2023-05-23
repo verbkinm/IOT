@@ -28,6 +28,7 @@ SOURCES += \
     ../lib/Protocols/embedded/read_write.cpp \
     ../lib/Protocols/embedded/state.cpp \
     ../lib/Protocols/embedded/iotvp_print.cpp \
+    ../lib/Protocols/embedded/tech.cpp \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
@@ -64,6 +65,7 @@ HEADERS += \
     ../lib/Protocols/embedded/read_write.h \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/iotvp_print.h \
+    ../lib/Protocols/embedded/tech.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
     IOTV_Client/iotv_client.h \

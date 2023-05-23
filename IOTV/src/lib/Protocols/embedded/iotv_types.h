@@ -5,6 +5,7 @@
 #define IDENTIFICATION_SIZE  16
 #define STATE_SIZE  15
 #define READ_WRITE_SIZE 15
+#define TECH_SIZE 15
 
 typedef enum {
     HEADER_TYPE_NONE = 0,
@@ -19,7 +20,8 @@ typedef enum
     HEADER_ASSIGNMENT_STATE,
     HEADER_ASSIGNMENT_READ,
     HEADER_ASSIGNMENT_WRITE,
-    HEADER_ASSIGNMENT_PING_PONG
+    HEADER_ASSIGNMENT_PING_PONG,
+    HEADER_ASSIGNMENT_TECH
 } Header_ASSIGNMENT;
 
 typedef enum
@@ -37,6 +39,7 @@ typedef enum
 typedef enum
 {
     ReadWrite_FLAGS_NONE = 0,
+    ReadWrite_FLAGS_IGNORE_CH = 0x01,
     ReadWrite_FLAGS_ERROR = 0xFF
 } ReadWrite_FLAGS;
 
@@ -51,6 +54,18 @@ typedef enum
     State_STATE_OFFLINE = 0,
     State_STATE_ONLINE
 } State_STATE;
+
+typedef enum
+{
+    Tech_TYPE_NONE = 0,
+    Tech_TYPE_EV_AC
+} Tech_TYPE;
+
+typedef enum
+{
+    Tech_FLAGS_NONE = 0,
+    Tech_FLAGS_ERROR = 0xFF
+} Tech_FLAGS;
 
 
 #endif // IOTV_TYPES_H

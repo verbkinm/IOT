@@ -76,6 +76,36 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
             || (iot->readChannel != NULL && (iot->numberReadChannel <= head->readWrite->channelNumber)))
         return 0;
 
+    if (head->readWrite->flags == ReadWrite_FLAGS_IGNORE_CH)
+    {
+        uint64_t resultDataSize = 0;
+        for(uint8_t ch_num = 0; ch_num < iot->numberReadChannel; ++ch_num)
+        {
+            struct Read_Write readWrite = {
+                .flags = ReadWrite_FLAGS_NONE,
+                        .nameSize = iot->nameSize,
+                        .channelNumber = ch_num,
+                        .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ch_num].dataSize : 0,
+                        .name = iot->name,
+                        .data = (iot->readChannel != NULL) ? iot->readChannel[ch_num].data : NULL
+            };
+
+            struct Header header = {
+                .type = HEADER_TYPE_RESPONSE,
+                        .assignment = HEADER_ASSIGNMENT_READ,
+                        .flags = HEADER_FLAGS_NONE,
+                        .version = 2,
+                        .dataSize = readWriteSize(&readWrite),
+                        .identification = NULL,
+                        .readWrite = &readWrite,
+                        .state = NULL
+            };
+
+            resultDataSize += headerToData(&header, outData + resultDataSize, dataSize - resultDataSize);
+        }
+        return resultDataSize;
+    }
+
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,
                 .nameSize = iot->nameSize,
@@ -227,13 +257,13 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
     return headerToData(&header, outData, outDataSize);
 }
 
-uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber)
+uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, ReadWrite_FLAGS flags)
 {
     if (outData == NULL)
         return 0;
 
     struct Read_Write readWrite = {
-        .flags = ReadWrite_FLAGS_NONE,
+        .flags = flags,
                 .nameSize = (uint8_t)strlen(name),
                 .channelNumber = channelNumber,
                 .dataSize = 0,

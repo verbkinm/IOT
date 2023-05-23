@@ -29,7 +29,8 @@ public:
     const std::unordered_map<QString, QString> &settingsData() const;
 
 private:
-    qint64 read(uint8_t channelNumber);
+    qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);
+    qint64 readAll();
     qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
     void setConnectionType();

@@ -67,6 +67,9 @@ void Base_conn_type::slotReadData()
     std::lock_guard lg(_hostBuffMutex);
 
     QByteArray inData = readAll();
+
+    //!!!
+    //! Так же нет ограничения буфера приёма!
 //    if (inData.length() < 1)
 //        return;
 

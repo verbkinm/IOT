@@ -15,7 +15,7 @@ uint64_t responseStateData(char *outData, uint64_t dataSize, const struct IOTV_S
 uint64_t queryIdentificationData(char *outData, uint64_t dataSize);
 uint64_t queryPingData(char *outData, uint64_t dataSize);
 uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize);
-uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber);
+uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, ReadWrite_FLAGS flags);
 uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name);
 
 struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header);
