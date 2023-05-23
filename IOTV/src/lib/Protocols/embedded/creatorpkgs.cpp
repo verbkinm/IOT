@@ -17,11 +17,13 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
         }
 
         if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-            header->identification = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->pkg = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-            header->state = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->pkg = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment ==HEADER_ASSIGNMENT_WRITE)
-            header->readWrite = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->pkg = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+        else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+            header->pkg = createTech(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);;
 
         // Если cutDataSize > 0, то пакет body сформирован
         // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
@@ -85,9 +87,10 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
         .flags = (Header_FLAGS)data[3],
         .version = data[0],
         .dataSize = bodySize,
-        .identification = NULL,
-        .readWrite = NULL,
-        .state = NULL
+        .pkg = NULL
+//        .identification = NULL,
+//        .readWrite = NULL,
+//        .state = NULL
     };
 
     memcpy((void *)headerResult, &header, sizeof(struct Header));
@@ -438,6 +441,7 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
             case HEADER_ASSIGNMENT_STATE :
             case HEADER_ASSIGNMENT_READ :
             case HEADER_ASSIGNMENT_WRITE :
+            case HEADER_ASSIGNMENT_TECH :
             return true;
         }
     }

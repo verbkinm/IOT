@@ -212,19 +212,19 @@ void MainWindow::slotConvert()
         {
             ui->convertText->appendPlainText("\tIDENTIFICATION\n");
             counterIdentification++;
-            printIdentificationData(header->identification);
+            printIdentificationData((struct Identification *)header->pkg);
         }
         else if(header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
         {
             ui->convertText->appendPlainText("\tREAD_WRITE\n");
             counterReadWrite++;
-            printReadWriteData(header->readWrite);
+            printReadWriteData((struct Read_Write *)header->pkg);
         }
         else if(header->assignment == HEADER_ASSIGNMENT_STATE)
         {
             ui->convertText->appendPlainText("\tSTATE\n");
             counterState++;
-            printStateData(header->state);
+            printStateData((struct State *)header->pkg);
         }
 
         clearHeader(header);

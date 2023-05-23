@@ -16,6 +16,7 @@ SOURCES += \
         ../../lib/Protocols/embedded/iotv_server_embedded.cpp \
         ../../lib/Protocols/embedded/read_write.cpp \
         ../../lib/Protocols/embedded/state.cpp \
+        ../../lib/Protocols/embedded/tech.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -31,6 +32,7 @@ HEADERS += \
     ../../lib/Protocols/embedded/iotv_server_embedded.h \
     ../../lib/Protocols/embedded/read_write.h \
     ../../lib/Protocols/embedded/state.h \
+    ../../lib/Protocols/embedded/tech.h \
     iot_server.h
 
 INCLUDEPATH += ../../lib/Protocols/embedded/

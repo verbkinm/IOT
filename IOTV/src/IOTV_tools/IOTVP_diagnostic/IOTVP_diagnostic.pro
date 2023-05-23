@@ -17,6 +17,7 @@ SOURCES += \
     ../../lib/Protocols/embedded/iotvp_print.cpp \
     ../../lib/Protocols/embedded/read_write.cpp \
     ../../lib/Protocols/embedded/state.cpp \
+    ../../lib/Protocols/embedded/tech.cpp \
     ../../lib/raw/raw.cpp \
     main.cpp \
     mainwindow.cpp
@@ -30,6 +31,7 @@ HEADERS += \
     ../../lib/Protocols/embedded/iotvp_print.h \
     ../../lib/Protocols/embedded/read_write.h \
     ../../lib/Protocols/embedded/state.h \
+    ../../lib/Protocols/embedded/tech.h \
     ../../lib/raw/raw.h \
     mainwindow.h
 

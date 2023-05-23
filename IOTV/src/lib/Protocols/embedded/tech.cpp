@@ -17,7 +17,7 @@ uint64_t techSize(const struct Tech *body)
     return TECH_SIZE + body->dataSize;
 }
 
-uint64_t stateToData(const struct Tech *body, char *outData, uint64_t outDataSize)
+uint64_t techToData(const struct Tech *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -51,3 +51,4 @@ void clearTech(struct Tech *tech)
     free(tech);
     tech = NULL;
 }
+

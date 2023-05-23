@@ -35,24 +35,26 @@ IOTV_Host::~IOTV_Host()
 void IOTV_Host::responceIdentification(const struct Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->identification != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
-    this->setId(header->identification->id);
+    struct Identification *pkg = (struct Identification *)header->pkg;
+
+    this->setId(pkg->id);
     // На данный момент имя константное и считывается с файла настроек
     // this->setNname
-    this->setDescription(QByteArray{header->identification->description, header->identification->descriptionSize});
+    this->setDescription(QByteArray{pkg->description, pkg->descriptionSize});
     this->removeAllSubChannel();
 
-    for (uint8_t i = 0; i < header->identification->numberReadChannel; i++)
+    for (uint8_t i = 0; i < pkg->numberReadChannel; i++)
     {
-        Q_ASSERT(header->identification->readChannelType != NULL);
-        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(header->identification->readChannelType[i]));
+        Q_ASSERT(pkg->readChannelType != NULL);
+        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(pkg->readChannelType[i]));
     }
 
-    for (uint8_t i = 0; i < header->identification->numberWriteChannel; i++)
+    for (uint8_t i = 0; i < pkg->numberWriteChannel; i++)
     {
-        Q_ASSERT(header->identification->writeChannelType != NULL);
-        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(header->identification->writeChannelType[i]));
+        Q_ASSERT(pkg->writeChannelType != NULL);
+        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(pkg->writeChannelType[i]));
     }
 }
 
@@ -66,19 +68,21 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 void IOTV_Host::responceRead(const struct Header *header)
 {
     Q_ASSERT(header != nullptr);
-    Q_ASSERT(header->readWrite != nullptr);
+    Q_ASSERT(header->pkg != nullptr);
 
-    uint8_t channelNumber = header->readWrite->channelNumber;
+    struct Read_Write *pkg = (struct Read_Write *)header->pkg;
 
-    QByteArray data(header->readWrite->data, header->readWrite->dataSize);
+    uint8_t channelNumber = pkg->channelNumber;
+
+    QByteArray data(pkg->data, pkg->dataSize);
     this->setReadChannelData(channelNumber, data);
 
     if(_logFile.isEmpty())
         return;
 
-    Raw raw(this->getReadChannelType(header->readWrite->channelNumber), data);
+    Raw raw(this->getReadChannelType(pkg->channelNumber), data);
     Log::write("R:"
-               + QString::number(header->readWrite->channelNumber)
+               + QString::number(pkg->channelNumber)
                + "="
                + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
@@ -179,9 +183,12 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 responcePingPoing(iot);
             else if(header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-                iot->state = header->state->state;
+                iot->state = ((struct State *)header->pkg)->state;
                 responceState(iot);
             }
+            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+                ;
+
             clearIOTV_Server(iot);
         }
         else if(header->type == HEADER_TYPE_REQUEST)
@@ -303,7 +310,9 @@ void IOTV_Host::slotPingTimeOut()
 
 void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
 {
-    write(channelNumber, data);
+    //!!! Нужно ли посылать данные на устройство, если они равны текущим данным?
+    if (getReadChannelData(channelNumber) != data)
+        write(channelNumber, data);
 }
 
 void IOTV_Host::slotConnected()

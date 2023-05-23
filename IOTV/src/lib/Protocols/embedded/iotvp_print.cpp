@@ -14,12 +14,12 @@ void printHeader(const struct Header *head)
 
     printf("dataSize - 0x%016lx\n", head->dataSize);
 
-    if (head->identification != NULL)
-        printIdentification(head->identification);
-    if (head->state != NULL)
-        printState(head->state);
-    if (head->readWrite != NULL)
-        printReadWrite(head->readWrite);
+//    if (head->identification != NULL)
+//        printIdentification(head->identification);
+//    if (head->state != NULL)
+//        printState(head->state);
+//    if (head->readWrite != NULL)
+//        printReadWrite(head->readWrite);
 
     printf("----------------------------------------\n");
 }

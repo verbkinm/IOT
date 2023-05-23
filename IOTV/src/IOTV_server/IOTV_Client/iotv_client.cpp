@@ -48,11 +48,12 @@ void IOTV_Client::queryIdentification()
 void IOTV_Client::queryState(const Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->state != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.first->getName() == QByteArray{header->state->name, header->state->nameSize};
+        struct State *pkg = (struct State *)header->pkg;
+        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
 
     if (it == _hosts.end())
@@ -72,11 +73,12 @@ void IOTV_Client::queryState(const Header *header)
 void IOTV_Client::queryRead(const Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->readWrite != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.first->getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+        struct Read_Write *pkg = (struct Read_Write *)header->pkg;
+        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
 
     if (it != _hosts.end())
@@ -97,11 +99,13 @@ void IOTV_Client::queryRead(const Header *header)
 void IOTV_Client::queryWrite(const Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->readWrite != NULL);
+    Q_ASSERT(header->pkg != NULL);
+
+    struct Read_Write *pkg = (struct Read_Write *)header->pkg;
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        return iotv_host.first->getName() == QByteArray{header->readWrite->name, header->readWrite->nameSize};
+        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
 
     if (it != _hosts.end() && it->first->state() != State_STATE_OFFLINE)
@@ -116,7 +120,7 @@ void IOTV_Client::queryWrite(const Header *header)
         write({outData, static_cast<int>(size)}, size);
 
         // !!! Послать данные на устройство напрямую нельзя - разные потоки
-        emit it->first->signalQueryWrite(header->readWrite->channelNumber, {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
+        emit it->first->signalQueryWrite(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
 
         clearIOTV_Server(iot);
     }

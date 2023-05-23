@@ -16,9 +16,10 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
                     .flags = HEADER_FLAGS_NONE,
                     .version = 2,
                     .dataSize = 0,
-                    .identification = NULL,
-                    .readWrite = NULL,
-                    .state = NULL
+                    .pkg = NULL
+//                    .identification = NULL,
+//                    .readWrite = NULL,
+//                    .state = NULL
         };
 
         return headerToData(&header, outData, dataSize);
@@ -43,9 +44,10 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = identificationSize(&ident),
-                .identification = &ident,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = &ident
+//                .identification = &ident,
+//                .readWrite = NULL,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -62,9 +64,10 @@ uint64_t responsePingData(char *outData, uint64_t dataSize)
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = 0,
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = NULL
+//                .identification = NULL,
+//                .readWrite = NULL,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -72,11 +75,15 @@ uint64_t responsePingData(char *outData, uint64_t dataSize)
 
 uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot, const struct Header *head)
 {
-    if (outData == NULL || iot == NULL || head == NULL || head->readWrite == NULL
-            || (iot->readChannel != NULL && (iot->numberReadChannel <= head->readWrite->channelNumber)))
+    if (head == NULL)
+        return 0;
+    struct Read_Write *ptrReadWrite = ((struct Read_Write *)head->pkg);
+
+    if (outData == NULL || iot == NULL || ptrReadWrite == NULL
+        || (iot->readChannel != NULL && (iot->numberReadChannel <= ptrReadWrite->channelNumber)))
         return 0;
 
-    if (head->readWrite->flags == ReadWrite_FLAGS_IGNORE_CH)
+    if (ptrReadWrite->flags == ReadWrite_FLAGS_IGNORE_CH)
     {
         uint64_t resultDataSize = 0;
         for(uint8_t ch_num = 0; ch_num < iot->numberReadChannel; ++ch_num)
@@ -96,9 +103,9 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
                         .flags = HEADER_FLAGS_NONE,
                         .version = 2,
                         .dataSize = readWriteSize(&readWrite),
-                        .identification = NULL,
-                        .readWrite = &readWrite,
-                        .state = NULL
+//                        .identification = NULL,
+                        .pkg = &readWrite,
+//                        .state = NULL
             };
 
             resultDataSize += headerToData(&header, outData + resultDataSize, dataSize - resultDataSize);
@@ -109,10 +116,10 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,
                 .nameSize = iot->nameSize,
-                .channelNumber = head->readWrite->channelNumber,
-                .dataSize = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].dataSize : 0,
+                .channelNumber = ptrReadWrite->channelNumber,
+                .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].dataSize : 0,
                 .name = iot->name,
-                .data = (iot->readChannel != NULL) ? iot->readChannel[head->readWrite->channelNumber].data : NULL
+                .data = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].data : NULL
     };
 
     struct Header header = {
@@ -121,9 +128,9 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+//                .identification = NULL,
+                .pkg = &readWrite,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -131,22 +138,26 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 
 uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_embedded *iot, const struct Header *head)
 {
-    if (outData == NULL || iot == NULL || iot->readChannel == NULL || head == NULL || head->readWrite == NULL
-            || iot->numberWriteChannel <= head->readWrite->channelNumber
-            || iot->numberReadChannel <= head->readWrite->channelNumber
-            || iot->readChannel[head->readWrite->channelNumber].data == NULL)
+    if (head == NULL)
+        return 0;
+    struct Read_Write *ptrReadWrite = ((struct Read_Write *)head->pkg);
+
+    if (outData == NULL || iot == NULL || iot->readChannel == NULL || ptrReadWrite == NULL
+            || iot->numberWriteChannel <= ptrReadWrite->channelNumber
+            || iot->numberReadChannel <= ptrReadWrite->channelNumber
+            || iot->readChannel[ptrReadWrite->channelNumber].data == NULL)
         return 0;
 
-    if (head->readWrite->dataSize > 0)
-        memcpy(iot->readChannel[head->readWrite->channelNumber].data, head->readWrite->data, iot->readChannel[head->readWrite->channelNumber].dataSize);
+    if (ptrReadWrite->dataSize > 0)
+        memcpy(iot->readChannel[ptrReadWrite->channelNumber].data, ptrReadWrite->data, iot->readChannel[ptrReadWrite->channelNumber].dataSize);
 
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,
                 .nameSize = iot->nameSize,
-                .channelNumber = head->readWrite->channelNumber,
-                .dataSize = iot->readChannel[head->readWrite->channelNumber].dataSize,
+                .channelNumber = ptrReadWrite->channelNumber,
+                .dataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize,
                 .name = iot->name,
-                .data = iot->readChannel[head->readWrite->channelNumber].data
+                .data = iot->readChannel[ptrReadWrite->channelNumber].data
     };
 
     struct Header header = {
@@ -155,9 +166,9 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+//                .identification = NULL,
+                .pkg = &readWrite,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -183,9 +194,9 @@ uint64_t responseStateData(char *outData, uint64_t dataSize, const struct IOTV_S
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = stateSize(&state),
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = &state
+//                .identification = NULL,
+//                .readWrite = NULL,
+                .pkg = &state
     };
 
     return headerToData(&header, outData, dataSize);
@@ -202,9 +213,10 @@ uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = 0,
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = NULL
+//                .identification = NULL,
+//                .readWrite = NULL,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -221,9 +233,10 @@ uint64_t queryPingData(char *outData, uint64_t dataSize)
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = 0,
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = NULL
+//                .identification = NULL,
+//                .readWrite = NULL,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -249,9 +262,9 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+//                .identification = NULL,
+                .pkg = &readWrite,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -277,9 +290,9 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+//                .identification = NULL,
+                .pkg = &readWrite,
+//                .state = NULL
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -305,9 +318,9 @@ uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = stateSize(&state),
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = &state
+//                .identification = NULL,
+//                .readWrite = NULL,
+                .pkg = &state
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -315,21 +328,23 @@ uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
 
 struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header)
 {
-    if (header == NULL || header->identification == NULL)
+    if (header == NULL || header->pkg == NULL)
         return NULL;
 
-    uint8_t nameSize = header->identification->nameSize;
-    uint16_t descriptionSize = header->identification->descriptionSize;
+    struct Identification *ptrIdentification = ((struct Identification *)header->pkg);
 
-    uint8_t numberWriteChannel = header->identification->numberWriteChannel;
-    uint8_t numberReadChannel = header->identification->numberReadChannel;
+    uint8_t nameSize = ptrIdentification->nameSize;
+    uint16_t descriptionSize = ptrIdentification->descriptionSize;
+
+    uint8_t numberWriteChannel = ptrIdentification->numberWriteChannel;
+    uint8_t numberReadChannel = ptrIdentification->numberReadChannel;
 
     struct IOTV_Server_embedded *ptrIot = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
     if (ptrIot == NULL)
         return NULL;
 
     struct IOTV_Server_embedded iot = {
-        .id = header->identification->id,
+        .id = ptrIdentification->id,
                 .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
                 .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
                 .numberReadChannel = numberReadChannel,
@@ -343,14 +358,14 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
     };
 
     if (nameSize > 0)
-        memcpy((void *)iot.name, header->identification->name, nameSize);
+        memcpy((void *)iot.name, ptrIdentification->name, nameSize);
     if (descriptionSize > 0)
-        memcpy((void *)iot.description, header->identification->description, descriptionSize);
+        memcpy((void *)iot.description, ptrIdentification->description, descriptionSize);
 
     bool mallocFlag = false;
     for (int i = 0; i < numberReadChannel; ++i)
     {
-        iot.readChannel[i].dataSize = dataSizeonDataType(header->identification->readChannelType[i]);
+        iot.readChannel[i].dataSize = dataSizeonDataType(ptrIdentification->readChannelType[i]);
         iot.readChannel[i].data = (char *)malloc(iot.readChannel[i].dataSize);
         if (iot.readChannel[i].dataSize > 0 && iot.readChannel[i].data == NULL)
         {
@@ -358,11 +373,11 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
             mallocFlag = true;
             break;
         }
-        iot.readChannelType[i] = header->identification->readChannelType[i];
+        iot.readChannelType[i] = ptrIdentification->readChannelType[i];
     }
 
     for (int i = 0; i < numberWriteChannel; ++i)
-        iot.writeChannelType[i] = header->identification->writeChannelType[i];
+        iot.writeChannelType[i] = ptrIdentification->writeChannelType[i];
 
     memcpy((void *)ptrIot, &iot, sizeof(struct IOTV_Server_embedded));
 
