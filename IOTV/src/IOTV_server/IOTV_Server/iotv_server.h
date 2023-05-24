@@ -8,6 +8,9 @@
 #include <QThread>
 #include <QCoreApplication>
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #include <list>
 #include <fstream>
 #include <unordered_map>
@@ -22,7 +25,7 @@ class IOTV_Server : public QTcpServer
 {
     Q_OBJECT
 public:
-    IOTV_Server(QObject *parent = nullptr);
+    explicit IOTV_Server(QObject *parent = nullptr);
     ~IOTV_Server();
 
     QStringList getFileSettingNames() const;
@@ -34,6 +37,12 @@ private:
     void startTCPServer();
 
     void clientOnlineFile() const;
+
+    Base_Host *baseHostFromName(const QString &name) const;
+    void parseJson(const QByteArray &data);
+    IOTV_Event *parseEvent(const QJsonObject &jobj) const;
+    IOTV_Action *parseAction(const QJsonObject &jobj) const;
+    QByteArray toData() const;
 
     std::unordered_map<IOTV_Host* , QThread*> _iot_hosts;
     std::unordered_map<IOTV_Client*, QThread*> _iot_clients;

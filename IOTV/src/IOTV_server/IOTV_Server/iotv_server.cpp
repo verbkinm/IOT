@@ -115,39 +115,43 @@ void IOTV_Server::readHostSetting()
     }
 
     // TESTING
-    // Подключение
-    {
-        Base_Host *ptrHost = _iot_hosts.begin()->first;
-        IOTV_Event_Connect *iotv_event = new IOTV_Event_Connect(ptrHost);
 
-        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Подключено");
-        _eventManager.bind(iotv_event, actionMSG);
-    }
-    // Отключение
-    {
-        Base_Host *ptrHost = _iot_hosts.begin()->first;
-        IOTV_Event_Disconnect *iotv_event = new IOTV_Event_Disconnect(ptrHost);
+    QFile file("/home/user/myProg/build-untitled19-Desktop-Debug/json.json");
+    file.open(QIODevice::ReadOnly);
+    parseJson(file.readAll());
+    //    // Подключение
+    //    {
+    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
+    //        IOTV_Event_Connect *iotv_event = new IOTV_Event_Connect(ptrHost);
 
-        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Отключено");
-        _eventManager.bind(iotv_event, actionMSG);
-    }
+    //        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Подключено");
+    //        _eventManager.bind(iotv_event, actionMSG);
+    //    }
+    //    // Отключение
+    //    {
+    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
+    //        IOTV_Event_Disconnect *iotv_event = new IOTV_Event_Disconnect(ptrHost);
 
-    // Данные
-    {
-        Base_Host *ptrHost = _iot_hosts.begin()->first;
-        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, std::equal_to<Raw>(), ptrHost, 0, Raw(true));
+    //        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Отключено");
+    //        _eventManager.bind(iotv_event, actionMSG);
+    //    }
 
-        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX(ptrHost, 1, Raw(true).data());
-        _eventManager.bind(iotv_event, actionTX);
-    }
-    {
-        Base_Host *ptrHost = _iot_hosts.begin()->first;
-        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, [](const Raw &lhs, const Raw &rhs){return true;}, ptrHost, 0, Raw());
+    //    // Данные
+    //    {
+    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
+    //        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, std::equal_to<Raw>(), ptrHost, 0, Raw(true));
 
-        IOTV_Action_Data_TX_Ref *actionTX_Ref = new IOTV_Action_Data_TX_Ref(ptrHost, 2, ptrHost, 0);
-        _eventManager.bind(iotv_event, actionTX_Ref);
+    //        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX(ptrHost, 1, Raw(true).data());
+    //        _eventManager.bind(iotv_event, actionTX);
+    //    }
+    //    {
+    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
+    //        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, [](const Raw &lhs, const Raw &rhs){return true;}, ptrHost, 0, Raw());
 
-    }
+    //        IOTV_Action_Data_TX_Ref *actionTX_Ref = new IOTV_Action_Data_TX_Ref(ptrHost, 2, ptrHost, 0);
+    //        _eventManager.bind(iotv_event, actionTX_Ref);
+
+    //    }
 }
 
 void IOTV_Server::startTCPServer()
@@ -192,6 +196,99 @@ void IOTV_Server::clientOnlineFile() const
     }
 
     file.close();
+}
+
+Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
+{
+    auto it = std::ranges::find_if(_iot_hosts, [&name](const auto &pair){
+        return pair.first->getName() == name;
+    });
+
+    if (it != _iot_hosts.end())
+        return it->first;
+
+    return nullptr;
+}
+
+void IOTV_Server::parseJson(const QByteArray &data)
+{
+    QJsonParseError err;
+    QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError)
+    {
+        qDebug() << err.errorString() << ' ' << err.offset;
+        return;
+    }
+
+    if (jdoc.isObject())
+    {
+        auto jobj = jdoc.object();
+        for (const auto &el : jobj)
+        {
+            if (el.isObject())
+            {
+                IOTV_Event *event = nullptr;
+                IOTV_Action *action = nullptr;
+
+                auto id_pair = el.toObject(); // id_
+                if (!id_pair.contains(Json_Event_Action::EVENT) || !id_pair.contains(Json_Event_Action::ACTION))
+                {
+                    qDebug() << "error json object " << id_pair;
+                    continue;
+                }
+
+                auto json_event = id_pair.value(Json_Event_Action::EVENT).toObject();
+                event = parseEvent(json_event);
+
+                auto json_action = id_pair.value(Json_Event_Action::ACTION).toObject();
+                action = parseAction(json_action);
+
+                _eventManager.bind(event, action);
+            }
+        }
+    }
+}
+
+IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
+{
+    QString type = jobj.value(Json_Event_Action::TYPE).toString();
+    Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
+    IOTV_Event *event = nullptr;
+
+    if (host == nullptr)
+        return event;
+
+    if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
+    {
+        event = _eventManager.createEvent(host, type);
+    }
+    else if (type == Json_Event_Action::TYPE_STATE)
+    {
+        QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
+        event = _eventManager.createEvent(host, type, state);
+    }
+    else if (type == Json_Event_Action::TYPE_DATA)
+    {
+        QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
+        QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
+        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
+        QVariant data = jobj.value(Json_Event_Action::DATA).toVariant();
+        event = _eventManager.createEvent(host, type, direction, data, compare, ch_num);
+    }
+
+    return event;
+}
+
+IOTV_Action *IOTV_Server::parseAction(const QJsonObject &jobj) const
+{
+    IOTV_Action *action = nullptr;
+
+    return action;
+}
+
+QByteArray IOTV_Server::toData() const
+{
+
 }
 
 void IOTV_Server::checkSettingsFileExist()

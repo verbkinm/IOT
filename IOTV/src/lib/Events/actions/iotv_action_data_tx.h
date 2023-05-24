@@ -20,7 +20,7 @@ public:
     virtual bool isValid() const override;
 
 private:
-    Base_Host *_host;
+    Base_Host *_dst_host;
     uint8_t _channelNumber;
     QByteArray _data;
 };

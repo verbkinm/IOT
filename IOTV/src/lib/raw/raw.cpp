@@ -306,12 +306,12 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
     return result;
 }
 
-bool Raw::boolType() const
+bool Raw::isBool() const
 {
     return type() == DATA_TYPE::BOOL;
 }
 
-bool Raw::intType() const
+bool Raw::isInt() const
 {
     if (type() == DATA_TYPE::INT_8 ||
             type() == DATA_TYPE::INT_16 ||
@@ -322,7 +322,7 @@ bool Raw::intType() const
     return false;
 }
 
-bool Raw::realType() const
+bool Raw::isReal() const
 {
     if (type() == DATA_TYPE::FLOAT_32 || type() == DATA_TYPE::DOUBLE_64)
         return true;
@@ -330,17 +330,17 @@ bool Raw::realType() const
     return false;
 }
 
-bool Raw::stringType() const
+bool Raw::isString() const
 {
     return type() == DATA_TYPE::STRING;
 }
 
-bool Raw::rawType() const
+bool Raw::isRawType() const
 {
     return type() == DATA_TYPE::RAW;
 }
 
-bool Raw::noneType() const
+bool Raw::isNoneType() const
 {
     return type() == DATA_TYPE::NONE;
 }
@@ -368,7 +368,7 @@ void Raw::setType(DATA_TYPE newType)
 template <typename C>
 bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
 {
-    if ((!lhs.noneType() || !rhs.noneType() ) &&
+    if ((!lhs.isNoneType() || !rhs.isNoneType() ) &&
             (!lhs.isValid() || !rhs.isValid()))
         return false;
 
@@ -454,7 +454,7 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
     }
     else
     {
-        if ((lhs.intType() || lhs.realType() || lhs.boolType()) && (rhs.intType() || rhs.realType() || rhs.boolType()))
+        if ((lhs.isInt() || lhs.isReal() || lhs.isBool()) && (rhs.isInt() || rhs.isReal() || rhs.isBool()))
         {
             bool ok1, ok2;
             double lhsArg = lhs.strData().first.toDouble(&ok1);
@@ -478,7 +478,7 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
 
     if (lhs.type() == rhs.type())
     {
-        if ((lhs.intType() || lhs.realType() || lhs.boolType()) && (rhs.intType() || rhs.realType() || rhs.boolType()))
+        if ((lhs.isInt() || lhs.isReal() || lhs.isBool()) && (rhs.isInt() || rhs.isReal() || rhs.isBool()))
         {
             bool ok1, ok2;
             double lhsArg = lhs.strData().first.toDouble(&ok1);
@@ -587,7 +587,7 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
     }
     else
     {
-        if ((lhs.intType() || lhs.realType() || lhs.boolType()) && (rhs.intType() || rhs.realType() || rhs.boolType()))
+        if ((lhs.isInt() || lhs.isReal() || lhs.isBool()) && (rhs.isInt() || rhs.isReal() || rhs.isBool()))
         {
             bool ok1, ok2;
             double lhsArg = lhs.strData().first.toDouble(&ok1);

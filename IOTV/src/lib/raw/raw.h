@@ -51,12 +51,12 @@ public:
     //! Длина данных соответствует типу. String и Raw всегда истинны
     bool isValid() const;
 
-    inline bool boolType() const;
-    inline bool intType() const;
-    inline bool realType() const;
-    inline bool stringType() const;
-    inline bool rawType() const;
-    inline bool noneType() const;
+    bool isBool() const;
+    bool isInt() const;
+    bool isReal() const;
+    bool isString() const;
+    bool isRawType() const;
+    bool isNoneType() const;
 
     friend bool operator==(const Raw &lhs, const Raw &rhs);
     friend bool operator!=(const Raw &lhs, const Raw &rhs);
