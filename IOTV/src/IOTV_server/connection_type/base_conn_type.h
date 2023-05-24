@@ -33,7 +33,7 @@ public:
     virtual void disconnectFromHost() = 0;
 
     void clearDataBuffer();
-    void setDataBuffer(QByteArray &data);
+    void setDataBuffer(const QByteArray &data);
 
     static QString ConnTypeToString(Conn_type conn_type);
 

@@ -350,12 +350,3 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();
 }
-
-void IOTV_Server::slotTest()
-{
-    IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
-    if (host == nullptr)
-        return;
-
-    qDebug() << "!!!!!!!!!!!connected " << host->getName();
-}

@@ -121,7 +121,7 @@ void dataReverse(void* data, uint64_t size)
     }
 }
 
-struct Identification *createIdentification(uint8_t * const data, uint64_t dataSize, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+struct Identification *createIdentification(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
     if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
         return NULL;
@@ -130,7 +130,7 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
     *expectedDataSize = 0;
     *cutDataSize = 0;
 
-    if (dataSize < IDENTIFICATION_SIZE)
+    if (size < IDENTIFICATION_SIZE)
     {
         *expectedDataSize = IDENTIFICATION_SIZE;
         return NULL;
@@ -153,7 +153,7 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
         return NULL;
     }
 
-    if (dataSize < (uint64_t)(IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel))
+    if (size < (uint64_t)(IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel))
     {
         *expectedDataSize = IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel;
         return NULL;

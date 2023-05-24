@@ -15,5 +15,5 @@ private:
     std::unique_ptr<IOTV_Server> _server;
 
 private slots:
-    void slotFileChange(QString fileName);
+    void slotFileChange(const QString &fileName);
 };

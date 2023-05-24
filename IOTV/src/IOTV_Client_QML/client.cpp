@@ -104,7 +104,7 @@ QList<QObject *> Client::devList()
     return list;
 }
 
-QObject *Client::deviceByName(QString name)
+QObject *Client::deviceByName(const QString &name)
 {
     auto it = _devices.find(name);
     if (it == _devices.end())
@@ -171,10 +171,12 @@ void Client::queryPing()
 void Client::responceIdentification(const Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->identification != NULL);
+    Q_ASSERT(header->pkg != NULL);
+
+    const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
-    QString name(QByteArray{header->identification->name, header->identification->nameSize});
+    QString name(QByteArray{pkg->name, pkg->nameSize});
 
     if (!_devices.contains(name))
     {
@@ -198,16 +200,18 @@ void Client::responceIdentification(const Header *header)
 void Client::responceState(const struct Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->state != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
-    QString name(QByteArray{header->state->name, header->state->nameSize});
+    const struct State *pkg = static_cast<const struct State *>(header->pkg);
+
+    QString name(QByteArray{pkg->name, pkg->nameSize});
 
     if (!_devices.contains(name))
         return;
 
-    if (_devices[name].state() != header->state->state)
+    if (_devices[name].state() != pkg->state)
     {
-        _devices[name].setState(header->state->state);
+        _devices[name].setState(pkg->state);
         emit onlineDeviceChanged();
     }
 }
@@ -215,21 +219,23 @@ void Client::responceState(const struct Header *header)
 void Client::responceRead(const struct Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->readWrite != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
-    QString name(QByteArray{header->readWrite->name, header->readWrite->nameSize});
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+
+    QString name(QByteArray{pkg->name, pkg->nameSize});
 
     if (!_devices.contains(name))
         return;
 
-    _devices[name].setData(header->readWrite->channelNumber,
-                           {header->readWrite->data, static_cast<int>(header->readWrite->dataSize)});
+    _devices[name].setData(pkg->channelNumber,
+                           {pkg->data, static_cast<int>(pkg->dataSize)});
 }
 
 void Client::responceWrite(const struct Header *header) const
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->readWrite != NULL);
+    Q_ASSERT(header->pkg != NULL);
 
     // Нет реакции на ответ о записи
 }
@@ -321,7 +327,7 @@ void Client::slotQueryState()
     queryState(dev->getName());
 }
 
-void Client::slotQueryWrite(int channelNumber, QByteArray data)
+void Client::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
     Device *dev = qobject_cast<Device*>(sender());
 

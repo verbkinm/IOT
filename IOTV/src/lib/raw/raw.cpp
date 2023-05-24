@@ -48,17 +48,21 @@ Raw::Raw(int64_t data) :
 Raw::Raw(float data) :
     _type(DATA_TYPE::FLOAT_32)
 {
-    char *ptr = reinterpret_cast<char*>(&data);
-    for (uint i = 0; i < sizeof(data); i++)
-        _data.push_back(ptr[i]);
+    _data.resize(sizeof(data));
+    std::memcpy(_data.data(), &data, sizeof(data));
+//    uint8_t *ptr = reinterpret_cast<uint8_t *>(&data);
+//    for (uint i = 0; i < sizeof(data); i++)
+//        _data.push_back(ptr[i]);
 }
 
 Raw::Raw(double data) :
     _type(DATA_TYPE::DOUBLE_64)
 {
-    char *ptr = reinterpret_cast<char*>(&data);
-    for (uint i = 0; i < sizeof(data); i++)
-        _data.push_back(ptr[i]);
+    _data.resize(sizeof(data));
+    std::memcpy(_data.data(), &data, sizeof(data));
+//    char *ptr = reinterpret_cast<char*>(&data);
+//    for (uint i = 0; i < sizeof(data); i++)
+//        _data.push_back(ptr[i]);
 }
 
 Raw::Raw(bool data) :
@@ -68,14 +72,14 @@ Raw::Raw(bool data) :
 
 }
 
-Raw::Raw(QString data) :
+Raw::Raw(const QString &data) :
     _type(DATA_TYPE::STRING),
     _data{data.toStdString().c_str(), static_cast<qsizetype>(data.toStdString().size())}
 {
 
 }
 
-Raw::Raw(QByteArray data) :
+Raw::Raw(const QByteArray &data) :
     _type(DATA_TYPE::RAW),
     _data(data)
 {
@@ -97,13 +101,14 @@ bool Raw::isZeroOnly() const
     if (!isValid())
         return false;
 
-    for (auto el : _data)
-    {
-        if (el != 0)
-            return false;
-    }
+    return std::all_of(_data.begin(), _data.end(), [](auto el){return el == 0;});
+//    for (char el : _data)
+//    {
+//        if (el != 0)
+//            return false;
+//    }
 
-    return true;
+//    return true;
 }
 
 bool Raw::isValid() const
@@ -197,82 +202,86 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
 
     if (type == DATA_TYPE::INT_8)
     {
-        int8_t data = dataStr.toLongLong(&ok);
+        int8_t value = dataStr.toLongLong(&ok);
         if (!ok)
         {
             qDebug() << "Convert to INT_8 error";
             return {};
         }
-        result.push_back(data);
+        result.push_back(value);
     }
     else if (type == DATA_TYPE::INT_16)
     {
-        int16_t data = dataStr.toLongLong(&ok);
+        int16_t value = dataStr.toLongLong(&ok);
         if (!ok)
         {
             qDebug() << "Convert to INT_16 error";
             return {};
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            data = qToLittleEndian(data);
+            value = qToLittleEndian(value);
 
-        char *ptr = reinterpret_cast<char*>(&data);
-        for (uint i = 0; i < sizeof(data); i++)
+        char *ptr = reinterpret_cast<char*>(&value);
+        for (uint i = 0; i < sizeof(value); i++)
             result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::INT_32)
     {
-        int32_t data = dataStr.toLongLong(&ok);
+        int32_t value = dataStr.toLongLong(&ok);
         if (!ok)
         {
             qDebug() << "Convert to INT_32 error";
             return {};
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            data = qToLittleEndian(data);
+            value = qToLittleEndian(value);
 
-        char *ptr = reinterpret_cast<char*>(&data);
-        for (uint i = 0; i < sizeof(data); i++)
+        char *ptr = reinterpret_cast<char*>(&value);
+        for (uint i = 0; i < sizeof(value); i++)
             result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::INT_64)
     {
-        qint64 data = dataStr.toLongLong(&ok);
+        qint64 value = dataStr.toLongLong(&ok);
         if (!ok)
         {
             qDebug() << "Convert to INT_64 error";
             return {};
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
-            data = qToLittleEndian(data);
+            value = qToLittleEndian(value);
 
-        char *ptr = reinterpret_cast<char*>(&data);
-        for (uint i = 0; i < sizeof(data); i++)
+        char *ptr = reinterpret_cast<char*>(&value);
+        for (uint i = 0; i < sizeof(value); i++)
             result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::FLOAT_32)
     {
-        float data = dataStr.toFloat(&ok);
+        float value = dataStr.toFloat(&ok);
         if (!ok)
         {
             qDebug() << "Convert to FLOAT_32 error";
             return {};
         }
-        char *ptr = reinterpret_cast<char*>(&data);
-        for (uint i = 0; i < sizeof(data); i++)
-            result.push_back(ptr[i]);
+        result.resize(sizeof(value));
+        std::memcpy(result.data(), &value, sizeof(value));
+//        char *ptr = reinterpret_cast<char*>(&data);
+//        for (uint i = 0; i < sizeof(data); i++)
+//            result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::DOUBLE_64)
     {
-        double data = dataStr.toDouble(&ok);
+        double value = dataStr.toDouble(&ok);
         if (!ok)
         {
             qDebug() << "Convert to DOUBLE_64 error";
             return {};
         }
-        char *ptr = reinterpret_cast<char*>(&data);
-        for (uint i = 0; i < sizeof(data); i++)
-            result.push_back(ptr[i]);
+        result.resize(sizeof(value));
+        std::memcpy(result.data(), &value, sizeof(value));
+//        char *ptr = reinterpret_cast<char*>(&data);
+//        for (uint i = 0; i < sizeof(data); i++)
+//            result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::BOOL)
     {
@@ -282,13 +291,13 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             result.push_back(false);
         else
         {
-            bool data = dataStr.toInt(&ok);
+            bool value = dataStr.toInt(&ok);
             if (!ok)
             {
                 qDebug() << "Convert to BOOL error";
                 return {};
             }
-            result.push_back(data);
+            result.push_back(value);
         }
     }
     else if (type == DATA_TYPE::RAW || type == DATA_TYPE::STRING)

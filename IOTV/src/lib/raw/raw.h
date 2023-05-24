@@ -39,8 +39,8 @@ public:
 
     Raw(bool data);
 
-    Raw(QString data);
-    Raw(QByteArray data);
+    Raw(const QString &data);
+    Raw(const QByteArray &data);
 
     Raw(DATA_TYPE type);
     Raw(DATA_TYPE type, const QByteArray &data);

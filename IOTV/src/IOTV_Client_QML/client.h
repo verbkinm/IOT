@@ -29,7 +29,7 @@ public:
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
     Q_INVOKABLE QList<QObject*> devList();
-    Q_INVOKABLE QObject *deviceByName(QString name);
+    Q_INVOKABLE QObject *deviceByName(const QString &name);
 
     bool stateConnection() const;
 
@@ -75,7 +75,7 @@ private slots:
     void slotQueryIdentification();
     void slotQueryRead();
     void slotQueryState();
-    void slotQueryWrite(int channelNumber, QByteArray data);
+    void slotQueryWrite(int channelNumber, const QByteArray &data);
 
     void slotError(QAbstractSocket::SocketError error);
 

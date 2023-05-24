@@ -17,7 +17,7 @@ Udp_conn_type::Udp_conn_type(const QString &name, const QString &address, quint1
         QTextStream msg;
         msg << "Error bind address\n";
         qFatal("%s", msg.string()->toStdString().c_str());
-        abort();
+//        abort();
     }
 
 }

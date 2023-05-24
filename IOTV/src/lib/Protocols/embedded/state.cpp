@@ -55,5 +55,5 @@ void clearState(struct State *state)
         free((void *)state->data);
 
     free(state);
-    state = NULL;
+//    state = NULL;
 }

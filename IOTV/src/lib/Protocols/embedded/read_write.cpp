@@ -54,5 +54,5 @@ void clearReadWrite(struct Read_Write *readWrite)
         free((void *)readWrite->data);
 
     free(readWrite);
-    readWrite = NULL;
+//    readWrite = NULL;
 }

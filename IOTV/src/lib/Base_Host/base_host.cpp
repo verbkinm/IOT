@@ -1,7 +1,7 @@
 #include "base_host.h"
 
 Base_Host::Base_Host(uint16_t id, QObject *parent) : QObject(parent),
-    _id(id), _description("None")
+    _id(id), _description("None"), _state(State_STATE::State_STATE_OFFLINE)
 {
 
 }
@@ -83,7 +83,7 @@ void Base_Host::setId(uint16_t id)
     _id = id;
 }
 
-void Base_Host::setDescription(const QString description)
+void Base_Host::setDescription(const QString &description)
 {
     _description = description;
 }
@@ -132,22 +132,22 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     struct IOTV_Server_embedded iot = {
         .id = getId(),
-        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL, //!!! нет проверки при не удаче выделить память
-        .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
+        .name = (nameSize > 0) ? static_cast<char *>(malloc(nameSize)) : NULL, //!!! нет проверки при не удаче выделить память
+        .description = (descriptionSize > 0) ? static_cast<char *>(malloc(descriptionSize)) : NULL,
         .numberReadChannel = getReadChannelLength(),
-        .readChannel = (numberReadChannel > 0) ? (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * numberReadChannel) : NULL, //!!! нет проверки при не удаче выделить память
-        .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL, //!!! нет проверки при не удаче выделить память
+        .readChannel = (numberReadChannel > 0) ? static_cast<struct RawEmbedded *>(malloc(sizeof(struct RawEmbedded) * numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
+        .readChannelType = (numberReadChannel > 0) ? static_cast<uint8_t *>(malloc(numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
         .numberWriteChannel = numberWriteChannel,
-        .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL, //!!! нет проверки при не удаче выделить память
+        .writeChannelType = (numberWriteChannel > 0) ? static_cast<uint8_t *>(malloc(numberWriteChannel)) : NULL, //!!! нет проверки при не удаче выделить память
         .state = (uint8_t)state(),
         .nameSize = static_cast<uint8_t>(nameSize),
         .descriptionSize = static_cast<uint16_t>(descriptionSize)
     };
 
     if (nameSize > 0)
-        memcpy((void *)iot.name, getName().toLocal8Bit(), nameSize);
+        memcpy(const_cast<char *>(iot.name), getName().toLocal8Bit(), nameSize);
     if (descriptionSize > 0)
-        memcpy((void *)iot.description, getDescription().toLocal8Bit(), descriptionSize);
+        memcpy(const_cast<char *>(iot.description), getDescription().toLocal8Bit(), descriptionSize);
 
     for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
     {
@@ -155,7 +155,7 @@ struct IOTV_Server_embedded *Base_Host::convert() const
         auto byteArr = getReadChannelData(i);
         if (numberReadChannel > 0) // что бы не ругался компилятор
         {
-            iot.readChannel[i].data = (char *)malloc(dataSize);
+            iot.readChannel[i].data = static_cast<char *>(malloc(dataSize));
             Q_ASSERT(iot.readChannel[i].data != NULL);
             iot.readChannel[i].dataSize = dataSize;
 
@@ -171,9 +171,9 @@ struct IOTV_Server_embedded *Base_Host::convert() const
     for (uint8_t i = 0; i < iot.numberWriteChannel; ++i)
         iot.writeChannelType[i] = (uint8_t)getWriteChannelType(i);
 
-    struct IOTV_Server_embedded *iotResult = (struct IOTV_Server_embedded *)malloc(sizeof(struct IOTV_Server_embedded));
+    struct IOTV_Server_embedded *iotResult = static_cast<struct IOTV_Server_embedded *>(malloc(sizeof(struct IOTV_Server_embedded)));
     Q_ASSERT(iotResult != NULL);
-    memcpy((void *)iotResult, &iot, sizeof(IOTV_Server_embedded));
+    memcpy(reinterpret_cast<char *>(iotResult), &iot, sizeof(IOTV_Server_embedded));
 
     return iotResult;
 }

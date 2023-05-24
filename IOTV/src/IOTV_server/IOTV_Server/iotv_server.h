@@ -54,7 +54,4 @@ private slots:
     void slotDisconnected();
 
     void slotError(QAbstractSocket::SocketError error);
-
-
-    void slotTest();
 };

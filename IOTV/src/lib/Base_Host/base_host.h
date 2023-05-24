@@ -51,7 +51,7 @@ protected:
     void removeAllSubChannel();
 
     void setId(uint16_t id);
-    void setDescription(const QString description);
+    void setDescription(const QString &description);
 
 private:
     uint16_t _id;

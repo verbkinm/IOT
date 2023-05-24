@@ -23,6 +23,7 @@ SOURCES += \
         ../lib/Protocols/embedded/iotvp_print.cpp \
         ../lib/Protocols/embedded/read_write.cpp \
         ../lib/Protocols/embedded/state.cpp \
+        ../lib/Protocols/embedded/tech.cpp \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
@@ -51,6 +52,7 @@ HEADERS += \
     ../lib/Protocols/embedded/iotvp_print.h \
     ../lib/Protocols/embedded/read_write.h \
     ../lib/Protocols/embedded/state.h \
+    ../lib/Protocols/embedded/tech.h \
     client.h \
     device.h \
     ../lib/Base_Host/base_host.h \

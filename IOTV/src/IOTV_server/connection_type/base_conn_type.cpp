@@ -3,7 +3,7 @@
 
 Base_conn_type::Base_conn_type(const QString& name, QObject *parent) : QObject(parent),
     expectedDataSize(0),
-    _name(name), _address("none address")
+    _name(name), _address("none address"), _type(Conn_type::NONE)
 {
 
 }
@@ -37,7 +37,7 @@ void Base_conn_type::clearDataBuffer()
     _host_buffer_data.clear();
 }
 
-void Base_conn_type::setDataBuffer(QByteArray &data)
+void Base_conn_type::setDataBuffer(const QByteArray &data)
 {
     std::lock_guard lg(_hostBuffMutex);
     _host_buffer_data = data;

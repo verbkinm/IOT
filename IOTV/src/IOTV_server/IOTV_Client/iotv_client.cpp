@@ -52,7 +52,7 @@ void IOTV_Client::queryState(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        struct State *pkg = (struct State *)header->pkg;
+        const struct State *pkg = static_cast<const struct State *>(header->pkg);
         return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
 
@@ -77,7 +77,7 @@ void IOTV_Client::queryRead(const Header *header)
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
-        struct Read_Write *pkg = (struct Read_Write *)header->pkg;
+        const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
         return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
 
@@ -101,7 +101,7 @@ void IOTV_Client::queryWrite(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    struct Read_Write *pkg = (struct Read_Write *)header->pkg;
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
     {
@@ -194,14 +194,16 @@ void IOTV_Client::slotReadData()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
                 queryIdentification();
-            else if(header->assignment == HEADER_ASSIGNMENT_READ)
+            else if (header->assignment == HEADER_ASSIGNMENT_READ)
                 queryRead(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
+            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 queryWrite(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
+            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 queryPingPoing();
             else if(header->assignment == HEADER_ASSIGNMENT_STATE)
                 queryState(header);
+            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+            ;
         }
 
         recivedBuff = recivedBuff.mid(cutDataSize);

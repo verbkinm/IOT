@@ -49,6 +49,6 @@ void clearTech(struct Tech *tech)
         free((void *)tech->data);
 
     free(tech);
-    tech = NULL;
+//    tech = NULL;
 }
 

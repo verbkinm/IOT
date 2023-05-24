@@ -135,5 +135,5 @@ void clearHeader(struct Header *header)
 //        clearState((struct State *)header->state);
 
     free(header);
-    header = NULL;
+//    header = NULL;
 }

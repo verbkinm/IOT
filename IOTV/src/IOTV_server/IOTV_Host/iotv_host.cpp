@@ -37,7 +37,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    struct Identification *pkg = (struct Identification *)header->pkg;
+    const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 
     this->setId(pkg->id);
     // На данный момент имя константное и считывается с файла настроек
@@ -70,7 +70,7 @@ void IOTV_Host::responceRead(const struct Header *header)
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
-    struct Read_Write *pkg = (struct Read_Write *)header->pkg;
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     uint8_t channelNumber = pkg->channelNumber;
 
@@ -137,8 +137,8 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
     if (getId() == 0)
     {
         char outData[BUFSIZ];
-        auto size = queryIdentificationData(outData, BUFSIZ);
-        return _conn_type->write({outData, static_cast<int>(size)}, size);
+        auto sizeData = queryIdentificationData(outData, BUFSIZ);
+        return _conn_type->write({outData, static_cast<int>(sizeData)}, sizeData);
     }
 
     return _conn_type->write(data, size);
@@ -183,11 +183,11 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 responcePingPoing(iot);
             else if(header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-                iot->state = ((struct State *)header->pkg)->state;
+                iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
-            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
-                ;
+//            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+//                ;
 
             clearIOTV_Server(iot);
         }
@@ -308,7 +308,7 @@ void IOTV_Host::slotPingTimeOut()
     }
 }
 
-void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
+void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
     //!!! Нужно ли посылать данные на устройство, если они равны текущим данным?
     if (getReadChannelData(channelNumber) != data)

@@ -98,7 +98,7 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 //        _host_buffer_data.clear();
 //    }
 
-    return 0;
+//    return 0;
 }
 
 void File_conn_type::connectToHost()
