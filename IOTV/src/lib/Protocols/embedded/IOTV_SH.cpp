@@ -149,7 +149,12 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
         return 0;
 
     if (ptrReadWrite->dataSize > 0)
+    {
+        if (iot->readChannel[ptrReadWrite->channelNumber].dataSize != ptrReadWrite->dataSize)
+            return 0;
+
         memcpy(iot->readChannel[ptrReadWrite->channelNumber].data, ptrReadWrite->data, iot->readChannel[ptrReadWrite->channelNumber].dataSize);
+    }
 
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,

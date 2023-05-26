@@ -71,9 +71,10 @@ signals:
     void signalStateChanged(State_STATE);
     void signalStateUnknow(State_STATE);
 
+    void signalIdentRecived();
     void signalDataRiceved(QByteArray);
-    void signalDataRX(uint8_t channleNumber, Raw raw);
-    void signalDataTX(uint8_t channleNumber, Raw raw);
+    void signalDataRX(uint8_t channleNumber, QByteArray data);
+    void signalDataTX(uint8_t channleNumber, QByteArray data);
     // Используетеся для записи данных полученых от клиентов из других потоков
     void signalQueryWrite(int channelNumber, QByteArray data);
 };

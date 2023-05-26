@@ -56,6 +56,8 @@ void IOTV_Host::responceIdentification(const struct Header *header)
         Q_ASSERT(pkg->writeChannelType != NULL);
         this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(pkg->writeChannelType[i]));
     }
+
+    emit signalIdentRecived();
 }
 
 void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
@@ -252,12 +254,9 @@ void IOTV_Host::setConnectionType()
 
     //!!!
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &Base_Host::signalConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
-
-//    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::signalConnected);
-//    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &IOTV_Host::signalDisconnected);
-//    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::signalDataRiceved);
 
     _conn_type->connectToHost();
 }

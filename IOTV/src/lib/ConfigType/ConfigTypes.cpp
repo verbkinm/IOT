@@ -63,10 +63,22 @@ const QString Json_Event_Action::COMPARE_GR = ">";
 const QString Json_Event_Action::COMPARE_LS = "<";
 const QString Json_Event_Action::COMPARE_GE = ">=";
 const QString Json_Event_Action::COMPARE_LE = "<=";
+const QString Json_Event_Action::COMPARE_ALWAYS_TRUE = "always true";
+const QString Json_Event_Action::COMPARE_ALWAYS_FALSE = "always false";
 
 const QString Json_Event_Action::CH_NUM = "chNumber";
 const QString Json_Event_Action::CH_NUM_DST = "dst_chNumber";
 const QString Json_Event_Action::CH_NUM_SRC = "src_chNumber";
 
 const QString Json_Event_Action::DATA = "data";
-
+const QString Json_Event_Action::DATA_TYPE = "data_type";
+const QString Json_Event_Action::DATA_TYPE_INT_8 = "int_8";
+const QString Json_Event_Action::DATA_TYPE_INT_16 = "int_16";
+const QString Json_Event_Action::DATA_TYPE_INT_32 = "int_32";
+const QString Json_Event_Action::DATA_TYPE_INT_64 = "int_64";
+const QString Json_Event_Action::DATA_TYPE_FLOAT_32 = "float_32";
+const QString Json_Event_Action::DATA_TYPE_DOUBLE_64 = "double_64";
+const QString Json_Event_Action::DATA_TYPE_BOOL = "bool";
+const QString Json_Event_Action::DATA_TYPE_STRING = "string";
+const QString Json_Event_Action::DATA_TYPE_RAW = "raw";
+const QString Json_Event_Action::DATA_TYPE_NONE = "none";

@@ -17,7 +17,6 @@
 
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
-#include "log.h"
 
 #include "iotv_event_manager.h"
 
@@ -56,11 +55,13 @@ private:
 
     uint _maxClientCount;
 
-    IOTV_Event_Manager _eventManager;
+    IOTV_Event_Manager *_eventManager;
 
 private slots:
     void slotNewConnection();
     void slotDisconnected();
 
     void slotError(QAbstractSocket::SocketError error);
+
+    void slotTest();
 };

@@ -29,7 +29,7 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
 
 bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
-    emit signalDataRX(channelNumber, this->getReadChannelDataRaw(channelNumber));
+    emit signalDataRX(channelNumber, data);
     return _readChannel.setData(channelNumber, data);
 }
 

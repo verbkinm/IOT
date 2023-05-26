@@ -78,13 +78,23 @@ struct Json_Event_Action
     static const QString COMPARE_LS;
     static const QString COMPARE_GE;
     static const QString COMPARE_LE;
+    static const QString COMPARE_ALWAYS_TRUE;
+    static const QString COMPARE_ALWAYS_FALSE;
 
     static const QString CH_NUM;
     static const QString CH_NUM_DST;
     static const QString CH_NUM_SRC;
 
     static const QString DATA;
-
-
-
+    static const QString DATA_TYPE;
+    static const QString DATA_TYPE_INT_8;
+    static const QString DATA_TYPE_INT_16;
+    static const QString DATA_TYPE_INT_32;
+    static const QString DATA_TYPE_INT_64;
+    static const QString DATA_TYPE_FLOAT_32;
+    static const QString DATA_TYPE_DOUBLE_64;
+    static const QString DATA_TYPE_BOOL;
+    static const QString DATA_TYPE_STRING;
+    static const QString DATA_TYPE_RAW;
+    static const QString DATA_TYPE_NONE;
 };

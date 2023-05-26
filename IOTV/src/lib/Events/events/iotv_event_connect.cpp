@@ -6,5 +6,5 @@ IOTV_Event_Connect::IOTV_Event_Connect(const Base_Host *host, QObject *parent) :
     if (host == nullptr)
         return;
 
-    connect(host, &Base_Host::signalConnected, this, &IOTV_Event::signalEvent, Qt::UniqueConnection);
+    connect(host, &Base_Host::signalConnected, this, &IOTV_Event::signalEvent, Qt::QueuedConnection);
 }

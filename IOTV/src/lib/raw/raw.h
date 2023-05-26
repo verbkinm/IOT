@@ -1,11 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include <unordered_map>
 
 #include <QByteArray>
+#include <QVariant>
 #include <QtEndian>
 
 #include <QDebug>
+
+#include "ConfigTypes.h"
 
 class Raw
 {
@@ -26,6 +30,7 @@ public:
         RAW,
         NONE
     };
+    static const std::unordered_map <QString, Raw::DATA_TYPE> typeOnString;
 
     Raw();
 
@@ -44,11 +49,12 @@ public:
 
     Raw(DATA_TYPE type);
     Raw(DATA_TYPE type, const QByteArray &data);
+    Raw(DATA_TYPE type, const QVariant &variant);
 
     //! Массив данных полностью состоит их нулей
     bool isZeroOnly() const;
 
-    //! Длина данных соответствует типу. String и Raw всегда истинны
+    //! Длина данных соответствует типу. String и Raw всегда истинны, None всегда ложь
     bool isValid() const;
 
     bool isBool() const;
@@ -85,6 +91,7 @@ public:
 
     static std::pair<QString, QString> strData(const QByteArray &data, DATA_TYPE type);
     static QByteArray strToByteArray(const QString &dataStr, DATA_TYPE type);
+    static DATA_TYPE dataType(const QString &str);
 
 private:
     DATA_TYPE _type;

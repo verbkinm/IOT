@@ -2,7 +2,8 @@
 
 IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
-    _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts")
+    _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
+    _eventManager(nullptr)
 {
     checkSettingsFileExist();
 
@@ -12,6 +13,8 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     readHostSetting();
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
+
+    slotTest();
 }
 
 IOTV_Server::~IOTV_Server()
@@ -111,47 +114,10 @@ void IOTV_Server::readHostSetting()
             exit(1);
         }
 
+//        connect (host, &Base_Host::signalIdentRecived, this, &IOTV_Server::slotTest);
+
         _settingsHosts.endGroup();
     }
-
-    // TESTING
-
-    QFile file("/home/user/myProg/build-untitled19-Desktop-Debug/json.json");
-    file.open(QIODevice::ReadOnly);
-    parseJson(file.readAll());
-    //    // Подключение
-    //    {
-    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
-    //        IOTV_Event_Connect *iotv_event = new IOTV_Event_Connect(ptrHost);
-
-    //        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Подключено");
-    //        _eventManager.bind(iotv_event, actionMSG);
-    //    }
-    //    // Отключение
-    //    {
-    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
-    //        IOTV_Event_Disconnect *iotv_event = new IOTV_Event_Disconnect(ptrHost);
-
-    //        IOTV_Action_MSG *actionMSG = new IOTV_Action_MSG("Тестовое сообщение - Отключено");
-    //        _eventManager.bind(iotv_event, actionMSG);
-    //    }
-
-    //    // Данные
-    //    {
-    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
-    //        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, std::equal_to<Raw>(), ptrHost, 0, Raw(true));
-
-    //        IOTV_Action_Data_TX *actionTX = new IOTV_Action_Data_TX(ptrHost, 1, Raw(true).data());
-    //        _eventManager.bind(iotv_event, actionTX);
-    //    }
-    //    {
-    //        Base_Host *ptrHost = _iot_hosts.begin()->first;
-    //        IOTV_Event_Data *iotv_event = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::RX, [](const Raw &lhs, const Raw &rhs){return true;}, ptrHost, 0, Raw());
-
-    //        IOTV_Action_Data_TX_Ref *actionTX_Ref = new IOTV_Action_Data_TX_Ref(ptrHost, 2, ptrHost, 0);
-    //        _eventManager.bind(iotv_event, actionTX_Ref);
-
-    //    }
 }
 
 void IOTV_Server::startTCPServer()
@@ -212,6 +178,11 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
 
 void IOTV_Server::parseJson(const QByteArray &data)
 {
+    if (_eventManager != nullptr)
+        delete _eventManager;
+
+    _eventManager = new IOTV_Event_Manager(this);
+
     QJsonParseError err;
     QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError)
@@ -243,7 +214,7 @@ void IOTV_Server::parseJson(const QByteArray &data)
                 auto json_action = id_pair.value(Json_Event_Action::ACTION).toObject();
                 action = parseAction(json_action);
 
-                _eventManager.bind(event, action);
+                _eventManager->bind(event, action);
             }
         }
     }
@@ -260,20 +231,21 @@ IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
 
     if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
     {
-        event = _eventManager.createEvent(host, type);
+        event = _eventManager->createEvent(host, type);
     }
     else if (type == Json_Event_Action::TYPE_STATE)
     {
         QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
-        event = _eventManager.createEvent(host, type, state);
+        event = _eventManager->createEvent(host, type, state);
     }
     else if (type == Json_Event_Action::TYPE_DATA)
     {
         QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
         QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
-        QVariant data = jobj.value(Json_Event_Action::DATA).toVariant();
-        event = _eventManager.createEvent(host, type, direction, data, compare, ch_num);
+        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
+        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
+        event = _eventManager->createEvent(host, type, direction, data, dataType, compare, ch_num);
     }
 
     return event;
@@ -281,14 +253,36 @@ IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
 
 IOTV_Action *IOTV_Server::parseAction(const QJsonObject &jobj) const
 {
+    QString type = jobj.value(Json_Event_Action::TYPE).toString();
     IOTV_Action *action = nullptr;
+
+    if (type == Json_Event_Action::TYPE_DATA_TX)
+    {
+        Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
+        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
+        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toVariant().toString();
+        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
+
+        action = _eventManager->createAction(type, host, ch_num, data, dataType);
+
+    }
+    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
+    {
+        Base_Host *dstHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_DST).toString());
+        Base_Host *srctHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_SRC).toString());
+
+        uint8_t dstChNum = jobj.value(Json_Event_Action::CH_NUM_DST).toInt();
+        uint8_t srcChNum = jobj.value(Json_Event_Action::CH_NUM_SRC).toInt();
+
+        action = _eventManager->createAction(type, dstHost, srctHost, dstChNum, srcChNum);
+    }
 
     return action;
 }
 
 QByteArray IOTV_Server::toData() const
 {
-
+//    _eventManager.createAction();
 }
 
 void IOTV_Server::checkSettingsFileExist()
@@ -446,4 +440,15 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();
+}
+
+void IOTV_Server::slotTest()
+{
+    // TESTING
+
+    QFile file("/home/user/myProg/build-untitled19-Desktop-Debug/json.json");
+    file.open(QIODevice::ReadOnly);
+    parseJson(file.readAll());
+
+//    qDebug() << toData();
 }

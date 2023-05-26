@@ -24,10 +24,7 @@ void IOTV_Action_Data_TX_Ref::exec()
 
 bool IOTV_Action_Data_TX_Ref::isValid() const
 {
-    if (type() == IOTV_Action::ACTION_TYPE::NONE || _dstHost == nullptr || _srcHost == nullptr)
-        return false;
-
-    return true;
+    return !(type() == IOTV_Action::ACTION_TYPE::NONE || _dstHost == nullptr || _srcHost == nullptr);
 }
 
 const Base_Host *IOTV_Action_Data_TX_Ref::dstHost() const

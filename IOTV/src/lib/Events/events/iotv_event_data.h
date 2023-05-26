@@ -24,11 +24,11 @@ public:
 private:
     DATA_DIRECTION _type;
     uint8_t _channelNumber;
-    Raw _raw;
+    Raw _data;
 
     std::function<bool(Raw, Raw)> _compare;
 
 private slots:
-    void slotCheckData(uint8_t channleNumber, Raw rhs);
+    void slotCheckData(uint8_t channleNumber, QByteArray rhs);
 };
 
