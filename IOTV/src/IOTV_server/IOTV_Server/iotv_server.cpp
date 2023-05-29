@@ -14,8 +14,6 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     readEventActionJson();
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
-
-    slotTest();
 }
 
 IOTV_Server::~IOTV_Server()
@@ -115,7 +113,7 @@ void IOTV_Server::readHostSetting()
             exit(1);
         }
 
-//        connect (host, &Base_Host::signalIdentRecived, this, &IOTV_Server::slotTest);
+        //        connect (host, &Base_Host::signalIdentRecived, this, &IOTV_Server::slotTest);
 
         _settingsHosts.endGroup();
     }
@@ -138,7 +136,20 @@ void IOTV_Server::readEventActionJson()
         file.open(QIODevice::ReadOnly);
     }
 
-    parseJson(file.readAll());
+    std::forward_list<const Base_Host *> hosts;
+    for(const auto &pair : _iot_hosts)
+        hosts.push_front(pair.first);
+
+
+    auto list = Event_Action_Parser::parseJson(file.readAll(), hosts);
+
+    if (_eventManager != nullptr)
+        delete _eventManager;
+
+    _eventManager = new IOTV_Event_Manager(this);
+
+    for(const auto &[event, action] : list)
+        _eventManager->bind(event, action);
 }
 
 void IOTV_Server::startTCPServer()
@@ -197,114 +208,80 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
     return nullptr;
 }
 
-void IOTV_Server::parseJson(const QByteArray &data)
-{
-    if (_eventManager != nullptr)
-        delete _eventManager;
+//void IOTV_Server::parseJson(const QByteArray &data)
+//{
+//    if (_eventManager != nullptr)
+//        delete _eventManager;
 
-    _eventManager = new IOTV_Event_Manager(this);
+//    _eventManager = new IOTV_Event_Manager(this);
 
-    QJsonParseError err;
-    QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
-    if (err.error != QJsonParseError::NoError)
-    {
-        qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
-        return;
-    }
 
-    if (jdoc.isObject())
-    {
-        auto jobj = jdoc.object();
-        for (const auto &el : jobj)
-        {
-            if (el.isObject())
-            {
-                IOTV_Event *event = nullptr;
-                IOTV_Action *action = nullptr;
+//}
 
-                auto id_pair = el.toObject(); // id_
-                if (!id_pair.contains(Json_Event_Action::EVENT) || !id_pair.contains(Json_Event_Action::ACTION))
-                {
-                    qDebug() << "error json object " << id_pair;
-                    continue;
-                }
+//IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
+//{
+//    QString type = jobj.value(Json_Event_Action::TYPE).toString();
+//    Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
+//    IOTV_Event *event = nullptr;
 
-                auto json_event = id_pair.value(Json_Event_Action::EVENT).toObject();
-                event = parseEvent(json_event);
+//    if (host == nullptr)
+//        return event;
 
-                auto json_action = id_pair.value(Json_Event_Action::ACTION).toObject();
-                action = parseAction(json_action);
+//    if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
+//    {
+//        event = _eventManager->createEvent(host, type);
+//    }
+//    else if (type == Json_Event_Action::TYPE_STATE)
+//    {
+//        QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
+//        event = _eventManager->createEvent(host, type, state);
+//    }
+//    else if (type == Json_Event_Action::TYPE_DATA)
+//    {
+//        QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
+//        QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
+//        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
+//        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
+//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
+//        event = _eventManager->createEvent(host, type, direction, data, dataType, compare, ch_num);
+//    }
 
-                _eventManager->bind(event, action);
-            }
-        }
-    }
-}
+//    return event;
+//}
 
-IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
-{
-    QString type = jobj.value(Json_Event_Action::TYPE).toString();
-    Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
-    IOTV_Event *event = nullptr;
+//IOTV_Action *IOTV_Server::parseAction(const QJsonObject &jobj) const
+//{
+//    QString type = jobj.value(Json_Event_Action::TYPE).toString();
+//    IOTV_Action *action = nullptr;
 
-    if (host == nullptr)
-        return event;
+//    if (type == Json_Event_Action::TYPE_DATA_TX)
+//    {
+//        Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
+//        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
+//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toVariant().toString();
+//        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
 
-    if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
-    {
-        event = _eventManager->createEvent(host, type);
-    }
-    else if (type == Json_Event_Action::TYPE_STATE)
-    {
-        QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
-        event = _eventManager->createEvent(host, type, state);
-    }
-    else if (type == Json_Event_Action::TYPE_DATA)
-    {
-        QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
-        QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
-        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
-        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
-        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
-        event = _eventManager->createEvent(host, type, direction, data, dataType, compare, ch_num);
-    }
+//        action = _eventManager->createAction(type, host, ch_num, data, dataType);
 
-    return event;
-}
+//    }
+//    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
+//    {
+//        Base_Host *dstHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_DST).toString());
+//        Base_Host *srctHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_SRC).toString());
 
-IOTV_Action *IOTV_Server::parseAction(const QJsonObject &jobj) const
-{
-    QString type = jobj.value(Json_Event_Action::TYPE).toString();
-    IOTV_Action *action = nullptr;
+//        uint8_t dstChNum = jobj.value(Json_Event_Action::CH_NUM_DST).toInt();
+//        uint8_t srcChNum = jobj.value(Json_Event_Action::CH_NUM_SRC).toInt();
 
-    if (type == Json_Event_Action::TYPE_DATA_TX)
-    {
-        Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
-        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
-        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toVariant().toString();
-        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
+//        action = _eventManager->createAction(type, dstHost, srctHost, dstChNum, srcChNum);
+//    }
 
-        action = _eventManager->createAction(type, host, ch_num, data, dataType);
+//    return action;
+//}
 
-    }
-    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
-    {
-        Base_Host *dstHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_DST).toString());
-        Base_Host *srctHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_SRC).toString());
-
-        uint8_t dstChNum = jobj.value(Json_Event_Action::CH_NUM_DST).toInt();
-        uint8_t srcChNum = jobj.value(Json_Event_Action::CH_NUM_SRC).toInt();
-
-        action = _eventManager->createAction(type, dstHost, srctHost, dstChNum, srcChNum);
-    }
-
-    return action;
-}
-
-QByteArray IOTV_Server::toData() const
-{
-//    _eventManager.createAction();
-}
+//QByteArray IOTV_Server::toData() const
+//{
+//    //    _eventManager.createAction();
+//}
 
 void IOTV_Server::checkSettingsFileExist()
 {
@@ -466,8 +443,4 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 void IOTV_Server::slotTest()
 {
     // TESTING
-
-
-
-//    qDebug() << toData();
 }

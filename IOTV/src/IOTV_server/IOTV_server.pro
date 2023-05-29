@@ -20,6 +20,7 @@ SOURCES += \
     ../lib/Events/events/iotv_event_disconnect.cpp \
     ../lib/Events/events/iotv_event_state.cpp \
     ../lib/Events/iotv_event_manager.cpp \
+    ../lib/Json_Parsers/event_action_parser.cpp \
     ../lib/Protocols/embedded/IOTV_SH.cpp \
     ../lib/Protocols/embedded/creatorpkgs.cpp \
     ../lib/Protocols/embedded/header.cpp \
@@ -57,6 +58,7 @@ HEADERS += \
     ../lib/Events/events/iotv_event_disconnect.h \
     ../lib/Events/events/iotv_event_state.h \
     ../lib/Events/iotv_event_manager.h \
+    ../lib/Json_Parsers/event_action_parser.h \
     ../lib/Protocols/embedded/IOTV_SH.h \
     ../lib/Protocols/embedded/creatorpkgs.h \
     ../lib/Protocols/embedded/header.h \
@@ -86,7 +88,8 @@ INCLUDEPATH += ../lib/Base_Host \
             ../lib/Protocols/ \
             ../lib/raw \
             ../lib/ConfigType \
-            ../lib/Events
+            ../lib/Events \
+            ../lib/Json_Parsers
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

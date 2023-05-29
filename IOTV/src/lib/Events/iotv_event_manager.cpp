@@ -47,7 +47,7 @@ size_t IOTV_Event_Manager::size() const
     return _worker.size();
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type) const
+IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type)
 {
     if (type == Json_Event_Action::TYPE_CONN)
         return new IOTV_Event_Connect(host);
@@ -57,7 +57,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return nullptr;
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &state) const
+IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &state)
 {
     if (type != Json_Event_Action::TYPE_STATE)
         return nullptr;
@@ -73,7 +73,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return new IOTV_Event_State(newState, host);
 }
 
-std::function<bool(Raw, Raw)> IOTV_Event_Manager::createCompare(const QString &compare) const
+std::function<bool(Raw, Raw)> IOTV_Event_Manager::createCompare(const QString &compare)
 {
     if (compare == Json_Event_Action::COMPARE_EQ)
         return std::equal_to<Raw>();
@@ -103,7 +103,7 @@ std::function<bool(Raw, Raw)> IOTV_Event_Manager::createCompare(const QString &c
 
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &direction,
                                             const QByteArray &data, const QString &dataType,
-                                            const QString &compare, uint8_t channelNumber) const
+                                            const QString &compare, uint8_t channelNumber)
 {
     if (type != Json_Event_Action::TYPE_DATA)
         return nullptr;
@@ -126,7 +126,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
 }
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                                              const QByteArray &data, const QString &dataType) const
+                                              const QByteArray &data, const QString &dataType)
 {
     if (type != Json_Event_Action::TYPE_DATA_TX && type != Json_Event_Action::TYPE_DATA_RX)
         return nullptr;
@@ -141,7 +141,7 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *ho
     return nullptr;
 }
 
-IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost, uint8_t dstCh_num, uint8_t srcCh_Num) const
+IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost, uint8_t dstCh_num, uint8_t srcCh_Num)
 {
     if (type != Json_Event_Action::TYPE_DATA_TX_REF && type != Json_Event_Action::TYPE_DATA_RX_REF)
         return nullptr;

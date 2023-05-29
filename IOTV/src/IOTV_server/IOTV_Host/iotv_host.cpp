@@ -1,7 +1,7 @@
 #include "iotv_host.h"
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData), /*_parentThread(QThread::currentThread()),*/
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
     _timerState.setParent(this);

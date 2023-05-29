@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iotv_action.h"
-#include "raw.h"
 #include "base_host.h"
 
 class IOTV_Action_Data_TX_Ref : public IOTV_Action
