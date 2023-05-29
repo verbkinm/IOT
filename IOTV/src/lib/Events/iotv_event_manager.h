@@ -1,6 +1,6 @@
 #pragma once
 
-#include <list>
+#include <forward_list>
 
 #include <QObject>
 
@@ -22,7 +22,7 @@ public:
 
     bool bind(IOTV_Event *event, IOTV_Action *action);
 
-    const std::list<std::pair<IOTV_Event *, IOTV_Action *> > &worker() const;
+    const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > &worker() const;
     size_t size() const;
 
     //! IOTV_Event_Connect и IOTV_Event_Disconnect
@@ -36,8 +36,6 @@ public:
                             const QByteArray &data, const QString &dataType,
                             const QString &compare, uint8_t channelNumber);
 
-    static std::function<bool(Raw, Raw)> createCompare(const QString &compare);
-
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
     static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num,
                               const QByteArray &data, const QString &dataType);
@@ -48,7 +46,7 @@ public:
 
 private:
 
-    std::list<std::pair<IOTV_Event *, IOTV_Action *>> _worker;
+    std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> _worker;
 
 signals:
 

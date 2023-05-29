@@ -5,6 +5,8 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
     _eventManager(nullptr)
 {
+
+
     checkSettingsFileExist();
 
     readServerSettings();
@@ -12,6 +14,9 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
 
     readHostSetting();
     readEventActionJson();
+    qDebug() << Event_Action_Parser::toData(_eventManager->worker()).toStdString().c_str();
+
+    exit(1);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }
@@ -136,12 +141,7 @@ void IOTV_Server::readEventActionJson()
         file.open(QIODevice::ReadOnly);
     }
 
-    std::forward_list<const Base_Host *> hosts;
-    for(const auto &pair : _iot_hosts)
-        hosts.push_front(pair.first);
-
-
-    auto list = Event_Action_Parser::parseJson(file.readAll(), hosts);
+    auto list = Event_Action_Parser::parseJson(file.readAll(), baseHostList());
 
     if (_eventManager != nullptr)
         delete _eventManager;
@@ -208,80 +208,14 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
     return nullptr;
 }
 
-//void IOTV_Server::parseJson(const QByteArray &data)
-//{
-//    if (_eventManager != nullptr)
-//        delete _eventManager;
+std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
+{
+    std::forward_list<const Base_Host *> result;
+    for(const auto &pair : _iot_hosts)
+        result.push_front(pair.first);
 
-//    _eventManager = new IOTV_Event_Manager(this);
-
-
-//}
-
-//IOTV_Event *IOTV_Server::parseEvent(const QJsonObject &jobj) const
-//{
-//    QString type = jobj.value(Json_Event_Action::TYPE).toString();
-//    Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
-//    IOTV_Event *event = nullptr;
-
-//    if (host == nullptr)
-//        return event;
-
-//    if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
-//    {
-//        event = _eventManager->createEvent(host, type);
-//    }
-//    else if (type == Json_Event_Action::TYPE_STATE)
-//    {
-//        QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
-//        event = _eventManager->createEvent(host, type, state);
-//    }
-//    else if (type == Json_Event_Action::TYPE_DATA)
-//    {
-//        QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
-//        QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
-//        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
-//        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
-//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
-//        event = _eventManager->createEvent(host, type, direction, data, dataType, compare, ch_num);
-//    }
-
-//    return event;
-//}
-
-//IOTV_Action *IOTV_Server::parseAction(const QJsonObject &jobj) const
-//{
-//    QString type = jobj.value(Json_Event_Action::TYPE).toString();
-//    IOTV_Action *action = nullptr;
-
-//    if (type == Json_Event_Action::TYPE_DATA_TX)
-//    {
-//        Base_Host *host = baseHostFromName(jobj.value(Json_Event_Action::HOST_NAME).toString());
-//        QByteArray data = jobj.value(Json_Event_Action::DATA).toVariant().toByteArray();
-//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toVariant().toString();
-//        uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toInt();
-
-//        action = _eventManager->createAction(type, host, ch_num, data, dataType);
-
-//    }
-//    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
-//    {
-//        Base_Host *dstHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_DST).toString());
-//        Base_Host *srctHost = baseHostFromName(jobj.value(Json_Event_Action::HOST_SRC).toString());
-
-//        uint8_t dstChNum = jobj.value(Json_Event_Action::CH_NUM_DST).toInt();
-//        uint8_t srcChNum = jobj.value(Json_Event_Action::CH_NUM_SRC).toInt();
-
-//        action = _eventManager->createAction(type, dstHost, srctHost, dstChNum, srcChNum);
-//    }
-
-//    return action;
-//}
-
-//QByteArray IOTV_Server::toData() const
-//{
-//    //    _eventManager.createAction();
-//}
+    return result;
+}
 
 void IOTV_Server::checkSettingsFileExist()
 {

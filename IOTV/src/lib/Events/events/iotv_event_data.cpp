@@ -1,6 +1,6 @@
 #include "iotv_event_data.h"
 
-IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<bool(Raw, Raw)> compare,
+IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
                                  const Base_Host *host,
                                  uint8_t channelNumber, const Raw &raw,
                                  QObject *parent) :
@@ -8,7 +8,8 @@ IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<
     _type(direction),
     _channelNumber(channelNumber),
     _data(raw),
-    _compare(compare)
+    _compare(createCompare(compare)),
+    _compareStr(compare)
 {
     if (host == nullptr)
         return;
@@ -29,6 +30,49 @@ IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<
 IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::type() const
 {
     return _type;
+}
+
+std::function<bool(Raw, Raw)> IOTV_Event_Data::createCompare(const QString &compare)
+{
+    if (compare == Json_Event_Action::COMPARE_EQ)
+        return std::equal_to<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_NE)
+        return std::not_equal_to<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_GR)
+        return std::greater<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_LS)
+        return std::less<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_GE)
+        return std::greater_equal<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_LE)
+        return std::less_equal<Raw>();
+    else if (compare == Json_Event_Action::COMPARE_ALWAYS_TRUE)
+    {
+        return [](Raw, Raw)->bool
+        {
+            return true;
+        };
+    }
+
+    return [](Raw, Raw)->bool
+    {
+        return false;
+    };
+}
+
+const QString &IOTV_Event_Data::compareStr() const
+{
+    return _compareStr;
+}
+
+uint8_t IOTV_Event_Data::channelNumber() const
+{
+    return _channelNumber;
+}
+
+const Raw &IOTV_Event_Data::data() const
+{
+    return _data;
 }
 
 void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)

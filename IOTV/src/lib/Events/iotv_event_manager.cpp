@@ -32,19 +32,19 @@ bool IOTV_Event_Manager::bind(IOTV_Event *event, IOTV_Action *action)
     action->setParent(this);
 
     connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec, Qt::UniqueConnection);
-    _worker.emplace_back(event, action);
+    _worker.emplace_front(event, action);
 
     return true;
 }
 
-const std::list<std::pair<IOTV_Event *, IOTV_Action *> > &IOTV_Event_Manager::worker() const
+const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > &IOTV_Event_Manager::worker() const
 {
     return _worker;
 }
 
 size_t IOTV_Event_Manager::size() const
 {
-    return _worker.size();
+    return std::ranges::distance(_worker);
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type)
@@ -73,34 +73,6 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return new IOTV_Event_State(newState, host);
 }
 
-std::function<bool(Raw, Raw)> IOTV_Event_Manager::createCompare(const QString &compare)
-{
-    if (compare == Json_Event_Action::COMPARE_EQ)
-        return std::equal_to<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_NE)
-        return std::not_equal_to<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_GR)
-        return std::greater<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_LS)
-        return std::less<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_GE)
-        return std::greater_equal<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_LE)
-        return std::less_equal<Raw>();
-    else if (compare == Json_Event_Action::COMPARE_ALWAYS_TRUE)
-    {
-        return [](Raw, Raw)->bool
-        {
-            return true;
-        };
-    }
-
-    return [](Raw, Raw)->bool
-    {
-        return false;
-    };
-}
-
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &direction,
                                             const QByteArray &data, const QString &dataType,
                                             const QString &compare, uint8_t channelNumber)
@@ -122,7 +94,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     if (!resultRaw.isValid())
         return nullptr;
 
-    return new IOTV_Event_Data(newDirection, createCompare(compare), host, channelNumber, resultRaw);
+    return new IOTV_Event_Data(newDirection, compare, host, channelNumber, resultRaw);
 }
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,

@@ -44,11 +44,27 @@ std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::
     return result;
 }
 
-QByteArray Event_Action_Parser::toData()
+QByteArray Event_Action_Parser::toData(const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> &list)
 {
-    QByteArray result;
+    QJsonDocument jdoc;
+    QJsonObject jobj_root;
 
-    return result;
+    int index = 0;
+    for (const auto &pair : list)
+    {
+        QJsonObject jpair;
+
+        auto jevent = parseEvent(pair.first);
+        auto jaction = parseAction(pair.second);
+
+        jpair.insert("event", jevent);
+        jpair.insert("action", jaction);
+
+        jobj_root.insert("id_" + QString::number(index++), jpair);
+    }
+
+    jdoc.setObject(jobj_root);
+    return jdoc.toJson();
 }
 
 IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::forward_list<const Base_Host *> &hosts)
@@ -121,4 +137,91 @@ const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const B
         return *it;
 
     return nullptr;
+}
+
+QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
+{
+    QJsonObject id;
+    if (event->type() == IOTV_Event::EVENT_TYPE::CONNECTING)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_CONN);
+        id.insert(Json_Event_Action::HOST_NAME, event->host()->getName());
+    }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::DISCONNECTING)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_DISCONN);
+        id.insert(Json_Event_Action::HOST_NAME, event->host()->getName());
+    }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::STATE)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_STATE);
+        id.insert(Json_Event_Action::HOST_NAME, event->host()->getName());
+
+        const IOTV_Event_State *state = dynamic_cast<const IOTV_Event_State *>(event);
+        Q_ASSERT(state == nullptr);
+        QString stateStr;
+
+        if (state->state() == IOTV_Event_State::STATE_TYPE::ONLINE)
+            stateStr = Json_Event_Action::STATE_ONLINE;
+        else if (state->state() == IOTV_Event_State::STATE_TYPE::OFFLINE)
+            stateStr = Json_Event_Action::STATE_OFFNLINE;
+        else if (state->state() == IOTV_Event_State::STATE_TYPE::SWITCH)
+            stateStr = Json_Event_Action::STATE_SWITCH;
+
+        id.insert(Json_Event_Action::STATE, stateStr);
+    }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::DATA)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_DATA);
+        id.insert(Json_Event_Action::HOST_NAME, event->host()->getName());
+
+        const IOTV_Event_Data *dataEv = dynamic_cast<const IOTV_Event_Data *>(event);
+        Q_ASSERT(dataEv != nullptr);
+
+        QString direction;
+
+        if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::RX)
+            direction = Json_Event_Action::DIRECTION_RX;
+        else if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::TX)
+            direction = Json_Event_Action::DIRECTION_TX;
+        else if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::ANY)
+            direction = Json_Event_Action::DIRECTION_ANY;
+        else if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::CHANGE)
+            direction = Json_Event_Action::DIRECTION_CHANGE;
+
+        QString compare = dataEv->compareStr();
+        uint8_t chNum = dataEv->channelNumber();
+        id.insert(Json_Event_Action::DIRECTION, direction);
+        id.insert(Json_Event_Action::COMPARE, compare);
+        id.insert(Json_Event_Action::CH_NUM, chNum);
+
+        if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
+        {
+            auto raw = dataEv->data();
+            id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
+
+            if (raw.isInt())
+                id.insert(Json_Event_Action::DATA, raw.strData().first.toInt());
+            else if (raw.isReal())
+                id.insert(Json_Event_Action::DATA, raw.strData().first.toDouble());
+            else if (raw.isBool())
+            {
+                QString val = raw.strData().first;
+                bool boolVal = true;
+                if (val == "false" || val == '0')
+                    boolVal = false;
+
+                id.insert(Json_Event_Action::DATA, boolVal);
+            }
+            else if (raw.isString())
+                id.insert(Json_Event_Action::DATA, raw.strData().first);
+        }
+    }
+
+    return id;
+}
+
+QJsonObject Event_Action_Parser::parseAction(const IOTV_Action *action)
+{
+    return {};
 }
