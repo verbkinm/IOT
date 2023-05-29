@@ -40,6 +40,8 @@ struct ServerLog
 
 struct Json_Event_Action
 {
+    static const QString EVENT_ACTION_FILE_NAME;
+
     static const QString EVENT;
     static const QString ACTION;
 
@@ -70,6 +72,7 @@ struct Json_Event_Action
     static const QString DIRECTION_TX;
     static const QString DIRECTION_RX;
     static const QString DIRECTION_ANY;
+    static const QString DIRECTION_CHANGE;
 
     static const QString COMPARE;
     static const QString COMPARE_EQ;

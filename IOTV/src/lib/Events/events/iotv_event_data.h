@@ -11,15 +11,21 @@ public:
         NONE = 0,
         RX,
         TX,
-        ANY
+        ANY,
+        CHANGE
     };
 
-    IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<bool(Raw, Raw)> compare,
+    IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
                     const Base_Host *host,
                     uint8_t channelNumber, const Raw &raw,
                     QObject *parent = nullptr);
 
     DATA_DIRECTION type() const;
+    const QString &compareStr() const;
+
+    uint8_t channelNumber() const;
+
+    const Raw &data() const;
 
 private:
     DATA_DIRECTION _type;
@@ -27,6 +33,9 @@ private:
     Raw _data;
 
     std::function<bool(Raw, Raw)> _compare;
+    QString _compareStr;
+
+    std::function<bool(Raw, Raw)> createCompare(const QString &compare);
 
 private slots:
     void slotCheckData(uint8_t channleNumber, QByteArray rhs);

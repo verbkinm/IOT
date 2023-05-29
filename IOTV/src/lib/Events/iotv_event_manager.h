@@ -1,6 +1,6 @@
 #pragma once
 
-#include <list>
+#include <forward_list>
 
 #include <QObject>
 
@@ -22,33 +22,31 @@ public:
 
     bool bind(IOTV_Event *event, IOTV_Action *action);
 
-    const std::list<std::pair<IOTV_Event *, IOTV_Action *> > &worker() const;
+    const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > &worker() const;
     size_t size() const;
 
     //! IOTV_Event_Connect и IOTV_Event_Disconnect
-    IOTV_Event *createEvent(Base_Host *host, const QString &type) const;
+    static IOTV_Event *createEvent(Base_Host *host, const QString &type);
 
     //! IOTV_Event_State
-    IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &state) const;
+    static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &state);
 
     //! IOTV_Event_Data
-    IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &direction,
+    static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &direction,
                             const QByteArray &data, const QString &dataType,
-                            const QString &compare, uint8_t channelNumber) const;
-
-    std::function<bool(Raw, Raw)> createCompare(const QString &compare) const;
+                            const QString &compare, uint8_t channelNumber);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
-    IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                              const QByteArray &data, const QString &dataType) const;
+    static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num,
+                              const QByteArray &data, const QString &dataType);
 
     //! IOTV_Action_Data_TX_Ref и IOTV_Action_Data_RX_Ref
-    IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
-                              uint8_t dstCh_num, uint8_t srcCh_Num) const;
+    static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
+                              uint8_t dstCh_num, uint8_t srcCh_Num);
 
 private:
 
-    std::list<std::pair<IOTV_Event *, IOTV_Action *>> _worker;
+    std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> _worker;
 
 signals:
 

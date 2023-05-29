@@ -29,8 +29,17 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
 
 bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
+    bool result = false;
+
+    if (_readChannel.getData(channelNumber) != data)
+    {
+        result = true;
+        _readChannel.setData(channelNumber, data);
+        emit signalDataChanged(channelNumber, data);
+    }
     emit signalDataRX(channelNumber, data);
-    return _readChannel.setData(channelNumber, data);
+
+    return result;
 }
 
 bool Base_Host::setWriteChannelData(uint8_t channelNumber, const Raw &data)
@@ -90,6 +99,7 @@ void Base_Host::setDescription(const QString &description)
 
 void Base_Host::setState(State_STATE newState)
 {
+    //!!!
     if (newState != State_STATE_ONLINE && newState != State_STATE_OFFLINE)
     {
         emit signalStateUnknow(newState);
