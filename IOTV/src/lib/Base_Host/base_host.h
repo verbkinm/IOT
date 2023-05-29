@@ -66,15 +66,21 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
+    void signalIdentRecived();
+
     void signalStateOnline();
     void signalStateOffline();
     void signalStateChanged(State_STATE);
     void signalStateUnknow(State_STATE);
 
-    void signalIdentRecived();
+    // получение сырых данных для формирования пакетов
     void signalDataRiceved(QByteArray);
+
+    // сформированные данные
     void signalDataRX(uint8_t channleNumber, QByteArray data);
     void signalDataTX(uint8_t channleNumber, QByteArray data);
+    void signalDataChanged(uint8_t channleNumber, QByteArray data);
+
     // Используетеся для записи данных полученых от клиентов из других потоков
     void signalQueryWrite(int channelNumber, QByteArray data);
 };

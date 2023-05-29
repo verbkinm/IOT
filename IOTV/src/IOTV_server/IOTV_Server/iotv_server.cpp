@@ -11,6 +11,7 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     startTCPServer();
 
     readHostSetting();
+    readEventActionJson();
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 
@@ -120,6 +121,26 @@ void IOTV_Server::readHostSetting()
     }
 }
 
+void IOTV_Server::readEventActionJson()
+{
+    QString fileName = QDir(QFileInfo(_settingsHosts.fileName()).path()).filePath(Json_Event_Action::EVENT_ACTION_FILE_NAME);
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    if (!file.isOpen())
+    {
+        file.open(QIODevice::WriteOnly);
+        if (!file.isOpen())
+        {
+            Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            exit(1);
+        }
+        file.close();
+        file.open(QIODevice::ReadOnly);
+    }
+
+    parseJson(file.readAll());
+}
+
 void IOTV_Server::startTCPServer()
 {
     connect(this, &QTcpServer::newConnection, this, &IOTV_Server::slotNewConnection);
@@ -187,7 +208,7 @@ void IOTV_Server::parseJson(const QByteArray &data)
     QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError)
     {
-        qDebug() << err.errorString() << ' ' << err.offset;
+        qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
         return;
     }
 
@@ -446,9 +467,7 @@ void IOTV_Server::slotTest()
 {
     // TESTING
 
-    QFile file("/home/user/myProg/build-untitled19-Desktop-Debug/json.json");
-    file.open(QIODevice::ReadOnly);
-    parseJson(file.readAll());
+
 
 //    qDebug() << toData();
 }

@@ -115,6 +115,8 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
         newDirection = IOTV_Event_Data::DATA_DIRECTION::TX;
     else if (direction == Json_Event_Action::DIRECTION_ANY)
         newDirection = IOTV_Event_Data::DATA_DIRECTION::ANY;
+    else if (direction == Json_Event_Action::DIRECTION_CHANGE)
+        newDirection = IOTV_Event_Data::DATA_DIRECTION::CHANGE;
 
     Raw resultRaw(Raw::dataType(dataType), data);
     if (!resultRaw.isValid())

@@ -79,6 +79,7 @@ void IOTV_Host::responceRead(const struct Header *header)
     QByteArray data(pkg->data, pkg->dataSize);
     this->setReadChannelData(channelNumber, data);
 
+
     if(_logFile.isEmpty())
         return;
 
@@ -123,7 +124,11 @@ qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
     char outData[BUFSIZ];
     auto size = queryWriteData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, data.data(), data.size());
 
-    return writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    auto resSize = writeToRemoteHost({outData, static_cast<int>(size)}, size);
+
+    emit signalDataTX(channelNumber, data);
+
+    return resSize;
 }
 
 QByteArray IOTV_Host::readData(uint8_t channelNumber) const
@@ -311,7 +316,9 @@ void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
     //!!! Нужно ли посылать данные на устройство, если они равны текущим данным?
     if (getReadChannelData(channelNumber) != data)
+    {
         write(channelNumber, data);
+    }
 }
 
 void IOTV_Host::slotConnected()

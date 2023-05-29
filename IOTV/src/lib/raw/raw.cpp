@@ -67,14 +67,14 @@ Raw::Raw(bool data) :
     _type(DATA_TYPE::BOOL),
     _data{1, /*(char)*/data}
 {
-//    if (data)
-//    {
-//        _data.push_back(0x01);
-//    }
-//    else
-//    {
-//        _data.push_back((char)0x00);
-//    }
+    //    if (data)
+    //    {
+    //        _data.push_back(0x01);
+    //    }
+    //    else
+    //    {
+    //        _data.push_back((char)0x00);
+    //    }
 
 }
 
@@ -120,8 +120,11 @@ Raw::Raw(DATA_TYPE type, const QVariant &variant)
 
     if (type == Raw::DATA_TYPE::BOOL)
     {
-        bool val = variant.toBool();
-        result = Raw(val);
+        QByteArray data = variant.toByteArray();
+        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data == "false"))
+            result = Raw(false);
+        else
+            result = Raw(true);
     }
     else if (type == Raw::DATA_TYPE::INT_8)
     {

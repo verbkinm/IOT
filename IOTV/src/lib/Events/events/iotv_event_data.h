@@ -11,7 +11,8 @@ public:
         NONE = 0,
         RX,
         TX,
-        ANY
+        ANY,
+        CHANGE
     };
 
     IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<bool(Raw, Raw)> compare,

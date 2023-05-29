@@ -22,6 +22,8 @@ IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, std::function<
         connect(host, &Base_Host::signalDataRX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
         connect(host, &Base_Host::signalDataTX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
     }
+    else if (direction == DATA_DIRECTION::CHANGE)
+        connect(host, &Base_Host::signalDataChanged, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
 }
 
 IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::type() const
@@ -31,7 +33,7 @@ IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::type() const
 
 void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)
 {
-    Raw raw = Raw(_host->getReadChannelType(channleNumber), rhs);
-    if (_channelNumber == channleNumber && _compare(_data, Raw(_host->getReadChannelType(channleNumber), rhs)))
+    Raw rawHost(_host->getReadChannelType(channleNumber), rhs);
+    if (_channelNumber == channleNumber && _compare(_data, rawHost))
         emit signalEvent();
 }

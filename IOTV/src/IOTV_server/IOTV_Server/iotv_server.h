@@ -33,6 +33,7 @@ private:
     void checkSettingsFileExist();
     void readServerSettings();
     void readHostSetting();
+    void readEventActionJson();
     void startTCPServer();
 
     void clientOnlineFile() const;
