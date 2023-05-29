@@ -2232,7 +2232,7 @@
     (property "Reference" "Q1" (at 177.8 64.77 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "MMBT3904" (at 177.8 67.31 90)
+    (property "Value" "S9013" (at 177.8 67.31 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 175.26 67.945 0)
