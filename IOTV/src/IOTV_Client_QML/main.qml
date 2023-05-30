@@ -41,6 +41,7 @@ ApplicationWindow {
             }
             onClicked: {
                 window.close()
+                console.log("test")
             }
         }
 
@@ -54,6 +55,24 @@ ApplicationWindow {
             horizontalAlignment: Text.AlignHCenter
             leftPadding: pressBack.width + pressBack.anchors.leftMargin
             rightPadding: pressBack.width + pressBack.anchors.leftMargin
+        }
+
+        ToolButton {
+            id: menu
+            //            icon {
+            //                color: "transparent"
+            //                source: "qrc:/img/back.png"
+            //            }
+            text: "S"
+
+            anchors{
+                verticalCenter: parent.verticalCenter
+                rightMargin: 20
+                right: parent.right
+            }
+            onClicked: {
+                drawer.visible = !drawer.visible
+            }
         }
     }
 
@@ -111,17 +130,14 @@ ApplicationWindow {
 
             ToolButton {
                 text: "E"
-//                icon {
-//                    color: "transparent"
-//                    source: "qrc:/img/home.png"
-//                }
+                //                icon {
+                //                    color: "transparent"
+                //                    source: "qrc:/img/home.png"
+                //                }
                 onClicked: {
-                    if (appStack.currentItem != homePage)
-                        appStack.replace(eventsPage)
-                    else
-                        appStack.push(eventsPage)
-
-//                    appStack.push(eventsPage)
+                    if (appStack.currentItem == clientPage)
+                        appStack.pop()
+                    appStack.push(eventsPage)
                     console.log("event page")
                 }
                 Layout.alignment: Qt.AlignCenter
@@ -133,10 +149,11 @@ ApplicationWindow {
                     source: "qrc:/img/menu.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem != homePage)
-                        appStack.replace(clientPage)
-                    else
-                        appStack.push(clientPage)
+                    if (appStack.currentItem == eventsPage)
+                        appStack.pop()
+                    appStack.push(clientPage)
+
+                    console.log(appStack.depth)
 
                 }
                 Layout.alignment: Qt.AlignCenter

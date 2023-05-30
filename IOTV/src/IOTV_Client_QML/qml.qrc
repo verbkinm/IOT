@@ -65,6 +65,7 @@
         <file>Devices/BaseItem/MeteoBlock.qml</file>
         <file>Devices/BaseItem/MeteoBlock_Item.qml</file>
         <file>Events/Events.qml</file>
+        <file>Events/AddEvent.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>
