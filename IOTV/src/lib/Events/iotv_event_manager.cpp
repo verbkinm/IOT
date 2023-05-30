@@ -100,7 +100,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
                                               const QByteArray &data, const QString &dataType)
 {
-    if (type != Json_Event_Action::TYPE_DATA_TX && type != Json_Event_Action::TYPE_DATA_RX)
+    if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
         return nullptr;
 
     Raw resultRaw(Raw::dataType(dataType), data);
@@ -115,7 +115,7 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *ho
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost, uint8_t dstCh_num, uint8_t srcCh_Num)
 {
-    if (type != Json_Event_Action::TYPE_DATA_TX_REF && type != Json_Event_Action::TYPE_DATA_RX_REF)
+    if (type != Json_Event_Action::TYPE_DATA_TX_REF/* && type != Json_Event_Action::TYPE_DATA_RX_REF*/)
         return nullptr;
 
     if (type == Json_Event_Action::TYPE_DATA_TX_REF)

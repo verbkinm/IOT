@@ -26,5 +26,7 @@ private:
 
     static QJsonObject parseEvent(const IOTV_Event *event);
     static QJsonObject parseAction(const IOTV_Action *action);
+
+    static void writeDatatoJson(const Raw &raw, QJsonObject &id);
 };
 

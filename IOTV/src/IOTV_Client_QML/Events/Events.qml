@@ -21,7 +21,32 @@ Page {
             font.pixelSize: 18
             wrapMode: Text.Wrap
         }
+
+        Button {
+            id: addEvent
+            width: parent.width * 0.8
+            height: 45
+
+            text: "Добавить событие"
+
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+                topMargin: 20
+            }
+
+            onClicked: {
+//                loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
+//                loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
+                //!!!
+                loaderNewAction.source = "qml:/Events/AddEvent.qml"
+                console.log(loaderNewAction.title)
+                loaderNewAction.title = loaderNewAction.objectName
+                appStack.push(loaderNewAction)
+            }
+        }
     }
+
 
 //    states: [
 //        State {
@@ -68,5 +93,12 @@ Page {
 
     Component.onDestruction: {
         console.log("Events page destruct: ", objectName)
+    }
+
+    // Добавление нового события
+    Loader {
+        property string title
+        id: loaderNewAction
+        source: ""
     }
 }

@@ -3,7 +3,7 @@
 IOTV_Action_Data_TX_Ref::IOTV_Action_Data_TX_Ref(Base_Host *dstHost, uint8_t dstChannelNumber,
                                                  Base_Host *srcHost, uint8_t srcChannelNumber,
                                                  QObject *parent) :
-    IOTV_Action(ACTION_TYPE::DATA_TX, parent),
+    IOTV_Action(ACTION_TYPE::DATA_TX_REF, parent),
     _dstHost(dstHost),
     _srcHost(srcHost),
     _dstChannelNumber(dstChannelNumber),

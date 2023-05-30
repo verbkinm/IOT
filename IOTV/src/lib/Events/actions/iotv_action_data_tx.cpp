@@ -4,7 +4,7 @@ IOTV_Action_Data_TX::IOTV_Action_Data_TX(Base_Host *host,
                                          uint8_t channelNumber, const Raw &raw,
                                          QObject *parent) :
     IOTV_Action(ACTION_TYPE::DATA_TX, parent),
-    _dst_host(host),
+    _host(host),
     _channelNumber(channelNumber),
     _data(raw)
 {
@@ -14,17 +14,17 @@ IOTV_Action_Data_TX::IOTV_Action_Data_TX(Base_Host *host,
 void IOTV_Action_Data_TX::exec()
 {
     if (isValid())
-        emit _dst_host->signalQueryWrite(_channelNumber, _data.data());
+        emit _host->signalQueryWrite(_channelNumber, _data.data());
 }
 
 bool IOTV_Action_Data_TX::isValid() const
 {
-    return !(type() == IOTV_Action::ACTION_TYPE::NONE || _dst_host == nullptr);
+    return !(type() == IOTV_Action::ACTION_TYPE::NONE || _host == nullptr);
 }
 
 const Base_Host *IOTV_Action_Data_TX::host() const
 {
-    return _dst_host;
+    return _host;
 }
 
 uint8_t IOTV_Action_Data_TX::channelNumber() const

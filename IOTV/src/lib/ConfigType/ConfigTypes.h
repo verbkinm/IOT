@@ -56,9 +56,9 @@ struct Json_Event_Action
 
     static const QString TYPE_DATA;
     static const QString TYPE_DATA_TX;
-    static const QString TYPE_DATA_RX;
+//    static const QString TYPE_DATA_RX;
     static const QString TYPE_DATA_TX_REF;
-    static const QString TYPE_DATA_RX_REF;
+//    static const QString TYPE_DATA_RX_REF;
 
     static const QString TYPE_CMD_CLIENT;
     static const QString TYPE_MESSAGE;
