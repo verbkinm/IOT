@@ -195,3 +195,10 @@ ApplicationWindow {
     }
 }
 
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}D{i:5}D{i:7}D{i:8}D{i:9}D{i:6}D{i:15}D{i:16}
+D{i:17}
+}
+##^##*/

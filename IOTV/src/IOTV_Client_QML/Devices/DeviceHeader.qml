@@ -5,98 +5,104 @@ Rectangle {
     height: 64
     color: Qt.rgba(0, 0, 0, 0)
 
-    Text {
-        text: device.state ? "online" : "offline"
-        color: device.state ? "green" : "red"
-        anchors {
-            top: parent.top
-            bottom: parent.bottom
-            left: parent.left
-            right: settings.left
-        }
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    DeviceHeaderForm {
+        width: parent.width
+        stateDevText: "online"
     }
 
-    Button {
-        id: settings
+//    Text {
+//        id: stateDev
+//        text: device.state ? "online" : "offline"
+//        color: device.state ? "green" : "red"
+//        anchors {
+//            top: parent.top
+//            bottom: parent.bottom
+//            left: parent.left
+//            right: settings.left
+//        }
+//        horizontalAlignment: Text.AlignHCenter
+//        verticalAlignment: Text.AlignVCenter
+//    }
 
-        width: 52
-        height: 52
+//    Button {
+//        id: settings
 
-        anchors{
-            right: debugMode.left
-            verticalCenter: parent.verticalCenter
-            rightMargin: 10
-        }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
-            source: "qrc:/img/settings.png"
-        }
+//        width: 52
+//        height: 52
 
-        onClicked: {
-            loaderDebug.objectName = device.aliasName + "_setting"
-            loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
-            appStack.push(loaderDebug)
-        }
-    }
+//        anchors{
+//            right: debugMode.left
+//            verticalCenter: parent.verticalCenter
+//            rightMargin: 10
+//        }
+//        display: AbstractButton.IconOnly
+//        icon {
+//            color: "transparent"
+//            source: "qrc:/img/settings.png"
+//        }
 
-    Button {
-        id: debugMode
+//        onClicked: {
+//            loaderDebug.objectName = device.aliasName + "_setting"
+//            loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
+//            appStack.push(loaderDebug)
+//        }
+//    }
 
-        width: settings.width
-        height: settings.height
+//    Button {
+//        id: debugMode
 
-        anchors{
-            right: info.left
-            verticalCenter: parent.verticalCenter
-            rightMargin: 10
-        }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
-            source: "qrc:/img/debug.png"
-        }
+//        width: settings.width
+//        height: settings.height
 
-        onClicked: {
-            loaderDebug.objectName = device.aliasName + "_debug"
-            loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
-            appStack.push(loaderDebug)
-        }
-    }
+//        anchors{
+//            right: info.left
+//            verticalCenter: parent.verticalCenter
+//            rightMargin: 10
+//        }
+//        display: AbstractButton.IconOnly
+//        icon {
+//            color: "transparent"
+//            source: "qrc:/img/debug.png"
+//        }
 
-    Button {
-        id: info
+//        onClicked: {
+//            loaderDebug.objectName = device.aliasName + "_debug"
+//            loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
+//            appStack.push(loaderDebug)
+//        }
+//    }
 
-        width: settings.width
-        height: settings.height
+//    Button {
+//        id: info
 
-        anchors{
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-            rightMargin: 10
-        }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
-            source: "qrc:/img/info.png"
-        }
-        onClicked: {
-            loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                     {parent: appStack,
-                                         visible: true,
-                                         title: "Описание",
-                                         standardButtons: Dialog.Ok,
-                                         text: device.description})
-        }
-    }
+//        width: settings.width
+//        height: settings.height
 
-    Loader {
-        property string title: device.aliasName
+//        anchors{
+//            right: parent.right
+//            verticalCenter: parent.verticalCenter
+//            rightMargin: 10
+//        }
+//        display: AbstractButton.IconOnly
+//        icon {
+//            color: "transparent"
+//            source: "qrc:/img/info.png"
+//        }
+//        onClicked: {
+//            loaderMainItem.setSource("qrc:/DialogShared.qml",
+//                                     {parent: appStack,
+//                                         visible: true,
+//                                         title: "Описание",
+//                                         standardButtons: Dialog.Ok,
+//                                         text: device.description})
+//        }
+//    }
 
-        id: loaderDebug
-        objectName: "debug"
-        source: ""
-    }
+//    Loader {
+//        property string title: device.aliasName
+
+//        id: loaderDebug
+//        objectName: "debug"
+//        source: ""
+//    }
 }

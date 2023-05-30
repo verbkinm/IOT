@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
+import QtQuick.Timeline 1.0
 
 Page {
     id: root
@@ -28,6 +29,8 @@ Page {
             height: 45
 
             text: "Добавить событие"
+            highlighted: false
+            flat: false
 
             anchors {
                 horizontalCenter: parent.horizontalCenter
@@ -36,8 +39,8 @@ Page {
             }
 
             onClicked: {
-//                loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
-//                loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
+                //                loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
+                //                loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
                 //!!!
                 loaderNewAction.source = "qml:/Events/AddEvent.qml"
                 console.log(loaderNewAction.title)
@@ -48,44 +51,44 @@ Page {
     }
 
 
-//    states: [
-//        State {
-//            name: stateConnected
-//            PropertyChanges { target: addr; enabled: false}
-//            PropertyChanges { target: port; enabled: false}
-//            PropertyChanges { target: autoConnect; enabled: false}
-//            PropertyChanges { target: btn_connect; text: "отключиться"}
-//            PropertyChanges { target: loaderMainItem; source: ""}
-//        },
-//        State {
-//            name: stateConnecting
-//            PropertyChanges { target: btn_connect; text: "подключение..."}
-//        },
-//        State {
-//            name: stateDisconnected
-//            PropertyChanges { target: addr; enabled: true}
-//            PropertyChanges { target: port; enabled: true}
-//            PropertyChanges { target: autoConnect; enabled: true}
-//            PropertyChanges { target: btn_connect; text: "подключиться"}
-//            PropertyChanges { target: loaderMainItem; source: ""}
-//        }
-//    ]
+    //    states: [
+    //        State {
+    //            name: stateConnected
+    //            PropertyChanges { target: addr; enabled: false}
+    //            PropertyChanges { target: port; enabled: false}
+    //            PropertyChanges { target: autoConnect; enabled: false}
+    //            PropertyChanges { target: btn_connect; text: "отключиться"}
+    //            PropertyChanges { target: loaderMainItem; source: ""}
+    //        },
+    //        State {
+    //            name: stateConnecting
+    //            PropertyChanges { target: btn_connect; text: "подключение..."}
+    //        },
+    //        State {
+    //            name: stateDisconnected
+    //            PropertyChanges { target: addr; enabled: true}
+    //            PropertyChanges { target: port; enabled: true}
+    //            PropertyChanges { target: autoConnect; enabled: true}
+    //            PropertyChanges { target: btn_connect; text: "подключиться"}
+    //            PropertyChanges { target: loaderMainItem; source: ""}
+    //        }
+    //    ]
 
-//    Connections {
-//        target: client
-//        function onSignalConnected() {
-//            state = stateConnected
-//            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение установлено"})
-//        }
-//        function onSignalConnecting() {
-//            state = stateConnecting
-//            loaderMainItem.setSource("qrc:/PopupWait.qml", {parent: appStack})
-//        }
-//        function onSignalDisconnected() {
-//            state = stateDisconnected
-//            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение сброшено"})
-//        }
-//    }
+    //    Connections {
+    //        target: client
+    //        function onSignalConnected() {
+    //            state = stateConnected
+    //            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение установлено"})
+    //        }
+    //        function onSignalConnecting() {
+    //            state = stateConnecting
+    //            loaderMainItem.setSource("qrc:/PopupWait.qml", {parent: appStack})
+    //        }
+    //        function onSignalDisconnected() {
+    //            state = stateDisconnected
+    //            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение сброшено"})
+    //        }
+    //    }
 
     Component.onCompleted: {
         console.log("Events page construct: ", objectName)
@@ -101,4 +104,17 @@ Page {
         id: loaderNewAction
         source: ""
     }
+
+    Timeline {
+        id: timeline
+        startFrame: 0
+        enabled: true
+        endFrame: 1000
+    }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}D{i:3}D{i:4}D{i:1}D{i:5}
+}
+##^##*/
