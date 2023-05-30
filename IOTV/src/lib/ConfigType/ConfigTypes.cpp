@@ -41,9 +41,9 @@ const QString Json_Event_Action::TYPE_DISCONN = "disconnection";
 const QString Json_Event_Action::TYPE_STATE = "state";
 const QString Json_Event_Action::TYPE_DATA = "data";
 const QString Json_Event_Action::TYPE_DATA_TX = "data_tx";
-const QString Json_Event_Action::TYPE_DATA_RX = "data_rx";
+//const QString Json_Event_Action::TYPE_DATA_RX = "data_rx";
 const QString Json_Event_Action::TYPE_DATA_TX_REF = "data_tx_ref";
-const QString Json_Event_Action::TYPE_DATA_RX_REF = "data_rx_ref";
+//const QString Json_Event_Action::TYPE_DATA_RX_REF = "data_rx_ref";
 const QString Json_Event_Action::TYPE_CMD_CLIENT = "cmd_client";
 const QString Json_Event_Action::TYPE_MESSAGE = "message";
 

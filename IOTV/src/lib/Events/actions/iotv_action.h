@@ -10,9 +10,7 @@ public:
     {
         NONE = 0,
         DATA_TX,
-        DATA_RX,
         DATA_TX_REF,
-        DATA_RC_REF,
         CMD_CLIENT,
         MESSAGE
     };

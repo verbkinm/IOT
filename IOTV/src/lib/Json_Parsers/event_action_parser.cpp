@@ -158,9 +158,9 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
         id.insert(Json_Event_Action::HOST_NAME, event->host()->getName());
 
         const IOTV_Event_State *state = dynamic_cast<const IOTV_Event_State *>(event);
-        Q_ASSERT(state == nullptr);
-        QString stateStr;
+        Q_ASSERT(state != nullptr);
 
+        QString stateStr;
         if (state->state() == IOTV_Event_State::STATE_TYPE::ONLINE)
             stateStr = Json_Event_Action::STATE_ONLINE;
         else if (state->state() == IOTV_Event_State::STATE_TYPE::OFFLINE)
@@ -179,7 +179,6 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
         Q_ASSERT(dataEv != nullptr);
 
         QString direction;
-
         if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::RX)
             direction = Json_Event_Action::DIRECTION_RX;
         else if (dataEv->type() == IOTV_Event_Data::DATA_DIRECTION::TX)
@@ -190,38 +189,72 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
             direction = Json_Event_Action::DIRECTION_CHANGE;
 
         QString compare = dataEv->compareStr();
-        uint8_t chNum = dataEv->channelNumber();
         id.insert(Json_Event_Action::DIRECTION, direction);
         id.insert(Json_Event_Action::COMPARE, compare);
-        id.insert(Json_Event_Action::CH_NUM, chNum);
+        id.insert(Json_Event_Action::CH_NUM, dataEv->channelNumber());
 
         if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
         {
             auto raw = dataEv->data();
             id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
 
-            if (raw.isInt())
-                id.insert(Json_Event_Action::DATA, raw.strData().first.toInt());
-            else if (raw.isReal())
-                id.insert(Json_Event_Action::DATA, raw.strData().first.toDouble());
-            else if (raw.isBool())
-            {
-                QString val = raw.strData().first;
-                bool boolVal = true;
-                if (val == "false" || val == '0')
-                    boolVal = false;
-
-                id.insert(Json_Event_Action::DATA, boolVal);
-            }
-            else if (raw.isString())
-                id.insert(Json_Event_Action::DATA, raw.strData().first);
+            writeDatatoJson(raw, id);
         }
     }
 
     return id;
 }
 
+void Event_Action_Parser::writeDatatoJson(const Raw &raw, QJsonObject &id)
+{
+    id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
+
+    if (raw.isInt())
+        id.insert(Json_Event_Action::DATA, raw.strData().first.toInt());
+    else if (raw.isReal())
+        id.insert(Json_Event_Action::DATA, raw.strData().first.toDouble());
+    else if (raw.isBool())
+    {
+        QString val = raw.strData().first;
+        bool boolVal = true;
+        if (val == "false" || val == '0')
+            boolVal = false;
+
+        id.insert(Json_Event_Action::DATA, boolVal);
+    }
+    else if (raw.isString())
+        id.insert(Json_Event_Action::DATA, raw.strData().first);
+}
+
 QJsonObject Event_Action_Parser::parseAction(const IOTV_Action *action)
 {
-    return {};
+    QJsonObject id;
+    if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_DATA_TX);
+
+        const IOTV_Action_Data_TX *actioDataTX = dynamic_cast<const IOTV_Action_Data_TX *>(action);
+        Q_ASSERT(actioDataTX != nullptr);
+
+        id.insert(Json_Event_Action::HOST_NAME, actioDataTX->host()->getName());
+        id.insert(Json_Event_Action::CH_NUM, actioDataTX->channelNumber());
+
+        auto raw = actioDataTX->data();
+        writeDatatoJson(raw, id);
+    }
+    else if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_DATA_TX_REF);
+
+        const IOTV_Action_Data_TX_Ref *actioDataTX_Ref = dynamic_cast<const IOTV_Action_Data_TX_Ref *>(action);
+        Q_ASSERT(actioDataTX_Ref != nullptr);
+
+        id.insert(Json_Event_Action::HOST_SRC, actioDataTX_Ref->srcHost()->getName());
+        id.insert(Json_Event_Action::HOST_DST, actioDataTX_Ref->dstHost()->getName());
+
+        id.insert(Json_Event_Action::CH_NUM_SRC, actioDataTX_Ref->srcChannelNumber());
+        id.insert(Json_Event_Action::CH_NUM_DST, actioDataTX_Ref->dstChannelNumber());
+    }
+
+    return id;
 }

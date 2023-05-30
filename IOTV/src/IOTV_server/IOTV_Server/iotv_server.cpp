@@ -16,7 +16,7 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     readEventActionJson();
     qDebug() << Event_Action_Parser::toData(_eventManager->worker()).toStdString().c_str();
 
-    exit(1);
+//    exit(1);
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }

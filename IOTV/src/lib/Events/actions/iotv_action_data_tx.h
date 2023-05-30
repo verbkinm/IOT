@@ -19,7 +19,7 @@ public:
     virtual bool isValid() const override;
 
 private:
-    Base_Host *_dst_host;
+    Base_Host *_host;
     uint8_t _channelNumber;
     Raw _data;
 };
