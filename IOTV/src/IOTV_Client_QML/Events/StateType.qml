@@ -7,7 +7,7 @@ Item {
 
     id: itemStateType
     height: 50
-    width: parent.width
+    width: 400//parent.width
 
     Text {
         text: "Тип состояния:"

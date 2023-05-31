@@ -7,7 +7,7 @@ Item {
 
     id: actionTypeItem
     height: 50
-    width: parent.width
+    width: 400//parent.width
 
     Text {
         text: "Тип действия:"
@@ -22,6 +22,7 @@ Item {
     ComboBox {
         id: actionTypeComboBox
         width: 200
+        wheelEnabled: false
 
         model: ["data_tx", "data_tx_ref"]
 

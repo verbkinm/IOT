@@ -28,6 +28,8 @@ Page {
             height: 45
 
             text: "Добавить событие"
+            flat: false
+            highlighted: true
 
             anchors {
                 horizontalCenter: parent.horizontalCenter

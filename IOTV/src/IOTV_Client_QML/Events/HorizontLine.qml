@@ -3,7 +3,7 @@ import QtQuick.Controls 2.5
 
 Item{
     height: 20
-    width: parent.width
+    width: 400//parent.width
 
     Rectangle{
         height: 2

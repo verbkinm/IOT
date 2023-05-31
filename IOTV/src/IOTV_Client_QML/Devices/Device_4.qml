@@ -227,7 +227,7 @@ Page {
             //                popup.open()
             //            }
 
-            adc_value = device.readData(0)
+            adc_value = parseInt(device.readData(0))
             repeateSate = device.readData(1) === "true" ? true : false
             mode = device.readData(2)
             triggerState = device.readData(3) === "true" ? true : false

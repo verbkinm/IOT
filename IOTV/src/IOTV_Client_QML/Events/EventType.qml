@@ -7,7 +7,7 @@ Item {
 
     id: eventTypeItem
     height: 50
-    width: parent.width
+    width: 400//parent.width
 
     Text {
         id: eventTypeNameText

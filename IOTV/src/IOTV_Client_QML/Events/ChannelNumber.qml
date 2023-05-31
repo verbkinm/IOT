@@ -6,7 +6,7 @@ Item {
     property alias value: chNumberSpinBox.value
 
     height: 50
-    width: parent.width
+    width: 400//parent.width
 
     Text {
         id: chNumberText

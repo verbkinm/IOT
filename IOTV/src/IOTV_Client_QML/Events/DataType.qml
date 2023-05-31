@@ -5,13 +5,13 @@ Column {
     property string direction: directionTypeComboBox.currentText
     property string compare: compareTypeComboBox.currentText
     property string dataType: dataTypeComboBox.currentText
-    property string dataString: data.text
+    property string dataString: _data.text
     property int channelNumber: chNum.value
 
     property alias model: compareTypeComboBox.model
 
     id: root
-    width: parent.width
+    width: 400//parent.width
 
     Item {
         id: rectData_1
@@ -102,12 +102,14 @@ Column {
     }
 
     DataString {
-        id: data
+        id: _data
         visible: !((compareTypeComboBox.currentText === compareTypeComboBox.model[6]) || (compareTypeComboBox.currentText === compareTypeComboBox.model[7]))
+        width: parent.width
     }
 
     ChannelNumber {
         id: chNum
         label: "№ канала"
+        width: parent.width
     }
 }

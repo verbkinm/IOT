@@ -3,11 +3,11 @@ import QtQuick.Controls 2.5
 
 Column {
     property string hostName: hostNameAction.hostName
-    property string dataString: data.text
+    property string dataString: _data.text
     property string dataType: dataTypeComboBox.currentText
     property int channelNumber: chNum.value
 
-    width: parent.width
+    width: 400//parent.width
 
     HostNameComboBox {
         id: hostNameAction
@@ -43,11 +43,13 @@ Column {
     }
 
     DataString {
-        id: data
+        id: _data
+        width: parent.width
     }
 
     ChannelNumber {
         id: chNum
         label: "№ канала"
+        width: parent.width
     }
 }

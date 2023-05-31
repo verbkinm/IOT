@@ -7,7 +7,7 @@ Column {
     property alias srcChannelNumber: srcChNum.value
     property alias dstChannelNumber: dstChNum.value
 
-    width: parent.width
+    width: 400//parent.width
 
     HostNameComboBox {
         id: srcHost
@@ -19,6 +19,7 @@ Column {
     ChannelNumber {
         id: srcChNum
         label: "Канал источника"
+        width: parent.width
     }
 
     HostNameComboBox {
@@ -31,6 +32,7 @@ Column {
     ChannelNumber {
         id: dstChNum
         label: "Канал приёмника"
+        width: parent.width
     }
 
     function listName() {

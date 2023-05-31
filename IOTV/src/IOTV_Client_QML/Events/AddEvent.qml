@@ -52,11 +52,13 @@ Page {
             StateType {
                 id: itemStateType
                 visible: eventTypeItem.eventType === eventTypeItem.model[2]
+                width: parent.width
             }
 
             DataType {
                 id: itemDataType
                 visible: eventTypeItem.eventType === eventTypeItem.model[3]
+                width: parent.width
             }
 
             HorizontLine {
@@ -84,6 +86,7 @@ Page {
 
             ActionType {
                 id: actionTypeItem
+                width: parent.width
             }
 
             ActionDataTX {
