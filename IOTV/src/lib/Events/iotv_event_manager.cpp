@@ -28,10 +28,14 @@ bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Actio
         return false;
     }
 
+    std::lock_guard lg(_workerMutex);
+
     event->setParent(this);
     action->setParent(this);
 
     connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec, Qt::UniqueConnection);
+
+
     _worker.emplace_front(name, std::make_pair(event, action));
 
     return true;
@@ -45,6 +49,7 @@ const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *
 
 size_t IOTV_Event_Manager::size() const
 {
+    std::lock_guard lg(_workerMutex);
     return std::ranges::distance(_worker);
 }
 

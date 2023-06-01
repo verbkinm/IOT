@@ -58,11 +58,10 @@ ApplicationWindow {
 
         ToolButton {
             id: menu
-            //            icon {
-            //                color: "transparent"
-            //                source: "qrc:/img/back.png"
-            //            }
-            text: "S"
+            icon {
+                color: "transparent"
+                source: "qrc:/img/menu.png"
+            }
 
             anchors{
                 verticalCenter: parent.verticalCenter
@@ -128,7 +127,10 @@ ApplicationWindow {
             }
 
             ToolButton {
-                text: "E"
+                icon {
+                    color: "transparent"
+                    source: "qrc:/img/calendar_white.png"
+                }
                 onClicked: {
                     if (appStack.currentItem == clientPage)
                         appStack.pop()
@@ -140,7 +142,7 @@ ApplicationWindow {
             ToolButton {
                 icon {
                     color: "transparent"
-                    source: "qrc:/img/menu.png"
+                    source: "qrc:/img/settings_white.png"
                 }
                 onClicked: {
                     if (appStack.currentItem == eventsPage)

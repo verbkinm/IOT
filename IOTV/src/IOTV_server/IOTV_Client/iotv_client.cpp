@@ -154,11 +154,8 @@ void IOTV_Client::processQueryTech(const Header *header)
         if (_eventManager != nullptr)
         {
             std::string str = Event_Action_Parser::toData(_eventManager->worker()).toStdString();
-            auto strSize = str.size();
-            size = responseTech(outData, BUFSIZ, str.c_str(), strSize, header);
+            size = responseTech(outData, BUFSIZ, str.c_str(), str.size(), header);
             write({outData, static_cast<int>(size)}, size);
-
-            qDebug() << "send tech data";
         }
     }
 }

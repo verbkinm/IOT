@@ -76,6 +76,8 @@
         <file>Events/EventType.qml</file>
         <file>Events/ActionType.qml</file>
         <file>Events/DataString.qml</file>
+        <file>img/settings_white.png</file>
+        <file>img/calendar_white.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

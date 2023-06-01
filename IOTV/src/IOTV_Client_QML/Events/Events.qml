@@ -9,7 +9,7 @@ Page {
 
     onVisibleChanged: {
         if (visible)
-            client.queryEventAction()
+            timer.start()
     }
 
     Flickable {
@@ -63,6 +63,7 @@ Page {
         function onSignalEventAction() {
             console.log("!!!!!!!!!!!")
             popup.close()
+            timer.stop()
         }
     }
 
@@ -82,6 +83,16 @@ Page {
 
         onSourceChanged: {
             console.log ("change source")
+        }
+    }
+
+    Timer {
+        id: timer
+        interval: 5000
+        repeat: true
+        running: false
+        onTriggered: {
+            client.queryEventAction()
         }
     }
 }
