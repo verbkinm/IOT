@@ -8,16 +8,14 @@
 #include <QTimer>
 #include <QByteArray>
 
-#include "log.h"
 #include "IOTV_Host/iotv_host.h"
-#include "IOTV_SH.h"
-#include "creatorpkgs.h"
+#include "iotv_event_manager.h"
 
 class IOTV_Client : public QObject
 {
     Q_OBJECT
 public:
-    IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent = nullptr);
+    IOTV_Client(QTcpSocket *socket, const IOTV_Event_Manager *eventManager, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent);
     ~IOTV_Client();
 
     const QTcpSocket *socket() const;
@@ -26,6 +24,7 @@ public:
 
 private:
     QTcpSocket *_socket;
+    const IOTV_Event_Manager *_eventManager;
 
     const std::unordered_map<IOTV_Host* , QThread*> &_hosts;
 
@@ -38,11 +37,12 @@ private:
     uint64_t _expectedDataSize;
 
     // Пришел запрос от клиента
-    void queryIdentification();
-    void queryState(const struct Header* header);
-    void queryRead(const struct Header* header);
-    void queryWrite(const struct Header* header);
-    void queryPingPoing();
+    void processQueryIdentification();
+    void processQueryState(const struct Header* header);
+    void processQueryRead(const struct Header* header);
+    void processQueryWrite(const struct Header* header);
+    void processQueryPingPoing();
+    void processQueryTech(const struct Header* header);
 
     void write(const QByteArray &data, qint64 size = -1) const;
 

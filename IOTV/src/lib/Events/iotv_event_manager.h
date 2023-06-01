@@ -1,6 +1,7 @@
 #pragma once
 
 #include <forward_list>
+#include <set>
 
 #include <QObject>
 
@@ -20,9 +21,9 @@ class IOTV_Event_Manager : public QObject
 public:
     explicit IOTV_Event_Manager(QObject *parent = nullptr);
 
-    bool bind(IOTV_Event *event, IOTV_Action *action);
+    bool bind(const QString &name, IOTV_Event *event, IOTV_Action *action);
 
-    const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > &worker() const;
+    const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>>  &worker() const;
     size_t size() const;
 
     //! IOTV_Event_Connect и IOTV_Event_Disconnect
@@ -45,8 +46,9 @@ public:
                               uint8_t dstCh_num, uint8_t srcCh_Num);
 
 private:
+    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> _worker;
 
-    std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> _worker;
+    mutable std::mutex _workerMutex;
 
 signals:
 

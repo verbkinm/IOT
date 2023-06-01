@@ -80,7 +80,7 @@ void IOTV_Host::responceRead(const struct Header *header)
     this->setReadChannelData(channelNumber, data);
 
 
-    if(_logFile.isEmpty())
+    if (_logFile.isEmpty())
         return;
 
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
@@ -118,7 +118,7 @@ qint64 IOTV_Host::readAll()
 
 qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
 {
-    if((channelNumber >= this->getWriteChannelLength()))
+    if ((channelNumber >= this->getWriteChannelLength()))
         return -1;
 
     char outData[BUFSIZ];
@@ -182,13 +182,13 @@ void IOTV_Host::slotDataResived(QByteArray data)
 
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
                 responceIdentification(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_READ)
+            else if (header->assignment == HEADER_ASSIGNMENT_READ)
                 responceRead(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
+            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(iot);
-            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
+            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 responcePingPoing(iot);
-            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
+            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
@@ -198,7 +198,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
 
             clearIOTV_Server(iot);
         }
-        else if(header->type == HEADER_TYPE_REQUEST)
+        else if (header->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент устройства нe посылают запросы!!!
             Log::write("Запрос от устройств не предусмотрен!",

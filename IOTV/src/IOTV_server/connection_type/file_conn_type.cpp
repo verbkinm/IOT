@@ -13,7 +13,7 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
     return -1;
 //    Log::write(_name + ": data transmit to " + _file.fileName() + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT);
 
-//    if((data.size() == 1) && (data[0] == IOTV_SH::QUERY_WAY_BYTE))
+//    if ((data.size() == 1) && (data[0] == IOTV_SH::QUERY_WAY_BYTE))
 //    {
 //        QByteArray recv;
 //        recv.push_back(IOTV_SH::RESPONSE_WAY_BYTE);
@@ -30,9 +30,9 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 
 //        return 0;
 //    }
-//    else if((data.size() == 1) && (data[0] == IOTV_SH::QUERY_READ_BYTE))
+//    else if ((data.size() == 1) && (data[0] == IOTV_SH::QUERY_READ_BYTE))
 //    {
-//        if(QFileInfo(_file).size() > BUFFER_MAX_SIZE)
+//        if (QFileInfo(_file).size() > BUFFER_MAX_SIZE)
 //        {
 //            Log::write("File " + _file.fileName() + " is large!");
 //            return 0;
@@ -57,9 +57,9 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 //        _host_buffer_data = recv;
 //        slotReadData();
 //    }
-//    else if(data.size() >= 3 && data[0] == IOTV_SH::QUERY_WRITE_BYTE)
+//    else if (data.size() >= 3 && data[0] == IOTV_SH::QUERY_WRITE_BYTE)
 //    {
-//        if(data.size() != (3 + (data.at(1) | data.at(2))) )
+//        if (data.size() != (3 + (data.at(1) | data.at(2))) )
 //        {
 //            Log::write(_name + ": data transimt error" + " -> " + data.toHex(':'));
 //            return -1;
@@ -67,7 +67,7 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 
 //        QByteArray buffer = data.mid(3);
 
-//        if(!_file.open(QIODevice::WriteOnly))
+//        if (!_file.open(QIODevice::WriteOnly))
 //        {
 //            Log::write(_name + ": can't write to file " + QFileInfo(_file).absoluteFilePath());
 //            return -1;
@@ -81,7 +81,7 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 //        _host_buffer_data = recv;
 //        slotReadData();
 //    }
-//    else if(data.size() == 1 && data[0] == IOTV_SH::QUERY_PING_BYTE)
+//    else if (data.size() == 1 && data[0] == IOTV_SH::QUERY_PING_BYTE)
 //    {
 //        IOTV_SH::RESPONSE_PONG pkg;
 //        pkg.state = true;
@@ -104,7 +104,7 @@ qint64 File_conn_type::write(const QByteArray &data, qint64 size)
 void File_conn_type::connectToHost()
 {
 //    _reconnectTimer.stop();
-    if(!_file.open(QIODevice::ReadWrite))
+    if (!_file.open(QIODevice::ReadWrite))
     {
         Log::write(_name + ": can't open file to read write " + QFileInfo(_file).absoluteFilePath(),
                    Log::Write_Flag::FILE_STDOUT,

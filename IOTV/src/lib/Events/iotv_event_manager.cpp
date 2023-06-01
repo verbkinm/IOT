@@ -6,7 +6,7 @@ IOTV_Event_Manager::IOTV_Event_Manager(QObject *parent)
 
 }
 
-bool IOTV_Event_Manager::bind(IOTV_Event *event, IOTV_Action *action)
+bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Action *action)
 {
     if (event == nullptr && action == nullptr)
         return false;
@@ -32,13 +32,14 @@ bool IOTV_Event_Manager::bind(IOTV_Event *event, IOTV_Action *action)
     action->setParent(this);
 
     connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec, Qt::UniqueConnection);
-    _worker.emplace_front(event, action);
+    _worker.emplace_front(name, std::make_pair(event, action));
 
     return true;
 }
 
-const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > &IOTV_Event_Manager::worker() const
+const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &IOTV_Event_Manager::worker() const
 {
+    std::lock_guard lg(_workerMutex);
     return _worker;
 }
 

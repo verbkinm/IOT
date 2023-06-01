@@ -41,7 +41,6 @@ ApplicationWindow {
             }
             onClicked: {
                 window.close()
-                console.log("test")
             }
         }
 
@@ -130,15 +129,10 @@ ApplicationWindow {
 
             ToolButton {
                 text: "E"
-                //                icon {
-                //                    color: "transparent"
-                //                    source: "qrc:/img/home.png"
-                //                }
                 onClicked: {
                     if (appStack.currentItem == clientPage)
                         appStack.pop()
                     appStack.push(eventsPage)
-                    console.log("event page")
                 }
                 Layout.alignment: Qt.AlignCenter
             }

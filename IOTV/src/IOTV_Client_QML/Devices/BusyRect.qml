@@ -2,8 +2,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 Rectangle {
-    width: parent.width
-    height: parent.height
+    width: 400//parent.width
+    height: 400//parent.height
     z: 1
     color: Qt.rgba(0, 0, 0, 0.1)
 

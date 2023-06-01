@@ -107,6 +107,19 @@ void MainWindow::printStateData(const State *body)
     ui->convertText->appendPlainText(result);
 }
 
+void MainWindow::printTechData(const Tech *body)
+{
+    Q_ASSERT(body != nullptr);
+    QString result;
+
+    result += "\tТип:\t" + techType(body->type) + "\n";
+    result += "\tФлаги:\t\t" + QString::number(body->flags) + "\n";
+    result += "\tРазмер данных\t" + QString::number(body->dataSize) + "\n";
+    result += "\tДанные:\t" + QByteArray{(const char*)body->data, static_cast<int>(body->dataSize)}.toHex(':') + "\n";
+
+    ui->convertText->appendPlainText(result);
+}
+
 QString MainWindow::headerType(Header_TYPE type) const
 {
     switch(type)
@@ -134,6 +147,8 @@ QString MainWindow::headerAssignment(Header_ASSIGNMENT assignment) const
         return "Запись";
     case HEADER_ASSIGNMENT_PING_PONG:
         return "Пинг";
+    case HEADER_ASSIGNMENT_TECH:
+        return "Технические данные";
     default:
         return "NONE";
     }
@@ -145,6 +160,18 @@ QString MainWindow::staetType(State_STATE state) const
     {
     case State_STATE_ONLINE:
         return "Online";
+    default:
+        return "Offline";
+    }
+}
+
+QString MainWindow::techType(Tech_TYPE type) const
+{
+    switch(type)
+    {
+    case Tech_TYPE_EV_AC:
+        return "Event and Action";
+    case Tech_TYPE_NONE:
     default:
         return "Offline";
     }
@@ -225,6 +252,12 @@ void MainWindow::slotConvert()
             ui->convertText->appendPlainText("\tSTATE\n");
             counterState++;
             printStateData((struct State *)header->pkg);
+        }
+        else if(header->assignment == HEADER_ASSIGNMENT_TECH)
+        {
+            ui->convertText->appendPlainText("\tTECH\n");
+            counterState++;
+            printTechData((struct Tech *)header->pkg);
         }
 
         clearHeader(header);

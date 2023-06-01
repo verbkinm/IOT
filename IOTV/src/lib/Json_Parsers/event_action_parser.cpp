@@ -1,6 +1,6 @@
 #include "event_action_parser.h"
 
-std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts)
+std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts)
 {
     QJsonParseError err;
     QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
@@ -10,12 +10,15 @@ std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::
         exit(-1);
     }
 
-    std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> result;
+    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> result;
 
     if (jdoc.isObject())
     {
-
         auto jobj = jdoc.object();
+
+        auto names = jobj.keys();
+        int index = 0;
+
         for (const auto &el : jobj)
         {
             if (el.isObject())
@@ -23,7 +26,7 @@ std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::
                 IOTV_Event *event = nullptr;
                 IOTV_Action *action = nullptr;
 
-                auto id_pair = el.toObject(); // id_
+                auto id_pair = el.toObject(); // Пара event и action
                 if (!id_pair.contains(Json_Event_Action::EVENT) || !id_pair.contains(Json_Event_Action::ACTION))
                 {
                     qDebug() << "error json object " << id_pair;
@@ -36,7 +39,7 @@ std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::
                 auto json_action = id_pair.value(Json_Event_Action::ACTION).toObject();
                 action = parseAction(json_action, hosts);
 
-                result.push_front({event, action});
+                result.emplace_front(names.at(index++), std::make_pair(event, action));
             }
         }
     }
@@ -44,23 +47,23 @@ std::forward_list<std::pair<IOTV_Event *, IOTV_Action *> > Event_Action_Parser::
     return result;
 }
 
-QByteArray Event_Action_Parser::toData(const std::forward_list<std::pair<IOTV_Event *, IOTV_Action *>> &list)
+QByteArray Event_Action_Parser::toData(const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> &list)
 {
     QJsonDocument jdoc;
     QJsonObject jobj_root;
 
-    int index = 0;
-    for (const auto &pair : list)
+    for (const auto &pairs : list)
     {
         QJsonObject jpair;
 
-        auto jevent = parseEvent(pair.first);
-        auto jaction = parseAction(pair.second);
+        auto name = pairs.first;
+        auto jevent = parseEvent(pairs.second.first);
+        auto jaction = parseAction(pairs.second.second);
 
         jpair.insert("event", jevent);
         jpair.insert("action", jaction);
 
-        jobj_root.insert("id_" + QString::number(index++), jpair);
+        jobj_root.insert(name, jpair);
     }
 
     jdoc.setObject(jobj_root);
@@ -129,7 +132,7 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
 
 const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const Base_Host *> &hosts, const QString &name)
 {
-    auto it = std::ranges::find_if(hosts, [&name](const auto host){
+    auto it = std::ranges::find_if (hosts, [&name](const auto host){
         return host->getName() == name;
     });
 

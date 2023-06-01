@@ -28,6 +28,7 @@ const QString ServerLog::DEFAULT_LOG = "default_log";
 //Json Event and Action
 const QString Json_Event_Action::EVENT_ACTION_FILE_NAME = "IOTV_Event_Action.json";
 
+const QString Json_Event_Action::EVENT_ACTION_NAME = "name";
 const QString Json_Event_Action::EVENT = "event";
 const QString Json_Event_Action::ACTION = "action";
 

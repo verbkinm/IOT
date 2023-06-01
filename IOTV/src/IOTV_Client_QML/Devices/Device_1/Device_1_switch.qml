@@ -82,6 +82,7 @@ Rectangle {
 
         Devices.BusyRect {
             id: popup
+            anchors.fill: parent
             visible: false
         }
     }

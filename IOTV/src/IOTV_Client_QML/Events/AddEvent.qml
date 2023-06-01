@@ -37,6 +37,12 @@ Page {
                 }
             }
 
+            DataString {
+                id: name
+                width: parent.width
+                label: "Название: "
+            }
+
             HostNameComboBox {
                 id: hostNameItem
                 height: 50

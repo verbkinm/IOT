@@ -30,6 +30,7 @@ public:
 
     Q_INVOKABLE QList<QObject*> devList();
     Q_INVOKABLE QObject *deviceByName(const QString &name);
+    Q_INVOKABLE void queryEventAction();
 
     bool stateConnection() const;
 
@@ -52,12 +53,14 @@ private:
     void queryRead(const QString &name, uint8_t channelNumber);
     void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
     void queryPing();
+    void queryTech(Tech_TYPE type, char *data, uint64_t dataSize);
 
     void responceIdentification(const struct Header *header);
     void responceState(const struct Header *header);
     void responceRead(const struct Header* header);
     void responceWrite(const struct Header *header) const;
     void responcePingPoing(const struct Header *header);
+    void responceTech(const struct Header *header);
 
     qint64 write(const QByteArray &data);
 
@@ -88,4 +91,6 @@ signals:
     void onlineDeviceChanged();
     void stateConnectionChanged();
     void autoConnectChanged();
+
+    void signalEventAction();
 };

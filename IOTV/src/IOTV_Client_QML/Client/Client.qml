@@ -147,7 +147,7 @@ Page {
                         return
                     }
 
-                    if(!client.state)
+                    if (!client.state)
                         client.connectToHost(addr.text, port.text)
                     else
                         client.disconnectFromHost()

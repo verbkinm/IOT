@@ -2,13 +2,14 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++17
+CONFIG += c++2a
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../../lib/ConfigType/ConfigTypes.cpp \
     ../../lib/Protocols/embedded/IOTV_SH.cpp \
     ../../lib/Protocols/embedded/creatorpkgs.cpp \
     ../../lib/Protocols/embedded/header.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    ../../lib/ConfigType/ConfigTypes.h \
     ../../lib/Protocols/embedded/IOTV_SH.h \
     ../../lib/Protocols/embedded/creatorpkgs.h \
     ../../lib/Protocols/embedded/header.h \
@@ -38,8 +40,9 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-INCLUDEPATH += "../../lib/Protocols/embedded/"
-INCLUDEPATH += "../../lib/raw/"
+INCLUDEPATH += ../../lib/Protocols/embedded/ \
+                ../../lib/ConfigType \
+                ../../lib/raw/
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

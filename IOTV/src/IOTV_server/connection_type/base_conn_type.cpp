@@ -45,13 +45,13 @@ void Base_conn_type::setDataBuffer(const QByteArray &data)
 
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
 {
-    if(conn_type == Conn_type::NONE)
+    if (conn_type == Conn_type::NONE)
         return "NONE";
-    else if(conn_type == Conn_type::COM)
+    else if (conn_type == Conn_type::COM)
         return "COM";
-    else if(conn_type == Conn_type::TCP)
+    else if (conn_type == Conn_type::TCP)
         return "TCP";
-    else if(conn_type == Conn_type::FILE)
+    else if (conn_type == Conn_type::FILE)
         return "FILE";
 
     return "UNKNOW";

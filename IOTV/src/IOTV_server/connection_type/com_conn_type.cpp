@@ -143,7 +143,7 @@ qint64 COM_conn_type::write(const QByteArray &data, qint64 size)
 
 void COM_conn_type::disconnectFromHost()
 {
-    if(_serialPort.isOpen())
+    if (_serialPort.isOpen())
         _serialPort.close();
 
     emit signalDisconnected();

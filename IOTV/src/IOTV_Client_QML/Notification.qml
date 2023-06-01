@@ -34,7 +34,6 @@ Rectangle {
         to: 0
         running: true
         duration: 2000
-
     }
 
     MouseArea {

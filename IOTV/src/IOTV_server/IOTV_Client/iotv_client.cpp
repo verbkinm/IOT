@@ -1,7 +1,10 @@
 #include "iotv_client.h"
+#include "event_action_parser.h"
 
-IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
-     _socket(socket), _hosts(hosts),
+IOTV_Client::IOTV_Client(QTcpSocket *socket, const IOTV_Event_Manager *eventManager, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
+    _socket(socket),
+    _eventManager(eventManager),
+    _hosts(hosts),
     _expectedDataSize(0)
 {
     _socket->setParent(this);
@@ -24,7 +27,7 @@ const QTcpSocket *IOTV_Client::socket() const
     return _socket;
 }
 
-void IOTV_Client::queryIdentification()
+void IOTV_Client::processQueryIdentification()
 {
     char outData[BUFSIZ];
 
@@ -45,12 +48,12 @@ void IOTV_Client::queryIdentification()
     }
 }
 
-void IOTV_Client::queryState(const Header *header)
+void IOTV_Client::processQueryState(const Header *header)
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
+    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
     {
         const struct State *pkg = static_cast<const struct State *>(header->pkg);
         return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
@@ -70,12 +73,12 @@ void IOTV_Client::queryState(const Header *header)
     clearIOTV_Server(iot);
 }
 
-void IOTV_Client::queryRead(const Header *header)
+void IOTV_Client::processQueryRead(const Header *header)
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
+    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
     {
         const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
         return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
@@ -96,14 +99,14 @@ void IOTV_Client::queryRead(const Header *header)
     }
 }
 
-void IOTV_Client::queryWrite(const Header *header)
+void IOTV_Client::processQueryWrite(const Header *header)
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
-    auto it = std::ranges::find_if(_hosts, [&](const auto &iotv_host)
+    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
     {
         return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
     });
@@ -126,7 +129,7 @@ void IOTV_Client::queryWrite(const Header *header)
     }
 }
 
-void IOTV_Client::queryPingPoing()
+void IOTV_Client::processQueryPingPoing()
 {
     uint64_t size;
     char outData[BUFSIZ];
@@ -134,6 +137,30 @@ void IOTV_Client::queryPingPoing()
     size = responsePingData(outData, BUFSIZ);
 
     write({outData, static_cast<int>(size)}, size);
+}
+
+void IOTV_Client::processQueryTech(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->pkg != NULL);
+
+    const struct Tech *pkg = static_cast<const struct Tech *>(header->pkg);
+
+    uint64_t size;
+    char outData[BUFSIZ];
+
+    if (pkg->type == Tech_TYPE_EV_AC)
+    {
+        if (_eventManager != nullptr)
+        {
+            std::string str = Event_Action_Parser::toData(_eventManager->worker()).toStdString();
+            auto strSize = str.size();
+            size = responseTech(outData, BUFSIZ, str.c_str(), strSize, header);
+            write({outData, static_cast<int>(size)}, size);
+
+            qDebug() << "send tech data";
+        }
+    }
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const
@@ -190,20 +217,20 @@ void IOTV_Client::slotReadData()
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
-        else if(header->type == HEADER_TYPE_REQUEST)
+        else if (header->type == HEADER_TYPE_REQUEST)
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-                queryIdentification();
+                processQueryIdentification();
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
-                queryRead(header);
+                processQueryRead(header);
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
-                queryWrite(header);
+                processQueryWrite(header);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                queryPingPoing();
-            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
-                queryState(header);
+                processQueryPingPoing();
+            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
+                processQueryState(header);
             else if (header->assignment == HEADER_ASSIGNMENT_TECH)
-            ;
+                processQueryTech(header);
         }
 
         recivedBuff = recivedBuff.mid(cutDataSize);

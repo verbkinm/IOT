@@ -50,7 +50,7 @@ uint64_t headerSize(const struct Header *header)
 
 uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize)
 {
-    if ( (header == NULL) || (outData == NULL) )
+    if ( header == NULL || outData == NULL)
         return 0;
 
     if (outDataSize < headerSize(header))
@@ -90,12 +90,6 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
             break;
         }
     }
-//    if (header->identification != NULL)
-//        result += identificationToData(header->identification, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
-//    else if (header->readWrite != NULL)
-//        result += readWriteToData(header->readWrite, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
-//    else if (header->state != NULL)
-//        result += stateToData(header->state, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
 
     return result;
 }

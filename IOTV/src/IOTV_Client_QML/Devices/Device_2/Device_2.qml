@@ -54,6 +54,7 @@ Page {
 
 
     Devices.BusyRect {
+        anchors.fill: parent
         visible: !device.state
     }
 }

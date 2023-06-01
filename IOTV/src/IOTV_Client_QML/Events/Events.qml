@@ -1,9 +1,16 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 
+import "qrc:/Devices/" as Devices
+
 Page {
     id: root
     title: "Настройки событий"
+
+    onVisibleChanged: {
+        if (visible)
+            client.queryEventAction()
+    }
 
     Flickable {
         width: parent.width
@@ -42,6 +49,20 @@ Page {
                 loaderNewAction.title = loaderNewAction.item.title
                 appStack.push(loaderNewAction)
             }
+        }
+    }
+
+    Devices.BusyRect {
+        id: popup
+        anchors.fill: parent
+        visible: true
+    }
+
+    Connections {
+        target: client
+        function onSignalEventAction() {
+            console.log("!!!!!!!!!!!")
+            popup.close()
         }
     }
 

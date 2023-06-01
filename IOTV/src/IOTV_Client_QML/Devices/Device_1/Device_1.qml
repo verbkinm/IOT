@@ -122,6 +122,7 @@ Page {
 
     Devices.BusyRect {
         id: busyRect
+        anchors.fill: parent
         visible: !device.state
     }
 

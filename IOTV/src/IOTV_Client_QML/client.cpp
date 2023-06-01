@@ -43,7 +43,7 @@ int Client::countDevices() const
 
 int Client::countDeviceOnline() const
 {
-    return std::count_if(_devices.begin(), _devices.end(), [](const auto &pair)
+    return std::count_if (_devices.begin(), _devices.end(), [](const auto &pair)
     {
         return pair.second.isOnline();
     });
@@ -113,6 +113,11 @@ QObject *Client::deviceByName(const QString &name)
     return &it->second;
 }
 
+void Client::queryEventAction()
+{
+    queryTech(Tech_TYPE_EV_AC, nullptr, 0);
+}
+
 bool Client::stateConnection() const
 {
     return _socket.state() == QAbstractSocket::ConnectedState;
@@ -137,7 +142,7 @@ void Client::queryState(const QString &name)
 void Client::queryRead(const QString &name, uint8_t channelNumber)
 {
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber);
+    auto size = queryReadData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber, ReadWrite_FLAGS_NONE);
 
     write({outData, static_cast<int>(size)});
 }
@@ -166,6 +171,14 @@ void Client::queryPing()
                    Log::Write_Flag::STDOUT, "");
         disconnectFromHost();
     }
+}
+
+void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
+{
+    char outData[BUFSIZ];
+    auto size = ::queryTech(outData, BUFSIZ, data, dataSize, type);
+
+    write({outData, static_cast<int>(size)});
 }
 
 void Client::responceIdentification(const Header *header)
@@ -246,6 +259,19 @@ void Client::responcePingPoing(const struct Header *header)
     _counterPing = 0;
 }
 
+void Client::responceTech(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->pkg != NULL);
+
+//    const struct Tech *pkg = static_cast<const struct Tech*>(header->pkg);
+
+//    for (uint64_t i = 0; i < pkg->dataSize; ++i)
+//        std::cout << (char)pkg->data[i];
+
+    emit signalEventAction();
+}
+
 void Client::slotReciveData()
 {
     _recivedBuff += _socket.readAll();
@@ -283,18 +309,18 @@ void Client::slotReciveData()
                 if (count != _devices.size())
                     emit countDeviceChanged();
             }
-            else if(header->assignment == HEADER_ASSIGNMENT_READ)
+            else if (header->assignment == HEADER_ASSIGNMENT_READ)
                 responceRead(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
+            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
+            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
                 responcePingPoing(header);
-            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
+            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
                 responceState(header);
-
-            //            printHeader(header);
+            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+                responceTech(header);
         }
-        else if(header->type == HEADER_TYPE_REQUEST)
+        else if (header->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент от сервера не должно приходить запросов
             Log::write("Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");

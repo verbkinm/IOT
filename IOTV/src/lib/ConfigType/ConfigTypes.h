@@ -42,6 +42,7 @@ struct Json_Event_Action
 {
     static const QString EVENT_ACTION_FILE_NAME;
 
+    static const QString EVENT_ACTION_NAME;
     static const QString EVENT;
     static const QString ACTION;
 

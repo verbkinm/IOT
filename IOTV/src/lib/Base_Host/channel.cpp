@@ -9,7 +9,7 @@ bool Channel::removeSubchannel(uint8_t channelNumber)
 {
     try
     {
-        if(channelNumber > _data.size())
+        if (channelNumber > _data.size())
             throw std::out_of_range{"out of range"};
 
         _data.erase(_data.begin() + channelNumber);

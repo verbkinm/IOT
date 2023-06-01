@@ -259,6 +259,7 @@ Page {
 
     BusyRect {
         id: popup
+        anchors.fill: parent
         visible: !device.state
     }
 

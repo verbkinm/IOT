@@ -88,17 +88,17 @@ void slotDataRecived()
                 uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
             }
-            else if(header->assignment == HEADER_ASSIGNMENT_READ)
+            else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
                 uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
             }
-            else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
+            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
                 uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
             }
-            else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
+            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
                 uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
@@ -107,7 +107,7 @@ void slotDataRecived()
                 data.append(transmitBuffer, size);
                 std::cout << peerHost.toString().toStdString().c_str() << ":" << peerPort << " -> " << data.toHex(':').data() << '\n';
             }
-            else if(header->assignment == HEADER_ASSIGNMENT_STATE)
+            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
                 uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);

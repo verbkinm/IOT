@@ -5,8 +5,6 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
     _eventManager(nullptr)
 {
-
-
     checkSettingsFileExist();
 
     readServerSettings();
@@ -14,9 +12,8 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
 
     readHostSetting();
     readEventActionJson();
-    qDebug() << Event_Action_Parser::toData(_eventManager->worker()).toStdString().c_str();
 
-//    exit(1);
+    qDebug() << Event_Action_Parser::toData(_eventManager->worker()).toStdString().c_str();
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }
@@ -89,7 +86,7 @@ void IOTV_Server::readHostSetting()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        auto it = std::ranges::find_if(_iot_hosts, [&setting](const auto &pair){
+        auto it = std::ranges::find_if (_iot_hosts, [&setting](const auto &pair){
             return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
         });
 
@@ -148,8 +145,8 @@ void IOTV_Server::readEventActionJson()
 
     _eventManager = new IOTV_Event_Manager(this);
 
-    for(const auto &[event, action] : list)
-        _eventManager->bind(event, action);
+    for(const auto &pairs : list)
+        _eventManager->bind(pairs.first, pairs.second.first, pairs.second.second);
 }
 
 void IOTV_Server::startTCPServer()
@@ -198,7 +195,7 @@ void IOTV_Server::clientOnlineFile() const
 
 Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
 {
-    auto it = std::ranges::find_if(_iot_hosts, [&name](const auto &pair){
+    auto it = std::ranges::find_if (_iot_hosts, [&name](const auto &pair){
         return pair.first->getName() == name;
     });
 
@@ -274,7 +271,7 @@ void IOTV_Server::slotNewConnection()
     }
 
     QThread *th = new QThread(this);
-    IOTV_Client *client = new IOTV_Client(socket, _iot_hosts, th);
+    IOTV_Client *client = new IOTV_Client(socket, _eventManager, _iot_hosts, th);
     th->start();
 
     _iot_clients[client] = th;

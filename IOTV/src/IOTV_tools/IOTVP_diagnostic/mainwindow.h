@@ -25,11 +25,13 @@ public:
     void printIdentificationData(const Identification *body);
     void printReadWriteData(const Read_Write *body);
     void printStateData(const State *body);
+    void printTechData(const Tech *body);
 
 
     QString headerType(Header_TYPE type) const;
     QString headerAssignment(Header_ASSIGNMENT assignment) const;
     QString staetType(State_STATE state) const;
+    QString techType(Tech_TYPE type) const;
 
 private slots:
     void on_action_triggered();
