@@ -9,7 +9,10 @@ Page {
 
     onVisibleChanged: {
         if (visible)
+        {
+            client.queryEventAction()
             timer.start()
+        }
     }
 
     Flickable {
@@ -61,7 +64,6 @@ Page {
     Connections {
         target: client
         function onSignalEventAction() {
-            console.log("!!!!!!!!!!!")
             popup.close()
             timer.stop()
         }

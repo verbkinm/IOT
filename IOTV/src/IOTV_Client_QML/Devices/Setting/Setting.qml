@@ -34,11 +34,11 @@ Page {
         }
     }
 
-    Devices.BusyRect {
-        id: busyRect
-        anchors.fill: parent
-        visible: !device.state
-    }
+//    Devices.BusyRect {
+//        id: busyRect
+//        anchors.fill: parent
+//        visible: !device.state
+//    }
 
     Component.onCompleted: {
         console.log("Setting construct: ", objectName)
