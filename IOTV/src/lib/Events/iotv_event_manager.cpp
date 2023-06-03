@@ -50,7 +50,7 @@ const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *
 size_t IOTV_Event_Manager::size() const
 {
     std::lock_guard lg(_workerMutex);
-    return std::ranges::distance(_worker);
+    return std::distance(_worker.begin(), _worker.end());
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type)
