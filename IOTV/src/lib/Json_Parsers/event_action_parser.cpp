@@ -132,7 +132,7 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
 
 const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const Base_Host *> &hosts, const QString &name)
 {
-    auto it = std::ranges::find_if (hosts, [&name](const auto host){
+    auto it = std::find_if (hosts.begin(), hosts.end(), [&name](const auto host){
         return host->getName() == name;
     });
 
