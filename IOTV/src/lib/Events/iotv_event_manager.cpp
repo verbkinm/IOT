@@ -97,7 +97,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
         newDirection = IOTV_Event_Data::DATA_DIRECTION::CHANGE;
 
     Raw resultRaw(Raw::dataType(dataType), data);
-    if (!resultRaw.isValid())
+    if (!resultRaw.isValid() && !(compare == Json_Event_Action::COMPARE_ALWAYS_TRUE || compare == Json_Event_Action::COMPARE_ALWAYS_FALSE))
         return nullptr;
 
     return new IOTV_Event_Data(newDirection, compare, host, channelNumber, resultRaw);

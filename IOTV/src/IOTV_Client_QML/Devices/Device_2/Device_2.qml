@@ -51,8 +51,6 @@ Page {
         console.log("Device 2 destruct: ", title)
     }
 
-
-
     Devices.BusyRect {
         anchors.fill: parent
         visible: !device.state

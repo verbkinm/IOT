@@ -1,4 +1,5 @@
 #include "device.h"
+#include <iostream>
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}}
@@ -78,7 +79,10 @@ void Device::setDataFromString(int channelNumber, QString data)
 
 QString Device::readData(int channelNumber) const
 {
-    return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).first;
+    //    std::cout << getReadChannelDataRaw(channelNumber) << std::endl;
+    QByteArray data = getReadChannelData(channelNumber);
+    Raw::DATA_TYPE type = getReadChannelType(channelNumber);
+    return Raw::strData(data, type).first;
 }
 
 QString Device::readDataType(int channelNumber) const

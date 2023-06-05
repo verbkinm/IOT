@@ -65,16 +65,8 @@ Raw::Raw(double data) :
 
 Raw::Raw(bool data) :
     _type(DATA_TYPE::BOOL),
-    _data{1, /*(char)*/data}
+    _data{1, data}
 {
-    //    if (data)
-    //    {
-    //        _data.push_back(0x01);
-    //    }
-    //    else
-    //    {
-    //        _data.push_back((char)0x00);
-    //    }
 
 }
 
@@ -99,9 +91,97 @@ Raw::Raw(DATA_TYPE type) : _type(type)
 
 Raw::Raw(DATA_TYPE type, const QByteArray &data)
 {
-    QVariant variant(data);
-    Raw result(type, variant);
-    *this = result;
+    if (type == Raw::DATA_TYPE::BOOL)
+    {
+        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data == "false"))
+            *this = Raw(false);
+        else
+            *this = Raw(true);
+    }
+    else if (type == Raw::DATA_TYPE::INT_8)
+    {
+        if (data.size() != sizeof(int8_t))
+            *this = Raw{};
+
+        int8_t val = data.at(0);
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_16)
+    {
+        int16_t val;
+
+        if (data.size() != sizeof(val))
+            *this = Raw{};
+
+        std::memcpy(&val, data.data(), sizeof(val));
+
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            val = qToLittleEndian(val);
+
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_32)
+    {
+        int32_t val;
+
+        if (data.size() != sizeof(val))
+            *this = Raw{};
+        std::memcpy(&val, data.data(), sizeof(val));
+
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            val = qToLittleEndian(val);
+
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_64)
+    {
+        int64_t val;
+
+        if (data.size() != sizeof(val))
+            *this = Raw{};
+        std::memcpy(&val, data.data(), sizeof(val));
+
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            val = qToLittleEndian(val);
+
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::FLOAT_32)
+    {
+        float val;
+
+        if (data.size() != sizeof(val))
+            *this = Raw{};
+        std::memcpy(&val, data.data(), sizeof(val));
+
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            val = qToLittleEndian(val);
+
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::DOUBLE_64)
+    {
+        double val;
+
+        if (data.size() != sizeof(val))
+            *this = Raw{};
+        std::memcpy(&val, data.data(), sizeof(val));
+
+        if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
+            val = qToLittleEndian(val);
+
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::STRING)
+    {
+        QString str = data;
+        *this = Raw(str);
+    }
+    else if (type == Raw::DATA_TYPE::RAW || type == Raw::DATA_TYPE::NONE)
+    {
+        this->setType(type);
+        this->setData(data);
+    }
 }
 
 template <typename T>
@@ -113,60 +193,60 @@ void createOnVariant(T val, Raw &raw, bool ok)
         raw = Raw(val);
 }
 
-Raw::Raw(DATA_TYPE type, const QVariant &variant)
-{
-    bool ok;
-    Raw result;
+//Raw::Raw(DATA_TYPE type, const QVariant &variant)
+//{
+//    bool ok;
+//    Raw result;
 
-    if (type == Raw::DATA_TYPE::BOOL)
-    {
-        QByteArray data = variant.toByteArray();
-        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data == "false"))
-            result = Raw(false);
-        else
-            result = Raw(true);
-    }
-    else if (type == Raw::DATA_TYPE::INT_8)
-    {
-        int8_t val = variant.toInt(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::INT_16)
-    {
-        int16_t val = variant.toInt(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::INT_32)
-    {
-        int32_t val = variant.toInt(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::INT_64)
-    {
-        int64_t val = variant.toLongLong(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::FLOAT_32)
-    {
-        float val = variant.toFloat(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::DOUBLE_64)
-    {
-        double val = variant.toDouble(&ok);
-        createOnVariant(val, result, ok);
-    }
-    else if (type == Raw::DATA_TYPE::STRING)
-    {
-        result = Raw(variant.toString());
-    }
-    else if (type == Raw::DATA_TYPE::RAW || type == Raw::DATA_TYPE::NONE)
-    {
-        result = Raw(variant.toByteArray());
-    }
+//    if (type == Raw::DATA_TYPE::BOOL)
+//    {
+//        QByteArray data = variant.toByteArray();
+//        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data == "false"))
+//            result = Raw(false);
+//        else
+//            result = Raw(true);
+//    }
+//    else if (type == Raw::DATA_TYPE::INT_8)
+//    {
+//        int8_t val = variant.toInt(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::INT_16)
+//    {
+//        int16_t val = variant.toInt(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::INT_32)
+//    {
+//        int32_t val = variant.toInt(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::INT_64)
+//    {
+//        int64_t val = variant.toLongLong(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::FLOAT_32)
+//    {
+//        float val = variant.toFloat(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::DOUBLE_64)
+//    {
+//        double val = variant.toDouble(&ok);
+//        createOnVariant(val, result, ok);
+//    }
+//    else if (type == Raw::DATA_TYPE::STRING)
+//    {
+//        result = Raw(variant.toString());
+//    }
+//    else if (type == Raw::DATA_TYPE::RAW || type == Raw::DATA_TYPE::NONE)
+//    {
+//        result = Raw(variant.toByteArray());
+//    }
 
-    *this = result;
-}
+//    *this = result;
+//}
 
 bool Raw::isZeroOnly() const
 {
@@ -174,13 +254,6 @@ bool Raw::isZeroOnly() const
         return false;
 
     return std::ranges::all_of(_data, [](auto el){return el == 0;});
-    //    for (char el : _data)
-    //    {
-    //        if (el != 0)
-    //            return false;
-    //    }
-
-    //    return true;
 }
 
 bool Raw::isValid() const
@@ -290,10 +363,10 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
-
-        char *ptr = reinterpret_cast<char*>(&value);
-        for (uint i = 0; i < sizeof(value); i++)
-            result.push_back(ptr[i]);
+        std::memcpy(result.data(), &value, sizeof(value));
+//        char *ptr = reinterpret_cast<char*>(&value);
+//        for (uint i = 0; i < sizeof(value); i++)
+//            result.push_back(ptr[i]);
     }
     else if (type == DATA_TYPE::INT_32)
     {
@@ -305,10 +378,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
-
-        char *ptr = reinterpret_cast<char*>(&value);
-        for (uint i = 0; i < sizeof(value); i++)
-            result.push_back(ptr[i]);
+        std::memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::INT_64)
     {
@@ -320,10 +390,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
-
-        char *ptr = reinterpret_cast<char*>(&value);
-        for (uint i = 0; i < sizeof(value); i++)
-            result.push_back(ptr[i]);
+        std::memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::FLOAT_32)
     {
@@ -639,4 +706,11 @@ Raw operator/(const Raw &lhs, const Raw &rhs)
         return {};
 
     return operation(lhs, rhs, std::divides<>{});
+}
+
+std::ostream &operator<<(std::ostream& os, const Raw &raw)
+{
+    auto pair = raw.strData();
+    os << pair.first.toStdString() << ' ' << pair.second.toStdString();
+    return os;
 }

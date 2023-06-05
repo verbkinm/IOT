@@ -158,13 +158,6 @@ int main(int argc, char *argv[])
     value = 97.5;
     memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
 
-
-
-
-
-
-
-
     server = new QTcpServer;
 
     QObject::connect(server, &QTcpServer::newConnection, [&](){

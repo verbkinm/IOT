@@ -81,7 +81,9 @@ Item {
     }
 
     Component.onCompleted: {
-        //        root.width = 320
-        //        root.height temperature.height + humidity.height + (pressure.visible ? pressure.height : 0)
+        console.log("Construct MeteoBlock")
+        temperature.text = temperatureValue()
+        humidity.text = humidityValue()
+        pressure.text = pressureValue()
     }
 }

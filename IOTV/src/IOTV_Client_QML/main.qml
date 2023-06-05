@@ -84,28 +84,28 @@ ApplicationWindow {
         anchors.fill: parent
         initialItem: homePage
 
-        HomePageModule.Home {
-            id: homePage
-            objectName: "Home"
-        }
-
-        EventsPageModule.Events {
-            id: eventsPage
-            objectName: "Events"
-            visible: false
-        }
-
-        ClientPageModule.Client {
-            id: clientPage
-            objectName: "Client"
-            visible: false
-        }
-
         onCurrentItemChanged: {
             console.log("stackView current item: ", stackView.currentItem.objectName)
             if (appStack.currentItem == homePage)
                 loaderDevice.source = ""
         }
+    }
+
+    HomePageModule.Home {
+        id: homePage
+        objectName: "Home"
+    }
+
+    EventsPageModule.Events {
+        id: eventsPage
+        objectName: "Events"
+        visible: false
+    }
+
+    ClientPageModule.Client {
+        id: clientPage
+        objectName: "Client"
+        visible: false
     }
 
     footer: ToolBar {
@@ -132,8 +132,9 @@ ApplicationWindow {
                     source: "qrc:/img/calendar_white.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem == clientPage)
+                    if (appStack.currentItem !== eventsPage)
                         appStack.pop()
+
                     appStack.push(eventsPage)
                 }
                 Layout.alignment: Qt.AlignCenter

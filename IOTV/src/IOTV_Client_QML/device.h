@@ -51,7 +51,7 @@ private:
 
     QTimer _timerRead, _timerState;
 
-    QByteArray stringToByteArray();
+//    QByteArray stringToByteArray();
 
 signals:
     void signalQueryIdentification();

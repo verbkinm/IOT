@@ -50,6 +50,7 @@ Page {
             onReleased: {
                 loaderNewAction.source = "qrc:/Events/AddEvent.qml"
                 loaderNewAction.title = loaderNewAction.item.title
+                loaderNewAction.objectName = loaderNewAction.item.title
                 appStack.push(loaderNewAction)
             }
         }
@@ -66,6 +67,7 @@ Page {
         function onSignalEventAction() {
             popup.close()
             timer.stop()
+
         }
     }
 
