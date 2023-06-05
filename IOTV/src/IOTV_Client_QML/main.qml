@@ -132,10 +132,10 @@ ApplicationWindow {
                     source: "qrc:/img/calendar_white.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem !== eventsPage)
+                    if (appStack.currentItem == eventsPage)
                         appStack.pop()
-
-                    appStack.push(eventsPage)
+                    else
+                        console.log(appStack.push(eventsPage))
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -149,9 +149,6 @@ ApplicationWindow {
                     if (appStack.currentItem == eventsPage)
                         appStack.pop()
                     appStack.push(clientPage)
-
-                    console.log(appStack.depth)
-
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -191,11 +188,3 @@ ApplicationWindow {
             appStack.pop()
     }
 }
-
-
-/*##^##
-Designer {
-    D{i:0;autoSize:true;height:480;width:640}D{i:5}D{i:7}D{i:8}D{i:9}D{i:6}D{i:15}D{i:16}
-D{i:17}
-}
-##^##*/
