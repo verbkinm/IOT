@@ -1,4 +1,4 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtQuick.Controls 2.5
 
 import "qrc:/Devices/" as Devices
@@ -13,6 +13,8 @@ Page {
             client.queryEventAction()
             timer.start()
         }
+//        else
+//            listModel.clear()
     }
 
     Flickable {
@@ -25,33 +27,43 @@ Page {
             visible: active
         }
 
-        Text {
-            text: qsTr("Тут будет список событий")
-            anchors.centerIn: parent
-            font.pixelSize: 18
-            wrapMode: Text.Wrap
-        }
-
-        Button {
-            id: addEvent
-            width: parent.width * 0.8
-            height: 45
-
-            text: "Добавить событие"
-            flat: false
-            highlighted: true
-
+        Column {
+            id: column
+            width: parent.width
             anchors {
-                horizontalCenter: parent.horizontalCenter
                 top: parent.top
                 topMargin: 20
             }
 
-            onReleased: {
-                loaderNewAction.source = "qrc:/Events/AddEvent.qml"
-                loaderNewAction.title = loaderNewAction.item.title
-                loaderNewAction.objectName = loaderNewAction.item.title
-                appStack.push(loaderNewAction)
+            Button {
+                id: addEvent
+                width: parent.width * 0.8
+                height: 45
+
+                text: "Добавить событие"
+                flat: false
+                highlighted: true
+
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                onClicked: {
+                    var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
+                    if (component.status === Component.Ready)
+                        appStack.push(component)
+                }
+            }
+
+            Text {
+                text: qsTr("Тут будет список событий")
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: 18
+                wrapMode: Text.Wrap
+            }
+
+            EvActList {
+                id: listView
             }
         }
     }
@@ -62,15 +74,6 @@ Page {
         visible: true
     }
 
-    Connections {
-        target: client
-        function onSignalEventAction() {
-            popup.close()
-            timer.stop()
-
-        }
-    }
-
     Component.onCompleted: {
         console.log("Events page construct: ", objectName)
     }
@@ -79,20 +82,9 @@ Page {
         console.log("Events page destruct: ", objectName)
     }
 
-    // Добавление нового события
-    Loader {
-        property string title
-        id: loaderNewAction
-        source: ""
-
-        onSourceChanged: {
-            console.log ("change source")
-        }
-    }
-
     Timer {
         id: timer
-        interval: 5000
+        interval: 2000
         repeat: true
         running: false
         onTriggered: {

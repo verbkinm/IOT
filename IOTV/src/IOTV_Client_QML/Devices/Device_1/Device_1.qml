@@ -110,7 +110,7 @@ Page {
             loaderMainItem.setSource("qrc:/DialogShared.qml", {parent: appStack,
                                              visible: true,
                                              title: "Ошибка устройства",
-                                             text: "каналов чтения отсутствуют",
+                                             text: "каналы чтения отсутствуют",
                                              standardButtons: Dialog.Ok})
             busyRect.visible = true
         }

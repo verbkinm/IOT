@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <forward_list>
 
 #include <QTcpSocket>
 #include <QHostAddress>
@@ -8,6 +9,7 @@
 #include <QFileInfo>
 #include <QEvent>
 
+#include "event_action_parser.h"
 #include "log.h"
 #include "IOTV_SH.h"
 #include "device.h"
@@ -31,6 +33,7 @@ public:
     Q_INVOKABLE QList<QObject*> devList();
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
+    Q_INVOKABLE QList<QList<QObject *> > evAcList() const;
 
     bool stateConnection() const;
 
@@ -47,6 +50,8 @@ private:
 
     //!!! unorder_map
     std::map<QString, Device> _devices;
+
+    QList<QList<QObject*>> _evAcList;
 
     void queryIdentification();
     void queryState(const QString &name);

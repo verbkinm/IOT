@@ -62,7 +62,7 @@ Drawer {
                                                      {parent: appStack,
                                                          visible: true,
                                                          standardButtons: Dialog.Ok,
-                                                         title: "О программе",
+                                                         title: "Версия",
                                                          text: "Клиент IOTV " + Qt.application.version})
                         }
 

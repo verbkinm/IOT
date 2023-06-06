@@ -5,6 +5,8 @@ Item {
     property string eventType: eventTypeComboBox.currentText
     property alias model: eventTypeComboBox.model
 
+    signal signalActivated();
+
     id: eventTypeItem
     height: 50
     width: 400//parent.width
@@ -32,7 +34,7 @@ Item {
         }
 
         onActivated: {
-            console.log (eventTypeComboBox.currentText)
+            signalActivated();
         }
     }
 }

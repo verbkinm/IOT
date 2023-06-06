@@ -86,8 +86,8 @@ ApplicationWindow {
 
         onCurrentItemChanged: {
             console.log("stackView current item: ", stackView.currentItem.objectName)
-            if (appStack.currentItem == homePage)
-                loaderDevice.source = ""
+//            if (appStack.currentItem == homePage)
+//                loaderDevice.source = ""
         }
     }
 
@@ -155,35 +155,16 @@ ApplicationWindow {
         }
     }
 
-    DialogShared {
-        id: dialogExit
-        parent: stackView
-        standardButtons: Dialog.Yes | Dialog.No
-        text: "Вы действительно хотите выйти?"
-        visible: false
-
-        onAccepted: {
-            Qt.exit(0)
-        }
-    }
-
     // Загружаются DialogShared и Notification со всей программы
     Loader {
         id: loaderMainItem
         source: ""
     }
 
-    // Загружаются устройства
-    Loader {
-        property string title
-        id: loaderDevice
-        source: ""
-    }
-
     onClosing: {
         close.accepted = false
         if (appStack.currentItem == homePage)
-            dialogExit.open()
+            loaderMainItem.setSource("qrc:/DialogExit.qml", {parent: appStack})
         else
             appStack.pop()
     }

@@ -1,6 +1,8 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 
+import "qrc:/Events/BaseItem" as BaseItem
+
 Page {
     property alias nameReadonly: name.textReadOnly
 
@@ -39,42 +41,46 @@ Page {
                 }
             }
 
-            DataString {
+            BaseItem.DataString {
                 id: name
                 width: parent.width
                 label: "Название: "
             }
 
-            HostNameComboBox {
+            BaseItem.HostNameComboBox {
                 id: hostNameItem
                 height: 50
                 width: parent.width
             }
 
-            EventType {
+            BaseItem.EventType {
                 id: eventTypeItem
                 height: 50
                 width: parent.width
+
+                onSignalActivated: {
+                    if (eventType === model[0] || eventType === model[1])
+                        eventTypeLoader.setSource("qrc:/Events/BaseItem/EmptyItem.qml")
+                    else if(eventType === model[2])
+                        eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: parent.width})
+                    else if(eventType === model[3])
+                        eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
+                }
             }
 
-            StateType {
-                id: itemStateType
-                visible: eventTypeItem.eventType === eventTypeItem.model[2]
-                width: parent.width
+            // Событие
+
+            Loader {
+                id: eventTypeLoader
+                source: ""
             }
 
-            DataType {
-                id: itemDataType
-                visible: eventTypeItem.eventType === eventTypeItem.model[3]
-                width: parent.width
-            }
-
-            HorizontLine {
+            BaseItem.HorizontLine {
                 height: 20
                 width: parent.width
             }
 
-            // Действия
+            // Действие
 
             Item {
                 height: 50
@@ -92,22 +98,24 @@ Page {
                 }
             }
 
-            ActionType {
+            BaseItem.ActionType {
                 id: actionTypeItem
                 width: parent.width
+
+                onSignalActivated: {
+                    if (actiontType === model[0])
+                        actionTypeLoader.setSource("qrc:/Events/BaseItem/ActionDataTX.qml", {width: parent.width})
+                    else if(actiontType === model[1])
+                        actionTypeLoader.setSource("qrc:/Events/BaseItem/ActionDataTX_Ref.qml", {width: parent.width})
+                }
             }
 
-            ActionDataTX {
-                width: parent.width
-                visible: actionTypeItem.actiontType === actionTypeItem.model[0]
+            Loader {
+                id: actionTypeLoader
+                source: ""
             }
 
-            ActionDataTX_Ref {
-                width: parent.width
-                visible: actionTypeItem.actiontType === actionTypeItem.model[1]
-            }
-
-            HorizontLine {
+            BaseItem.HorizontLine {
                 height: 20
                 width: parent.width
             }
@@ -134,9 +142,15 @@ Page {
 
     Component.onCompleted: {
         console.log("Add Events page construct: ", objectName)
+        forceActiveFocus()
     }
 
     Component.onDestruction: {
         console.log("Add Events page destruct: ", objectName)
+    }
+
+    onFocusChanged: {
+        eventTypeItem.signalActivated()
+        actionTypeItem.signalActivated()
     }
 }

@@ -123,6 +123,11 @@ bool Client::stateConnection() const
     return _socket.state() == QAbstractSocket::ConnectedState;
 }
 
+QList<QList<QObject*>> Client::evAcList() const
+{
+    return _evAcList;
+}
+
 void Client::queryIdentification()
 {
     char outData[BUFSIZ];
@@ -264,12 +269,30 @@ void Client::responceTech(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-//    const struct Tech *pkg = static_cast<const struct Tech*>(header->pkg);
+    const struct Tech *pkg = static_cast<const struct Tech*>(header->pkg);
 
-//    for (uint64_t i = 0; i < pkg->dataSize; ++i)
-//        std::cout << (char)pkg->data[i];
+    if (pkg->type == Tech_TYPE_EV_AC)
+    {
+        QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
 
-    emit signalEventAction();
+        std::forward_list<const Base_Host *> hosts;
+        for(const auto &pair : _devices)
+            hosts.push_front(&pair.second);
+
+        auto list = Event_Action_Parser::parseJson(data, hosts);
+
+        _evAcList.clear();
+
+        for (const auto &el : list)
+        {
+            QList<QObject *> l;
+            l << el.second.first << el.second.second;
+            l[0]->setObjectName(el.first);
+            _evAcList << l;
+        }
+
+        emit signalEventAction();
+    }
 }
 
 void Client::slotReciveData()

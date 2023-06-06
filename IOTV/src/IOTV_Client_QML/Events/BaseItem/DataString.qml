@@ -21,6 +21,7 @@ Item {
 
     TextField {
         id: dataTextField
+        focus: true
         width: 200
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -35,4 +36,10 @@ Item {
             rightMargin: 20
         }
     }
+
+
+//    Component.onCompleted: {
+//        forceActiveFocus()
+//    }
+
 }

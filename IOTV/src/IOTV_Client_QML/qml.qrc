@@ -66,18 +66,22 @@
         <file>Devices/BaseItem/MeteoBlock_Item.qml</file>
         <file>Events/Events.qml</file>
         <file>Events/AddEvent.qml</file>
-        <file>Events/StateType.qml</file>
-        <file>Events/DataType.qml</file>
-        <file>Events/ActionDataTX.qml</file>
-        <file>Events/HorizontLine.qml</file>
-        <file>Events/HostNameComboBox.qml</file>
-        <file>Events/ActionDataTX_Ref.qml</file>
-        <file>Events/ChannelNumber.qml</file>
-        <file>Events/EventType.qml</file>
-        <file>Events/ActionType.qml</file>
-        <file>Events/DataString.qml</file>
         <file>img/settings_white.png</file>
         <file>img/calendar_white.png</file>
+        <file>DialogExit.qml</file>
+        <file>Events/BaseItem/ActionDataTX.qml</file>
+        <file>Events/BaseItem/ActionDataTX_Ref.qml</file>
+        <file>Events/BaseItem/ActionType.qml</file>
+        <file>Events/BaseItem/ChannelNumber.qml</file>
+        <file>Events/BaseItem/DataString.qml</file>
+        <file>Events/BaseItem/DataType.qml</file>
+        <file>Events/BaseItem/EventType.qml</file>
+        <file>Events/BaseItem/HorizontLine.qml</file>
+        <file>Events/BaseItem/HostNameComboBox.qml</file>
+        <file>Events/BaseItem/StateType.qml</file>
+        <file>Events/BaseItem/EmptyItem.qml</file>
+        <file>Events/EvActComponent.qml</file>
+        <file>Events/EvActList.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

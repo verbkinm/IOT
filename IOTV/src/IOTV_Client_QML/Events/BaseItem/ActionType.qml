@@ -5,6 +5,8 @@ Item {
     property string actiontType: actionTypeComboBox.currentText
     property alias model: actionTypeComboBox.model
 
+    signal signalActivated()
+
     id: actionTypeItem
     height: 50
     width: 400//parent.width
@@ -30,6 +32,10 @@ Item {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 20
+        }
+
+        onActivated: {
+            signalActivated();
         }
     }
 }
