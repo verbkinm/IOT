@@ -4,6 +4,9 @@ import QtQuick.Controls 2.5
 Item {
     property string hostName: hostComboBox.currentText
     property alias label: hostNameText.text
+    property alias model: hostComboBox.model
+    property alias comboBox: hostComboBox
+//    property alias enabled: hostComboBox.enabled
 
     id: root
     height: 50

@@ -38,6 +38,8 @@ ListView {
             popup.close()
             timer.stop()
 
+            listModel.clear()
+
             var list = target.evAcList()
             for( var i = 0; i < list.length; i++)
             {

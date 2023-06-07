@@ -27,6 +27,8 @@ public:
 
     const Raw &data() const;
 
+    Q_INVOKABLE QString directionString() const;
+
 private:
     DATA_DIRECTION _type;
     uint8_t _channelNumber;

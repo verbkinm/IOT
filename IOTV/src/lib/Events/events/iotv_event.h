@@ -5,6 +5,7 @@
 class IOTV_Event : public QObject
 {
     Q_OBJECT
+
 public:
     enum class EVENT_TYPE : uint8_t
     {

@@ -4,6 +4,7 @@ import QtQuick.Controls 2.5
 Item {
     property string eventType: eventTypeComboBox.currentText
     property alias model: eventTypeComboBox.model
+    property alias comboBox: eventTypeComboBox
 
     signal signalActivated();
 

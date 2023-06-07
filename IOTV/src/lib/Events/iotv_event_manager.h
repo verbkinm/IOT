@@ -45,6 +45,8 @@ public:
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
                               uint8_t dstCh_num, uint8_t srcCh_Num);
 
+//    static
+
 private:
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> _worker;
 

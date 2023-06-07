@@ -31,7 +31,38 @@ Rectangle {
             if (component.status === Component.Ready)
             {
                 var object = component.createObject()
+
                 object.title = _event.objectName
+                object.evAcName = _event.objectName
+
+                var hostNmae =  _event.host.name
+                var index = object.hostNameItem.comboBox.find(hostNmae)
+
+                if (index === -1)
+                {
+                    object.hostNameItem.enabled = false
+                    object.hostNameItem.model = [hostNmae]
+                }
+                else
+                {
+                    object.hostNameItem.comboBox.currentIndex = index
+                }
+
+                var eventType = _event.typeString()
+                index = object.eventTypeItem.comboBox.find(eventType)
+
+                if (index === -1)
+                {
+                    object.eventTypeItem.enabled = false
+                    object.eventTypeItem.model = [eventType]
+                }
+                else
+                {
+                    object.eventTypeItem.comboBox.currentIndex = index
+                }
+
+                console.log(_event.directionString())
+
                 appStack.push(object)
             }
         }

@@ -253,7 +253,7 @@ bool Raw::isZeroOnly() const
     if (!isValid())
         return false;
 
-    return std::ranges::all_of(_data, [](auto el){return el == 0;});
+    return std::all_of(_data.begin(), _data.end(), [](auto el){return el == 0;});
 }
 
 bool Raw::isValid() const
@@ -708,9 +708,9 @@ Raw operator/(const Raw &lhs, const Raw &rhs)
     return operation(lhs, rhs, std::divides<>{});
 }
 
-std::ostream &operator<<(std::ostream& os, const Raw &raw)
-{
-    auto pair = raw.strData();
-    os << pair.first.toStdString() << ' ' << pair.second.toStdString();
-    return os;
-}
+//std::ostream &operator<<(std::ostream& os, const Raw &raw)
+//{
+//    auto pair = raw.strData();
+//    os << pair.first.toStdString() << ' ' << pair.second.toStdString();
+//    return os;
+//}

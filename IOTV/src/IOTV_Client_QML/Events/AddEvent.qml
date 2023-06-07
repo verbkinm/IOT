@@ -6,6 +6,10 @@ import "qrc:/Events/BaseItem" as BaseItem
 Page {
     property alias nameReadonly: name.textReadOnly
 
+    property alias evAcName: name.text
+    property alias hostNameItem: hostNameItem
+    property alias eventTypeItem: eventTypeItem
+
     id: root
     title: "Новое событие"
 

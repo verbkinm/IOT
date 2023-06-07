@@ -76,7 +76,7 @@ public:
     friend Raw operator*(const Raw &lhs, const Raw &rhs);
     friend Raw operator/(const Raw &lhs, const Raw &rhs);
 
-    friend std::ostream &operator<<(std::ostream& os, const Raw &raw);
+//    friend std::ostream &operator<<(std::ostream& os, const Raw &raw);
 
     uint16_t size() const;
 
