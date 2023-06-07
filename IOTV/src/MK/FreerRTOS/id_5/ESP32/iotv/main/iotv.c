@@ -383,7 +383,19 @@ void OLED_Task(void *pvParameters)
 		{
 			if (++counter > 300)
 			{
-				OLED_Draw_Page(*(double *)iot.readChannel[CH_TEMP].data, *(double *)iot.readChannel[CH_HUM].data, *(double *)iot.readChannel[CH_PRES].data);
+				struct DateTime dt = {
+						.seconds = *(uint8_t *)iot.readChannel[CH_SEC].data,
+						.minutes = *(uint8_t *)iot.readChannel[CH_MIN].data,
+						.hour = *(uint8_t *)iot.readChannel[CH_HOUR].data,
+						.day = *(uint8_t *)iot.readChannel[CH_DAY].data,
+						.date = *(uint8_t *)iot.readChannel[CH_DATE].data,
+						.month = *(uint8_t *)iot.readChannel[CH_MONTH].data,
+						.year = *(uint8_t *)iot.readChannel[CH_YEAR].data,
+				};
+				OLED_Draw_Page(*(double *)iot.readChannel[CH_TEMP].data,
+						*(double *)iot.readChannel[CH_HUM].data,
+						*(double *)iot.readChannel[CH_PRES].data,
+						&dt);
 				counter = 0;
 			}
 			vTaskDelay(10 / portTICK_PERIOD_MS);

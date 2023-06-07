@@ -65,8 +65,8 @@ void wifi_init_sta(void)
 
 	wifi_config_t wifi_config = {
 			.sta = {
-					.ssid = CONFIG_EXAMPLE_WIFI_SSID,
-					.password = CONFIG_EXAMPLE_WIFI_PASSWORD,
+					.ssid = WIFI_SSID,
+					.password = WIFI_PASSWORD,
 					.threshold.authmode = WIFI_AUTH_WPA2_PSK,
 					.sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
 			},
@@ -88,9 +88,9 @@ void wifi_init_sta(void)
 	/* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
 	 * happened. */
 	if (bits & WIFI_CONNECTED_BIT)
-		ESP_LOGI(TAG, "connected to ap SSID:%s password:%s", CONFIG_EXAMPLE_WIFI_SSID, CONFIG_EXAMPLE_WIFI_PASSWORD);
+		ESP_LOGI(TAG, "connected to ap SSID:%s password:%s", WIFI_SSID, WIFI_PASSWORD);
 	else if (bits & WIFI_FAIL_BIT)
-		ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s", CONFIG_EXAMPLE_WIFI_SSID, CONFIG_EXAMPLE_WIFI_PASSWORD);
+		ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s", WIFI_SSID, WIFI_PASSWORD);
 	else
 		ESP_LOGE(TAG, "UNEXPECTED EVENT");
 }

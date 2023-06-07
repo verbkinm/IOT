@@ -21,7 +21,7 @@ static void OLED_increase_lvgl_tick(void *arg);
 
 void modf_two_part(float val, int *int_part, int *fract_part);
 
-static void draw_page_0(void);
+static void draw_page_0(const struct DateTime *dt);
 static void draw_page_1(float t);
 static void draw_page_2(float h);
 static void draw_page_3(int d);
@@ -81,10 +81,13 @@ void modf_two_part(float val, int *int_part, int *fract_part)
 }
 
 
-static void draw_page_0(void)
+static void draw_page_0(const struct DateTime *dt)
 {
 	lv_obj_t *scr = lv_disp_get_scr_act(disp);
 	lv_obj_clean(scr);
+
+	if (dt == NULL)
+		return;
 
 	//	lv_disp_load_scr(scr);
 	//	screen_clear(disp);
@@ -97,7 +100,7 @@ static void draw_page_0(void)
 	// Время
 	lv_obj_t *label_time = lv_label_create(scr);
 	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
-	lv_label_set_text_fmt(label_time, "%d %c %d", 23, ':', 34);
+	lv_label_set_text_fmt(label_time, "%02d %c %02d", dt->hour, ':', dt->minutes);
 	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
 	//	lv_obj_set_pos(label, 0, 10);
 
@@ -110,7 +113,7 @@ static void draw_page_0(void)
 	// Дата
 	lv_obj_t *label_date = lv_label_create(scr);
 	lv_label_set_long_mode(label_date, LV_LABEL_LONG_DOT); /* Circular scroll */
-	lv_label_set_text_fmt(label_date, "%.02d . %.02d . %d", 1, 3, 2023);
+	lv_label_set_text_fmt(label_date, "%02d . %02d . 20%02d", dt->date, dt->month, dt->year);
 	lv_obj_align(label_date, LV_ALIGN_BOTTOM_MID, 0, 0);
 	//	lv_obj_set_pos(label, 0, 10);
 
@@ -277,12 +280,12 @@ void OLED_init(void)
 
 }
 
-void OLED_Draw_Page(float t, float h, float p)
+void OLED_Draw_Page(float t, float h, float p, const struct DateTime *dt)
 {
 	switch (current_page)
 	{
 	case 0:
-		draw_page_0();
+		draw_page_0(dt);
 		break;
 	case 1:
 		draw_page_1(t);

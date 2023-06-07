@@ -15,9 +15,13 @@
 #define WIFI_DISCONNECTED_BIT 				BIT1
 #define WIFI_FAIL_BIT      					BIT2
 
+// WIFI
+#define WIFI_SSID							"TP-Link_A6BE"
+#define WIFI_PASSWORD						"41706831"
+
 // I2C
-#define I2C_MASTER_SCL_IO           		CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           		CONFIG_I2C_MASTER_SDA      /*!< GPIO number used for I2C master data  */
+#define I2C_MASTER_SCL_IO           		22					       /*!< GPIO number used for I2C master clock */
+#define I2C_MASTER_SDA_IO           		21						   /*!< GPIO number used for I2C master data  */
 #define I2C_MASTER_NUM              		0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
 #define I2C_MASTER_FREQ_HZ          		400000                     /*!< I2C master clock frequency */
 #define I2C_MASTER_TX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
@@ -31,12 +35,12 @@
 #define DS3231_ADDR							0x68
 
 // Led Signals
-#define LED_WIFI							GPIO_NUM_5
-#define LED_TCP								GPIO_NUM_4
-#define LED_ERROR							GPIO_NUM_15
+#define LED_WIFI							GPIO_NUM_4
+#define LED_TCP								GPIO_NUM_15
+#define LED_ERROR							GPIO_NUM_5
 
 // IOTV
-#define RELE_PIN 							GPIO_NUM_2
+#define RELE_PIN 							GPIO_NUM_32
 #define BORDER_DISTANCE_DEFAULT 			150
 
 // Номер ошибки

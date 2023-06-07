@@ -22,9 +22,10 @@
 #include "math.h"
 
 #include "Global_def.h"
+#include "DS3231.h"
 
 void OLED_init(void);
-void OLED_Draw_Page(float t, float h, float p);
+void OLED_Draw_Page(float t, float h, float p, const struct DateTime *dt);
 void OLED_Draw_Distance(int d);
 
 #endif /* MAIN_I2C_OLED_H_ */

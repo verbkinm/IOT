@@ -24,6 +24,14 @@ void LedSignals_Task(void *pvParameters)
 {
 	ESP_LOGW(TAG, "LedSignals task created");
 
+	gpio_reset_pin(LED_WIFI);
+	gpio_reset_pin(LED_TCP);
+	gpio_reset_pin(LED_ERROR);
+
+	gpio_set_direction(LED_WIFI, GPIO_MODE_INPUT_OUTPUT);
+	gpio_set_direction(LED_TCP, GPIO_MODE_INPUT_OUTPUT);
+	gpio_set_direction(LED_ERROR, GPIO_MODE_INPUT_OUTPUT);
+
 	xSemaphore = xSemaphoreCreateMutex();
 	struct LedSignalPkg pkg = {NULL, 0};
 
@@ -58,7 +66,6 @@ static void errorBlink(const char* errorTag, uint8_t value)
 
 static void LedGPIO_State(gpio_port_t gpio_num, bool state)
 {
-	gpio_set_direction(gpio_num, GPIO_MODE_INPUT_OUTPUT);
 	gpio_set_level(gpio_num, state);
 }
 
