@@ -34,12 +34,12 @@ public:
 
     //! IOTV_Event_Data
     static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &direction,
-                            const QByteArray &data, const QString &dataType,
+                            const QString &data, const QString &dataType,
                             const QString &compare, uint8_t channelNumber);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
     static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                              const QByteArray &data, const QString &dataType);
+                              const QString &data, const QString &dataType);
 
     //! IOTV_Action_Data_TX_Ref и IOTV_Action_Data_RX_Ref
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,

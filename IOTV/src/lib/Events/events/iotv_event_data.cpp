@@ -27,7 +27,7 @@ IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, QString compar
         connect(host, &Base_Host::signalDataChanged, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
 }
 
-IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::type() const
+IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::direction() const
 {
     return _type;
 }
@@ -73,27 +73,6 @@ uint8_t IOTV_Event_Data::channelNumber() const
 const Raw &IOTV_Event_Data::data() const
 {
     return _data;
-}
-
-QString IOTV_Event_Data::directionString() const
-{
-    switch (_type) {
-    case DATA_DIRECTION::RX:
-        return Json_Event_Action::DIRECTION_RX;
-        break;
-    case DATA_DIRECTION::TX:
-        return Json_Event_Action::DIRECTION_TX;
-        break;
-    case DATA_DIRECTION::ANY:
-        return Json_Event_Action::DIRECTION_ANY;
-        break;
-    case DATA_DIRECTION::CHANGE:
-        return Json_Event_Action::DIRECTION_CHANGE;
-        break;
-    default:
-        return "NONE";
-        break;
-    }
 }
 
 void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)

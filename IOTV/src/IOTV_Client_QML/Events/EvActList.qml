@@ -41,14 +41,14 @@ ListView {
             listModel.clear()
 
             var list = target.evAcList()
+
             for( var i = 0; i < list.length; i++)
             {
-                var name = list[i][0].objectName
                 var event = list[i][0]
                 var action = list[i][1]
 
                 var object = {
-                    name: name,
+                    name: event["name"],
                     event: event,
                     action: action
                 }

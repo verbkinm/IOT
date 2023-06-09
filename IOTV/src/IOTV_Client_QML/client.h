@@ -33,7 +33,8 @@ public:
     Q_INVOKABLE QList<QObject*> devList();
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
-    Q_INVOKABLE QList<QList<QObject *> > evAcList() const;
+    Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
+
 
     bool stateConnection() const;
 
@@ -51,7 +52,7 @@ private:
     //!!! unorder_map
     std::map<QString, Device> _devices;
 
-    QList<QList<QObject*>> _evAcList;
+    QList<QList<QVariantMap>> _evAcList;
 
     void queryIdentification();
     void queryState(const QString &name);

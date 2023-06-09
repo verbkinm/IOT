@@ -2,8 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property string _state: stateTypeComboBox.currentText
-    property alias model: stateTypeComboBox.model
+    property alias comboBox: stateTypeComboBox
 
     id: itemStateType
     height: 50

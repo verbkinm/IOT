@@ -2,13 +2,14 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
-    property string direction: directionTypeComboBox.currentText
-    property string compare: compareTypeComboBox.currentText
-    property string dataType: dataTypeComboBox.currentText
-    property string dataString: _data.text
-    property int channelNumber: chNum.value
+    property alias directectionComboBox: directionTypeComboBox
+    property alias compareTypeComboBox: compareTypeComboBox
+    property alias dataTypeComboBox: dataTypeComboBox
+    property alias dataString: _data.text
+    property alias channelNumber: chNum.value
 
-    property alias model: compareTypeComboBox.model
+
+    //    property alias model: compareTypeComboBox.model
 
     id: root
     width: 400//parent.width

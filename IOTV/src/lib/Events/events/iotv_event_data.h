@@ -20,14 +20,12 @@ public:
                     uint8_t channelNumber, const Raw &raw,
                     QObject *parent = nullptr);
 
-    DATA_DIRECTION type() const;
+    DATA_DIRECTION direction() const;
     const QString &compareStr() const;
 
     uint8_t channelNumber() const;
 
     const Raw &data() const;
-
-    Q_INVOKABLE QString directionString() const;
 
 private:
     DATA_DIRECTION _type;

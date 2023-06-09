@@ -2,7 +2,9 @@
 #include <iostream>
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
-    : Base_Host{static_cast<uint8_t>(dev->id), parent}, _name{QByteArray{dev->name, dev->nameSize}}
+    : Base_Host{static_cast<uint8_t>(dev->id), parent},
+    _name{QByteArray{dev->name, dev->nameSize}},
+    _aliasName(_name)
 {
     Q_ASSERT(dev != nullptr);
 

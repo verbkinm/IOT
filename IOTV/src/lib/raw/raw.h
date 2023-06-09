@@ -49,7 +49,7 @@ public:
 
     Raw(DATA_TYPE type);
     Raw(DATA_TYPE type, const QByteArray &data);
-//    Raw(DATA_TYPE type, const QVariant &variant);
+    Raw(DATA_TYPE type, const QString &data);
 
     //! Массив данных полностью состоит их нулей
     bool isZeroOnly() const;

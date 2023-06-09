@@ -4,11 +4,8 @@ import QtQuick.Controls 2.5
 import "qrc:/Events/BaseItem" as BaseItem
 
 Page {
-    property alias nameReadonly: name.textReadOnly
-
-    property alias evAcName: name.text
-    property alias hostNameItem: hostNameItem
-    property alias eventTypeItem: eventTypeItem
+    property var _event
+    property var _action
 
     id: root
     title: "Новое событие"
@@ -49,6 +46,7 @@ Page {
                 id: name
                 width: parent.width
                 label: "Название: "
+                text: _event["name"]
             }
 
             BaseItem.HostNameComboBox {
@@ -62,6 +60,7 @@ Page {
                 height: 50
                 width: parent.width
 
+
                 onSignalActivated: {
                     if (eventType === model[0] || eventType === model[1])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/EmptyItem.qml")
@@ -69,6 +68,12 @@ Page {
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: parent.width})
                     else if(eventType === model[3])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
+                }
+
+                Component.onCompleted: {
+                    var eventType = _event["type"]
+                    var index = comboBox.find(eventType)
+                    comboBox.currentIndex = index
                 }
             }
 
@@ -156,5 +161,88 @@ Page {
     onFocusChanged: {
         eventTypeItem.signalActivated()
         actionTypeItem.signalActivated()
+
+        var eventType = _event["type"]
+
+        if (eventType === "state")
+            stateProperty()
+        else if (eventType === "data")
+            dataProperty()
+    }
+
+    function stateProperty()
+    {
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: column.width})
+        var state = _event["state"]
+        var index = eventTypeLoader.item.comboBox.find(state)
+
+        if (index === -1)
+        {
+            eventTypeLoader.item.enabled = false
+            eventTypeLoader.item.model = [state]
+        }
+        else
+        {
+            eventTypeLoader.item.comboBox.currentIndex = index
+        }
+    }
+
+    function dataProperty()
+    {
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: column.width})
+        var item = eventTypeLoader.item
+
+        // direction
+        var direction = _event["direction"]
+        var index = item.directectionComboBox.find(direction)
+
+        if (index === -1)
+        {
+            item.enabled = false
+            item.directectionComboBox.model = [direction]
+        }
+        else
+        {
+            item.directectionComboBox.currentIndex = index
+        }
+
+        // compare
+        var compare = _event["compare"]
+        index = eventTypeLoader.item.compareTypeComboBox.find(compare)
+
+        if (index === -1)
+        {
+            item.enabled = false
+            item.compareTypeComboBox.model = [compare]
+        }
+        else
+        {
+            item.compareTypeComboBox.currentIndex = index
+        }
+
+        if (compare !== "always true" && compare !== "always false")
+        {
+            // dataType
+            var dataType = _event["data_type"]
+            index = item.dataTypeComboBox.find(dataType)
+
+            if (index === -1)
+            {
+                item.enabled = false
+                item.dataTypeComboBox.model = [dataType]
+            }
+            else
+            {
+                item.dataTypeComboBox.currentIndex = index
+            }
+
+            // data
+            var data = _event["data"]
+            item.dataString = data
+        }
+
+        // channel number
+        var chNum = _event["chNumber"]
+        item.channelNumber = chNum
     }
 }

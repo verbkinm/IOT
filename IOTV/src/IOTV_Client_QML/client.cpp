@@ -123,10 +123,15 @@ bool Client::stateConnection() const
     return _socket.state() == QAbstractSocket::ConnectedState;
 }
 
-QList<QList<QObject*>> Client::evAcList() const
+QList<QList<QVariantMap>> Client::evAcList() const
 {
     return _evAcList;
 }
+
+//IOTV_Event_Property *Client::eventProperty() const
+//{
+//    return new IOTV_Event_Property;
+//}
 
 void Client::queryIdentification()
 {
@@ -279,16 +284,35 @@ void Client::responceTech(const Header *header)
         for(const auto &pair : _devices)
             hosts.push_front(&pair.second);
 
-        auto list = Event_Action_Parser::parseJson(data, hosts);
+        _evAcList = Event_Action_Parser::parseJsonToVariantMap(data, hosts);
 
-        _evAcList.clear();
-
-        for (const auto &el : list)
+        // Заменяем имена устройств на их aliasName
+        for (auto &list : _evAcList)
         {
-            QList<QObject *> l;
-            l << el.second.first << el.second.second;
-            l[0]->setObjectName(el.first);
-            _evAcList << l;
+            if (list.size() < 2)
+                continue;
+
+            // У событий
+            auto hostName = list.at(0)[Json_Event_Action::HOST_NAME].toString();
+            if (_devices.contains(hostName))
+                list[0][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
+
+            // У действий
+            if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX)
+            {
+                auto hostName = list.at(1)[Json_Event_Action::HOST_NAME].toString();
+                if (_devices.contains(hostName))
+                    list[1][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
+            }
+            else if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX_REF)
+            {
+                auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
+                if (_devices.contains(srcHostName))
+                    list[1][Json_Event_Action::HOST_SRC] = _devices[hostName].aliasName();
+                auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
+                if (_devices.contains(dstHostName))
+                    list[1][Json_Event_Action::HOST_DST] = _devices[hostName].aliasName();
+            }
         }
 
         emit signalEventAction();

@@ -29,6 +29,7 @@ Raw::Raw(int16_t data) :
     if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
         data = qToLittleEndian(data);
 
+    _data.resize(sizeof(data));
     std::memcpy(_data.data(), &data, sizeof(data));
 }
 
@@ -38,6 +39,7 @@ Raw::Raw(int32_t data) :
     if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
         data = qToLittleEndian(data);
 
+    _data.resize(sizeof(data));
     std::memcpy(_data.data(), &data, sizeof(data));
 }
 
@@ -47,6 +49,7 @@ Raw::Raw(int64_t data) :
     if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
         data = qToLittleEndian(data);
 
+    _data.resize(sizeof(data));
     std::memcpy(_data.data(), &data, sizeof(data));
 }
 Raw::Raw(float data) :
@@ -181,6 +184,56 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
     {
         this->setType(type);
         this->setData(data);
+    }
+}
+
+Raw::Raw(DATA_TYPE type, const QString &data)
+{
+    if (type == Raw::DATA_TYPE::BOOL)
+    {
+        if (data.size() > 0 && (data == "0" || data == "false"))
+            *this = Raw(false);
+        else
+            *this = Raw(true);
+    }
+    else if (type == Raw::DATA_TYPE::INT_8)
+    {
+        int8_t val = data.toInt();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_16)
+    {
+        int16_t val = data.toInt();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_32)
+    {
+        int32_t val = data.toInt();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::INT_64)
+    {
+        int64_t val = data.toLong();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::FLOAT_32)
+    {
+        float val = data.toFloat();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::DOUBLE_64)
+    {
+        double val = data.toDouble();
+        *this = Raw(val);
+    }
+    else if (type == Raw::DATA_TYPE::STRING)
+    {
+        *this = Raw(data);
+    }
+    else if (type == Raw::DATA_TYPE::RAW || type == Raw::DATA_TYPE::NONE)
+    {
+        this->setType(type);
+        this->setData(QByteArray(data.toStdString().c_str(), data.toStdString().size()));
     }
 }
 

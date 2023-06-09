@@ -80,7 +80,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &direction,
-                                            const QByteArray &data, const QString &dataType,
+                                            const QString &data, const QString &dataType,
                                             const QString &compare, uint8_t channelNumber)
 {
     if (type != Json_Event_Action::TYPE_DATA)
@@ -104,7 +104,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
 }
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                                              const QByteArray &data, const QString &dataType)
+                                              const QString &data, const QString &dataType)
 {
     if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
         return nullptr;

@@ -16,6 +16,7 @@ public:
     ~Event_Action_Parser() = delete;
 
     static std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
+    static QList<QList<QVariantMap> > parseJsonToVariantMap(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
     static QByteArray toData(const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> &list);
 
 private:
@@ -27,6 +28,8 @@ private:
     static QJsonObject parseEvent(const IOTV_Event *event);
     static QJsonObject parseAction(const IOTV_Action *action);
 
-    static void writeDatatoJson(const Raw &raw, QJsonObject &id);
+    static QVariantMap parseJsonToVariantMapEvent(const IOTV_Event *event, const QString &name);
+    static QVariantMap parseJsonToVariantMapAction(const IOTV_Action *action);
+//    static void writeDatatoJson(const Raw &raw, QJsonObject &id);
 };
 
