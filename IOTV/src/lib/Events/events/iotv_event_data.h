@@ -17,7 +17,7 @@ public:
 
     IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
                     const Base_Host *host,
-                    uint8_t channelNumber, const Raw &raw,
+                    uint8_t channelNumber, const QString &data,
                     QObject *parent = nullptr);
 
     DATA_DIRECTION direction() const;
@@ -25,15 +25,15 @@ public:
 
     uint8_t channelNumber() const;
 
-    const Raw &data() const;
+    const QString data() const;
 
 private:
     DATA_DIRECTION _type;
     uint8_t _channelNumber;
-    Raw _data;
+    QString _data;
 
-    std::function<bool(Raw, Raw)> _compare;
     QString _compareStr;
+    std::function<bool(Raw, Raw)> _compare;
 
     std::function<bool(Raw, Raw)> createCompare(const QString &compare);
 

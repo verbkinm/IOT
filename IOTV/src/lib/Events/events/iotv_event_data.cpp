@@ -2,14 +2,14 @@
 
 IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
                                  const Base_Host *host,
-                                 uint8_t channelNumber, const Raw &raw,
+                                 uint8_t channelNumber, const QString &raw,
                                  QObject *parent) :
     IOTV_Event(EVENT_TYPE::DATA, host, parent),
     _type(direction),
     _channelNumber(channelNumber),
     _data(raw),
-    _compare(createCompare(compare)),
-    _compareStr(compare)
+    _compareStr(compare),
+    _compare(createCompare(compare))
 {
     if (host == nullptr)
         return;
@@ -34,6 +34,12 @@ IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::direction() const
 
 std::function<bool(Raw, Raw)> IOTV_Event_Data::createCompare(const QString &compare)
 {
+    if (_type == DATA_DIRECTION::CHANGE && _compareStr.isEmpty())
+        return [](Raw, Raw)->bool
+        {
+            return true;
+        };
+
     if (compare == Json_Event_Action::COMPARE_EQ)
         return std::equal_to<Raw>();
     else if (compare == Json_Event_Action::COMPARE_NE)
@@ -70,14 +76,20 @@ uint8_t IOTV_Event_Data::channelNumber() const
     return _channelNumber;
 }
 
-const Raw &IOTV_Event_Data::data() const
+const QString IOTV_Event_Data::data() const
 {
     return _data;
 }
 
 void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)
 {
+    if (_host->getId() == 0)
+        return;
+
+
     Raw rawHost(_host->getReadChannelType(channleNumber), rhs);
-    if (_channelNumber == channleNumber && _compare(_data, rawHost))
+    QString str = rawHost.strData().first;
+    bool res = _compare(_data, str);
+    if (_channelNumber == channleNumber && res)
         emit signalEvent();
 }

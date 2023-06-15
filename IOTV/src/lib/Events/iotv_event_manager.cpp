@@ -75,12 +75,14 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
         newState = IOTV_Event_State::STATE_TYPE::OFFLINE;
     else if (state == Json_Event_Action::STATE_SWITCH)
         newState = IOTV_Event_State::STATE_TYPE::SWITCH;
+    else
+        return nullptr;
 
     return new IOTV_Event_State(newState, host);
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &direction,
-                                            const QString &data, const QString &dataType,
+                                            const QString &data,
                                             const QString &compare, uint8_t channelNumber)
 {
     if (type != Json_Event_Action::TYPE_DATA)
@@ -95,26 +97,26 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
         newDirection = IOTV_Event_Data::DATA_DIRECTION::ANY;
     else if (direction == Json_Event_Action::DIRECTION_CHANGE)
         newDirection = IOTV_Event_Data::DATA_DIRECTION::CHANGE;
-
-    Raw resultRaw(Raw::dataType(dataType), data);
-    if (!resultRaw.isValid() && !(compare == Json_Event_Action::COMPARE_ALWAYS_TRUE || compare == Json_Event_Action::COMPARE_ALWAYS_FALSE))
+    else
         return nullptr;
 
-    return new IOTV_Event_Data(newDirection, compare, host, channelNumber, resultRaw);
+    if (compare != Json_Event_Action::COMPARE_EQ && compare != Json_Event_Action::COMPARE_NE
+        && compare != Json_Event_Action::COMPARE_GR && compare != Json_Event_Action::COMPARE_LS
+        && compare != Json_Event_Action::COMPARE_GE && compare != Json_Event_Action::COMPARE_LE
+        && compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
+        return nullptr;
+
+    return new IOTV_Event_Data(newDirection, compare, host, channelNumber, data);
 }
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                                              const QString &data, const QString &dataType)
+                                              const QString &data)
 {
     if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
         return nullptr;
 
-    Raw resultRaw(Raw::dataType(dataType), data);
-    if (!resultRaw.isValid())
-        return nullptr;
-
     if (type == Json_Event_Action::TYPE_DATA_TX)
-        return new IOTV_Action_Data_TX(host, ch_num, resultRaw);
+        return new IOTV_Action_Data_TX(host, ch_num, data);
 
     return nullptr;
 }

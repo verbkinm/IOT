@@ -53,6 +53,7 @@ Page {
                 id: hostNameItem
                 height: 50
                 width: parent.width
+                startHostName: _event["host_name"]
             }
 
             BaseItem.EventType {
@@ -82,6 +83,7 @@ Page {
             Loader {
                 id: eventTypeLoader
                 source: ""
+                width: parent.width
             }
 
             BaseItem.HorizontLine {
@@ -122,6 +124,7 @@ Page {
             Loader {
                 id: actionTypeLoader
                 source: ""
+                width: parent.width
             }
 
             BaseItem.HorizontLine {
@@ -151,7 +154,7 @@ Page {
 
     Component.onCompleted: {
         console.log("Add Events page construct: ", objectName)
-        forceActiveFocus()
+        //        forceActiveFocus()
     }
 
     Component.onDestruction: {
@@ -162,8 +165,20 @@ Page {
         eventTypeItem.signalActivated()
         actionTypeItem.signalActivated()
 
-        var eventType = _event["type"]
+//        var hostName  = _event["host_name"]
+//        var index = hostNameItem.comboBox.find(hostName)
 
+//        if (index === -1)
+//        {
+//            hostNameItem.enabled = false
+//            hostNameItem.model = [hostName]
+//        }
+//        else
+//        {
+//            hostNameItem.comboBox.currentIndex = index
+//        }
+
+        var eventType = _event["type"]
         if (eventType === "state")
             stateProperty()
         else if (eventType === "data")
@@ -172,77 +187,17 @@ Page {
 
     function stateProperty()
     {
-        eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: column.width})
         var state = _event["state"]
-        var index = eventTypeLoader.item.comboBox.find(state)
-
-        if (index === -1)
-        {
-            eventTypeLoader.item.enabled = false
-            eventTypeLoader.item.model = [state]
-        }
-        else
-        {
-            eventTypeLoader.item.comboBox.currentIndex = index
-        }
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {startState: state})
     }
 
     function dataProperty()
     {
-        eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: column.width})
-        var item = eventTypeLoader.item
-
-        // direction
-        var direction = _event["direction"]
-        var index = item.directectionComboBox.find(direction)
-
-        if (index === -1)
-        {
-            item.enabled = false
-            item.directectionComboBox.model = [direction]
-        }
-        else
-        {
-            item.directectionComboBox.currentIndex = index
-        }
-
-        // compare
         var compare = _event["compare"]
-        index = eventTypeLoader.item.compareTypeComboBox.find(compare)
-
-        if (index === -1)
-        {
-            item.enabled = false
-            item.compareTypeComboBox.model = [compare]
-        }
-        else
-        {
-            item.compareTypeComboBox.currentIndex = index
-        }
-
-        if (compare !== "always true" && compare !== "always false")
-        {
-            // dataType
-            var dataType = _event["data_type"]
-            index = item.dataTypeComboBox.find(dataType)
-
-            if (index === -1)
-            {
-                item.enabled = false
-                item.dataTypeComboBox.model = [dataType]
-            }
-            else
-            {
-                item.dataTypeComboBox.currentIndex = index
-            }
-
-            // data
-            var data = _event["data"]
-            item.dataString = data
-        }
-
-        // channel number
+        var direction = _event["direction"]
+        var data = _event["data"]
         var chNum = _event["chNumber"]
-        item.channelNumber = chNum
+
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {startCompare: compare, startDirection: direction, dataString: data, channelNumber: chNum})
     }
 }

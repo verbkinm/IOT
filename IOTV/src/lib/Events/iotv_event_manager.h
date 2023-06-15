@@ -33,19 +33,18 @@ public:
     static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &state);
 
     //! IOTV_Event_Data
-    static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &direction,
-                            const QString &data, const QString &dataType,
-                            const QString &compare, uint8_t channelNumber);
+    static IOTV_Event *createEvent(Base_Host *host, const QString &type,
+                                   const QString &direction, const QString &data,
+                                   const QString &compare, uint8_t channelNumber);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
-    static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num,
-                              const QString &data, const QString &dataType);
+    static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num, const QString &data);
 
     //! IOTV_Action_Data_TX_Ref и IOTV_Action_Data_RX_Ref
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
-                              uint8_t dstCh_num, uint8_t srcCh_Num);
+                                     uint8_t dstCh_num, uint8_t srcCh_Num);
 
-//    static
+    //    static
 
 private:
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> _worker;

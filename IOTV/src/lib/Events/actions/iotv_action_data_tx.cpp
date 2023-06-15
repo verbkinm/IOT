@@ -1,20 +1,25 @@
 #include "iotv_action_data_tx.h"
 
 IOTV_Action_Data_TX::IOTV_Action_Data_TX(Base_Host *host,
-                                         uint8_t channelNumber, const Raw &raw,
+                                         uint8_t channelNumber, const QString &data,
                                          QObject *parent) :
     IOTV_Action(ACTION_TYPE::DATA_TX, parent),
     _host(host),
     _channelNumber(channelNumber),
-    _data(raw)
+    _data(data)
 {
 
 }
 
 void IOTV_Action_Data_TX::exec()
 {
+    if (_host->getId() == 0)
+        return;
+
+    Raw raw(_host->getReadChannelType(_channelNumber), _data);
+
     if (isValid())
-        emit _host->signalQueryWrite(_channelNumber, _data.data());
+        emit _host->signalQueryWrite(_channelNumber, raw.data());
 }
 
 bool IOTV_Action_Data_TX::isValid() const
@@ -32,7 +37,7 @@ uint8_t IOTV_Action_Data_TX::channelNumber() const
     return _channelNumber;
 }
 
-const Raw &IOTV_Action_Data_TX::data() const
+const QString &IOTV_Action_Data_TX::data() const
 {
     return _data;
 }

@@ -2,11 +2,12 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property string hostName: hostComboBox.currentText
-    property alias label: hostNameText.text
-    property alias model: hostComboBox.model
+//    property string hostName: hostComboBox.currentText
+//    property alias label: hostNameText.text
+//    property alias model: hostComboBox.model
     property alias comboBox: hostComboBox
-//    property alias enabled: hostComboBox.enabled
+
+    property string startHostName: ""
 
     id: root
     height: 50
@@ -28,6 +29,7 @@ Item {
         width: 200
 
         model: listName()
+        currentIndex: startIndex(model, startHostName)
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -42,5 +44,16 @@ Item {
             arr.push(client.devList()[i].aliasName)
 
         return arr
+    }
+
+    function startIndex(model, textItem)
+    {
+        if (textItem === "")
+            return 0;
+
+        const found = (element) => element === textItem;
+        var index = model.findIndex(found)
+
+        return index === -1 ? 0 : index
     }
 }

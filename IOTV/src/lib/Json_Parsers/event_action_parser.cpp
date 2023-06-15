@@ -122,8 +122,8 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
         QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
         QString data = jobj.value(Json_Event_Action::DATA).toString();
-        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
-        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, direction, data, dataType, compare, ch_num);
+//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
+        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, direction, data, /*dataType, */compare, ch_num);
     }
 
     return event;
@@ -141,7 +141,7 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
         QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
 
-        action = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(host), ch_num, data, dataType);
+        action = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(host), ch_num, data);
 
     }
     else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
@@ -225,11 +225,7 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
         id.insert(Json_Event_Action::CH_NUM, QString::number(dataEv->channelNumber()));
 
         if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
-        {
-            auto raw = dataEv->data();
-            id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
-            id.insert(Json_Event_Action::DATA, raw.strData().first);
-        }
+            id.insert(Json_Event_Action::DATA, dataEv->data());
     }
 
     return id;
@@ -269,9 +265,7 @@ QJsonObject Event_Action_Parser::parseAction(const IOTV_Action *action)
         id.insert(Json_Event_Action::HOST_NAME, actioDataTX->host()->getName());
         id.insert(Json_Event_Action::CH_NUM, QString::number(actioDataTX->channelNumber()));
 
-        auto raw = actioDataTX->data();
-        id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
-        id.insert(Json_Event_Action::DATA, raw.strData().first);
+        id.insert(Json_Event_Action::DATA, actioDataTX->data());
 //        writeDatatoJson(raw, id);
     }
     else if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
@@ -364,10 +358,7 @@ QVariantMap Event_Action_Parser::parseJsonToVariantMapEvent(const IOTV_Event *ev
         newEvent[Json_Event_Action::COMPARE] = compare;
 
         if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
-        {
-            newEvent[Json_Event_Action::DATA_TYPE] = eventData->data().strData().second;
-            newEvent[Json_Event_Action::DATA] = eventData->data().strData().first;
-        }
+            newEvent[Json_Event_Action::DATA] = eventData->data();
     }
 
     return newEvent;
@@ -388,8 +379,7 @@ QVariantMap Event_Action_Parser::parseJsonToVariantMapAction(const IOTV_Action *
             return {};
 
         newAction[Json_Event_Action::HOST_NAME] = dataTX->host()->getName();
-        newAction[Json_Event_Action::DATA] = dataTX->data().strData().first;
-        newAction[Json_Event_Action::DATA_TYPE] = dataTX->data().strData().second;
+        newAction[Json_Event_Action::DATA] = dataTX->data();
         newAction[Json_Event_Action::CH_NUM] = dataTX->channelNumber();
 
     }

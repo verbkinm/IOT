@@ -4,7 +4,7 @@ import QtQuick.Controls 2.5
 Item {
     property alias text: dataTextField.text
     property alias label: dataText.text
-    property alias textReadOnly: dataTextField.readOnly
+//    property alias textReadOnly: dataTextField.readOnly
 
     height: 50
     width: 400//parent.width
