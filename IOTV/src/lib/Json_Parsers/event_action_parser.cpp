@@ -122,8 +122,7 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
         QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
         QString data = jobj.value(Json_Event_Action::DATA).toString();
-//        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
-        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, direction, data, /*dataType, */compare, ch_num);
+        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, direction, data, compare, ch_num);
     }
 
     return event;
@@ -138,7 +137,6 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
     {
         const Base_Host *host = hostByName(hosts, jobj.value(Json_Event_Action::HOST_NAME).toString());
         QString data = jobj.value(Json_Event_Action::DATA).toString();
-        QString dataType = jobj.value(Json_Event_Action::DATA_TYPE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
 
         action = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(host), ch_num, data);

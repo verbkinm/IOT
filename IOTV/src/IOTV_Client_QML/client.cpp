@@ -308,10 +308,10 @@ void Client::responceTech(const Header *header)
             {
                 auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
                 if (_devices.contains(srcHostName))
-                    list[1][Json_Event_Action::HOST_SRC] = _devices[hostName].aliasName();
+                    list[1][Json_Event_Action::HOST_SRC] = _devices[srcHostName].aliasName();
                 auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
                 if (_devices.contains(dstHostName))
-                    list[1][Json_Event_Action::HOST_DST] = _devices[hostName].aliasName();
+                    list[1][Json_Event_Action::HOST_DST] = _devices[dstHostName].aliasName();
             }
         }
 

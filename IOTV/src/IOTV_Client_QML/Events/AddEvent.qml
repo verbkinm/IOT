@@ -46,21 +46,20 @@ Page {
                 id: name
                 width: parent.width
                 label: "Название: "
-                text: _event["name"]
             }
 
             BaseItem.HostNameComboBox {
                 id: hostNameItem
                 height: 50
                 width: parent.width
-                startHostName: _event["host_name"]
+                startHostName: (_event === undefined) ? "" : _event["host_name"]
             }
 
             BaseItem.EventType {
                 id: eventTypeItem
                 height: 50
                 width: parent.width
-
+                startType: (_event === undefined) ? "" : _event["type"]
 
                 onSignalActivated: {
                     if (eventType === model[0] || eventType === model[1])
@@ -69,12 +68,6 @@ Page {
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: parent.width})
                     else if(eventType === model[3])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
-                }
-
-                Component.onCompleted: {
-                    var eventType = _event["type"]
-                    var index = comboBox.find(eventType)
-                    comboBox.currentIndex = index
                 }
             }
 
@@ -112,6 +105,7 @@ Page {
             BaseItem.ActionType {
                 id: actionTypeItem
                 width: parent.width
+                startType: (_action === undefined) ? "" : _action["type"]
 
                 onSignalActivated: {
                     if (actiontType === model[0])
@@ -165,24 +159,31 @@ Page {
         eventTypeItem.signalActivated()
         actionTypeItem.signalActivated()
 
-//        var hostName  = _event["host_name"]
-//        var index = hostNameItem.comboBox.find(hostName)
+        if (_event === undefined)
+        {
+            name.text = ""
+        }
+        else
+        {
+            var eventType = _event["type"]
+            if (eventType === "state")
+                stateProperty()
+            else if (eventType === "data")
+                dataProperty()
+        }
 
-//        if (index === -1)
-//        {
-//            hostNameItem.enabled = false
-//            hostNameItem.model = [hostName]
-//        }
-//        else
-//        {
-//            hostNameItem.comboBox.currentIndex = index
-//        }
+        if (_action === undefined)
+        {
 
-        var eventType = _event["type"]
-        if (eventType === "state")
-            stateProperty()
-        else if (eventType === "data")
-            dataProperty()
+        }
+        else
+        {
+            var actionType = _action["type"]
+            if (actionType === "data_tx")
+                dataTX()
+            else if (actionType === "data_tx_ref")
+                dataTX_Ref()
+        }
     }
 
     function stateProperty()
@@ -193,11 +194,28 @@ Page {
 
     function dataProperty()
     {
-        var compare = _event["compare"]
-        var direction = _event["direction"]
-        var data = _event["data"]
-        var chNum = _event["chNumber"]
+        var compare = _event["compare"] === undefined ? "" : _event["compare"]
+        var direction = _event["direction"] === undefined ? "" : _event["direction"]
+        var data = _event["data"] === undefined ? "" : _event["data"]
+        var chNum = _event["chNumber"] === undefined ? "" : _event["chNumber"]
 
         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {startCompare: compare, startDirection: direction, dataString: data, channelNumber: chNum})
+    }
+
+    function dataTX()
+    {
+        var hostName = _action["host_name"]
+        var data = _action["data"]
+        var chNum = _action["chNumber"]
+        actionTypeLoader.setSource("qrc:/Events/BaseItem/ActionDataTX.qml", {dataString: data, channelNumber: chNum, hostName: hostName})
+    }
+
+    function dataTX_Ref()
+    {
+        var srcHostName = _action["src_host"]
+        var dstHostName = _action["dst_host"]
+        var srcChNum = _action["src_chNumber"]
+        var dstChNum = _action["dst_chNumber"]
+        actionTypeLoader.setSource("qrc:/Events/BaseItem/ActionDataTX_Ref.qml", {srcHostName: srcHostName, dstHostName: dstHostName, srcChannelNumber: srcChNum, dstChannelNumber: dstChNum})
     }
 }

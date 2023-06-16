@@ -13,8 +13,6 @@ Page {
             client.queryEventAction()
             timer.start()
         }
-//        else
-//            listModel.clear()
     }
 
     Flickable {
@@ -53,13 +51,6 @@ Page {
                     if (component.status === Component.Ready)
                         appStack.push(component)
                 }
-            }
-
-            Text {
-                text: qsTr("Тут будет список событий")
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.pixelSize: 18
-                wrapMode: Text.Wrap
             }
 
             EvActList {

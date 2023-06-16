@@ -5,6 +5,7 @@ Item {
     property string eventType: eventTypeComboBox.currentText
     property alias model: eventTypeComboBox.model
     property alias comboBox: eventTypeComboBox
+    property string startType: ""
 
     signal signalActivated();
 
@@ -27,6 +28,7 @@ Item {
         width: 200
 
         model: ["connection", "disconnection", "state", "data"]
+        currentIndex: startIndex(model, startType)
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -37,5 +39,16 @@ Item {
         onActivated: {
             signalActivated();
         }
+    }
+
+    function startIndex(model, textItem)
+    {
+        if (textItem === "")
+            return 0;
+
+        const found = (element) => element === textItem;
+        var index = model.findIndex(found)
+
+        return index === -1 ? 0 : index
     }
 }

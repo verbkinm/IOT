@@ -4,6 +4,8 @@ import QtQuick.Controls 2.5
 Item {
     property string actiontType: actionTypeComboBox.currentText
     property alias model: actionTypeComboBox.model
+    property alias comboBox: actionTypeComboBox
+    property string startType: ""
 
     signal signalActivated()
 
@@ -27,6 +29,7 @@ Item {
         wheelEnabled: false
 
         model: ["data_tx", "data_tx_ref"]
+        currentIndex: startIndex(model, startType)
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -37,5 +40,16 @@ Item {
         onActivated: {
             signalActivated();
         }
+    }
+
+    function startIndex(model, textItem)
+    {
+        if (textItem === "")
+            return 0;
+
+        const found = (element) => element === textItem;
+        var index = model.findIndex(found)
+
+        return index === -1 ? 0 : index
     }
 }
