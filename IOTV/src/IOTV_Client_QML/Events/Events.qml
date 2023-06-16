@@ -16,9 +16,10 @@ Page {
     }
 
     Flickable {
+        id: flickable
         width: parent.width
         height: parent.height
-        contentHeight: 200
+//        contentHeight: listView.height + addEvent.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
@@ -55,6 +56,10 @@ Page {
 
             EvActList {
                 id: listView
+
+                onContentHeightChanged: {
+                    flickable.contentHeight = listView.contentHeight + addEvent.height + 45
+                }
             }
         }
     }
