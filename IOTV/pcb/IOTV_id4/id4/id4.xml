@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>/home/user/myProg/IOT/IOTV/pcb/IOTV_id4/id4/id4.kicad_sch</source>
+    <date>Вт 20 июн 2023 15:58:26</date>
+    <tool>Eeschema 7.0.2-6a45011f42~172~ubuntu22.10.1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>IOTV_id4</title>
+        <company>Вербкин М.С.</company>
+        <rev>1</rev>
+        <date>2023-03-25</date>
+        <source>id4.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="D1">
+      <value>LED_BGRK</value>
+      <libsource lib="Device" part="LED_BGRK" description="RGB LED, blue/green/red/cathode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="RGB LED, blue/green/red/cathode"/>
+      <property name="ki_keywords" value="LED RGB diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>92650cfe-c224-402b-aab6-4f13c33d42e7</tstamps>
+    </comp>
+    <comp ref="Q1">
+      <value>S8050</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>http://www.unisonic.com.tw/datasheet/S8050.pdf</datasheet>
+      <libsource lib="Transistor_BJT" part="S8050" description="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="ki_keywords" value="S8050 NPN Low Voltage High Current Transistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1b1c116a-f632-4438-bae6-edabd214ec7a</tstamps>
+    </comp>
+    <comp ref="Q2">
+      <value>S8050</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>http://www.unisonic.com.tw/datasheet/S8050.pdf</datasheet>
+      <libsource lib="Transistor_BJT" part="S8050" description="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="ki_keywords" value="S8050 NPN Low Voltage High Current Transistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b6c0eb52-c42a-42b7-ad3f-b30fb640dacb</tstamps>
+    </comp>
+    <comp ref="Q3">
+      <value>S8050</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <datasheet>http://www.unisonic.com.tw/datasheet/S8050.pdf</datasheet>
+      <libsource lib="Transistor_BJT" part="S8050" description="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92"/>
+      <property name="ki_keywords" value="S8050 NPN Low Voltage High Current Transistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a78a0b76-f1e4-47b2-8616-cf62874c55b7</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>220</value>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>11f1a0ef-a043-47cd-a3cf-878505333b58</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>220</value>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>549dba94-e8ac-46d7-8276-c7a09a1ff5ca</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>220</value>
+      <fields>
+        <field name="Sim.Device">R</field>
+        <field name="Sim.Pins">1=+ 2=-</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sim.Device" value="R"/>
+      <property name="Sim.Pins" value="1=+ 2=-"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="id4.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7b89516f-8731-44fb-86d7-744b9e7bd46b</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Device" part="LED_BGRK">
+      <description>RGB LED, blue/green/red/cathode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED_BGRK</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="BA" type="passive"/>
+        <pin num="2" name="GA" type="passive"/>
+        <pin num="3" name="RA" type="passive"/>
+        <pin num="4" name="K" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Transistor_BJT" part="S8050">
+      <description>0.7A Ic, 20V Vce, Low Voltage High Current NPN Transistor, TO-92</description>
+      <docs>http://www.unisonic.com.tw/datasheet/S8050.pdf</docs>
+      <footprints>
+        <fp>TO?92*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">S8050</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">http://www.unisonic.com.tw/datasheet/S8050.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="E" type="passive"/>
+        <pin num="2" name="B" type="input"/>
+        <pin num="3" name="C" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Device">
+      <uri>/usr/share/kicad/symbols//Device.kicad_sym</uri>
+    </library>
+    <library logical="Transistor_BJT">
+      <uri>/usr/share/kicad/symbols//Transistor_BJT.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3.3V">
+      <node ref="Q1" pin="3" pinfunction="C" pintype="passive"/>
+      <node ref="Q2" pin="3" pinfunction="C" pintype="passive"/>
+      <node ref="Q3" pin="3" pinfunction="C" pintype="passive"/>
+    </net>
+    <net code="2" name="GND">
+      <node ref="D1" pin="4" pinfunction="K" pintype="passive"/>
+    </net>
+    <net code="3" name="GPIO_32">
+      <node ref="Q1" pin="2" pinfunction="B" pintype="input"/>
+    </net>
+    <net code="4" name="GPIO_33">
+      <node ref="Q3" pin="2" pinfunction="B" pintype="input"/>
+    </net>
+    <net code="5" name="GPIO_35">
+      <node ref="Q2" pin="2" pinfunction="B" pintype="input"/>
+    </net>
+    <net code="6" name="Net-(D1-BA)">
+      <node ref="D1" pin="1" pinfunction="BA" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+    </net>
+    <net code="7" name="Net-(D1-GA)">
+      <node ref="D1" pin="2" pinfunction="GA" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+    </net>
+    <net code="8" name="Net-(D1-RA)">
+      <node ref="D1" pin="3" pinfunction="RA" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+    </net>
+    <net code="9" name="Net-(Q1-E)">
+      <node ref="Q1" pin="1" pinfunction="E" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+    </net>
+    <net code="10" name="Net-(Q2-E)">
+      <node ref="Q2" pin="1" pinfunction="E" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+    </net>
+    <net code="11" name="Net-(Q3-E)">
+      <node ref="Q3" pin="1" pinfunction="E" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+    </net>
+  </nets>
+</export>
