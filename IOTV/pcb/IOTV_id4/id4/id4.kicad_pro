@@ -393,7 +393,7 @@
       "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
-      "simulation_model_issue": "error",
+      "simulation_model_issue": "warning",
       "unannotated": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
@@ -492,6 +492,10 @@
     [
       "c803e514-1b04-4687-9a92-b8766a99fa37",
       ""
+    ],
+    [
+      "f548f163-9ccc-4482-93d7-6dfb5f829f7f",
+      "LEDS"
     ]
   ],
   "text_variables": {}
