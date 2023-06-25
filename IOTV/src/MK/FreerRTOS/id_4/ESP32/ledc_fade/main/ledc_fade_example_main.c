@@ -15,11 +15,11 @@
 //#define LEDC_TEST_DUTY         (LED_maxDuty)
 
 TaskHandle_t led_rgb_task = NULL;
-extern uint8_t Led_RGB_scriptNumber;
+//extern uint8_t Led_RGB_scriptNumber;
 
 void app_main(void)
 {
-	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, 1, &led_rgb_task);
+	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 4096, NULL, 1, &led_rgb_task);
 
 //	Led_RGB_script_1_init();
 //
@@ -30,10 +30,8 @@ void app_main(void)
 
 	while (1)
 	{
-		vTaskDelay(3000 / portTICK_PERIOD_MS);
-		Led_RGB_scriptNumber++;
-		printf("Led_RGB_scriptNumber %d\n", Led_RGB_scriptNumber);
-		fflush(stdout);
-//		Led_RGB_scriptNumber = 2;
+		vTaskDelay(10000 / portTICK_PERIOD_MS);
+//		if (++Led_RGB_scriptNumber > 4)
+//			Led_RGB_scriptNumber = 1;
 	}
 }
