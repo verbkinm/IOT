@@ -10,7 +10,7 @@ typedef enum {
 	LIGTHBLUE,
 	MAGENTA,
 	WHITE,
-	NONE
+	NONE_COLOR
 } Led_RGB_color_t;
 
 typedef struct {
@@ -21,8 +21,9 @@ typedef struct {
 
 void Led_RGB_Task(void *pvParameters);
 
-void Led_RGB_shutdown(const led_rgb_t *led, int16_t time);
+void Led_RGB_startFade(const ledc_channel_config_t *pin, uint16_t duty, uint16_t time, ledc_fade_mode_t mode);
 void Led_RGB_setColor(const led_rgb_t *led, Led_RGB_color_t color, uint16_t duty, int16_t time, ledc_fade_mode_t mode);
+void Led_RGB_shutdown(const led_rgb_t *led, int16_t time);
 
 // Поочерёдная смена цвета на всех светодиодах. Один цвет загорелся - погас, следующий цвет загорелся погас.
 void Led_RGB_script_1_init();
@@ -36,9 +37,14 @@ void Led_RGB_script_2();
 void Led_RGB_script_3_init();
 void Led_RGB_script_3();
 
-// Поочерёдная загораются/гаснут все сведодиоты. Смена цвета на каждом круге
+// Поочерёдная загораются/гаснут все сведодиоты. Смена цвета на каждом круге. Фоновый цвет - выкл.
 void Led_RGB_script_4_init();
 void Led_RGB_script_4();
 
+// Поочерёдная загораются/гаснут все сведодиоты. Смена цвета на каждом круге. Фоновый цвет образуется наполнением текущего сведодиода.
+void Led_RGB_script_5_init();
+void Led_RGB_script_5();
 
-//void Led_RGB_fade_start(const led_rgb_t *led, );
+// Как и 5-й режим, но загораются и гаснут светодиоды на каждый круг.
+void Led_RGB_script_6_init();
+void Led_RGB_script_6();

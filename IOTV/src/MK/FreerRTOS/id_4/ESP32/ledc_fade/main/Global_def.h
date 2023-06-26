@@ -14,7 +14,20 @@
 //#define WIFI_CONNECTED_BIT					BIT0
 //#define WIFI_DISCONNECTED_BIT 				BIT1
 //#define WIFI_FAIL_BIT      					BIT2
-//
+
+// LED
+#define LED_0_RED			GPIO_NUM_15
+#define LED_0_GREEN			GPIO_NUM_2
+#define LED_0_BLUE			GPIO_NUM_4
+
+#define LED_1_RED			GPIO_NUM_16
+#define LED_1_GREEN			GPIO_NUM_17
+#define LED_1_BLUE			GPIO_NUM_5
+
+#define LED_2_RED			GPIO_NUM_18
+#define LED_2_GREEN			GPIO_NUM_19
+#define LED_2_BLUE			GPIO_NUM_21
+
 //// I2C
 //#define I2C_MASTER_SCL_IO           		CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
 //#define I2C_MASTER_SDA_IO           		CONFIG_I2C_MASTER_SDA      /*!< GPIO number used for I2C master data  */
