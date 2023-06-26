@@ -7,6 +7,7 @@
 
 #include "Led_RGB.h"
 
+extern uint8_t Led_RGB_scriptNumber;
 TaskHandle_t led_rgb_task = NULL;
 
 void app_main(void)
@@ -57,20 +58,8 @@ void app_main(void)
 
 	while (1)
 	{
-//		ledc_set_fade_with_time(channel1.speed_mode, channel1.channel, 8192, 1000);
-//		ledc_fade_start(channel1.speed_mode, channel1.channel, LEDC_FADE_NO_WAIT);
-//
-//		ledc_set_fade_with_time(channel1.speed_mode, channel1.channel, 0, 1000);
-//		ledc_fade_start(channel1.speed_mode, channel1.channel, LEDC_FADE_NO_WAIT);
-//
-//		ledc_set_fade_with_time(channel2.speed_mode, channel2.channel, 8192, 1000);
-//		ledc_fade_start(channel2.speed_mode, channel2.channel, LEDC_FADE_NO_WAIT);
-//
-//		ledc_set_fade_with_time(channel2.speed_mode, channel2.channel, 0, 1000);
-//		ledc_fade_start(channel2.speed_mode, channel2.channel, LEDC_FADE_NO_WAIT);
-
 		vTaskDelay(10000 / portTICK_PERIOD_MS);
-//		if (++Led_RGB_scriptNumber > 4)
+//		if (++Led_RGB_scriptNumber > 6)
 //			Led_RGB_scriptNumber = 1;
 	}
 }

@@ -11,12 +11,13 @@
 #include "Global_def.h"
 #include "Led_RGB.h"
 
-#define LEDC_TEST_FREQ			1000
-#define LEDC_TEST_FADE_TIME     500
+#define LEDC_TEST_FREQ			5000
+#define LEDC_TEST_FADE_TIME     2000
 #define LEDS_LENGTH 3
 
 extern uint16_t LED_maxDuty, LED_minDuty;
 extern uint8_t Led_RGB_scriptNumber;
+extern bool demo;
 
 static led_rgb_t leds[LEDS_LENGTH];
 
@@ -230,8 +231,11 @@ void Led_RGB_script_1()
 			Led_RGB_shutdown(led_all, LEDC_TEST_FADE_TIME);
 		}
 
-		Led_RGB_scriptNumber = 2;
-		while (1);
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 2;
+			while (1);
+		}
 	}
 }
 
@@ -247,8 +251,11 @@ void Led_RGB_script_2()
 		Led_RGB_startFade(&(led_all->green), 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led_all->blue), 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
 
-		Led_RGB_scriptNumber = 3;
-		while (1);
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 3;
+			while (1);
+		}
 	}
 }
 
@@ -265,8 +272,11 @@ void Led_RGB_script_3()
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 		}
 
-		Led_RGB_scriptNumber = 4;
-		while (1);
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 4;
+			while (1);
+		}
 	}
 }
 
@@ -323,6 +333,12 @@ void Led_RGB_script_4()
 				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 				Led_RGB_script_4_ext2(&leds[i], color);
 			}
+		}
+
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 5;
+			while (1);
 		}
 	}
 }
@@ -433,6 +449,12 @@ void Led_RGB_script_5()
 				Led_RGB_script_5_ext2(&leds[i], color, LED_minDuty);
 			}
 		}
+
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 6;
+			while (1);
+		}
 	}
 }
 
@@ -466,6 +488,12 @@ void Led_RGB_script_6()
 				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 				Led_RGB_script_6_ext2(&leds[i], color, LED_minDuty);
 			}
+		}
+
+		if (demo)
+		{
+			Led_RGB_scriptNumber = 1;
+			while (1);
 		}
 	}
 }
