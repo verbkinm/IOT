@@ -12,8 +12,8 @@
 #include "Led_RGB.h"
 
 #define LEDC_TEST_FREQ			5000
-#define LEDC_TEST_FADE_TIME     2000
-#define LEDS_LENGTH 3
+#define LEDC_TEST_FADE_TIME     500
+#define LEDS_LENGTH 5
 
 extern uint16_t LED_maxDuty, LED_minDuty;
 extern uint8_t Led_RGB_scriptNumber;
@@ -25,15 +25,6 @@ static TaskHandle_t led_rgb_script_task = NULL;
 
 static void Led_RGB_default();
 
-static void Led_RGB_script_4_ext1(led_rgb_t *led);
-static void Led_RGB_script_4_ext2(led_rgb_t *led, Led_RGB_color_t color);
-
-static void Led_RGB_script_5_ext1(led_rgb_t *led);
-static void Led_RGB_script_5_ext2(led_rgb_t *led, Led_RGB_color_t color, uint16_t duty);
-
-static void Led_RGB_script_6_ext1(led_rgb_t *led);
-static void Led_RGB_script_6_ext2(led_rgb_t *led, Led_RGB_color_t color, uint16_t duty);
-
 void Led_RGB_Task(void *pvParameters)
 {
 	Led_RGB_default();
@@ -44,34 +35,23 @@ void Led_RGB_Task(void *pvParameters)
 		lastscriptNumber = Led_RGB_scriptNumber;
 
 		if (Led_RGB_scriptNumber == 1)
-		{
-			Led_RGB_script_1_init();
 			xTaskCreate(Led_RGB_script_1, "Led_RGB_script_1", 2048, NULL, 1, &led_rgb_script_task);
-		}
 		else if (Led_RGB_scriptNumber == 2)
-		{
-			Led_RGB_script_2_init();
 			xTaskCreate(Led_RGB_script_2, "Led_RGB_script_2", 2048, NULL, 1, &led_rgb_script_task);
-		}
 		else if (Led_RGB_scriptNumber == 3)
-		{
-			Led_RGB_script_3_init();
 			xTaskCreate(Led_RGB_script_3, "Led_RGB_script_3", 2048, NULL, 1, &led_rgb_script_task);
-		}
 		else if (Led_RGB_scriptNumber == 4)
-		{
-			Led_RGB_script_4_init();
 			xTaskCreate(Led_RGB_script_4, "Led_RGB_script_4", 2048, NULL, 1, &led_rgb_script_task);
-		}
 		else if (Led_RGB_scriptNumber == 5)
-		{
-			Led_RGB_script_5_init();
 			xTaskCreate(Led_RGB_script_5, "Led_RGB_script_5", 2048, NULL, 1, &led_rgb_script_task);
-		}
 		else if (Led_RGB_scriptNumber == 6)
-		{
-			Led_RGB_script_6_init();
 			xTaskCreate(Led_RGB_script_6, "Led_RGB_script_6", 2048, NULL, 1, &led_rgb_script_task);
+		else if (Led_RGB_scriptNumber == 255)
+			xTaskCreate(Led_RGB_script_alert, "Led_RGB_script_alert", 2048, NULL, 1, &led_rgb_script_task);
+		else
+		{
+			Led_RGB_scriptNumber = 1;
+			continue;
 		}
 
 		while (Led_RGB_scriptNumber == lastscriptNumber)
@@ -79,14 +59,11 @@ void Led_RGB_Task(void *pvParameters)
 
 		if (led_rgb_script_task != NULL)
 		{
-			ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
-			ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
-			ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
-
-			ledc_fade_func_uninstall();
-
 			vTaskDelete(led_rgb_script_task);
 			led_rgb_script_task = NULL;
+
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_shutdown(&(leds[i]), LEDC_TEST_FADE_TIME);
 		}
 	}
 }
@@ -95,7 +72,7 @@ static void Led_RGB_default()
 {
 	ledc_timer_config_t t0 = {
 			.duty_resolution = LEDC_TIMER_13_BIT,
-			.freq_hz = 1000,
+			.freq_hz = 5000,
 			.speed_mode = LEDC_HIGH_SPEED_MODE,
 			.timer_num = LEDC_TIMER_0,
 			.clk_cfg = LEDC_AUTO_CLK,
@@ -103,7 +80,7 @@ static void Led_RGB_default()
 
 	ledc_timer_config_t t1 = {
 			.duty_resolution = LEDC_TIMER_13_BIT,
-			.freq_hz = 1000,
+			.freq_hz = 5000,
 			.speed_mode = LEDC_LOW_SPEED_MODE,
 			.timer_num = LEDC_TIMER_0,
 			.clk_cfg = LEDC_AUTO_CLK,
@@ -112,21 +89,73 @@ static void Led_RGB_default()
 	ledc_timer_config(&t0);
 	ledc_timer_config(&t1);
 
-	ledc_channel_config_t channel = {
-			.channel = LEDC_CHANNEL_0,
-			.duty = 0,
-			.speed_mode = t0.speed_mode,
-			.hpoint = 0,
-			.timer_sel = t0.timer_num,
-			.flags.output_invert = 0
-	};
-
 	for (int i = 0; i < LEDS_LENGTH; ++i)
 	{
-		leds[i].red = channel;
-		leds[i].green = channel;
-		leds[i].blue = channel;
+		leds[i].red.duty = 0;
+		leds[i].red.hpoint = 0;
+		leds[i].red.flags.output_invert = 0;
 	}
+
+	leds[0].red.channel = LEDC_CHANNEL_0;
+	leds[0].red.speed_mode = t0.speed_mode;
+	leds[0].red.timer_sel = t0.timer_num;
+
+	leds[0].green.channel = LEDC_CHANNEL_1;
+	leds[0].green.speed_mode = t0.speed_mode;
+	leds[0].green.timer_sel = t0.timer_num;
+
+	leds[0].blue.channel = LEDC_CHANNEL_2;
+	leds[0].blue.speed_mode = t0.speed_mode;
+	leds[0].blue.timer_sel = t0.timer_num;
+
+	leds[1].red.channel = LEDC_CHANNEL_3;
+	leds[1].red.speed_mode = t0.speed_mode;
+	leds[1].red.timer_sel = t0.timer_num;
+
+	leds[1].green.channel = LEDC_CHANNEL_4;
+	leds[1].green.speed_mode = t0.speed_mode;
+	leds[1].green.timer_sel = t0.timer_num;
+
+	leds[1].blue.channel = LEDC_CHANNEL_5;
+	leds[1].blue.speed_mode = t0.speed_mode;
+	leds[1].blue.timer_sel = t0.timer_num;
+
+	leds[2].red.channel = LEDC_CHANNEL_0;
+	leds[2].red.speed_mode = t1.speed_mode;
+	leds[2].red.timer_sel = t1.timer_num;
+
+	leds[2].green.channel = LEDC_CHANNEL_1;
+	leds[2].green.speed_mode = t1.speed_mode;
+	leds[2].green.timer_sel = t1.timer_num;
+
+	leds[2].blue.channel = LEDC_CHANNEL_2;
+	leds[2].blue.speed_mode = t1.speed_mode;
+	leds[2].blue.timer_sel = t1.timer_num;
+
+	leds[3].red.channel = LEDC_CHANNEL_3;
+	leds[3].red.speed_mode = t1.speed_mode;
+	leds[3].red.timer_sel = t1.timer_num;
+
+	leds[3].green.channel = LEDC_CHANNEL_4;
+	leds[3].green.speed_mode = t1.speed_mode;
+	leds[3].green.timer_sel = t1.timer_num;
+
+	leds[3].blue.channel = LEDC_CHANNEL_5;
+	leds[3].blue.speed_mode = t1.speed_mode;
+	leds[3].blue.timer_sel = t1.timer_num;
+
+	leds[4].red.channel = LEDC_CHANNEL_6;
+	leds[4].red.speed_mode = t0.speed_mode;
+	leds[4].red.timer_sel = t0.timer_num;
+
+	leds[4].green.channel = LEDC_CHANNEL_7;
+	leds[4].green.speed_mode = t0.speed_mode;
+	leds[4].green.timer_sel = t0.timer_num;
+
+	leds[4].blue.channel = LEDC_CHANNEL_6;
+	leds[4].blue.speed_mode = t1.speed_mode;
+	leds[4].blue.timer_sel = t1.timer_num;
+
 
 	leds[0].red.gpio_num = LED_0_RED;
 	leds[0].green.gpio_num = LED_0_GREEN;
@@ -140,37 +169,16 @@ static void Led_RGB_default()
 	leds[2].green.gpio_num = LED_2_GREEN;
 	leds[2].blue.gpio_num = LED_2_BLUE;
 
+	leds[3].red.gpio_num = LED_3_RED;
+	leds[3].green.gpio_num = LED_3_GREEN;
+	leds[3].blue.gpio_num = LED_3_BLUE;
+
+	leds[4].red.gpio_num = LED_4_RED;
+	leds[4].green.gpio_num = LED_4_GREEN;
+	leds[4].blue.gpio_num = LED_4_BLUE;
+
 	for (int i = 0; i < LEDS_LENGTH; ++i)
 	{
-		gpio_reset_pin(leds[i].red.gpio_num);
-		gpio_reset_pin(leds[i].green.gpio_num);
-		gpio_reset_pin(leds[i].blue.gpio_num);
-
-		gpio_set_level(leds[i].red.gpio_num, 0);
-		gpio_set_level(leds[i].green.gpio_num, 0);
-		gpio_set_level(leds[i].blue.gpio_num, 0);
-
-		gpio_set_direction(leds[i].red.gpio_num, GPIO_MODE_OUTPUT);
-		gpio_set_direction(leds[i].green.gpio_num, GPIO_MODE_OUTPUT);
-		gpio_set_direction(leds[i].blue.gpio_num, GPIO_MODE_OUTPUT);
-	}
-
-	ledc_fade_func_install(0);
-}
-
-void Led_RGB_script_1_init()
-{
-	Led_RGB_default();
-	for (int i = 0; i < LEDS_LENGTH; ++i)
-	{
-		leds[i].red.channel = LEDC_CHANNEL_0;
-		leds[i].green.channel = LEDC_CHANNEL_1;
-		leds[i].blue.channel = LEDC_CHANNEL_2;
-
-		leds[i].red.timer_sel = LEDC_TIMER_0;
-		leds[i].green.timer_sel = LEDC_TIMER_0;
-		leds[i].blue.timer_sel = LEDC_TIMER_0;
-
 		ledc_channel_config(&leds[i].red);
 		ledc_channel_config(&leds[i].green);
 		ledc_channel_config(&leds[i].blue);
@@ -179,56 +187,21 @@ void Led_RGB_script_1_init()
 	ledc_fade_func_install(0);
 }
 
-void Led_RGB_script_2_init()
-{
-	Led_RGB_script_1_init();
-}
-
-void Led_RGB_script_3_init()
-{
-	Led_RGB_script_1_init();
-}
-
-void Led_RGB_script_4_init()
-{
-	Led_RGB_default();
-
-	ledc_timer_config_t t0 = {
-			.duty_resolution = LEDC_TIMER_13_BIT,
-			.freq_hz = 1000,
-			.speed_mode = LEDC_HIGH_SPEED_MODE,
-			.timer_num = LEDC_TIMER_0,
-			.clk_cfg = LEDC_AUTO_CLK,
-	};
-
-	ledc_timer_config_t t1 = t0;
-	t1.timer_num = LEDC_TIMER_1;
-
-	ledc_timer_config(&t0);
-	ledc_timer_config(&t1);
-
-	ledc_fade_func_install(0);
-}
-
-void Led_RGB_script_5_init()
-{
-	Led_RGB_default();
-}
-
-void Led_RGB_script_6_init()
-{
-	Led_RGB_default();
-}
-
 void Led_RGB_script_1()
 {
-	const led_rgb_t *led_all = &leds[0];
 	while (1)
 	{
-		for (int i = RED; i <= WHITE; ++i)
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
-			Led_RGB_setColor(led_all, i, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
-			Led_RGB_shutdown(led_all, LEDC_TEST_FADE_TIME);
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+
+			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
+
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_setColor(&(leds[i]), LED_NONE_COLOR, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+
+			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
 		}
 
 		if (demo)
@@ -241,15 +214,15 @@ void Led_RGB_script_1()
 
 void Led_RGB_script_2()
 {
-	const led_rgb_t *led_all = &leds[0];
-
 	while (1)
 	{
-		for (int i = RED; i <= WHITE; ++i)
-			Led_RGB_setColor(led_all, i, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
+		{
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
 
-		Led_RGB_startFade(&(led_all->green), 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
-		Led_RGB_startFade(&(led_all->blue), 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
+		}
 
 		if (demo)
 		{
@@ -261,15 +234,19 @@ void Led_RGB_script_2()
 
 void Led_RGB_script_3()
 {
-	const led_rgb_t *led_all = &leds[0];
 	while (1)
 	{
-		for (int i = RED; i <= WHITE; ++i)
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
-			Led_RGB_setColor(led_all, i, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-			vTaskDelay(500 / portTICK_PERIOD_MS);
-			Led_RGB_setColor(led_all, i, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-			vTaskDelay(500 / portTICK_PERIOD_MS);
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+
+			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
+
+			for (int i = 0; i < LEDS_LENGTH; ++i)
+				Led_RGB_setColor(&(leds[i]), color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+
+			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
 		}
 
 		if (demo)
@@ -280,58 +257,16 @@ void Led_RGB_script_3()
 	}
 }
 
-static void Led_RGB_script_4_ext1(led_rgb_t *led)
-{
-	if (led == NULL)
-		return;
-
-	led->red.channel = LEDC_CHANNEL_0;
-	led->green.channel = LEDC_CHANNEL_1;
-	led->blue.channel = LEDC_CHANNEL_2;
-
-	led->red.timer_sel = LEDC_TIMER_0;
-	led->green.timer_sel = LEDC_TIMER_0;
-	led->blue.timer_sel = LEDC_TIMER_0;
-
-	ledc_channel_config(&led->red);
-	ledc_channel_config(&led->green);
-	ledc_channel_config(&led->blue);
-}
-
-static void Led_RGB_script_4_ext2(led_rgb_t *led, Led_RGB_color_t color)
-{
-	if (led == NULL)
-		return;
-
-	led->red.channel = LEDC_CHANNEL_3;
-	led->green.channel = LEDC_CHANNEL_4;
-	led->blue.channel = LEDC_CHANNEL_5;
-
-	led->red.timer_sel = LEDC_TIMER_1;
-	led->green.timer_sel = LEDC_TIMER_1;
-	led->blue.timer_sel = LEDC_TIMER_1;
-
-	ledc_channel_config(&led->red);
-	ledc_channel_config(&led->green);
-	ledc_channel_config(&led->blue);
-
-	ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, 0, 0);
-	ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, 0, 0);
-	ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, 0, 0);
-}
-
 void Led_RGB_script_4()
 {
 	while (1)
 	{
-		for (int color = RED; color <= WHITE; ++color)
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 			{
-				Led_RGB_script_4_ext1(&leds[i]);
 				Led_RGB_setColor(&leds[i], color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_script_4_ext2(&leds[i], color);
+				Led_RGB_setColor(&leds[i], color, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 			}
 		}
 
@@ -343,110 +278,16 @@ void Led_RGB_script_4()
 	}
 }
 
-static void Led_RGB_script_5_ext1(led_rgb_t *led)
-{
-	if (led == NULL)
-		return;
-
-	led->red.channel = LEDC_CHANNEL_0;
-	led->green.channel = LEDC_CHANNEL_1;
-	led->blue.channel = LEDC_CHANNEL_2;
-
-	led->red.speed_mode = LEDC_LOW_SPEED_MODE;
-	led->green.speed_mode = LEDC_LOW_SPEED_MODE;
-	led->blue.speed_mode = LEDC_LOW_SPEED_MODE;
-
-	ledc_channel_config(&led->red);
-	ledc_channel_config(&led->green);
-	ledc_channel_config(&led->blue);
-}
-
-static void Led_RGB_script_5_ext2(led_rgb_t *led, Led_RGB_color_t color, uint16_t duty)
-{
-	if (led == NULL)
-		return;
-
-	static bool flag = false;
-
-	led->red.speed_mode = LEDC_HIGH_SPEED_MODE;
-	led->green.speed_mode = LEDC_HIGH_SPEED_MODE;
-	led->blue.speed_mode = LEDC_HIGH_SPEED_MODE;
-
-	if (flag)
-	{
-		led->red.channel = LEDC_CHANNEL_3;
-		led->green.channel = LEDC_CHANNEL_4;
-		led->blue.channel = LEDC_CHANNEL_5;
-
-		flag = false;
-	}
-	else
-	{
-		led->red.channel = LEDC_CHANNEL_0;
-		led->green.channel = LEDC_CHANNEL_1;
-		led->blue.channel = LEDC_CHANNEL_2;
-
-		flag = true;
-	}
-
-	ledc_channel_config(&led->red);
-	ledc_channel_config(&led->green);
-	ledc_channel_config(&led->blue);
-
-	switch (color)
-	{
-	case RED:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, duty, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, 0, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, 0, 0);
-		break;
-	case GREEN:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, 0, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, duty, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, 0, 0);
-		break;
-	case BLUE:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, 0, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, 0, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, duty, 0);
-		break;
-	case YELLOW:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, duty, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, duty, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, 0, 0);
-		break;
-	case LIGTHBLUE:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, 0, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, duty, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, duty, 0);
-		break;
-	case MAGENTA:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, duty, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, 0, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, duty, 0);
-		break;
-	case WHITE:
-		ledc_set_duty_and_update(led->red.speed_mode, led->red.channel, duty, 0);
-		ledc_set_duty_and_update(led->green.speed_mode, led->green.channel, duty, 0);
-		ledc_set_duty_and_update(led->blue.speed_mode, led->blue.channel, duty, 0);
-		break;
-	default:
-		break;
-	}
-}
-
 void Led_RGB_script_5()
 {
 	while (1)
 	{
-		for (int color = RED; color <= WHITE; ++color)
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 			{
-				Led_RGB_script_5_ext1(&leds[i]);
 				Led_RGB_setColor(&leds[i], color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_script_5_ext2(&leds[i], color, LED_minDuty);
 			}
 		}
 
@@ -458,36 +299,17 @@ void Led_RGB_script_5()
 	}
 }
 
-static void Led_RGB_script_6_ext1(led_rgb_t *led)
-{
-	Led_RGB_script_5_ext1(led);
-}
-
-static void Led_RGB_script_6_ext2(led_rgb_t *led, Led_RGB_color_t color, uint16_t duty)
-{
-	Led_RGB_script_5_ext2(led, color, duty);
-}
-
 void Led_RGB_script_6()
 {
 	while (1)
 	{
-		for (int color = RED; color <= WHITE; ++color)
+		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-			{
-				Led_RGB_script_6_ext1(&leds[i]);
-				Led_RGB_setColor(&leds[i], color, LED_minDuty, 0, LEDC_FADE_WAIT_DONE);
-				Led_RGB_setColor(&leds[i], color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_script_6_ext2(&leds[i], color, LED_maxDuty);
-			}
+				Led_RGB_setColor(&leds[i], color, 8192, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-			{
-				Led_RGB_script_6_ext1(&leds[i]);
-				Led_RGB_setColor(&leds[i], color, LED_maxDuty, 0, LEDC_FADE_WAIT_DONE);
-				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_script_6_ext2(&leds[i], color, LED_minDuty);
-			}
+				Led_RGB_setColor(&leds[i], color, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 		}
 
 		if (demo)
@@ -495,6 +317,20 @@ void Led_RGB_script_6()
 			Led_RGB_scriptNumber = 1;
 			while (1);
 		}
+	}
+}
+
+void Led_RGB_script_alert()
+{
+	while (1)
+	{
+		for (int i = 0; i < LEDS_LENGTH; ++i)
+			Led_RGB_setColor(&leds[i], LED_RED, LED_maxDuty, 200, LEDC_FADE_NO_WAIT);
+
+		for (int i = 0; i < LEDS_LENGTH; ++i)
+			Led_RGB_shutdown(&leds[i], 0);
+
+		vTaskDelay(500 / portTICK_PERIOD_MS);
 	}
 }
 
@@ -525,48 +361,54 @@ void Led_RGB_setColor(const led_rgb_t *led, Led_RGB_color_t color, uint16_t duty
 
 	switch (color)
 	{
-	case RED:
+	case LED_RED:
 		Led_RGB_startFade(&(led->green), 0, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->blue), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->red), duty, time, mode);
 		break;
-	case GREEN:
+	case LED_GREEN:
 		Led_RGB_startFade(&(led->red), 0, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->blue), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->green), duty, time, mode);
 		break;
-	case BLUE:
+	case LED_BLUE:
 		Led_RGB_startFade(&(led->red), 0, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->green), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->blue), duty, time, mode);
 		break;
-	case YELLOW:
+	case LED_YELLOW:
 		Led_RGB_startFade(&(led->blue), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->red), duty, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->green), duty, time, mode);
 		break;
-	case LIGTHBLUE:
+	case LED_LIGTHBLUE:
 		Led_RGB_startFade(&(led->red), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->green), duty, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->blue), duty, time, mode);
 		break;
-	case MAGENTA:
+	case LED_MAGENTA:
 		Led_RGB_startFade(&(led->green), 0, time, LEDC_FADE_NO_WAIT);
 
 		Led_RGB_startFade(&(led->red), duty, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->blue), duty, time, mode);
 		break;
-	case WHITE:
+	case LED_WHITE:
 		Led_RGB_startFade(&(led->red), duty, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->green), duty, time, LEDC_FADE_NO_WAIT);
 		Led_RGB_startFade(&(led->blue), duty, time, mode);
 		break;
+	case LED_NONE_COLOR:
 	default:
+		Led_RGB_startFade(&(led->red), 0, time, LEDC_FADE_NO_WAIT);
+		Led_RGB_startFade(&(led->green), 0, time, LEDC_FADE_NO_WAIT);
+		Led_RGB_startFade(&(led->blue), 0, time, LEDC_FADE_NO_WAIT);
+		if (mode == LEDC_FADE_WAIT_DONE)
+			vTaskDelay(time / portTICK_PERIOD_MS);
 		break;
 	}
 }
