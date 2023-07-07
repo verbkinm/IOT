@@ -1,5 +1,6 @@
 QT -= gui
-QT += network serialport testlib
+QT += network serialport
+#testlib
 
 CONFIG += c++2a console warn_on depend_includepath testcase
 CONFIG -= app_bundle

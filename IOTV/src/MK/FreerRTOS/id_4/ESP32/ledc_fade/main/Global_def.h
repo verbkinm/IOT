@@ -1,7 +1,16 @@
 #ifndef MAIN_GLOBAL_DEF_H_
 #define MAIN_GLOBAL_DEF_H_
 
-#include <stdint.h>
+#include "driver/gpio.h"
+
+// Приоритеты заданий
+#define NET_PRIORITY						1
+#define IOTV_PRIORITY						1
+#define UART_PRIORITY						4
+#define Led_RGB_PRIORITY					5
+#define DF_PLAYER_PRIORITY					5
+//#define LED_SIGNALS_PRIORITY				6
+#define LOW_PROIRITY						10
 
 // TCP
 #define PORT                        		8888
@@ -10,18 +19,25 @@
 #define KEEPALIVE_COUNT             		3
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
+// WIFI
+#define WIFI_SSID							"TP-Link_A6BE"
+#define WIFI_PASSWORD						"41706831"
+
 // WIFI event
 #define WIFI_CONNECTED_BIT					BIT0
 #define WIFI_DISCONNECTED_BIT 				BIT1
 #define WIFI_FAIL_BIT      					BIT2
 
 // LED
+#define LED_MAX_DUTY_VAL					8192
+#define LED_MIN_DUTY_VAL					0
+
 #define LED_0_RED							GPIO_NUM_15
 #define LED_0_GREEN							GPIO_NUM_2
 #define LED_0_BLUE							GPIO_NUM_4
 
-#define LED_1_RED							GPIO_NUM_16
-#define LED_1_GREEN							GPIO_NUM_17
+#define LED_1_RED							GPIO_NUM_33
+#define LED_1_GREEN							GPIO_NUM_32
 #define LED_1_BLUE							GPIO_NUM_5
 
 #define LED_2_RED							GPIO_NUM_18
@@ -37,35 +53,40 @@
 #define LED_4_BLUE							GPIO_NUM_27
 
 // Led Signals
-#define LED_WIFI							GPIO_NUM_26
-#define LED_TCP								GPIO_NUM_25
-#define LED_ERROR							GPIO_NUM_33
+//#define LED_WIFI							GPIO_NUM_26
+//#define LED_TCP								GPIO_NUM_25
 
-// IOTV
-#define RELE_PIN 							GPIO_NUM_2
-#define BORDER_DISTANCE_DEFAULT 			150
+// UART
+#define TXD_PIN								GPIO_NUM_17
+#define RXD_PIN								GPIO_NUM_16
+#define UART_BUF_SIZE						256
 
-// Номер ошибки
-#define I2C_INIT_FAIL						1
-#define I2C_DEINIT_FAIL						2
-#define I2C_WRITE_FAIL						3
-#define I2C_READ_FAIL						4
-#define RESULT__INTERRUPT_STATUS_GPIO_LOOP 	5
-#define RESULT__RANGE_STATUS_LOOP			6
-#define SYSTEM__FRESH_OUT_OF_RESET_LOOP		7
-#define OLED_INIT_FAIL						8
+// DF_PLAYER
+#define DF_BUSY								GPIO_NUM_36
+/*
+  	DF_CMD
+	0 - Выключить / включить воспроизведение.
+	1 - Режим воспроизведения.
+	2 - Выключить / включить повтор текущего режима воспроизведения.
+	3 - Громкость.
+	4 - Эквалайзер.
+*/
+#define DF_CMD_PS							0
+#define DF_CMD_MODE							1
+#define DF_CMD_REPEATE						2
+#define DF_CMD_VOLUME						3
+#define DF_CMD_EQ							4
+
+#define DF_MODE_SIZE						3
+#define DF_MODE_1							1
+#define DF_MODE_2							2
+#define DF_MODE_3							3
 
 // Структуры
 struct DataPkg
 {
 	uint8_t *data;
 	uint64_t size;
-};
-
-struct LedSignalPkg
-{
-	const char *TAG;
-	int errorNumber;
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

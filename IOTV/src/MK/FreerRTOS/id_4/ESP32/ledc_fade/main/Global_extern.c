@@ -1,14 +1,14 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-#include <stdint.h>
 
-//QueueHandle_t xQueueInData, xQueueOutData;
+// Очереди для взаимосвязи TCP и IOTV
+QueueHandle_t xQueueInData, xQueueOutData;//, xQueueLedSignals;
 
-//uint64_t realBufSize = 0;
-//uint64_t expextedDataSize = 20;
+// Очередь для DF плеера
+QueueHandle_t xQueueDF;
 
-uint16_t LED_maxDuty = 2000;
-uint16_t LED_minDuty = 100;
-uint8_t Led_RGB_scriptNumber = 0;
+// Очередь для LEDC
+QueueHandle_t xQueueLEDC;
 
-bool demo = true;
+uint64_t realBufSize = 0;
+uint64_t expextedDataSize = 0;

@@ -1,6 +1,13 @@
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "driver/ledc.h"
+
+#include "Global_def.h"
+#include "esp_log.h"
+#include "Local_Lib/local_lib.h"
+#include "iotv.h"
 
 typedef enum {
 	LED_RED,
@@ -42,6 +49,9 @@ void Led_RGB_script_5();
 
 // Как и 5-й режим, но загораются и гаснут светодиоды на каждый круг.
 void Led_RGB_script_6();
+
+// Ручное управление светодиодами. По номеру светодиода и цвету.
+void Led_RGB_script_manual();
 
 // Тревога
 void Led_RGB_script_alert();

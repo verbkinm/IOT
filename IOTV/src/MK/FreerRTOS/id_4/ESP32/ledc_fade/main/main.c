@@ -1,65 +1,49 @@
-#include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "nvs_flash.h"
 #include "driver/ledc.h"
 #include "esp_err.h"
 
+#include "iotv.h"
+#include "Net/Tcp.h"
+#include "Net/WIFI.h"
 #include "Led_RGB.h"
+#include "df_player.h"
 
-//extern uint8_t Led_RGB_scriptNumber;
-TaskHandle_t led_rgb_task = NULL;
+extern QueueHandle_t xQueueInData, xQueueOutData, xQueueDF;
+
+static const char *TAG = "main";
 
 void app_main(void)
 {
-	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 4096, NULL, 1, &led_rgb_task);
-
-
-//	ledc_timer_config_t t0 = {
-//			.duty_resolution = LEDC_TIMER_13_BIT,
-//			.freq_hz = 1000,
-//			.speed_mode = LEDC_HIGH_SPEED_MODE,
-//			.timer_num = LEDC_TIMER_0,
-//			.clk_cfg = LEDC_AUTO_CLK,
-//	};
-//	ledc_timer_config_t t1 = {
-//			.duty_resolution = LEDC_TIMER_13_BIT,
-//			.freq_hz = 1000,
-//			.speed_mode = LEDC_LOW_SPEED_MODE,
-//			.timer_num = LEDC_TIMER_0,
-//			.clk_cfg = LEDC_AUTO_CLK,
-//	};
-//	ledc_timer_config(&t0);
-//	ledc_timer_config(&t1);
-//
-//	ledc_channel_config_t channel1 = {
-//			.gpio_num = GPIO_NUM_15,
-//			.channel = LEDC_CHANNEL_0,
-//			.duty = 0,
-//			.speed_mode = LEDC_HIGH_SPEED_MODE,
-//			.hpoint = 0,
-//			.timer_sel = LEDC_TIMER_0,
-//			.flags.output_invert = 0
-//	};
-//	ledc_channel_config_t channel2 = {
-//			.gpio_num = GPIO_NUM_5,
-//			.channel = LEDC_CHANNEL_0,
-//			.duty = 0,
-//			.speed_mode = LEDC_LOW_SPEED_MODE,
-//			.hpoint = 0,
-//			.timer_sel = LEDC_TIMER_0,
-//			.flags.output_invert = 0
-//	};
-//
-//	ledc_channel_config(&channel1);
-//	ledc_channel_config(&channel2);
-//
-//	ledc_fade_func_install(0);
-
-	while (1)
-	{
-		vTaskDelay(10000 / portTICK_PERIOD_MS);
-//		if (++Led_RGB_scriptNumber > 6)
-//			Led_RGB_scriptNumber = 1;
+	//Initialize NVS
+	esp_err_t ret = nvs_flash_init();
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		ret = nvs_flash_init();
 	}
+	ESP_ERROR_CHECK(ret);
+
+	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+	wifi_init_sta();
+
+	// Инициализациия глобальных очередей
+	xQueueInData = xQueueCreate(100, sizeof(struct DataPkg));
+	xQueueOutData = xQueueCreate(100, sizeof(struct DataPkg));
+	xQueueDF = xQueueCreate(5, sizeof(int8_t));
+
+	if (xQueueInData == NULL  || xQueueOutData == NULL || xQueueDF == NULL)// || xQueueLedSignals == NULL)
+	{
+		ESP_LOGE(TAG, "Queue was not created and must not be used");
+		esp_restart();
+	}
+
+	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, Led_RGB_PRIORITY, NULL);
+
+	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, IOTV_PRIORITY, NULL);
+	xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, NET_PRIORITY, NULL);
+
+//	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	xTaskCreate(DF_Task, "DF_Task", 2048, NULL, DF_PLAYER_PRIORITY, NULL);
 }

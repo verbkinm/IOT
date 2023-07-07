@@ -4,66 +4,72 @@
  *  Created on: 21 июн. 2023 г.
  *      Author: verbkinm
  */
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include "Global_def.h"
 #include "Led_RGB.h"
 
 #define LEDC_TEST_FREQ			5000
-#define LEDC_TEST_FADE_TIME     500
+#define LEDC_TEST_FADE_TIME     5000
 #define LEDS_LENGTH 5
 
-extern uint16_t LED_maxDuty, LED_minDuty;
-extern uint8_t Led_RGB_scriptNumber;
-extern bool demo;
+extern struct IOTV_Server_embedded iot;
+
+static const char *TAG = "Led_RGB";
 
 static led_rgb_t leds[LEDS_LENGTH];
-
 static TaskHandle_t led_rgb_script_task = NULL;
+
+static int16_t *LED_maxDuty, *LED_minDuty;
+static int8_t *Led_RGB_scriptNumber, *Led_Manual;
 
 static void Led_RGB_default();
 
 void Led_RGB_Task(void *pvParameters)
 {
+	while(iot.state == 0)
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+
+	LED_maxDuty = (int16_t *)iot.readChannel[CH_MAX_BRIGHTNESS].data;
+	LED_minDuty = (int16_t *)iot.readChannel[CH_MIN_BRIGHTNESS].data;
+	Led_RGB_scriptNumber = (int8_t *)iot.readChannel[CH_LED_MODE].data;
+	Led_Manual = (int8_t *)iot.readChannel[CH_LED_COLOR].data;
+
+	ESP_LOGW(TAG, "Led_RGB task created");
+
 	Led_RGB_default();
 
-	uint8_t lastscriptNumber;
+	int8_t lastscriptNumber;
 	while (1)
 	{
-		lastscriptNumber = Led_RGB_scriptNumber;
+//		*Led_RGB_scriptNumber = inRange(*Led_RGB_scriptNumber, -2, 6);
 
-		if (Led_RGB_scriptNumber == 1)
-			xTaskCreate(Led_RGB_script_1, "Led_RGB_script_1", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 2)
-			xTaskCreate(Led_RGB_script_2, "Led_RGB_script_2", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 3)
-			xTaskCreate(Led_RGB_script_3, "Led_RGB_script_3", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 4)
-			xTaskCreate(Led_RGB_script_4, "Led_RGB_script_4", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 5)
-			xTaskCreate(Led_RGB_script_5, "Led_RGB_script_5", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 6)
-			xTaskCreate(Led_RGB_script_6, "Led_RGB_script_6", 2048, NULL, 1, &led_rgb_script_task);
-		else if (Led_RGB_scriptNumber == 255)
-			xTaskCreate(Led_RGB_script_alert, "Led_RGB_script_alert", 2048, NULL, 1, &led_rgb_script_task);
-		else
-		{
-			Led_RGB_scriptNumber = 1;
-			continue;
-		}
+		lastscriptNumber = *Led_RGB_scriptNumber;
 
-		while (Led_RGB_scriptNumber == lastscriptNumber)
+		for (int i = 0; i < LEDS_LENGTH; ++i)
+			Led_RGB_shutdown(&(leds[i]), 200);
+
+		if (*Led_RGB_scriptNumber == 1)
+			xTaskCreate(Led_RGB_script_1, "Led_RGB_script_1", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == 2)
+			xTaskCreate(Led_RGB_script_2, "Led_RGB_script_2", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == 3)
+			xTaskCreate(Led_RGB_script_3, "Led_RGB_script_3", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == 4)
+			xTaskCreate(Led_RGB_script_4, "Led_RGB_script_4", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == 5)
+			xTaskCreate(Led_RGB_script_5, "Led_RGB_script_5", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == 6)
+			xTaskCreate(Led_RGB_script_6, "Led_RGB_script_6", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == -2)
+			xTaskCreate(Led_RGB_script_manual, "Led_RGB_script_manual", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+		else if (*Led_RGB_scriptNumber == -1)
+			xTaskCreate(Led_RGB_script_alert, "Led_RGB_script_alert", 2048, NULL, LOW_PROIRITY, &led_rgb_script_task);
+
+		while (*Led_RGB_scriptNumber == lastscriptNumber)
 			vTaskDelay(100 / portTICK_PERIOD_MS);
 
 		if (led_rgb_script_task != NULL)
 		{
 			vTaskDelete(led_rgb_script_task);
 			led_rgb_script_task = NULL;
-
-			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_shutdown(&(leds[i]), LEDC_TEST_FADE_TIME);
 		}
 	}
 }
@@ -194,20 +200,14 @@ void Led_RGB_script_1()
 		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+				Led_RGB_setColor(&(leds[i]), color, *LED_maxDuty, LEDC_TEST_FADE_TIME * 2, LEDC_FADE_NO_WAIT);
 
-			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
+//			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
 
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 				Led_RGB_setColor(&(leds[i]), LED_NONE_COLOR, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
 
 			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
-		}
-
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 2;
-			while (1);
 		}
 	}
 }
@@ -219,15 +219,9 @@ void Led_RGB_script_2()
 		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+				Led_RGB_setColor(&(leds[i]), color, *LED_maxDuty, LEDC_TEST_FADE_TIME * 2, LEDC_FADE_NO_WAIT);
 
-			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
-		}
-
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 3;
-			while (1);
+			vTaskDelay((LEDC_TEST_FADE_TIME * 2 + 2000) / portTICK_PERIOD_MS);
 		}
 	}
 }
@@ -239,20 +233,14 @@ void Led_RGB_script_3()
 		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_setColor(&(leds[i]), color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+				Led_RGB_setColor(&(leds[i]), color, *LED_maxDuty, 10000, LEDC_FADE_NO_WAIT);
 
-			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
+			vTaskDelay((10000 + 2000) / portTICK_PERIOD_MS);
 
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_setColor(&(leds[i]), color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_NO_WAIT);
+				Led_RGB_setColor(&(leds[i]), color, *LED_minDuty, 5000, LEDC_FADE_NO_WAIT);
 
-			vTaskDelay((LEDC_TEST_FADE_TIME + 2000) / portTICK_PERIOD_MS);
-		}
-
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 4;
-			while (1);
+			vTaskDelay((5000 + 2000) / portTICK_PERIOD_MS);
 		}
 	}
 }
@@ -265,15 +253,9 @@ void Led_RGB_script_4()
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 			{
-				Led_RGB_setColor(&leds[i], color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+				Led_RGB_setColor(&leds[i], color, *LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 				Led_RGB_setColor(&leds[i], color, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 			}
-		}
-
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 5;
-			while (1);
 		}
 	}
 }
@@ -286,15 +268,9 @@ void Led_RGB_script_5()
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 			{
-				Led_RGB_setColor(&leds[i], color, LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
-				Led_RGB_setColor(&leds[i], color, LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+				Led_RGB_setColor(&leds[i], color, *LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+				Led_RGB_setColor(&leds[i], color, *LED_minDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 			}
-		}
-
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 6;
-			while (1);
 		}
 	}
 }
@@ -306,17 +282,27 @@ void Led_RGB_script_6()
 		for (int color = LED_RED; color <= LED_WHITE; ++color)
 		{
 			for (int i = 0; i < LEDS_LENGTH; ++i)
-				Led_RGB_setColor(&leds[i], color, 8192, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
+				Led_RGB_setColor(&leds[i], color, *LED_maxDuty, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 
 			for (int i = 0; i < LEDS_LENGTH; ++i)
 				Led_RGB_setColor(&leds[i], color, 0, LEDC_TEST_FADE_TIME, LEDC_FADE_WAIT_DONE);
 		}
+	}
+}
 
-		if (demo)
-		{
-			Led_RGB_scriptNumber = 1;
-			while (1);
-		}
+void Led_RGB_script_manual()
+{
+	while (1)
+	{
+		while (*Led_Manual == -1)
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+
+		*Led_Manual = decToBcd(*Led_Manual);
+		uint8_t Led_Number = inRange((*Led_Manual) >> 4, 0, LEDS_LENGTH - 1);
+		uint8_t Led_Color = inRange((*Led_Manual) & 0x0F, LED_RED, LED_NONE_COLOR);
+		Led_RGB_setColor(&leds[Led_Number], Led_Color, *LED_maxDuty, 100, LEDC_FADE_WAIT_DONE);
+
+		*Led_Manual = -1;
 	}
 }
 
@@ -325,12 +311,10 @@ void Led_RGB_script_alert()
 	while (1)
 	{
 		for (int i = 0; i < LEDS_LENGTH; ++i)
-			Led_RGB_setColor(&leds[i], LED_RED, LED_maxDuty, 200, LEDC_FADE_NO_WAIT);
+			Led_RGB_setColor(&leds[i], LED_RED, *LED_maxDuty, 100, LEDC_FADE_WAIT_DONE);
 
 		for (int i = 0; i < LEDS_LENGTH; ++i)
-			Led_RGB_shutdown(&leds[i], 0);
-
-		vTaskDelay(500 / portTICK_PERIOD_MS);
+			Led_RGB_shutdown(&leds[i], 100);
 	}
 }
 

@@ -18,9 +18,6 @@ struct Header
     const uint64_t dataSize;
 
     const void *pkg;
-//    const struct Identification *identification;
-//    const struct Read_Write *readWrite;
-//    const struct State *state;
 };
 
 uint64_t headerSize(const struct Header *header);

@@ -104,7 +104,10 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
     else if (type == Raw::DATA_TYPE::INT_8)
     {
         if (data.size() != sizeof(int8_t))
+        {
             *this = Raw{};
+            return;
+        }
 
         int8_t val = data.at(0);
         *this = Raw(val);
@@ -416,6 +419,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
+        result.resize(sizeof(value));
         std::memcpy(result.data(), &value, sizeof(value));
 //        char *ptr = reinterpret_cast<char*>(&value);
 //        for (uint i = 0; i < sizeof(value); i++)
@@ -431,6 +435,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
+        result.resize(sizeof(value));
         std::memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::INT_64)
@@ -443,6 +448,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
+        result.resize(sizeof(value));
         std::memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::FLOAT_32)
