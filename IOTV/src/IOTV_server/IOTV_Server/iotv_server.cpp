@@ -13,8 +13,6 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     readHostSetting();
     readEventActionJson();
 
-    qDebug() << Event_Action_Parser::toData(_eventManager->worker()).toStdString().c_str();
-
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServer);
 }
 
@@ -134,8 +132,16 @@ void IOTV_Server::readEventActionJson()
             Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
         }
+        file.write("{\n}");
         file.close();
         file.open(QIODevice::ReadOnly);
+
+        // Если запись разрешена, а чтение всё же не доступно
+        if (!file.isOpen())
+        {
+            Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            exit(1);
+        }
     }
 
     auto list = Event_Action_Parser::parseJson(file.readAll(), baseHostList());
