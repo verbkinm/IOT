@@ -12,6 +12,7 @@ Column {
 
     id: root
     width: 400
+    spacing: 15
 
     Item {
         id: rectData_1

@@ -25,6 +25,7 @@ Page {
             id: column
             width: parent.width
             anchors.top: parent.top
+            spacing: 15
 
             Item {
                 height: 50

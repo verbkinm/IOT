@@ -8,6 +8,7 @@ Column {
     property alias hostName: hostNameAction.startHostName
 
     width: 400//parent.width
+    spacing: 15
 
     HostNameComboBox {
         id: hostNameAction

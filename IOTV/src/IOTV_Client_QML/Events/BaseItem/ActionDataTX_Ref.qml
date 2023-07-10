@@ -8,6 +8,7 @@ Column {
     property alias dstChannelNumber: dstChNum.value
 
     width: 400//parent.width
+    spacing: 15
 
     HostNameComboBox {
         id: srcHost
