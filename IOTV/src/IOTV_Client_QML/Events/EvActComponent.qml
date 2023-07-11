@@ -26,7 +26,7 @@ Rectangle {
             var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
             if (component.status === Component.Ready)
             {
-                var object = component.createObject(null, {_event: model.event, _action: model.action})
+                var object = component.createObject(null, {_event: model.event, _action: model.action, title: model.name})
 //                for(var el in model.action)
 //                    console.log(el, " = ", model.action[el])
                 appStack.push(object)

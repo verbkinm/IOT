@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
+    property alias comboBox: hostNameAction
     property alias dataString: _data.text
     property alias channelNumber: chNum.value
 
@@ -25,5 +26,9 @@ Column {
         id: chNum
         label: "№ канала"
         width: parent.width
+    }
+
+    function currentHostName() {
+        return hostNameAction.comboBox.currentText
     }
 }

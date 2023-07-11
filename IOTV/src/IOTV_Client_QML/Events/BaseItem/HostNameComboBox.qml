@@ -53,4 +53,8 @@ Item {
 
         return index === -1 ? 0 : index
     }
+
+    function hostName() {
+        return hostComboBox.currentText
+    }
 }

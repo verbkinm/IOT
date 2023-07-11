@@ -1,5 +1,15 @@
 #include "event_action_parser.h"
 
+#include "iotv_event_manager.h"
+//#include "events/iotv_event_connect.h"
+//#include "events/iotv_event_disconnect.h"
+#include "events/iotv_event_state.h"
+#include "events/iotv_event_data.h"
+
+#include "actions/iotv_action_data_tx.h"
+#include "actions/iotv_action_data_tx_ref.h"
+//#include "actions/iotv_action_msg.h"
+
 std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts)
 {
     QJsonParseError err;
@@ -109,12 +119,12 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
 
     if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
     {
-        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type);
+        event = IOTV_Event_Manager::createEvent(host, type);
     }
     else if (type == Json_Event_Action::TYPE_STATE)
     {
         QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
-        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, state);
+        event = IOTV_Event_Manager::createEvent(host, type, state);
     }
     else if (type == Json_Event_Action::TYPE_DATA)
     {
@@ -122,7 +132,7 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
         QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
         QString data = jobj.value(Json_Event_Action::DATA).toString();
-        event = IOTV_Event_Manager::createEvent(const_cast<Base_Host *>(host), type, direction, data, compare, ch_num);
+        event = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
     }
 
     return event;
@@ -158,7 +168,7 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
 
 const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const Base_Host *> &hosts, const QString &name)
 {
-    auto it = std::find_if (hosts.begin(), hosts.end(), [&name](const auto host){
+    auto it = std::find_if (hosts.begin(), hosts.end(), [&name](auto &host){
         return host->getName() == name;
     });
 

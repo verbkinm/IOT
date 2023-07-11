@@ -9,9 +9,7 @@
 #include <QFileInfo>
 #include <QEvent>
 
-#include "event_action_parser.h"
-#include "log.h"
-#include "IOTV_SH.h"
+
 #include "device.h"
 
 class Client : public QObject
@@ -34,7 +32,7 @@ public:
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
     Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
-
+    Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action) const;
 
     bool stateConnection() const;
 
@@ -69,6 +67,9 @@ private:
     void responceTech(const struct Header *header);
 
     qint64 write(const QByteArray &data);
+
+    QList<QList<QVariantMap>> replaceRealNameToAlias(const QList<QList<QVariantMap>> &evActList) const;
+    QList<QList<QVariantMap>> replaceAliasToRealName(const QList<QList<QVariantMap>> &evActList) const;
 
 public slots:
     void connectToHost(const QString &address, qint64 port);

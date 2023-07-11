@@ -26,6 +26,8 @@ Rectangle {
         font.pixelSize: 18
         wrapMode: Text.Wrap
         text: "Example text"
+
+        width: parent.width * 0.8
     }
 
     NumberAnimation on opacity {

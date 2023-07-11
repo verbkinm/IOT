@@ -1,5 +1,15 @@
 #include "iotv_event_manager.h"
 
+#include "event_action_parser.h"
+#include "events/iotv_event_connect.h"
+#include "events/iotv_event_disconnect.h"
+#include "events/iotv_event_state.h"
+#include "events/iotv_event_data.h"
+
+#include "actions/iotv_action_data_tx.h"
+#include "actions/iotv_action_data_tx_ref.h"
+//#include "actions/iotv_action_msg.h"
+
 IOTV_Event_Manager::IOTV_Event_Manager(QObject *parent)
     : QObject{parent}
 {
@@ -35,7 +45,6 @@ bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Actio
 
     connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec, Qt::UniqueConnection);
 
-
     _worker.emplace_front(name, std::make_pair(event, action));
 
     return true;
@@ -53,7 +62,7 @@ size_t IOTV_Event_Manager::size() const
     return std::distance(_worker.begin(), _worker.end());
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type)
+IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString &type)
 {
     if (type == Json_Event_Action::TYPE_CONN)
         return new IOTV_Event_Connect(host);
@@ -63,7 +72,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return nullptr;
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &state)
+IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString &type, const QString &state)
 {
     if (type != Json_Event_Action::TYPE_STATE)
         return nullptr;
@@ -81,7 +90,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return new IOTV_Event_State(newState, host);
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type, const QString &direction,
+IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString &type, const QString &direction,
                                             const QString &data,
                                             const QString &compare, uint8_t channelNumber)
 {
@@ -109,6 +118,38 @@ IOTV_Event *IOTV_Event_Manager::createEvent(Base_Host *host, const QString &type
     return new IOTV_Event_Data(newDirection, compare, host, channelNumber, data);
 }
 
+IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
+{
+    IOTV_Event *result = nullptr;
+
+    const Base_Host *host = Event_Action_Parser::hostByName(hosts, event[Json_Event_Action::HOST_NAME].toString());
+
+    if (event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_CONN || event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DISCONN)
+    {
+        QString type = event[Json_Event_Action::TYPE].toString();
+        result = createEvent(host, type);
+    }
+    else if (event[Json_Event_Action::TYPE] == Json_Event_Action::STATE)
+    {
+        QString state = event[Json_Event_Action::STATE].toString();
+        QString type = event[Json_Event_Action::TYPE_STATE].toString();
+
+        result = IOTV_Event_Manager::createEvent(host, type, state);
+    }
+    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DATA)
+    {
+        QString direction = event[Json_Event_Action::DIRECTION].toString();
+        QString compare = event[Json_Event_Action::COMPARE].toString();
+        uint8_t ch_num = event[Json_Event_Action::CH_NUM].toString().toInt();
+        QString data = event[Json_Event_Action::DATA].toString();
+        QString type = event[Json_Event_Action::TYPE].toString();
+
+        result = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
+    }
+
+    return result;
+}
+
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
                                               const QString &data)
 {
@@ -130,4 +171,32 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *ds
         return new IOTV_Action_Data_TX_Ref(dstHost, dstCh_num, srcHost, srcCh_Num);
 
     return nullptr;
+}
+
+IOTV_Action *IOTV_Event_Manager::createAction(const QVariantMap &action, const std::forward_list<const Base_Host *> &hosts)
+{
+    QString type = action[Json_Event_Action::TYPE].toString();
+    IOTV_Action *result = nullptr;
+
+    if (type == Json_Event_Action::TYPE_DATA_TX)
+    {
+        const Base_Host *host = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_NAME].toString());
+        QString data = action[Json_Event_Action::DATA].toString();
+        uint8_t ch_num = action[Json_Event_Action::CH_NUM].toString().toInt();
+
+        result = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(host), ch_num, data);
+
+    }
+    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
+    {
+        const Base_Host *dstHost = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_DST].toString());
+        const Base_Host *srcHost = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_SRC].toString());
+
+        uint8_t dstChNum = action[Json_Event_Action::CH_NUM_DST].toString().toInt();
+        uint8_t srcChNum = action[Json_Event_Action::CH_NUM_SRC].toString().toInt();
+
+        result = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(dstHost), const_cast<Base_Host *>(srcHost), dstChNum, srcChNum);
+    }
+
+    return result;
 }

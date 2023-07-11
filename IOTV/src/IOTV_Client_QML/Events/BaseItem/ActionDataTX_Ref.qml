@@ -44,6 +44,13 @@ Column {
         return arr
     }
 
+    function srcHostNameText() {
+        return srcHost.comboBox.currentText
+    }
+    function dstHostNameText() {
+        return dstHost.comboBox.currentText
+    }
+
 //    Component.onCompleted: {
 //        console.log(srcHostName)
 //        console.log(dstHostName)

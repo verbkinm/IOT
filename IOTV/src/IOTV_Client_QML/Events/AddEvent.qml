@@ -47,6 +47,7 @@ Page {
                 id: name
                 width: parent.width
                 label: "Название: "
+                text: title
             }
 
             BaseItem.HostNameComboBox {
@@ -141,6 +142,64 @@ Page {
 
                     onClicked: {
 
+                        if (title !== name.text)
+                        {
+                            var list = client.evAcList()
+                            for( var i = 0; i < list.length; i++)
+                            {
+                                var obj = list[i][0]
+                                if (obj["name"] === name.text)
+                                {
+                                    loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "Событие с таким именем уже существует"})
+                                    return
+                                }
+                            }
+                        }
+
+                        // Событие
+                        var event = new Map
+                        event["name"] = name.text
+                        event["host_name"] = hostNameItem.hostName()
+                        event["type"] = eventTypeItem.eventType
+
+                        if(event["type"] === eventTypeItem.model[2])
+                            event["state"] = eventTypeLoader.item.stateType()
+
+                        if(event["type"] === eventTypeItem.model[3])
+                        {
+                            event["compare"] = eventTypeLoader.item.compare()
+                            event["direction"] = eventTypeLoader.item.direction()
+                            event["chNumber"] = eventTypeLoader.item.channelNumber
+                            if (event["compare"] !== eventTypeLoader.item.compareTypeComboBox.model[6] && event["compare"] !== eventTypeLoader.item.compareTypeComboBox.model[7])
+                                event["data"] = eventTypeLoader.item.dataString
+
+                        }
+
+                        var action = new Map
+                        action["type"] = actionTypeItem.actiontType
+                        if (action["type"] === actionTypeItem.model[0])
+                        {
+                            action["host_name"] = actionTypeLoader.item.currentHostName()
+                            action["data"] = actionTypeLoader.item.dataString
+                            action["chNumber"] = actionTypeLoader.item.channelNumber
+                        }
+                        else if (action["type"] === actionTypeItem.model[1])
+                        {
+                            action["src_host"] = actionTypeLoader.item.srcHostNameText()
+                            action["dst_host"] = actionTypeLoader.item.dstHostNameText()
+                            action["src_chNumber"] = actionTypeLoader.item.srcChannelNumber
+                            action["dst_chNumber"] = actionTypeLoader.item.dstChannelNumber
+                        }
+
+                        client.saveEventAction(event, action)
+//                        console.log(event)
+//                        for(var el in event)
+//                            console.log(el, " = ", event[el])
+
+//                        console.log()
+
+//                        for(el in action)
+//                            console.log(el, " = ", action[el])
                     }
                 }
             }

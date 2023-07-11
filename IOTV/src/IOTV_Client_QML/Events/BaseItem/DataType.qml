@@ -94,4 +94,12 @@ Column {
 
         return index === -1 ? 0 : index
     }
+
+    function compare() {
+        return compareTypeComboBox.currentText
+    }
+
+    function direction() {
+        return directionTypeComboBox.currentText
+    }
 }

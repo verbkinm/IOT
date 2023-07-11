@@ -42,4 +42,8 @@ Item {
 
         return index === -1 ? 0 : index
     }
+
+    function stateType() {
+        return stateTypeComboBox.currentText
+    }
 }

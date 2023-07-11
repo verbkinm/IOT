@@ -5,15 +5,8 @@
 
 #include <QObject>
 
-#include "events/iotv_event_connect.h"
-#include "events/iotv_event_disconnect.h"
-#include "events/iotv_event_state.h"
-#include "events/iotv_event_data.h"
-
-#include "actions/iotv_action_data_tx.h"
-#include "actions/iotv_action_data_tx_ref.h"
-#include "actions/iotv_action_msg.h"
-
+#include "events/iotv_event.h"
+#include "actions/iotv_action.h"
 
 class IOTV_Event_Manager : public QObject
 {
@@ -27,15 +20,17 @@ public:
     size_t size() const;
 
     //! IOTV_Event_Connect и IOTV_Event_Disconnect
-    static IOTV_Event *createEvent(Base_Host *host, const QString &type);
+    static IOTV_Event *createEvent(const Base_Host *host, const QString &type);
 
     //! IOTV_Event_State
-    static IOTV_Event *createEvent(Base_Host *host, const QString &type, const QString &state);
+    static IOTV_Event *createEvent(const Base_Host *host, const QString &type, const QString &state);
 
     //! IOTV_Event_Data
-    static IOTV_Event *createEvent(Base_Host *host, const QString &type,
+    static IOTV_Event *createEvent(const Base_Host *host, const QString &type,
                                    const QString &direction, const QString &data,
                                    const QString &compare, uint8_t channelNumber);
+
+    static IOTV_Event *createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
     static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num, const QString &data);
@@ -44,7 +39,7 @@ public:
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
                                      uint8_t dstCh_num, uint8_t srcCh_Num);
 
-    //    static
+    static IOTV_Action *createAction(const QVariantMap &action, const std::forward_list<const Base_Host *> &hosts);
 
 private:
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> _worker;
