@@ -37,7 +37,7 @@ Page {
             Button {
                 id: addEvent
                 width: parent.width * 0.8
-                height: 45
+                height: 60
 
                 text: "Добавить событие"
                 flat: false

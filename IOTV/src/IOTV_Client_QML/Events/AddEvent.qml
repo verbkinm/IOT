@@ -135,7 +135,10 @@ Page {
                 Button {
                     id: deleteEvent
                     width: 140
+                    height: 60
                     text: "Удалить"
+                    flat: false
+                    highlighted: true
                     anchors {
                         right: parent.right
                         rightMargin: 20
@@ -151,6 +154,9 @@ Page {
                     id: save
                     text: "Сохранить"
                     width: deleteEvent.width
+                    height: deleteEvent.height
+                    flat: false
+                    highlighted: true
                     anchors {
                         right: deleteEvent.left
                         rightMargin: 20
