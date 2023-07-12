@@ -9,13 +9,12 @@
 #include <QByteArray>
 
 #include "IOTV_Host/iotv_host.h"
-#include "iotv_event_manager.h"
 
 class IOTV_Client : public QObject
 {
     Q_OBJECT
 public:
-    IOTV_Client(QTcpSocket *socket, const IOTV_Event_Manager *eventManager, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent);
+    IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent);
     ~IOTV_Client();
 
     const QTcpSocket *socket() const;
@@ -24,7 +23,6 @@ public:
 
 private:
     QTcpSocket *_socket;
-    const IOTV_Event_Manager *_eventManager;
 
     const std::unordered_map<IOTV_Host* , QThread*> &_hosts;
 
@@ -50,8 +48,14 @@ private slots:
     void slotDisconnected();
 
     void slotReadData();
+    void slotFetchEventActionDataFromServer(QByteArray data);
 
 signals:
     void signalStopThread();
     void signalDisconnected();
+
+    void signalFetchEventActionData(QByteArray data);
+    void signalQueryEventActionData();
+    void signalFetchEventActionDataFromServer(QByteArray data);
+
 };

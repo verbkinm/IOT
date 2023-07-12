@@ -130,17 +130,38 @@ Page {
 
             Item {
                 width: parent.width
-                height: 50
+                height: 70
+
                 Button {
-                    id: save
-                    text: "Сохранить"
+                    id: deleteEvent
+                    width: 140
+                    text: "Удалить"
                     anchors {
                         right: parent.right
                         rightMargin: 20
-                        verticalCenter: parent.verticalCenter
                     }
 
                     onClicked: {
+                        client.removeEventAction(title)
+                        appStack.pop()
+                    }
+                }
+
+                Button {
+                    id: save
+                    text: "Сохранить"
+                    width: deleteEvent.width
+                    anchors {
+                        right: deleteEvent.left
+                        rightMargin: 20
+                    }
+
+                    onClicked: {
+                        if (name.text === "")
+                        {
+                            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "Имя события не может быть пустым!"})
+                            return
+                        }
 
                         if (title !== name.text)
                         {
@@ -191,7 +212,8 @@ Page {
                             action["dst_chNumber"] = actionTypeLoader.item.dstChannelNumber
                         }
 
-                        client.saveEventAction(event, action)
+                        client.saveEventAction(event, action, title)
+                        appStack.pop()
 //                        console.log(event)
 //                        for(var el in event)
 //                            console.log(el, " = ", event[el])

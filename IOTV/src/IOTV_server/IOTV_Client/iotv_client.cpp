@@ -1,9 +1,8 @@
 #include "iotv_client.h"
 #include "event_action_parser.h"
 
-IOTV_Client::IOTV_Client(QTcpSocket *socket, const IOTV_Event_Manager *eventManager, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
+IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
     _socket(socket),
-    _eventManager(eventManager),
     _hosts(hosts),
     _expectedDataSize(0)
 {
@@ -13,6 +12,9 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const IOTV_Event_Manager *eventMana
     connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost, Qt::QueuedConnection);
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData, Qt::QueuedConnection);
     connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected, Qt::QueuedConnection);
+
+    connect(this, &IOTV_Client::signalFetchEventActionDataFromServer, this, &IOTV_Client::slotFetchEventActionDataFromServer, Qt::QueuedConnection);
+
 
     _silenceTimer.setInterval(_silenceInterval);
     _silenceTimer.start();
@@ -54,10 +56,10 @@ void IOTV_Client::processQueryState(const Header *header)
     Q_ASSERT(header->pkg != NULL);
 
     auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
-    {
-        const struct State *pkg = static_cast<const struct State *>(header->pkg);
-        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-    });
+                                   {
+                                       const struct State *pkg = static_cast<const struct State *>(header->pkg);
+                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                                   });
 
     if (it == _hosts.end())
         return;
@@ -79,10 +81,10 @@ void IOTV_Client::processQueryRead(const Header *header)
     Q_ASSERT(header->pkg != NULL);
 
     auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
-    {
-        const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
-        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-    });
+                                   {
+                                       const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                                   });
 
     if (it != _hosts.end())
     {
@@ -107,9 +109,9 @@ void IOTV_Client::processQueryWrite(const Header *header)
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
-    {
-        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-    });
+                                   {
+                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                                   });
 
     if (it != _hosts.end() && it->first->state() != State_STATE_OFFLINE)
     {
@@ -146,16 +148,25 @@ void IOTV_Client::processQueryTech(const Header *header)
 
     const struct Tech *pkg = static_cast<const struct Tech *>(header->pkg);
 
-    uint64_t size;
-    char outData[BUFSIZ];
+    //    uint64_t size;
+    //    char outData[BUFSIZ];
 
     if (pkg->type == Tech_TYPE_EV_AC)
     {
-        if (_eventManager != nullptr)
+        if (pkg->dataSize == 0)
         {
-            std::string str = Event_Action_Parser::toData(_eventManager->worker()).toStdString();
-            size = responseTech(outData, BUFSIZ, str.c_str(), str.size(), header);
-            write({outData, static_cast<int>(size)}, size);
+            emit signalQueryEventActionData();
+            //            if (_eventManager != nullptr)
+            //            {
+            //                std::string str = Event_Action_Parser::toData(_eventManager->worker()).toStdString();
+            //                size = responseTech(outData, BUFSIZ, str.c_str(), str.size(), header);
+            //                write({outData, static_cast<int>(size)}, size);
+            //            }
+        }
+        else
+        {
+            QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
+            emit signalFetchEventActionData(data);
         }
     }
 }
@@ -163,8 +174,8 @@ void IOTV_Client::processQueryTech(const Header *header)
 void IOTV_Client::write(const QByteArray &data, qint64 size) const
 {
     Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
-               + QString::number(_socket->peerPort())
-               + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+                   + QString::number(_socket->peerPort())
+                   + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
     _socket->write(data.data(), size);
 }
@@ -180,8 +191,8 @@ void IOTV_Client::slotReadData()
     recivedBuff += _socket->readAll();
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
-               + QString::number(socket()->peerPort())
-               + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+                   + QString::number(socket()->peerPort())
+                   + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
@@ -234,6 +245,32 @@ void IOTV_Client::slotReadData()
 
         clearHeader(header);
     }
+}
+
+void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
+{
+    uint64_t size;
+    char outData[BUFSIZ];
+
+    struct Tech tech = {
+        .flags = Tech_FLAGS_NONE,
+        .type = Tech_TYPE_EV_AC,
+        .dataSize = static_cast<uint64_t>(data.size()),
+        .data = (const uint8_t*)data.data()
+    };
+
+    struct Header header = {
+        .type = HEADER_TYPE_RESPONSE,
+        .assignment = HEADER_ASSIGNMENT_TECH,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = techSize(&tech),
+        .pkg = &tech
+    };
+
+
+    size = responseTech(outData, BUFSIZ, data.data(), data.size(), &header);
+    write({outData, static_cast<int>(size)}, size);
 }
 
 bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)

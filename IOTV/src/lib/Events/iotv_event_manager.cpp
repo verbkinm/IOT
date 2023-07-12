@@ -16,6 +16,19 @@ IOTV_Event_Manager::IOTV_Event_Manager(QObject *parent)
 
 }
 
+IOTV_Event_Manager::~IOTV_Event_Manager()
+{
+    for (auto &el : _worker)
+    {
+        auto event = el.second.first;
+        auto action = el.second.second;
+        if (event != nullptr)
+            delete event;
+        if (action != nullptr)
+            delete action;
+    }
+}
+
 bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Action *action)
 {
     if (event == nullptr && action == nullptr)
@@ -52,7 +65,8 @@ bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Actio
 
 const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &IOTV_Event_Manager::worker() const
 {
-    std::lock_guard lg(_workerMutex);
+    //!!!
+//    std::lock_guard lg(_workerMutex);
     return _worker;
 }
 
@@ -132,7 +146,7 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std:
     else if (event[Json_Event_Action::TYPE] == Json_Event_Action::STATE)
     {
         QString state = event[Json_Event_Action::STATE].toString();
-        QString type = event[Json_Event_Action::TYPE_STATE].toString();
+        QString type = event[Json_Event_Action::TYPE].toString();
 
         result = IOTV_Event_Manager::createEvent(host, type, state);
     }

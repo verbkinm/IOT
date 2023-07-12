@@ -91,9 +91,9 @@ void IOTV_Server::readHostSetting()
         if (it != _iot_hosts.end())
         {
             Log::write(QString(Q_FUNC_INFO) +
-                       ", Error: Double host name in config file - " + setting[hostField::name],
-                    Log::Write_Flag::FILE_STDERR,
-                    ServerLog::DEFAULT_LOG_FILENAME);
+                           ", Error: Double host name in config file - " + setting[hostField::name],
+                       Log::Write_Flag::FILE_STDERR,
+                       ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
         }
 
@@ -107,7 +107,7 @@ void IOTV_Server::readHostSetting()
         if (!th->isRunning())
         {
             Log::write(QString(Q_FUNC_INFO) +
-                       " Error: Can't run IOT_Host in new thread",
+                           " Error: Can't run IOT_Host in new thread",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
             exit(1);
@@ -153,6 +153,20 @@ void IOTV_Server::readEventActionJson()
 
     for(const auto &pairs : list)
         _eventManager->bind(pairs.first, pairs.second.first, pairs.second.second);
+}
+
+void IOTV_Server::writeEventActionJson(const QByteArray &data)
+{
+    QString fileName = QDir(QFileInfo(_settingsHosts.fileName()).path()).filePath(Json_Event_Action::EVENT_ACTION_FILE_NAME);
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly);
+    if (!file.isOpen())
+    {
+        Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        exit(1);
+    }
+
+    file.write(data);
 }
 
 void IOTV_Server::startTCPServer()
@@ -260,9 +274,9 @@ void IOTV_Server::slotNewConnection()
     }
 
     Log::write("Client new connection: "
-               + socket->peerAddress().toString()
-               + ":"
-               + QString::number(socket->peerPort()),
+                   + socket->peerAddress().toString()
+                   + ":"
+                   + QString::number(socket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::TCP_LOG_FILENAME);
 
@@ -277,7 +291,7 @@ void IOTV_Server::slotNewConnection()
     }
 
     QThread *th = new QThread(this);
-    IOTV_Client *client = new IOTV_Client(socket, _eventManager, _iot_hosts, th);
+    IOTV_Client *client = new IOTV_Client(socket, _iot_hosts, th);
     th->start();
 
     _iot_clients[client] = th;
@@ -291,6 +305,10 @@ void IOTV_Server::slotNewConnection()
     }
 
     connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected, Qt::QueuedConnection);
+
+    connect(client, &IOTV_Client::signalFetchEventActionData, this, &IOTV_Server::slotFetchEventActionData, Qt::QueuedConnection);
+    connect(client, &IOTV_Client::signalQueryEventActionData, this, &IOTV_Server::slotQueryEventActionData, Qt::QueuedConnection);
+
     clientOnlineFile();
 }
 
@@ -375,6 +393,31 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();
+}
+
+void IOTV_Server::slotFetchEventActionData(QByteArray data)
+{
+    QJsonParseError err;
+    QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError)
+    {
+        qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
+        exit(-1);
+    }
+
+    writeEventActionJson(data);
+    readEventActionJson();
+}
+
+void IOTV_Server::slotQueryEventActionData()
+{
+    IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
+
+    if (client == nullptr || _eventManager == nullptr)
+        return;
+
+    QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
+    emit client->signalFetchEventActionDataFromServer(data);
 }
 
 void IOTV_Server::slotTest()

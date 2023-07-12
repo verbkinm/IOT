@@ -13,6 +13,7 @@ class IOTV_Event_Manager : public QObject
     Q_OBJECT
 public:
     explicit IOTV_Event_Manager(QObject *parent = nullptr);
+    ~IOTV_Event_Manager();
 
     bool bind(const QString &name, IOTV_Event *event, IOTV_Action *action);
 

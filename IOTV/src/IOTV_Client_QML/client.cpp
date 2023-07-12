@@ -80,25 +80,17 @@ QList<QList<QVariantMap> > Client::replaceRealNameToAlias(const QList<QList<QVar
             continue;
 
         // У событий
-        auto hostName = list.at(0)[Json_Event_Action::HOST_NAME].toString();
-        if (_devices.contains(hostName))
-            list[0][Json_Event_Action::HOST_NAME] = _devices.at(hostName).aliasName();
+        list[0][Json_Event_Action::HOST_NAME] = findAliasName(list.at(0)[Json_Event_Action::HOST_NAME].toString());
 
         // У действий
         if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX)
         {
-            auto hostName = list.at(1)[Json_Event_Action::HOST_NAME].toString();
-            if (_devices.contains(hostName))
-                list[1][Json_Event_Action::HOST_NAME] = _devices.at(hostName).aliasName();
+            list[1][Json_Event_Action::HOST_NAME] = findAliasName(list.at(1)[Json_Event_Action::HOST_NAME].toString());
         }
         else if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX_REF)
         {
-            auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
-            if (_devices.contains(srcHostName))
-                list[1][Json_Event_Action::HOST_SRC] = _devices.at(srcHostName).aliasName();
-            auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
-            if (_devices.contains(dstHostName))
-                list[1][Json_Event_Action::HOST_DST] = _devices.at(dstHostName).aliasName();
+            list[1][Json_Event_Action::HOST_SRC] = findAliasName(list.at(1)[Json_Event_Action::HOST_SRC].toString());
+            list[1][Json_Event_Action::HOST_DST] = findAliasName(list.at(1)[Json_Event_Action::HOST_DST].toString());
         }
     }
 
@@ -115,35 +107,93 @@ QList<QList<QVariantMap> > Client::replaceAliasToRealName(const QList<QList<QVar
             continue;
 
         // У событий
-        auto hostName = list.at(0)[Json_Event_Action::HOST_NAME].toString();
-        for (auto &pair : _devices)
-        {
-            if (pair.second.aliasName() == hostName)
-            {
-                list[0][Json_Event_Action::HOST_NAME] = pair.second.getName();
-                break;
-            }
-        }
-!!!
+        list[0][Json_Event_Action::HOST_NAME] = findRealName(list.at(0)[Json_Event_Action::HOST_NAME].toString());
+
         // У действий
         if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX)
         {
-            auto hostName = list.at(1)[Json_Event_Action::HOST_NAME].toString();
-            if (_devices.contains(hostName))
-                list[1][Json_Event_Action::HOST_NAME] = _devices.at(hostName).aliasName();
+            list[1][Json_Event_Action::HOST_NAME] = findRealName(list.at(1)[Json_Event_Action::HOST_NAME].toString());
         }
         else if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX_REF)
         {
-            auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
-            if (_devices.contains(srcHostName))
-                list[1][Json_Event_Action::HOST_SRC] = _devices.at(srcHostName).aliasName();
-            auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
-            if (_devices.contains(dstHostName))
-                list[1][Json_Event_Action::HOST_DST] = _devices.at(dstHostName).aliasName();
+            list[1][Json_Event_Action::HOST_SRC] = findRealName(list.at(1)[Json_Event_Action::HOST_SRC].toString());
+            list[1][Json_Event_Action::HOST_DST] = findRealName(list.at(1)[Json_Event_Action::HOST_DST].toString());
         }
     }
 
     return result;
+}
+
+QString Client::findRealName(const QString &alias) const
+{
+    for (auto &pair : _devices)
+    {
+        if (pair.second.aliasName() == alias)
+            return pair.second.getName();
+    }
+
+    return alias;
+}
+
+QString Client::findAliasName(const QString &realName) const
+{
+    if (_devices.contains(realName))
+        return _devices.at(realName).aliasName();
+
+    return realName;
+}
+
+void Client::removeEventAction(QList<QList<QVariantMap> > &list, const QString &name)
+{
+    for (auto i = 0; i < list.size(); ++i)
+    {
+        if (list[i].size() < 2)
+            continue;
+
+        if (list[i][0][Json_Event_Action::EVENT_ACTION_NAME] == name)
+            list.remove(i);
+    }
+}
+
+std::forward_list<const Base_Host *> Client::host_list() const
+{
+    std::forward_list<const Base_Host *> hosts;
+    for(const auto &pair : _devices)
+        hosts.push_front(&pair.second);
+
+    return hosts;
+}
+
+std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > Client::convert(const QList<QList<QVariantMap> > &list) const
+{
+    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> result;
+    auto hosts = host_list();
+
+    for (auto &el : list)
+    {
+        QString el_name = el.at(0)[Json_Event_Action::EVENT_ACTION_NAME].toString();
+        IOTV_Event *el_event = IOTV_Event_Manager::createEvent(el.at(0), hosts);
+        IOTV_Action *el_action = IOTV_Event_Manager::createAction(el.at(1), hosts);
+
+        result.emplace_front(el_name, std::make_pair(el_event, el_action));
+    }
+
+    return result;
+}
+
+void Client::clearList(std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &list) const
+{
+    for (auto &el : list)
+    {
+        auto event = el.second.first;
+        auto action = el.second.second;
+
+        if (event != nullptr)
+            delete event;
+
+        if (action != nullptr)
+            delete action;
+    }
 }
 
 void Client::slotConnected()
@@ -209,75 +259,47 @@ QList<QList<QVariantMap>> Client::evAcList() const
     return _evAcList;
 }
 
-void Client::saveEventAction(QVariantMap event, QVariantMap action) const
+void Client::saveEventAction(QVariantMap event, QVariantMap action,  QString oldName)
 {
-//    // Замена алиасов имен у устройств
+    auto host = host_list();
 
-//    // У событий
-//    auto hostName = event[Json_Event_Action::HOST_NAME].toString();
-//    for (auto &pair : _devices)
-//    {
-//        if (pair.second.aliasName() == hostName)
-//        {
-//            event[Json_Event_Action::HOST_NAME] = pair.second.getName();
-//            break;
-//        }
-//    }
-
-//    if (_devices.contains(hostName))
-//        list[0][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
-
-//    // У действий
-//    if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX)
-//    {
-//        auto hostName = list.at(1)[Json_Event_Action::HOST_NAME].toString();
-//        if (_devices.contains(hostName))
-//            list[1][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
-//    }
-//    else if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX_REF)
-//    {
-//        auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
-//        if (_devices.contains(srcHostName))
-//            list[1][Json_Event_Action::HOST_SRC] = _devices[srcHostName].aliasName();
-//        auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
-//        if (_devices.contains(dstHostName))
-//            list[1][Json_Event_Action::HOST_DST] = _devices[dstHostName].aliasName();
-//    }
-
-
-
-
-    std::forward_list<const Base_Host *> hosts;
-    for(const auto &pair : _devices)
-        hosts.push_front(&pair.second);
+    {
+        QList<QVariantMap> list;
+        list << event << action;
+        auto l = replaceAliasToRealName({list});
+        event = l[0][0];
+        action = l[0][1];
+    }
 
     QString name = event[Json_Event_Action::EVENT_ACTION_NAME].toString();
-    IOTV_Event *_event = IOTV_Event_Manager::createEvent(event, hosts);
-    IOTV_Action *_action = IOTV_Event_Manager::createAction(action, hosts);
+    IOTV_Event *_event = IOTV_Event_Manager::createEvent(event, host);
+    IOTV_Action *_action = IOTV_Event_Manager::createAction(action, host);
 
-    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> list;
+    auto evAcListWithRealName = replaceAliasToRealName(_evAcList);
 
-//    for (auto &el : _evAcListWithRealName)
-//    {
-//        QString el_name = el.at(0)[Json_Event_Action::EVENT_ACTION_NAME].toString();
-//        IOTV_Event *el_event;
-//        IOTV_Action *el_action;
+    removeEventAction(evAcListWithRealName, name);
+    removeEventAction(evAcListWithRealName, oldName);
 
-//        if (el_name == name)
-//        {
-//            el_event = _event;
-//            el_action = _action;
-//        }
-//        else
-//        {
-//            el_event = IOTV_Event_Manager::createEvent(el.at(0), hosts);
-//            el_action = IOTV_Event_Manager::createAction(el.at(1), hosts);
-//        }
+    auto list = convert(evAcListWithRealName);
+    list.emplace_front(name, std::make_pair(_event, _action));
 
-//        list.emplace_front(name, std::make_pair(el_event, el_action));
-//    }
+    QByteArray data = Event_Action_Parser::toData(list);
+    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
 
-    qDebug() << event << action;
+    clearList(list);
+}
+
+void Client::removeEventAction(QString name)
+{
+    auto evAcListWithRealName = replaceAliasToRealName(_evAcList);
+    removeEventAction(evAcListWithRealName, name);
+
+    auto list = convert(evAcListWithRealName);
+
+    QByteArray data = Event_Action_Parser::toData(list);
+    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
+
+    clearList(list);
 }
 
 void Client::queryIdentification()
@@ -433,35 +455,6 @@ void Client::responceTech(const Header *header)
 
         _evAcList = Event_Action_Parser::parseJsonToVariantMap(data, hosts);
         _evAcList = replaceRealNameToAlias(_evAcList);
-
-//        // Заменяем имена устройств на их aliasName
-//        for (auto &list : _evAcList)
-//        {
-//            if (list.size() < 2)
-//                continue;
-
-//            // У событий
-//            auto hostName = list.at(0)[Json_Event_Action::HOST_NAME].toString();
-//            if (_devices.contains(hostName))
-//                list[0][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
-
-//            // У действий
-//            if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX)
-//            {
-//                auto hostName = list.at(1)[Json_Event_Action::HOST_NAME].toString();
-//                if (_devices.contains(hostName))
-//                    list[1][Json_Event_Action::HOST_NAME] = _devices[hostName].aliasName();
-//            }
-//            else if (list.at(1)[Json_Event_Action::TYPE].toString() == Json_Event_Action::TYPE_DATA_TX_REF)
-//            {
-//                auto srcHostName = list.at(1)[Json_Event_Action::HOST_SRC].toString();
-//                if (_devices.contains(srcHostName))
-//                    list[1][Json_Event_Action::HOST_SRC] = _devices[srcHostName].aliasName();
-//                auto dstHostName = list.at(1)[Json_Event_Action::HOST_DST].toString();
-//                if (_devices.contains(dstHostName))
-//                    list[1][Json_Event_Action::HOST_DST] = _devices[dstHostName].aliasName();
-//            }
-//        }
 
         emit signalEventAction();
     }

@@ -10,7 +10,9 @@
 #include <QEvent>
 
 
+#include "actions/iotv_action.h"
 #include "device.h"
+#include "events/iotv_event.h"
 
 class Client : public QObject
 {
@@ -32,7 +34,8 @@ public:
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
     Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
-    Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action) const;
+    Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action, QString oldName);
+    Q_INVOKABLE void removeEventAction(QString name);
 
     bool stateConnection() const;
 
@@ -70,6 +73,14 @@ private:
 
     QList<QList<QVariantMap>> replaceRealNameToAlias(const QList<QList<QVariantMap>> &evActList) const;
     QList<QList<QVariantMap>> replaceAliasToRealName(const QList<QList<QVariantMap>> &evActList) const;
+    QString findRealName(const QString &alias) const;
+    QString findAliasName(const QString &realName) const;
+
+    void removeEventAction(QList<QList<QVariantMap> > &list, const QString &name);
+
+    std::forward_list<const Base_Host *> host_list() const;
+    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> convert(const QList<QList<QVariantMap>> &list) const;
+    void clearList(std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &list) const;
 
 public slots:
     void connectToHost(const QString &address, qint64 port);

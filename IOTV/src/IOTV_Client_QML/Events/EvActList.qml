@@ -7,7 +7,7 @@ ListView {
     id: listView
     width: parent.width
     spacing: 15
-    interactive: false
+//    interactive: false
 
     // Анимация появления элементов модели
     populate: Transition {
@@ -55,7 +55,7 @@ ListView {
 
                 listModel.append(object)
             }
-            listView.height = list.length * 80
+            listView.height = list.length * 100
         }
     }
 }
