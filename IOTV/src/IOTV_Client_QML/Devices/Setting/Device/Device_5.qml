@@ -12,9 +12,6 @@ Rectangle {
 
     color: Qt.rgba(0, 0, 0, 0)
 
-    //    border.width: 1
-    //    border.color: "green"
-
     Column {
         width: parent.width
         spacing: 15
@@ -22,9 +19,6 @@ Rectangle {
         Rectangle
         {
             color: Qt.rgba(0, 0, 0, 0)
-
-            //            border.width: 1
-            //            border.color: "red"
 
             width: parent.width
             height: 40
@@ -104,7 +98,6 @@ Rectangle {
 
                 anchors{
                     left: sliderBorder.right
-//                    verticalCenter: parent.verticalCenter
                     leftMargin: 15
                 }
             }
@@ -115,9 +108,6 @@ Rectangle {
             height: 20
 
             color: Qt.rgba(0, 0, 0, 0)
-
-            //            border.color: "yellow"
-            //            border.width: 1
 
             Label {
                 text: "Дата, время:"
@@ -138,9 +128,6 @@ Rectangle {
             height: 80
 
             color: Qt.rgba(0, 0, 0, 0)
-
-            //            border.color: "red"
-            //            border.width: 1
 
             FontMetrics {
                 id: fontMetrics

@@ -55,7 +55,7 @@ void IOTV_Client::processQueryState(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
+    auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
                                    {
                                        const struct State *pkg = static_cast<const struct State *>(header->pkg);
                                        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
@@ -80,7 +80,7 @@ void IOTV_Client::processQueryRead(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
+    auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
                                    {
                                        const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
                                        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
@@ -108,7 +108,7 @@ void IOTV_Client::processQueryWrite(const Header *header)
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
-    auto it = std::ranges::find_if (_hosts, [&](const auto &iotv_host)
+    auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
                                    {
                                        return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
                                    });

@@ -9,9 +9,6 @@ Rectangle {
     id: root
     width: parent.width
 
-//    border.width: 1
-//    border.color: "red"
-
     color: Qt.rgba(0, 0, 0, 0)
 
     ListView {
@@ -39,12 +36,8 @@ Rectangle {
         Rectangle {
             id: componentRect
             width: listView.width
-            height: 40
-
+            height: 52
             color: Qt.rgba(0, 0, 0, 0)
-
-//            border.width: 1
-//            border.color: "green"
 
             Label {
                 id: lbl

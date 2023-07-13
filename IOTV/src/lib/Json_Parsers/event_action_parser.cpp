@@ -1,5 +1,6 @@
 #include "event_action_parser.h"
 
+#include "events/iotv_event_alarm.h"
 #include "iotv_event_manager.h"
 //#include "events/iotv_event_connect.h"
 //#include "events/iotv_event_disconnect.h"
@@ -114,25 +115,69 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
     const Base_Host *host = hostByName(hosts, jobj.value(Json_Event_Action::HOST_NAME).toString());
     IOTV_Event *event = nullptr;
 
-    if (host == nullptr)
-        return event;
-
     if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
     {
+        if (host == nullptr)
+            return event;
+
         event = IOTV_Event_Manager::createEvent(host, type);
     }
     else if (type == Json_Event_Action::TYPE_STATE)
     {
+        if (host == nullptr)
+            return event;
+
         QString state = jobj.value(Json_Event_Action::TYPE_STATE).toString();
         event = IOTV_Event_Manager::createEvent(host, type, state);
     }
     else if (type == Json_Event_Action::TYPE_DATA)
     {
+        if (host == nullptr)
+            return event;
+
         QString direction = jobj.value(Json_Event_Action::DIRECTION).toString();
         QString compare = jobj.value(Json_Event_Action::COMPARE).toString();
         uint8_t ch_num = jobj.value(Json_Event_Action::CH_NUM).toString().toInt();
         QString data = jobj.value(Json_Event_Action::DATA).toString();
         event = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
+    }
+    else if (type == Json_Event_Action::TYPE_ALARM)
+    {
+        QString timeStr = jobj.value(Json_Event_Action::ALARM_TIME).toString();
+        QString daysStr = jobj.value(Json_Event_Action::ALARM_DAYS).toString();
+
+        QTime time;
+        std::array<bool, 7> days;
+
+        QStringList HM = timeStr.split(':');
+        if ( HM.size() != 2 )
+            return nullptr;
+
+        bool ok_h, ok_m;
+        int h = HM.at(0).toInt(&ok_h);
+        int m = HM.at(1).toInt(&ok_m);
+
+        if (ok_h == false || ok_m == false)
+            return nullptr;
+
+        time.setHMS(h, m, 0);
+
+        if ( daysStr.size() != 7 )
+            return nullptr;
+
+        for (uint i = 0; i < days.size(); ++i)
+        {
+            bool ok;
+            int val = QString(daysStr.at(i)).toUInt(&ok);
+            if ( ok == false )
+                return nullptr;
+            if ( val > 1 )
+                return nullptr;
+
+            days[i] = val;
+        }
+
+        event = IOTV_Event_Manager::createEvent(type, time, days);
     }
 
     return event;
@@ -180,6 +225,9 @@ const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const B
 
 QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
 {
+    if (event == nullptr)
+        return {};
+
     QJsonObject id;
     if (event->type() == IOTV_Event::EVENT_TYPE::CONNECTING)
     {
@@ -235,33 +283,25 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
         if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
             id.insert(Json_Event_Action::DATA, dataEv->data());
     }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::ALARM)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_ALARM);
+
+        const IOTV_Event_Alarm *alarmEvent = dynamic_cast<const IOTV_Event_Alarm *>(event);
+        Q_ASSERT(alarmEvent != nullptr);
+
+        id.insert(Json_Event_Action::ALARM_TIME, alarmEvent->time().toString("h:m"));
+        id.insert(Json_Event_Action::ALARM_DAYS, alarmEvent->dayString());
+    }
 
     return id;
 }
 
-//void Event_Action_Parser::writeDatatoJson(const Raw &raw, QJsonObject &id)
-//{
-////    id.insert(Json_Event_Action::DATA_TYPE, raw.strData().second);
-
-////    if (raw.isInt())
-////        id.insert(Json_Event_Action::DATA, raw.strData().first.toInt());
-////    else if (raw.isReal())
-////        id.insert(Json_Event_Action::DATA, raw.strData().first.toDouble());
-////    else if (raw.isBool())
-////    {
-////        QString val = raw.strData().first;
-////        bool boolVal = true;
-////        if (val == "false" || val == '0')
-////            boolVal = false;
-
-////        id.insert(Json_Event_Action::DATA, boolVal);
-////    }
-////    else if (raw.isString())
-////        id.insert(Json_Event_Action::DATA, raw.strData().first);
-//}
-
 QJsonObject Event_Action_Parser::parseAction(const IOTV_Action *action)
 {
+    if (action == nullptr)
+        return {};
+
     QJsonObject id;
     if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX)
     {
@@ -301,7 +341,9 @@ QVariantMap Event_Action_Parser::parseJsonToVariantMapEvent(const IOTV_Event *ev
     QVariantMap newEvent;
 
     newEvent[Json_Event_Action::EVENT_ACTION_NAME] = name;
-    newEvent[Json_Event_Action::HOST_NAME] = event->host()->getName();
+
+    if ( event->host() != nullptr )
+        newEvent[Json_Event_Action::HOST_NAME] = event->host()->getName();
 
     if (event->type() == IOTV_Event::EVENT_TYPE::CONNECTING)
     {
@@ -367,6 +409,16 @@ QVariantMap Event_Action_Parser::parseJsonToVariantMapEvent(const IOTV_Event *ev
 
         if (compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
             newEvent[Json_Event_Action::DATA] = eventData->data();
+    }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::ALARM)
+    {
+        const IOTV_Event_Alarm *alarmEvent = dynamic_cast<const IOTV_Event_Alarm *>(event);
+        if (alarmEvent == nullptr)
+            return {};
+
+        newEvent[Json_Event_Action::TYPE] = Json_Event_Action::TYPE_ALARM;
+        newEvent[Json_Event_Action::ALARM_TIME] = alarmEvent->time().toString("h:m");
+        newEvent[Json_Event_Action::ALARM_DAYS] = alarmEvent->dayString();
     }
 
     return newEvent;

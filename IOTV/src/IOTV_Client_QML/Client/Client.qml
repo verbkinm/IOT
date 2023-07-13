@@ -129,11 +129,13 @@ Page {
 
             Button {
                 id: btn_connect
+                height: 60
                 width: 180
                 font.pixelSize: 18
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: autoConnect.bottom
                 anchors.margins: 10
+                highlighted: true
 
                 onClicked: {
                     if (!addr.text.length)

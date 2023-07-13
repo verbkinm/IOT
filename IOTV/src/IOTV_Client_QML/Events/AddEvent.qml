@@ -7,6 +7,8 @@ Page {
     property var _event
     property var _action
 
+    property alias btnDeleteVisible: deleteEvent.visible
+
     id: root
     title: "Новое событие"
 
@@ -64,12 +66,19 @@ Page {
                 startType: (_event === undefined) ? "" : _event["type"]
 
                 onSignalActivated: {
+                    if (eventType === model[4])
+                        hostNameItem.visible = false
+                    else
+                        hostNameItem.visible = true
+
                     if (eventType === model[0] || eventType === model[1])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/EmptyItem.qml")
                     else if(eventType === model[2])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: parent.width})
                     else if(eventType === model[3])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
+                    else if(eventType === model[4])
+                        eventTypeLoader.setSource("qrc:/Events/BaseItem/AlarmType.qml", {width: parent.width})
                 }
             }
 
@@ -140,7 +149,7 @@ Page {
                     flat: false
                     highlighted: true
                     anchors {
-                        right: parent.right
+                        right: save.left
                         rightMargin: 20
                     }
 
@@ -157,15 +166,21 @@ Page {
                     height: deleteEvent.height
                     flat: false
                     highlighted: true
+
                     anchors {
-                        right: deleteEvent.left
+                        right: parent.right
                         rightMargin: 20
                     }
 
                     onClicked: {
                         if (name.text === "")
                         {
-                            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "Имя события не может быть пустым!"})
+                            loaderMainItem.setSource("qrc:/DialogShared.qml",
+                                                     {parent: appStack,
+                                                         visible: true,
+                                                         title: "Внимание",
+                                                         standardButtons: Dialog.Ok,
+                                                         text: "Имя события не может быть пустым!"})
                             return
                         }
 
@@ -177,7 +192,12 @@ Page {
                                 var obj = list[i][0]
                                 if (obj["name"] === name.text)
                                 {
-                                    loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "Событие с таким именем уже существует"})
+                                    loaderMainItem.setSource("qrc:/DialogShared.qml",
+                                                             {parent: appStack,
+                                                                 visible: true,
+                                                                 title: "Внимание",
+                                                                 standardButtons: Dialog.Ok,
+                                                                 text: "Событие с таким именем уже существует"})
                                     return
                                 }
                             }
@@ -192,7 +212,7 @@ Page {
                         if(event["type"] === eventTypeItem.model[2])
                             event["state"] = eventTypeLoader.item.stateType()
 
-                        if(event["type"] === eventTypeItem.model[3])
+                        else if(event["type"] === eventTypeItem.model[3])
                         {
                             event["compare"] = eventTypeLoader.item.compare()
                             event["direction"] = eventTypeLoader.item.direction()
@@ -200,6 +220,13 @@ Page {
                             if (event["compare"] !== eventTypeLoader.item.compareTypeComboBox.model[6] && event["compare"] !== eventTypeLoader.item.compareTypeComboBox.model[7])
                                 event["data"] = eventTypeLoader.item.dataString
 
+                        }
+                        else if(event["type"] === eventTypeItem.model[4])
+                        {
+                            event["time"] = eventTypeLoader.item.time()
+                            event["days"] = eventTypeLoader.item.days
+                            console.log(event["time"])
+                            console.log(event["days"])
                         }
 
                         var action = new Map
@@ -220,14 +247,14 @@ Page {
 
                         client.saveEventAction(event, action, title)
                         appStack.pop()
-//                        console.log(event)
-//                        for(var el in event)
-//                            console.log(el, " = ", event[el])
+                        //                        console.log(event)
+                        //                        for(var el in event)
+                        //                            console.log(el, " = ", event[el])
 
-//                        console.log()
+                        //                        console.log()
 
-//                        for(el in action)
-//                            console.log(el, " = ", action[el])
+                        //                        for(el in action)
+                        //                            console.log(el, " = ", action[el])
                     }
                 }
             }
@@ -258,6 +285,8 @@ Page {
                 stateProperty()
             else if (eventType === "data")
                 dataProperty()
+            else if (eventType === "alarm")
+                alarmPoperty()
         }
 
         if (_action === undefined)
@@ -288,6 +317,14 @@ Page {
         var chNum = _event["chNumber"] === undefined ? "" : _event["chNumber"]
 
         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {startCompare: compare, startDirection: direction, dataString: data, channelNumber: chNum})
+    }
+
+    function alarmPoperty()
+    {
+        var _days = _event["days"]
+        var hours = _event["time"].split(':')[0]
+        var minutes = _event["time"].split(':')[1]
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/AlarmType.qml", {days: _days, h: hours, m: minutes})
     }
 
     function dataTX()

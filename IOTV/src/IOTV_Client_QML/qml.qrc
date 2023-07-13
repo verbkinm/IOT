@@ -82,6 +82,8 @@
         <file>Events/BaseItem/EmptyItem.qml</file>
         <file>Events/EvActComponent.qml</file>
         <file>Events/EvActList.qml</file>
+        <file>Events/BaseItem/AlarmType.qml</file>
+        <file>Events/BaseItem/Round_Button.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

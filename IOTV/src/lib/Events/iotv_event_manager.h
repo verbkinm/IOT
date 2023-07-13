@@ -31,6 +31,9 @@ public:
                                    const QString &direction, const QString &data,
                                    const QString &compare, uint8_t channelNumber);
 
+    //! IOTV_Event_Alarm
+    static IOTV_Event *createEvent(const QString &type, const QTime &time, const std::array<bool, 7> &days);
+
     static IOTV_Event *createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
@@ -41,7 +44,6 @@ public:
                                      uint8_t dstCh_num, uint8_t srcCh_Num);
 
     static IOTV_Action *createAction(const QVariantMap &action, const std::forward_list<const Base_Host *> &hosts);
-
 private:
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> _worker;
 

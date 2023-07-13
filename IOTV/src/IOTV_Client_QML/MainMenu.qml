@@ -13,9 +13,9 @@ Drawer {
     height: window.height - overlayHeader.height
 
     modal: inPortrait
-    interactive: inPortrait
-    position: inPortrait ? 0 : 1
-    visible: !inPortrait
+//    interactive: inPortrait
+//    position: inPortrait ? 0 : 1
+//    visible: !inPortrait
 
 
     ListModel {

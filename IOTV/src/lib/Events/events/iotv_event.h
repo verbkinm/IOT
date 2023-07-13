@@ -14,6 +14,7 @@ public:
         DISCONNECTING,
         STATE,
         DATA,
+        ALARM
     };
 
     IOTV_Event(EVENT_TYPE type, const Base_Host *host,

@@ -67,7 +67,7 @@ Page {
         Column {
             id: columnRead
             width: root.width
-            spacing: 5
+            spacing: 10
             anchors {
                 top: lbl1.bottom
                 left: parent.left
@@ -86,7 +86,7 @@ Page {
                     textField.text: device.readData(model.index)
                     textField.readOnly: true
 
-                    button.icon.source: "qrc:/img/copy.png"
+                    buttonIcon: "qrc:/img/copy.png"
 
                     button.onClicked: {
                         textField.selectAll()
@@ -124,7 +124,7 @@ Page {
         Column {
             id: columnWrite
             width: root.width
-            spacing: 5
+            spacing: 10
             anchors {
                 top: lbl2.bottom
                 left: parent.left
@@ -141,7 +141,7 @@ Page {
                     type: device.writeDataType(model.index)
                     width: columnWrite.width
 
-                    button.icon.source: "qrc:/img/send.png"
+                    buttonIcon: "qrc:/img/send.png"
                     button.onClicked: {
                         device.setDataFromString(model.index, textField.text)
                     }

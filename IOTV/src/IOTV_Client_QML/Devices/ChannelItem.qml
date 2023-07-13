@@ -6,8 +6,9 @@ Item {
     property int number: 0
     property alias type: typeName.text
     property alias button: btn
+    property alias buttonIcon: img.source
 
-    height: 50
+    height: 52
 
     Label {
         id: lb1
@@ -41,6 +42,7 @@ Item {
 
     TextField {
         id: txtField
+        height: 52
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
@@ -60,20 +62,25 @@ Item {
     Button {
         id: btn
 
-        width: 46
-        height: 46
+        width: 52
+        height: 52
 
         display: AbstractButton.IconOnly
 
         font.pixelSize: 12
-        icon {
-            color: "transparent"
-        }
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 10
+        }
+        Image {
+            id: img
+            anchors.centerIn: parent
+            source: ""
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit  // ensure it fits
         }
     }
 }

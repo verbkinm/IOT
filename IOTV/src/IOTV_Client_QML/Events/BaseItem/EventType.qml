@@ -27,7 +27,7 @@ Item {
         id: eventTypeComboBox
         width: 200
 
-        model: ["connection", "disconnection", "state", "data"]
+        model: ["connection", "disconnection", "state", "data", "alarm"]
         currentIndex: startIndex(model, startType)
 
         anchors {

@@ -12,6 +12,7 @@ Page {
         {
             client.queryEventAction()
             timer.start()
+            popup.open()
         }
     }
 
@@ -19,7 +20,6 @@ Page {
         id: flickable
         width: parent.width
         height: parent.height
-//        contentHeight: listView.height + addEvent.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
@@ -33,6 +33,7 @@ Page {
                 top: parent.top
                 topMargin: 20
             }
+            spacing: 15
 
             Button {
                 id: addEvent
@@ -40,7 +41,6 @@ Page {
                 height: 60
 
                 text: "Добавить событие"
-                flat: false
                 highlighted: true
 
                 anchors {
@@ -50,7 +50,10 @@ Page {
                 onClicked: {
                     var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
                     if (component.status === Component.Ready)
-                        appStack.push(component)
+                    {
+                        var obj = component.createObject(null, {btnDeleteVisible: false})
+                        appStack.push(obj)
+                    }
                 }
             }
 

@@ -5,6 +5,7 @@
 #include "events/iotv_event_disconnect.h"
 #include "events/iotv_event_state.h"
 #include "events/iotv_event_data.h"
+#include "events/iotv_event_alarm.h"
 
 #include "actions/iotv_action_data_tx.h"
 #include "actions/iotv_action_data_tx_ref.h"
@@ -132,6 +133,14 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString
     return new IOTV_Event_Data(newDirection, compare, host, channelNumber, data);
 }
 
+IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, const QTime &time, const std::array<bool, 7> &days)
+{
+    if (type != Json_Event_Action::TYPE_ALARM)
+        return nullptr;
+
+    return new IOTV_Event_Alarm(time, days);
+}
+
 IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
 {
     IOTV_Event *result = nullptr;
@@ -159,6 +168,41 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std:
         QString type = event[Json_Event_Action::TYPE].toString();
 
         result = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
+    }
+    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_ALARM)
+    {
+        QString timeStr = event[Json_Event_Action::ALARM_TIME].toString();
+        QString daysStr = event[Json_Event_Action::ALARM_DAYS].toString();
+        QString type = event[Json_Event_Action::TYPE].toString();
+
+        QTime time;
+        std::array<bool, 7> days;
+
+        QStringList HM = timeStr.split(':');
+        if ( HM.size() != 2 )
+            return nullptr;
+
+        bool ok_h, ok_m;
+        int h = HM.at(0).toInt(&ok_h);
+        int m = HM.at(1).toInt(&ok_m);
+
+        if (ok_h == false || ok_m == false)
+            return nullptr;
+
+        time.setHMS(h, m, 0);
+
+        if ( daysStr.size() != 7 )
+            return nullptr;
+
+        for (uint i = 0; i < days.size(); ++i)
+        {
+            auto ch = daysStr.at(i);
+            if ( ch != '0' && ch != '1' )
+                return nullptr;
+
+            days[i] = QString(ch).toInt();
+        }
+        result = IOTV_Event_Manager::createEvent(type, time, days);
     }
 
     return result;

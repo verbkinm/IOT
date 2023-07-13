@@ -20,7 +20,7 @@ const Base_Host *IOTV_Event::host() const
 
 bool IOTV_Event::isValid() const
 {
-    if (_host == nullptr || _type == EVENT_TYPE::NONE)
+    if (/*_host == nullptr || */_type == EVENT_TYPE::NONE)
         return false;
 
     return true;

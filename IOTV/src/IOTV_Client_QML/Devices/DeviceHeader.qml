@@ -1,5 +1,5 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick.Controls
 
 Rectangle {
     height: 64
@@ -30,11 +30,21 @@ Rectangle {
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
+        Image {
+            anchors.centerIn: parent
             source: "qrc:/img/settings.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit  // ensure it fits
         }
+
+        //        display: AbstractButton.IconOnly
+        //        icon {
+        //            color: "transparent"
+        //            source: "qrc:/img/settings.png"
+        //            height: 50
+        //            width: 50
+        //        }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_setting"
@@ -54,11 +64,18 @@ Rectangle {
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
+        Image {
+            anchors.centerIn: parent
             source: "qrc:/img/debug.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit  // ensure it fits
         }
+//        display: AbstractButton.IconOnly
+//        icon {
+//            color: "transparent"
+//            source: "qrc:/img/debug.png"
+//        }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_debug"
@@ -78,11 +95,18 @@ Rectangle {
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
-        display: AbstractButton.IconOnly
-        icon {
-            color: "transparent"
+        Image {
+            anchors.centerIn: parent
             source: "qrc:/img/info.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit  // ensure it fits
         }
+//        display: AbstractButton.IconOnly
+//        icon {
+//            color: "transparent"
+//            source: "qrc:/img/info.png"
+//        }
         onClicked: {
             loaderMainItem.setSource("qrc:/DialogShared.qml",
                                      {parent: appStack,
