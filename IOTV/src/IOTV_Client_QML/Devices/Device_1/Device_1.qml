@@ -35,57 +35,12 @@ Page {
             topPadding: 15
 
             Repeater {
-                model: device.readChannelLength
+                model: [0, 1, 2]//device.readChannelLength
 
+                //!!!
                 Device_1_switch {
-                    channel: model.index
-                    btn.checked: device.readData(model.index) === "true"
-                    btn.onClicked: {
-                        device.setDataFromString(model.index, (btn.checked ? "true" : "false"))
-                        btn.toggle()
-                        wait()
-                        timer.start()
-                    }
-
-                    SequentialAnimation {
-                        id: anim
-                        PropertyAnimation {
-                            target: rec
-                            property: "color"
-                            from: Qt.rgba(0, 0, 0, 0)
-                            to: Qt.rgba(0, 0, 255, 0.5)
-                            duration: 200
-                        }
-                        PropertyAnimation  {
-                            target: rec
-                            property: "color"
-                            from: Qt.rgba(0, 0, 255, 0.5)
-                            to: Qt.rgba(0, 0, 0, 0)
-                            duration: 200
-                        }
-                    }
-
-                    Timer {
-                        id: timer
-                        interval: 10000
-                        repeat: false
-                        onTriggered: {
-                            notWait()
-                            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: desciptionLabel.text + "\nответ не получен"})
-                        }
-                    }
-
-                    Connections {
-                        target: device
-                        function onSignalDataChanged(channel) {
-                            if (channel !== model.index)
-                                return
-
-                            btn.checked = device.readData(channel) === "true"
-                            anim.start()
-                            timer.stop()
-                        }
-                    }
+                    device: root.device
+                    channel: Number(model.index)
                 }
             }
         }

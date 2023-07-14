@@ -202,12 +202,13 @@ Page {
         function onSignalDisconnected() {
             state = stateDisconnected
             loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение сброшено"})
+            if (appStack.currentItem.objectName !== root.objectName)
+                appStack.pop(homePage)
         }
     }
 
     Component.onCompleted: {
         console.log("Client page construct: ", objectName)
-        //        connection_attempt = settings.autoConnect
         if (settings.autoConnect)
             client.connectToHost(addr.text, port.text)
     }

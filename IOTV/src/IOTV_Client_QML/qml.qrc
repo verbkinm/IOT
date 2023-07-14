@@ -30,7 +30,6 @@
         <file>img/settings.png</file>
         <file>img/play.png</file>
         <file>img/humidity.png</file>
-        <file>img/id/3.png</file>
         <file>img/cloud_on.png</file>
         <file>img/cloud_off.png</file>
         <file>img/copy.png</file>
@@ -84,6 +83,8 @@
         <file>Events/EvActList.qml</file>
         <file>Events/BaseItem/AlarmType.qml</file>
         <file>Events/BaseItem/Round_Button.qml</file>
+        <file>Devices/BaseItem/Led_state.qml</file>
+        <file>img/id/5.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

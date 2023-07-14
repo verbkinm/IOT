@@ -9,6 +9,8 @@ Item {
     required property var channelHumidity
     required property var channelPressure
 
+//    anchors.fill: parent
+
     Column{
         id: column
         width: parent.width

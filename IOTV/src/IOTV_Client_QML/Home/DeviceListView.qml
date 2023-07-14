@@ -3,8 +3,8 @@ import QtQuick.Controls 2.5
 
 GridView {
     id: listView
-    cellHeight: 130
-    cellWidth: 130
+    cellWidth: 155
+    cellHeight: 110
 
     anchors {
         fill: parent
@@ -42,10 +42,11 @@ GridView {
         listModel.clear()
         for( var i = 0; i < client.totalDevice; i++)
         {
-            var device = client.devList()[i];
+            var _device = client.devList()[i];
             var object = {
-                name: device.name,
-                source: imageById(device.id)
+                name: _device.name,
+                source: imageById(_device.id),
+                device: _device
             }
             listModel.append(object)
         }

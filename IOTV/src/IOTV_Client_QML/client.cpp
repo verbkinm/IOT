@@ -151,7 +151,7 @@ void Client::removeEventAction(QList<QList<QVariantMap> > &list, const QString &
             continue;
 
         if (list[i][0][Json_Event_Action::EVENT_ACTION_NAME] == name)
-            list.remove(i);
+            list.removeAt(i);
     }
 }
 

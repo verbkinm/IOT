@@ -55,6 +55,7 @@ Rectangle {
         width: clientPage.btn.width
         font.pixelSize: clientPage.btn.font.pixelSize
         text: clientPage.btn.text
+        highlighted: true
 
         anchors.top: txtConnection.bottom
         anchors.margins: 10

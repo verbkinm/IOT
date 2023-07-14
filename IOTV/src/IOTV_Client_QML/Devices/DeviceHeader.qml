@@ -1,23 +1,24 @@
 import QtQuick 2.9
-import QtQuick.Controls
+import QtQuick.Controls 2.5
+import "qrc:/Devices/BaseItem" as BaseItem
 
 Rectangle {
     height: 64
-    color: Qt.rgba(0, 0, 0, 0)
 
-    Text {
-        id: stateDev
-        text: device.state ? "online" : "offline"
-        color: device.state ? "green" : "red"
+    color: Qt.rgba(255, 255, 255, 1)
+    border.width: 1
+    border.color: Qt.rgba(0, 0, 0, 0.1)
+
+
+    BaseItem.Led_state {
+        deviceName: device.name
         anchors {
-            top: parent.top
-            bottom: parent.bottom
             left: parent.left
-            right: settings.left
+            leftMargin: parent.height / 2
+            verticalCenter: parent.verticalCenter
         }
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
     }
+
 
     Button {
         id: settings
@@ -37,14 +38,6 @@ Rectangle {
             width: 22
             fillMode: Image.PreserveAspectFit  // ensure it fits
         }
-
-        //        display: AbstractButton.IconOnly
-        //        icon {
-        //            color: "transparent"
-        //            source: "qrc:/img/settings.png"
-        //            height: 50
-        //            width: 50
-        //        }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_setting"
@@ -71,11 +64,6 @@ Rectangle {
             width: 22
             fillMode: Image.PreserveAspectFit  // ensure it fits
         }
-//        display: AbstractButton.IconOnly
-//        icon {
-//            color: "transparent"
-//            source: "qrc:/img/debug.png"
-//        }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_debug"
@@ -102,11 +90,7 @@ Rectangle {
             width: 22
             fillMode: Image.PreserveAspectFit  // ensure it fits
         }
-//        display: AbstractButton.IconOnly
-//        icon {
-//            color: "transparent"
-//            source: "qrc:/img/info.png"
-//        }
+
         onClicked: {
             loaderMainItem.setSource("qrc:/DialogShared.qml",
                                      {parent: appStack,

@@ -27,6 +27,7 @@ Item {
 
     Label {
         id: typeName
+        width: 40
         text: "type"
         font.pixelSize: 12
         anchors {

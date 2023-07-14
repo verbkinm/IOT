@@ -9,12 +9,12 @@ import "Events" as EventsPageModule
 
 ApplicationWindow {
     id: window
-    width: 360
+    width: 400
     height: 640
     visible: true
     title: qsTr("IOTV Client")
 
-    minimumWidth: 360
+    minimumWidth: 400
     minimumHeight: 520
 
     //! [orientation]
@@ -86,8 +86,8 @@ ApplicationWindow {
 
         onCurrentItemChanged: {
             console.log("stackView current item: ", stackView.currentItem.objectName)
-//            if (appStack.currentItem == homePage)
-//                loaderDevice.source = ""
+            //            if (appStack.currentItem == homePage)
+            //                loaderDevice.source = ""
         }
     }
 
@@ -133,10 +133,16 @@ ApplicationWindow {
                 }
                 onClicked: {
                     if (appStack.currentItem == eventsPage)
-                        appStack.pop()
-                    else
-                        console.log(appStack.push(eventsPage))
+                        return
+
+                    if (appStack.push(eventsPage) === null)
+                    {
+                        appStack.pop(homePage, StackView.PopTransition)
+                        homePage.visible = false
+                        appStack.push(eventsPage, StackView.PushTransition)
+                    }
                 }
+                //                }
                 Layout.alignment: Qt.AlignCenter
             }
 
@@ -146,9 +152,15 @@ ApplicationWindow {
                     source: "qrc:/img/settings_white.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem == eventsPage)
-                        appStack.pop()
-                    appStack.push(clientPage)
+                    if (appStack.currentItem == clientPage)
+                        return
+
+                    if (appStack.push(clientPage) === null)
+                    {
+                        appStack.pop(homePage, StackView.PopTransition)
+                        homePage.visible = false
+                        appStack.push(clientPage, StackView.PushTransition)
+                    }
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -168,4 +180,6 @@ ApplicationWindow {
         else
             appStack.pop()
     }
+
+
 }

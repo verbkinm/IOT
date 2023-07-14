@@ -20,14 +20,14 @@ Rectangle {
     border.color: "black"
     radius: 3
 
+
     Label {
         id: lbl
-        anchors.centerIn: parent
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 18
         wrapMode: Text.Wrap
         text: "Example text"
-
-        width: parent.width * 0.8
     }
 
     NumberAnimation on opacity {

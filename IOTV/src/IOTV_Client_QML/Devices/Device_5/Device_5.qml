@@ -42,42 +42,8 @@ Page {
             // Выключатель
             Devices_1.Device_1_switch {
                 id: btn_id5
+                device: root.device
                 channel: 0
-                btn.checked: device.readData(0) === "true"
-                btn.onClicked: {
-                    device.setDataFromString(0, (btn.checked ? "true" : "false"))
-                    btn.toggle()
-                    wait()
-                    timer.start()
-                }
-
-                SequentialAnimation {
-                    id: anim
-                    PropertyAnimation {
-                        target: btn_id5.rec
-                        property: "color"
-                        from: Qt.rgba(0, 0, 0, 0)
-                        to: Qt.rgba(0, 0, 255, 0.5)
-                        duration: 200
-                    }
-                    PropertyAnimation  {
-                        target: btn_id5.rec
-                        property: "color"
-                        from: Qt.rgba(0, 0, 255, 0.5)
-                        to: Qt.rgba(0, 0, 0, 0)
-                        duration: 200
-                    }
-                }
-
-                Timer {
-                    id: timer
-                    interval: 5000
-                    repeat: false
-                    onTriggered: {
-                        btn_id5.notWait()
-                        loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: btn_id5.desciptionLabel.text + "\nответ не получен"})
-                    }
-                }
             }
 
             BaseItem.MeteoBlock {
@@ -100,18 +66,6 @@ Page {
 
     Component.onDestruction: {
         console.log("Device 5 destruct: ", objectName)
-    }
-
-    Connections {
-        target: device
-        function onSignalDataChanged(channel) {
-            if (channel === 0)
-            {
-                btn_id5.btn.checked = device.readData(0) === "true"
-                anim.start()
-                timer.stop()
-            }
-        }
     }
 
     Devices.BusyRect {

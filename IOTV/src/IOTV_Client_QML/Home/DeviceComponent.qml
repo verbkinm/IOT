@@ -1,104 +1,127 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
 import Qt.labs.settings 1.1
+import "qrc:/Devices/BaseItem" as BaseItem
 
-Rectangle {
-    id: componentRect
+Item {
+//    readonly property string stateOnline: "online"
+//    readonly property string stateOffline: "offline"
 
-    readonly property string stateOnline: "online"
-    readonly property string stateOffline: "offline"
+//    state: stateOffline
 
-    state: stateOffline
+    width: 155
+    height: 110
 
-    width: 120
-    height: 120
+    Canvas {
+        id: shadow
+        width: parent.width
+        height: parent.height
+        smooth: true
+        //        z: -1
 
-    border.width: 1
-    border.color: Qt.rgba(0, 0, 0, 0.1)
-    radius: 5
+        onPaint: {
+            var x = componentRect.x
+            var y = componentRect.y
+            var r = 5
+            var w = componentRect.width
+            var h = componentRect.height
+            var ctx = getContext("2d")
+            ctx.strokeStyle = "#aaa"
+            ctx.beginPath();
+            ctx.moveTo(x+r, y);
+            ctx.arcTo(x+w, y,   x+w, y+h, r);
+            ctx.arcTo(x+w, y+h, x,   y+h, r);
+            ctx.arcTo(x,   y+h, x,   y,   r);
+            ctx.arcTo(x,   y,   x+w, y,   r);
+            ctx.closePath();
+            ctx.shadowBlur = 3;
+            ctx.fill()
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
-            loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
-            appStack.push(loaderDevice)
         }
     }
 
-    Image
-    {
-        id: icon
-        source: model.source
-        anchors {
-            top: parent.top
-            horizontalCenter: parent.horizontalCenter
-            topMargin: 10
-        }
-        width: 54
-        height: 54
-        fillMode: Image.PreserveAspectFit
-    }
+    Rectangle {
+        id: componentRect
+        anchors.centerIn: parent
 
-    Label {
-        id: devName
-        text: (client != null) ? (client.deviceByName(model.name).aliasName) : ""
-        font.pixelSize: 16
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: icon.bottom
-            bottom: parent.bottom
-            leftMargin: 10
-            rightMargin: 10
-        }
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        wrapMode: Text.Wrap
-        elide: Text.ElideRight
+        width: 145
+        height: 100
 
-        Settings {
-            id: setting
-            category: model.name
-            property string name
+        color: Qt.rgba(255, 255, 255, 1)
+        radius: 5
 
-            Component.onCompleted: {
-                if (this.name.length === 0)
-                    this.name = model.name
-
-                var dev = client.deviceByName(model.name)
-                dev.aliasName = this.name
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {device: client.deviceByName(model.name)})
+                loaderDevice.title = loaderDevice.objectName = Qt.binding( function() {return  client.deviceByName(model.name).aliasName})
+                appStack.push(loaderDevice)
             }
         }
-    }
 
-    Connections {
-        target: client.deviceByName(name)
-        function onSignalUpdate() { model.source = imageById(target.id) }
-    }
 
-    states: [
-        State {
-            name: stateOnline
-            when: client.deviceByName(model.name).state
-            PropertyChanges { target: componentRect; color: Qt.rgba(0, 1, 0, 0.1)}
-        },
-        State {
-            name: stateOffline
-            when: !client.deviceByName(model.name).state
-            PropertyChanges { target: componentRect; color: Qt.rgba(1, 0, 0, 0.1)}
+
+        Image
+        {
+            id: icon
+            source: model.source
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+                topMargin: 10
+            }
+            width: 54
+            height: 54
+            fillMode: Image.PreserveAspectFit
         }
-    ]
-    transitions: [
-        Transition {
-            to: stateOnline
-            ColorAnimation { duration: 1000 }
-        },
-        Transition {
-            to: stateOffline
-            ColorAnimation { duration: 1000 }
+
+        Label {
+            id: devName
+            text: (client != null) ? (client.deviceByName(model.name).aliasName) : ""
+            font.pixelSize: 16
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: icon.bottom
+                bottom: parent.bottom
+                leftMargin: 10
+                rightMargin: 10
+            }
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+            elide: Text.ElideRight
+
+            Settings {
+                id: setting
+                category: model.name
+                property string name
+
+                Component.onCompleted: {
+                    if (this.name.length === 0)
+                        this.name = model.name
+
+                    var dev = client.deviceByName(model.name)
+                    dev.aliasName = this.name
+                }
+            }
         }
-    ]
+
+        BaseItem.Led_state {
+            deviceName: model.name
+            anchors {
+                right: parent.right
+                top: parent.top
+                rightMargin: 10
+                topMargin: 10
+            }
+        }
+
+        Connections {
+            target: client.deviceByName(name)
+            function onSignalUpdate() { model.source = imageById(target.id) }
+        }
+    }
 
     function createDeviceBy(id)
     {

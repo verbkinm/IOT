@@ -30,7 +30,7 @@ Raw::Raw(int16_t data) :
         data = qToLittleEndian(data);
 
     _data.resize(sizeof(data));
-    std::memcpy(_data.data(), &data, sizeof(data));
+    memcpy(_data.data(), &data, sizeof(data));
 }
 
 Raw::Raw(int32_t data) :
@@ -40,7 +40,7 @@ Raw::Raw(int32_t data) :
         data = qToLittleEndian(data);
 
     _data.resize(sizeof(data));
-    std::memcpy(_data.data(), &data, sizeof(data));
+    memcpy(_data.data(), &data, sizeof(data));
 }
 
 Raw::Raw(int64_t data) :
@@ -50,20 +50,20 @@ Raw::Raw(int64_t data) :
         data = qToLittleEndian(data);
 
     _data.resize(sizeof(data));
-    std::memcpy(_data.data(), &data, sizeof(data));
+    memcpy(_data.data(), &data, sizeof(data));
 }
 Raw::Raw(float data) :
     _type(DATA_TYPE::FLOAT_32)
 {
     _data.resize(sizeof(data));
-    std::memcpy(_data.data(), &data, sizeof(data));
+    memcpy(_data.data(), &data, sizeof(data));
 }
 
 Raw::Raw(double data) :
     _type(DATA_TYPE::DOUBLE_64)
 {
     _data.resize(sizeof(data));
-    std::memcpy(_data.data(), &data, sizeof(data));
+    memcpy(_data.data(), &data, sizeof(data));
 }
 
 Raw::Raw(bool data) :
@@ -75,7 +75,7 @@ Raw::Raw(bool data) :
 
 Raw::Raw(const QString &data) :
     _type(DATA_TYPE::STRING),
-    _data{data.toStdString().c_str(), static_cast<qsizetype>(data.toStdString().size())}
+    _data{data.toStdString().c_str(), static_cast<int>(data.toStdString().size())}
 {
 
 }
@@ -119,7 +119,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
         if (data.size() != sizeof(val))
             *this = Raw{};
 
-        std::memcpy(&val, data.data(), sizeof(val));
+        memcpy(&val, data.data(), sizeof(val));
 
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             val = qToLittleEndian(val);
@@ -132,7 +132,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
 
         if (data.size() != sizeof(val))
             *this = Raw{};
-        std::memcpy(&val, data.data(), sizeof(val));
+        memcpy(&val, data.data(), sizeof(val));
 
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             val = qToLittleEndian(val);
@@ -145,7 +145,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
 
         if (data.size() != sizeof(val))
             *this = Raw{};
-        std::memcpy(&val, data.data(), sizeof(val));
+        memcpy(&val, data.data(), sizeof(val));
 
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             val = qToLittleEndian(val);
@@ -158,7 +158,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
 
         if (data.size() != sizeof(val))
             *this = Raw{};
-        std::memcpy(&val, data.data(), sizeof(val));
+        memcpy(&val, data.data(), sizeof(val));
 
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             val = qToLittleEndian(val);
@@ -171,7 +171,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
 
         if (data.size() != sizeof(val))
             *this = Raw{};
-        std::memcpy(&val, data.data(), sizeof(val));
+        memcpy(&val, data.data(), sizeof(val));
 
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             val = qToLittleEndian(val);
@@ -420,7 +420,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
         result.resize(sizeof(value));
-        std::memcpy(result.data(), &value, sizeof(value));
+        memcpy(result.data(), &value, sizeof(value));
 //        char *ptr = reinterpret_cast<char*>(&value);
 //        for (uint i = 0; i < sizeof(value); i++)
 //            result.push_back(ptr[i]);
@@ -436,7 +436,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
         result.resize(sizeof(value));
-        std::memcpy(result.data(), &value, sizeof(value));
+        memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::INT_64)
     {
@@ -449,7 +449,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             value = qToLittleEndian(value);
         result.resize(sizeof(value));
-        std::memcpy(result.data(), &value, sizeof(value));
+        memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::FLOAT_32)
     {
@@ -460,7 +460,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             return {};
         }
         result.resize(sizeof(value));
-        std::memcpy(result.data(), &value, sizeof(value));
+        memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::DOUBLE_64)
     {
@@ -471,7 +471,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
             return {};
         }
         result.resize(sizeof(value));
-        std::memcpy(result.data(), &value, sizeof(value));
+        memcpy(result.data(), &value, sizeof(value));
     }
     else if (type == DATA_TYPE::BOOL)
     {
@@ -589,8 +589,8 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
         {
             int16_t lhsArg, rhsArg;
 
-            std::memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
-            std::memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
+            memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
+            memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
 
             if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             {
@@ -603,8 +603,8 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
         else if (lhs.type() == Raw::DATA_TYPE::INT_32)
         {
             int32_t lhsArg, rhsArg;
-            std::memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
-            std::memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
+            memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
+            memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
 
             if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             {
@@ -617,8 +617,8 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
         else if (lhs.type() == Raw::DATA_TYPE::INT_64)
         {
             int64_t lhsArg, rhsArg;
-            std::memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
-            std::memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
+            memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
+            memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
 
             if (Q_BYTE_ORDER != Q_LITTLE_ENDIAN)
             {
@@ -631,16 +631,16 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
         else if (lhs.type() == Raw::DATA_TYPE::FLOAT_32)
         {
             float lhsArg, rhsArg;
-            std::memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
-            std::memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
+            memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
+            memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
 
             return cmp(lhsArg, rhsArg);
         }
         else if (lhs.type() == Raw::DATA_TYPE::DOUBLE_64)
         {
             double lhsArg, rhsArg;
-            std::memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
-            std::memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
+            memcpy(&lhsArg, lhs.data().data(), sizeof(lhsArg));
+            memcpy(&rhsArg, rhs.data().data(), sizeof(rhsArg));
 
             return cmp(lhsArg, rhsArg);
         }
