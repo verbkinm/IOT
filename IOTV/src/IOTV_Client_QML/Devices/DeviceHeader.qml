@@ -9,7 +9,6 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(0, 0, 0, 0.1)
 
-
     BaseItem.Led_state {
         deviceName: device.name
         anchors {
@@ -19,85 +18,92 @@ Rectangle {
         }
     }
 
-
-    Button {
+    RoundButton {
         id: settings
 
         width: 52
         height: 52
+        highlighted: true
 
-        anchors{
+        anchors {
             right: debugMode.left
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
         Image {
             anchors.centerIn: parent
-            source: "qrc:/img/settings.png"
+            source: "qrc:/img/settings_white.png"
             height: 22
             width: 22
-            fillMode: Image.PreserveAspectFit  // ensure it fits
+            fillMode: Image.PreserveAspectFit // ensure it fits
         }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_setting"
-            loaderDebug.setSource("/Devices/Setting/Setting.qml", {device: device})
+            loaderDebug.setSource("/Devices/Setting/Setting.qml", {
+                                      "device": device
+                                  })
             appStack.push(loaderDebug)
         }
     }
 
-    Button {
+    RoundButton {
         id: debugMode
 
         width: settings.width
         height: settings.height
+        highlighted: true
 
-        anchors{
+        anchors {
             right: info.left
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
         Image {
             anchors.centerIn: parent
-            source: "qrc:/img/debug.png"
+            source: "qrc:/img/debug_white.png"
             height: 22
             width: 22
-            fillMode: Image.PreserveAspectFit  // ensure it fits
+            fillMode: Image.PreserveAspectFit // ensure it fits
         }
 
         onClicked: {
             loaderDebug.objectName = device.aliasName + "_debug"
-            loaderDebug.setSource("/Devices/Device_0.qml", {device: device})
+            loaderDebug.setSource("/Devices/Device_0.qml", {
+                                      "device": device
+                                  })
             appStack.push(loaderDebug)
         }
     }
 
-    Button {
+    RoundButton {
         id: info
 
         width: settings.width
         height: settings.height
+        highlighted: true
 
-        anchors{
+        anchors {
             right: parent.right
             verticalCenter: parent.verticalCenter
             rightMargin: 10
         }
         Image {
             anchors.centerIn: parent
-            source: "qrc:/img/info.png"
+            source: "qrc:/img/question_mark_white.png"
             height: 22
             width: 22
-            fillMode: Image.PreserveAspectFit  // ensure it fits
+            fillMode: Image.PreserveAspectFit // ensure it fits
         }
 
         onClicked: {
-            loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                     {parent: appStack,
-                                         visible: true,
-                                         title: "Описание",
-                                         standardButtons: Dialog.Ok,
-                                         text: device.description})
+            loaderMainItem.setSource("qrc:/DialogShared.qml", {
+                                         "parent": appStack,
+                                         "visible": true,
+                                         "title": "Описание",
+                                         "standardButtons": Dialog.Ok,
+                                         "text": device.description
+                                     })
         }
     }
 

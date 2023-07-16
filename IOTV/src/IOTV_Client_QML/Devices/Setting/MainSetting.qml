@@ -12,28 +12,30 @@ Rectangle {
 
     color: Qt.rgba(0, 0, 0, 0)
 
-    Label {
-        id: lbl
-        wrapMode: Text.Wrap
-        text: "Имя устройства: "
-        font.pixelSize: 14
-        elide: Text.ElideRight
+    //    Label {
+    //        id: lbl
+    //        wrapMode: Text.Wrap
+    //        text: "Имя устройства: "
+    //        font.pixelSize: 14
+    //        elide: Text.ElideRight
 
-        anchors{
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-            leftMargin: 15
-            rightMargin: 15
-        }
-    }
-
+    //        anchors {
+    //            left: parent.left
+    //            verticalCenter: parent.verticalCenter
+    //            leftMargin: 15
+    //            rightMargin: 15
+    //        }
+    //    }
     TextField {
         id: txt
-        font.pointSize: 12
+        height: 52
+        antialiasing: true
+        font.pixelSize: 14
         horizontalAlignment: Text.AlignHCenter
+        placeholderText: "Имя устройства"
 
         anchors {
-            left: lbl.right
+            left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
             leftMargin: 15

@@ -27,8 +27,7 @@ Page {
         GroupBox {
             id: groupBox
             height: 255
-            anchors
-            {
+            anchors {
                 top: parent.top
                 left: parent.left
                 right: parent.right
@@ -100,9 +99,11 @@ Page {
                 font.pixelSize: 14
                 placeholderText: "Введите порт сервера"
                 placeholderTextColor: "#cccccc"
-                validator: IntValidator{bottom: 0}
+                validator: IntValidator {
+                    bottom: 0
+                }
 
-                anchors{
+                anchors {
                     top: addr.bottom
                     left: label2.right
                     right: parent.right
@@ -138,13 +139,11 @@ Page {
                 highlighted: true
 
                 onClicked: {
-                    if (!addr.text.length)
-                    {
+                    if (!addr.text.length) {
                         addr.focus = true
                         return
                     }
-                    if (!port.text.length)
-                    {
+                    if (!port.text.length) {
                         port.focus = true
                         return
                     }
@@ -161,23 +160,56 @@ Page {
     states: [
         State {
             name: stateConnected
-            PropertyChanges { target: addr; enabled: false}
-            PropertyChanges { target: port; enabled: false}
-            PropertyChanges { target: autoConnect; enabled: false}
-            PropertyChanges { target: btn_connect; text: "отключиться"}
-            PropertyChanges { target: loaderMainItem; source: ""}
+            PropertyChanges {
+                target: addr
+                enabled: false
+            }
+            PropertyChanges {
+                target: port
+                enabled: false
+            }
+            PropertyChanges {
+                target: autoConnect
+                enabled: false
+            }
+            PropertyChanges {
+                target: btn_connect
+                text: "отключиться"
+            }
+            PropertyChanges {
+                target: loaderMainItem
+                source: ""
+            }
         },
         State {
             name: stateConnecting
-            PropertyChanges { target: btn_connect; text: "подключение..."}
+            PropertyChanges {
+                target: btn_connect
+                text: "подключение..."
+            }
         },
         State {
             name: stateDisconnected
-            PropertyChanges { target: addr; enabled: true}
-            PropertyChanges { target: port; enabled: true}
-            PropertyChanges { target: autoConnect; enabled: true}
-            PropertyChanges { target: btn_connect; text: "подключиться"}
-            PropertyChanges { target: loaderMainItem; source: ""}
+            PropertyChanges {
+                target: addr
+                enabled: true
+            }
+            PropertyChanges {
+                target: port
+                enabled: true
+            }
+            PropertyChanges {
+                target: autoConnect
+                enabled: true
+            }
+            PropertyChanges {
+                target: btn_connect
+                text: "подключиться"
+            }
+            PropertyChanges {
+                target: loaderMainItem
+                source: ""
+            }
         }
     ]
 
@@ -193,17 +225,30 @@ Page {
         target: client
         function onSignalConnected() {
             state = stateConnected
-            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение установлено"})
+            loaderMainItem.setSource("qrc:/Notification.qml", {
+                                         "parent": appStack,
+                                         "text": "cоединение установлено"
+                                     })
         }
         function onSignalConnecting() {
             state = stateConnecting
-            loaderMainItem.setSource("qrc:/PopupWait.qml", {parent: appStack})
+            loaderMainItem.setSource("qrc:/PopupWait.qml", {
+                                         "parent": appStack
+                                     })
         }
         function onSignalDisconnected() {
             state = stateDisconnected
-            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "cоединение сброшено"})
+            loaderMainItem.setSource("qrc:/Notification.qml", {
+                                         "parent": appStack,
+                                         "text": "cоединение сброшено"
+                                     })
             if (appStack.currentItem.objectName !== root.objectName)
                 appStack.pop(homePage)
+            else {
+                appStack.clear()
+                appStack.push(homePage)
+                appStack.push(clientPage)
+            }
         }
     }
 

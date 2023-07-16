@@ -4,10 +4,6 @@
 #include "state.h"
 #include "tech.h"
 
-//!!! проверку на NULL
-
-
-
 uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot)
 {
     if (outData == NULL)

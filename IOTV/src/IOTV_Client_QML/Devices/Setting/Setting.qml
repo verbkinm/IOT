@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 
 import "qrc:/Devices/" as Devices
 
-Page {    
+Page {
     //Ссылка на Device
     required property var device
 
@@ -25,7 +25,7 @@ Page {
         Column {
             id: column
             width: parent.width
-            spacing: 15
+            spacing: 30
             topPadding: 15
 
             MainSetting {
@@ -34,18 +34,19 @@ Page {
         }
     }
 
-//    Devices.BusyRect {
-//        id: busyRect
-//        anchors.fill: parent
-//        visible: !device.state
-//    }
-
+    Devices.BusyRect {
+        id: busyRect
+        anchors.fill: parent
+        visible: !device.state
+    }
     Component.onCompleted: {
         console.log("Setting construct: ", objectName)
-        var component = Qt.createComponent("Device/Device_" + device.id + ".qml");
-        if (component.status === Component.Ready)
-        {
-            var obj = component.createObject(column, {device: root.device})
+        var component = Qt.createComponent(
+                    "Device/Device_" + device.id + ".qml")
+        if (component.status === Component.Ready) {
+            var obj = component.createObject(column, {
+                                                 "device": root.device
+                                             })
             obj.objectName = objectName + "_setting_channels"
             fl.contentHeight = obj.height
         }

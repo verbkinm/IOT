@@ -94,6 +94,7 @@ public:
     static std::pair<QString, QString> strData(const QByteArray &data, DATA_TYPE type);
     static QByteArray strToByteArray(const QString &dataStr, DATA_TYPE type);
     static DATA_TYPE dataType(const QString &str);
+    static QString strType(DATA_TYPE type);
 
 private:
     DATA_TYPE _type;

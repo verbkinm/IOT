@@ -81,7 +81,6 @@ void Device::setDataFromString(int channelNumber, QString data)
 
 QString Device::readData(int channelNumber) const
 {
-    //    std::cout << getReadChannelDataRaw(channelNumber) << std::endl;
     QByteArray data = getReadChannelData(channelNumber);
     Raw::DATA_TYPE type = getReadChannelType(channelNumber);
     return Raw::strData(data, type).first;
@@ -89,12 +88,12 @@ QString Device::readData(int channelNumber) const
 
 QString Device::readDataType(int channelNumber) const
 {
-    return Raw::strData(getReadChannelData(channelNumber), getReadChannelType(channelNumber)).second;
+    return Raw::strType(getReadChannelType(channelNumber));
 }
 
 QString Device::writeDataType(int channelNumber) const
 {
-    return Raw::strData(QByteArray {}, getWriteChannelType(channelNumber)).second;
+    return Raw::strType(getWriteChannelType(channelNumber));
 }
 
 void Device::setReadInterval(int interval)

@@ -85,6 +85,11 @@
         <file>Events/BaseItem/Round_Button.qml</file>
         <file>Devices/BaseItem/Led_state.qml</file>
         <file>img/id/5.png</file>
+        <file>img/info_white.png</file>
+        <file>img/debug_white.png</file>
+        <file>img/question_mark_white.png</file>
+        <file>img/copy_white.png</file>
+        <file>img/send_white.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

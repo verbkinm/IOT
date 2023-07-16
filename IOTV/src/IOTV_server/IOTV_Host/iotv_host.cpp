@@ -314,11 +314,11 @@ void IOTV_Host::slotPingTimeOut()
 
 void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
-    //!!! Нужно ли посылать данные на устройство, если они равны текущим данным?
-    if (getReadChannelData(channelNumber) != data)
-    {
+//    !!! Нужно ли посылать данные на устройство, если они равны текущим данным?
+//    if (getReadChannelData(channelNumber) != data)
+//    {
         write(channelNumber, data);
-    }
+//    }
 }
 
 void IOTV_Host::slotConnected()

@@ -19,8 +19,8 @@ ApplicationWindow {
 
     //! [orientation]
     readonly property bool inPortrait: window.width < window.height
-    //! [orientation]
 
+    //! [orientation]
     property alias appStack: stackView
 
     header: ToolBar {
@@ -34,13 +34,16 @@ ApplicationWindow {
                 source: "qrc:/img/back.png"
             }
 
-            anchors{
+            anchors {
                 verticalCenter: parent.verticalCenter
                 leftMargin: 20
                 left: parent.left
             }
             onClicked: {
-                window.close()
+                if (drawer.visible)
+                    drawer.visible = false
+                else
+                    window.close()
             }
         }
 
@@ -63,7 +66,7 @@ ApplicationWindow {
                 source: "qrc:/img/menu.png"
             }
 
-            anchors{
+            anchors {
                 verticalCenter: parent.verticalCenter
                 rightMargin: 20
                 right: parent.right
@@ -85,7 +88,8 @@ ApplicationWindow {
         initialItem: homePage
 
         onCurrentItemChanged: {
-            console.log("stackView current item: ", stackView.currentItem.objectName)
+            console.log("stackView current item: ",
+                        stackView.currentItem.objectName)
             //            if (appStack.currentItem == homePage)
             //                loaderDevice.source = ""
         }
@@ -135,8 +139,7 @@ ApplicationWindow {
                     if (appStack.currentItem == eventsPage)
                         return
 
-                    if (appStack.push(eventsPage) === null)
-                    {
+                    if (appStack.push(eventsPage) === null) {
                         appStack.pop(homePage, StackView.PopTransition)
                         homePage.visible = false
                         appStack.push(eventsPage, StackView.PushTransition)
@@ -155,8 +158,7 @@ ApplicationWindow {
                     if (appStack.currentItem == clientPage)
                         return
 
-                    if (appStack.push(clientPage) === null)
-                    {
+                    if (appStack.push(clientPage) === null) {
                         appStack.pop(homePage, StackView.PopTransition)
                         homePage.visible = false
                         appStack.push(clientPage, StackView.PushTransition)
@@ -176,10 +178,10 @@ ApplicationWindow {
     onClosing: {
         close.accepted = false
         if (appStack.currentItem == homePage)
-            loaderMainItem.setSource("qrc:/DialogExit.qml", {parent: appStack})
+            loaderMainItem.setSource("qrc:/DialogExit.qml", {
+                                         "parent": appStack
+                                     })
         else
             appStack.pop()
     }
-
-
 }

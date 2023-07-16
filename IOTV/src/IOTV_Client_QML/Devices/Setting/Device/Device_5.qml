@@ -16,41 +16,45 @@ Rectangle {
         width: parent.width
         spacing: 15
 
-        Rectangle
-        {
-            color: Qt.rgba(0, 0, 0, 0)
+        leftPadding: 15
+        rightPadding: 15
 
-            width: parent.width
-            height: 40
+        TextField {
+            id: txt
+            height: 52
+            width: parent.width - parent.leftPadding - parent.rightPadding
+            antialiasing: true
+            font.pixelSize: 14
+            horizontalAlignment: Text.AlignHCenter
+            placeholderText: "Имя канала"
+        }
 
-            Label {
-                id: lbl
-                wrapMode: Text.Wrap
-                text: "Канал : " + 0
-                font.pixelSize: 14
-                elide: Text.ElideRight
+        TextField {
+            id: dateTime
+            readOnly: true
+            height: 52
+            antialiasing: true
+            font.pixelSize: 14
+            placeholderText: "Время и дата"
+            horizontalAlignment: Text.AlignHCenter
 
-                anchors{
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                    leftMargin: 15
-                    rightMargin: 15
-                }
+            anchors {
+                left: parent.left
+                right: parent.right
+                leftMargin: 15
+                rightMargin: 15
             }
 
-            TextField {
-                id: txt
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
+            property int year: 0
+            property int month: 1
+            property int day: 1
+            property int hours: 0
+            property int minutes: 0
+            property int seconds: 0
 
-                anchors {
-                    left: lbl.right
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    leftMargin: 15
-                    rightMargin: 15
-                }
-            }
+            text: addZero(hours) + ":" + addZero(minutes) + ":" + addZero(
+                      seconds) + " " + addZero(day) + "/" + addZero(
+                      month) + "/20" + addZero(year)
         }
 
         Rectangle {
@@ -63,7 +67,7 @@ Rectangle {
                 font.pixelSize: 14
                 elide: Text.ElideRight
 
-                anchors{
+                anchors {
                     left: parent.left
                     verticalCenter: parent.verticalCenter
                     leftMargin: 15
@@ -81,11 +85,12 @@ Rectangle {
                 from: 0
                 to: 255
                 value: parseFloat(device.readData(1))
-                width: 240
-                anchors{
+                //                width: 240
+                anchors {
                     left: parent.left
+                    right: valueBorder.left
                     verticalCenter: parent.verticalCenter
-                    leftMargin: 15
+                    //                    leftMargin: 15
                 }
                 onValueChanged: {
                     device.setDataFromString(1, parseInt(value).toString())
@@ -95,176 +100,24 @@ Rectangle {
             Label {
                 id: valueBorder
                 text: parseInt(sliderBorder.value).toString()
-
-                anchors{
-                    left: sliderBorder.right
-                    leftMargin: 15
-                }
-            }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 20
-
-            color: Qt.rgba(0, 0, 0, 0)
-
-            Label {
-                text: "Дата, время:"
-                font.pixelSize: 14
-                elide: Text.ElideRight
-
-                anchors{
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                    leftMargin: 15
-                }
-            }
-        }
-
-        Rectangle {
-            id: rectTime
-            width: parent.width
-            height: 80
-
-            color: Qt.rgba(0, 0, 0, 0)
-
-            FontMetrics {
-                id: fontMetrics
-            }
-
-            Component {
-                id: delegateComponent
-
-                Label {
-
-                    function formatText(count, modelData) {
-                        var data = count === 12 ? modelData + 1 : modelData;
-                        return data.toString().length < 2 ? "0" + data : data;
-                    }
-
-                    text: formatText(Tumbler.tumbler.count, modelData)
-                    opacity: 1.0 - Math.abs(Tumbler.displacement) / (Tumbler.tumbler.visibleItemCount / 2)
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: fontMetrics.font.pixelSize * 1.25
-                }
-            }
-
-            Tumbler {
-                id: hoursTumbler
-                model: 24
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    right: minutesTumbler.left
-                }
-                onCurrentIndexChanged: {
-                    console.log(currentIndex)
-                }
-            }
-
-            Tumbler {
-                id: minutesTumbler
-                model: 60
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    centerIn: parent
-                }
-            }
-
-            Tumbler {
-                id: secondsTumbler
-                model: 60
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    left: minutesTumbler.right
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: parent.height / 3
-
-                color: Qt.rgba(0, 0, 0, 0)
-                //                border.color: "blue"
-                //                border.width: 1
+                width: 50
 
                 anchors {
-                    centerIn: parent
+                    rightMargin: 15
+                    right: parent.right
                 }
-
-            }
-            MouseArea {
-                anchors.fill: parent
-            }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 80
-
-            color: Qt.rgba(0, 0, 0, 0)
-
-            //            border.color: "green"
-            //            border.width: 1
-
-            Tumbler {
-                id: dayTumbler
-                model: getRange(1, 31)
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    right: monthTumbler.left
-                }
-                onCurrentIndexChanged: {
-                    console.log(currentIndex)
-                }
-            }
-
-            Tumbler {
-                id: monthTumbler
-                model: getRange(0, 11)
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    centerIn: parent
-                }
-                onCurrentIndexChanged: {
-                    console.log(currentIndex)
-                }
-            }
-
-            Tumbler {
-                id: yearTumbler
-                model: getRange(2000, 2099)
-                delegate: delegateComponent
-                visibleItemCount: 3
-                height: parent.height
-                anchors {
-                    left: monthTumbler.right
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
             }
         }
 
         Button {
             id: btnSystemDateTime
             text: "Установить\nсистемное время"
+            highlighted: true
 
             anchors.horizontalCenter: parent.horizontalCenter
 
             onClicked: {
-                var dt = new Date();
+                var dt = new Date()
 
                 device.setDataFromString(2, dt.getSeconds())
                 device.setDataFromString(3, dt.getMinutes())
@@ -272,15 +125,15 @@ Rectangle {
 
                 device.setDataFromString(5, dt.getDay())
                 device.setDataFromString(6, dt.getDate())
-                device.setDataFromString(7, dt.getMonth())
+                device.setDataFromString(7, dt.getMonth() + 1)
                 device.setDataFromString(8, dt.getFullYear() - 2000)
 
-                secondsTumbler.currentIndex = dt.getSeconds()
-                minutesTumbler.currentIndex = dt.getMinutes()
-                hoursTumbler.currentIndex = dt.getHours()
-                dayTumbler.currentIndex = dt.getDate() - 1
-                monthTumbler.currentIndex = dt.getMonth() - 1
-                yearTumbler.currentIndex = dt.getFullYear() - 2000
+                dateTime.seconds = dt.getSeconds()
+                dateTime.minutes = dt.getMinutes()
+                dateTime.hours = dt.getHours()
+                dateTime.day = dt.getDate()
+                dateTime.month = dt.getMonth() + 1
+                dateTime.year = dt.getFullYear() - 2000
             }
         }
     }
@@ -288,47 +141,60 @@ Rectangle {
     Connections {
         target: device
         function onSignalDataChanged(channel) {
-            if (channel === 1)
-            {
+            if (channel === 1) {
                 if (!sliderBorder.pressed)
                     sliderBorder.value = parseFloat(device.readData(1))
-            }
-            else if (channel === 2)
-                secondsTumbler.currentIndex = Number(device.readData(2))
+            } else if (channel === 2)
+                dateTime.seconds = Number(device.readData(2))
             else if (channel === 3)
-                minutesTumbler.currentIndex = Number(device.readData(3))
+                dateTime.minutes = Number(device.readData(3))
             else if (channel === 4)
-                hoursTumbler.currentIndex = Number(device.readData(4))
+                dateTime.hours = Number(device.readData(4))
             else if (channel === 6)
-                dayTumbler.currentIndex = Number(device.readData(6)) - 1
+                dateTime.day = Number(device.readData(6))
             else if (channel === 7)
-                monthTumbler.currentIndex = Number(device.readData(7)) - 1
+                dateTime.month = Number(device.readData(7))
             else if (channel === 8)
-                yearTumbler.currentIndex = Number(device.readData(8))
-
+                dateTime.year = Number(device.readData(8))
         }
     }
 
     Component.onCompleted: {
         console.log("Device settings 5 construct: ", objectName)
-        secondsTumbler.currentIndex = Number(device.readData(2))
-        minutesTumbler.currentIndex = Number(device.readData(3))
-        hoursTumbler.currentIndex = Number(device.readData(4))
-        dayTumbler.currentIndex = Number(device.readData(6)) - 1
-        monthTumbler.currentIndex = Number(device.readData(7)) - 1
-        yearTumbler.currentIndex = Number(device.readData(8))
+        dateTime.seconds = Number(device.readData(2))
+        dateTime.minutes = Number(device.readData(3))
+        dateTime.hours = Number(device.readData(4))
+        dateTime.day = Number(device.readData(6))
+        dateTime.month = Number(device.readData(7))
+        dateTime.year = Number(device.readData(8))
+        //        secondsTumbler.currentIndex =
+        //        minutesTumbler.currentIndex = Number(device.readData(3))
+        //        hoursTumbler.currentIndex =
+        //        dayTumbler.currentIndex =
+        //        monthTumbler.currentIndex =  - 1
+        //        yearTumbler.currentIndex =
     }
 
     Component.onDestruction: {
         console.log("Device settings 5 destruct: ", objectName)
     }
 
-    function getRange(min, max){
+    function getRange(min, max) {
         var arr = []
-        for (var i = min, j = 0; i <= max; i++, j++)
+        var j = 0
+        for (var i = min; i <= max; ++i) {
             arr[j] = i
+            ++j
+        }
 
         return arr
+    }
+
+    function addZero(val) {
+        if (val < 10)
+            return "0" + val
+
+        return val
     }
 
     Settings {

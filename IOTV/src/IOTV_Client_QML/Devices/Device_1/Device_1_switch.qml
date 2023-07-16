@@ -7,16 +7,15 @@ import "qrc:/Devices/" as Devices
 Rectangle {
     required property var device
     required property int channel
-//    property alias btn: button
-//    property alias desciptionLabel: userDescription
 
+    //    signal signalDataRX(var data, int channel)
     id: root
     width: parent.width * 0.8
     height: 80
 
     color: Qt.rgba(255, 255, 255, 1)
 
-    anchors{
+    anchors {
         left: parent.left
         right: parent.right
     }
@@ -35,14 +34,14 @@ Rectangle {
             var h = rectangle.height
             var ctx = getContext("2d")
             ctx.strokeStyle = "#aaa"
-            ctx.beginPath();
-            ctx.moveTo(x+r, y);
-            ctx.arcTo(x+w, y,   x+w, y+h, r);
-            ctx.arcTo(x+w, y+h, x,   y+h, r);
-            ctx.arcTo(x,   y+h, x,   y,   r);
-            ctx.arcTo(x,   y,   x+w, y,   r);
-            ctx.closePath();
-            ctx.shadowBlur = 3;
+            ctx.beginPath()
+            ctx.moveTo(x + r, y)
+            ctx.arcTo(x + w, y, x + w, y + h, r)
+            ctx.arcTo(x + w, y + h, x, y + h, r)
+            ctx.arcTo(x, y + h, x, y, r)
+            ctx.arcTo(x, y, x + w, y, r)
+            ctx.closePath()
+            ctx.shadowBlur = 3
             ctx.fill()
         }
     }
@@ -59,12 +58,12 @@ Rectangle {
             centerIn: parent
         }
 
-        Switch{
+        Switch {
             id: button
             height: 80
             checked: device.readData(channel) === "true"
 
-            anchors{
+            anchors {
                 left: parent.left
                 leftMargin: 30
                 verticalCenter: parent.verticalCenter
@@ -75,7 +74,8 @@ Rectangle {
             }
 
             onClicked: {
-                device.setDataFromString(channel, (button.checked ? "true" : "false"))
+                device.setDataFromString(channel,
+                                         (button.checked ? "true" : "false"))
                 button.toggle()
                 wait()
                 timer.start()
@@ -98,7 +98,7 @@ Rectangle {
 
             font.pixelSize: 18
 
-            anchors{
+            anchors {
                 right: parent.right
                 rightMargin: 10
                 left: button.right
@@ -124,11 +124,11 @@ Rectangle {
     Connections {
         target: device
         function onSignalDataChanged(ch) {
-            if (ch === channel)
-            {
+            if (ch === channel) {
                 button.checked = device.readData(channel) === "true"
                 anim.start()
                 timer.stop()
+                //                signalDataRX(button.checked, ch)
             }
         }
     }
@@ -139,7 +139,10 @@ Rectangle {
         repeat: false
         onTriggered: {
             notWait()
-            loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: desciptionLabel.text + "\nответ не получен"})
+            loaderMainItem.setSource("qrc:/Notification.qml", {
+                                         "parent": appStack,
+                                         "text": text + "\nответ не получен"
+                                     })
         }
     }
 
@@ -152,7 +155,7 @@ Rectangle {
             to: Qt.rgba(0, 0, 255, 0.5)
             duration: 200
         }
-        PropertyAnimation  {
+        PropertyAnimation {
             target: rectangle
             property: "color"
             from: Qt.rgba(0, 0, 255, 0.5)
@@ -174,7 +177,7 @@ Rectangle {
     }
 
     Component.onDestruction: {
-        console.log("Device 1_", channel, "destruct:", objectName)
+        console.log("Device 1_", channel, " destruct:", objectName)
     }
 
     function wait() {

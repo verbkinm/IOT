@@ -351,6 +351,7 @@ void Raw::setData(const QByteArray &newData)
 
 std::pair<QString, QString> Raw::strData() const
 {
+    //!!! Если _data по длине не равняется типу данных, что произойдёт?
     switch (_type)
     {
     case DATA_TYPE::INT_8:
@@ -503,6 +504,35 @@ Raw::DATA_TYPE Raw::dataType(const QString &str)
         return it->second;
 
     return DATA_TYPE::NONE;
+}
+
+QString Raw::strType(DATA_TYPE type)
+{
+    switch (type)
+    {
+    case DATA_TYPE::INT_8:
+        return Json_Event_Action::DATA_TYPE_INT_8;
+    case DATA_TYPE::INT_16:
+        return Json_Event_Action::DATA_TYPE_INT_16;
+    case DATA_TYPE::INT_32:
+        return Json_Event_Action::DATA_TYPE_INT_32;
+    case DATA_TYPE::INT_64:
+        return Json_Event_Action::DATA_TYPE_INT_64;
+    case DATA_TYPE::FLOAT_32:
+        return Json_Event_Action::DATA_TYPE_FLOAT_32;
+    case DATA_TYPE::DOUBLE_64:
+        return Json_Event_Action::DATA_TYPE_DOUBLE_64;
+    case DATA_TYPE::BOOL:
+        return Json_Event_Action::DATA_TYPE_BOOL;
+    case DATA_TYPE::STRING:
+        return Json_Event_Action::DATA_TYPE_STRING;
+    case DATA_TYPE::RAW:
+        return Json_Event_Action::DATA_TYPE_RAW;
+    default:
+        return Json_Event_Action::DATA_TYPE_NONE;
+    }
+
+    return {};
 }
 
 bool Raw::isBool() const

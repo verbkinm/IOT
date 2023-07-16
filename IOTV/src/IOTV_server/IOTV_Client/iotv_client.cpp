@@ -124,7 +124,7 @@ void IOTV_Client::processQueryWrite(const Header *header)
         // Ответ клиенту о записи
         write({outData, static_cast<int>(size)}, size);
 
-        // !!! Послать данные на устройство напрямую нельзя - разные потоки
+        // Послать данные на устройство напрямую нельзя - разные потоки
         emit it->first->signalQueryWrite(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
 
         clearIOTV_Server(iot);

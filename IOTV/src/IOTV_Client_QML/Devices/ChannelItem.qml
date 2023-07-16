@@ -47,7 +47,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
-        font.pixelSize: 12
+        font.pixelSize: 14
 
         text: ""
         placeholderText: "Введите данные..."
@@ -60,14 +60,14 @@ Item {
             verticalCenter: parent.verticalCenter
         }
     }
-    Button {
+    RoundButton {
         id: btn
 
         width: 52
         height: 52
 
         display: AbstractButton.IconOnly
-
+        highlighted: true
         font.pixelSize: 12
 
         anchors {
@@ -81,7 +81,7 @@ Item {
             source: ""
             height: 22
             width: 22
-            fillMode: Image.PreserveAspectFit  // ensure it fits
+            fillMode: Image.PreserveAspectFit // ensure it fits
         }
     }
 }

@@ -22,22 +22,32 @@ Rectangle {
         State {
             name: stateOnline
             when: client.deviceByName(deviceName).state
-            PropertyChanges { target: statusConnection; color: Qt.rgba(0, 100, 0, 1)}
+            PropertyChanges {
+                target: statusConnection
+                color: Qt.rgba(0, 100, 0, 1)
+            }
         },
         State {
             name: stateOffline
             when: !client.deviceByName(deviceName).state
-            PropertyChanges { target: statusConnection; color: Qt.rgba(255, 0, 0, 1)}
+            PropertyChanges {
+                target: statusConnection
+                color: Qt.rgba(255, 0, 0, 1)
+            }
         }
     ]
     transitions: [
         Transition {
             to: stateOnline
-            ColorAnimation { duration: 1000 }
+            ColorAnimation {
+                duration: 500
+            }
         },
         Transition {
             to: stateOffline
-            ColorAnimation { duration: 1000 }
+            ColorAnimation {
+                duration: 500
+            }
         }
     ]
 }

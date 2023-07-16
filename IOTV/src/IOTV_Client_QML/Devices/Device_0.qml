@@ -13,7 +13,8 @@ Page {
         id: fl
         width: root.width
         height: root.height
-        contentHeight: column.height + lbl1.height + columnRead.height + lbl2.height + columnWrite.height + 50
+        contentHeight: column.height + lbl1.height + columnRead.height
+                       + lbl2.height + columnWrite.height + 50
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
@@ -26,7 +27,7 @@ Page {
             spacing: 10
 
             Label {
-                id:name
+                id: name
                 text: "Имя устройства: " + device.name
             }
             Label {
@@ -38,17 +39,17 @@ Page {
             }
             Label {
                 id: devId
-                text :"ID устройства: " + device.id
+                text: "ID устройства: " + device.id
             }
             Label {
-                id:description
+                id: description
                 wrapMode: Text.Wrap
                 width: fl.width
                 rightPadding: 10
                 text: "Описание: " + device.description
             }
             Label {
-                id:state
+                id: state
                 text: "Состояние: " + (device.state ? "онлайн" : "офлайн")
             }
         }
@@ -56,7 +57,7 @@ Page {
         Label {
             id: lbl1
             text: "Каналы чтения: "
-            anchors{
+            anchors {
                 top: column.bottom
                 left: parent.left
                 leftMargin: 10
@@ -86,14 +87,17 @@ Page {
                     textField.text: device.readData(model.index)
                     textField.readOnly: true
 
-                    buttonIcon: "qrc:/img/copy.png"
+                    buttonIcon: "qrc:/img/copy_white.png"
 
                     button.onClicked: {
                         textField.selectAll()
                         textField.copy()
                         textField.deselect()
 
-                        loaderMainItem.setSource("qrc:/Notification.qml", {parent: appStack, text: "скопировано в буфер"})
+                        loaderMainItem.setSource("qrc:/Notification.qml", {
+                                                     "parent": appStack,
+                                                     "text": "скопировано в буфер"
+                                                 })
                     }
 
                     Connections {
@@ -112,7 +116,7 @@ Page {
         Label {
             id: lbl2
             text: "Каналы записи: "
-            anchors{
+            anchors {
                 top: columnRead.bottom
                 left: parent.left
                 leftMargin: 10
@@ -137,13 +141,14 @@ Page {
                 model: device.writeChannelLength
 
                 ChannelItem {
-                    number: model.index
-                    type: device.writeDataType(model.index)
+                    required property int index
+                    number: index
+                    type: device.writeDataType(index)
                     width: columnWrite.width
 
-                    buttonIcon: "qrc:/img/send.png"
+                    buttonIcon: "qrc:/img/send_white.png"
                     button.onClicked: {
-                        device.setDataFromString(model.index, textField.text)
+                        device.setDataFromString(index, textField.text)
                     }
                 }
             }
