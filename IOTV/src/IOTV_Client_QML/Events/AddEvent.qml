@@ -66,7 +66,7 @@ Page {
                 startType: (_event === undefined) ? "" : _event["type"]
 
                 onSignalActivated: {
-                    if (eventType === model[4])
+                    if (eventType === model[4] || eventType === model[5])
                         hostNameItem.visible = false
                     else
                         hostNameItem.visible = true
@@ -79,6 +79,8 @@ Page {
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
                     else if(eventType === model[4])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/AlarmType.qml", {width: parent.width})
+                    else if(eventType === model[5])
+                        eventTypeLoader.setSource("qrc:/Events/BaseItem/TimerType.qml", {width: parent.width})
                 }
             }
 
@@ -143,10 +145,12 @@ Page {
 
                 Button {
                     id: deleteEvent
-                    width: 140
+                    width: 160
                     height: 60
+                    font.pixelSize: 18
+                    antialiasing: true
+
                     text: "Удалить"
-                    flat: false
                     highlighted: true
                     anchors {
                         right: save.left
@@ -164,7 +168,10 @@ Page {
                     text: "Сохранить"
                     width: deleteEvent.width
                     height: deleteEvent.height
-                    flat: false
+
+                    font.pixelSize: 18
+                    antialiasing: true
+
                     highlighted: true
 
                     anchors {
@@ -225,8 +232,10 @@ Page {
                         {
                             event["time"] = eventTypeLoader.item.time()
                             event["days"] = eventTypeLoader.item.days
-                            console.log(event["time"])
-                            console.log(event["days"])
+                        }
+                        else if(event["type"] === eventTypeItem.model[5])
+                        {
+                            event["seconds"] = eventTypeLoader.item.totalSeconds()
                         }
 
                         var action = new Map
@@ -263,7 +272,6 @@ Page {
 
     Component.onCompleted: {
         console.log("Add Events page construct: ", objectName)
-        //        forceActiveFocus()
     }
 
     Component.onDestruction: {
@@ -287,6 +295,8 @@ Page {
                 dataProperty()
             else if (eventType === "alarm")
                 alarmPoperty()
+            else if (eventType === "timer")
+                timerPoperty()
         }
 
         if (_action === undefined)
@@ -325,6 +335,12 @@ Page {
         var hours = _event["time"].split(':')[0]
         var minutes = _event["time"].split(':')[1]
         eventTypeLoader.setSource("qrc:/Events/BaseItem/AlarmType.qml", {days: _days, h: hours, m: minutes})
+    }
+
+    function timerPoperty()
+    {
+        var _seconds = _event["seconds"]
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/TimerType.qml", {seconds: _seconds})
     }
 
     function dataTX()

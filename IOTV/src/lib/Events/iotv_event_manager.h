@@ -34,6 +34,9 @@ public:
     //! IOTV_Event_Alarm
     static IOTV_Event *createEvent(const QString &type, const QTime &time, const std::array<bool, 7> &days);
 
+    //! IOTV_Event_Timer
+    static IOTV_Event *createEvent(const QString &type, int seconds);
+
     static IOTV_Event *createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts);
 
     //! IOTV_Action_Data_TX и IOTV_Action_Data_RX

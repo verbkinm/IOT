@@ -25,26 +25,45 @@ Page {
         height: root.height
         enabled: device.state
 
-        contentHeight: meteoBlock.height + 50
+//        contentHeight: meteoBlock.height + column.topPadding + column.spacing + overlayHeader.height
+//        contentHeight: contentItem.childrenRect.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
             visible: active
         }
 
-        BaseItem.MeteoBlock {
-            id: meteoBlock
-            anchors.fill: parent
-            device: root.device
+        Column {
+            id: column
+            width: parent.width
+            spacing: 15
 
-            channelTemperature: 0
-            channelHumidity: 1
-            channelPressure: 2
+            anchors {
+                top: parent.top
+                topMargin: 15
+            }
+
+            BaseItem.MeteoBlock {
+                id: meteoBlock
+                width: parent.width
+                device: root.device
+
+                channelTemperature: 0
+                channelHumidity: 1
+                channelPressure: 2
+            }
+
+            onPositioningComplete: {
+                fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
+//                console.log(column.height)
+
+            }
         }
     }
 
     Component.onCompleted: {
         console.log("Device 2 construct: ", title)
+        fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height
     }
 
     Component.onDestruction: {

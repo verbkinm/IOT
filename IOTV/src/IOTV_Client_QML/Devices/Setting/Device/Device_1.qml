@@ -39,32 +39,34 @@ Rectangle {
             height: 52
             color: Qt.rgba(0, 0, 0, 0)
 
-            Label {
-                id: lbl
-                wrapMode: Text.Wrap
-                text: "Канал : " + model.index
-                font.pixelSize: 14
-                elide: Text.ElideRight
+//            Label {
+//                id: lbl
+//                wrapMode: Text.Wrap
+//                text: "Канал : " + model.index
+//                font.pixelSize: 14
+//                elide: Text.ElideRight
 
-                anchors{
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                    leftMargin: 15
-                    rightMargin: 15
-                }
-            }
+//                anchors{
+//                    left: parent.left
+//                    verticalCenter: parent.verticalCenter
+//                    leftMargin: 15
+//                    rightMargin: 15
+//                }
+//            }
 
             TextField {
                 id: txt
-                font.pointSize: 12
+                antialiasing: true
+                font.pixelSize: 14
+                placeholderText: "Канал : " + model.index
                 horizontalAlignment: Text.AlignHCenter
 
                 anchors {
-                    left: lbl.right
+                    left: parent.left
                     right: parent.right
                     verticalCenter: parent.verticalCenter
-                    leftMargin: 15
-                    rightMargin: 15
+                    leftMargin: 30
+                    rightMargin: 30
                 }
             }
 

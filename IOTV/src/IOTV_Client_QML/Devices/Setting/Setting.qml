@@ -25,8 +25,8 @@ Page {
         Column {
             id: column
             width: parent.width
-            spacing: 30
-            topPadding: 15
+            spacing: 15
+            topPadding: 30
 
             MainSetting {
                 deviceName: device.name

@@ -12,15 +12,14 @@ Item {
 
     Button {
         text: "Настроить будильник"
-        height: 50
+        height: 60
         width: parent.width * 0.8
+        font.pixelSize: 18
         anchors.centerIn: parent
         highlighted: true
 
         onClicked: {
             alarmSetting.visible = true
-
-            console.log(days)
         }
     }
 
@@ -29,7 +28,10 @@ Item {
         modal: true
         standardButtons: Dialog.Ok
 
-        width: appStack.width
+        leftMargin: 15
+        rightMargin: 15
+
+        width: appStack.width - leftMargin - rightMargin
         height: item1.height + item2.height + 70
 
         visible: false
@@ -42,9 +44,11 @@ Item {
         Item {
             id: item1
             height: 180
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+            }
             Row {
                 anchors.centerIn: parent
                 id: tumblerRow
@@ -57,6 +61,15 @@ Item {
                     visibleItemCount: 3
                     model: 24
                     font.pixelSize: 18
+
+                    Label {
+                        font.pixelSize: 18
+                        text: ":"
+                        anchors {
+                            verticalCenter: hours.verticalCenter
+                            left: hours.right
+                        }
+                    }
                 }
 
                 Tumbler {
@@ -70,7 +83,7 @@ Item {
             }
             Rectangle {
                 id: tumblerRect
-                width: rowDays.width
+                width: parent.width * 0.9
                 height: 60
                 color: "#11000000"
                 radius: 25

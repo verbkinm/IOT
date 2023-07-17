@@ -23,10 +23,11 @@ Item {
         id: dataTextField
         focus: true
         width: 200
+        height: 52
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         antialiasing: true
-        font.pixelSize: 12
+        font.pixelSize: 14
         text: ""
         placeholderText: "Введите данные..."
         placeholderTextColor: "#ccc"

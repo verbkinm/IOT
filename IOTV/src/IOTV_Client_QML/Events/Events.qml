@@ -42,6 +42,7 @@ Page {
 
                 text: "Добавить событие"
                 highlighted: true
+                font.pixelSize: 18
 
                 anchors {
                     horizontalCenter: parent.horizontalCenter

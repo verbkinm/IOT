@@ -137,35 +137,6 @@ Item {
         color: Qt.rgba(255, 255, 255, 1)
         radius: 5
 
-        //        MouseArea {
-        //            anchors.fill: parent
-        //            onPressed: {
-        //                console.log("pressed")
-        //                componentRect.scale = 0.95
-        //            }
-        //            onExited: {
-        //                console.log("exited")
-        //                componentRect.scale = 1.0
-        //            }
-        //            onCanceled: {
-        //                console.log("canceled")
-        //                componentRect.scale = 1.0
-        //            }
-
-        //            onClicked: {
-        //                console.log("clicked")
-        //                //                loaderDevice.setSource(createDeviceBy(client.deviceByName(
-        //                //                                                          model.name).id), {
-        //                //                                           "device": client.deviceByName(
-        //                //                                                         model.name)
-        //                //                                       })
-        //                //                loaderDevice.title = loaderDevice.objectName = Qt.binding(
-        //                //                            function () {
-        //                //                                return client.deviceByName(model.name).aliasName
-        //                //                            })
-        //                //                appStack.push(loaderDevice)
-        //            }
-        //        }
         Image {
             id: icon
             source: model.source
@@ -236,7 +207,7 @@ Item {
         else if (id === 2)
             return "/Devices/Device_2/Device_2.qml"
         else if (id === 4)
-            return "/Devices/Device_4.qml"
+            return "/Devices/Device_4/Device_4.qml"
         else if (id === 5)
             return "/Devices/Device_5/Device_5.qml"
         else

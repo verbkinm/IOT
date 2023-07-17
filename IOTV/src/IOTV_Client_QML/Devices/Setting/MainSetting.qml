@@ -8,24 +8,10 @@ Rectangle {
     id: root
 
     width: parent.width
-    height: 40
+    height: 52
 
     color: Qt.rgba(0, 0, 0, 0)
 
-    //    Label {
-    //        id: lbl
-    //        wrapMode: Text.Wrap
-    //        text: "Имя устройства: "
-    //        font.pixelSize: 14
-    //        elide: Text.ElideRight
-
-    //        anchors {
-    //            left: parent.left
-    //            verticalCenter: parent.verticalCenter
-    //            leftMargin: 15
-    //            rightMargin: 15
-    //        }
-    //    }
     TextField {
         id: txt
         height: 52

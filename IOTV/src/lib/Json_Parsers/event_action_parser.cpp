@@ -1,11 +1,12 @@
 #include "event_action_parser.h"
 
-#include "events/iotv_event_alarm.h"
 #include "iotv_event_manager.h"
 //#include "events/iotv_event_connect.h"
 //#include "events/iotv_event_disconnect.h"
 #include "events/iotv_event_state.h"
 #include "events/iotv_event_data.h"
+#include "events/iotv_event_alarm.h"
+#include "events/iotv_event_timer.h"
 
 #include "actions/iotv_action_data_tx.h"
 #include "actions/iotv_action_data_tx_ref.h"
@@ -179,6 +180,16 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
 
         event = IOTV_Event_Manager::createEvent(type, time, days);
     }
+    else if (type == Json_Event_Action::TYPE_TIMER)
+    {
+        QString seconds = jobj.value(Json_Event_Action::TIMER_SECONDS).toString();
+        bool ok;
+        int sec = seconds.toInt(&ok);
+        if (ok)
+            event = IOTV_Event_Manager::createEvent(type, sec);
+        else
+            event = nullptr;
+    }
 
     return event;
 }
@@ -293,6 +304,15 @@ QJsonObject Event_Action_Parser::parseEvent(const IOTV_Event *event)
         id.insert(Json_Event_Action::ALARM_TIME, alarmEvent->time().toString("h:m"));
         id.insert(Json_Event_Action::ALARM_DAYS, alarmEvent->dayString());
     }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::TIMER)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_TIMER);
+
+        const IOTV_Event_Timer *timerEvent = dynamic_cast<const IOTV_Event_Timer *>(event);
+        Q_ASSERT(timerEvent != nullptr);
+
+        id.insert(Json_Event_Action::TIMER_SECONDS, QString::number(timerEvent->seconds()));
+    }
 
     return id;
 }
@@ -314,7 +334,6 @@ QJsonObject Event_Action_Parser::parseAction(const IOTV_Action *action)
         id.insert(Json_Event_Action::CH_NUM, QString::number(actioDataTX->channelNumber()));
 
         id.insert(Json_Event_Action::DATA, actioDataTX->data());
-//        writeDatatoJson(raw, id);
     }
     else if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
     {
@@ -419,6 +438,15 @@ QVariantMap Event_Action_Parser::parseJsonToVariantMapEvent(const IOTV_Event *ev
         newEvent[Json_Event_Action::TYPE] = Json_Event_Action::TYPE_ALARM;
         newEvent[Json_Event_Action::ALARM_TIME] = alarmEvent->time().toString("h:m");
         newEvent[Json_Event_Action::ALARM_DAYS] = alarmEvent->dayString();
+    }
+    else if (event->type() == IOTV_Event::EVENT_TYPE::TIMER)
+    {
+        const IOTV_Event_Timer *timerEvent = dynamic_cast<const IOTV_Event_Timer *>(event);
+        if (timerEvent == nullptr)
+            return {};
+
+        newEvent[Json_Event_Action::TYPE] = Json_Event_Action::TYPE_TIMER;
+        newEvent[Json_Event_Action::TIMER_SECONDS] = QString::number(timerEvent->seconds());
     }
 
     return newEvent;

@@ -9,35 +9,24 @@
         <file>img/id/1.png</file>
         <file>Devices/ChannelItem.qml</file>
         <file>img/debug.png</file>
-        <file>Devices/Device_4.qml</file>
         <file>img/id/4.png</file>
         <file>img/lamp_on.png</file>
         <file>img/lamp_off.png</file>
-        <file>img/repeate_off.png</file>
         <file>Devices/DeviceHeader.qml</file>
         <file>audio/click.ogg</file>
         <file>audio/click.mp3</file>
-        <file>img/toy.png</file>
         <file>img/files.png</file>
         <file>img/switch.png</file>
         <file>img/unknown.png</file>
-        <file>img/repeate_on.png</file>
         <file>img/send.png</file>
         <file>img/back.png</file>
         <file>img/menu.png</file>
         <file>img/home.png</file>
-        <file>img/pause.png</file>
         <file>img/settings.png</file>
-        <file>img/play.png</file>
         <file>img/humidity.png</file>
-        <file>img/cloud_on.png</file>
-        <file>img/cloud_off.png</file>
         <file>img/copy.png</file>
         <file>img/id/0.png</file>
         <file>Devices/BusyRect.qml</file>
-        <file>img/palette.png</file>
-        <file>img/tree.png</file>
-        <file>img/note.png</file>
         <file>img/id_1/humidity.png</file>
         <file>img/id_1/pressure.png</file>
         <file>img/id_1/temperature.png</file>
@@ -57,8 +46,6 @@
         <file>Devices/Device_2/Device_2.qml</file>
         <file>Devices/Device_1/Device_1.qml</file>
         <file>Devices/Device_1/Device_1_switch.qml</file>
-        <file>img/cloud_led.png</file>
-        <file>img/cloud.png</file>
         <file>Devices/Device_5/Device_5.qml</file>
         <file>Devices/Setting/Device/Device_5.qml</file>
         <file>Devices/BaseItem/MeteoBlock.qml</file>
@@ -90,6 +77,29 @@
         <file>img/question_mark_white.png</file>
         <file>img/copy_white.png</file>
         <file>img/send_white.png</file>
+        <file>Devices/BaseItem/ItemShadow.qml</file>
+        <file>Events/BaseItem/TimerType.qml</file>
+        <file>img/id_4/cloud_off.png</file>
+        <file>img/id_4/cloud_on.png</file>
+        <file>Devices/Device_4/Device_4.qml</file>
+        <file>img/id_4/note.png</file>
+        <file>img/id_4/palette.png</file>
+        <file>img/id_4/pause.png</file>
+        <file>img/id_4/play.png</file>
+        <file>img/id_4/repeate_off.png</file>
+        <file>img/id_4/repeate_on.png</file>
+        <file>img/id_4/toy.png</file>
+        <file>img/id_4/tree.png</file>
+        <file>img/id_4/lamp.png</file>
+        <file>img/id_4/lamp_white.png</file>
+        <file>img/id_4/note_white.png</file>
+        <file>img/id_4/palette_white.png</file>
+        <file>img/id_4/play_white.png</file>
+        <file>img/id_4/tree_white.png</file>
+        <file>img/id_4/repeate_on_white.png</file>
+        <file>img/id_4/toy_white.png</file>
+        <file>img/id_4/volume.png</file>
+        <file>img/id_4/stop.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

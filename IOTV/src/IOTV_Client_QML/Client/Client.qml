@@ -23,119 +23,74 @@ Page {
             id: scroll
             visible: active
         }
-
-        GroupBox {
-            id: groupBox
-            height: 255
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-                leftMargin: 10
-                rightMargin: 10
-                bottomMargin: 10
-                topMargin: 10
-            }
-
-            Label {
-                id: label1
-                width: 100
-                height: addr.height
-                text: "Адресс: "
-                font.pixelSize: 14
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    margins: 10
-                }
-            }
-
-            Label {
-                id: label2
-                width: label1.width
-                height: label1.height
-                text: "Порт: "
-                font.pixelSize: 14
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                anchors {
-                    left: parent.left
-                    top: label1.bottom
-                    margins: 10
-                }
-            }
+        Column
+        {
+            width: parent.width
+            spacing: 15
+            padding: 30
 
             TextField {
                 id: addr
-                height: 40
+                height: 52
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: 30
+                    rightMargin: 30
+                }
+
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 antialiasing: true
                 font.pixelSize: 14
-                placeholderText: "Введите адрес сервера"
+                placeholderText: "Адрес сервера"
                 placeholderTextColor: "#cccccc"
 
-                anchors {
-                    left: label1.right
-                    top: parent.top
-                    right: parent.right
-                    margins: 10
-                    rightMargin: 20
-                }
                 text: settings.address
                 onTextChanged: settings.address = text
             }
 
             TextField {
                 id: port
-                width: addr.width
-                height: addr.height
+                height: 52
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: 30
+                    rightMargin: 30
+                }
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 layer.textureMirroring: ShaderEffectSource.MirrorVertically
                 antialiasing: true
                 font.pixelSize: 14
-                placeholderText: "Введите порт сервера"
+                placeholderText: "Порт сервера"
                 placeholderTextColor: "#cccccc"
+
                 validator: IntValidator {
                     bottom: 0
                 }
 
-                anchors {
-                    top: addr.bottom
-                    left: label2.right
-                    right: parent.right
-                    margins: 10
-                    rightMargin: 20
-                }
                 text: settings.port
 
                 onTextChanged: settings.port = text
             }
             CheckBox {
                 id: autoConnect
-                height: label2.height
+                height: 52
                 text: qsTr("Подключение при запуске программы")
-                anchors {
-                    left: parent.left
-                    top: label2.bottom
-                    margins: 10
-                }
                 font.pixelSize: 14
+                antialiasing: true
 
                 checked: settings.autoConnect
             }
 
             Button {
                 id: btn_connect
-                height: 60
                 width: 180
+                height: 60
                 font.pixelSize: 18
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: autoConnect.bottom
-                anchors.margins: 10
                 highlighted: true
 
                 onClicked: {

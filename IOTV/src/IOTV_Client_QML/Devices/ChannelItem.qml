@@ -4,7 +4,7 @@ import QtQuick.Controls 2.5
 Item {
     property alias textField: txtField
     property int number: 0
-    property alias type: typeName.text
+    property alias type: txtField.placeholderText
     property alias button: btn
     property alias buttonIcon: img.source
 
@@ -25,21 +25,21 @@ Item {
         verticalAlignment: Text.AlignVCenter
     }
 
-    Label {
-        id: typeName
-        width: 40
-        text: "type"
-        font.pixelSize: 12
-        anchors {
-            left: lb1.right
-            top: parent.top
-            bottom: parent.bottom
-            leftMargin: 10
-            rightMargin: 10
-        }
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-    }
+//    Label {
+//        id: typeName
+//        width: 60
+//        text: "type"
+//        font.pixelSize: 12
+//        anchors {
+//            left: lb1.right
+//            top: parent.top
+//            bottom: parent.bottom
+//            leftMargin: 10
+//            rightMargin: 10
+//        }
+//        horizontalAlignment: Text.AlignHCenter
+//        verticalAlignment: Text.AlignVCenter
+//    }
 
     TextField {
         id: txtField
@@ -53,7 +53,7 @@ Item {
         placeholderText: "Введите данные..."
         placeholderTextColor: "#ccc"
         anchors {
-            left: typeName.right
+            left: lb1.right
             right: btn.left
             leftMargin: 10
             rightMargin: 10

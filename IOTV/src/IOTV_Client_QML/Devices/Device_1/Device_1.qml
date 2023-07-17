@@ -22,7 +22,7 @@ Page {
         height: root.height
         enabled: device.state
 
-        contentHeight: column.height
+        contentHeight: column.height + column.topPadding + column.spacing + overlayHeader.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll

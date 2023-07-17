@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 
 Item {
     id: root
+    height: column.height + column.topPadding + column.spacing
 
     required property var device
     required property var channelTemperature
@@ -15,7 +16,7 @@ Item {
         id: column
         width: parent.width
         spacing: 15
-        topPadding: 30
+//        topPadding: 30
 
         //Температура
         MeteoBlock_Item {
@@ -46,6 +47,10 @@ Item {
 
             onSignalClick:
                 text = pressureValue()
+        }
+
+        onPositioningComplete: {
+//            root.height = column.height + column.topPadding + column.spacing
         }
     }
 
@@ -87,5 +92,10 @@ Item {
         temperature.text = temperatureValue()
         humidity.text = humidityValue()
         pressure.text = pressureValue()
+
+//        console.log(column.height)
+    }
+    Component.onDestruction: {
+        console.log("Destruct MeteoBlock")
     }
 }

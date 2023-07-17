@@ -1,7 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-Item {
+ItemShadow {
     id: root
     property alias source: img.source
     property alias text: lbl.text
@@ -13,35 +13,8 @@ Item {
 
     anchors.horizontalCenter: parent.horizontalCenter
 
-    Canvas {
-        id: shadow
-        width: parent.width
-        height: parent.height
-        smooth: true
-        //        z: -1
-
-        onPaint: {
-            var x = rect.x
-            var y = rect.y
-            var r = 5
-            var w = rect.width
-            var h = rect.height
-            var ctx = getContext("2d")
-            ctx.strokeStyle = "#aaa"
-            ctx.beginPath();
-            ctx.moveTo(x+r, y);
-            ctx.arcTo(x+w, y,   x+w, y+h, r);
-            ctx.arcTo(x+w, y+h, x,   y+h, r);
-            ctx.arcTo(x,   y+h, x,   y,   r);
-            ctx.arcTo(x,   y,   x+w, y,   r);
-            ctx.closePath();
-            ctx.shadowBlur = 3;
-            ctx.fill()
-        }
-    }
-
     Rectangle {
-        id: rect
+        id: rectangle
 
         width: parent.width * 0.8
         height: 70
@@ -85,30 +58,59 @@ Item {
             }
         }
 
-        SequentialAnimation {
-            id: anim
-            PropertyAnimation {
-                target: rect
-                property: "color"
-                from: Qt.rgba(255, 255, 255, 1)
-                to: Qt.rgba(0, 0, 255, 0.5)
-                duration: 200
+//        SequentialAnimation {
+//            id: anim
+            ParallelAnimation {
+                id: animPressed
+                PropertyAnimation {
+                    target: rectangle
+                    property: "color"
+                    from: Qt.rgba(255, 255, 255, 1)
+                    to: Qt.rgba(0, 0, 100, 0.5)
+                    duration: 200
+                }
+                PropertyAnimation {
+                    target: lbl
+                    property: "color"
+                    from: Qt.rgba(0, 0, 0, 1)
+                    to: Qt.rgba(255, 255, 255, 1)
+                    duration: 200
+                }
             }
-            PropertyAnimation  {
-                target: rect
-                property: "color"
-                from: Qt.rgba(0, 0, 255, 0.5)
-                to: Qt.rgba(255, 255, 255, 1)
-                duration: 200
+            ParallelAnimation {
+                id: animReleased
+                PropertyAnimation  {
+                    target: rectangle
+                    property: "color"
+                    from: Qt.rgba(0, 0, 100, 0.5)
+                    to: Qt.rgba(255, 255, 255, 1.0)
+                    duration: 200
+                }
+                PropertyAnimation {
+                    target: lbl
+                    property: "color"
+                    from: Qt.rgba(255, 255, 255, 1.0)
+                    to: Qt.rgba(0, 0, 0, 1.0)
+                    duration: 200
+                }
             }
-        }
+//        }
 
         MouseArea {
             anchors.fill: parent
 
             onClicked: {
-                anim.start()
+                animReleased.start()
                 signalClick()
+            }
+            onPressed: {
+                animPressed.start()
+            }
+            onCanceled: {
+                animReleased.start()
+            }
+            onExited: {
+                 animReleased.start()
             }
         }
     }

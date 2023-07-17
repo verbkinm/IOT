@@ -6,6 +6,7 @@
 #include "events/iotv_event_state.h"
 #include "events/iotv_event_data.h"
 #include "events/iotv_event_alarm.h"
+#include "events/iotv_event_timer.h"
 
 #include "actions/iotv_action_data_tx.h"
 #include "actions/iotv_action_data_tx_ref.h"
@@ -141,6 +142,14 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, const QTime &ti
     return new IOTV_Event_Alarm(time, days);
 }
 
+IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, int seconds)
+{
+    if (type != Json_Event_Action::TYPE_TIMER)
+        return nullptr;
+
+    return new IOTV_Event_Timer(seconds);
+}
+
 IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
 {
     IOTV_Event *result = nullptr;
@@ -203,6 +212,19 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std:
             days[i] = QString(ch).toInt();
         }
         result = IOTV_Event_Manager::createEvent(type, time, days);
+    }
+    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_TIMER)
+    {
+        QString seconds = event[Json_Event_Action::TIMER_SECONDS].toString();
+        QString type = event[Json_Event_Action::TYPE].toString();
+
+        bool ok;
+        int sec = seconds.toInt(&ok);
+
+        if (ok)
+            result = IOTV_Event_Manager::createEvent(type, sec);
+        else
+            result = nullptr;
     }
 
     return result;

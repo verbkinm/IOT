@@ -111,7 +111,9 @@ Rectangle {
 
         Button {
             id: btnSystemDateTime
-            text: "Установить\nсистемное время"
+            text: "Установить системное время"
+            height: 60
+            font.pixelSize: 18
             highlighted: true
 
             anchors.horizontalCenter: parent.horizontalCenter
