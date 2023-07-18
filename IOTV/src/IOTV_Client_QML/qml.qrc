@@ -100,6 +100,10 @@
         <file>img/id_4/toy_white.png</file>
         <file>img/id_4/volume.png</file>
         <file>img/id_4/stop.png</file>
+        <file>Devices/BaseItem/AnimRoundButton.qml</file>
+        <file>img/id_4/stop_white.png</file>
+        <file>Devices/Device_4/MyImg.qml</file>
+        <file>img/id_4/note2.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

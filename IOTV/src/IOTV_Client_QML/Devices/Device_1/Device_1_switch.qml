@@ -14,6 +14,8 @@ BaseItem.ItemShadow {
     width: parent.width
     height: 80
 
+    radius: 5
+
     anchors {
         left: parent.left
         right: parent.right

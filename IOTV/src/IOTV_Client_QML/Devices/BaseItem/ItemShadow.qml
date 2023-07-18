@@ -6,12 +6,14 @@ Item {
     width: 200
     height: 200
 
+    property int radius: 0
+
     Rectangle {
         height: parent.height
         width: parent.width
 
         color: Qt.rgba(0, 0, 0, 0.0)
-        radius: 5
+        radius: root.radius
 
         anchors {
             centerIn: parent
@@ -26,7 +28,7 @@ Item {
             onPaint: {
                 var x = rectangle.x
                 var y = rectangle.y
-                var r = 5
+                var r = root.radius
                 var w = rectangle.width
                 var h = rectangle.height
                 var ctx = getContext("2d")
