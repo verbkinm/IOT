@@ -219,6 +219,13 @@ Image {
                     to: 0
                     duration: 0
                 }
+                PropertyAnimation {
+                    target: note3
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                    duration: 0
+                }
             }
         }
     ]

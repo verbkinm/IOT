@@ -5,20 +5,20 @@ Page {
     id: root
     title: "Главная"
 
-    footer: Item {
-        height: 20
-        width: parent.width
+//    footer: Item {
+//        height: 20
+//        width: parent.width
 
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.margins: 5
-            font.pixelSize: 12
-            text: "Состояние: " +
-                  (client.state ? "подключено" : "отключено") +
-                  ", кол-во устройств: (" + client.onlineDevice + "/" + client.totalDevice + ")"
-            wrapMode: Text.Wrap
-        }
-    }
+//        Label {
+//            anchors.horizontalCenter: parent.horizontalCenter
+//            anchors.margins: 5
+//            font.pixelSize: 12
+//            text: "Состояние: " +
+//                  (client.state ? "подключено" : "отключено") +
+//                  ", кол-во устройств: (" + client.onlineDevice + "/" + client.totalDevice + ")"
+//            wrapMode: Text.Wrap
+//        }
+//    }
 
     Loader {
         id: loaderHome

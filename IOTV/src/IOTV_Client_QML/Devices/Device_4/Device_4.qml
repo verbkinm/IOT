@@ -11,39 +11,6 @@ Page {
 
     required property var device
 
-    //    property bool play: false
-    //    property int playMode: 1
-    //    property bool repeateMode: false
-    //    property int maxDuty: 8192
-    //    property int minDuty: 100
-    //    property int volume: 0
-    //    property int eq: 0
-
-    //    readonly property string statePlay: "play"
-    //    readonly property string stateStop: "stop"
-
-    //    state: stateStop
-
-    //    onStateChanged: {
-    //        console.log(state)
-    //    }
-
-    //    states: [
-    //        State {
-    //            name: statePlay
-    //            //            when: adc_value > adc_border && device.state
-    //            //            PropertyChanges { target: play; icon.source: "qrc:/img/pause.png"}
-    //            //            PropertyChanges { target: anim_led; running: true}
-    //        },
-    //        State {
-    //            name: stateStop
-    //            //            when: (adc_value <= adc_border) || !device.state
-    //            //            PropertyChanges { target: play; icon.source: "qrc:/img/play.png"}
-    //            //            PropertyChanges { target: anim_led; running: false}
-    //            //            PropertyChanges { target: img_led; opacity: 0}
-    //        }
-    //    ]
-
     header: Devices.DeviceHeader {
         id: headerPanel
     }
@@ -260,66 +227,6 @@ Page {
         }
     }
 
-    //    Dialog {
-    //        id: ledModeDialog
-    //        modal: true
-    //        standardButtons: Dialog.Ok
-    //        //        horizontalPadding: 20
-    //        leftMargin: 15
-    //        rightMargin: 15
-
-    //        width: appStack.width - leftMargin - rightMargin
-    //        height: item_ledModeDialog.height + 70
-
-    //        visible: false
-
-    //        onVisibleChanged: {
-    //            if (visible)
-    //                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledModeDialog.height
-    //        }
-
-    //        Item {
-    //            id: item_ledModeDialog
-    //            height: 70
-    //            anchors {
-    //                left: parent.left
-    //                right: parent.right
-    //                top: parent.top
-    //            }
-
-    //            Row {
-    //                id: row_item_ledModeDialog
-    //                anchors.verticalCenter: parent.verticalCenter
-    //                anchors.horizontalCenter: parent.horizontalCenter
-    //                Repeater {
-    //                    id: repeater
-    //                    model: 7
-    //                    RoundButton{
-    //                        required property int index
-    //                        checkable: true
-    //                        text: index
-
-    //                        highlighted: ledMode === index
-
-    //                        onClicked: {
-    //                            popup_item_ledModeDialog.open()
-    //                            popup_item_ledModeDialog.waitForVal = -1
-    //                            //                            highlighted = true
-    //                            device.setDataFromString(2, index)
-    //                        }
-    //                    }
-    //                }
-    //            }
-
-    //            Devices.BusyRect {
-    //                property int waitForVal: ledMode
-    //                id: popup_item_ledModeDialog
-    //                anchors.fill: parent
-    //                visible: waitForVal !== ledMode
-    //            }
-    //        }
-    //    }
-
     Devices.BusyRect {
         id: popup
         anchors.fill: parent
@@ -327,14 +234,14 @@ Page {
     }
 
     Connections {
-//        target: playButton
-//        function onHighlightedChanged()
-//        {
-//            if (target.highlighted)
-//                cloud_MyImg.state = cloud_MyImg.playing
-//            else
-//                cloud_MyImg.state = cloud_MyImg.stoped
-//        }
+        //        target: playButton
+        //        function onHighlightedChanged()
+        //        {
+        //            if (target.highlighted)
+        //                cloud_MyImg.state = cloud_MyImg.playing
+        //            else
+        //                cloud_MyImg.state = cloud_MyImg.stoped
+        //        }
 
         //        target: appStack
         //        function onHeightChanged() {

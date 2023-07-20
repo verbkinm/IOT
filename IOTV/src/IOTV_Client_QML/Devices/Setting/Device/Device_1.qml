@@ -65,8 +65,8 @@ Rectangle {
                     left: parent.left
                     right: parent.right
                     verticalCenter: parent.verticalCenter
-                    leftMargin: 30
-                    rightMargin: 30
+                    leftMargin: 15
+                    rightMargin: 15
                 }
             }
 
