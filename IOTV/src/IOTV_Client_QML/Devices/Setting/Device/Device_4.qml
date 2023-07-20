@@ -104,28 +104,7 @@ Rectangle {
                     else
                         highlighted = true
 
-                    dumyMaxDialog.open()
-                }
-            }
-
-            BaseItem.AnimRoundButton {
-                id: dutyMinButton
-
-                highlighted: true
-
-                image_origin: "qrc:/img/id_4/lamp_off.png"
-                image_invert: "qrc:/img/id_4/lamp_off_white.png"
-
-                onClicked: {
-                    if (highlighted)
-                    {
-                        highlighted = false
-                        highlighted = true
-                    }
-                    else
-                        highlighted = true
-
-                    dumyMinDialog.open()
+                    dumyDialog.open()
                 }
             }
         }
@@ -248,67 +227,9 @@ Rectangle {
         }
 
         Dialog {
-            id: dumyMaxDialog
+            id: dumyDialog
             modal: true
-            title: "Максимальная яркость"
-            leftMargin: 15
-            rightMargin: 15
-
-            width: appStack.width - leftMargin - rightMargin
-            height: item_dutyMaxDialog.height + 70
-
-            visible: false
-
-            onVisibleChanged: {
-                if (visible)
-                    y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMaxDialog.height / 2
-            }
-
-
-            Item {
-                id: item_dutyMaxDialog
-                height: 300
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                }
-
-                Row {
-                    id: row_item_dutyMaxDialog
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 45
-
-                    Label {
-                        text: addZero(parseInt(sliderDutyMax.value), 4)
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.pixelSize: 64
-                    }
-
-                    Slider {
-                        id: sliderDutyMax
-                        from: sliderDutyMin.value
-                        to: 8192
-
-                        height: 140
-                        scale: 2
-
-                        orientation: Qt.Vertical
-                        value: parseFloat(device.readData(4))
-
-                        onValueChanged: {
-                            device.setDataFromString(4, parseInt(value).toString())
-                        }
-                    }
-                }
-            }
-        }
-
-        Dialog {
-            id: dumyMinDialog
-            modal: true
-            title: "Минимальная яркость"
+            title: "Яркость"
             leftMargin: 15
             rightMargin: 15
 
@@ -319,13 +240,14 @@ Rectangle {
 
             onVisibleChanged: {
                 if (visible)
-                    y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMinDialog.height / 2
+                    y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
             }
 
 
             Item {
                 id: item_dutyMinDialog
-                height: 300
+                height: 240
+
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -338,32 +260,54 @@ Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 45
 
-                    Label {
-                        text: addZero(parseInt(sliderDutyMin.value), 4)
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.pixelSize: 64
+                    Column {
+                        spacing: 30
+
+                        Row {
+                            spacing: 15
+                            Label {
+                                text: "Max -"
+                                font.pixelSize: 32
+                            }
+
+                            Label {
+                                text: addZero(parseInt(rangeSliderDuty.second.value), 4)
+                                font.pixelSize: 32
+                            }
+                        }
+                        Row {
+                            spacing: 15
+                            Label {
+                                text: "Min - "
+                                font.pixelSize: 32
+                            }
+
+                            Label {
+                                text: addZero(parseInt(rangeSliderDuty.first.value), 4)
+                                font.pixelSize: 32
+                            }
+                        }
                     }
 
                     RangeSlider {
-                        orientation: Qt.Horizontal
+                        id: rangeSliderDuty
+                        orientation: Qt.Vertical
 
                         from: 0
                         to: 8192
-                    }
 
-                    Slider {
-                        id: sliderDutyMin
-                        from: 0
-                        to: sliderDutyMax.value
-
-                        height: 140
+                        height: 120
                         scale: 2
 
-                        orientation: Qt.Vertical
-                        value: parseFloat(device.readData(5))
+                        first.value: parseFloat(device.readData(5))
+                        second.value: parseFloat(device.readData(4))
 
-                        onValueChanged: {
-                            device.setDataFromString(5, parseInt(value).toString())
+                        first.onMoved: {
+                            device.setDataFromString(5, parseInt(first.value))
+                        }
+
+                        second.onMoved:  {
+                            device.setDataFromString(4, parseInt(second.value))
                         }
                     }
                 }
@@ -376,14 +320,12 @@ Rectangle {
         function onHeightChanged() {
             volumeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - volumeDialog.height / 2
             eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - eqDialog.height / 2
-            dumyMaxDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMaxDialog.height / 2
-            dumyMinDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMinDialog.height / 2
+            dumyDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
         }
         function onWidthChanged() {
             volumeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - volumeDialog.height / 2
             eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - eqDialog.height / 2
-            dumyMaxDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMaxDialog.height / 2
-            dumyMinDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyMinDialog.height / 2
+            dumyDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
         }
     }
 
@@ -394,13 +336,13 @@ Rectangle {
             var val = device.readData(channel)
 
             if (channel === 4)
-                sliderDutyMax.value = val
+                rangeSliderDuty.first.value = val
             else if (channel === 5)
-                sliderDutyMin.value = val
+                rangeSliderDuty.second.value = val
             else if (channel === 6)
                 sliderVolume.value = val
-//            else if (channel === 7)
-////                dateTime.year = Number(device.readData(8))
+            //            else if (channel === 7)
+            ////                dateTime.year = Number(device.readData(8))
         }
     }
 

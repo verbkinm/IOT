@@ -73,6 +73,7 @@ RESOURCES += \
 INCLUDEPATH += ../lib/Base_Host \
             ../lib/Log \
             ../lib/Protocols/embedded \
+            ../lib/Protocols/ \
             ../lib/raw \
             ../lib/ConfigType \
             ../lib/Events \
