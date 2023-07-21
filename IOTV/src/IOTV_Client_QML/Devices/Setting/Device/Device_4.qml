@@ -187,8 +187,9 @@ Rectangle {
                     orientation: Qt.Vertical
                     value: parseFloat(device.readData(6))
 
-                    onValueChanged: {
-                        device.setDataFromString(6, parseInt(value).toString())
+                    onPressedChanged: {
+                        if (!pressed)
+                            device.setDataFromString(6, parseInt(value).toString())
                     }
 
                     onVisibleChanged: {
@@ -250,15 +251,15 @@ Rectangle {
                         }
 
 
-                        //                            Connections {
-                        //                                target: device
-                        //                                function onSignalDataChanged(channel) {
-                        //                                    if (channel === 8)
-                        //                                    {
-                        //                                        checked = parseInt(device.readData(8)) === index
-                        //                                    }
-                        //                                }
-                        //                            }
+                        Connections {
+                            target: device
+                            function onSignalDataChanged(channel) {
+                                if (channel === 8)
+                                {
+                                    checked = parseInt(device.readData(8)) === index
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -342,12 +343,14 @@ Rectangle {
                     first.value: parseFloat(device.readData(5))
                     second.value: parseFloat(device.readData(4))
 
-                    first.onMoved: {
-                        device.setDataFromString(5, parseInt(first.value))
+                    first.onPressedChanged: {
+                        if (!first.pressed)
+                            device.setDataFromString(5, parseInt(first.value))
                     }
 
-                    second.onMoved:  {
-                        device.setDataFromString(4, parseInt(second.value))
+                    second.onPressedChanged: {
+                        if (!second.pressed)
+                            device.setDataFromString(4, parseInt(second.value))
                     }
 
                     onVisibleChanged: {
@@ -408,6 +411,16 @@ Rectangle {
 
                         onVisibleChanged: {
                             checked = parseInt(device.readData(2)) === index
+                        }
+
+                        Connections {
+                            target: device
+                            function onSignalDataChanged(channel) {
+                                if (channel === 2)
+                                {
+                                    checked = parseInt(device.readData(2)) === index
+                                }
+                            }
                         }
                     }
                 }
@@ -578,16 +591,12 @@ Rectangle {
         {
             var val = device.readData(channel)
 
-            //            if (channel === 4)
-            //            {
-            //                rangeSliderDuty.second.value = val
-            //            }
-            //            else if (channel === 5)
-            //                rangeSliderDuty.first.value = val
-            //            else if (channel === 6)
-            //                sliderVolume.value = val
-            //            else if (channel === 7)
-            ////                dateTime.year = Number(device.readData(8))
+            if (channel === 4)
+                rangeSliderDuty.second.value = parseFloat(val)
+            else if (channel === 5)
+                rangeSliderDuty.first.value = parseFloat(val)
+            else if (channel === 6)
+                sliderVolume.value = val
         }
     }
 
@@ -598,17 +607,6 @@ Rectangle {
     Component.onDestruction: {
         console.log("Device settings 5 destruct: ", objectName)
     }
-
-    //    function getRange(min, max) {
-    //        var arr = []
-    //        var j = 0
-    //        for (var i = min; i <= max; ++i) {
-    //            arr[j] = i
-    //            ++j
-    //        }
-
-    //        return arr
-    //    }
 
     function addZero(val, stringWidth) {
         var result = ""

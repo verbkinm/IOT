@@ -76,8 +76,6 @@ Page {
                     image_origin: "qrc:/img/id_4/play.png"
                     image_invert: "qrc:/img/id_4/play_white.png"
 
-
-
                     onClicked: {
                         if (highlighted)
                         {
@@ -254,11 +252,11 @@ Page {
             else if (ch === 1)
             {
                 if (res === "1")
-                    playMode_1_Button.clicked()
+                    playMode_1_Button.highlighted = true
                 else if (res === "2")
-                    playMode_2_Button.clicked()
+                    playMode_2_Button.highlighted = true
                 else if (res === "3")
-                    playMode_3_Button.clicked()
+                    playMode_3_Button.highlighted = true
             }
             else if (ch === 2)
             {
