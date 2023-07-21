@@ -12,6 +12,26 @@ RoundButton {
     property string image_origin: ""
     property string image_invert: "" 
 
+    signal pressAndHold()
+
+    Timer {
+        id: longPressTimer
+        interval: 1000
+        repeat: false
+        running: false
+        onTriggered: {
+            root.pressAndHold()
+        }
+    }
+
+    onPressedChanged: {
+        if ( pressed ) {
+            longPressTimer.running = true;
+        } else {
+            longPressTimer.running = false;
+        }
+    }
+
     Image {
         anchors.centerIn: parent
         source: root.highlighted ? image_invert : image_origin

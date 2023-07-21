@@ -36,6 +36,8 @@ public:
     Q_INVOKABLE QString readData(int channelNumber) const;
     Q_INVOKABLE QString readDataType(int channelNumber) const;
     Q_INVOKABLE QString writeDataType(int channelNumber) const;
+    Q_INVOKABLE void setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blue);
+
 
     void setReadInterval(int interval);
 

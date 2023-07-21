@@ -52,10 +52,12 @@ Rectangle {
 
     // Дублирует clientPage.btn
     Button {
+        height: clientPage.btn.height
         width: clientPage.btn.width
         font.pixelSize: clientPage.btn.font.pixelSize
         text: clientPage.btn.text
-        highlighted: true
+        highlighted: clientPage.btn.highlighted
+
 
         anchors.top: txtConnection.bottom
         anchors.margins: 10

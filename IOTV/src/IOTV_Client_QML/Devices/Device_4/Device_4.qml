@@ -71,7 +71,7 @@ Page {
                 BaseItem.AnimRoundButton {
                     id: playButton
 
-                    highlighted: device.readData(0) === "1"
+                    highlighted: device.readData(0) === "true"
 
                     image_origin: "qrc:/img/id_4/play.png"
                     image_invert: "qrc:/img/id_4/play_white.png"
@@ -89,14 +89,14 @@ Page {
 
                         stopButton.highlighted = false
 
-                        device.setDataFromString(0, "1")
+                        device.setDataFromString(0, "true")
                     }
                 }
 
                 BaseItem.AnimRoundButton {
                     id: stopButton
 
-                    highlighted: device.readData(0) === "0"
+                    highlighted: device.readData(0) === "false"
 
                     image_origin: "qrc:/img/id_4/stop.png"
                     image_invert: "qrc:/img/id_4/stop_white.png"
@@ -111,7 +111,7 @@ Page {
                             highlighted = true
 
                         playButton.highlighted = false
-                        device.setDataFromString(0, "0")
+                        device.setDataFromString(0, "false")
                     }
                 }
 
@@ -234,35 +234,22 @@ Page {
     }
 
     Connections {
-        //        target: playButton
-        //        function onHighlightedChanged()
-        //        {
-        //            if (target.highlighted)
-        //                cloud_MyImg.state = cloud_MyImg.playing
-        //            else
-        //                cloud_MyImg.state = cloud_MyImg.stoped
-        //        }
-
-        //        target: appStack
-        //        function onHeightChanged() {
-        //            ledModeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledModeDialog.height
-        //        }
-        //        function onWidthChanged() {
-        //            ledModeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledModeDialog.height
-        //        }
+        target: appStack
+        function onHeightChanged() {
+            item_eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - item_eqDialog.height / 2
+        }
+        function onWidthChanged() {
+            item_eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - item_eqDialog.height / 2
+        }
     }
-
     Connections {
         target: device
         function onSignalDataChanged(ch) {
             var res = device.readData(ch)
             if (ch === 0)
             {
-                playButton.highlighted = res === "1"
-                if (playButton.highlighted)
-                    stopButton.highlighted = false
-                else
-                    stopButton.highlighted = true
+                playButton.highlighted = res === "true"
+                stopButton.highlighted = !playButton.highlighted
             }
             else if (ch === 1)
             {

@@ -11,6 +11,8 @@ ItemShadow {
     width: parent.width
     height: 80
 
+    radius: 5
+
     anchors.horizontalCenter: parent.horizontalCenter
 
     Rectangle {

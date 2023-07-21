@@ -112,6 +112,7 @@
         <file>img/id_4/led.png</file>
         <file>img/id_4/lamp_off.png</file>
         <file>img/id_4/lamp_off_white.png</file>
+        <file>Devices/Setting/Device/test.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

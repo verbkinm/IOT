@@ -96,6 +96,44 @@ QString Device::writeDataType(int channelNumber) const
     return Raw::strType(getWriteChannelType(channelNumber));
 }
 
+void Device::setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blue)
+{
+    typedef enum {
+        LED_RED,
+        LED_GREEN,
+        LED_BLUE,
+        LED_YELLOW,
+        LED_LIGTHBLUE,
+        LED_MAGENTA,
+        LED_WHITE,
+        LED_NONE_COLOR
+    } Led_RGB_color_t;
+
+    Led_RGB_color_t color = LED_NONE_COLOR;
+
+    if (red && !green && !blue)
+        color = LED_RED;
+    else if (!red && green && !blue)
+        color = LED_GREEN;
+    else if (!red && !green && blue)
+        color = LED_BLUE;
+    else if (red && green && !blue)
+        color = LED_YELLOW;
+    else if (!red && green && blue)
+        color = LED_LIGTHBLUE;
+    else if (red && !green && blue)
+        color = LED_MAGENTA;
+    else if (red && green && blue)
+        color = LED_WHITE;
+
+    uint8_t resultData = (ledNumder << 4) | color;
+
+    QString data(QString::number(resultData, 16));
+
+    qDebug() << data;
+
+}
+
 void Device::setReadInterval(int interval)
 {
     _timerRead.setInterval(interval);
@@ -114,7 +152,7 @@ void Device::setState(bool newState)
 bool operator==(const Device &lhs, const Device &rhs)
 {
     if (std::make_tuple(lhs.getId(), lhs.getName(), lhs.getDescription(), lhs.getReadChannelLength(), lhs.getWriteChannelLength()) ==
-            std::make_tuple(rhs.getId(), rhs.getName(), rhs.getDescription(), rhs.getReadChannelLength(), rhs.getWriteChannelLength()))
+        std::make_tuple(rhs.getId(), rhs.getName(), rhs.getDescription(), rhs.getReadChannelLength(), rhs.getWriteChannelLength()))
     {
         for (uint8_t i = 0; i < lhs.getReadChannelLength(); i++)
         {

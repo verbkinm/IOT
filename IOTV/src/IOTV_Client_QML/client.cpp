@@ -4,6 +4,7 @@
 #include "event_action_parser.h"
 #include "log.h"
 #include "IOTV_SH.h"
+#include <iostream>
 
 Client::Client(QObject *parent): QObject{parent},
     _expectedDataSize(0), _counterPing(0)
