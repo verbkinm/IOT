@@ -52,6 +52,8 @@
 #define LED_4_GREEN							GPIO_NUM_14
 #define LED_4_BLUE							GPIO_NUM_27
 
+#define LED_MODE_MIN						1
+#define LED_MODE_MAX						6
 // Led Signals
 //#define LED_WIFI							GPIO_NUM_26
 //#define LED_TCP								GPIO_NUM_25

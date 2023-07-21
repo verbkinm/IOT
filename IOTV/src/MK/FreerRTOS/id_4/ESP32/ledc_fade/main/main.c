@@ -41,8 +41,8 @@ void app_main(void)
 
 	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, Led_RGB_PRIORITY, NULL);
 
-	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, IOTV_PRIORITY, NULL);
-	xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, NET_PRIORITY, NULL);
+	xTaskCreate(iotvTask, "iotvTask", 4096 * 2, NULL, IOTV_PRIORITY, NULL);
+	xTaskCreate(tcp_server_task, "tcp_server", 4096 * 2, (void*)AF_INET, NET_PRIORITY, NULL);
 
 //	vTaskDelay(1000 / portTICK_PERIOD_MS);
 	xTaskCreate(DF_Task, "DF_Task", 2048, NULL, DF_PLAYER_PRIORITY, NULL);

@@ -7,11 +7,10 @@ static const char *TAG = "DF_PLAYER";
 
 static uint8_t sendDataBuffer[DF_BUFFER_SIZE], recDataBuffer[DF_BUFFER_SIZE], recDataBufferSize = 0;
 
-static bool *isPlay;
-static int8_t *curr_mode;
-static bool *repeate;
-static int8_t *curr_vol;
-static int8_t  *curr_eq;
+static bool *isPlay, *repeate;
+static int8_t *curr_mode, *curr_vol, *curr_eq ;
+
+static int8_t *Led_RGB_scriptNumber;
 
 static uint8_t  num_USB_tracks,
 				num_SD_tracks,
@@ -21,7 +20,7 @@ static uint8_t  num_USB_tracks,
 
 // количесвто треков для каждого режима
 static uint8_t mode_tracks[DF_MODE_SIZE];
-// текущий трек на режиме n
+// текущий трек на режиме n. Отсчет с 1
 static uint8_t mode_curr_trak[DF_MODE_SIZE] = {1, 1, 1};
 
 static void initUART(void);
@@ -37,6 +36,7 @@ void DF_Task(void *pvParameters)
 	repeate = (bool *)iot.readChannel[CH_REPEATE].data;
 	curr_vol = (int8_t *)iot.readChannel[CH_VOLUME].data;
 	curr_eq = (int8_t *)iot.readChannel[CH_EQ].data;
+	Led_RGB_scriptNumber = (int8_t *)iot.readChannel[CH_LED_MODE].data;
 
 	gpio_reset_pin(DF_BUSY);
 	gpio_set_direction(DF_BUSY, GPIO_MODE_INPUT);
@@ -62,17 +62,20 @@ void DF_Task(void *pvParameters)
 				{
 					DF_playLargeFolder(*curr_mode, mode_curr_trak[*curr_mode - 1]);
 					mode_curr_trak[*curr_mode - 1] = inc(mode_curr_trak[*curr_mode - 1], 1, mode_tracks[*curr_mode - 1]);
+					*Led_RGB_scriptNumber = inc(*Led_RGB_scriptNumber, LED_MODE_MIN, LED_MODE_MAX);
 				}
 				else
 				{
 					*repeate = false;
 					DF_stop();
+					*Led_RGB_scriptNumber = 0;
 				}
 				break;
 			case DF_CMD_MODE:
 				*curr_mode = inRange(*curr_mode, DF_MODE_1, DF_MODE_3);
 				DF_playLargeFolder(*curr_mode, mode_curr_trak[*curr_mode - 1]);
 				mode_curr_trak[*curr_mode - 1] = inc(mode_curr_trak[*curr_mode - 1], 1, mode_tracks[*curr_mode - 1]);
+				*Led_RGB_scriptNumber = inc(*Led_RGB_scriptNumber, LED_MODE_MIN, LED_MODE_MAX);
 				break;
 			case DF_CMD_REPEATE:
 				*repeate = inRange(*repeate, DF_MODE_1, DF_MODE_3);
@@ -102,6 +105,7 @@ void DF_Task(void *pvParameters)
 			{
 				DF_playLargeFolder(*curr_mode, mode_curr_trak[*curr_mode - 1]);
 				mode_curr_trak[*curr_mode - 1] = inc(mode_curr_trak[*curr_mode - 1], 1, mode_tracks[*curr_mode - 1]);
+				*Led_RGB_scriptNumber = inc(*Led_RGB_scriptNumber, LED_MODE_MIN, LED_MODE_MAX);
 				counter = 0;
 			}
 		}

@@ -23,30 +23,30 @@ static uint8_t readType[CH_NUMBER] = {
 		DATA_TYPE_INT_8			// Эквалайзер
 };
 
-static uint8_t writeType[CH_NUMBER] = {
-		DATA_TYPE_BOOL,			// Выключить / включить воспроизведение.
-		DATA_TYPE_INT_8, 		// Режим воспроизведения.
-		DATA_TYPE_INT_8, 		// Режимы света.
-		DATA_TYPE_BOOL,			// Выключить / включить повтор текущего режима воспроизведения.
-		DATA_TYPE_INT_16,		// Максимальная яркость светодиодов.
-		DATA_TYPE_INT_16,		// Минимальная яркость светодиодов.
-		DATA_TYPE_INT_8,		// Громкость
-		DATA_TYPE_INT_8,		// Цвет светодиода
-		DATA_TYPE_INT_8			// Эквалайзер
-};
+//static uint8_t writeType[CH_NUMBER] = {
+//		DATA_TYPE_BOOL,			// Выключить / включить воспроизведение.
+//		DATA_TYPE_INT_8, 		// Режим воспроизведения.
+//		DATA_TYPE_INT_8, 		// Режимы света.
+//		DATA_TYPE_BOOL,			// Выключить / включить повтор текущего режима воспроизведения.
+//		DATA_TYPE_INT_16,		// Максимальная яркость светодиодов.
+//		DATA_TYPE_INT_16,		// Минимальная яркость светодиодов.
+//		DATA_TYPE_INT_8,		// Громкость
+//		DATA_TYPE_INT_8,		// Цвет светодиода
+//		DATA_TYPE_INT_8			// Эквалайзер
+//};
 
 struct IOTV_Server_embedded iot = {
-		.id = 255,
-		.name = "id4",
-		.description = "id4",
+		.id = 4,
+		.name = "Облачко",
+		.description = "Облачко - ночник, для Евы - королевы!",
 		.numberReadChannel = CH_NUMBER,
 		.readChannel = NULL,
 		.readChannelType = readType,
 		.numberWriteChannel = CH_NUMBER,
-		.writeChannelType = writeType,
+		.writeChannelType = readType,
 		.state = 0,
-		.nameSize = 3,
-		.descriptionSize = 3,
+		.nameSize = 14,
+		.descriptionSize = 64,
 };
 
 static void dataRecived(const struct DataPkg *pkg);
@@ -68,9 +68,10 @@ void iotvTask(void *pvParameters)
 	}
 
 	// Настройки по умолчанию
-	*(int16_t*)iot.readChannel[CH_MAX_BRIGHTNESS].data = 8192;
-	*(int16_t*)iot.readChannel[CH_MIN_BRIGHTNESS].data = 100;
-	*(int8_t*)iot.readChannel[CH_LED_COLOR].data = -1;
+	*(int16_t *)iot.readChannel[CH_MAX_BRIGHTNESS].data = 8192;
+	*(int16_t *)iot.readChannel[CH_MIN_BRIGHTNESS].data = 100;
+	*(int8_t *)iot.readChannel[CH_LED_COLOR].data = -1;
+	*(bool *)iot.readChannel[CH_REPEATE].data = true;
 
 	iot.state = 1;
 
