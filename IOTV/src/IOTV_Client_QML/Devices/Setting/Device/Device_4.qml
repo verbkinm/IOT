@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.15
 
 import "qrc:/Devices/BaseItem" as BaseItem
+import "qrc:/Devices/Setting/Device/Device_4" as ItemSetting
 
 Rectangle {
     //Ссылка на Device
@@ -136,24 +137,10 @@ Rectangle {
         }
     }
 
-    Dialog {
+    ItemSetting.MyDialog {
         id: volumeDialog
-        modal: true
         title: "Громкость"
-        leftMargin: 15
-        rightMargin: 15
-
-        width: appStack.width - leftMargin - rightMargin
-        height: item_volumeDialog.height + 70
-
-        visible: false
-
-        onVisibleChanged: {
-            if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - volumeDialog.height / 2
-        }
-
-
+        height: item_volumeDialog.height + 120
 
         Item {
             id: item_volumeDialog
@@ -201,22 +188,10 @@ Rectangle {
         }
     }
 
-    Dialog {
+    ItemSetting.MyDialog {
         id: eqDialog
-        modal: true
         title: "Эквалайзер"
-        leftMargin: 15
-        rightMargin: 15
-
-        width: appStack.width - leftMargin - rightMargin
-        height: item_eqDialog.height + 70
-
-        visible: false
-
-        onVisibleChanged: {
-            if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - eqDialog.height / 2
-        }
+        height: item_eqDialog.height + 120
 
         Item {
             id: item_eqDialog
@@ -267,26 +242,14 @@ Rectangle {
         }
     }
 
-    Dialog {
+    ItemSetting.MyDialog {
         id: dumyDialog
-        modal: true
         title: "Яркость"
-        leftMargin: 15
-        rightMargin: 15
-
-        width: appStack.width - leftMargin - rightMargin
-        height: item_dutyMinDialog.height + 70
-
-        visible: false
-
-        onVisibleChanged: {
-            if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
-        }
+        height: item_dutyDialog.height + 120
 
 
         Item {
-            id: item_dutyMinDialog
+            id: item_dutyDialog
             height: 240
 
             anchors {
@@ -296,7 +259,7 @@ Rectangle {
             }
 
             Row {
-                id: row_item_dutyMinDialog
+                id: row_item_dutyDialog
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 45
@@ -365,22 +328,10 @@ Rectangle {
         }
     }
 
-    Dialog {
+    ItemSetting.MyDialog {
         id: ledModeDialog
-        modal: true
         title: "Режим света"
-        leftMargin: 15
-        rightMargin: 15
-
-        width: appStack.width - leftMargin - rightMargin
-        height: item_ledDialog.height + 70
-
-        visible: false
-
-        onVisibleChanged: {
-            if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledModeDialog.height / 2
-        }
+        height: item_ledDialog.height + 120
 
         Item {
             id: item_ledDialog
@@ -397,7 +348,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 Repeater {
-                    model: 6
+                    model: 7
 
                     RadioButton {
                         required property int index
@@ -429,22 +380,10 @@ Rectangle {
         }
     }
 
-    Dialog {
+    ItemSetting.MyDialog {
         id: ledManualDialog
-        modal: true
         title: "Управление светодиодами"
-        leftMargin: 15
-        rightMargin: 15
-
-        width: appStack.width - leftMargin - rightMargin
-        height: item_ledManualDialog.height + 70
-
-        visible: false
-
-        onVisibleChanged: {
-            if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledManualDialog.height / 2
-        }
+        height: item_ledManualDialog.height + 120
 
         Item {
             id: item_ledManualDialog
@@ -565,23 +504,6 @@ Rectangle {
                     }
                 }
             }
-        }
-    }
-
-
-    Connections {
-        target: appStack
-        function onHeightChanged() {
-            volumeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - volumeDialog.height / 2
-            eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - eqDialog.height / 2
-            dumyDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
-            ledManualDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledManualDialog.height / 2
-        }
-        function onWidthChanged() {
-            volumeDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - volumeDialog.height / 2
-            eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - eqDialog.height / 2
-            dumyDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - dumyDialog.height / 2
-            ledManualDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - ledManualDialog.height / 2
         }
     }
 

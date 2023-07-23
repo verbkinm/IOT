@@ -9,8 +9,8 @@ import "Client" as ClientPageModule
 Drawer {
     id: drawer
 
-    width: window.width / 2
-    height: window.height - overlayHeader.height
+    width: global_window.width / 2
+    height: global_window.height - overlayHeader.height
 
     modal: inPortrait
 //    interactive: inPortrait

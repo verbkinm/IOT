@@ -27,8 +27,8 @@ void Led_RGB_Task(void *pvParameters)
 	while(iot.state == 0)
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 
-	LED_maxDuty = (int16_t *)iot.readChannel[CH_MAX_BRIGHTNESS].data;
-	LED_minDuty = (int16_t *)iot.readChannel[CH_MIN_BRIGHTNESS].data;
+	LED_maxDuty = (int16_t *)iot.readChannel[CH_MAX_DUTY].data;
+	LED_minDuty = (int16_t *)iot.readChannel[CH_MIN_DUTY].data;
 	Led_RGB_scriptNumber = (int8_t *)iot.readChannel[CH_LED_MODE].data;
 	Led_Manual = (int8_t *)iot.readChannel[CH_LED_COLOR].data;
 

@@ -252,11 +252,23 @@ Page {
             else if (ch === 1)
             {
                 if (res === "1")
+                {
                     playMode_1_Button.highlighted = true
+                    playMode_2_Button.highlighted = false
+                    playMode_3_Button.highlighted = false
+                }
                 else if (res === "2")
+                {
                     playMode_2_Button.highlighted = true
+                    playMode_1_Button.highlighted = false
+                    playMode_3_Button.highlighted = false
+                }
                 else if (res === "3")
+                {
                     playMode_3_Button.highlighted = true
+                    playMode_1_Button.highlighted = false
+                    playMode_2_Button.highlighted = false
+                }
             }
             else if (ch === 2)
             {

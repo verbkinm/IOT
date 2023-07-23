@@ -71,7 +71,7 @@ void IOTV_Server::readHostSetting()
         std::unordered_map<QString, QString> setting;
 
         setting[hostField::name] = group.toLatin1();
-        setting[hostField::name] = setting[hostField::name].toLocal8Bit().size() > 30 ? setting[hostField::name].toLocal8Bit().mid(0, 30) : setting[hostField::name];
+        setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
         setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, "TCP").toString();
         setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();

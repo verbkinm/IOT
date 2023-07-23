@@ -1,0 +1,8 @@
+key,type,encoding,value
+CH_PLAY_MODE,iotv,i8,1
+CH_REPEATE,iotv,i8,1
+CH_MAX_DUTY,iotv,i16,8192
+CH_MIN_DUTY,iotv,i16,100
+CH_VOLUME,iotv,i8,20
+CH_EQ,iotv,i8,0
+

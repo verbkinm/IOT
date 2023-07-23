@@ -492,7 +492,7 @@ QByteArray Raw::strToByteArray(const QString &dataStr, DATA_TYPE type)
         }
     }
     else if (type == DATA_TYPE::RAW || type == DATA_TYPE::STRING)
-        result.append(dataStr.toLocal8Bit());
+        result.append(dataStr.toStdString().c_str());
 
     return result;
 }

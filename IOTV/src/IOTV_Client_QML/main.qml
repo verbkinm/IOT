@@ -8,7 +8,7 @@ import "Client" as ClientPageModule
 import "Events" as EventsPageModule
 
 ApplicationWindow {
-    id: window
+    id: global_window
     width: 400
     height: 640
     visible: true
@@ -18,7 +18,7 @@ ApplicationWindow {
 //    minimumHeight: 520
 
     //! [orientation]
-    readonly property bool inPortrait: window.width < window.height
+    readonly property bool inPortrait: global_window.width < global_window.height
 
     //! [orientation]
     property alias appStack: stackView
@@ -43,7 +43,7 @@ ApplicationWindow {
                 if (drawer.visible)
                     drawer.visible = false
                 else
-                    window.close()
+                    global_window.close()
             }
         }
 

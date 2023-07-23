@@ -104,7 +104,6 @@
         <file>img/id_4/stop_white.png</file>
         <file>Devices/Device_4/MyImg.qml</file>
         <file>img/id_4/note2.png</file>
-        <file>Devices/Setting/Device/Device_4.qml</file>
         <file>img/id_4/volume_white.png</file>
         <file>img/id_4/equalizer_white.png</file>
         <file>img/id_4/equalizer.png</file>
@@ -112,7 +111,8 @@
         <file>img/id_4/led.png</file>
         <file>img/id_4/lamp_off.png</file>
         <file>img/id_4/lamp_off_white.png</file>
-        <file>Devices/Setting/Device/test.qml</file>
+        <file>Devices/Setting/Device/Device_4.qml</file>
+        <file>Devices/Setting/Device/Device_4/MyDialog.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

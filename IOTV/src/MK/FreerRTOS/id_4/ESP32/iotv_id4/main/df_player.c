@@ -32,7 +32,6 @@ void DF_Task(void *pvParameters)
 
 	isPlay = (bool *)iot.readChannel[CH_PLAY].data;
 	curr_mode = (int8_t *)iot.readChannel[CH_PLAY_MODE].data;
-	*curr_mode = 1;
 	repeate = (bool *)iot.readChannel[CH_REPEATE].data;
 	curr_vol = (int8_t *)iot.readChannel[CH_VOLUME].data;
 	curr_eq = (int8_t *)iot.readChannel[CH_EQ].data;
@@ -46,6 +45,9 @@ void DF_Task(void *pvParameters)
 
 	ESP_LOGW(TAG, "DF_Task created");
 	xTaskCreate(DF_dataRecive_Task, "DF_dataRecive_Task", 2048, NULL, UART_PRIORITY, NULL);
+
+	DF_volume(*curr_vol);
+	DF_EQSelect(*curr_eq);
 
 	DF_updateData();
 

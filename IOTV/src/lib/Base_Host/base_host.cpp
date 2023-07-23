@@ -135,8 +135,8 @@ QString Base_Host::getDescription() const
 
 struct IOTV_Server_embedded *Base_Host::convert() const
 {
-    auto nameSize = getName().toLocal8Bit().size();
-    auto descriptionSize = getDescription().toLocal8Bit().size();
+    auto nameSize = strlen(getName().toStdString().c_str());
+    auto descriptionSize = strlen(getDescription().toStdString().c_str());
     auto numberReadChannel = getReadChannelLength();
     auto numberWriteChannel = getWriteChannelLength();
 
@@ -154,10 +154,12 @@ struct IOTV_Server_embedded *Base_Host::convert() const
         .descriptionSize = static_cast<uint16_t>(descriptionSize)
     };
 
+    //!!! сделать проверку на выделение памяти в  iot
+
     if (nameSize > 0)
-        memcpy(const_cast<char *>(iot.name), getName().toLocal8Bit(), nameSize);
+        memcpy(const_cast<char *>(iot.name), getName().toStdString().c_str(), nameSize);
     if (descriptionSize > 0)
-        memcpy(const_cast<char *>(iot.description), getDescription().toLocal8Bit(), descriptionSize);
+        memcpy(const_cast<char *>(iot.description), getDescription().toStdString().c_str(), descriptionSize);
 
     for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
     {
