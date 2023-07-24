@@ -38,3 +38,5 @@ build*
 *.pro.user
 
 *MakeFile
+
+IOTV/src/MK/.directory

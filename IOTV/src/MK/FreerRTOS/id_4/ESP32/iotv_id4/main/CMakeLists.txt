@@ -14,4 +14,5 @@ idf_component_register(SRCS "main.c"
 						"Net/Tcp.c"
 						"Net/WIFI.c"
 						"df_player.c"
+						"button.c"
                     INCLUDE_DIRS ".")

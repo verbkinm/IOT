@@ -7,9 +7,9 @@
 #define NET_PRIORITY						1
 #define IOTV_PRIORITY						1
 #define UART_PRIORITY						4
+#define BUTTON_PRIORITY						1
 #define Led_RGB_PRIORITY					5
 #define DF_PLAYER_PRIORITY					5
-//#define LED_SIGNALS_PRIORITY				6
 #define LOW_PROIRITY						10
 
 // TCP
@@ -54,9 +54,11 @@
 
 #define LED_MODE_MIN						1
 #define LED_MODE_MAX						6
-// Led Signals
-//#define LED_WIFI							GPIO_NUM_26
-//#define LED_TCP								GPIO_NUM_25
+
+// Кнопки
+#define BUTTON_PLAY_STOP					GPIO_NUM_39
+#define BUTTON_PLAY_MODE					GPIO_NUM_34
+#define BUTTON_LED_MODE						GPIO_NUM_35
 
 // UART
 #define TXD_PIN								GPIO_NUM_17

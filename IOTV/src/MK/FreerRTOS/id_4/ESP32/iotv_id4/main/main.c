@@ -10,6 +10,7 @@
 #include "Net/WIFI.h"
 #include "Led_RGB.h"
 #include "df_player.h"
+#include "button.h"
 
 extern QueueHandle_t xQueueInData, xQueueOutData, xQueueDF;
 
@@ -39,11 +40,10 @@ void app_main(void)
 		esp_restart();
 	}
 
-	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, Led_RGB_PRIORITY, NULL);
-
 	xTaskCreate(iotvTask, "iotvTask", 4096 * 2, NULL, IOTV_PRIORITY, NULL);
 	xTaskCreate(tcp_server_task, "tcp_server", 4096 * 2, (void*)AF_INET, NET_PRIORITY, NULL);
 
-//	vTaskDelay(1000 / portTICK_PERIOD_MS);
 	xTaskCreate(DF_Task, "DF_Task", 2048, NULL, DF_PLAYER_PRIORITY, NULL);
+	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, Led_RGB_PRIORITY, NULL);
+	xTaskCreate(Button_Task, "Button_Task", 1024, NULL, BUTTON_PRIORITY, NULL);
 }
