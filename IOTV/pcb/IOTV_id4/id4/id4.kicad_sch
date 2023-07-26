@@ -1013,14 +1013,14 @@
     )
   )
 
-  (sheet (at 230.886 74.676) (size 31.75 52.07) (fields_autoplaced)
+  (sheet (at 208.28 20.828) (size 38.862 48.006) (fields_autoplaced)
     (stroke (width 0.1524) (type solid))
     (fill (color 0 0 0 0.0000))
-    (uuid f548f163-9ccc-4482-93d7-6dfb5f829f7f)
-    (property "Sheetname" "LEDS" (at 230.886 73.9644 0)
+    (uuid bfa57b12-2bf2-45c0-b1f1-f32064398f66)
+    (property "Sheetname" "Leds" (at 208.28 20.1164 0)
       (effects (font (size 1.27 1.27)) (justify left bottom))
     )
-    (property "Sheetfile" "untitled.kicad_sch" (at 230.886 127.3306 0)
+    (property "Sheetfile" "leds.kicad_sch" (at 208.28 69.4186 0)
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances

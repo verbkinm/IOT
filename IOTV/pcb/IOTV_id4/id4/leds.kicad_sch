@@ -819,23 +819,23 @@
     (uuid fc09b4d4-f0c4-4daf-af02-32fb15d8f95d)
   )
 
-  (text "LED 0" (at 60.96 44.45 0)
+  (text "LED 1" (at 60.96 44.45 0)
     (effects (font (size 5 5) (thickness 1) bold) (justify left bottom))
     (uuid 02b66d9f-0dcc-4136-bf6e-37d8c56c34b9)
   )
-  (text "LED 4" (at 138.43 111.76 0)
+  (text "LED 5" (at 138.43 111.76 0)
     (effects (font (size 5 5) (thickness 1) bold) (justify left bottom))
     (uuid 23caaa13-1cf5-4065-9ee0-e08b9bb8b7a7)
   )
-  (text "LED 2" (at 219.71 44.45 0)
+  (text "LED 3" (at 219.71 44.45 0)
     (effects (font (size 5 5) (thickness 1) bold) (justify left bottom))
     (uuid 73fa4cb0-557c-4d82-99a4-5fd6b90ba7a6)
   )
-  (text "LED 3" (at 60.96 111.76 0)
+  (text "LED 4" (at 60.96 111.76 0)
     (effects (font (size 5 5) (thickness 1) bold) (justify left bottom))
     (uuid 97994355-05c8-49b9-9d0e-032bb1972c86)
   )
-  (text "LED 1" (at 138.43 44.45 0)
+  (text "LED 2" (at 138.43 44.45 0)
     (effects (font (size 5 5) (thickness 1) bold) (justify left bottom))
     (uuid c5ec16b3-92c4-4ba1-bdc7-4d3b129a1649)
   )
@@ -1044,8 +1044,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R21") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R30") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R27") (unit 1)
         )
       )
     )
@@ -1084,8 +1084,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "D1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "D3") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "D4") (unit 1)
         )
       )
     )
@@ -1123,7 +1123,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q7") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q7") (unit 1)
         )
       )
@@ -1152,8 +1152,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R2") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R26") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R8") (unit 1)
         )
       )
     )
@@ -1187,8 +1187,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R24") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R15") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R30") (unit 1)
         )
       )
     )
@@ -1197,10 +1197,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 161.29 135.89 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1a58e36f-7d89-4b47-a01d-8f935e62366e)
-    (property "Reference" "Q12" (at 161.29 127 90)
+    (property "Reference" "Q12" (at 161.29 128.27 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 161.29 129.54 90)
+    (property "Value" "S8050" (at 161.29 130.81 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 163.195 130.81 0)
@@ -1226,7 +1226,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q12") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q15") (unit 1)
         )
       )
@@ -1261,8 +1261,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R6") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R3") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R6") (unit 1)
         )
       )
     )
@@ -1290,8 +1290,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R25") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R7") (unit 1)
         )
       )
     )
@@ -1325,8 +1325,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R15") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R24") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R15") (unit 1)
         )
       )
     )
@@ -1354,7 +1354,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R19") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R19") (unit 1)
         )
       )
@@ -1394,8 +1394,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "D4") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "D4") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "D5") (unit 1)
         )
       )
     )
@@ -1423,8 +1423,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R5") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R2") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R5") (unit 1)
         )
       )
     )
@@ -1452,8 +1452,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R16") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R1") (unit 1)
         )
       )
     )
@@ -1462,10 +1462,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 68.58 125.73 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 496895c6-8af2-4ef8-8850-33234165dae6)
-    (property "Reference" "Q1" (at 68.58 116.84 90)
+    (property "Reference" "Q1" (at 68.58 118.11 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 68.58 119.38 90)
+    (property "Value" "S8050" (at 68.58 120.65 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 70.485 120.65 0)
@@ -1491,8 +1491,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q10") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q4") (unit 1)
         )
       )
     )
@@ -1501,10 +1501,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 76.2 130.81 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c09d875-0fb2-4e4c-96f1-48533d1dc9b5)
-    (property "Reference" "Q3" (at 76.2 121.92 90)
+    (property "Reference" "Q3" (at 76.2 123.19 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 76.2 124.46 90)
+    (property "Value" "S8050" (at 76.2 125.73 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 78.105 125.73 0)
@@ -1530,8 +1530,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q3") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q11") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q5") (unit 1)
         )
       )
     )
@@ -1569,7 +1569,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q1") (unit 1)
         )
       )
@@ -1608,8 +1608,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q10") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q4") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q10") (unit 1)
         )
       )
     )
@@ -1630,15 +1630,15 @@
     (property "Datasheet" "~" (at 146.05 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid b1353e06-68ea-4d99-b377-ef5a78884800))
-    (pin "2" (uuid 06f6f7c0-3b54-46cf-92ca-cac796a929fa))
+    (pin "1" (uuid cef82ce9-5622-4963-9201-5b5f15577623))
+    (pin "2" (uuid f0d598f9-d0c6-43b3-b200-eb1879c973fc))
     (instances
       (project "id4"
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R22") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R13") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R28") (unit 1)
         )
       )
     )
@@ -1666,7 +1666,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R4") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R10") (unit 1)
         )
       )
@@ -1695,8 +1695,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R20") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R29") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R26") (unit 1)
         )
       )
     )
@@ -1730,8 +1730,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R3") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R18") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R3") (unit 1)
         )
       )
     )
@@ -1769,8 +1769,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q2") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q3") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q2") (unit 1)
         )
       )
     )
@@ -1779,10 +1779,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 146.05 125.73 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5d0c9c56-6336-42a5-87ce-318d006fbedb)
-    (property "Reference" "Q10" (at 146.05 116.84 90)
+    (property "Reference" "Q10" (at 146.05 118.11 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 146.05 119.38 90)
+    (property "Value" "S8050" (at 146.05 120.65 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 147.955 120.65 0)
@@ -1808,7 +1808,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q10") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q13") (unit 1)
         )
       )
@@ -1848,8 +1848,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "D4") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "D1") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "D2") (unit 1)
         )
       )
     )
@@ -1877,8 +1877,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R19") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R28") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R25") (unit 1)
         )
       )
     )
@@ -1906,7 +1906,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R20") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R20") (unit 1)
         )
       )
@@ -1935,8 +1935,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R4") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R1") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R4") (unit 1)
         )
       )
     )
@@ -1970,8 +1970,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R3") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R27") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R9") (unit 1)
         )
       )
     )
@@ -2010,8 +2010,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "D1") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "D0") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "D1") (unit 1)
         )
       )
     )
@@ -2039,8 +2039,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R23") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R14") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R29") (unit 1)
         )
       )
     )
@@ -2079,8 +2079,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "D3") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "D2") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "D3") (unit 1)
         )
       )
     )
@@ -2108,8 +2108,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R17") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R8") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R17") (unit 1)
         )
       )
     )
@@ -2137,8 +2137,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R23") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R5") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R23") (unit 1)
         )
       )
     )
@@ -2166,8 +2166,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R14") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R23") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R14") (unit 1)
         )
       )
     )
@@ -2195,8 +2195,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R2") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R17") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R2") (unit 1)
         )
       )
     )
@@ -2205,10 +2205,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 153.67 130.81 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b727cb02-705f-40a1-a310-c6653f20d34e)
-    (property "Reference" "Q11" (at 153.67 121.92 90)
+    (property "Reference" "Q11" (at 153.67 123.19 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 153.67 124.46 90)
+    (property "Value" "S8050" (at 153.67 125.73 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 155.575 125.73 0)
@@ -2234,7 +2234,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q11") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q14") (unit 1)
         )
       )
@@ -2269,8 +2269,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R18") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R9") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R18") (unit 1)
         )
       )
     )
@@ -2308,8 +2308,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q3") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q2") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q3") (unit 1)
         )
       )
     )
@@ -2347,7 +2347,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q9") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q9") (unit 1)
         )
       )
@@ -2386,8 +2386,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q12") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q6") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q12") (unit 1)
         )
       )
     )
@@ -2421,7 +2421,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R21") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R21") (unit 1)
         )
       )
@@ -2431,10 +2431,10 @@
   (symbol (lib_id "Transistor_BJT:S8050") (at 83.82 135.89 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ca1b0385-9f60-4b57-9663-105aef0b2f62)
-    (property "Reference" "Q2" (at 83.82 127 90)
+    (property "Reference" "Q2" (at 83.82 128.27 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "S8050" (at 83.82 129.54 90)
+    (property "Value" "S8050" (at 83.82 130.81 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 85.725 130.81 0)
@@ -2460,8 +2460,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q2") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q12") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q6") (unit 1)
         )
       )
     )
@@ -2489,7 +2489,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R5") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R11") (unit 1)
         )
       )
@@ -2524,8 +2524,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R24") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R6") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R24") (unit 1)
         )
       )
     )
@@ -2553,8 +2553,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R22") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R4") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R22") (unit 1)
         )
       )
     )
@@ -2592,8 +2592,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q11") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "Q5") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "Q11") (unit 1)
         )
       )
     )
@@ -2621,8 +2621,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R16") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R7") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R16") (unit 1)
         )
       )
     )
@@ -2660,7 +2660,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "Q8") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "Q8") (unit 1)
         )
       )
@@ -2695,7 +2695,7 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R6") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
           (reference "R12") (unit 1)
         )
       )
@@ -2724,8 +2724,8 @@
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
           (reference "R13") (unit 1)
         )
-        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/f548f163-9ccc-4482-93d7-6dfb5f829f7f"
-          (reference "R22") (unit 1)
+        (path "/c803e514-1b04-4687-9a92-b8766a99fa37/bfa57b12-2bf2-45c0-b1f1-f32064398f66"
+          (reference "R13") (unit 1)
         )
       )
     )
