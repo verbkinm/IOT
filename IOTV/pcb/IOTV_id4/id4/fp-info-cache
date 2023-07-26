@@ -1,4 +1,4 @@
-21672320469933951
+21665687234502151
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90201,10 +90201,3 @@ MODULE_DFR0299
 0
 16
 16
-kicad
-esp32_devkit_v1_doit
-ESPWROOM32, ESP32, 30 GPIOs version
-
-0
-30
-30
