@@ -1,0 +1,7 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "aht10_breakout")(type "Legacy")(uri "/home/user/.local/share/kicad/kicad/symbols/aht10_breakout.lib")(options "")(descr ""))
+  (lib (name "am312_breakout")(type "Legacy")(uri "/home/user/.local/share/kicad/kicad/symbols/am312_breakout.lib")(options "")(descr ""))
+  (lib (name "esp32_devkit_v1_doit")(type "Legacy")(uri "/home/user/.local/share/kicad/kicad/symbols/esp32_devkit_v1_doit.lib")(options "")(descr ""))
+  (lib (name "DFR0299")(type "KiCad")(uri "${KIPRJMOD}/import/DFR0299.kicad_sym")(options "")(descr ""))
+)
