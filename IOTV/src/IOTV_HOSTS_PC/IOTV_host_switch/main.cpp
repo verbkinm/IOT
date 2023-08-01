@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
 
 
-    server = new QTcpServer;
+    server = new QTcpServer();
 
     QObject::connect(server, &QTcpServer::newConnection, [&](){
         slotNewConnection();

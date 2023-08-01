@@ -13,6 +13,7 @@
 #include <list>
 #include <fstream>
 #include <unordered_map>
+#include <algorithm>
 
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"

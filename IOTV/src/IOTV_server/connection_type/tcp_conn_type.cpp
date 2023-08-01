@@ -4,9 +4,6 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     Base_conn_type(name, parent),
     _tcpPort(port)
 {
-    _reconnectTimer.setParent(parent);
-    _reconnectTimer.setInterval(SERVER_RECONNECT_INTERVAL);
-
     _address = address;
     _type = Conn_type::TCP;
 
@@ -17,16 +14,6 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
     connect(&_tcpSocket, &QAbstractSocket::errorOccurred, this, &TCP_conn_type::slotError, Qt::QueuedConnection);
     connect(&_tcpSocket, &QAbstractSocket::stateChanged, this, &TCP_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
 }
-
-//quint16 TCP_conn_type::getPort() const
-//{
-//    return _tcpPort;
-//}
-
-//void TCP_conn_type::setPort(quint16 port)
-//{
-//    _tcpPort = port;
-//}
 
 qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
@@ -61,7 +48,6 @@ void TCP_conn_type::disconnectFromHost()
 {
 
     _tcpSocket.abort();//disconnectFromHost();
-//    _reconnectTimer.start();
 }
 
 QByteArray TCP_conn_type::readAll()
@@ -71,7 +57,6 @@ QByteArray TCP_conn_type::readAll()
 
 void TCP_conn_type::slotNewConnection()
 {
-//    _reconnectTimer.stop();
     Log::write(_name + ": connected to " + _tcpSocket.peerAddress().toString()
                + ":" + QString::number(_tcpSocket.peerPort()),
                Log::Write_Flag::FILE_STDOUT,

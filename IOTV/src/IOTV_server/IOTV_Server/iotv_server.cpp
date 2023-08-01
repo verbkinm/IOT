@@ -84,7 +84,7 @@ void IOTV_Server::readHostSetting()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        auto it = std::ranges::find_if (_iot_hosts, [&setting](const auto &pair){
+        auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&setting](const auto &pair){
             return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
         });
 
@@ -215,7 +215,7 @@ void IOTV_Server::clientOnlineFile() const
 
 Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
 {
-    auto it = std::ranges::find_if (_iot_hosts, [&name](const auto &pair){
+    auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&name](const auto &pair){
         return pair.first->getName() == name;
     });
 
