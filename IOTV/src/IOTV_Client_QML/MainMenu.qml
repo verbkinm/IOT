@@ -67,7 +67,9 @@ Drawer {
                         }
 
                         else if (index === 3)
-                            dialogExit.open()
+                            loaderMainItem.setSource("qrc:/DialogExit.qml", {
+                                                         "parent": appStack
+                                                     })
 
                         drawer.visible = 0
                     }
