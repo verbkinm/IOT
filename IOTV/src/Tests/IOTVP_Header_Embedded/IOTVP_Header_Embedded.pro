@@ -22,6 +22,7 @@ HEADERS +=  ../../lib/Protocols/embedded/creatorpkgs.h \
             ../../lib/Protocols/embedded/state.h \
             ../../lib/Protocols/embedded/IOTV_SH.h \
             ../../lib/Protocols/embedded/iotv_server_embedded.h \
+            ../../lib/ConfigType/ConfigTypes.h \
 
 INCLUDEPATH +=  ../../lib/Protocols/embedded \
                 ../../lib/raw/ \

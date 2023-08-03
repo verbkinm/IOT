@@ -256,7 +256,7 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
         .flags = Tech_FLAGS_NONE,
         .type = Tech_TYPE_EV_AC,
         .dataSize = static_cast<uint64_t>(data.size()),
-        .data = (const uint8_t*)data.data()
+        .data = reinterpret_cast<const uint8_t*>(data.data())
     };
 
     struct Header header = {

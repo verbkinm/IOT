@@ -89,7 +89,7 @@ void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)
 
     Raw rawHost(_host->getReadChannelType(channleNumber), rhs);
     QString str = rawHost.strData().first;
-    bool res = _compare(_data, str);
+    bool res = _compare(Raw(_data), Raw(str));
     if (_channelNumber == channleNumber && res)
         emit signalEvent();
 }

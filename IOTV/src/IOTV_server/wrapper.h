@@ -8,7 +8,7 @@ class Wrapper : public QObject
 {
     Q_OBJECT
 public:
-    Wrapper(QObject *parent = nullptr);
+    explicit Wrapper(QObject *parent = nullptr);
 
 private:
     QFileSystemWatcher _watcher;

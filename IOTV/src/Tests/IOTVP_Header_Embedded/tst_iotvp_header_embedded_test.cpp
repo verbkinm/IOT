@@ -446,9 +446,7 @@ void IOTVP_Header_Embedded_Test::test_DataTransmitPing()
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = 0,
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = NULL
     };
 
     char outData[HEADER_SIZE];
@@ -486,9 +484,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = identificationSize(&ident),
-                .identification = &ident,
-                .readWrite = NULL,
-                .state = NULL
+                .pkg = NULL
     };
 
     char outData[headerSize(&header)];
@@ -524,9 +520,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+                .pkg = &readWrite
     };
 
     char outData[headerSize(&header)];
@@ -561,9 +555,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = readWriteSize(&readWrite),
-                .identification = NULL,
-                .readWrite = &readWrite,
-                .state = NULL
+                .pkg = &readWrite,
     };
 
     char outData[headerSize(&header)];
@@ -598,9 +590,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
                 .flags = HEADER_FLAGS_NONE,
                 .version = 2,
                 .dataSize = stateSize(&state),
-                .identification = NULL,
-                .readWrite = NULL,
-                .state = &state
+                .pkg = &state
     };
 
     char outData[headerSize(&header)];

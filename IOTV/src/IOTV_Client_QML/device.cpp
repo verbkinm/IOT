@@ -13,10 +13,10 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     this->setDescription(QByteArray{dev->description, dev->descriptionSize});
 
     for (int i = 0; i < dev->numberReadChannel; ++i)
-        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
+        this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->readChannelType[i])});
 
     for (int i = 0; i < dev->numberWriteChannel; ++i)
-        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+        this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i])});
 
     connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut);
     connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut);
@@ -42,10 +42,10 @@ void Device::update(const IOTV_Server_embedded *dev)
             this->removeAllSubChannel();
 
             for (int i = 0; i < dev->numberReadChannel; ++i)
-                this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(dev->readChannelType[i]));
+                this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->readChannelType[i])});
 
             for (int i = 0; i < dev->numberWriteChannel; ++i)
-                this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i]));
+                this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i])});
         }
         emit signalUpdate();
     }

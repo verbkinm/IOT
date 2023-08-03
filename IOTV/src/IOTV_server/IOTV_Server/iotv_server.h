@@ -18,7 +18,7 @@
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
 
-#include "event_action_parser.h"
+
 #include "iotv_event_manager.h"
 
 class IOTV_Server : public QTcpServer
