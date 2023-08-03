@@ -304,23 +304,23 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
 
     // Запрос записи
     uint8_t dataRaw[] =  {
-        2,                                          // Версия протокола
+        2,                                  // Версия протокола
         HEADER_TYPE_REQUEST,                // Тип пакета - запрос
         HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
         HEADER_FLAGS_NONE,                  // Флаги
-        25, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
-        32, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    32
-        6,                                          // Длина имени устройства
-        1,                                          // Номер канала
-        0,                                          // Флаги
-        4, 0, 0, 0,                                 // Размер данных
-        11, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма
-        'D', 'e', 'v', 'i', 'c', 'e',               // Имя устройства
-        123, 0, 0, 0                                // Данные
+        23, 0, 0, 0, 0, 0, 0, 0,            // Размер тела пакета               23 = Wite_SIZE + nameSize + data (2)
+        30, 0, 0, 0, 0, 0, 0, 0,            // Контрольная сумма тела пакета    30
+        6,                                  // Длина имени устройства
+        1,                                  // Номер канала
+        0,                                  // Флаги
+        2, 0, 0, 0,                         // Размер данных
+        9, 0, 0, 0, 0, 0, 0, 0,             // Контрольная сумма
+        'D', 'e', 'v', 'i', 'c', 'e',       // Имя устройства
+        123, 0                              // Данные
     };
 
     // в transmitBuffer будет ответ на Write по окончанию цикла
-    for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6 + 4; ++i) // 6 - имя устройства, 4 - данные
+    for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6 + 2; ++i) // 6 - имя устройства, 2 - данные
     {
         if (i > 0 && i < HEADER_SIZE)
             QCOMPARE(expextedDataSize, HEADER_SIZE);
@@ -335,7 +335,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
 
     QCOMPARE(error, false);
     QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, 45);
+    QCOMPARE(cutDataSize, 43);
     QCOMPARE(expextedDataSize, 0);
 
 //    QCOMPARE(iot.readChannel[1], 123);
@@ -566,7 +566,7 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
 
     QCOMPARE(error, false);
     QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6 + 4); // осталось от test_dataRecivedWrite 45 = HEADER_SIZE + Wite_SIZE + nameSize + data (4)
+    QCOMPARE(cutDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6 + 2); // осталось от test_dataRecivedWrite 45 = HEADER_SIZE + Wite_SIZE + nameSize + data (2)
     QCOMPARE(expextedDataSize, 0);
 }
 
