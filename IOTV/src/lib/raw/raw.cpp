@@ -715,12 +715,12 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
                 return {};
 
             double result = op(lhsArg, rhsArg);
-            return result;
+            return Raw(result);
         }
         else if (lhs.type() == Raw::DATA_TYPE::STRING || lhs.type() == Raw::DATA_TYPE::RAW || lhs.type() == Raw::DATA_TYPE::NONE)
         {
             if (typeid(op) == typeid(std::plus<>))
-                return {lhs.type(), lhs.data() + rhs.data()};
+                return Raw{lhs.type(), lhs.data() + rhs.data()};
 
             return {};
         }
@@ -737,7 +737,7 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
                 return {};
 
             double result = op(lhsArg, rhsArg);
-            return result;
+            return Raw{result};
         }
     }
 

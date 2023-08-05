@@ -34,22 +34,22 @@ public:
 
     Raw();
 
-    Raw(int8_t data);
-    Raw(int16_t data);
-    Raw(int32_t data);
-    Raw(int64_t data);
+    explicit Raw(int8_t data);
+    explicit Raw(int16_t data);
+    explicit Raw(int32_t data);
+    explicit Raw(int64_t data);
 
-    Raw(float data);
-    Raw(double data);
+    explicit Raw(float data);
+    explicit Raw(double data);
 
-    Raw(bool data);
+    explicit Raw(bool data);
 
-    Raw(const QString &data);
-    Raw(const QByteArray &data);
+    explicit Raw(const QString &data);
+    explicit Raw(const QByteArray &data);
 
-    Raw(DATA_TYPE type);
-    Raw(DATA_TYPE type, const QByteArray &data);
-    Raw(DATA_TYPE type, const QString &data);
+    explicit Raw(DATA_TYPE type);
+    explicit Raw(DATA_TYPE type, const QByteArray &data);
+    explicit Raw(DATA_TYPE type, const QString &data);
 
     //! Массив данных полностью состоит их нулей
     bool isZeroOnly() const;

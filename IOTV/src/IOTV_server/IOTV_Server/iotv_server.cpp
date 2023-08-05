@@ -1,5 +1,7 @@
 #include "iotv_server.h"
 
+#include "event_action_parser.h"
+
 IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
@@ -228,8 +230,19 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
 {
     std::forward_list<const Base_Host *> result;
-    for(const auto &pair : _iot_hosts)
-        result.push_front(pair.first);
+
+//    auto start = std::chrono::system_clock::now();
+
+//    for(const auto &pair : _iot_hosts)
+//        result.push_front(pair.first);
+
+//    qDebug() << "insertionSort - " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start).count();
+
+//    result.clear();
+
+    std::transform(_iot_hosts.begin(), _iot_hosts.end(), std::front_inserter(result), [](auto const &pair){
+       return pair.first;
+    });
 
     return result;
 }

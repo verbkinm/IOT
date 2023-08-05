@@ -88,13 +88,13 @@ HEADERS += \
     ../lib/raw/raw.h
 
 INCLUDEPATH += ../lib/Base_Host \
-            ../lib/Log \
-            ../lib/Protocols/embedded \
-            ../lib/Protocols/ \
-            ../lib/raw \
-            ../lib/ConfigType \
-            ../lib/Events \
-            ../lib/Json_Parsers
+                ../lib/Log \
+                ../lib/Protocols/embedded \
+                ../lib/Protocols/ \
+                ../lib/raw \
+                ../lib/ConfigType \
+                ../lib/Events \
+                ../lib/Json_Parsers
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

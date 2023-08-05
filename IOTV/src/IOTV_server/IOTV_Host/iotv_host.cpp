@@ -48,13 +48,13 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     for (uint8_t i = 0; i < pkg->numberReadChannel; i++)
     {
         Q_ASSERT(pkg->readChannelType != NULL);
-        this->addReadSubChannel(static_cast<Raw::DATA_TYPE>(pkg->readChannelType[i]));
+        this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(pkg->readChannelType[i])});
     }
 
     for (uint8_t i = 0; i < pkg->numberWriteChannel; i++)
     {
         Q_ASSERT(pkg->writeChannelType != NULL);
-        this->addWriteSubChannel(static_cast<Raw::DATA_TYPE>(pkg->writeChannelType[i]));
+        this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(pkg->writeChannelType[i])});
     }
 
     emit signalIdentRecived();
