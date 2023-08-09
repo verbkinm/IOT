@@ -16,5 +16,6 @@ idf_component_register(SRCS "main.c"
 						"Protocols/embedded/IOTV_SH.c"
 						"Protocols/embedded/read_write.c"
 						"Protocols/embedded/state.c"
+						"Protocols/embedded/tech.c"
 						"Local_Lib/local_lib.c"
                     INCLUDE_DIRS ".")

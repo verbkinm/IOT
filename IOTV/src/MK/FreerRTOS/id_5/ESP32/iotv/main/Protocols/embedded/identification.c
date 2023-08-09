@@ -73,5 +73,5 @@ void clearIdentification(struct Identification *ident)
     }
 
     free(ident);
-    ident = NULL;
+//    ident = NULL;
 }

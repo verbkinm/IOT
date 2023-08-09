@@ -7,9 +7,16 @@
 
 #include "Global_def.h"
 
+struct THP {
+	double 	temperature,
+			humidity,
+			pressure;
+	bool err;
+};
+
 void BME280_init(void);
 void BME280_deinit(void);
 
-void BME280_readValues(double *temp, double *press, double *hum);
+struct THP BME280_readValues();
 
 #endif /* MAIN_BME280_H_ */

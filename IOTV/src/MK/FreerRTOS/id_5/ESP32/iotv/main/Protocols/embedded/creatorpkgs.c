@@ -1,6 +1,7 @@
 #include "creatorpkgs.h"
 
-#include "string.h"
+//#include "string.h"
+
 struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
     struct Header *header = createHeader(data, size, error, expectedDataSize, cutDataSize);
@@ -16,11 +17,13 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
         }
 
         if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-            header->identification = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->pkg = createIdentification(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-            header->state = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
-        else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
-            header->readWrite = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+            header->pkg = createState(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+        else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment ==HEADER_ASSIGNMENT_WRITE)
+            header->pkg = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+        else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+            header->pkg = createTech(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);;
 
         // Если cutDataSize > 0, то пакет body сформирован
         // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
@@ -84,16 +87,17 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
         .flags = (Header_FLAGS)data[3],
         .version = data[0],
         .dataSize = bodySize,
-        .identification = NULL,
-        .readWrite = NULL,
-        .state = NULL
+        .pkg = NULL
+//        .identification = NULL,
+//        .readWrite = NULL,
+//        .state = NULL
     };
 
     memcpy((void *)headerResult, &header, sizeof(struct Header));
     *cutDataSize = HEADER_SIZE;
 
     return headerResult;
-};
+}
 
 bool isLittleEndian()
 {
@@ -117,7 +121,7 @@ void dataReverse(void* data, uint64_t size)
     }
 }
 
-struct Identification *createIdentification(uint8_t * const data, uint64_t dataSize, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+struct Identification *createIdentification(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
     if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
         return NULL;
@@ -126,7 +130,7 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
     *expectedDataSize = 0;
     *cutDataSize = 0;
 
-    if (dataSize < IDENTIFICATION_SIZE)
+    if (size < IDENTIFICATION_SIZE)
     {
         *expectedDataSize = IDENTIFICATION_SIZE;
         return NULL;
@@ -149,7 +153,7 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
         return NULL;
     }
 
-    if (dataSize < (uint64_t)(IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel))
+    if (size < (uint64_t)(IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel))
     {
         *expectedDataSize = IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel + numberReadChannel;
         return NULL;
@@ -175,15 +179,6 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
         .readChannelType = (numberReadChannel > 0) ? (const uint8_t *)malloc(numberReadChannel) : NULL,
     };
 
-    if (nameSize > 0)
-        memcpy((void *)identification.name, &data[IDENTIFICATION_SIZE], nameSize);
-    if (descriptionSize > 0)
-        memcpy((void *)identification.description, &data[IDENTIFICATION_SIZE + nameSize], descriptionSize);
-    if (numberWriteChannel > 0)
-        memcpy((void *)identification.writeChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize], numberWriteChannel);
-    if (numberReadChannel > 0)
-        memcpy((void *)identification.readChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel], numberReadChannel);
-
     memcpy((void *)identificationResult, &identification, sizeof(struct Identification));
 
     if ((nameSize > 0 && identification.name == NULL)
@@ -195,6 +190,15 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t dataS
         clearIdentification(identificationResult);
         return NULL;
     }
+
+    if (nameSize > 0)
+        memcpy((void *)identification.name, &data[IDENTIFICATION_SIZE], nameSize);
+    if (descriptionSize > 0)
+        memcpy((void *)identification.description, &data[IDENTIFICATION_SIZE + nameSize], descriptionSize);
+    if (numberWriteChannel > 0)
+        memcpy((void *)identification.writeChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize], numberWriteChannel);
+    if (numberReadChannel > 0)
+        memcpy((void *)identification.readChannelType, &data[IDENTIFICATION_SIZE + nameSize + descriptionSize + numberWriteChannel], numberReadChannel);
 
     *cutDataSize = identificationSize(identificationResult);
 
@@ -255,19 +259,19 @@ struct State *createState(uint8_t * const data, uint64_t size, bool *error, uint
         .data = (dataSize > 0) ? (uint8_t *)malloc(dataSize) : NULL
     };
 
-    if (nameSize > 0)
-        memcpy((void *)state.name, &data[STATE_SIZE], nameSize);
-    if (dataSize > 0)
-        memcpy((void *)state.data, &data[STATE_SIZE + nameSize], dataSize);
-
     memcpy((void *)stateResult, &state, sizeof(struct State));
 
-    if ( ((nameSize > 0) && (stateResult->name == NULL)) || ((dataSize > 0) && (stateResult->data == NULL)) )
+    if ( ((nameSize > 0) && (state.name == NULL)) || ((dataSize > 0) && (state.data == NULL)) )
     {
         *error = true;
         clearState(stateResult);
         return NULL;
     }
+
+    if (nameSize > 0)
+        memcpy((void *)state.name, &data[STATE_SIZE], nameSize);
+    if (dataSize > 0)
+        memcpy((void *)state.data, &data[STATE_SIZE + nameSize], dataSize);
 
     *cutDataSize = stateSize(stateResult);
 
@@ -328,23 +332,92 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
         .data = (dataSize > 0) ? (char *)malloc(dataSize) : NULL
     };
 
-    if (nameSize > 0)
-        memcpy((void *)readWrite.name, &data[READ_WRITE_SIZE], nameSize);
-    if (dataSize > 0)
-        memcpy((void *)readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
-
     memcpy((void *)readWriteReslut, &readWrite, sizeof(struct Read_Write));
 
-    if ( ((nameSize > 0) && (readWriteReslut->name == NULL)) || ((dataSize > 0) && (readWriteReslut->data == NULL)) )
+    if ( ((nameSize > 0) && (readWrite.name == NULL)) || ((dataSize > 0) && (readWrite.data == NULL)) )
     {
         *error = true;
         clearReadWrite(readWriteReslut);
         return NULL;
     }
 
+    if (nameSize > 0)
+        memcpy((void *)readWrite.name, &data[READ_WRITE_SIZE], nameSize);
+    if (dataSize > 0)
+        memcpy((void *)readWrite.data, &data[READ_WRITE_SIZE + nameSize], dataSize);
+
     *cutDataSize = readWriteSize(readWriteReslut);
 
     return readWriteReslut;
+}
+
+struct Tech *createTech(uint8_t * data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+{
+    if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
+        return NULL;
+
+    *error = false;
+    *expectedDataSize = 0;
+    *cutDataSize = 0;
+
+    if (size < TECH_SIZE)
+    {
+        *expectedDataSize = TECH_SIZE;
+        return NULL;
+    }
+
+    uint8_t type = data[0];
+//    uint8_t devState = data[1];
+    uint8_t flags = data[2];
+
+    uint32_t dataSize = 0;
+    memcpy(&dataSize, &data[3], 4); // 4 - Размер данных пакета (документация)
+
+    if (size < (TECH_SIZE + dataSize))
+    {
+        *expectedDataSize = TECH_SIZE + dataSize;
+        return NULL;
+    }
+
+    uint64_t sum = type + flags + dataSize;
+    uint64_t chSum = 0;
+    memcpy(&chSum, &data[7], 8); // 8 - Размер контрольной суммы пакета (документация)
+
+    if (sum != chSum)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    struct Tech *techResult = (struct Tech *)malloc(sizeof(struct Tech));
+    if (techResult == NULL)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    struct Tech tech = {
+        .flags = (Tech_FLAGS)flags,
+        .type = (Tech_TYPE)type,
+        .dataSize = dataSize,
+        .data = (dataSize > 0) ? (uint8_t *)malloc(dataSize) : NULL
+    };
+
+    if ((dataSize > 0) && (tech.data == NULL))
+    {
+        *error = true;
+        clearTech(techResult);
+        return NULL;
+    }
+
+    if (dataSize > 0)
+        memcpy((void *)tech.data, &data[TECH_SIZE], dataSize);
+
+    memcpy((void *)techResult, &tech, sizeof(struct Tech));
+
+    *cutDataSize = techSize(techResult);
+
+    return techResult;
 }
 
 bool isBodyMustBe(uint8_t type, uint8_t assigment)
@@ -357,6 +430,7 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
             case HEADER_ASSIGNMENT_STATE :
             case HEADER_ASSIGNMENT_READ :
             case HEADER_ASSIGNMENT_WRITE :
+            case HEADER_ASSIGNMENT_TECH :
             return true;
         }
     }
@@ -367,10 +441,10 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
             case HEADER_ASSIGNMENT_STATE :
             case HEADER_ASSIGNMENT_READ :
             case HEADER_ASSIGNMENT_WRITE :
+            case HEADER_ASSIGNMENT_TECH :
             return true;
         }
     }
 
     return false;
 }
-

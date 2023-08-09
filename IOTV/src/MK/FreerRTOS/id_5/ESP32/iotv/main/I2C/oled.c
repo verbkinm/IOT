@@ -9,8 +9,7 @@
 extern QueueHandle_t xQueueLedSignals;
 
 static const char *TAG = "OLED";
-static uint8_t current_page = 0;
-
+static bool isWifiConnect, isTCP_Connect;
 static lv_disp_t *disp = NULL;
 
 static bool OLED_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
@@ -21,10 +20,16 @@ static void OLED_increase_lvgl_tick(void *arg);
 
 void modf_two_part(float val, int *int_part, int *fract_part);
 
-static void draw_page_0(const struct DateTime *dt);
-static void draw_page_1(float t);
-static void draw_page_2(float h);
-static void draw_page_3(int d);
+static void draw_time(const struct DateTime *dt, lv_obj_t *scr);
+static void draw_date(const struct DateTime *dt, lv_obj_t *scr);
+static void draw_temperature(const struct THP *thp, lv_obj_t *scr);
+static void draw_humidity(const struct THP *thp, lv_obj_t *scr);
+static void draw_pressure(const struct THP *thp, lv_obj_t *scr);
+
+static void draw_status_wifi(lv_obj_t *scr);
+static void draw_status_TCP(lv_obj_t *scr);
+static void draw_status_rele(bool isReleOn, lv_obj_t *scr);
+static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10]);
 
 static bool OLED_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
@@ -74,139 +79,320 @@ void modf_two_part(float val, int *int_part, int *fract_part)
 	if (int_part == NULL || fract_part == NULL)
 		return;
 
-    double int_part_double;
+	double int_part_double;
 
-    *fract_part = modf(val, &int_part_double) * 100;
-    *int_part = int_part_double;
+	*fract_part = modf(val, &int_part_double) * 100;
+	*int_part = int_part_double;
 }
 
-
-static void draw_page_0(const struct DateTime *dt)
+static void draw_time(const struct DateTime *dt, lv_obj_t *scr)
 {
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
-	lv_obj_clean(scr);
-
-	if (dt == NULL)
-		return;
-
-	//	lv_disp_load_scr(scr);
-	//	screen_clear(disp);
-
-	//	lv_obj_t *my_rect = lv_obj_create(scr);
-	//	lv_obj_set_size(my_rect , 128, 64);
-	//	lv_obj_set_pos(my_rect , 0, 0);
-	//	lv_obj_set_style_bg_color(my_rect , lv_color_white(), 0);
-
 	// Время
 	lv_obj_t *label_time = lv_label_create(scr);
-	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
-	lv_label_set_text_fmt(label_time, "%02d %c %02d", dt->hour, ':', dt->minutes);
-	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
-	//	lv_obj_set_pos(label, 0, 10);
+	//	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
+	if (dt->err || dt->hour > 23 || dt->minutes > 59)
+		lv_label_set_text_fmt(label_time, "   -- : --");
+	else
+		lv_label_set_text_fmt(label_time, "%02d : %02d", dt->hour, dt->minutes);
+	lv_obj_set_pos(label_time, 47, 15);
 
 	static lv_style_t style_time;
 	lv_style_init(&style_time);
 
-	lv_style_set_text_font(&style_time, &lv_font_montserrat_30);
+	lv_style_set_text_font(&style_time, &lv_font_montserrat_24);
 	lv_obj_add_style(label_time, &style_time, 0);
+}
 
+static void draw_date(const struct DateTime *dt, lv_obj_t *scr)
+{
 	// Дата
 	lv_obj_t *label_date = lv_label_create(scr);
-	lv_label_set_long_mode(label_date, LV_LABEL_LONG_DOT); /* Circular scroll */
-	lv_label_set_text_fmt(label_date, "%02d . %02d . 20%02d", dt->date, dt->month, dt->year);
-	lv_obj_align(label_date, LV_ALIGN_BOTTOM_MID, 0, 0);
-	//	lv_obj_set_pos(label, 0, 10);
+	if (dt->err || dt->date > 31 || dt->month > 12)
+		lv_label_set_text_fmt(label_date, " -- . -- . ----");
+	else
+		lv_label_set_text_fmt(label_date, "%02d.%02d.20%02d", dt->date, dt->month, dt->year);
+	lv_obj_set_pos(label_date, 49, 45);
 
 	static lv_style_t style_date;
 	lv_style_init(&style_date);
+	lv_style_set_text_letter_space(&style_date, 2);
 
-	lv_style_set_text_font(&style_date, &lv_font_montserrat_12);
+	lv_style_set_text_font(&style_date, &lv_font_montserrat_10);
 	lv_obj_add_style(label_date, &style_date, 0);
-
-
 }
 
-static void draw_page_1(float t)
+static void draw_temperature(const struct THP *thp, lv_obj_t *scr)
 {
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
-	lv_obj_clean(scr);
-	//	lv_disp_load_scr(scr);
+	lv_obj_t *parent = lv_obj_create(scr);
+	lv_obj_set_size(parent, 43, 22);
+	lv_obj_set_pos(parent, 0, 0);
+	lv_obj_set_style_border_width(parent, 1, 0);
+	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
+	lv_obj_set_style_radius(parent , 0, 0);
+	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
 
-	//	lv_obj_t *my_rect = lv_obj_create(scr);
-	//	lv_obj_set_size(my_rect , 128, 64);
-	//	lv_obj_set_pos(my_rect , 0, 0);
-	//	lv_obj_set_style_bg_color(my_rect , lv_color_white(), 0);
+	lv_obj_t *label_temp = lv_label_create(parent);
+	//	lv_label_set_long_mode(label_temp, LV_LABEL_LONG_DOT); /* Circular scroll */
 
-	// Температура
-	lv_obj_t *label_time = lv_label_create(scr);
-	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
+	int part, fract;
+	modf_two_part(thp->temperature, &part, &fract);
 
-    int part, fract;
-    modf_two_part(t, &part, &fract);
+	char buff[5];
+	itoa(part, buff, 10);
+	buff[4] = 0;
 
-	lv_label_set_text_fmt(label_time, "%d.%.02d  C", part, fract);
-	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
+	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
+	if (strlen(buff) > 3 || thp->err)
+		lv_label_set_text_fmt(label_temp, "err");
+	else
+	{
+		if (part > 0)
+		{
+			memmove(&buff[1], buff, sizeof(buff) - 1);
+			buff[0] = '+';
+		}
+		lv_label_set_text_fmt(label_temp, "%s", buff);
+	}
 
-	static lv_style_t style_time;
-	lv_style_init(&style_time);
+	lv_obj_align(label_temp, LV_ALIGN_CENTER, 0, 0);
 
-	lv_style_set_text_font(&style_time, &lv_font_montserrat_22);
-	lv_obj_add_style(label_time, &style_time, 0);
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_temp, &style, 0);
 
 	// Символ градуса
 	lv_obj_t *my_Cir = lv_obj_create(scr);
-	lv_obj_set_scrollbar_mode(my_Cir , LV_SCROLLBAR_MODE_ON);
-	lv_obj_set_size(my_Cir, 7, 7);
-	lv_obj_set_pos(my_Cir, 84, 20);
+	lv_obj_set_scrollbar_mode(my_Cir , LV_SCROLLBAR_MODE_OFF);
+	lv_obj_set_size(my_Cir, 3, 3);
 	lv_obj_set_style_border_width(my_Cir , 1, 0);
 	lv_obj_set_style_border_color(my_Cir, lv_color_black(), 0);
-	//	lv_obj_set_style_bg_color(my_Cir , lv_palette_lighten(LV_PALETTE_YELLOW, 255), 0);
-	lv_obj_set_style_radius(my_Cir , LV_RADIUS_CIRCLE, 0);
+	lv_obj_set_style_radius(my_Cir, LV_RADIUS_CIRCLE, 0);
+
+	int cirX = -3;
+	// Расположение символа градуса относительно длины строки
+	if (thp->err != true)
+	{
+		if (strlen(buff) == 1)
+			cirX = 29;
+		else if (strlen(buff) == 2)
+			cirX = 32;
+		else if (strlen(buff) == 3)
+			cirX = 35;
+	}
+	lv_obj_set_pos(my_Cir, cirX, 4);
 }
 
-static void draw_page_2(float h)
+static void draw_humidity(const struct THP *thp, lv_obj_t *scr)
 {
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
-	lv_obj_clean(scr);
-	//	lv_disp_load_scr(scr);
+	lv_obj_t *parent = lv_obj_create(scr);
+	lv_obj_set_size(parent, 43, 22);
+	lv_obj_set_pos(parent, 0, 21);
+	lv_obj_set_style_border_width(parent, 1, 0);
+	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
+	lv_obj_set_style_radius(parent , 0, 0);
+	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
 
-	// Влажность
-	lv_obj_t *label_time = lv_label_create(scr);
-	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
+	lv_obj_t *label_hum = lv_label_create(parent);
 
-    int part, fract;
-    modf_two_part(h, &part, &fract);
+	int part, fract;
+	modf_two_part(thp->humidity, &part, &fract);
 
-	lv_label_set_text_fmt(label_time, "%d.%.02d %%", part, fract);
-	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
+	char buff[5];
+	itoa(part, buff, 10);
+	buff[4] = 0;
 
-	static lv_style_t style_time;
-	lv_style_init(&style_time);
+	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
+	if (strlen(buff) > 3 || thp->err)
+		lv_label_set_text_fmt(label_hum, "err");
+	else
+		lv_label_set_text_fmt(label_hum, "%s%%", buff);
 
-	lv_style_set_text_font(&style_time, &lv_font_montserrat_22);
-	lv_obj_add_style(label_time, &style_time, 0);
+	lv_obj_align(label_hum, LV_ALIGN_CENTER, 0, 0);
+
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_hum, &style, 0);
 }
 
-static void draw_page_3(int d)
+static void draw_pressure(const struct THP *thp, lv_obj_t *scr)
 {
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
-	lv_obj_clean(scr);
-	taskYIELD();
+	lv_obj_t *parent = lv_obj_create(scr);
+	lv_obj_set_size(parent, 43, 22);
+	lv_obj_set_pos(parent, 0, 42);
+	lv_obj_set_style_border_width(parent, 1, 0);
+	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
+	lv_obj_set_style_radius(parent , 0, 0);
+	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
 
-	// Дистанция
-	lv_obj_t *label_time = lv_label_create(scr);
-	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
+	lv_obj_t *label_hum = lv_label_create(parent);
 
-	lv_label_set_text_fmt(label_time, "%d mm", d);
-	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
+	int part, fract;
+	double convert = thp->pressure * 7.50062 * 0.001;
+	modf_two_part(convert, &part, &fract);
 
-	static lv_style_t style_time;
-	lv_style_init(&style_time);
+	char buff[5];
+	itoa(part, buff, 10);
+	buff[4] = 0;
 
-	lv_style_set_text_font(&style_time, &lv_font_montserrat_22);
-	lv_obj_add_style(label_time, &style_time, 0);
+	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
+	if (strlen(buff) > 3 || thp->err)
+		lv_label_set_text_fmt(label_hum, "err");
+	else
+		lv_label_set_text_fmt(label_hum, "%s", buff);
+
+	lv_obj_align(label_hum, LV_ALIGN_CENTER, 0, 0);
+
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_hum, &style, 0);
 }
 
+static void draw_status_wifi(lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	lv_obj_t *canvas = lv_canvas_create(scr);
+	lv_obj_set_size(canvas, 10, 10);
+	lv_obj_set_pos(canvas, 117, 0);
+	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas, 0, lv_color_black());
+
+	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
+
+	uint8_t wifi_connected[10][10] = {
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+			{1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+			{1, 0, 0, 1, 1, 1, 1, 0, 0, 1},
+			{0, 0, 1, 0, 0, 0, 0, 1, 0, 0},
+			{0, 1, 0, 0, 1, 1, 0, 0, 1, 0},
+			{0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+	};
+
+	uint8_t wifi_disconnected[10][10] = {
+			{1, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{1, 1, 0, 1, 1, 1, 1, 1, 1, 0},
+			{0, 1, 1, 0, 0, 0, 0, 0, 1, 1},
+			{1, 0, 1, 1, 1, 1, 1, 0, 0, 1},
+			{0, 0, 1, 1, 1, 0, 0, 1, 0, 0},
+			{0, 1, 0, 0, 1, 1, 0, 0, 1, 0},
+			{0, 0, 0, 1, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 1, 1, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 1, 1, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 1, 1}
+	};
+
+	uint8_t (*arr)[10][10] = isWifiConnect ? &wifi_connected : &wifi_disconnected;
+	draw_status_on_canva(canvas, arr);
+}
+
+static void draw_status_TCP(lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	lv_obj_t *canvas = lv_canvas_create(scr);
+	lv_obj_set_size(canvas, 10, 10);
+	lv_obj_set_pos(canvas, 102, 0);
+	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas, 0, lv_color_black());
+
+	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
+
+	uint8_t tcp_connected[10][10] = {
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 0, 1, 1, 0, 1, 1, 1},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0}
+	};
+
+	uint8_t tcp_disconnected[10][10] = {
+			{1, 1, 0, 1, 1, 1, 1, 1, 1, 1},
+			{0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+			{1, 0, 1, 1, 0, 1, 0, 1, 1, 1},
+			{0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 1, 1, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 1, 1, 0},
+			{0, 0, 0, 1, 1, 1, 1, 0, 1, 1},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 1}
+	};
+
+	uint8_t (*arr)[10][10] = isTCP_Connect ? &tcp_connected : &tcp_disconnected;
+	draw_status_on_canva(canvas, arr);
+}
+
+static void draw_status_rele(bool isReleOn, lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	lv_obj_t *canvas = lv_canvas_create(scr);
+	lv_obj_set_size(canvas, 10, 10);
+	lv_obj_set_pos(canvas, 87, 0);
+	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas, 0, lv_color_black());
+
+	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
+
+	uint8_t rele_on[10][10] = {
+			{0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+			{0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{1, 0, 1, 1, 1, 1, 1, 1, 0, 1},
+			{0, 1, 1, 0, 0, 0, 0, 1, 1, 0},
+			{0, 1, 1, 1, 0, 0, 1, 1, 1, 0},
+			{1, 0, 1, 1, 1, 0, 1, 1, 0, 1},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 0, 0, 1, 1, 0, 0, 1, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+	};
+
+	uint8_t rele_off[10][10] = {
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 0, 1, 0, 0, 0, 0, 1, 0, 0},
+			{0, 1, 0, 1, 1, 1, 1, 0, 1, 0},
+			{0, 1, 0, 0, 1, 1, 0, 0, 1, 0},
+			{0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
+			{0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			{0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+	};
+
+	uint8_t (*arr)[10][10] = isReleOn ? &rele_on : &rele_off;
+	draw_status_on_canva(canvas, arr);
+}
+
+static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10])
+{
+	for(uint8_t y = 0; y < 10; y++)
+	{
+		for(uint8_t x = 0; x < 10; x++)
+		{
+			if ((*arr)[y][x])
+				lv_canvas_set_px(canvas, x, y, lv_color_black());
+		}
+	}
+}
 
 void OLED_init(void)
 {
@@ -259,7 +445,7 @@ void OLED_init(void)
 	disp_drv.rounder_cb = OLED_lvgl_rounder;
 	disp_drv.set_px_cb = OLED_lvgl_set_px_cb;
 	disp = lv_disp_drv_register(&disp_drv);
-	//	lv_disp_set_default(disp);
+	lv_disp_set_default(disp);
 
 
 	ESP_LOGI(TAG, "Install LVGL tick timer");
@@ -280,25 +466,51 @@ void OLED_init(void)
 
 }
 
-void OLED_Draw_Page(float t, float h, float p, const struct DateTime *dt)
+void OLED_boot_screen(void)
 {
-	switch (current_page)
-	{
-	case 0:
-		draw_page_0(dt);
-		break;
-	case 1:
-		draw_page_1(t);
-		break;
-	case 2:
-		draw_page_2(h);
-		break;
-	default:
-		break;
-	}
+	lv_obj_t *scr = lv_disp_get_scr_act(disp);
+	lv_obj_clean(scr);
 
-	if (++current_page > 2)
-		current_page = 0;
+	lv_obj_t *label1 = lv_label_create(scr);
+	lv_obj_t *label2 = lv_label_create(scr);
+	//	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
+
+	lv_label_set_text_fmt(label1, "IOTV ID5");
+	lv_label_set_text_fmt(label2, "version: %s", VERSION);
+
+	lv_style_t style1, style2;
+	lv_style_init(&style1);
+	lv_style_init(&style2);
+
+	lv_style_set_text_font(&style1, &lv_font_montserrat_24);
+	lv_obj_add_style(label1, &style1, 0);
+	lv_obj_align(label1, LV_ALIGN_CENTER, 0, -10);
+
+	lv_style_set_text_font(&style2, &lv_font_montserrat_14);
+	lv_obj_add_style(label2, &style2, 0);
+	lv_obj_align(label2, LV_ALIGN_CENTER, 0, +10);
+
+	lv_timer_handler();
+//	taskYIELD();
+}
+
+void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn)
+{
+	if (dt == NULL || thp == NULL)
+		return;
+
+	lv_obj_t *scr = lv_disp_get_scr_act(disp);
+	lv_obj_clean(scr);
+
+	draw_time(dt, scr);
+	draw_date(dt, scr);
+	draw_temperature(thp, scr);
+	draw_humidity(thp, scr);
+	draw_pressure(thp, scr);
+
+	draw_status_wifi(scr);
+	draw_status_TCP(scr);
+	draw_status_rele(isReleOn, scr);
 
 	lv_timer_handler();
 	taskYIELD();
@@ -306,7 +518,17 @@ void OLED_Draw_Page(float t, float h, float p, const struct DateTime *dt)
 
 void OLED_Draw_Distance(int d)
 {
-	draw_page_3(d);
+	//	draw_page_3(d);
 	lv_timer_handler();
 	taskYIELD();
+}
+
+void OLED_setWIFI_State(bool val)
+{
+	isWifiConnect = val;
+}
+
+void OLED_setTCP_State(bool val)
+{
+	isTCP_Connect = val;
 }

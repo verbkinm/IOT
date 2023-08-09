@@ -29,11 +29,11 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     outData[1] = body->state;
     outData[2] = body->flags;
 
-    if (outDataSize < stateSize(body))
-        return 0;
+//    if (outDataSize < stateSize(body))
+//        return 0;
 
     uint32_t dataSize =  body->dataSize;
-    memcpy(&outData[3], &dataSize, 4);
+    memcpy(&outData[3], &dataSize, 4); // 4 - документация
 
     uint64_t chSum =  body->nameSize + body->state + body->flags + body->dataSize;
     memcpy(&outData[7], &chSum, 8);
@@ -55,5 +55,5 @@ void clearState(struct State *state)
         free((void *)state->data);
 
     free(state);
-    state = NULL;
+//    state = NULL;
 }

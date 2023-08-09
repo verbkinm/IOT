@@ -12,6 +12,7 @@
 
 #include "Global_def.h"
 #include "LedSignals.h"
+#include "I2C/oled.h"
 
 void tcp_server_task(void *pvParameters);
 

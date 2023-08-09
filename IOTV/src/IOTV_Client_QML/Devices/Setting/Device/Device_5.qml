@@ -92,8 +92,9 @@ Rectangle {
                     verticalCenter: parent.verticalCenter
                     //                    leftMargin: 15
                 }
-                onValueChanged: {
-                    device.setDataFromString(1, parseInt(value).toString())
+                onPressedChanged: {
+                    if (!pressed)
+                     device.setDataFromString(1, parseInt(value).toString())
                 }
             }
 

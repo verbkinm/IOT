@@ -19,12 +19,13 @@
 
 struct DateTime {
 	uint8_t seconds,
-	minutes,
-	hour,
-	day,
-	date,
-	month,
-	year;
+			minutes,
+			hour,
+			day,
+			date,
+			month,
+			year;
+	bool err;
 };
 
 struct DateTime DS3231_DataTime(void);

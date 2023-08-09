@@ -3,11 +3,13 @@
 
 #include <stdint.h>
 
+#define VERSION								"1.1"
+
 // TCP
-#define PORT                        		CONFIG_EXAMPLE_PORT
-#define KEEPALIVE_IDLE              		CONFIG_EXAMPLE_KEEPALIVE_IDLE
-#define KEEPALIVE_INTERVAL          		CONFIG_EXAMPLE_KEEPALIVE_INTERVAL
-#define KEEPALIVE_COUNT             		CONFIG_EXAMPLE_KEEPALIVE_COUNT
+#define PORT                        		8888
+#define KEEPALIVE_IDLE              		5
+#define KEEPALIVE_INTERVAL          		5
+#define KEEPALIVE_COUNT             		3
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
 // WIFI event
@@ -16,8 +18,10 @@
 #define WIFI_FAIL_BIT      					BIT2
 
 // WIFI
-#define WIFI_SSID							"TP-Link_A6BE"
-#define WIFI_PASSWORD						"41706831"
+#define WIFI_SSID							"realme 9 Pro+"
+#define WIFI_PASSWORD						"y3z4pfrm"
+//#define WIFI_SSID							"TP-Link_A6BE"
+//#define WIFI_PASSWORD						"41706831"
 
 // I2C
 #define I2C_MASTER_SCL_IO           		22					       /*!< GPIO number used for I2C master clock */

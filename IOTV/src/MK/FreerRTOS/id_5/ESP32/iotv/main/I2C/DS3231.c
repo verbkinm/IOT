@@ -19,6 +19,7 @@ struct DateTime DS3231_DataTime(void)
 		if (i2c_master_write_read_device(I2C_MASTER_NUM, DS3231_ADDR, &reg, 1, (data_read + reg), 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 		{
 			ESP_LOGE(TAG, "read error");
+			dt.err = true;
 		}
 	}
 

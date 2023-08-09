@@ -144,6 +144,7 @@ void tcp_server_task(void *pvParameters)
 		}
 		ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
 		LedSignals_setTCPState(true);
+		OLED_setTCP_State(true);
 
 		do_retransmit(sock);
 
@@ -156,6 +157,7 @@ void tcp_server_task(void *pvParameters)
 		shutdown(sock, SHUT_RDWR); //0
 		close(sock);
 		LedSignals_setTCPState(false);
+		OLED_setTCP_State(false);
 
 		realBufSize = 0;
 		expextedDataSize = 0;

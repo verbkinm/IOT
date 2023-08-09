@@ -28,11 +28,11 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
     outData[1] = body->channelNumber;
     outData[2] = body->flags;
 
-    if (outDataSize < readWriteSize(body))
-        return 0;
+//    if (outDataSize < readWriteSize(body))
+//        return 0;
 
     uint32_t dataSize =  body->dataSize;
-    memcpy((void *)&outData[3], &dataSize, 4);
+    memcpy((void *)&outData[3], &dataSize, 4); // 4 - документация
 
     uint64_t chSum =  body->nameSize + body->channelNumber + body->flags + body->dataSize;
     memcpy(&outData[7], &chSum, 8);
@@ -54,5 +54,5 @@ void clearReadWrite(struct Read_Write *readWrite)
         free((void *)readWrite->data);
 
     free(readWrite);
-    readWrite = NULL;
+//    readWrite = NULL;
 }
