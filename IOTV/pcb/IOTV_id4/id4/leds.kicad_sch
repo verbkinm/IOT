@@ -2559,9 +2559,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 6645f47a-1da0-4ab7-939b-c012021749cc))
+    (pin "2" (uuid b3ac5b84-01ec-4454-957a-94bed88bdeb2))
     (pin "3" (uuid c55c17d4-8b0a-4a08-af0f-9c9d9493460f))
     (pin "4" (uuid bfec1482-03b5-4d01-8045-40f1e1a7a16a))
-    (pin "2" (uuid b3ac5b84-01ec-4454-957a-94bed88bdeb2))
     (instances
       (project "id4"
         (path "/c803e514-1b04-4687-9a92-b8766a99fa37"
