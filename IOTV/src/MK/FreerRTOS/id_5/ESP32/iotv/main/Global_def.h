@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define VERSION								"1.1"
-
 // TCP
 #define PORT                        		8888
 #define KEEPALIVE_IDLE              		5
@@ -74,7 +72,8 @@
 #define OLED_LCD_CMD_BITS           		8
 #define OLED_LCD_PARAM_BITS         		8
 
-#define OLED_LVGL_TICK_PERIOD_MS    		2
+#define OLED_LVGL_TICK_PERIOD_MS    		1
+#define OLED_BOOT_SCREEN_TIME				5000
 
 // Регистры BME280
 enum

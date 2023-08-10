@@ -16,6 +16,7 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
+#include "esp_app_desc.h"
 #include "lvgl.h"
 #include "esp_log.h"
 #include "esp_err.h"
@@ -28,7 +29,6 @@
 void OLED_init(void);
 void OLED_boot_screen(void);
 void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn);
-void OLED_Draw_Distance(int d);
 void OLED_setWIFI_State(bool val);
 void OLED_setTCP_State(bool val);
 

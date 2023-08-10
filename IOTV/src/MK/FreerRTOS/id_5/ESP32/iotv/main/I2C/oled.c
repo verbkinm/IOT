@@ -31,6 +31,8 @@ static void draw_status_TCP(lv_obj_t *scr);
 static void draw_status_rele(bool isReleOn, lv_obj_t *scr);
 static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10]);
 
+static void anim_x_cb(void * var, int32_t v);
+
 static bool OLED_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
 	lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
@@ -463,7 +465,12 @@ void OLED_init(void)
 		struct LedSignalPkg pkg = {TAG, OLED_INIT_FAIL};
 		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 	}
+}
 
+static void anim_x_cb(void * var, int32_t v)
+{
+	lv_obj_set_x(var, v);
+	//	lv_obj_set_style_opa(var, v, 0);
 }
 
 void OLED_boot_screen(void)
@@ -473,10 +480,9 @@ void OLED_boot_screen(void)
 
 	lv_obj_t *label1 = lv_label_create(scr);
 	lv_obj_t *label2 = lv_label_create(scr);
-	//	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
 
 	lv_label_set_text_fmt(label1, "IOTV ID5");
-	lv_label_set_text_fmt(label2, "version: %s", VERSION);
+	lv_label_set_text_fmt(label2, "version: %s", esp_app_get_description()->version);
 
 	lv_style_t style1, style2;
 	lv_style_init(&style1);
@@ -490,8 +496,36 @@ void OLED_boot_screen(void)
 	lv_obj_add_style(label2, &style2, 0);
 	lv_obj_align(label2, LV_ALIGN_CENTER, 0, +10);
 
-	lv_timer_handler();
-//	taskYIELD();
+	lv_anim_t a;
+	lv_anim_init(&a);
+	lv_anim_set_var(&a, label1);
+	lv_anim_set_time(&a, 1000);
+	//	lv_anim_set_playback_delay(&a, 1500);
+	//	lv_anim_set_playback_time(&a, 500);
+	//	lv_anim_set_repeat_delay(&a, 500);
+	lv_anim_set_repeat_count(&a, 0/*LV_ANIM_REPEAT_INFINITE*/);
+	lv_anim_set_path_cb(&a, lv_anim_path_bounce);
+
+	lv_anim_set_exec_cb(&a, anim_x_cb);
+	lv_anim_set_values(&a, 128, 0);
+	lv_anim_start(&a);
+
+	lv_anim_t b;
+	lv_anim_init(&b);
+	lv_anim_set_var(&b, label2);
+	lv_anim_set_time(&b, 1000);
+	lv_anim_set_repeat_count(&b, 0/*LV_ANIM_REPEAT_INFINITE*/);
+	lv_anim_set_path_cb(&b, lv_anim_path_bounce);
+
+	lv_anim_set_exec_cb(&b, anim_x_cb);
+	lv_anim_set_values(&b, 128, 0);
+	lv_anim_start(&b);
+
+	for (int i = 0; i < OLED_BOOT_SCREEN_TIME / 10; ++i)
+	{
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+		lv_timer_handler();
+	}
 }
 
 void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn)
@@ -513,14 +547,6 @@ void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isRel
 	draw_status_rele(isReleOn, scr);
 
 	lv_timer_handler();
-	taskYIELD();
-}
-
-void OLED_Draw_Distance(int d)
-{
-	//	draw_page_3(d);
-	lv_timer_handler();
-	taskYIELD();
 }
 
 void OLED_setWIFI_State(bool val)

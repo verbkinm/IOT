@@ -389,8 +389,6 @@ void OLED_Task(void *pvParameters)
 	OLED_init();
 	OLED_boot_screen();
 
-	vTaskDelay(10000 / portTICK_PERIOD_MS);
-
 	while(true)
 	{
 		struct DateTime dt = DS3231_DataTime();
