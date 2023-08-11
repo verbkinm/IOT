@@ -21,13 +21,16 @@
 #include "esp_log.h"
 #include "esp_err.h"
 #include "math.h"
+#include "driver/i2c.h"
+#include "esp_lvgl_port.h"
 
 #include "Global_def.h"
 #include "DS3231.h"
 #include "BME280.h"
 
-void OLED_init(void);
+void OLED_init2(void);
 void OLED_boot_screen(void);
+void OLED_init_draw_element(void);
 void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn);
 void OLED_setWIFI_State(bool val);
 void OLED_setTCP_State(bool val);

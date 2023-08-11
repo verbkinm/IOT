@@ -45,6 +45,21 @@
 #define RELE_PIN 							GPIO_NUM_32
 #define BORDER_DISTANCE_DEFAULT 			150
 
+#define CH_RELAY_STATE 	0
+#define CH_BORDER		1
+#define CH_SEC			2
+#define CH_MIN			3
+#define	CH_HOUR			4
+#define	CH_DAY			5
+#define CH_DATE			6
+#define CH_MONTH		7
+#define CH_YEAR			8
+#define CH_RANGE		9
+#define CH_LUX			10
+#define CH_TEMP			11
+#define CH_HUM			12
+#define CH_PRES			13
+
 // Номер ошибки
 #define I2C_INIT_FAIL						1
 #define I2C_DEINIT_FAIL						2

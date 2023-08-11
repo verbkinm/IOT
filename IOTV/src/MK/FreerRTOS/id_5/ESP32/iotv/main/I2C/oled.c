@@ -6,75 +6,56 @@
  */
 #include "oled.h"
 
-extern QueueHandle_t xQueueLedSignals;
+//extern QueueHandle_t xQueueLedSignals;
 
 static const char *TAG = "OLED";
-static bool isWifiConnect, isTCP_Connect;
-static lv_disp_t *disp = NULL;
 
-static bool OLED_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
-static void OLED_lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map);
-static void OLED_lvgl_set_px_cb(lv_disp_drv_t *disp_drv, uint8_t *buf, lv_coord_t buf_w, lv_coord_t x, lv_coord_t y, lv_color_t color, lv_opa_t opa);
-static void OLED_lvgl_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area);
-static void OLED_increase_lvgl_tick(void *arg);
+static bool isWifiConnect, isTCP_Connect;
+
+static lv_disp_t *glob_disp = NULL;
+
+static lv_obj_t *label_time = NULL;
+static lv_obj_t *label_date = NULL;
+
+static lv_obj_t *label_temperature = NULL;
+static lv_obj_t *temperature_obj = NULL;
+static lv_obj_t *temperature_symbol = NULL;
+
+static lv_obj_t *label_humidity = NULL;
+static lv_obj_t *humidity_obj = NULL;
+
+static lv_obj_t *label_pressure = NULL;
+static lv_obj_t *pressure_obj = NULL;
+
+static lv_obj_t *canvas_wifi = NULL;
+static lv_obj_t *canvas_tcp = NULL;
+static lv_obj_t *canvas_rele = NULL;
 
 void modf_two_part(float val, int *int_part, int *fract_part);
 
-static void draw_time(const struct DateTime *dt, lv_obj_t *scr);
-static void draw_date(const struct DateTime *dt, lv_obj_t *scr);
-static void draw_temperature(const struct THP *thp, lv_obj_t *scr);
-static void draw_humidity(const struct THP *thp, lv_obj_t *scr);
-static void draw_pressure(const struct THP *thp, lv_obj_t *scr);
+static void init_draw_time(lv_obj_t *scr);
+static void init_draw_date(lv_obj_t *scr);
 
-static void draw_status_wifi(lv_obj_t *scr);
-static void draw_status_TCP(lv_obj_t *scr);
-static void draw_status_rele(bool isReleOn, lv_obj_t *scr);
+static void init_draw_temperature(lv_obj_t *scr);
+static void init_draw_humidity(lv_obj_t *scr);
+static void init_draw_pressure(lv_obj_t *scr);
+
+static void init_draw_wifi(lv_obj_t *scr);
+static void init_draw_tcp(lv_obj_t *scr);
+static void init_draw_relestate(lv_obj_t *scr);
+
+static void draw_time(const struct DateTime *dt);
+static void draw_date(const struct DateTime *dt);
+static void draw_temperature(const struct THP *thp);
+static void draw_humidity(const struct THP *thp);
+static void draw_pressure(const struct THP *thp);
+
+static void draw_status_wifi();
+static void draw_status_TCP();
+static void draw_status_rele(bool isReleOn);
 static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10]);
 
 static void anim_x_cb(void * var, int32_t v);
-
-static bool OLED_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
-{
-	lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
-	lv_disp_flush_ready(disp_driver);
-	return false;
-}
-
-static void OLED_lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
-{
-	esp_lcd_panel_handle_t panel_handle = (esp_lcd_panel_handle_t) drv->user_data;
-	int offsetx1 = area->x1;
-	int offsetx2 = area->x2;
-	int offsety1 = area->y1;
-	int offsety2 = area->y2;
-	// copy a buffer's content to a specific area of the display
-	esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 + 1, offsety2 + 1, color_map);
-}
-
-static void OLED_lvgl_set_px_cb(lv_disp_drv_t *disp_drv, uint8_t *buf, lv_coord_t buf_w, lv_coord_t x, lv_coord_t y,
-		lv_color_t color, lv_opa_t opa)
-{
-	uint16_t byte_index = x + (( y >> 3 ) * buf_w);
-	uint8_t  bit_index  = y & 0x7;
-
-	if ((color.full == 0) && (LV_OPA_TRANSP != opa)) {
-		buf[byte_index] |= (1 << bit_index);
-	} else {
-		buf[byte_index] &= ~(1 << bit_index);
-	}
-}
-
-static void OLED_lvgl_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
-{
-	area->y1 = area->y1 & (~0x7);
-	area->y2 = area->y2 | 0x7;
-}
-
-static void OLED_increase_lvgl_tick(void *arg)
-{
-	/* Tell LVGL how many milliseconds has elapsed */
-	lv_tick_inc(OLED_LVGL_TICK_PERIOD_MS);
-}
 
 void modf_two_part(float val, int *int_part, int *fract_part)
 {
@@ -87,15 +68,9 @@ void modf_two_part(float val, int *int_part, int *fract_part)
 	*int_part = int_part_double;
 }
 
-static void draw_time(const struct DateTime *dt, lv_obj_t *scr)
+static void init_draw_time(lv_obj_t *scr)
 {
-	// Время
-	lv_obj_t *label_time = lv_label_create(scr);
-	//	lv_label_set_long_mode(label_time, LV_LABEL_LONG_DOT); /* Circular scroll */
-	if (dt->err || dt->hour > 23 || dt->minutes > 59)
-		lv_label_set_text_fmt(label_time, "   -- : --");
-	else
-		lv_label_set_text_fmt(label_time, "%02d : %02d", dt->hour, dt->minutes);
+	label_time = lv_label_create(scr);
 	lv_obj_set_pos(label_time, 47, 15);
 
 	static lv_style_t style_time;
@@ -105,47 +80,164 @@ static void draw_time(const struct DateTime *dt, lv_obj_t *scr)
 	lv_obj_add_style(label_time, &style_time, 0);
 }
 
-static void draw_date(const struct DateTime *dt, lv_obj_t *scr)
+static void init_draw_date(lv_obj_t *scr)
 {
-	// Дата
-	lv_obj_t *label_date = lv_label_create(scr);
-	if (dt->err || dt->date > 31 || dt->month > 12)
-		lv_label_set_text_fmt(label_date, " -- . -- . ----");
-	else
-		lv_label_set_text_fmt(label_date, "%02d.%02d.20%02d", dt->date, dt->month, dt->year);
+	label_date = lv_label_create(scr);
 	lv_obj_set_pos(label_date, 49, 45);
 
 	static lv_style_t style_date;
 	lv_style_init(&style_date);
-	lv_style_set_text_letter_space(&style_date, 2);
 
 	lv_style_set_text_font(&style_date, &lv_font_montserrat_10);
+	lv_style_set_text_letter_space(&style_date, 2);
 	lv_obj_add_style(label_date, &style_date, 0);
 }
 
-static void draw_temperature(const struct THP *thp, lv_obj_t *scr)
+static void init_draw_temperature(lv_obj_t *scr)
 {
-	lv_obj_t *parent = lv_obj_create(scr);
-	lv_obj_set_size(parent, 43, 22);
-	lv_obj_set_pos(parent, 0, 0);
-	lv_obj_set_style_border_width(parent, 1, 0);
-	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
-	lv_obj_set_style_radius(parent , 0, 0);
-	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
+	temperature_obj = lv_obj_create(scr);
+	lv_obj_set_size(temperature_obj, 43, 22);
+	lv_obj_set_pos(temperature_obj, 0, 0);
+	lv_obj_set_style_border_width(temperature_obj, 1, 0);
+	lv_obj_set_style_border_color(temperature_obj, lv_color_black(), 0);
+	lv_obj_set_style_radius(temperature_obj , 0, 0);
+	lv_obj_set_scrollbar_mode(temperature_obj , LV_SCROLLBAR_MODE_OFF);
 
-	lv_obj_t *label_temp = lv_label_create(parent);
-	//	lv_label_set_long_mode(label_temp, LV_LABEL_LONG_DOT); /* Circular scroll */
+	label_temperature = lv_label_create(temperature_obj);
+	lv_obj_align(label_temperature, LV_ALIGN_CENTER, 0, 0);
 
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_temperature, &style, 0);
+
+	// Символ градуса
+	temperature_symbol = lv_obj_create(scr);
+	lv_obj_set_scrollbar_mode(temperature_symbol , LV_SCROLLBAR_MODE_OFF);
+	lv_obj_set_size(temperature_symbol, 3, 3);
+	lv_obj_set_style_border_width(temperature_symbol , 1, 0);
+	lv_obj_set_style_border_color(temperature_symbol, lv_color_black(), 0);
+	lv_obj_set_style_radius(temperature_symbol, LV_RADIUS_CIRCLE, 0);
+
+	lv_obj_set_pos(temperature_symbol, -3, 0);
+}
+
+static void init_draw_humidity(lv_obj_t *scr)
+{
+	humidity_obj = lv_obj_create(scr);
+	lv_obj_set_size(humidity_obj, 43, 22);
+	lv_obj_set_pos(humidity_obj, 0, 21);
+	lv_obj_set_style_border_width(humidity_obj, 1, 0);
+	lv_obj_set_style_border_color(humidity_obj, lv_color_black(), 0);
+	lv_obj_set_style_radius(humidity_obj , 0, 0);
+	lv_obj_set_scrollbar_mode(humidity_obj , LV_SCROLLBAR_MODE_OFF);
+
+	label_humidity = lv_label_create(humidity_obj);
+	lv_obj_align(label_humidity, LV_ALIGN_CENTER, 0, 0);
+
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_humidity, &style, 0);
+}
+
+static void init_draw_pressure(lv_obj_t *scr)
+{
+	pressure_obj = lv_obj_create(scr);
+	lv_obj_set_size(pressure_obj, 43, 22);
+	lv_obj_set_pos(pressure_obj, 0, 42);
+	lv_obj_set_style_border_width(pressure_obj, 1, 0);
+	lv_obj_set_style_border_color(pressure_obj, lv_color_black(), 0);
+	lv_obj_set_style_radius(pressure_obj , 0, 0);
+	lv_obj_set_scrollbar_mode(pressure_obj , LV_SCROLLBAR_MODE_OFF);
+
+	label_pressure = lv_label_create(pressure_obj);
+	lv_obj_align(label_pressure, LV_ALIGN_CENTER, 0, 0);
+
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_text_letter_space(&style, 1);
+
+	lv_style_set_text_font(&style, &lv_font_montserrat_14);
+	lv_obj_add_style(label_pressure, &style, 0);
+}
+
+static void init_draw_wifi(lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	canvas_wifi = lv_canvas_create(scr);
+	lv_obj_set_size(canvas_wifi, 10, 10);
+	lv_obj_set_pos(canvas_wifi, 117, 0);
+	lv_canvas_set_buffer(canvas_wifi, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas_wifi, 0, lv_color_black());
+}
+
+static void init_draw_tcp(lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	canvas_tcp = lv_canvas_create(scr);
+	lv_obj_set_size(canvas_tcp, 10, 10);
+	lv_obj_set_pos(canvas_tcp, 102, 0);
+	lv_canvas_set_buffer(canvas_tcp, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas_tcp, 0, lv_color_black());
+}
+
+static void init_draw_relestate(lv_obj_t *scr)
+{
+	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
+
+	canvas_rele = lv_canvas_create(scr);
+	lv_obj_set_size(canvas_rele, 10, 10);
+	lv_obj_set_pos(canvas_rele, 87, 0);
+	lv_canvas_set_buffer(canvas_rele, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
+	lv_canvas_set_palette(canvas_rele, 0, lv_color_black());
+}
+
+static void draw_time(const struct DateTime *dt)
+{
+	static int sec = 0;
+	static int min = 0;
+
+	lv_label_set_text_fmt(label_time, "%02d : %02d", min, sec++);
+
+	if (sec >= 60)
+	{
+		sec = 0;
+		++min;
+	}
+
+//	if (dt->err || dt->hour > 23 || dt->minutes > 59)
+//		lv_label_set_text_fmt(label_time, "   -- : --");
+//	else
+//		lv_label_set_text_fmt(label_time, "%02d : %02d", dt->hour, dt->minutes);
+
+}
+
+static void draw_date(const struct DateTime *dt)
+{
+	// Дата
+	if (dt->err || dt->date > 31 || dt->month > 12)
+		lv_label_set_text_fmt(label_date, " -- . -- . ----");
+	else
+		lv_label_set_text_fmt(label_date, "%02d.%02d.20%02d", dt->date, dt->month, dt->year);
+}
+
+static void draw_temperature(const struct THP *thp)
+{
 	int part, fract;
 	modf_two_part(thp->temperature, &part, &fract);
 
-	char buff[5];
+	char buff[5] = {0, 0, 0, 0, 0};
 	itoa(part, buff, 10);
-	buff[4] = 0;
 
-	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
-	if (strlen(buff) > 3 || thp->err)
-		lv_label_set_text_fmt(label_temp, "err");
+	if (strlen(buff) > 3 || thp->err) // strlen(buff) > 3
+		lv_label_set_text_fmt(label_temperature, "err");
 	else
 	{
 		if (part > 0)
@@ -153,25 +245,8 @@ static void draw_temperature(const struct THP *thp, lv_obj_t *scr)
 			memmove(&buff[1], buff, sizeof(buff) - 1);
 			buff[0] = '+';
 		}
-		lv_label_set_text_fmt(label_temp, "%s", buff);
+		lv_label_set_text_fmt(label_temperature, "%s", buff);
 	}
-
-	lv_obj_align(label_temp, LV_ALIGN_CENTER, 0, 0);
-
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_text_letter_space(&style, 1);
-
-	lv_style_set_text_font(&style, &lv_font_montserrat_14);
-	lv_obj_add_style(label_temp, &style, 0);
-
-	// Символ градуса
-	lv_obj_t *my_Cir = lv_obj_create(scr);
-	lv_obj_set_scrollbar_mode(my_Cir , LV_SCROLLBAR_MODE_OFF);
-	lv_obj_set_size(my_Cir, 3, 3);
-	lv_obj_set_style_border_width(my_Cir , 1, 0);
-	lv_obj_set_style_border_color(my_Cir, lv_color_black(), 0);
-	lv_obj_set_style_radius(my_Cir, LV_RADIUS_CIRCLE, 0);
 
 	int cirX = -3;
 	// Расположение символа градуса относительно длины строки
@@ -184,92 +259,42 @@ static void draw_temperature(const struct THP *thp, lv_obj_t *scr)
 		else if (strlen(buff) == 3)
 			cirX = 35;
 	}
-	lv_obj_set_pos(my_Cir, cirX, 4);
+	lv_obj_set_pos(temperature_symbol, cirX, 4);
 }
 
-static void draw_humidity(const struct THP *thp, lv_obj_t *scr)
+static void draw_humidity(const struct THP *thp)
 {
-	lv_obj_t *parent = lv_obj_create(scr);
-	lv_obj_set_size(parent, 43, 22);
-	lv_obj_set_pos(parent, 0, 21);
-	lv_obj_set_style_border_width(parent, 1, 0);
-	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
-	lv_obj_set_style_radius(parent , 0, 0);
-	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
-
-	lv_obj_t *label_hum = lv_label_create(parent);
-
 	int part, fract;
 	modf_two_part(thp->humidity, &part, &fract);
 
-	char buff[5];
+	char buff[5] = {0, 0, 0, 0, 0};
 	itoa(part, buff, 10);
-	buff[4] = 0;
 
 	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
 	if (strlen(buff) > 3 || thp->err)
-		lv_label_set_text_fmt(label_hum, "err");
+		lv_label_set_text_fmt(label_humidity, "err");
 	else
-		lv_label_set_text_fmt(label_hum, "%s%%", buff);
-
-	lv_obj_align(label_hum, LV_ALIGN_CENTER, 0, 0);
-
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_text_letter_space(&style, 1);
-
-	lv_style_set_text_font(&style, &lv_font_montserrat_14);
-	lv_obj_add_style(label_hum, &style, 0);
+		lv_label_set_text_fmt(label_humidity, "%s%%", buff);
 }
 
-static void draw_pressure(const struct THP *thp, lv_obj_t *scr)
+static void draw_pressure(const struct THP *thp)
 {
-	lv_obj_t *parent = lv_obj_create(scr);
-	lv_obj_set_size(parent, 43, 22);
-	lv_obj_set_pos(parent, 0, 42);
-	lv_obj_set_style_border_width(parent, 1, 0);
-	lv_obj_set_style_border_color(parent, lv_color_black(), 0);
-	lv_obj_set_style_radius(parent , 0, 0);
-	lv_obj_set_scrollbar_mode(parent , LV_SCROLLBAR_MODE_OFF);
-
-	lv_obj_t *label_hum = lv_label_create(parent);
-
 	int part, fract;
 	double convert = thp->pressure * 7.50062 * 0.001;
 	modf_two_part(convert, &part, &fract);
 
-	char buff[5];
+	char buff[5] = {0, 0, 0, 0, 0};
 	itoa(part, buff, 10);
-	buff[4] = 0;
 
 	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
 	if (strlen(buff) > 3 || thp->err)
-		lv_label_set_text_fmt(label_hum, "err");
+		lv_label_set_text_fmt(label_pressure, "err");
 	else
-		lv_label_set_text_fmt(label_hum, "%s", buff);
-
-	lv_obj_align(label_hum, LV_ALIGN_CENTER, 0, 0);
-
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_text_letter_space(&style, 1);
-
-	lv_style_set_text_font(&style, &lv_font_montserrat_14);
-	lv_obj_add_style(label_hum, &style, 0);
+		lv_label_set_text_fmt(label_pressure, "%s", buff);
 }
 
-static void draw_status_wifi(lv_obj_t *scr)
+static void draw_status_wifi()
 {
-	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
-
-	lv_obj_t *canvas = lv_canvas_create(scr);
-	lv_obj_set_size(canvas, 10, 10);
-	lv_obj_set_pos(canvas, 117, 0);
-	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
-	lv_canvas_set_palette(canvas, 0, lv_color_black());
-
-	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
-
 	uint8_t wifi_connected[10][10] = {
 			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
 			{0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
@@ -297,21 +322,11 @@ static void draw_status_wifi(lv_obj_t *scr)
 	};
 
 	uint8_t (*arr)[10][10] = isWifiConnect ? &wifi_connected : &wifi_disconnected;
-	draw_status_on_canva(canvas, arr);
+	draw_status_on_canva(canvas_wifi, arr);
 }
 
-static void draw_status_TCP(lv_obj_t *scr)
+static void draw_status_TCP()
 {
-	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
-
-	lv_obj_t *canvas = lv_canvas_create(scr);
-	lv_obj_set_size(canvas, 10, 10);
-	lv_obj_set_pos(canvas, 102, 0);
-	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
-	lv_canvas_set_palette(canvas, 0, lv_color_black());
-
-	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
-
 	uint8_t tcp_connected[10][10] = {
 			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -339,21 +354,11 @@ static void draw_status_TCP(lv_obj_t *scr)
 	};
 
 	uint8_t (*arr)[10][10] = isTCP_Connect ? &tcp_connected : &tcp_disconnected;
-	draw_status_on_canva(canvas, arr);
+	draw_status_on_canva(canvas_tcp, arr);
 }
 
-static void draw_status_rele(bool isReleOn, lv_obj_t *scr)
+static void draw_status_rele(bool isReleOn)
 {
-	static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(10, 10)];
-
-	lv_obj_t *canvas = lv_canvas_create(scr);
-	lv_obj_set_size(canvas, 10, 10);
-	lv_obj_set_pos(canvas, 87, 0);
-	lv_canvas_set_buffer(canvas, cbuf, 10, 10, LV_IMG_CF_INDEXED_1BIT);
-	lv_canvas_set_palette(canvas, 0, lv_color_black());
-
-	lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
-
 	uint8_t rele_on[10][10] = {
 			{0, 0, 0, 1, 0, 0, 1, 0, 0, 0},
 			{0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
@@ -381,38 +386,38 @@ static void draw_status_rele(bool isReleOn, lv_obj_t *scr)
 	};
 
 	uint8_t (*arr)[10][10] = isReleOn ? &rele_on : &rele_off;
-	draw_status_on_canva(canvas, arr);
+	draw_status_on_canva(canvas_rele, arr);
 }
 
 static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10])
 {
-	for(uint8_t y = 0; y < 10; y++)
+	for(uint8_t y = 0; y < 10; ++y)
 	{
-		for(uint8_t x = 0; x < 10; x++)
-		{
-			if ((*arr)[y][x])
-				lv_canvas_set_px(canvas, x, y, lv_color_black());
-		}
+		for(uint8_t x = 0; x < 10; ++x)
+			lv_canvas_set_px(canvas, x, y, (*arr)[y][x] ? lv_color_black() : lv_color_white());
 	}
 }
 
-void OLED_init(void)
+static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
-	static lv_disp_draw_buf_t disp_buf; // contains internal graphic buffer(s) called draw buffer(s)
-	static lv_disp_drv_t disp_drv;      // contains callback functions
+	lv_disp_t * disp = (lv_disp_t *)user_ctx;
+	lvgl_port_flush_ready(disp);
+	return false;
+}
 
+void OLED_init2(void)
+{
 	ESP_LOGI(TAG, "Install panel IO");
+
 	esp_lcd_panel_io_handle_t io_handle = NULL;
 	esp_lcd_panel_io_i2c_config_t io_config = {
 			.dev_addr = OLED_ADDR,
 			.control_phase_bytes = 1,               // According to SSD1306 datasheet
-			.dc_bit_offset = 6,                     // According to SSD1306 datasheet
 			.lcd_cmd_bits = OLED_LCD_CMD_BITS,   // According to SSD1306 datasheet
 			.lcd_param_bits = OLED_LCD_CMD_BITS, // According to SSD1306 datasheet
-			.on_color_trans_done = OLED_notify_lvgl_flush_ready,
-			.user_ctx = &disp_drv,
+			.dc_bit_offset = 6,
 	};
-	esp_err_t res = esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)0, &io_config, &io_handle);
+	ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)0, &io_config, &io_handle));
 
 	ESP_LOGI(TAG, "Install SSD1306 panel driver");
 	esp_lcd_panel_handle_t panel_handle = NULL;
@@ -420,62 +425,64 @@ void OLED_init(void)
 			.bits_per_pixel = 1,
 			.reset_gpio_num = OLED_PIN_NUM_RST,
 	};
-	res |= esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &panel_handle);
+	ESP_ERROR_CHECK(esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &panel_handle));
+	ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
+	ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
+	ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
-	res |= esp_lcd_panel_reset(panel_handle);
-	res |= esp_lcd_panel_init(panel_handle);
-	res |= esp_lcd_panel_disp_on_off(panel_handle, true);
+	ESP_LOGI(TAG, "Initialize LVGL");
+	const lvgl_port_cfg_t lvgl_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+	lvgl_port_init(&lvgl_cfg);
 
-	ESP_LOGI(TAG, "Initialize LVGL library");
-	lv_init();
-	// alloc draw buffers used by LVGL
-	// it's recommended to choose the size of the draw buffer(s) to be at least 1/10 screen sized
-	lv_color_t *buf1 = malloc(OLED_LCD_H_RES * 20 * sizeof(lv_color_t));
-	assert(buf1);
-	lv_color_t *buf2 = malloc(OLED_LCD_H_RES * 20 * sizeof(lv_color_t));
-	assert(buf2);
-	// initialize LVGL draw buffers
-	lv_disp_draw_buf_init(&disp_buf, buf1, buf2, OLED_LCD_H_RES * 20);
-
-	ESP_LOGI(TAG, "Register display driver to LVGL");
-	lv_disp_drv_init(&disp_drv);
-	disp_drv.hor_res = OLED_LCD_H_RES;
-	disp_drv.ver_res = OLED_LCD_V_RES;
-	disp_drv.flush_cb = OLED_lvgl_flush_cb;
-	disp_drv.draw_buf = &disp_buf;
-	disp_drv.user_data = panel_handle;
-	disp_drv.rounder_cb = OLED_lvgl_rounder;
-	disp_drv.set_px_cb = OLED_lvgl_set_px_cb;
-	disp = lv_disp_drv_register(&disp_drv);
-	lv_disp_set_default(disp);
-
-
-	ESP_LOGI(TAG, "Install LVGL tick timer");
-	// Tick interface for LVGL (using esp_timer to generate 2ms periodic event)
-	const esp_timer_create_args_t lvgl_tick_timer_args = {
-			.callback = &OLED_increase_lvgl_tick,
-			.name = "lvgl_tick"
+	const lvgl_port_display_cfg_t disp_cfg = {
+			.io_handle = io_handle,
+			.panel_handle = panel_handle,
+			.buffer_size = OLED_LCD_H_RES * OLED_LCD_V_RES,
+			.double_buffer = true,
+			.hres = OLED_LCD_H_RES,
+			.vres = OLED_LCD_V_RES,
+			.monochrome = true,
+			.rotation = {
+					.swap_xy = false,
+					.mirror_x = false,
+					.mirror_y = false,
+			}
 	};
-	esp_timer_handle_t lvgl_tick_timer = NULL;
-	res |= esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer);
-	res |= esp_timer_start_periodic(lvgl_tick_timer, OLED_LVGL_TICK_PERIOD_MS * 1000);
+	lv_disp_t * disp = lvgl_port_add_disp(&disp_cfg);
+	/* Register done callback for IO */
+	const esp_lcd_panel_io_callbacks_t cbs = {
+			.on_color_trans_done = notify_lvgl_flush_ready,
+	};
+	ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(io_handle, &cbs, disp));
 
-	if (res == ESP_FAIL)
-	{
-		struct LedSignalPkg pkg = {TAG, OLED_INIT_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
-	}
+	/* Rotation of the screen */
+	lv_disp_set_rotation(disp, LV_DISP_ROT_180);
+	glob_disp = disp;
 }
 
 static void anim_x_cb(void * var, int32_t v)
 {
 	lv_obj_set_x(var, v);
-	//	lv_obj_set_style_opa(var, v, 0);
+}
+
+void OLED_init_draw_element(void)
+{
+	lv_obj_t *scr = lv_disp_get_scr_act(glob_disp);
+	init_draw_time(scr);
+	init_draw_date(scr);
+
+	init_draw_temperature(scr);
+	init_draw_humidity(scr);
+	init_draw_pressure(scr);
+
+	init_draw_wifi(scr);
+	init_draw_tcp(scr);
+	init_draw_relestate(scr);
 }
 
 void OLED_boot_screen(void)
 {
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
+	lv_obj_t *scr = lv_disp_get_scr_act(glob_disp);
 	lv_obj_clean(scr);
 
 	lv_obj_t *label1 = lv_label_create(scr);
@@ -499,7 +506,7 @@ void OLED_boot_screen(void)
 	lv_anim_t a;
 	lv_anim_init(&a);
 	lv_anim_set_var(&a, label1);
-	lv_anim_set_time(&a, 1000);
+	lv_anim_set_time(&a, 2000);
 	//	lv_anim_set_playback_delay(&a, 1500);
 	//	lv_anim_set_playback_time(&a, 500);
 	//	lv_anim_set_repeat_delay(&a, 500);
@@ -513,19 +520,22 @@ void OLED_boot_screen(void)
 	lv_anim_t b;
 	lv_anim_init(&b);
 	lv_anim_set_var(&b, label2);
-	lv_anim_set_time(&b, 1000);
+	lv_anim_set_time(&b, 2000);
 	lv_anim_set_repeat_count(&b, 0/*LV_ANIM_REPEAT_INFINITE*/);
 	lv_anim_set_path_cb(&b, lv_anim_path_bounce);
 
 	lv_anim_set_exec_cb(&b, anim_x_cb);
 	lv_anim_set_values(&b, 128, 0);
 	lv_anim_start(&b);
+	//
+	vTaskDelay(OLED_BOOT_SCREEN_TIME / portTICK_PERIOD_MS);
 
-	for (int i = 0; i < OLED_BOOT_SCREEN_TIME / 10; ++i)
-	{
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-		lv_timer_handler();
-	}
+	lv_obj_clean(scr);
+	//	for (int i = 0; i < OLED_BOOT_SCREEN_TIME / 10; ++i)
+	//	{
+	//		vTaskDelay(10 / portTICK_PERIOD_MS);
+	//		lv_timer_handler();
+	//	}
 }
 
 void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn)
@@ -533,20 +543,16 @@ void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isRel
 	if (dt == NULL || thp == NULL)
 		return;
 
-	lv_obj_t *scr = lv_disp_get_scr_act(disp);
-	lv_obj_clean(scr);
+	draw_time(dt);
+	draw_date(dt);
 
-	draw_time(dt, scr);
-	draw_date(dt, scr);
-	draw_temperature(thp, scr);
-	draw_humidity(thp, scr);
-	draw_pressure(thp, scr);
+	draw_temperature(thp);
+	draw_humidity(thp);
+	draw_pressure(thp);
 
-	draw_status_wifi(scr);
-	draw_status_TCP(scr);
-	draw_status_rele(isReleOn, scr);
-
-	lv_timer_handler();
+	draw_status_wifi();
+	draw_status_TCP();
+	draw_status_rele(isReleOn);
 }
 
 void OLED_setWIFI_State(bool val)

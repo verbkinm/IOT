@@ -26,32 +26,18 @@ struct DateTime DS3231_DataTime(void)
 	for (int i = DS3231_REG_SEC; i <= DS3231_REG_YEAR; ++i)
 		data_read[i] = bcdToDec(data_read[i]);
 
-//	dt.seconds = bcdToDec(dt.seconds);
-//	dt.minutes = bcdToDec(dt.minutes);
-//	dt.hour = bcdToDec(dt.hour);// + (((dt.hour & 0x20) >> 5) * 10);
-//	dt.date = bcdToDec(dt.date);
-//	dt.month = bcdToDec(dt.month);
-//	dt.year = bcdToDec(dt.year);
-
 	return dt;
 }
 
 void DS3231_SetDataTime(const struct DateTime *dt)
 {
 	if (dt == NULL)
-		return ;
+		return;
 
-	struct DateTime copy_dt;// = *dt;
+	struct DateTime copy_dt;
 
 	for (int i = DS3231_REG_SEC; i <= DS3231_REG_YEAR; ++i)
 		((uint8_t *)&copy_dt)[i] = decToBcd(((uint8_t *)dt)[i]);
-
-//	copy_dt.seconds = decToBcd(dt->seconds);
-//	copy_dt.minutes = decToBcd(dt->minutes);
-//	copy_dt.hour = decToBcd(dt->hour);// + (((dt.hour & 0x20) >> 5) * 10);
-//	copy_dt.date = decToBcd(dt->date);
-//	copy_dt.month = decToBcd(dt->month);
-//	copy_dt.year = decToBcd(dt->year);
 
 	uint8_t *data_write = (uint8_t *)&copy_dt;
 

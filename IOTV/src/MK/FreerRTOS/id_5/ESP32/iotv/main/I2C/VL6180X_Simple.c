@@ -129,6 +129,7 @@ static void VL6180X_writeReg(uint16_t reg, uint8_t value)
 
 	if (i2c_master_write_to_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 3, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
+		ESP_LOGE(TAG, "write error");
 		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
 		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_WRITE_FAIL);
 	}
@@ -145,6 +146,7 @@ static uint8_t VL6180X_readReg(uint16_t reg)
 
 	if (i2c_master_write_read_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 2, data_read, 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
+		ESP_LOGE(TAG, "read error");
 		VL6180X_state = false;
 		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
 		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);
@@ -166,6 +168,7 @@ static uint16_t VL6180X_readReg16(uint16_t reg)
 
 	if (i2c_master_write_read_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 2, data_read, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
+		ESP_LOGE(TAG, "read error");
 		VL6180X_state = false;
 		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
 		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);

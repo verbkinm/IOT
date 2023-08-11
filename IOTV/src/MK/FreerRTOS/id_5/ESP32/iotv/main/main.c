@@ -22,9 +22,10 @@ void wifi_init_sta_Task(void *pvParameters)
 	wifi_init_sta();
 	vTaskDelete(NULL);
 }
+
 void app_main(void)
 {
-	//Initialize NVS
+	//	//Initialize NVS
 	esp_err_t ret = nvs_flash_init();
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
@@ -50,7 +51,7 @@ void app_main(void)
 
 	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 2, NULL);
 	xTaskCreate(tcp_server_task, "tcp_server", 8192, (void*)AF_INET, 1, NULL);
-	xTaskCreate(OLED_Task, "oledTask", 4096, NULL, 1, NULL);
+	xTaskCreate(OLED_Task, "oledTask", 8192, NULL, 2, NULL);
 
 	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 4096, NULL, 3, NULL);
 	xTaskCreate(BME280_Task, "BME280_Task", 4096, NULL, 3, NULL);

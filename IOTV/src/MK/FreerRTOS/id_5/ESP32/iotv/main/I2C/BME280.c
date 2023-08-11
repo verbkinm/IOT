@@ -84,36 +84,22 @@ static uint8_t BME280_readReg(uint8_t reg)
 
 struct THP BME280_readValues()
 {
-	struct THP values;
+	struct THP thp;
 
 	if (BME280_state == false)
 		BME280_init();
 
 	if (BME280_state == false)
 	{
-		values.err = true;
-		return values;
+		thp.err = true;
+		return thp;
 	}
 
-//	if (temp == NULL || press == NULL || hum == NULL)
-//		return;
-//
-//	if (BME280_state == false)
-//		BME280_init();
-//
-//	if (BME280_state == false)
-//	{
-//		*temp = infinity();
-//		*press = infinity();
-//		*hum = infinity();
-//		return;
-//	}
+	thp.temperature = BME280_temperature();
+	thp.pressure = BME280_pressure();
+	thp.humidity = BME280_humidity();
 
-	values.temperature = BME280_temperature();
-	values.pressure = BME280_pressure();
-	values.humidity = BME280_humidity();
-
-	return values;
+	return thp;
 }
 
 static double BME280_temperature(void)

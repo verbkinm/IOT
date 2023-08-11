@@ -11,21 +11,6 @@ static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
 static uint64_t cutDataSize = 0;
 static bool error = false;
 
-#define CH_RELAY_STATE 	0
-#define CH_BORDER		1
-#define CH_SEC			2
-#define CH_MIN			3
-#define	CH_HOUR			4
-#define	CH_DAY			5
-#define CH_DATE			6
-#define CH_MONTH		7
-#define CH_YEAR			8
-#define CH_RANGE		9
-#define CH_LUX			10
-#define CH_TEMP			11
-#define CH_HUM			12
-#define CH_PRES			13
-
 static uint8_t readType[14] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
@@ -386,16 +371,30 @@ void OLED_Task(void *pvParameters)
 
 	ESP_LOGW(TAG, "OLED task created");
 
-	OLED_init();
+	OLED_init2();
 	OLED_boot_screen();
-
+	OLED_init_draw_element(); // после boot_screen
+	//
 	while(true)
 	{
-		struct DateTime dt = DS3231_DataTime();
-		struct THP thp = BME280_readValues();
+		struct DateTime dt;
+		uint8_t *data_read = (uint8_t *)&dt;
+
+		for (int i = CH_SEC; i < CH_RANGE; ++i)
+			data_read[i] = *(uint8_t *)iot.readChannel[i].data;
+
+		dt.err = dt.seconds == 255 ? true : false; // если данные не считались, то все значения для dt = 255. Смотри DS3231_Task if (dt.err)
+
+		struct THP thp = {
+				.temperature = *(double *)iot.readChannel[CH_TEMP].data,
+				.humidity = *(double *)iot.readChannel[CH_HUM].data,
+				.pressure = *(double *)iot.readChannel[CH_PRES].data,
+				.err = thp.temperature == INFINITY ? true : false // если данные не считались, то все значения для thp = INFINITY. Смотри BME280_Task if (values.err)
+		};
+
 		OLED_Draw_Page(&thp, &dt, *(bool *)iot.readChannel[CH_RELAY_STATE].data);
 
-		vTaskDelay(100 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
 
