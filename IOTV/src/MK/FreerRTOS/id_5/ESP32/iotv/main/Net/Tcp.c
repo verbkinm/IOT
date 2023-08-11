@@ -39,7 +39,7 @@ static void do_retransmit(const int sock)
 	uint8_t rx_buffer[BUFSIZE];
 	struct DataPkg pkg = { NULL, 0 };
 
-	if (xTaskCreate(writeData, "writeData_Task", 2048,  (void *)&sock, 2, &xHandleWriteData ) != pdPASS)
+	if (xTaskCreate(writeData, "writeData_Task", 4096,  (void *)&sock, 2, &xHandleWriteData ) != pdPASS)
 	{
 		ESP_LOGE(TAG, "xTaskCreate(writeData, \"writeData_Task\", 4096,  NULL, 2, &xHandleWriteData ) != pdPASS");
 		return;

@@ -18,7 +18,7 @@ struct DateTime DS3231_DataTime(void)
 	{
 		if (i2c_master_write_read_device(I2C_MASTER_NUM, DS3231_ADDR, &reg, 1, (data_read + reg), 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 		{
-			ESP_LOGE(TAG, "read error");
+//			ESP_LOGE(TAG, "read error");
 			dt.err = true;
 		}
 	}
@@ -46,7 +46,8 @@ void DS3231_SetDataTime(const struct DateTime *dt)
 		uint8_t data[2] = {reg, data_write[reg]};
 		if (i2c_master_write_to_device(I2C_MASTER_NUM, DS3231_ADDR, data, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 		{
-			ESP_LOGE(TAG, "write error");
+			;
+//			ESP_LOGE(TAG, "write error");
 		}
 	}
 }

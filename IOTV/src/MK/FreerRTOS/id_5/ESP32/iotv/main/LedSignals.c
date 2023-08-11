@@ -57,8 +57,8 @@ static void errorBlink(const char* errorTag, uint8_t value)
 		}
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 
-		if ((value > 0) && (value < OLED_INIT_FAIL)) // OLED_INIT_FAIL - крайний элемент
-			ESP_LOGE(TAG, "%s FAIL: %s", errorTag, failStr[value - 1]);
+//		if ((value > 0) && (value < OLED_INIT_FAIL)) // OLED_INIT_FAIL - крайний элемент
+//			ESP_LOGE(TAG, "%s FAIL: %s", errorTag, failStr[value - 1]);
 
 		xSemaphoreGive( xSemaphore );
 	}

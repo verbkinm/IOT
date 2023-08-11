@@ -50,7 +50,7 @@ void app_main(void)
 	i2c_init();
 
 	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 2, NULL);
-	xTaskCreate(tcp_server_task, "tcp_server", 8192, (void*)AF_INET, 1, NULL);
+	xTaskCreate(tcp_server_task, "tcp_server", 8192, (void*)AF_INET, 2, NULL);
 	xTaskCreate(OLED_Task, "oledTask", 8192, NULL, 2, NULL);
 
 	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 4096, NULL, 3, NULL);
