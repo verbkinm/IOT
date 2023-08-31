@@ -45,5 +45,5 @@ void app_main(void)
 
 	xTaskCreate(DF_Task, "DF_Task", 2048, NULL, DF_PLAYER_PRIORITY, NULL);
 	xTaskCreate(Led_RGB_Task, "Led_RGB_Task", 2048, NULL, Led_RGB_PRIORITY, NULL);
-	xTaskCreate(Button_Task, "Button_Task", 1024, NULL, BUTTON_PRIORITY, NULL);
+	xTaskCreate(Button_Task, "Button_Task", 2048, NULL, BUTTON_PRIORITY, NULL);
 }

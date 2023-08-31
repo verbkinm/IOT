@@ -13,10 +13,10 @@ static int8_t *curr_mode, *curr_vol, *curr_eq ;
 static int8_t *Led_RGB_scriptNumber;
 
 static uint8_t  num_USB_tracks,
-				num_SD_tracks,
-				curr_USB_track,
-				curr_SD_track,
-				num_folders;
+num_SD_tracks,
+curr_USB_track,
+curr_SD_track,
+num_folders;
 
 // количесвто треков для каждого режима
 static uint8_t mode_tracks[DF_MODE_SIZE];
@@ -24,6 +24,7 @@ static uint8_t mode_tracks[DF_MODE_SIZE];
 static uint8_t mode_curr_trak[DF_MODE_SIZE] = {1, 1, 1};
 
 static void initUART(void);
+static bool currModeError(void);
 
 void DF_Task(void *pvParameters)
 {
@@ -62,6 +63,14 @@ void DF_Task(void *pvParameters)
 				*isPlay = inRange(*isPlay, 0, 1);
 				if (*isPlay)
 				{
+					if (currModeError())
+					{
+						*repeate = false;
+						DF_stop();
+						*Led_RGB_scriptNumber = 0;
+						break;
+					}
+
 					DF_playLargeFolder(*curr_mode, mode_curr_trak[*curr_mode - 1]);
 					mode_curr_trak[*curr_mode - 1] = inc(mode_curr_trak[*curr_mode - 1], 1, mode_tracks[*curr_mode - 1]);
 					*Led_RGB_scriptNumber = inc(*Led_RGB_scriptNumber, LED_MODE_MIN, LED_MODE_MAX);
@@ -75,7 +84,17 @@ void DF_Task(void *pvParameters)
 				break;
 			case DF_CMD_MODE:
 				*curr_mode = inRange(*curr_mode, DF_MODE_1, DF_MODE_3);
+
+				if (currModeError())
+				{
+					*repeate = false;
+					DF_stop();
+					*Led_RGB_scriptNumber = 0;
+					break;
+				}
+
 				DF_playLargeFolder(*curr_mode, mode_curr_trak[*curr_mode - 1]);
+
 				mode_curr_trak[*curr_mode - 1] = inc(mode_curr_trak[*curr_mode - 1], 1, mode_tracks[*curr_mode - 1]);
 				*Led_RGB_scriptNumber = inc(*Led_RGB_scriptNumber, LED_MODE_MIN, LED_MODE_MAX);
 				break;
@@ -920,14 +939,14 @@ void DF_printBuff(uint8_t *data, uint8_t size)
 
 void DF_updateData()
 {
-//	DF_volumeAdjustSet(0, 0);
+	//	DF_volumeAdjustSet(0, 0);
 
-//	DF_query_isPlaying();
+	//	DF_query_isPlaying();
 	DF_query_currentVolume();
 	DF_query_currentEQ();
-//	DF_query_numUsbTracks();
+	//	DF_query_numUsbTracks();
 	DF_query_numSdTracks();
-//	DF_query_currentUsbTrack();
+	//	DF_query_currentUsbTrack();
 	DF_query_currentSdTrack();
 	DF_query_numFolders();
 
@@ -951,4 +970,17 @@ static void initUART(void)
 	uart_driver_install(UART_NUM_1, UART_BUF_SIZE, 0, 0, NULL, 0);
 	uart_param_config(UART_NUM_1, &uart_config);
 	uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+}
+
+static bool currModeError(void)
+{
+	for (uint8_t i = 0; i < DF_MODE_SIZE; ++i)
+	{
+		if (mode_tracks[*curr_mode - 1] == 0)
+			*curr_mode = inc(*curr_mode, DF_MODE_1, DF_MODE_3);
+		else
+			return false;
+	}
+
+	return true;
 }

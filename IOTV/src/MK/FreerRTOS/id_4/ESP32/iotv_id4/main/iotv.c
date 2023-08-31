@@ -29,7 +29,7 @@ static uint8_t readType[CH_NUMBER] = {
 struct IOTV_Server_embedded iot = {
 		.id = 4,
 		.name = "Облачко",
-		.description = "Облачко - ночник, для Евы - королевы!",
+		.description = "Облачко - ночник, для Евы - королевы и остальных жителей её королевства!",
 		.numberReadChannel = CH_NUMBER,
 		.readChannel = NULL,
 		.readChannelType = readType,
@@ -37,7 +37,7 @@ struct IOTV_Server_embedded iot = {
 		.writeChannelType = readType,
 		.state = 0,
 		.nameSize = 14,
-		.descriptionSize = 64,
+		.descriptionSize = 129,
 };
 
 static void dataRecived(const struct DataPkg *pkg);

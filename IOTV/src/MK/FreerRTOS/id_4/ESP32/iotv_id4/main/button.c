@@ -51,6 +51,7 @@ void Button_Task(void *pvParameters)
 		if (isButtonPressed(buttons[1]))
 		{
 			cmd = DF_CMD_MODE;
+			*curr_mode = inc(*curr_mode, DF_MODE_1, DF_MODE_3);
 			xQueueSend(xQueueDF, (void *)&cmd, portMAX_DELAY);
 
 			waitButtonRelease(buttons[1]);
