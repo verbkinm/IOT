@@ -1,13 +1,16 @@
 #include "iotv.h"
 
-extern QueueHandle_t xQueueInData, xQueueOutData;
+//extern QueueHandle_t xQueueInData, xQueueOutData;
 
 extern uint64_t realBufSize;
 extern uint64_t expextedDataSize;
 
 static const char *TAG = "iotv";
 
-static uint8_t recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
+static uint8_t recivedBuffer[BUFSIZE];
+uint8_t transmitBuffer[BUFSIZE];
+int transmitBufferSize = 0;
+
 static uint64_t cutDataSize = 0;
 static bool error = false;
 
@@ -57,14 +60,11 @@ static struct IOTV_Server_embedded iot = {
 		.descriptionSize = 11,
 };
 
-static void dataRecived(const struct DataPkg *pkg);
 static int16_t readBorderDistanceFromNVS();
 static void writeBorderDistanceToNVS(int16_t value);
 
-void iotvTask(void *pvParameters)
+void iotvInit(void)
 {
-	ESP_LOGW(TAG, "iotv task created");
-
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
 
@@ -76,39 +76,44 @@ void iotvTask(void *pvParameters)
 
 	iot.state = 1;
 
-	struct DataPkg pkg = { NULL, 0 };
+//	struct DataPkg pkg = { NULL, 0 };
 
-	while (true)
-	{
-		if (xQueueReceive( xQueueInData, (void *)&pkg, portMAX_DELAY) == pdPASS )
-		{
-			dataRecived(&pkg);
-			free(pkg.data);
-		}
-	}
+//	while (true)
+//	{
+//		if (xQueueReceive( xQueueInData, (void *)&pkg, portMAX_DELAY) == pdPASS )
+//		{
+//			dataRecived(&pkg);
+//			free(pkg.data);
+//		}
+//	}
 }
 
-static void dataRecived(const struct DataPkg *pkg)
+//static void dataRecived(const struct DataPkg *pkg)
+void dataRecived(const uint8_t *data, int size)
 {
+	if (data == NULL)
+		return;
+
 	//страховка
-	if ((realBufSize + pkg->size) >= BUFSIZE)
+	if ((realBufSize + size) >= BUFSIZE)
 	{
 		realBufSize = 0;
 		expextedDataSize = 0;
 		cutDataSize = 0;
-		ESP_LOGE(TAG, "Buffer overlow");
+		ESP_LOGE(TAG, "Buffer overflow");
 		return;
 	}
 
-	memcpy(&recivedBuffer[realBufSize], pkg->data, pkg->size);
-	realBufSize += pkg->size;
+	memcpy(&recivedBuffer[realBufSize], data, size);
+	realBufSize += size;
 
 	if (realBufSize < expextedDataSize)
 		return;
 
 	while (realBufSize > 0)
 	{
-		struct DataPkg pkg = { NULL, 0 };
+
+//		struct DataPkg pkg = { NULL, 0 };
 		struct Header *header = createPkgs(recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
 
 		if (error == true)
@@ -126,23 +131,24 @@ static void dataRecived(const struct DataPkg *pkg)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
 			{
-				pkg.size = responseIdentificationData((char *)transmitBuffer, BUFSIZE, &iot);
-				pkg.data = malloc(pkg.size);
-				memcpy(pkg.data, transmitBuffer, pkg.size);
-				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
+				transmitBufferSize += responseIdentificationData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
+//				pkg.data = malloc(pkg.size);
+//				memcpy(pkg.data, transmitBuffer, pkg.size);
+//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
 			{
-				pkg.size = responseReadData((char *)transmitBuffer, BUFSIZE, &iot, header);
-				pkg.data = malloc(pkg.size);
-				memcpy(pkg.data, transmitBuffer, pkg.size);
-				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
+				transmitBufferSize = responseReadData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
+//				pkg.data = malloc(pkg.size);
+//				memcpy(pkg.data, transmitBuffer, pkg.size);
+//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
-				pkg.size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
+				int len = responseWriteData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
+				transmitBufferSize += len;
 
-				if (pkg.size > 0)
+				if (len > 0)
 				{
 					uint8_t channelNumber = ((struct Read_Write *)header->pkg)->channelNumber;
 					int16_t *val = (int16_t *)iot.readChannel[channelNumber].data;
@@ -198,24 +204,24 @@ static void dataRecived(const struct DataPkg *pkg)
 					DS3231_SetDataTime(&dt);
 				}
 
-
-				pkg.data = malloc(pkg.size);
-				memcpy(pkg.data, transmitBuffer, pkg.size);
-				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
+//
+//				pkg.data = malloc(pkg.size);
+//				memcpy(pkg.data, transmitBuffer, pkg.size);
+//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
 			{
-				pkg.size = responsePingData((char *)transmitBuffer, BUFSIZE);
-				pkg.data = malloc(pkg.size);
-				memcpy(pkg.data, transmitBuffer, pkg.size);
-				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
+				transmitBufferSize += responsePingData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE);
+//				pkg.data = malloc(pkg.size);
+//				memcpy(pkg.data, transmitBuffer, pkg.size);
+//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_STATE)
 			{
-				pkg.size = responseStateData((char *)transmitBuffer, BUFSIZE, &iot);
-				pkg.data = malloc(pkg.size);
-				memcpy(pkg.data, transmitBuffer, pkg.size);
-				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
+				transmitBufferSize += responseStateData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
+//				pkg.data = malloc(pkg.size);
+//				memcpy(pkg.data, transmitBuffer, pkg.size);
+//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 		}
 

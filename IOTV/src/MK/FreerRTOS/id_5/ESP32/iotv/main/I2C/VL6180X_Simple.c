@@ -1,6 +1,6 @@
 #include "VL6180X_Simple.h"
 
-extern QueueHandle_t xQueueLedSignals;
+//extern QueueHandle_t xQueueLedSignals;
 
 static const char *TAG = "VL6180X_Simple";
 static bool VL6180X_state = false;
@@ -18,8 +18,8 @@ void VL6180X_init(void)
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 		if (++counter >= 3)
 		{
-			struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
+//			struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
 			return;
 		}
 	}
@@ -32,8 +32,8 @@ void VL6180X_init(void)
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 		if (++counter >= 3)
 		{
-			struct LedSignalPkg pkg = {TAG, SYSTEM__FRESH_OUT_OF_RESET_LOOP};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
+//			struct LedSignalPkg pkg = {TAG, SYSTEM__FRESH_OUT_OF_RESET_LOOP};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
 			return;
 		}
 	}
@@ -113,8 +113,9 @@ void VL6180X_deinit(void)
 {
 	if (i2c_driver_delete(I2C_MASTER_NUM) != ESP_OK)
 	{
-		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
+		;
+//		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_DEINIT_FAIL);
 	}
 	ESP_LOGI(TAG, "I2C de-initialized successfully");
 }
@@ -129,9 +130,10 @@ static void VL6180X_writeReg(uint16_t reg, uint8_t value)
 
 	if (i2c_master_write_to_device(I2C_MASTER_NUM, VL6180X_ADDR, data_write, 3, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
+		;
 //		ESP_LOGE(TAG, "write error");
-		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_WRITE_FAIL);
+//		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_WRITE_FAIL);
 	}
 }
 
@@ -148,8 +150,8 @@ static uint8_t VL6180X_readReg(uint16_t reg)
 	{
 //		ESP_LOGE(TAG, "read error");
 		VL6180X_state = false;
-		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);
+//		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);
 	}
 	else
 		VL6180X_state = true;
@@ -170,8 +172,8 @@ static uint16_t VL6180X_readReg16(uint16_t reg)
 	{
 //		ESP_LOGE(TAG, "read error");
 		VL6180X_state = false;
-		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);
+//		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / I2C_READ_FAIL);
 	}
 	else
 		VL6180X_state = true;
@@ -194,8 +196,8 @@ uint8_t VL6180X_simpleRange(void)
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter >= 25)
 		{
-			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__RANGE_STATUS_LOOP);
+//			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__RANGE_STATUS_LOOP);
 			break;
 		}
 	}
@@ -210,8 +212,8 @@ uint8_t VL6180X_simpleRange(void)
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter >= 25)
 		{
-			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__INTERRUPT_STATUS_GPIO_LOOP);
+//			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__INTERRUPT_STATUS_GPIO_LOOP);
 			break;
 		}
 	}
@@ -240,8 +242,8 @@ uint16_t VL6180X_simpleALS(uint8_t gain)
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter >= 25)
 		{
-			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__RANGE_STATUS_LOOP);
+//			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__RANGE_STATUS_LOOP);
 			break;
 		}
 	}
@@ -256,8 +258,8 @@ uint16_t VL6180X_simpleALS(uint8_t gain)
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 		if (++counter >= 25)
 		{
-			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__INTERRUPT_STATUS_GPIO_LOOP);
+//			struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
+//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / RESULT__INTERRUPT_STATUS_GPIO_LOOP);
 			break;
 		}
 	}

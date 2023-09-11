@@ -13,7 +13,7 @@
 #include "Net/Tcp.h"
 #include "Net/WIFI.h"
 
-extern QueueHandle_t xQueueInData, xQueueOutData, xQueueLedSignals;
+//extern QueueHandle_t xQueueInData, xQueueOutData, xQueueLedSignals;
 
 static const char *TAG = "main";
 
@@ -37,25 +37,25 @@ void app_main(void)
 	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
 
 	// Инициализациия глобальных очередей
-	xQueueInData = xQueueCreate(100, sizeof(struct DataPkg));
-	xQueueOutData = xQueueCreate(100, sizeof(struct DataPkg));
-	xQueueLedSignals = xQueueCreate(10, sizeof(struct LedSignalPkg));
+//	xQueueInData = xQueueCreate(100, sizeof(struct DataPkg));
+//	xQueueOutData = xQueueCreate(100, sizeof(struct DataPkg));
+//	xQueueLedSignals = xQueueCreate(10, sizeof(struct LedSignalPkg));
 
-	if (xQueueInData == NULL  || xQueueOutData == NULL || xQueueLedSignals == NULL)
-	{
-		ESP_LOGE(TAG, "Queue was not created and must not be used");
-		esp_restart();
-	}
+//	if (xQueueInData == NULL  || xQueueOutData == NULL || xQueueLedSignals == NULL)
+//	{
+//		ESP_LOGE(TAG, "Queue was not created and must not be used");
+//		esp_restart();
+//	}
 
 	i2c_init();
+	iotvInit();
 
-	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 2, NULL);
+//	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 2, NULL);
 	xTaskCreate(tcp_server_task, "tcp_server", 8192, (void*)AF_INET, 2, NULL);
 	xTaskCreate(OLED_Task, "oledTask", 8192, NULL, 2, NULL);
 
 	xTaskCreate(Vl6180X_Task, "Vl6180X_Task", 4096, NULL, 3, NULL);
 	xTaskCreate(BME280_Task, "BME280_Task", 4096, NULL, 3, NULL);
 	xTaskCreate(DS3231_Task, "DS3132_Task", 4096, NULL, 3, NULL);
-	xTaskCreate(LedSignals_Task, "LedSignals_Task", 2048, NULL, 3, NULL);
 }
 

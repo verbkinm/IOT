@@ -17,7 +17,9 @@
 #include "I2C/oled.h"
 #include "I2C/DS3231.h"
 
-void iotvTask(void *pvParameters);
+void iotvInit(void);
+void dataRecived(const uint8_t *data, int size);
+
 void Vl6180X_Task(void *pvParameters);
 void BME280_Task(void *pvParameters);
 void DS3231_Task(void *pvParameters);
