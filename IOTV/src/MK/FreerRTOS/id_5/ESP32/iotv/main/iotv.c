@@ -75,17 +75,6 @@ void iotvInit(void)
 	}
 
 	iot.state = 1;
-
-//	struct DataPkg pkg = { NULL, 0 };
-
-//	while (true)
-//	{
-//		if (xQueueReceive( xQueueInData, (void *)&pkg, portMAX_DELAY) == pdPASS )
-//		{
-//			dataRecived(&pkg);
-//			free(pkg.data);
-//		}
-//	}
 }
 
 //static void dataRecived(const struct DataPkg *pkg)
@@ -112,8 +101,6 @@ void dataRecived(const uint8_t *data, int size)
 
 	while (realBufSize > 0)
 	{
-
-//		struct DataPkg pkg = { NULL, 0 };
 		struct Header *header = createPkgs(recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
 
 		if (error == true)
@@ -130,19 +117,9 @@ void dataRecived(const uint8_t *data, int size)
 		if (header->type == HEADER_TYPE_REQUEST)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-			{
 				transmitBufferSize += responseIdentificationData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
-//				pkg.data = malloc(pkg.size);
-//				memcpy(pkg.data, transmitBuffer, pkg.size);
-//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
-			}
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
-			{
 				transmitBufferSize = responseReadData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
-//				pkg.data = malloc(pkg.size);
-//				memcpy(pkg.data, transmitBuffer, pkg.size);
-//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
-			}
 			else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
 				int len = responseWriteData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
@@ -203,26 +180,11 @@ void dataRecived(const uint8_t *data, int size)
 
 					DS3231_SetDataTime(&dt);
 				}
-
-//
-//				pkg.data = malloc(pkg.size);
-//				memcpy(pkg.data, transmitBuffer, pkg.size);
-//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-			{
 				transmitBufferSize += responsePingData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE);
-//				pkg.data = malloc(pkg.size);
-//				memcpy(pkg.data, transmitBuffer, pkg.size);
-//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
-			}
 			else if(header->assignment == HEADER_ASSIGNMENT_STATE)
-			{
 				transmitBufferSize += responseStateData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
-//				pkg.data = malloc(pkg.size);
-//				memcpy(pkg.data, transmitBuffer, pkg.size);
-//				xQueueSend(xQueueOutData, (void *)&pkg, portMAX_DELAY);
-			}
 		}
 
 		memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZE - cutDataSize);
@@ -287,28 +249,35 @@ void Vl6180X_Task(void *pvParameters)
 	int16_t *border = (int16_t *)iot.readChannel[CH_BORDER].data;
 	*border = readBorderDistanceFromNVS();
 
+	int16_t *range = (int16_t *)iot.readChannel[CH_RANGE].data;
+
 	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
 
 	VL6180X_init();
 
 	while(true)
 	{
-		int16_t *range = (int16_t *)iot.readChannel[CH_RANGE].data;
 		*range = VL6180X_simpleRange();
 		//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
 		//		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
+
 		if (*range < *border)
 		{
-			gpio_set_level(RELE_PIN, !(*releState));
-			if (*releState != gpio_get_level(RELE_PIN))
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+			*range = VL6180X_simpleRange();
+			if (*range < *border)
 			{
-				*releState ^= 1;
-				printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), *range);
-			}
-			else
-				ESP_LOGE(TAG, "Can't switch relay");
+				gpio_set_level(RELE_PIN, !(*releState));
+				if (*releState != gpio_get_level(RELE_PIN))
+				{
+					*releState ^= 1;
+					printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), *range);
+				}
+				else
+					ESP_LOGE(TAG, "Can't switch relay");
 
-			vTaskDelay(500 / portTICK_PERIOD_MS);
+				vTaskDelay(1000 / portTICK_PERIOD_MS);
+			}
 		}
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
@@ -351,6 +320,7 @@ void DS3231_Task(void *pvParameters)
 
 	struct DateTime dt;
 
+
 	while(true)
 	{
 		dt = DS3231_DataTime();
@@ -363,7 +333,7 @@ void DS3231_Task(void *pvParameters)
 		else
 		{
 			for (uint8_t i = CH_SEC, j = 0; i < CH_RANGE; ++i, ++j)
-				*(uint8_t *)iot.readChannel[i].data = (uint8_t)(((uint8_t *)&dt)[j]);
+				*(uint8_t *)iot.readChannel[i].data = ((uint8_t *)&dt)[j];
 		}
 
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -380,16 +350,14 @@ void OLED_Task(void *pvParameters)
 	OLED_init2();
 	OLED_boot_screen();
 	OLED_init_draw_element(); // после boot_screen
-	//
+
 	while(true)
 	{
 		struct DateTime dt;
-		uint8_t *data_read = (uint8_t *)&dt;
 
-		for (int i = CH_SEC; i < CH_RANGE; ++i)
-			data_read[i] = *(uint8_t *)iot.readChannel[i].data;
-
-		dt.err = dt.seconds == 255 ? true : false; // если данные не считались, то все значения для dt = 255. Смотри DS3231_Task if (dt.err)
+		for (uint8_t i = CH_SEC, j = 0; i < CH_RANGE; ++i, ++j)
+			((uint8_t *)&dt)[j] = *(uint8_t *)iot.readChannel[i].data;
+		dt.err = (dt.seconds == 255) ? true : false; // если данные не считались, то все значения для dt = 255. Смотри DS3231_Task if (dt.err)
 
 		struct THP thp = {
 				.temperature = *(double *)iot.readChannel[CH_TEMP].data,

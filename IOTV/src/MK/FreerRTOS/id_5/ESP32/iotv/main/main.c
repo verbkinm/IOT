@@ -36,21 +36,9 @@ void app_main(void)
 	xTaskCreate(wifi_init_sta_Task, "wifi_init_sta", 4096, NULL, 1, NULL);
 	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
 
-	// Инициализациия глобальных очередей
-//	xQueueInData = xQueueCreate(100, sizeof(struct DataPkg));
-//	xQueueOutData = xQueueCreate(100, sizeof(struct DataPkg));
-//	xQueueLedSignals = xQueueCreate(10, sizeof(struct LedSignalPkg));
-
-//	if (xQueueInData == NULL  || xQueueOutData == NULL || xQueueLedSignals == NULL)
-//	{
-//		ESP_LOGE(TAG, "Queue was not created and must not be used");
-//		esp_restart();
-//	}
-
 	i2c_init();
 	iotvInit();
 
-//	xTaskCreate(iotvTask, "iotvTask", 4096, NULL, 2, NULL);
 	xTaskCreate(tcp_server_task, "tcp_server", 8192, (void*)AF_INET, 2, NULL);
 	xTaskCreate(OLED_Task, "oledTask", 8192, NULL, 2, NULL);
 

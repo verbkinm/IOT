@@ -71,7 +71,7 @@ void modf_two_part(float val, int *int_part, int *fract_part)
 static void init_draw_time(lv_obj_t *scr)
 {
 	label_time = lv_label_create(scr);
-	lv_obj_set_pos(label_time, 47, 15);
+	lv_obj_set_pos(label_time, 54, 15);
 
 	static lv_style_t style_time;
 	lv_style_init(&style_time);
@@ -83,7 +83,7 @@ static void init_draw_time(lv_obj_t *scr)
 static void init_draw_date(lv_obj_t *scr)
 {
 	label_date = lv_label_create(scr);
-	lv_obj_set_pos(label_date, 49, 45);
+	lv_obj_set_pos(label_date, 54, 45);
 
 	static lv_style_t style_date;
 	lv_style_init(&style_date);
@@ -201,21 +201,21 @@ static void init_draw_relestate(lv_obj_t *scr)
 
 static void draw_time(const struct DateTime *dt)
 {
-	static int sec = 0;
-	static int min = 0;
+//	static int sec = 0;
+//	static int min = 0;
+//
+//	lv_label_set_text_fmt(label_time, "%02d : %02d", min, sec++);
+//
+//	if (sec >= 60)
+//	{
+//		sec = 0;
+//		++min;
+//	}
 
-	lv_label_set_text_fmt(label_time, "%02d : %02d", min, sec++);
-
-	if (sec >= 60)
-	{
-		sec = 0;
-		++min;
-	}
-
-//	if (dt->err || dt->hour > 23 || dt->minutes > 59)
-//		lv_label_set_text_fmt(label_time, "   -- : --");
-//	else
-//		lv_label_set_text_fmt(label_time, "%02d : %02d", dt->hour, dt->minutes);
+	if (dt->err || dt->hour > 23 || dt->minutes > 59)
+		lv_label_set_text_fmt(label_time, "   -- : --");
+	else
+		lv_label_set_text_fmt(label_time, "%02d : %02d", dt->hour, dt->minutes);
 
 }
 
@@ -531,11 +531,6 @@ void OLED_boot_screen(void)
 	vTaskDelay(OLED_BOOT_SCREEN_TIME / portTICK_PERIOD_MS);
 
 	lv_obj_clean(scr);
-	//	for (int i = 0; i < OLED_BOOT_SCREEN_TIME / 10; ++i)
-	//	{
-	//		vTaskDelay(10 / portTICK_PERIOD_MS);
-	//		lv_timer_handler();
-	//	}
 }
 
 void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn)

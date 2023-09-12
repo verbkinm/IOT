@@ -23,8 +23,6 @@ void BME280_init(void)
 		vTaskDelay(500 / portTICK_PERIOD_MS);
 		if (++counter >= 3)
 		{
-//			struct LedSignalPkg pkg = {TAG, I2C_INIT_FAIL};
-//			xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 			return;
 		}
 	}
@@ -58,8 +56,6 @@ static void BME280_writeReg(uint8_t reg, uint8_t value)
 	if (i2c_master_write_to_device(I2C_MASTER_NUM, BME280_ADDR, data_write, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
 		BME280_state = false;
-//		struct LedSignalPkg pkg = {TAG, I2C_WRITE_FAIL};
-//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 	}
 	else
 		BME280_state = true;
@@ -73,8 +69,6 @@ static uint8_t BME280_readReg(uint8_t reg)
 	if (i2c_master_write_read_device(I2C_MASTER_NUM, BME280_ADDR, &reg, 1, &data_read, 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 	{
 		BME280_state = false;
-//		struct LedSignalPkg pkg = {TAG, I2C_READ_FAIL};
-//		xQueueSend(xQueueLedSignals, (void *)&pkg, 10 / portTICK_PERIOD_MS);
 	}
 	else
 		BME280_state = true;
@@ -84,7 +78,7 @@ static uint8_t BME280_readReg(uint8_t reg)
 
 struct THP BME280_readValues()
 {
-	struct THP thp;
+	struct THP thp = {.err = false};
 
 	if (BME280_state == false)
 		BME280_init();

@@ -11,20 +11,19 @@ static const char *TAG = "DS3132";
 
 struct DateTime DS3231_DataTime(void)
 {
-	struct DateTime dt;
-	uint8_t *data_read = (uint8_t *)&dt;
+	struct DateTime dt = {.err = false};
 
 	for (uint8_t reg = DS3231_REG_SEC; reg <= DS3231_REG_YEAR; ++reg)
 	{
-		if (i2c_master_write_read_device(I2C_MASTER_NUM, DS3231_ADDR, &reg, 1, (data_read + reg), 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
+		if (i2c_master_write_read_device(I2C_MASTER_NUM, DS3231_ADDR, &reg, 1, ((uint8_t *)&dt + reg), 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 		{
-//			ESP_LOGE(TAG, "read error");
+			ESP_LOGE(TAG, "read error");
 			dt.err = true;
 		}
 	}
 
 	for (int i = DS3231_REG_SEC; i <= DS3231_REG_YEAR; ++i)
-		data_read[i] = bcdToDec(data_read[i]);
+		((uint8_t *)&dt)[i] = bcdToDec(((uint8_t *)&dt)[i]);
 
 	return dt;
 }
@@ -47,7 +46,7 @@ void DS3231_SetDataTime(const struct DateTime *dt)
 		if (i2c_master_write_to_device(I2C_MASTER_NUM, DS3231_ADDR, data, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
 		{
 			;
-//			ESP_LOGE(TAG, "write error");
+			ESP_LOGE(TAG, "write error");
 		}
 	}
 }

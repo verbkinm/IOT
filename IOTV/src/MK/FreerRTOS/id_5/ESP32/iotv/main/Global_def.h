@@ -16,10 +16,10 @@
 #define WIFI_FAIL_BIT      					BIT2
 
 // WIFI
-#define WIFI_SSID							"realme 9 Pro+"
-#define WIFI_PASSWORD						"y3z4pfrm"
-//#define WIFI_SSID							"TP-Link_A6BE"
-//#define WIFI_PASSWORD						"41706831"
+//#define WIFI_SSID							"realme 9 Pro+"
+//#define WIFI_PASSWORD						"y3z4pfrm"
+#define WIFI_SSID							"TP-Link_A6BE"
+#define WIFI_PASSWORD						"41706831"
 
 // I2C
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_22				   /*!< GPIO number used for I2C master clock */
@@ -35,11 +35,6 @@
 #define VL6180X_ADDR                 		0x29
 #define OLED_ADDR							0x3C
 #define DS3231_ADDR							0x68
-
-// Led Signals
-#define LED_WIFI							GPIO_NUM_4
-#define LED_TCP								GPIO_NUM_15
-#define LED_ERROR							GPIO_NUM_5
 
 // IOTV
 #define RELE_PIN 							GPIO_NUM_32
@@ -59,16 +54,6 @@
 #define CH_TEMP			11
 #define CH_HUM			12
 #define CH_PRES			13
-
-// Номер ошибки
-#define I2C_INIT_FAIL						1
-#define I2C_DEINIT_FAIL						2
-#define I2C_WRITE_FAIL						3
-#define I2C_READ_FAIL						4
-#define RESULT__INTERRUPT_STATUS_GPIO_LOOP 	5
-#define RESULT__RANGE_STATUS_LOOP			6
-#define SYSTEM__FRESH_OUT_OF_RESET_LOOP		7
-#define OLED_INIT_FAIL						8
 
 // VL6180X
 #define VL6180X_ALS_GAIN_1 					0x06    ///< 1x gain
@@ -233,19 +218,6 @@ enum
 	FIRMWARE__RESULT_SCALER               = 0x120,
 	I2C_SLAVE__DEVICE_ADDRESS             = 0x212,
 	INTERLEAVED_MODE__ENABLE              = 0x2A3,
-};
-
-//// Структуры
-//struct DataPkg
-//{
-//	uint8_t *data;
-//	uint64_t size;
-//};
-
-struct LedSignalPkg
-{
-	const char *TAG;
-	int errorNumber;
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

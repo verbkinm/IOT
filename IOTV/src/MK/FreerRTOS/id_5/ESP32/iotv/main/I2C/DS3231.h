@@ -15,7 +15,7 @@
 #include "Local_Lib/local_lib.h"
 
 #define DS3231_REG_SEC	0x00
-#define DS3231_REG_YEAR	0x07
+#define DS3231_REG_YEAR	0x06
 
 struct DateTime {
 	uint8_t seconds,
