@@ -28,11 +28,9 @@
 #include "DS3231.h"
 #include "BME280.h"
 
-void OLED_init2(void);
+void OLED_init2(uint8_t displayOrientation);
 void OLED_boot_screen(void);
 void OLED_init_draw_element(void);
-void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn);
-void OLED_setWIFI_State(bool val);
-void OLED_setTCP_State(bool val);
+void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, uint8_t status);
 
 #endif /* MAIN_I2C_OLED_H_ */

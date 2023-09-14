@@ -1,6 +1,7 @@
 #include "WIFI.h"
 
 extern uint64_t realBufSize, expextedDataSize;
+extern uint8_t glob_status;
 
 static const char *TAG = "WIFI";
 /* FreeRTOS event group to signal when we are connected*/
@@ -27,11 +28,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 			xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
 
 		ESP_LOGI(TAG, "disconnect from AP");
-		OLED_setWIFI_State(false);
+		setBitInByte(&glob_status, 0, MY_STATUS_WIFI);
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
-		OLED_setWIFI_State(true);
+		setBitInByte(&glob_status, 1, MY_STATUS_WIFI);
 		ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
 		xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);

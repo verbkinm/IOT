@@ -3,50 +3,14 @@
 extern uint64_t realBufSize, expextedDataSize;
 extern uint8_t transmitBuffer[BUFSIZE];
 extern int transmitBufferSize;
-
-//extern QueueHandle_t xQueueInData, xQueueOutData;
+extern uint8_t glob_status;
 
 static const char *TAG = "TCP";
-//static TaskHandle_t xHandleWriteData;
-
-//static void writeData(void *pvParameters)
-//{
-//	ESP_LOGW(TAG, "writeData task created");
-//	struct DataPkg pkg = { NULL, 0 };
-//
-//	while (true)
-//	{
-//		if (xQueueReceive(xQueueOutData, (void *)&pkg, portMAX_DELAY) == pdPASS)
-//		{
-//			if (pkg.data != NULL)
-//			{
-//				if (send(*(int *)pvParameters, pkg.data, pkg.size, 0) < 0)
-//				{
-//					ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-//					break;
-//				}
-//				free(pkg.data);
-//			}
-//		}
-//		else
-//			ESP_LOGE(TAG, "xQueueReceive( xQueueOutData, pkg, ( TickType_t ) 10 ) != pdPASS");
-//	}
-//
-//	vTaskDelete(NULL);
-//	xHandleWriteData = NULL;
-//}
 
 static void do_retransmit(const int sock)
 {
 	int len;
 	uint8_t rx_buffer[BUFSIZE];
-//	struct DataPkg pkg = { NULL, 0 };
-
-//	if (xTaskCreate(writeData, "writeData_Task", 4096,  (void *)&sock, 2, &xHandleWriteData ) != pdPASS)
-//	{
-//		ESP_LOGE(TAG, "xTaskCreate(writeData, \"writeData_Task\", 4096,  NULL, 2, &xHandleWriteData ) != pdPASS");
-//		return;
-//	}
 
 	do
 	{
@@ -72,15 +36,6 @@ static void do_retransmit(const int sock)
 				}
 				transmitBufferSize = 0;
 			}
-
-//			pkg.data = malloc(len);
-//			memcpy(pkg.data, rx_buffer, len);
-//			pkg.size = len;
-//
-//
-//
-//			if ( xQueueSend(xQueueInData, (void *)&pkg, (TickType_t)10) != pdPASS )
-//				ESP_LOGE(TAG, "xQueueSend( xQueueOutData, (void *)&pkg, ( TickType_t ) 10 ) != pdPASS");
 
 			taskYIELD();
 		}
@@ -161,19 +116,13 @@ void tcp_server_task(void *pvParameters)
 			inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
 		}
 		ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
-		OLED_setTCP_State(true);
+		setBitInByte(&glob_status, 1, MY_STATUS_TCP);
 
 		do_retransmit(sock);
 
-//		if (xHandleWriteData != NULL)
-//		{
-//			vTaskDelete(xHandleWriteData);
-//			ESP_LOGW(TAG, "writeData task delete");
-//		}
-
 		shutdown(sock, SHUT_RDWR); //0
 		close(sock);
-		OLED_setTCP_State(false);
+		setBitInByte(&glob_status, 0, MY_STATUS_TCP);
 
 		realBufSize = 0;
 		expextedDataSize = 0;

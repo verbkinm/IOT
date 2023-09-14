@@ -30,7 +30,5 @@ struct DateTime {
 
 struct DateTime DS3231_DataTime(void);
 void DS3231_SetDataTime(const struct DateTime *dt);
-//uint16_t VL6180X_simpleALS(uint8_t gain);
-
 
 #endif /* MAIN_I2C_DS3231_H_ */

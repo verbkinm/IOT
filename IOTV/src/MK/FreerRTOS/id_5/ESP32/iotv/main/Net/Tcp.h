@@ -11,7 +11,6 @@
 #include <lwip/netdb.h>
 
 #include "Global_def.h"
-#include "I2C/oled.h"
 #include "iotv.h"
 
 void tcp_server_task(void *pvParameters);

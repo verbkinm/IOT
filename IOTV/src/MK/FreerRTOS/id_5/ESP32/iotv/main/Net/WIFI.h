@@ -10,7 +10,7 @@
 #include "esp_log.h"
 
 #include "Global_def.h"
-#include "I2C/oled.h"
+#include "Local_Lib/local_lib.h"
 
 void wifi_init_sta(void);
 

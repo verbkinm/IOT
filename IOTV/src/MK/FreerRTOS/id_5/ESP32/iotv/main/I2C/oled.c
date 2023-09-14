@@ -10,8 +10,6 @@
 
 static const char *TAG = "OLED";
 
-static bool isWifiConnect, isTCP_Connect;
-
 static lv_disp_t *glob_disp = NULL;
 
 static lv_obj_t *label_time = NULL;
@@ -31,8 +29,6 @@ static lv_obj_t *canvas_wifi = NULL;
 static lv_obj_t *canvas_tcp = NULL;
 static lv_obj_t *canvas_rele = NULL;
 
-void modf_two_part(float val, int *int_part, int *fract_part);
-
 static void init_draw_time(lv_obj_t *scr);
 static void init_draw_date(lv_obj_t *scr);
 
@@ -50,28 +46,17 @@ static void draw_temperature(const struct THP *thp);
 static void draw_humidity(const struct THP *thp);
 static void draw_pressure(const struct THP *thp);
 
-static void draw_status_wifi();
-static void draw_status_TCP();
+static void draw_status_wifi(bool isConnected);
+static void draw_status_TCP(bool isConnected);
 static void draw_status_rele(bool isReleOn);
 static void draw_status_on_canva(lv_obj_t *canvas, uint8_t (*arr)[10][10]);
 
 static void anim_x_cb(void * var, int32_t v);
 
-void modf_two_part(float val, int *int_part, int *fract_part)
-{
-	if (int_part == NULL || fract_part == NULL)
-		return;
-
-	double int_part_double;
-
-	*fract_part = modf(val, &int_part_double) * 100;
-	*int_part = int_part_double;
-}
-
 static void init_draw_time(lv_obj_t *scr)
 {
 	label_time = lv_label_create(scr);
-	lv_obj_set_pos(label_time, 54, 15);
+	lv_obj_set_pos(label_time, 50, 15);
 
 	static lv_style_t style_time;
 	lv_style_init(&style_time);
@@ -230,33 +215,29 @@ static void draw_date(const struct DateTime *dt)
 
 static void draw_temperature(const struct THP *thp)
 {
-	int part, fract;
-	modf_two_part(thp->temperature, &part, &fract);
+	int t = thp->temperature + 0.5;
 
-	char buff[5] = {0, 0, 0, 0, 0};
-	itoa(part, buff, 10);
-
-	if (strlen(buff) > 3 || thp->err) // strlen(buff) > 3
+	if (thp->err || t > 99 || t < -99) // ошибка или трехзначное число
 		lv_label_set_text_fmt(label_temperature, "err");
 	else
 	{
-		if (part > 0)
-		{
-			memmove(&buff[1], buff, sizeof(buff) - 1);
-			buff[0] = '+';
-		}
-		lv_label_set_text_fmt(label_temperature, "%s", buff);
+		if (t > 0)
+			lv_label_set_text_fmt(label_temperature, "+%d", t);
+		else if (t < 0)
+			lv_label_set_text_fmt(label_temperature, "-%d", t);
+		else
+			lv_label_set_text_fmt(label_temperature, "%d", t);
 	}
 
 	int cirX = -3;
 	// Расположение символа градуса относительно длины строки
 	if (thp->err != true)
 	{
-		if (strlen(buff) == 1)
+		if (0) 						// один символ
 			cirX = 29;
-		else if (strlen(buff) == 2)
+		else if (t > -10 && t < 10) // одноразрядное число плюс символа + или -
 			cirX = 32;
-		else if (strlen(buff) == 3)
+		else if (t < -9 || t > 9) 	// двухзначное число плюс символа + или -
 			cirX = 35;
 	}
 	lv_obj_set_pos(temperature_symbol, cirX, 4);
@@ -264,36 +245,25 @@ static void draw_temperature(const struct THP *thp)
 
 static void draw_humidity(const struct THP *thp)
 {
-	int part, fract;
-	modf_two_part(thp->humidity, &part, &fract);
+	int h = thp->humidity + 0.5;
 
-	char buff[5] = {0, 0, 0, 0, 0};
-	itoa(part, buff, 10);
-
-	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
-	if (strlen(buff) > 3 || thp->err)
+	if (thp->err || h > 99)
 		lv_label_set_text_fmt(label_humidity, "err");
 	else
-		lv_label_set_text_fmt(label_humidity, "%s%%", buff);
+		lv_label_set_text_fmt(label_humidity, "%d%%", h);
 }
 
 static void draw_pressure(const struct THP *thp)
 {
-	int part, fract;
-	double convert = thp->pressure * 7.50062 * 0.001;
-	modf_two_part(convert, &part, &fract);
+	int p = thp->pressure * 7.50062 * 0.001 + 0.5; // перевод в мм.рт.ст
 
-	char buff[5] = {0, 0, 0, 0, 0};
-	itoa(part, buff, 10);
-
-	//		lv_label_set_text_fmt(label_temp, "%d.%.01d", part, fract);
-	if (strlen(buff) > 3 || thp->err)
+	if (thp->err || p > 999)
 		lv_label_set_text_fmt(label_pressure, "err");
 	else
-		lv_label_set_text_fmt(label_pressure, "%s", buff);
+		lv_label_set_text_fmt(label_pressure, "%d", p);
 }
 
-static void draw_status_wifi()
+static void draw_status_wifi(bool isConnected)
 {
 	uint8_t wifi_connected[10][10] = {
 			{0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
@@ -321,11 +291,11 @@ static void draw_status_wifi()
 			{0, 0, 0, 0, 1, 1, 0, 0, 1, 1}
 	};
 
-	uint8_t (*arr)[10][10] = isWifiConnect ? &wifi_connected : &wifi_disconnected;
+	uint8_t (*arr)[10][10] = isConnected ? &wifi_connected : &wifi_disconnected;
 	draw_status_on_canva(canvas_wifi, arr);
 }
 
-static void draw_status_TCP()
+static void draw_status_TCP(bool isConnected)
 {
 	uint8_t tcp_connected[10][10] = {
 			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -353,7 +323,7 @@ static void draw_status_TCP()
 			{0, 0, 0, 1, 1, 1, 1, 0, 0, 1}
 	};
 
-	uint8_t (*arr)[10][10] = isTCP_Connect ? &tcp_connected : &tcp_disconnected;
+	uint8_t (*arr)[10][10] = isConnected ? &tcp_connected : &tcp_disconnected;
 	draw_status_on_canva(canvas_tcp, arr);
 }
 
@@ -405,7 +375,7 @@ static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_
 	return false;
 }
 
-void OLED_init2(void)
+void OLED_init2(uint8_t displayOrientation)
 {
 	ESP_LOGI(TAG, "Install panel IO");
 
@@ -456,7 +426,7 @@ void OLED_init2(void)
 	ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(io_handle, &cbs, disp));
 
 	/* Rotation of the screen */
-	lv_disp_set_rotation(disp, LV_DISP_ROT_180);
+	lv_disp_set_rotation(disp, displayOrientation);
 	glob_disp = disp;
 }
 
@@ -533,7 +503,7 @@ void OLED_boot_screen(void)
 	lv_obj_clean(scr);
 }
 
-void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isReleOn)
+void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, uint8_t status)
 {
 	if (dt == NULL || thp == NULL)
 		return;
@@ -545,17 +515,7 @@ void OLED_Draw_Page(const struct THP *thp, const struct DateTime *dt, bool isRel
 	draw_humidity(thp);
 	draw_pressure(thp);
 
-	draw_status_wifi();
-	draw_status_TCP();
-	draw_status_rele(isReleOn);
-}
-
-void OLED_setWIFI_State(bool val)
-{
-	isWifiConnect = val;
-}
-
-void OLED_setTCP_State(bool val)
-{
-	isTCP_Connect = val;
+	draw_status_wifi(status & (1 << MY_STATUS_WIFI));
+	draw_status_TCP(status & (1 << MY_STATUS_TCP));
+	draw_status_rele(status & (1 << MY_STATUS_RELE));
 }

@@ -17,6 +17,17 @@ uint8_t decToBcd(uint8_t val)
 	return( (val / 10 * 16) + (val % 10) );
 }
 
+void setBitInByte(uint8_t *byte, bool bitValue, uint8_t bitNumber)
+{
+	if (byte == NULL)
+		return;
+
+	if (bitValue)
+		*byte |= (1 << bitNumber);
+	else
+		*byte &= ~(1 << bitNumber);
+}
+
 double inRange(double val, double min, double max)
 {
 	if (val < min)
@@ -26,3 +37,4 @@ double inRange(double val, double min, double max)
 
 	return val;
 }
+

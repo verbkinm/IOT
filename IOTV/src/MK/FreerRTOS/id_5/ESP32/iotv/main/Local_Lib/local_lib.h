@@ -10,9 +10,11 @@
 
 #include "stdint.h"
 #include "stddef.h"
+#include "stdbool.h"
 
 uint8_t bcdToDec(uint8_t val);
 uint8_t decToBcd(uint8_t val);
+void setBitInByte(uint8_t *byte, bool bitValue, uint8_t bitNumber);
 
 double inRange(double val, double min, double max);
 

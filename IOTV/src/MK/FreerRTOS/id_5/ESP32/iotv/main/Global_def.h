@@ -39,6 +39,7 @@
 // IOTV
 #define RELE_PIN 							GPIO_NUM_32
 #define BORDER_DISTANCE_DEFAULT 			150
+#define DISPLAY_ORIENTATION_DEFAULT			0
 
 #define CH_RELAY_STATE 	0
 #define CH_BORDER		1
@@ -49,11 +50,13 @@
 #define CH_DATE			6
 #define CH_MONTH		7
 #define CH_YEAR			8
-#define CH_RANGE		9
-#define CH_LUX			10
-#define CH_TEMP			11
-#define CH_HUM			12
-#define CH_PRES			13
+#define CH_DISP_ORNT	9
+#define CH_RANGE		10
+#define CH_LUX			11
+#define CH_TEMP			12
+#define CH_HUM			13
+#define CH_PRES			14
+
 
 // VL6180X
 #define VL6180X_ALS_GAIN_1 					0x06    ///< 1x gain
@@ -218,6 +221,14 @@ enum
 	FIRMWARE__RESULT_SCALER               = 0x120,
 	I2C_SLAVE__DEVICE_ADDRESS             = 0x212,
 	INTERLEAVED_MODE__ENABLE              = 0x2A3,
+};
+
+// Биты статусов
+enum
+{
+	MY_STATUS_WIFI = 1,
+	MY_STATUS_TCP = 2,
+	MY_STATUS_RELE = 4
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */
