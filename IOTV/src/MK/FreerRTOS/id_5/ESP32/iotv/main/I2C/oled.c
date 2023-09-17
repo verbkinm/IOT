@@ -56,7 +56,7 @@ static void anim_x_cb(void * var, int32_t v);
 static void init_draw_time(lv_obj_t *scr)
 {
 	label_time = lv_label_create(scr);
-	lv_obj_set_pos(label_time, 50, 15);
+	lv_obj_set_pos(label_time, 48, 15);
 
 	static lv_style_t style_time;
 	lv_style_init(&style_time);
@@ -68,7 +68,7 @@ static void init_draw_time(lv_obj_t *scr)
 static void init_draw_date(lv_obj_t *scr)
 {
 	label_date = lv_label_create(scr);
-	lv_obj_set_pos(label_date, 54, 45);
+	lv_obj_set_pos(label_date, 52, 45);
 
 	static lv_style_t style_date;
 	lv_style_init(&style_date);

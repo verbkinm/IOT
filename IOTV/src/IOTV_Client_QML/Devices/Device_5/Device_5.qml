@@ -52,11 +52,10 @@ Page {
                 height: 300
 
                 device: root.device
-                channelTemperature: 11
-                channelHumidity: 12
-                channelPressure: 13
+                channelTemperature: 12
+                channelHumidity: 13
+                channelPressure: 14
             }
-
         }
     }
 

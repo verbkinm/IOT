@@ -82,6 +82,9 @@ void iotvInit(void)
 		iot.readChannel[i].data = (char *)calloc(1, iot.readChannel[i].dataSize);
 	}
 
+	*(int16_t *)iot.readChannel[CH_BORDER].data = readBorderDistanceFromNVS();
+	*(int8_t *)iot.readChannel[CH_DISP_ORNT].data = readDisplayOrientationFromNVS();
+
 	iot.state = 1;
 }
 
@@ -136,7 +139,7 @@ void dataRecived(const uint8_t *data, int size)
 				if (len > 0)
 				{
 					uint8_t channelNumber = ((struct Read_Write *)header->pkg)->channelNumber;
-					int16_t *val = (int16_t *)iot.readChannel[channelNumber].data;
+					int8_t *val = (int8_t *)iot.readChannel[channelNumber].data;
 					switch (channelNumber)
 					{
 					case CH_RELAY_STATE:
@@ -155,9 +158,10 @@ void dataRecived(const uint8_t *data, int size)
 
 						break;
 					case CH_BORDER:
-						*val = inRange(*val, 0, 255);
-						printf("Data in border: %d\n", *val);
-						writeBorderDistanceToNVS(*val);
+						int16_t *val16 = (int16_t *)iot.readChannel[channelNumber].data;
+						*val16 = inRange(*val16, 0, 255);
+						printf("Data in border: %d\n", *val16);
+						writeBorderDistanceToNVS(*val16);
 						break;
 					case CH_SEC:
 					case CH_MIN:
@@ -180,7 +184,10 @@ void dataRecived(const uint8_t *data, int size)
 						break;
 					case CH_DISP_ORNT:
 						// проверка!!!
-						writeDisplayOrientationToNVS(*(uint8_t *)iot.readChannel[channelNumber].data);
+						printf("orientation: %d\n", *val);
+						*val = inRange(*val, 0, 3);
+						printf("orientation: %d\n", *val);
+						writeDisplayOrientationToNVS(*val);
 						break;
 					default:
 						break;
@@ -304,8 +311,6 @@ void Vl6180X_Task(void *pvParameters)
 	releState = iot.readChannel[CH_RELAY_STATE].data;
 
 	int16_t *border = (int16_t *)iot.readChannel[CH_BORDER].data;
-	*border = readBorderDistanceFromNVS();
-
 	int16_t *range = (int16_t *)iot.readChannel[CH_RANGE].data;
 
 	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
@@ -412,10 +417,6 @@ void OLED_Task(void *pvParameters)
 	struct DateTime dt;
 	struct THP thp;
 
-	static struct DateTime lastDT = {0};
-	static struct THP lastTHP = {0};
-	static uint8_t lastStatus = 0;
-
 	while(true)
 	{
 		// на 32 байта меньше, чем поэлементное присваивание,
@@ -423,13 +424,13 @@ void OLED_Task(void *pvParameters)
 		for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
 			((uint8_t *)&dt)[j] = *(uint8_t *)iot.readChannel[i].data;
 
-//		dt.seconds = *(uint8_t *)iot.readChannel[CH_SEC].data;
-//		dt.minutes = *(uint8_t *)iot.readChannel[CH_MIN].data;
-//		dt.hour = *(uint8_t *)iot.readChannel[CH_HOUR].data;
-//		dt.day = *(uint8_t *)iot.readChannel[CH_DAY].data;
-//		dt.date = *(uint8_t *)iot.readChannel[CH_DATE].data;
-//		dt.month = *(uint8_t *)iot.readChannel[CH_MONTH].data;
-//		dt.year = *(uint8_t *)iot.readChannel[CH_YEAR].data;
+		//		dt.seconds = *(uint8_t *)iot.readChannel[CH_SEC].data;
+		//		dt.minutes = *(uint8_t *)iot.readChannel[CH_MIN].data;
+		//		dt.hour = *(uint8_t *)iot.readChannel[CH_HOUR].data;
+		//		dt.day = *(uint8_t *)iot.readChannel[CH_DAY].data;
+		//		dt.date = *(uint8_t *)iot.readChannel[CH_DATE].data;
+		//		dt.month = *(uint8_t *)iot.readChannel[CH_MONTH].data;
+		//		dt.year = *(uint8_t *)iot.readChannel[CH_YEAR].data;
 		dt.err = (dt.seconds == 255) ? true : false; // если данные не считались, то все значения для dt = 255. Смотри DS3231_Task if (dt.err)
 
 		thp.temperature = *(double *)iot.readChannel[CH_TEMP].data;
@@ -437,16 +438,8 @@ void OLED_Task(void *pvParameters)
 		thp.pressure = *(double *)iot.readChannel[CH_PRES].data;
 		thp.err = thp.temperature == INFINITY ? true : false; // если данные не считались, то все значения для thp = INFINITY. Смотри BME280_Task if (values.err)
 
-		if ( memcmp(&lastDT, &dt, sizeof(struct DateTime)) != 0
-				|| memcmp(&lastTHP, &thp, sizeof(struct THP)) != 0
-				|| (lastStatus != glob_status))
-		{
-			OLED_Draw_Page(&thp, &dt, glob_status);
-			lastDT = dt;
-			lastTHP = thp;
-			lastStatus = glob_status;
-		}
-		vTaskDelay(10 / portTICK_PERIOD_MS);
+		OLED_Draw_Page(&thp, &dt, glob_status);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
 
