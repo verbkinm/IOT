@@ -12,7 +12,9 @@ static const char *TAG = "OLED";
 
 static lv_disp_t *glob_disp = NULL;
 
+static lv_obj_t *time_obj = NULL;
 static lv_obj_t *label_time = NULL;
+static lv_obj_t *date_obj = NULL;
 static lv_obj_t *label_date = NULL;
 
 static lv_obj_t *label_temperature = NULL;
@@ -55,8 +57,16 @@ static void anim_x_cb(void * var, int32_t v);
 
 static void init_draw_time(lv_obj_t *scr)
 {
-	label_time = lv_label_create(scr);
-	lv_obj_set_pos(label_time, 48, 15);
+	time_obj = lv_obj_create(scr);
+	lv_obj_set_size(time_obj, 86, 30);
+	lv_obj_set_pos(time_obj, 42, 12);
+//	lv_obj_set_style_border_width(time_obj, 1, 0);
+//	lv_obj_set_style_border_color(time_obj, lv_color_black(), 0);
+//	lv_obj_set_style_radius(time_obj , 0, 0);
+	lv_obj_set_scrollbar_mode(time_obj , LV_SCROLLBAR_MODE_OFF);
+
+	label_time = lv_label_create(time_obj);
+	lv_obj_align(label_time, LV_ALIGN_CENTER, 0, 0);
 
 	static lv_style_t style_time;
 	lv_style_init(&style_time);
@@ -67,8 +77,16 @@ static void init_draw_time(lv_obj_t *scr)
 
 static void init_draw_date(lv_obj_t *scr)
 {
-	label_date = lv_label_create(scr);
-	lv_obj_set_pos(label_date, 52, 45);
+	date_obj = lv_obj_create(scr);
+	lv_obj_set_size(date_obj, 86, 20);
+	lv_obj_set_pos(date_obj, 42, 41);
+//	lv_obj_set_style_border_width(date_obj, 1, 0);
+//	lv_obj_set_style_border_color(date_obj, lv_color_black(), 0);
+//	lv_obj_set_style_radius(date_obj , 0, 0);
+	lv_obj_set_scrollbar_mode(date_obj , LV_SCROLLBAR_MODE_OFF);
+
+	label_date = lv_label_create(date_obj);
+	lv_obj_align(label_date, LV_ALIGN_CENTER, 0, 0);
 
 	static lv_style_t style_date;
 	lv_style_init(&style_date);
