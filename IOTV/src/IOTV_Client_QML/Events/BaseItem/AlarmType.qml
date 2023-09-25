@@ -103,10 +103,13 @@ Item {
                 id: rowDays
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 0
                 Repeater {
                     id: repeater
                     model: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
                     RoundButton{
+                        width: 45
+                        height: width
                         checkable: true
                         text: modelData
                         highlighted: days[model.index] === "1"

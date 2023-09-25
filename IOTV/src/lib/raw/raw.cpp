@@ -18,7 +18,7 @@ Raw::Raw() : _type(DATA_TYPE::NONE)
 
 Raw::Raw(int8_t data) :
     _type(DATA_TYPE::INT_8),
-    _data{1, data}
+    _data{1, static_cast<char>(data)}
 {
 
 }
