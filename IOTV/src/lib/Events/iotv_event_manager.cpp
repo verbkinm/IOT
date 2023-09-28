@@ -20,7 +20,7 @@ IOTV_Event_Manager::IOTV_Event_Manager(QObject *parent)
 
 IOTV_Event_Manager::~IOTV_Event_Manager()
 {
-    for (auto &el : _worker)
+    for (auto const &el : _worker)
     {
         auto event = el.second.first;
         auto action = el.second.second;

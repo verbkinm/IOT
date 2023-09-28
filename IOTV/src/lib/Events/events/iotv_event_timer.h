@@ -7,7 +7,7 @@
 class IOTV_Event_Timer : public IOTV_Event
 {
 public:
-    IOTV_Event_Timer(int seconds, QObject *parent = nullptr);
+    explicit IOTV_Event_Timer(int seconds, QObject *parent = nullptr);
 
     int seconds() const;
 

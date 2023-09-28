@@ -1,13 +1,13 @@
 #include "iotv_event_data.h"
 
-IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
+IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, const QString &compare,
                                  const Base_Host *host,
-                                 uint8_t channelNumber, const QString &raw,
+                                 uint8_t channelNumber, const QString &data,
                                  QObject *parent) :
     IOTV_Event(EVENT_TYPE::DATA, host, parent),
     _type(direction),
     _channelNumber(channelNumber),
-    _data(raw),
+    _data(data),
     _compareStr(compare),
     _compare(createCompare(compare))
 {

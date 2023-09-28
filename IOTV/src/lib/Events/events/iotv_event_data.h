@@ -15,7 +15,7 @@ public:
         CHANGE
     };
 
-    IOTV_Event_Data(const DATA_DIRECTION &direction, QString compare,
+    IOTV_Event_Data(const DATA_DIRECTION &direction, const QString &compare,
                     const Base_Host *host,
                     uint8_t channelNumber, const QString &data,
                     QObject *parent = nullptr);

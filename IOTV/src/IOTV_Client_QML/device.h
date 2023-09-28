@@ -22,7 +22,7 @@ class Device : public Base_Host
 
 public:
     Device() = default;
-    Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
+    explicit Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
     void update(const struct IOTV_Server_embedded *dev);
 
     virtual QString getName() const override;

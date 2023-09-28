@@ -22,7 +22,7 @@ class Client : public QObject
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
     Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
 public:
-    Client(QObject *parent = nullptr);
+    explicit Client(QObject *parent = nullptr);
     ~Client();
 
     int countDevices() const;
