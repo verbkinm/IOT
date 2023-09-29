@@ -18,7 +18,6 @@
 #include "wifi.h"
 
 // Глобальные объекты
-//extern bool global_wifi_sta_connect;
 extern iotv_wifi_status_t global_wifi_sta_status;
 
 // Приватные объекты
@@ -58,7 +57,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
 			return;
 		}
 
-		global_wifi_sta_status |= IOTV_WIFI_STA_START_CONNECTING;
+		global_wifi_sta_status = IOTV_WIFI_STA_START_CONNECTING;
 		esp_wifi_connect();
 
 		ESP_LOGI(TAG, "retry to connect to the AP");
@@ -87,14 +86,14 @@ void wifi_sta_connect(const char *ssid, const char *pass)
 	}
 
 	wifi_config_t sta_config = {};
-	memcpy(sta_config.sta.ssid, ssid, (strlen(ssid) > WIFI_SSID_MAX_LENGH ? WIFI_SSID_MAX_LENGH : strlen(ssid) ));
-	memcpy(sta_config.sta.password, pass, (strlen(pass) > WIFI_PASS_MAX_LENGH ? WIFI_PASS_MAX_LENGH : strlen(pass) ));
+	memcpy(sta_config.sta.ssid, ssid, MIN(strlen(ssid), WIFI_SSID_MAX_LENGH));
+	memcpy(sta_config.sta.password, pass, MIN(strlen(pass), WIFI_PASS_MAX_LENGH));
 	sta_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
 	sta_config.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));
 
-	global_wifi_sta_status |= IOTV_WIFI_STA_START_CONNECTING;
+	global_wifi_sta_status = IOTV_WIFI_STA_START_CONNECTING;
 	esp_wifi_connect();
 }
 

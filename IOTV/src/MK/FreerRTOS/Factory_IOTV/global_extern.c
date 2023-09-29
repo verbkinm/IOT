@@ -9,4 +9,5 @@
 #include "stdbool.h"
 
 iotv_wifi_status_t global_wifi_sta_status = IOTV_WIFI_STA_NULL;
+iotv_ota_status_t global_ota_status = IOTV_OTA_NULL;
 //bool global_wifi_sta_connect = false;

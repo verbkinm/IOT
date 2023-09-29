@@ -6,11 +6,11 @@
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
-		<form action="/cmd" method="get">
+		<form action="/cmd" method="post">
 			<h1>Введите данные точки доступа:</h1>
 			<p>WIFI SSID: <input type="text" size="40" name="ssid" required=""></p>
 			<p>WIFI пароль: <input type="password" size="40" name="pass" required=""></p>
-			<p><input type="submit"></p>
+			<p><input type="submit" value="Сохранить" style="width:150px;"></p>
 		</form>
 	</body>
 </html>

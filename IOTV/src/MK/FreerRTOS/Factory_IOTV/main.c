@@ -32,7 +32,12 @@ void app_main(void)
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
 	// Initialize NVS needed by Wi-Fi
-	ESP_ERROR_CHECK(nvs_flash_init());
+	esp_err_t err = nvs_flash_init();
+	if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+	{
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		ESP_ERROR_CHECK(nvs_flash_init());
+	}
 
 	wifi_init();
 	start_webserver();

@@ -8,6 +8,8 @@
 
 #include "web.h"
 #include "wifi/wifi.h"
+#include "ota/ota.h"
+#include "lib/urldecode.h"
 
 #include <sys/param.h>
 
@@ -16,9 +18,10 @@
 #include "esp_mac.h"
 
 // Глобальные объекты
-//extern bool global_wifi_sta_connect;
 extern iotv_wifi_status_t global_wifi_sta_status;
+extern iotv_ota_status_t global_ota_status;
 
+// HTML страницы
 extern const unsigned char index_start[] asm("_binary_index_html_start");
 extern const unsigned char index_end[] asm("_binary_index_html_end");
 
@@ -28,20 +31,37 @@ extern const unsigned char connecting_end[] asm("_binary_connecting_html_end");
 extern const unsigned char error_connect_start[] asm("_binary_error_html_start");
 extern const unsigned char error_connect_end[]   asm("_binary_error_html_end");
 
+// OTA
 extern const unsigned char ota_start[] asm("_binary_ota_html_start");
-extern const unsigned char iota_end[] asm("_binary_ota_html_end");
+extern const unsigned char ota_end[] asm("_binary_ota_html_end");
 
+extern const unsigned char ota_downloaded_start[] asm("_binary_ota_downloaded_html_start");
+extern const unsigned char ota_downloaded_end[] asm("_binary_ota_downloaded_html_end");
+
+extern const unsigned char ota_downloading_start[] asm("_binary_ota_downloading_html_start");
+extern const unsigned char ota_downloading_end[] asm("_binary_ota_downloading_html_end");
+
+extern const unsigned char ota_fail_start[] asm("_binary_ota_fail_html_start");
+extern const unsigned char ota_fail_end[] asm("_binary_ota_fail_html_end");
+
+// FAVICON
 extern const unsigned char favicon_start[] asm("_binary_favicon_ico_start");
 extern const unsigned char favicon_end[] asm("_binary_favicon_ico_end");
 
 // Приватные свойства
 static const char *TAG = "web";
+static char *otaDecodeUrl = NULL;
 
 // Приватные функцие
 static esp_err_t root_get_handler(httpd_req_t *req);
-static esp_err_t cmd_get_handler(httpd_req_t *req);
 static esp_err_t favicon_get_handler(httpd_req_t *req);
+static esp_err_t ota_get_handler(httpd_req_t *req);
+static esp_err_t cap_handler(httpd_req_t *req);
 static esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err);
+
+static esp_err_t cmd_post_handler(httpd_req_t *req);
+static esp_err_t ota_post_handler(httpd_req_t *req);
+
 static char *parseUri(const char* uri, size_t *resultSize, const char *searchStr);
 
 // Приватные объекты использующие функции описанные выше
@@ -51,16 +71,34 @@ static const httpd_uri_t root = {
 		.handler = root_get_handler
 };
 
-static const httpd_uri_t cmd = {
+static const httpd_uri_t cmd_get = {
 		.uri = "/cmd",
 		.method = HTTP_GET,
-		.handler = cmd_get_handler
+		.handler = cap_handler
 };
 
 static const httpd_uri_t favicon = {
 		.uri = "/favicon.ico",
 		.method = HTTP_GET,
 		.handler = favicon_get_handler
+};
+
+static const httpd_uri_t ota_get = {
+		.uri = "/ota",
+		.method = HTTP_GET,
+		.handler = ota_get_handler
+};
+
+static const httpd_uri_t cmd_post = {
+		.uri = "/cmd",
+		.method = HTTP_POST,
+		.handler = cmd_post_handler
+};
+
+static const httpd_uri_t ota_post = {
+		.uri = "/ota",
+		.method = HTTP_POST,
+		.handler = ota_post_handler
 };
 
 //Реализация приватных функций
@@ -92,51 +130,57 @@ static esp_err_t root_get_handler(httpd_req_t *req)
 {
 	printf("uri - %s\n", req->uri);
 
-	char *index = NULL;
-	size_t indexSize = 0;
+	char *index = (char *)index_start;
+	size_t indexSize = index_end - index_start;
 
-	if (global_wifi_sta_status == IOTV_WIFI_STA_NULL)
+	if (global_ota_status != IOTV_OTA_NULL || global_wifi_sta_status == IOTV_WIFI_STA_CONNECTED)
 	{
-		index = (char *)index_start;
-		indexSize = index_end - index_start;
+		httpd_resp_set_status(req, "302 Temporary Redirect");
+		httpd_resp_set_hdr(req, "Location", "/ota");
+		httpd_resp_send(req, "Redirect to the captive portal", HTTPD_RESP_USE_STRLEN);
+
+		ESP_LOGI(TAG, "Redirecting to /ota");
+		return ESP_OK;
 	}
-	else if (global_wifi_sta_status & IOTV_WIFI_STA_START_CONNECTING)
+	else if (global_wifi_sta_status == IOTV_WIFI_STA_START_CONNECTING)
 	{
 		index = (char *)connecting_start;
 		indexSize = connecting_end - connecting_start;
 	}
-	else if (global_wifi_sta_status & IOTV_WIFI_FAIL_CONNECT)
+	else if (global_wifi_sta_status == IOTV_WIFI_FAIL_CONNECT)
 	{
 		global_wifi_sta_status = IOTV_WIFI_STA_NULL;
 
 		index = (char *)error_connect_start;
 		indexSize = error_connect_end - error_connect_start;
 	}
-	else if (global_wifi_sta_status == IOTV_WIFI_STA_CONNECTED)
-	{
-		index = (char *)ota_start;
-		indexSize = iota_end - ota_start;
-	}
 
 	httpd_resp_set_type(req, "text/html");
 	httpd_resp_send(req, index, indexSize);
 
-	//	httpd_resp_set_type(req, "image/x-icon");
-	//	index = favicon_start;
-	//	indexSize = favicon_end - favicon_start;
-	//	httpd_resp_send(req, index, indexSize);
-
 	return ESP_OK;
 }
 
-static esp_err_t cmd_get_handler(httpd_req_t *req)
+static esp_err_t cmd_post_handler(httpd_req_t *req)
 {
 	printf("uri - %s\n", req->uri);
+
+	char content[100] = {};
+	size_t recv_size = MIN(req->content_len, sizeof(content));
+
+	if (httpd_req_recv(req, content, recv_size) <= 0)
+		return cap_handler(req);
+
+	char *decodeText = urlDecode(content);
+	memcpy(content, decodeText, strlen(decodeText));
+	free(decodeText);
+
+	ESP_LOGE(TAG, "content: %s", content);
 
 	bool errArgs = false;
 	size_t resultSize;
 	size_t indexSize;
-	char *result = parseUri(req->uri, &resultSize, "ssid=");
+	char *result = parseUri(content, &resultSize, "ssid=");
 
 	if (result == NULL || resultSize > WIFI_SSID_MAX_LENGH)
 	{
@@ -191,6 +235,36 @@ static esp_err_t cmd_get_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+static esp_err_t ota_post_handler(httpd_req_t *req)
+{
+	printf("uri - %s\n", req->uri);
+
+	if (global_wifi_sta_status != IOTV_WIFI_STA_CONNECTED && global_ota_status != IOTV_OTA_NULL)
+		return ESP_OK;
+
+	char content[100] = {};
+	size_t recv_size = MIN(req->content_len, sizeof(content));
+
+	if (httpd_req_recv(req, content, recv_size) <= 0)
+		return cap_handler(req);
+
+	ESP_LOGE(TAG, "content: %s", content);
+
+	size_t resultSize;
+	char *result = parseUri(content, &resultSize, "firmware=");
+
+	if (result == NULL)
+		return cap_handler(req);
+
+	otaDecodeUrl = urlDecode(result);
+
+	global_ota_status = IOTV_OTA_DOWNLOADING;
+	cap_handler(req);
+
+
+	return ESP_OK;
+}
+
 static esp_err_t favicon_get_handler(httpd_req_t *req)
 {
 	printf("uri - %s\n", req->uri);
@@ -199,6 +273,58 @@ static esp_err_t favicon_get_handler(httpd_req_t *req)
 	size_t indexSize = favicon_end - favicon_start;
 
 	httpd_resp_set_type(req, "image/x-icon");
+	httpd_resp_send(req, index, indexSize);
+
+	return ESP_OK;
+}
+
+static esp_err_t ota_get_handler(httpd_req_t *req)
+{
+	printf("uri - %s\n", req->uri);
+
+	char *index = (char *)index_start;
+	size_t indexSize = index_end - index_start;
+
+	if (global_ota_status == IOTV_OTA_NULL && global_wifi_sta_status == IOTV_WIFI_STA_CONNECTED)
+	{
+		index = (char *)ota_start;
+		indexSize = ota_end - ota_start;
+	}
+	else if (global_ota_status == IOTV_OTA_DOWNLOADING)
+	{
+		index = (char *)ota_downloading_start;
+		indexSize = ota_downloading_end - ota_downloading_start;
+
+		httpd_resp_set_type(req, "text/html");
+		httpd_resp_send(req, index, indexSize);
+
+		if (otaDecodeUrl != NULL)
+		{
+			ota_firmware(otaDecodeUrl);
+			free(otaDecodeUrl);
+		}
+
+		return ESP_OK;
+	}
+	else if (global_ota_status == IOTV_OTA_DOWNLOADED)
+	{
+		index = (char *)ota_downloaded_start;
+		indexSize = ota_downloaded_end - ota_downloaded_start;
+		global_ota_status = IOTV_OTA_REBOOTING;
+	}
+	else if (global_ota_status == IOTV_OTA_REBOOTING)
+		esp_restart();
+	else if (global_ota_status == IOTV_OTA_FAIL)
+	{
+		index = (char *)ota_fail_start;
+		indexSize = ota_fail_end - ota_fail_start;
+
+		global_ota_status = IOTV_OTA_NULL;
+	}
+	else
+		return cap_handler(req);
+
+	httpd_resp_set_type(req, "text/html");
 	httpd_resp_send(req, index, indexSize);
 
 	return ESP_OK;
@@ -218,6 +344,11 @@ static esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 	return ESP_OK;
 }
 
+static esp_err_t cap_handler(httpd_req_t *req)
+{
+	return http_404_error_handler(req, 0);
+}
+
 //Реализация публичных функций
 httpd_handle_t start_webserver(void)
 {
@@ -233,8 +364,12 @@ httpd_handle_t start_webserver(void)
 		// Set URI handlers
 		ESP_LOGI(TAG, "Registering URI handlers");
 		httpd_register_uri_handler(server, &root);
-		httpd_register_uri_handler(server, &cmd);
+		httpd_register_uri_handler(server, &cmd_get);
 		httpd_register_uri_handler(server, &favicon);
+		httpd_register_uri_handler(server, &ota_get);
+
+		httpd_register_uri_handler(server, &cmd_post);
+		httpd_register_uri_handler(server, &ota_post);
 
 		httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, http_404_error_handler);
 	}
