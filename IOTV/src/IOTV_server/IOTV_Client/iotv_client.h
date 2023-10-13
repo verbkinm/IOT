@@ -24,7 +24,7 @@ public:
 private:
     QTcpSocket *_socket;
 
-    const std::unordered_map<IOTV_Host* , QThread*> &_hosts;
+    const std::unordered_map<IOTV_Host *, QThread *> &_hosts;
 
     QByteArray recivedBuff;
 

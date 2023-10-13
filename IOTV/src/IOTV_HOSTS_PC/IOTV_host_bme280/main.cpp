@@ -8,10 +8,12 @@
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
 
+#define BUFSIZE 8
+
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
 
-char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
+char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZE];
 uint64_t realBufSize = 0;
 
 uint64_t expextedDataSize = HEADER_SIZE;
@@ -50,9 +52,10 @@ void slotDataRecived()
 
     while (buffer.size() > 0)
     {
-        memcpy(recivedBuffer, buffer.data(), buffer.size());
+        auto bufSize = (buffer.size() > BUFSIZE) ? BUFSIZE : buffer.size();
+        memcpy(recivedBuffer, buffer.data(), bufSize);
 
-        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
+        struct Header* header = createPkgs((uint8_t*)recivedBuffer, bufSize, &error, &expextedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -70,27 +73,27 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
+                uint64_t size = responseReadData(transmitBuffer, BUFSIZE, &iot, header);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZE, &iot, header);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
+                uint64_t size = responsePingData(transmitBuffer, BUFSIZE);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
+                uint64_t size = responseStateData(transmitBuffer, BUFSIZE, &iot);
                 socket->write(transmitBuffer, size);
             }
         }
@@ -99,11 +102,11 @@ void slotDataRecived()
     }
 
     //    //!!!
-    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
+    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZE - cutDataSize);
     //    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
 
     //    //страховка
-    //    if (realBufSize >= BUFSIZ)
+    //    if (realBufSize >= BUFSIZE)
     //    {
     //        realBufSize = 0;
     //        expextedDataSize = 0;

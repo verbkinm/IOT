@@ -4,7 +4,11 @@
 
 struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
+    if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
+        return NULL;
+
     struct Header *header = createHeader(data, size, error, expectedDataSize, cutDataSize);
+
     if (header == NULL)
         return NULL;
 
@@ -56,7 +60,7 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
     }
 
     uint64_t bodySize = 0;
-    memcpy(&bodySize, &data[4], 8); // Размер тела пакета (документация)
+    memcpy(&bodySize, &data[4], 8); // 8 - размер тела пакета (документация)
 
     if (size < (HEADER_SIZE + bodySize))
     {
@@ -66,7 +70,7 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
 
     uint64_t sum = data[0] + data[1] + data[2] + data[3] + bodySize;
     uint64_t chSum = 0;
-    memcpy(&chSum, &data[12], 8); // Размер контрольной суммы пакета (документация)
+    memcpy(&chSum, &data[12], 8); // 8 - размер контрольной суммы пакета (документация)
 
     if (sum != chSum)
     {
@@ -88,9 +92,6 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
         .version = data[0],
         .dataSize = bodySize,
         .pkg = NULL
-//        .identification = NULL,
-//        .readWrite = NULL,
-//        .state = NULL
     };
 
     memcpy((void *)headerResult, &header, sizeof(struct Header));
@@ -182,9 +183,9 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t size,
     memcpy((void *)identificationResult, &identification, sizeof(struct Identification));
 
     if ((nameSize > 0 && identification.name == NULL)
-            || (descriptionSize > 0 && identification.description == NULL)
-            || (numberReadChannel > 0 && identification.readChannelType == NULL)
-            || (numberWriteChannel > 0 && identification.writeChannelType == NULL))
+        || (descriptionSize > 0 && identification.description == NULL)
+        || (numberReadChannel > 0 && identification.readChannelType == NULL)
+        || (numberWriteChannel > 0 && identification.writeChannelType == NULL))
     {
         *error = true;
         clearIdentification(identificationResult);
@@ -298,9 +299,9 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     uint8_t flags = data[2];
 
     uint32_t dataSize = 0;
-    memcpy(&dataSize, &data[3], 4); // Размер данных пакета (документация)
+    memcpy(&dataSize, &data[3], 4); // 4 - размер данных пакета (документация)
 
-    if (size < (READ_WRITE_SIZE + nameSize + dataSize))
+    if ((size < (READ_WRITE_SIZE + nameSize + dataSize)) && (flags != ReadWrite_FLAGS_STREAM))
     {
         *expectedDataSize = READ_WRITE_SIZE + nameSize + dataSize;
         return NULL;
@@ -308,7 +309,7 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
 
     uint64_t sum = nameSize + channelNumber + flags + dataSize;
     uint64_t chSum = 0;
-    memcpy(&chSum, &data[7], 8); // Размер контрольной суммы пакета (документация)
+    memcpy(&chSum, &data[7], 8); // 8 - размер контрольной суммы пакета (документация)
 
     if (sum != chSum)
     {
@@ -317,6 +318,7 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     }
 
     struct Read_Write *readWriteReslut = (struct Read_Write *)malloc(sizeof(struct Read_Write));
+
     if (readWriteReslut == NULL)
     {
         *error = true;
@@ -329,8 +331,14 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
         .channelNumber = channelNumber,
         .dataSize = dataSize,
         .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
-        .data = (dataSize > 0) ? (char *)malloc(dataSize) : NULL
+        .data = NULL
+        //        .data = (dataSize > 0) ? (char *)malloc(dataSize) : NULL
     };
+
+    if (dataSize > (size - READ_WRITE_SIZE + nameSize))
+        readWrite.data = (char *)malloc(size - READ_WRITE_SIZE + nameSize);
+    else if (dataSize > 0)
+        readWrite.data = (char *)malloc(dataSize);
 
     memcpy((void *)readWriteReslut, &readWrite, sizeof(struct Read_Write));
 
@@ -367,7 +375,7 @@ struct Tech *createTech(uint8_t * data, uint64_t size, bool *error, uint64_t *ex
     }
 
     uint8_t type = data[0];
-//    uint8_t devState = data[1];
+    //    uint8_t devState = data[1];
     uint8_t flags = data[2];
 
     uint32_t dataSize = 0;
@@ -426,11 +434,11 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
     {
         switch (assigment)
         {
-            case HEADER_ASSIGNMENT_IDENTIFICATION :
-            case HEADER_ASSIGNMENT_STATE :
-            case HEADER_ASSIGNMENT_READ :
-            case HEADER_ASSIGNMENT_WRITE :
-            case HEADER_ASSIGNMENT_TECH :
+        case HEADER_ASSIGNMENT_IDENTIFICATION :
+        case HEADER_ASSIGNMENT_STATE :
+        case HEADER_ASSIGNMENT_READ :
+        case HEADER_ASSIGNMENT_WRITE :
+        case HEADER_ASSIGNMENT_TECH :
             return true;
         }
     }
@@ -438,10 +446,10 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
     {
         switch (assigment)
         {
-            case HEADER_ASSIGNMENT_STATE :
-            case HEADER_ASSIGNMENT_READ :
-            case HEADER_ASSIGNMENT_WRITE :
-            case HEADER_ASSIGNMENT_TECH :
+        case HEADER_ASSIGNMENT_STATE :
+        case HEADER_ASSIGNMENT_READ :
+        case HEADER_ASSIGNMENT_WRITE :
+        case HEADER_ASSIGNMENT_TECH :
             return true;
         }
     }

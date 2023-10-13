@@ -79,7 +79,6 @@ void IOTV_Host::responceRead(const struct Header *header)
     QByteArray data(pkg->data, pkg->dataSize);
     this->setReadChannelData(channelNumber, data);
 
-
     if (_logFile.isEmpty())
         return;
 

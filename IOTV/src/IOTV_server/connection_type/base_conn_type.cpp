@@ -68,11 +68,6 @@ void Base_conn_type::slotReadData()
 
     QByteArray inData = readAll();
 
-    //!!!
-    //! Так же нет ограничения буфера приёма!
-//    if (inData.length() < 1)
-//        return;
-
     _host_buffer_data.append(inData);
     Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT,

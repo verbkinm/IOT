@@ -16,7 +16,7 @@ struct Read_Write
 
     const uint64_t dataSize;
 
-    const char *name;
+    const char * const name;
     const char *data;
 };
 

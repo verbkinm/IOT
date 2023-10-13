@@ -56,10 +56,10 @@ void IOTV_Client::processQueryState(const Header *header)
     Q_ASSERT(header->pkg != NULL);
 
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
-                                   {
-                                       const struct State *pkg = static_cast<const struct State *>(header->pkg);
-                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-                                   });
+                           {
+                               const struct State *pkg = static_cast<const struct State *>(header->pkg);
+                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                           });
 
     if (it == _hosts.end())
         return;
@@ -80,25 +80,32 @@ void IOTV_Client::processQueryRead(const Header *header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
-                                   {
-                                       const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
-                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-                                   });
+                           {
+//                               const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                           });
 
-    if (it != _hosts.end())
+    if (it == _hosts.end())
+        return;
+
+    auto iot = it->first->convert();
+
+    ///!!!
+    if (it->first->getReadChannelType(pkg->channelNumber) == Raw::DATA_TYPE::RAW)
     {
-        auto iot = it->first->convert();
 
-        uint64_t size;
-        char outData[BUFSIZ];
-
-        size = responseReadData(outData, BUFSIZ, iot, header);
-
-        write({outData, static_cast<int>(size)}, size);
-
-        clearIOTV_Server(iot);
     }
+
+    uint64_t size;
+    char outData[BUFSIZ];
+
+    size = responseReadData(outData, BUFSIZ, iot, header);
+
+    write({outData, static_cast<int>(size)}, size);
+
+    clearIOTV_Server(iot);
 }
 
 void IOTV_Client::processQueryWrite(const Header *header)
@@ -109,9 +116,9 @@ void IOTV_Client::processQueryWrite(const Header *header)
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
-                                   {
-                                       return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
-                                   });
+                           {
+                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                           });
 
     if (it != _hosts.end() && it->first->state() != State_STATE_OFFLINE)
     {
@@ -220,7 +227,7 @@ void IOTV_Client::slotReadData()
 
         if (header->type == HEADER_TYPE_RESPONSE)
         {
-            // На данный момент от клиент не должно приходить ответов
+            // На данный момент от клиента не должно приходить ответов
             Log::write("Ответ от клиента не предусмотрен!",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);

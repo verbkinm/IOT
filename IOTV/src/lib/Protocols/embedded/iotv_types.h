@@ -40,6 +40,7 @@ typedef enum
 {
     ReadWrite_FLAGS_NONE = 0,
     ReadWrite_FLAGS_IGNORE_CH = 0x01,
+    ReadWrite_FLAGS_STREAM = 0x02,
     ReadWrite_FLAGS_ERROR = 0xFF
 } ReadWrite_FLAGS;
 

@@ -1,9 +1,10 @@
-#include <QCoreApplication>
+#include <QApplication>
 #include <QTcpServer>
 #include <QTcpSocket>
 
 #include <iostream>
 
+#include "QtWidgets/qapplication.h"
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
@@ -11,9 +12,9 @@
 #include "widget.h"
 
 Widget *camera;
-char imageBuffer[1024 * 5];
+char imageBuffer[1024 * 1024 * 5];
 
-#define BUFSIZE 1024 * 5
+#define BUFSIZE 1024
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
@@ -57,7 +58,7 @@ void slotDataRecived()
 
     while (buffer.size() > 0)
     {
-        memcpy(recivedBuffer, buffer.data(), buffer.size());
+        memcpy(recivedBuffer, buffer.data(), buffer.size()); //!!!
 
         struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
 
@@ -82,7 +83,10 @@ void slotDataRecived()
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-//                iot.readChannel[0].dataSize = camera->getData(iot.readChannel[0].data, sizeof(imageBuffer));
+                 auto dataS = camera->getData(iot.readChannel[0].data, sizeof(imageBuffer));
+//                iot.readChannel[0].dataSize = dataS;
+
+
                 uint64_t size = responseReadData(transmitBuffer, BUFSIZE, &iot, header);
                 socket->write(transmitBuffer, size);
             }
@@ -146,9 +150,10 @@ void slotNewConnection()
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
 
     camera = new Widget;
+
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
 

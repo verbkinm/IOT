@@ -1,7 +1,7 @@
-QT -= gui
-QT += network multimedia
+#QT -= gui
+QT += gui network multimedia widgets
 
-CONFIG += c++17 console
+CONFIG += c++17
 CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.

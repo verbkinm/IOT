@@ -52,7 +52,7 @@ void TCP_conn_type::disconnectFromHost()
 
 QByteArray TCP_conn_type::readAll()
 {
-    return _tcpSocket.readAll();
+    return _tcpSocket.read(BUFFER_MAX_SIZE - _host_buffer_data.size());// readAll();
 }
 
 void TCP_conn_type::slotNewConnection()
