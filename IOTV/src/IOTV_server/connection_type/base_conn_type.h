@@ -32,8 +32,8 @@ public:
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 
-    void clearDataBuffer();
-    void setDataBuffer(const QByteArray &data);
+//    void clearDataBuffer();
+//    void setDataBuffer(const QByteArray &data);
 
     static QString ConnTypeToString(Conn_type conn_type);
 
@@ -44,7 +44,7 @@ protected:
     QString _address;
     QString _logFile;
     Conn_type _type;
-    QByteArray _host_buffer_data;
+//    QByteArray _host_buffer_data;
 
     std::mutex _hostBuffMutex;
 

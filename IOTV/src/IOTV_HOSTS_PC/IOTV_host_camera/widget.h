@@ -20,12 +20,14 @@ public:
     char *getData(char *outData, size_t outDataSize) const;
     void moveTh(QThread *th);
 
+    QImage getImage() const;
+
 private:
     QCamera *camera;
     QMediaCaptureSession captureSession;
     QImageCapture imageCapture;
     QTimer *timer;
-    QImage image;
+    QImage _image;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);

@@ -3,7 +3,6 @@
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>Devices/Device_0.qml</file>
-        <file>Devices/Device_3.qml</file>
         <file>img/info.png</file>
         <file>img/id/2.png</file>
         <file>img/id/1.png</file>
@@ -113,6 +112,7 @@
         <file>img/id_4/lamp_off_white.png</file>
         <file>Devices/Setting/Device/Device_4.qml</file>
         <file>Devices/Setting/Device/Device_4/MyDialog.qml</file>
+        <file>Devices/Device_8/Device_8.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

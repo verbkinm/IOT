@@ -90,6 +90,9 @@ public slots:
     void slotDisconnected();
     void slotStateChanged(QAbstractSocket::SocketState socketState);
 
+    void slotOpenReadStream(int channel);
+    void slotCloseReadStream(int channel);
+
 private slots:
     void slotReciveData();
 

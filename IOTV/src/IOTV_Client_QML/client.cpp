@@ -226,6 +226,32 @@ void Client::slotStateChanged(QAbstractSocket::SocketState socketState)
         emit signalConnecting();
 }
 
+void Client::slotOpenReadStream(int channel)
+{
+    Device *dev = qobject_cast<Device*>(sender());
+
+    if ( (dev == nullptr) || !dev->isOnline())
+        return;
+
+    char outData[BUFSIZ];
+    auto size = queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
+
+    write({outData, static_cast<int>(size)});
+}
+
+void Client::slotCloseReadStream(int channel)
+{
+    Device *dev = qobject_cast<Device*>(sender());
+
+    if ( (dev == nullptr) || !dev->isOnline())
+        return;
+
+    char outData[BUFSIZ];
+    auto size = queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
+
+    write({outData, static_cast<int>(size)});
+}
+
 QList<QObject *> Client::devList()
 {
     QList<QObject *> list;
@@ -382,6 +408,8 @@ void Client::responceIdentification(const Header *header)
             connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead);
             connect(&device, &Device::signalQueryState, this, &Client::slotQueryState);
             connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite);
+            connect(&device, &Device::signalOpenReadStream, this, &Client::slotOpenReadStream);
+            connect(&device, &Device::signalCloseReadStream, this, &Client::slotCloseReadStream);
         }
     }
     else

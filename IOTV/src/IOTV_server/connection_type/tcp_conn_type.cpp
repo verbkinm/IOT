@@ -52,7 +52,8 @@ void TCP_conn_type::disconnectFromHost()
 
 QByteArray TCP_conn_type::readAll()
 {
-    return _tcpSocket.read(BUFFER_MAX_SIZE - _host_buffer_data.size());// readAll();
+    return _tcpSocket.read(BUFFER_MAX_SIZE);
+//    return _tcpSocket.read(BUFFER_MAX_SIZE - _host_buffer_data.size());// readAll();
 }
 
 void TCP_conn_type::slotNewConnection()
@@ -70,7 +71,7 @@ void TCP_conn_type::slotNewConnection()
 
 void TCP_conn_type::slotSocketDisconnected()
 {
-    clearDataBuffer();
+//    clearDataBuffer();
     expectedDataSize = 0;
 
     Log::write(_name + ": disconnected from " + _tcpSocket.peerAddress().toString()

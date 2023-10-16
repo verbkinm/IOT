@@ -47,7 +47,7 @@ Widget::~Widget()
 
 char* Widget::getData(char *outData, size_t outDataSize) const
 {
-    outData = (char *)image.bits();
+    outData = (char *)_image.bits();
 //    if (image.sizeInBytes() > outDataSize)
 //        return 0;
 
@@ -63,16 +63,21 @@ void Widget::moveTh(QThread *th)
     timer->start(100);
 }
 
+QImage Widget::getImage() const
+{
+    return _image;
+}
+
 
 void Widget::processCapturedImage(int requestId, const QImage &img)
 {
     Q_UNUSED(requestId);
 
     timer->stop();
-    image = img;
+    _image = img;
 
-    qDebug() << img.size();
-    qDebug() << "photo size " << img.sizeInBytes();
+//    qDebug() << img.size();
+//    qDebug() << "photo size " << img.sizeInBytes();
     //    ui->label->setPixmap(QPixmap::fromImage(img));
 
     timer->start(100);
@@ -82,11 +87,11 @@ void Widget::timerOut()
 {
     if (imageCapture.isReadyForCapture())
     {
-        camera->stop();
-        imageCapture.setQuality(QImageCapture::LowQuality);
-        imageCapture.setFileFormat(QImageCapture::FileFormat::JPEG);
-        imageCapture.setResolution(320, 240);
-        camera->start();
+//        camera->stop();
+//        imageCapture.setQuality(QImageCapture::LowQuality);
+//        imageCapture.setFileFormat(QImageCapture::FileFormat::JPEG);
+//        imageCapture.setResolution(320, 240);
+//        camera->start();
 
         imageCapture.capture();
     }

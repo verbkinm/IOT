@@ -31,17 +31,17 @@ void Base_conn_type::setAddress(const QString &address)
 //    return -1;
 //}
 
-void Base_conn_type::clearDataBuffer()
-{
-    std::lock_guard lg(_hostBuffMutex);
-    _host_buffer_data.clear();
-}
+//void Base_conn_type::clearDataBuffer()
+//{
+//    std::lock_guard lg(_hostBuffMutex);
+//    _host_buffer_data.clear();
+//}
 
-void Base_conn_type::setDataBuffer(const QByteArray &data)
-{
-    std::lock_guard lg(_hostBuffMutex);
-    _host_buffer_data = data;
-}
+//void Base_conn_type::setDataBuffer(const QByteArray &data)
+//{
+//    std::lock_guard lg(_hostBuffMutex);
+////    _host_buffer_data = data;
+//}
 
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
 {
@@ -68,21 +68,22 @@ void Base_conn_type::slotReadData()
 
     QByteArray inData = readAll();
 
-    _host_buffer_data.append(inData);
-    Log::write(_name + ": data response <- " + _host_buffer_data.toHex(':'),
+//    _host_buffer_data.append(inData);
+    Log::write(_name + ": data response <- " + inData.toHex(':'),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 
-    if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
-    {
-        _host_buffer_data.clear();
-        Log::write(_name + ": buffer cleared!",
-                   Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::DEFAULT_LOG_FILENAME);
-        return;
-    }
+//    if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
+//    {
+//        _host_buffer_data.clear();
+//        Log::write(_name + ": buffer cleared!",
+//                   Log::Write_Flag::FILE_STDOUT,
+//                   ServerLog::DEFAULT_LOG_FILENAME);
+//        return;
+//    }
 
-    emit signalDataRiceved(_host_buffer_data);
+//    emit signalDataRiceved(_host_buffer_data);
+    emit signalDataRiceved(inData);
 }
 
 QString Base_conn_type::getName() const

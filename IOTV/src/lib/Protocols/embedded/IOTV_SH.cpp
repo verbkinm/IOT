@@ -13,11 +13,11 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
     {
         struct Header header = {
             .type = HEADER_TYPE_RESPONSE,
-                    .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
-                    .flags = HEADER_FLAGS_NONE,
-                    .version = 2,
-                    .dataSize = 0,
-                    .pkg = NULL
+            .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
+            .flags = HEADER_FLAGS_NONE,
+            .version = 2,
+            .dataSize = 0,
+            .pkg = NULL
         };
 
         return headerToData(&header, outData, dataSize);
@@ -25,24 +25,24 @@ uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const stru
 
     struct Identification ident = {
         .flags = Identification_FLAGS_NONE,
-                .id = iot->id,
-                .nameSize = iot->nameSize,
-                .descriptionSize = iot->descriptionSize,
-                .numberWriteChannel = iot->numberWriteChannel,
-                .numberReadChannel = iot->numberReadChannel,
-                .name = iot->name,
-                .description = iot->description,
-                .writeChannelType = iot->writeChannelType,
-                .readChannelType = iot->readChannelType
+        .id = iot->id,
+        .nameSize = iot->nameSize,
+        .descriptionSize = iot->descriptionSize,
+        .numberWriteChannel = iot->numberWriteChannel,
+        .numberReadChannel = iot->numberReadChannel,
+        .name = iot->name,
+        .description = iot->description,
+        .writeChannelType = iot->writeChannelType,
+        .readChannelType = iot->readChannelType
     };
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = identificationSize(&ident),
-                .pkg = &ident
+        .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = identificationSize(&ident),
+        .pkg = &ident
     };
 
     return headerToData(&header, outData, dataSize);
@@ -55,11 +55,11 @@ uint64_t responsePingData(char *outData, uint64_t dataSize)
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_PING_PONG,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = 0,
-                .pkg = NULL
+        .assignment = HEADER_ASSIGNMENT_PING_PONG,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = 0,
+        .pkg = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -82,20 +82,20 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
         {
             struct Read_Write readWrite = {
                 .flags = ReadWrite_FLAGS_NONE,
-                        .nameSize = iot->nameSize,
-                        .channelNumber = ch_num,
-                        .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ch_num].dataSize : 0,
-                        .name = iot->name,
-                        .data = (iot->readChannel != NULL) ? iot->readChannel[ch_num].data : NULL
+                .nameSize = iot->nameSize,
+                .channelNumber = ch_num,
+                .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ch_num].dataSize : 0,
+                .name = iot->name,
+                .data = (iot->readChannel != NULL) ? iot->readChannel[ch_num].data : NULL
             };
 
             struct Header header = {
                 .type = HEADER_TYPE_RESPONSE,
-                        .assignment = HEADER_ASSIGNMENT_READ,
-                        .flags = HEADER_FLAGS_NONE,
-                        .version = 2,
-                        .dataSize = readWriteSize(&readWrite),
-                        .pkg = &readWrite,
+                .assignment = HEADER_ASSIGNMENT_READ,
+                .flags = HEADER_FLAGS_NONE,
+                .version = 2,
+                .dataSize = readWriteSize(&readWrite),
+                .pkg = &readWrite,
             };
 
             resultDataSize += headerToData(&header, outData + resultDataSize, dataSize - resultDataSize);
@@ -105,20 +105,20 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,
-                .nameSize = iot->nameSize,
-                .channelNumber = ptrReadWrite->channelNumber,
-                .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].dataSize : 0,
-                .name = iot->name,
-                .data = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].data : NULL
+        .nameSize = iot->nameSize,
+        .channelNumber = ptrReadWrite->channelNumber,
+        .dataSize = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].dataSize : 0,
+        .name = iot->name,
+        .data = (iot->readChannel != NULL) ? iot->readChannel[ptrReadWrite->channelNumber].data : NULL
     };
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_READ,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite,
+        .assignment = HEADER_ASSIGNMENT_READ,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite,
     };
 
     return headerToData(&header, outData, dataSize);
@@ -132,9 +132,9 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
     struct Read_Write *ptrReadWrite = ((struct Read_Write *)head->pkg);
 
     if (iot->readChannel == NULL
-            || iot->numberWriteChannel <= ptrReadWrite->channelNumber
-            || iot->numberReadChannel <= ptrReadWrite->channelNumber
-            || iot->readChannel[ptrReadWrite->channelNumber].data == NULL)
+        || iot->numberWriteChannel <= ptrReadWrite->channelNumber
+        || iot->numberReadChannel <= ptrReadWrite->channelNumber
+        || iot->readChannel[ptrReadWrite->channelNumber].data == NULL)
         return 0;
 
     if (ptrReadWrite->dataSize > 0)
@@ -147,20 +147,20 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
 
     struct Read_Write readWrite = {
         .flags = ReadWrite_FLAGS_NONE,
-                .nameSize = iot->nameSize,
-                .channelNumber = ptrReadWrite->channelNumber,
-                .dataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize,
-                .name = iot->name,
-                .data = iot->readChannel[ptrReadWrite->channelNumber].data
+        .nameSize = iot->nameSize,
+        .channelNumber = ptrReadWrite->channelNumber,
+        .dataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize,
+        .name = iot->name,
+        .data = iot->readChannel[ptrReadWrite->channelNumber].data
     };
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_WRITE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite,
+        .assignment = HEADER_ASSIGNMENT_WRITE,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite,
     };
 
     return headerToData(&header, outData, dataSize);
@@ -173,20 +173,20 @@ uint64_t responseStateData(char *outData, uint64_t dataSize, const struct IOTV_S
 
     struct State state = {
         .flags = STATE_FLAGS_NONE,
-                .state = (State_STATE)iot->state,
-                .nameSize = iot->nameSize,
-                .dataSize = 0,
-                .name = iot->name,
-                .data = NULL
+        .state = (State_STATE)iot->state,
+        .nameSize = iot->nameSize,
+        .dataSize = 0,
+        .name = iot->name,
+        .data = NULL
     };
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_STATE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = stateSize(&state),
-                .pkg = &state
+        .assignment = HEADER_ASSIGNMENT_STATE,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = stateSize(&state),
+        .pkg = &state
     };
 
     return headerToData(&header, outData, dataSize);
@@ -199,11 +199,11 @@ uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = 0,
-                .pkg = NULL
+        .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = 0,
+        .pkg = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -216,11 +216,11 @@ uint64_t queryPingData(char *outData, uint64_t dataSize)
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_PING_PONG,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = 0,
-                .pkg = NULL
+        .assignment = HEADER_ASSIGNMENT_PING_PONG,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = 0,
+        .pkg = NULL
     };
 
     return headerToData(&header, outData, dataSize);
@@ -233,20 +233,20 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
 
     struct Read_Write readWrite = {
         .flags =ReadWrite_FLAGS_NONE,
-                .nameSize = (uint8_t)strlen(name),
-                .channelNumber = channelNumber,
-                .dataSize = dataWriteSize,
-                .name = name,
-                .data = dataToWrite
+        .nameSize = (uint8_t)strlen(name),
+        .channelNumber = channelNumber,
+        .dataSize = dataWriteSize,
+        .name = name,
+        .data = dataToWrite
     };
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_WRITE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite,
+        .assignment = HEADER_ASSIGNMENT_WRITE,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite,
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -259,20 +259,20 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
 
     struct Read_Write readWrite = {
         .flags = flags,
-                .nameSize = (uint8_t)strlen(name),
-                .channelNumber = channelNumber,
-                .dataSize = 0,
-                .name = name,
-                .data = NULL
+        .nameSize = (uint8_t)strlen(name),
+        .channelNumber = channelNumber,
+        .dataSize = 0,
+        .name = name,
+        .data = NULL
     };
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_READ,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite,
+        .assignment = HEADER_ASSIGNMENT_READ,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite,
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -285,20 +285,20 @@ uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
 
     struct State state = {
         .flags = STATE_FLAGS_NONE,
-                .state = State_STATE_OFFLINE,
-                .nameSize = (uint8_t)strlen(name),
-                .dataSize = 0,
-                .name = name,
-                .data = NULL
+        .state = State_STATE_OFFLINE,
+        .nameSize = (uint8_t)strlen(name),
+        .dataSize = 0,
+        .name = name,
+        .data = NULL
     };
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_STATE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = stateSize(&state),
-                .pkg = &state
+        .assignment = HEADER_ASSIGNMENT_STATE,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = stateSize(&state),
+        .pkg = &state
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -323,16 +323,16 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
 
     struct IOTV_Server_embedded iot = {
         .id = ptrIdentification->id,
-                .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
-                .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
-                .numberReadChannel = numberReadChannel,
-                .readChannel = (numberReadChannel > 0) ? (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * numberReadChannel) : NULL,
-                .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL,
-                .numberWriteChannel = numberWriteChannel,
-                .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL,
-                .state = false,
-                .nameSize = nameSize,
-                .descriptionSize = descriptionSize
+        .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
+        .description = (descriptionSize > 0) ? (char *)malloc(descriptionSize) : NULL,
+        .numberReadChannel = numberReadChannel,
+        .readChannel = (numberReadChannel > 0) ? (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * numberReadChannel) : NULL,
+        .readChannelType = (numberReadChannel > 0) ? (uint8_t *)malloc(numberReadChannel) : NULL,
+        .numberWriteChannel = numberWriteChannel,
+        .writeChannelType = (numberWriteChannel > 0) ? (uint8_t *)malloc(numberWriteChannel) : NULL,
+        .state = false,
+        .nameSize = nameSize,
+        .descriptionSize = descriptionSize
     };
 
     if (nameSize > 0)
@@ -361,10 +361,10 @@ struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Head
 
     // Проверка malloc!
     if (mallocFlag
-            ||(nameSize > 0 && ptrIot->name == NULL)
-            || (descriptionSize > 0 && ptrIot->description == NULL)
-            || (numberReadChannel > 0 && (ptrIot->readChannel == NULL || ptrIot->readChannelType == NULL))
-            || (numberWriteChannel > 0 && ptrIot->writeChannelType == NULL))
+        ||(nameSize > 0 && ptrIot->name == NULL)
+        || (descriptionSize > 0 && ptrIot->description == NULL)
+        || (numberReadChannel > 0 && (ptrIot->readChannel == NULL || ptrIot->readChannelType == NULL))
+        || (numberWriteChannel > 0 && ptrIot->writeChannelType == NULL))
     {
         clearIOTV_Server(ptrIot);
     }
@@ -389,11 +389,11 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, u
 
     struct Header header = {
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_TECH,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = techSize(&tech),
-                .pkg = &tech
+        .assignment = HEADER_ASSIGNMENT_TECH,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = techSize(&tech),
+        .pkg = &tech
     };
 
     return headerToData(&header, outData, outDataSize);
@@ -413,11 +413,11 @@ uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_
 
     struct Header header = {
         .type = HEADER_TYPE_REQUEST,
-                .assignment = HEADER_ASSIGNMENT_TECH,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = techSize(&tech),
-                .pkg = &tech
+        .assignment = HEADER_ASSIGNMENT_TECH,
+        .flags = HEADER_FLAGS_NONE,
+        .version = 2,
+        .dataSize = techSize(&tech),
+        .pkg = &tech
     };
 
     return headerToData(&header, outData, dataSize);

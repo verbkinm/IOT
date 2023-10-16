@@ -38,7 +38,6 @@ public:
     Q_INVOKABLE QString writeDataType(int channelNumber) const;
     Q_INVOKABLE void setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blue);
 
-
     void setReadInterval(int interval);
 
     friend bool operator==(const Device &lhs, const Device &rhs);
@@ -66,6 +65,9 @@ signals:
     void signalAliasNameChanged();
 
     void signalDataChanged(int channel);
+
+    void signalOpenReadStream(int channel);
+    void signalCloseReadStream(int channel);
 
 private slots:
     void slotTimerReadTimeOut();

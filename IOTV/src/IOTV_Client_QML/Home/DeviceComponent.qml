@@ -210,6 +210,8 @@ Item {
             return "/Devices/Device_4/Device_4.qml"
         else if (id === 5)
             return "/Devices/Device_5/Device_5.qml"
+        else if (id === 8)
+            return "/Devices/Device_8/Device_8.qml"
         else
             return "/Devices/Device_0.qml"
     }

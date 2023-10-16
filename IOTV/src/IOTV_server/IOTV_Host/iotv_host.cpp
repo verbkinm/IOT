@@ -1,5 +1,8 @@
 #include "iotv_host.h"
 
+#include <fstream>
+
+
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
@@ -78,8 +81,11 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     if (_streamRead.count(channelNumber))
     {
+        std::ofstream file;
+        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+        file.write(pkg->data, pkg->dataSize);
         emit signalStreamRead(channelNumber, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
-        return;
+//        return;
     }
 
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
@@ -161,21 +167,25 @@ void IOTV_Host::slotDataResived(QByteArray data)
     bool error = false;
     uint64_t cutDataSize = 0;
 
-    while (data.size() > 0)
+    _buff += data;
+
+    while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(data.data()), data.size(), &error, &_conn_type->expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &_expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
-            _conn_type->clearDataBuffer();
-            _conn_type->expectedDataSize = 0;
+            _buff.clear();
+            _expectedDataSize = 0;
+//            _conn_type->clearDataBuffer();
+//            _conn_type->expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_conn_type->expectedDataSize > 0)
+        if (_expectedDataSize > 0)
         {
             clearHeader(header);
             break;
@@ -210,12 +220,9 @@ void IOTV_Host::slotDataResived(QByteArray data)
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
-        data = data.mid(cutDataSize);
+        _buff = _buff.mid(cutDataSize);
         clearHeader(header);
     }
-
-    //!!! !!!
-    _conn_type->setDataBuffer(data);
 }
 
 QString IOTV_Host::getName() const
@@ -279,14 +286,22 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 {
     std::lock_guard lg(_mutexStreamRead);
+    char outData[BUFSIZ];
+    bool result = false;
 
     if (_streamRead.count(channel) == 0)
     {
         _streamRead[channel] = {client};
-        return true;
+        result = true;
     }
+    else
+        result = _streamRead[channel].insert(client).second;
 
-    return _streamRead[channel].insert(client).second;
+
+    auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
+    writeToRemoteHost({outData, static_cast<int>(size)}, size);
+
+    return result;
 }
 
 //void IOTV_Host::addStreamWrite(uint8_t channel)
@@ -298,6 +313,7 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 {
     std::lock_guard lg(_mutexStreamRead);
+    char outData[BUFSIZ];
 
     if (_streamRead.count(channel) == 0)
         return;
@@ -306,6 +322,9 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 
     if (_streamRead[channel].size() == 0)
         _streamRead.erase(channel);
+
+    auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
+    writeToRemoteHost({outData, static_cast<int>(size)}, size);
 }
 
 //void IOTV_Host::removeStreamWrite(uint8_t channel)

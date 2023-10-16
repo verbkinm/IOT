@@ -332,16 +332,14 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
         .dataSize = dataSize,
         .name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL,
         .data = NULL
-        //        .data = (dataSize > 0) ? (char *)malloc(dataSize) : NULL
     };
 
-    if (dataSize > (size - READ_WRITE_SIZE + nameSize))
-        readWrite.data = (char *)malloc(size - READ_WRITE_SIZE + nameSize);
-    else if (dataSize > 0)
+    if (dataSize > 0 && (dataSize <= (size - READ_WRITE_SIZE + nameSize)))
         readWrite.data = (char *)malloc(dataSize);
 
     memcpy((void *)readWriteReslut, &readWrite, sizeof(struct Read_Write));
 
+    // Память не была выделена
     if ( ((nameSize > 0) && (readWrite.name == NULL)) || ((dataSize > 0) && (readWrite.data == NULL)) )
     {
         *error = true;
