@@ -76,7 +76,13 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     uint8_t channelNumber = pkg->channelNumber;
 
-    QByteArray data(pkg->data, pkg->dataSize);
+    if (_streamRead.count(channelNumber))
+    {
+        emit signalStreamRead(channelNumber, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
+        return;
+    }
+
+    QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
     this->setReadChannelData(channelNumber, data);
 
     if (_logFile.isEmpty())
@@ -270,12 +276,47 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
     return _settingsData;
 }
 
+bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
+{
+    std::lock_guard lg(_mutexStreamRead);
+
+    if (_streamRead.count(channel) == 0)
+    {
+        _streamRead[channel] = {client};
+        return true;
+    }
+
+    return _streamRead[channel].insert(client).second;
+}
+
+//void IOTV_Host::addStreamWrite(uint8_t channel)
+//{
+//    std::lock_guard lg(_mutexStreamWrite);
+//    _streamWrite.insert(channel);
+//}
+
+void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
+{
+    std::lock_guard lg(_mutexStreamRead);
+
+    if (_streamRead.count(channel) == 0)
+        return;
+
+    _streamRead[channel].erase(client);
+
+    if (_streamRead[channel].size() == 0)
+        _streamRead.erase(channel);
+}
+
+//void IOTV_Host::removeStreamWrite(uint8_t channel)
+//{
+//    std::lock_guard lg(_mutexStreamWrite);
+//    _streamWrite.erase(channel);
+//}
+
 void IOTV_Host::slotReReadTimeOut()
 {
     readAll();
-
-//    for (int i = 0; i < getReadChannelLength(); i++)
-//        read(i);
 }
 
 void IOTV_Host::slotStateTimeOut()

@@ -50,6 +50,8 @@ private slots:
     void slotReadData();
     void slotFetchEventActionDataFromServer(QByteArray data);
 
+    void slotStreamRead(uint8_t channel, QByteArray data);
+
 signals:
     void signalStopThread();
     void signalDisconnected();

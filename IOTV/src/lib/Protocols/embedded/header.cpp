@@ -121,13 +121,5 @@ void clearHeader(struct Header *header)
         }
     }
 
-//    if (header->identification != NULL)
-//        clearIdentification((struct Identification *)header->identification);
-//    if (header->readWrite != NULL)
-//        clearReadWrite((struct Read_Write *)header->readWrite);
-//    if (header->state != NULL)
-//        clearState((struct State *)header->state);
-
     free(header);
-//    header = NULL;
 }

@@ -301,7 +301,7 @@ struct Read_Write *createReadWrite(uint8_t * const data, uint64_t size, bool *er
     uint32_t dataSize = 0;
     memcpy(&dataSize, &data[3], 4); // 4 - размер данных пакета (документация)
 
-    if ((size < (READ_WRITE_SIZE + nameSize + dataSize)) && (flags != ReadWrite_FLAGS_STREAM))
+    if (size < (READ_WRITE_SIZE + nameSize + dataSize))
     {
         *expectedDataSize = READ_WRITE_SIZE + nameSize + dataSize;
         return NULL;

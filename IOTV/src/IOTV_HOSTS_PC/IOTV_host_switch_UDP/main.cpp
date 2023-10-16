@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QUdpSocket>
 #include <QNetworkDatagram>
+#include <QNetworkProxy>
 
 #include <iostream>
 
@@ -147,33 +148,34 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
+//    iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
 
-    iot.readChannel[0].dataSize = dataSizeonDataType(readType[0]);
-    iot.readChannel[1].dataSize = dataSizeonDataType(readType[1]);
-    iot.readChannel[2].dataSize = dataSizeonDataType(readType[2]);
+//    iot.readChannel[0].dataSize = dataSizeonDataType(readType[0]);
+//    iot.readChannel[1].dataSize = dataSizeonDataType(readType[1]);
+//    iot.readChannel[2].dataSize = dataSizeonDataType(readType[2]);
 
-    iot.readChannel[0].data = (char *)malloc(iot.readChannel[0].dataSize);
-    int16_t value = 257;
-    memcpy(iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
+//    iot.readChannel[0].data = (char *)malloc(iot.readChannel[0].dataSize);
+//    int16_t value = 257;
+//    memcpy(iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
 
-    iot.readChannel[1].data = (char *)malloc(iot.readChannel[1].dataSize);
-    value = 300;
-    memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
+//    iot.readChannel[1].data = (char *)malloc(iot.readChannel[1].dataSize);
+//    value = 300;
+//    memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
 
-    iot.readChannel[2].data = (char *)malloc(iot.readChannel[2].dataSize);
-    value = 3;
-    memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
+//    iot.readChannel[2].data = (char *)malloc(iot.readChannel[2].dataSize);
+//    value = 3;
+//    memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
 
 
     socket = new QUdpSocket;
-    if (!socket->bind(QHostAddress::LocalHost, 2025))
+    socket->setProxy(QNetworkProxy::NoProxy);
+    if (!(socket->bind(QHostAddress::LocalHost, 2025, QAbstractSocket::ShareAddress)))
     {
         std::cerr << "Error bind\n";
         return -1;
     }
 
-    QObject::connect(socket, &QUdpSocket::readyRead, slotDataRecived);
+//    QObject::connect(socket, &QUdpSocket::readyRead, slotDataRecived);
 
     std::cout << "Start service on 127.0.0.1:2025" << std::endl;
 

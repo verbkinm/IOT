@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <mutex>
+#include <map>
+#include <set>
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/udp_conn_type.h"
@@ -28,6 +30,12 @@ public:
 
     const std::unordered_map<QString, QString> &settingsData() const;
 
+    bool addStreamRead(uint8_t channel, QObject *client);
+    void addStreamWrite(uint8_t channel);
+
+    void removeStreamRead(uint8_t channel, QObject *client);
+    void removeStreamWrite(uint8_t channel);
+
 private:
     qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);
     qint64 readAll();
@@ -47,7 +55,10 @@ private:
 
     std::unordered_map<QString, QString>  _settingsData;
 
-    std::mutex _mutexParametersChange, _mutexWrite;
+    std::mutex _mutexParametersChange,
+        _mutexWrite, //writeToRemoteHost
+        _mutexStreamRead,
+        _mutexStreamWrite;
 
     // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
     static constexpr int COUNTER_STATE_COUNT = 3;
@@ -55,6 +66,8 @@ private:
 
     static constexpr int COUNTER_PING_COUNT = 3;
     int _counterPing;
+
+    std::map<uint8_t, std::set<QObject *>> _streamRead, _streamWrite;
 
 private slots:
     void slotDataResived(QByteArray data);
@@ -70,7 +83,5 @@ private slots:
 
 signals:
     void signalDevicePingTimeOut();
-
-//    // Используетеся для записи данных полученых от клиентов из других потоков
-//    void signalQueryWrite(int channelNumber, QByteArray data);
+    void signalStreamRead(uint8_t channel, QByteArray data);
 };
