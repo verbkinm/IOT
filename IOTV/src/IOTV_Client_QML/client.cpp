@@ -4,6 +4,12 @@
 #include "event_action_parser.h"
 #include "log.h"
 #include "IOTV_SH.h"
+#include "creatorpkgs.h"
+#include "identification.h"
+#include "state.h"
+#include "read_write.h"
+#include "tech.h"
+
 #include <iostream>
 
 Client::Client(QObject *parent): QObject{parent},

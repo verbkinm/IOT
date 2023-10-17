@@ -11,14 +11,15 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_embedded *iot, const struct Header *head);
 uint64_t responseStateData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot);
 uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, uint64_t inDataSize, const struct Header *head);
+uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOTV_Server_embedded *iot, const struct Header *header);
 
 // Формируем запросы сразу в сыром виде в outData
 uint64_t queryIdentificationData(char *outData, uint64_t dataSize);
 uint64_t queryPingData(char *outData, uint64_t dataSize);
 uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize);
-uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, ReadWrite_FLAGS flags);
+uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, uint8_t flags);
 uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name);
-uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, Tech_TYPE type);
+uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, uint8_t type);
 
 struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header);
 

@@ -1,7 +1,7 @@
 #ifndef IOTV_TYPES_H
 #define IOTV_TYPES_H
 
-#define HEADER_SIZE 20
+#define HEADER_SIZE 24
 #define IDENTIFICATION_SIZE  16
 #define STATE_SIZE  15
 #define READ_WRITE_SIZE 15

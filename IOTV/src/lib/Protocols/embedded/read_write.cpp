@@ -1,5 +1,9 @@
 #include "read_write.h"
 
+#include "iotv_types.h"
+#include "string.h"
+#include "stdlib.h"
+
 uint64_t readWriteCheckSum(const struct Read_Write *body)
 {
     if (body == NULL)
@@ -27,9 +31,6 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
     outData[0] = body->nameSize;
     outData[1] = body->channelNumber;
     outData[2] = body->flags;
-
-//    if (outDataSize < readWriteSize(body))
-//        return 0;
 
     uint32_t dataSize =  body->dataSize;
     memcpy((void *)&outData[3], &dataSize, 4); // 4 - документация

@@ -28,10 +28,10 @@ public:
     void printTechData(const Tech *body);
 
 
-    QString headerType(Header_TYPE type) const;
-    QString headerAssignment(Header_ASSIGNMENT assignment) const;
-    QString staetType(State_STATE state) const;
-    QString techType(Tech_TYPE type) const;
+    QString headerType(uint8_t type) const;
+    QString headerAssignment(uint8_t assignment) const;
+    QString staetType(uint8_t state) const;
+    QString techType(uint8_t type) const;
 
 private slots:
     void on_action_triggered();

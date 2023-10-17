@@ -85,7 +85,7 @@ void IOTV_Host::responceRead(const struct Header *header)
         file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
         file.write(pkg->data, pkg->dataSize);
         emit signalStreamRead(channelNumber, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
-//        return;
+        return;
     }
 
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
@@ -296,7 +296,6 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
     }
     else
         result = _streamRead[channel].insert(client).second;
-
 
     auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
     writeToRemoteHost({outData, static_cast<int>(size)}, size);

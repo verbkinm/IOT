@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "iotv_types.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -37,6 +39,8 @@ void MainWindow::printHeaderData(const Header *header)
     result += "Тип пакета:\t\t" + headerType(header->type) + "\n";
     result += "Назначение пакета:\t" + headerAssignment(header->assignment) + "\n";
     result += "Флаги:\t\t" + QString::number(header->flags) + "\n";
+    result += "Номер фрагмента:\t" + QString::number(header->fragment) + "\n";
+    result += "Количество фрагментов:\t" + QString::number(header->fragments) + "\n";
     result += "Размер данных:\t" + QString::number(header->dataSize) + "\n";
     result += "Контрольная сумма:\t" + QString::number(headerCheckSum(header)) + "\n";
 
@@ -120,7 +124,7 @@ void MainWindow::printTechData(const Tech *body)
     ui->convertText->appendPlainText(result);
 }
 
-QString MainWindow::headerType(Header_TYPE type) const
+QString MainWindow::headerType(uint8_t type) const
 {
     switch(type)
     {
@@ -133,7 +137,7 @@ QString MainWindow::headerType(Header_TYPE type) const
     }
 }
 
-QString MainWindow::headerAssignment(Header_ASSIGNMENT assignment) const
+QString MainWindow::headerAssignment(uint8_t assignment) const
 {
     switch(assignment)
     {
@@ -154,7 +158,7 @@ QString MainWindow::headerAssignment(Header_ASSIGNMENT assignment) const
     }
 }
 
-QString MainWindow::staetType(State_STATE state) const
+QString MainWindow::staetType(uint8_t state) const
 {
     switch(state)
     {
@@ -165,7 +169,7 @@ QString MainWindow::staetType(State_STATE state) const
     }
 }
 
-QString MainWindow::techType(Tech_TYPE type) const
+QString MainWindow::techType(uint8_t type) const
 {
     switch(type)
     {

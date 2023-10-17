@@ -2,21 +2,17 @@
 #define STATE_H
 
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "iotv_types.h"
 
 struct State
 {
-    const State_FLAGS flags;
-    const State_STATE state;
+    uint8_t nameSize;
+    uint8_t state;
+    uint8_t flags;
 
-    const uint8_t nameSize;
-    const uint64_t dataSize;
+    uint64_t dataSize;
 
-    const char *name;
-    const uint8_t *data;
+    char *name;
+    uint8_t *data;
 };
 
 uint64_t stateCheckSum(const struct State *body);

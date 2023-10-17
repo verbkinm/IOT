@@ -1,5 +1,7 @@
 #include "base_host.h"
 
+#include "iotv_server_embedded.h"
+
 Base_Host::Base_Host(uint16_t id, QObject *parent) : QObject(parent),
     _id(id), _description("None"), _state(State_STATE::State_STATE_OFFLINE)
 {
@@ -142,16 +144,16 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     struct IOTV_Server_embedded iot = {
         .id = getId(),
-        .name = (nameSize > 0) ? static_cast<char *>(malloc(nameSize)) : NULL, //!!! нет проверки при не удаче выделить память
-        .description = (descriptionSize > 0) ? static_cast<char *>(malloc(descriptionSize)) : NULL,
         .numberReadChannel = getReadChannelLength(),
-        .readChannel = (numberReadChannel > 0) ? static_cast<struct RawEmbedded *>(malloc(sizeof(struct RawEmbedded) * numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
-        .readChannelType = (numberReadChannel > 0) ? static_cast<uint8_t *>(malloc(numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
         .numberWriteChannel = numberWriteChannel,
-        .writeChannelType = (numberWriteChannel > 0) ? static_cast<uint8_t *>(malloc(numberWriteChannel)) : NULL, //!!! нет проверки при не удаче выделить память
         .state = (uint8_t)state(),
         .nameSize = static_cast<uint8_t>(nameSize),
-        .descriptionSize = static_cast<uint16_t>(descriptionSize)
+        .descriptionSize = static_cast<uint16_t>(descriptionSize),
+        .readChannel = (numberReadChannel > 0) ? static_cast<struct RawEmbedded *>(malloc(sizeof(struct RawEmbedded) * numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
+        .readChannelType = (numberReadChannel > 0) ? static_cast<uint8_t *>(malloc(numberReadChannel)) : NULL, //!!! нет проверки при не удаче выделить память
+        .writeChannelType = (numberWriteChannel > 0) ? static_cast<uint8_t *>(malloc(numberWriteChannel)) : NULL, //!!! нет проверки при не удаче выделить память
+        .name = (nameSize > 0) ? static_cast<char *>(malloc(nameSize)) : NULL, //!!! нет проверки при не удаче выделить память
+        .description = (descriptionSize > 0) ? static_cast<char *>(malloc(descriptionSize)) : NULL,
     };
 
     //!!! сделать проверку на выделение памяти в  iot

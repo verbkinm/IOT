@@ -27,8 +27,8 @@ IOTV_Client::~IOTV_Client()
         for (int i = 0; i < el.first->getReadChannelLength(); ++i)
             el.first->removeStreamRead(i, this);
 
-//        for (int i = 0; i < el.first->getWriteChannelLength(); ++i)
-//            el.first->removeStreamWrite(i, this);
+        //        for (int i = 0; i < el.first->getWriteChannelLength(); ++i)
+        //            el.first->removeStreamWrite(i, this);
 
     }
 }
@@ -283,14 +283,16 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
         .flags = Tech_FLAGS_NONE,
         .type = Tech_TYPE_EV_AC,
         .dataSize = static_cast<uint64_t>(data.size()),
-        .data = reinterpret_cast<const uint8_t*>(data.data())
+        .data = reinterpret_cast<uint8_t *>(data.data())
     };
 
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_TECH,
         .flags = HEADER_FLAGS_NONE,
-        .version = 2,
+        .fragment = 1,
+        .fragments = 1,
         .dataSize = techSize(&tech),
         .pkg = &tech
     };
@@ -313,19 +315,21 @@ void IOTV_Client::slotStreamRead(uint8_t channel, QByteArray data)
     char outData[BUFSIZ];
 
     struct Read_Write read = {
-        .flags = ReadWrite_FLAGS_OPEN_STREAM,
         .nameSize = iot->nameSize,
         .channelNumber = channel,
+        .flags = ReadWrite_FLAGS_OPEN_STREAM,
         .dataSize = static_cast<uint64_t>(data.size()),
         .name = iot->name,
         .data = data.data()
     };
 
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_READ,
         .flags = HEADER_FLAGS_NONE,
-        .version = 2,
+        .fragment = 1,
+        .fragments = 1,
         .dataSize = 0,
         .pkg = &read
     };

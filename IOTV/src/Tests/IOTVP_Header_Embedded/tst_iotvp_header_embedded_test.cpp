@@ -5,7 +5,10 @@
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
+#include "iotv_types.h"
 
+const char *name = "Device";
+const char *description = "Description";
 class IOTVP_Header_Embedded_Test : public QObject
 {
     Q_OBJECT
@@ -19,16 +22,21 @@ public:
 
     struct IOTV_Server_embedded iot = {
         .id = 1,
-        .name = "Device",
-        .description = "Description",
+
         .numberReadChannel = 3,
+        .numberWriteChannel = 2,
+
+        .state = 1,
+
+        .nameSize = static_cast<uint8_t>(strlen(name)),
+        .descriptionSize = static_cast<uint16_t>(strlen(description)),
+
         .readChannel = NULL,
         .readChannelType = readType,
-        .numberWriteChannel = 2,
         .writeChannelType = writeType,
-        .state = 1,
-        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-        .descriptionSize = static_cast<uint16_t>(strlen(iot.description))
+
+        .name = (char *)name,
+        .description = (char *)description,
     };
 
     char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
@@ -39,6 +47,7 @@ public:
     bool error = false;
 
     void dataRecived(char ch);
+    void test_dataTransmitWriteFragmet();
 
 private slots:
     void test_headerOk();
@@ -54,7 +63,11 @@ private slots:
     void test_dataTransmitWrite();
     void test_dataTransmitState();
 
+    void test_dataTransmitWriteFragmets();
+
     void timeCompare();
+
+    void cleanupTestCase();
 };
 
 IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
@@ -70,11 +83,11 @@ IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
     memcpy(iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
 
     iot.readChannel[1].data = (char *)malloc(iot.readChannel[1].dataSize);
-//    value = 256;
+    //    value = 256;
     memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
 
     iot.readChannel[2].data = (char *)malloc(iot.readChannel[2].dataSize);
-//    value = 256;
+    //    value = 256;
     memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
 }
 
@@ -157,8 +170,10 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
         1,                                           // Тип пакета - запрос
         5,                                           // Назначение пакета PING
         1,                                           // Флаги
+        1, 0,                                        // Номер фрагмента
+        1, 0,                                        // Кол-во фрагментов
         0, 0, 0, 0, 0, 0, 0, 0,                      // Размер тела пакета
-        9, 0, 0, 0, 0, 0, 0, 0                       // Контрольная сумма тела пакета
+        11, 0, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета
     };
 
     const struct Header *header = createHeader(dataRaw, HEADER_SIZE, &error, &expextedDataSize, &cutDataSize);
@@ -169,7 +184,7 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
     QCOMPARE(header->assignment, HEADER_ASSIGNMENT_PING_PONG);
     QCOMPARE(header->flags, 1);
     QCOMPARE(header->dataSize, 0);
-    QCOMPARE(headerCheckSum(header), 9);
+    QCOMPARE(headerCheckSum(header), 11);
     QCOMPARE(isLittleEndian(), Q_BYTE_ORDER == Q_LITTLE_ENDIAN);
 
     char outData[HEADER_SIZE];
@@ -192,8 +207,10 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedPing()
         1,                                           // Тип пакета - запрос
         5,                                           // Назначение пакета PING
         1,                                           // Флаги
+        1, 0,                                        // Номер фрагмента
+        1, 0,                                        // Кол-во фрагментов
         0, 0, 0, 0, 0, 0, 0, 0,                      // Размер тела пакета
-        9, 0, 0, 0, 0, 0, 0, 0                       // Контрольная сумма тела пакета
+        11, 0, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета
     };
 
     // в transmitBuffer будет ответ на Ping по окончанию цикла
@@ -210,7 +227,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedPing()
     }
 
     QCOMPARE(expextedDataSize, 0);
-    QCOMPARE(cutDataSize, 20);
+    QCOMPARE(cutDataSize, HEADER_SIZE);
     QCOMPARE(realBufSize, 0);
     QCOMPARE(error, false);
 }
@@ -225,11 +242,13 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedIdentefication()
     // Цельный заголовок без ошибок и без тела пакета
     uint8_t dataRaw[] =  {
         2,                                          // Версия протокола
-        HEADER_TYPE_REQUEST             ,   // Тип пакета - запрос
-        HEADER_ASSIGNMENT_IDENTIFICATION,   // Назначение пакета Indetification
-        HEADER_FLAGS_ERROR,                 // Флаги
+        HEADER_TYPE_REQUEST,                        // Тип пакета - запрос
+        HEADER_ASSIGNMENT_IDENTIFICATION,           // Назначение пакета Indetification
+        1,                                          // Флаги
+        1, 0,                                       // Номер фрагмента
+        1, 0,                                       // Кол-во фрагментов
         0, 0, 0, 0, 0, 0, 0, 0,                     // Размер тела пакета
-        3, 1, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета  - 259
+        7, 0, 0, 0, 0, 0, 0, 0                      // Контрольная сумма тела пакета
     };
 
     // в transmitBuffer будет ответ на Identification по окончанию цикла
@@ -259,13 +278,15 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
     cutDataSize = 0;
 
     // Запрос чтения
-    uint8_t dataRaw[] =  {
+    uint8_t dataRaw[] = {
         2,                                          // Версия протокола
-        HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-        HEADER_ASSIGNMENT_READ,             // Назначение пакета Read
-        HEADER_FLAGS_NONE,                  // Флаги
+        HEADER_TYPE_REQUEST,                        // Тип пакета - запрос
+        HEADER_ASSIGNMENT_READ,                     // Назначение пакета Read
+        HEADER_FLAGS_NONE,                          // Флаги
+        1, 0,                                       // Номер фрагмента
+        1, 0,                                       // Кол-во фрагментов
         21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = READ_SIZE + nameSize
-        27, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
+        29, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма заголовка
         6,                                          // Длина имени устройства
         1,                                          // Номер канала
         0,                                          // Флаги
@@ -289,7 +310,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
 
     QCOMPARE(error, false);
     QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, 41);
+    QCOMPARE(cutDataSize, 45);
     QCOMPARE(expextedDataSize, 0);
 
     //    QCOMPARE(iot.readChannel[1], 123); //вызывается второй раз из теста write
@@ -308,8 +329,10 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
         HEADER_TYPE_REQUEST,                // Тип пакета - запрос
         HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
         HEADER_FLAGS_NONE,                  // Флаги
+        1, 0,                               // Номер фрагмента
+        1, 0,                               // Кол-во фрагментов
         23, 0, 0, 0, 0, 0, 0, 0,            // Размер тела пакета               23 = Wite_SIZE + nameSize + data (2)
-        30, 0, 0, 0, 0, 0, 0, 0,            // Контрольная сумма тела пакета    30
+        32, 0, 0, 0, 0, 0, 0, 0,            // Контрольная сумма тела пакета    32
         6,                                  // Длина имени устройства
         1,                                  // Номер канала
         0,                                  // Флаги
@@ -335,10 +358,10 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
 
     QCOMPARE(error, false);
     QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, 43);
+    QCOMPARE(cutDataSize, 47);
     QCOMPARE(expextedDataSize, 0);
 
-//    QCOMPARE(iot.readChannel[1], 123);
+    //    QCOMPARE(iot.readChannel[1], 123);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataReciveState()
@@ -352,11 +375,13 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         // Запрос чтения
         uint8_t dataRaw[] =  {
             2,                                          // Версия протокола
-            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                        // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,                    // Назначение пакета State
+            HEADER_FLAGS_NONE,                          // Флаги
+            1, 0,                                       // Номер фрагмента
+            1, 0,                                       // Кол-во фрагментов
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
+            28, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    28
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
@@ -377,7 +402,7 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
 
         QCOMPARE(error, false);
         QCOMPARE(realBufSize, 0);
-        QCOMPARE(cutDataSize, 41);
+        QCOMPARE(cutDataSize, 45);
         QCOMPARE(expextedDataSize, 0);
 
         QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
@@ -392,11 +417,13 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         // Запрос чтения
         uint8_t dataRaw[] =  {
             2,                                          // Версия протокола
-            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                        // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,                    // Назначение пакета State
+            HEADER_FLAGS_NONE,                          // Флаги
+            1, 0,                                       // Номер фрагмента
+            1, 0,                                       // Кол-во фрагментов
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
+            28, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    28
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
@@ -404,11 +431,13 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
             6, 0, 0, 0, 0, 0, 0, 0,                     // Контрольная сумма
             'D', 'e', 'v', 'i', 'c', 'e',                // Имя устройства
             2,                                          // Версия протокола
-            HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-            HEADER_ASSIGNMENT_STATE,            // Назначение пакета State
-            HEADER_FLAGS_NONE,                  // Флаги
+            HEADER_TYPE_REQUEST,                        // Тип пакета - запрос
+            HEADER_ASSIGNMENT_STATE,                    // Назначение пакета State
+            HEADER_FLAGS_NONE,                          // Флаги
+            1, 0,                                       // Номер фрагмента
+            1, 0,                                       // Кол-во фрагментов
             21, 0, 0, 0, 0, 0, 0, 0,                    // Размер тела пакета               21 = STATE_SIZE + nameSize
-            26, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    27
+            28, 0, 0, 0, 0, 0, 0, 0,                    // Контрольная сумма тела пакета    28
             6,                                          // Длина имени устройства
             0,                                          // Состояние
             0,                                          // Флаги
@@ -420,8 +449,8 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         // в transmitBuffer будет ответ на State по окончанию цикла
         for (uint i = 0; i < (HEADER_SIZE + STATE_SIZE + 6) * 2; ++i) // 6 - имя устройства
         {
-//            if (i > 0 && i < HEADER_SIZE)
-//                QCOMPARE(expextedDataSize, HEADER_SIZE);
+            //            if (i > 0 && i < HEADER_SIZE)
+            //                QCOMPARE(expextedDataSize, HEADER_SIZE);
 
             QCOMPARE(error, false);
             dataRecived(dataRaw[i]);
@@ -429,7 +458,7 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
 
         QCOMPARE(error, false);
         QCOMPARE(realBufSize, 0);
-        QCOMPARE(cutDataSize, 41);
+        QCOMPARE(cutDataSize, 45);
         QCOMPARE(expextedDataSize, 0);
 
         QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
@@ -441,12 +470,14 @@ void IOTVP_Header_Embedded_Test::test_DataTransmitPing()
     test_dataRecivedPing();
     // Заголовок ответ на PING
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_PING_PONG,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = 0,
-                .pkg = NULL
+        .assignment = HEADER_ASSIGNMENT_PING_PONG,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = 0,
+        .pkg = NULL
     };
 
     char outData[HEADER_SIZE];
@@ -466,25 +497,27 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
     test_dataRecivedIdentefication();
 
     struct Identification ident = {
+        .id = iot.id,
+        .descriptionSize = static_cast<uint16_t>(strlen(iot.description)),
+        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+        .numberWriteChannel = iot.numberWriteChannel,
+        .numberReadChannel = iot.numberReadChannel,
         .flags = Identification_FLAGS_NONE,
-                .id = iot.id,
-                .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-                .descriptionSize = static_cast<uint16_t>(strlen(iot.description)),
-                .numberWriteChannel = iot.numberWriteChannel,
-                .numberReadChannel = iot.numberReadChannel,
-                .name = iot.name,
-                .description = iot.description,
-                .writeChannelType = iot.writeChannelType,
-                .readChannelType = iot.readChannelType
+        .name = iot.name,
+        .description = iot.description,
+        .writeChannelType = iot.writeChannelType,
+        .readChannelType = iot.readChannelType
     };
 
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = identificationSize(&ident),
-                .pkg = NULL
+        .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = identificationSize(&ident),
+        .pkg = NULL
     };
 
     char outData[headerSize(&header)];
@@ -506,21 +539,24 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
     test_dataRecivedRead();
 
     struct Read_Write readWrite = {
+        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+        .channelNumber = 1,
         .flags = ReadWrite_FLAGS_NONE,
-                .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-                .channelNumber = 1,
-                .dataSize = iot.readChannel[1].dataSize,
-                .name = iot.name,
-                .data = iot.readChannel[1].data
+        .dataSize = iot.readChannel[1].dataSize,
+        .name = iot.name,
+        .data = iot.readChannel[1].data
     };
 
     struct Header header = {
+        .version = 2,
+
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_READ,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite
+        .assignment = HEADER_ASSIGNMENT_READ,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite
     };
 
     char outData[headerSize(&header)];
@@ -541,21 +577,23 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
     test_dataRecivedWrite();
 
     struct Read_Write readWrite = {
+        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+        .channelNumber = 1,
         .flags = ReadWrite_FLAGS_NONE,
-                .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-                .channelNumber = 1,
-                .dataSize = iot.readChannel[1].dataSize,
-                .name = iot.name,
-                .data = iot.readChannel[1].data
+        .dataSize = iot.readChannel[1].dataSize,
+        .name = iot.name,
+        .data = iot.readChannel[1].data
     };
 
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_WRITE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = readWriteSize(&readWrite),
-                .pkg = &readWrite,
+        .assignment = HEADER_ASSIGNMENT_WRITE,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite,
     };
 
     char outData[headerSize(&header)];
@@ -576,21 +614,23 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
     test_dataReciveState();
 
     struct State state = {
+        .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+        .state = iot.state,
         .flags = STATE_FLAGS_NONE,
-                .state = static_cast<State_STATE>(iot.state),
-                .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-                .dataSize = 0,
-                .name = iot.name,
-                .data = NULL
+        .dataSize = 0,
+        .name = iot.name,
+        .data = NULL
     };
 
     struct Header header = {
+        .version = 2,
         .type = HEADER_TYPE_RESPONSE,
-                .assignment = HEADER_ASSIGNMENT_STATE,
-                .flags = HEADER_FLAGS_NONE,
-                .version = 2,
-                .dataSize = stateSize(&state),
-                .pkg = &state
+        .assignment = HEADER_ASSIGNMENT_STATE,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = stateSize(&state),
+        .pkg = &state
     };
 
     char outData[headerSize(&header)];
@@ -605,55 +645,99 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
     QCOMPARE(expextedDataSize, 0);
 }
 
+void IOTVP_Header_Embedded_Test::test_dataTransmitWriteFragmet()
+{
+    struct Header* header = createPkgs((uint8_t*)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+    struct Read_Write *ptrReadWrite = ((struct Read_Write *)header->pkg);
+
+    QFile file("test_dataTransmitWriteFragmets_2.txt");
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    file.write(ptrReadWrite->data, ptrReadWrite->dataSize);
+    file.close();
+}
+
+void IOTVP_Header_Embedded_Test::test_dataTransmitWriteFragmets()
+{
+    {
+        QFile file("test_dataTransmitWriteFragmets.txt");
+        file.open(QIODevice::ReadWrite);
+        QFile file2("test_dataTransmitWriteFragmets_2.txt");
+        file2.open(QIODevice::ReadWrite);
+
+        file.remove();
+        file2.remove();
+    }
+
+    QFile file("test_dataTransmitWriteFragmets.txt");
+    file.open(QIODevice::WriteOnly);
+
+    for (int i = 0; i < 1'000; ++i)
+        file.write("Hello world!!!\n");
+    file.close();
+
+    uint64_t sizeToSend = file.size();
+    uint64_t countPkg = pkgCount(sizeToSend, BUFSIZ, HEADER_SIZE + READ_WRITE_SIZE + strlen(iot.name));
+
+    file.open(QIODevice::ReadOnly);
+    for (uint64_t i = 0; i < countPkg; ++i)
+    {
+        auto dataRead = file.read(BUFSIZ - (HEADER_SIZE + READ_WRITE_SIZE + strlen(iot.name)));
+
+        struct Read_Write readWrite = {
+            .nameSize = static_cast<uint8_t>(strlen(iot.name)),
+            .channelNumber = 1,
+            .flags = ReadWrite_FLAGS_NONE,
+            .dataSize = static_cast<uint64_t>(dataRead.size()),
+            .name = iot.name,
+            .data = dataRead.data()
+        };
+
+        struct Header header = {
+            .version = 2,
+            .type = HEADER_TYPE_RESPONSE,
+            .assignment = HEADER_ASSIGNMENT_READ,
+            .flags = HEADER_FLAGS_NONE,
+            .fragment = static_cast<uint16_t>(i + 1),
+            .fragments = static_cast<uint16_t>(countPkg),
+            .dataSize = readWriteSize(&readWrite),
+            .pkg = &readWrite
+        };
+
+        realBufSize = headerToData(&header, recivedBuffer, BUFSIZ);
+        test_dataTransmitWriteFragmet();
+    }
+    file.close();
+
+    {
+        QFile file("test_dataTransmitWriteFragmets.txt");
+        file.open(QIODevice::ReadOnly);
+        QFile file2("test_dataTransmitWriteFragmets_2.txt");
+        file2.open(QIODevice::ReadOnly);
+
+        QCOMPARE(file.size(), file2.size());
+        QCOMPARE(file.readAll(), file2.readAll());
+    }
+
+    QCOMPARE(error, false);
+    QCOMPARE(realBufSize, 6898);
+    QCOMPARE(cutDataSize, 6898);
+    QCOMPARE(expextedDataSize, 0);
+}
+
 void IOTVP_Header_Embedded_Test::timeCompare()
 {
-    // Сравнение скороси выполнения разных версий кода
-//    // Запрос записи
-//    uint8_t dataRaw[] =  {
-//        2,                                          // Версия протокола
-//        HEADER_TYPE_REQUEST,                // Тип пакета - запрос
-//        HEADER_ASSIGNMENT_WRITE,            // Назначение пакета Write
-//        HEADER_FLAGS_NONE,                  // Флаги
-//        0, 0, 0, 0, 0, 0, 0, 25,                    // Размер тела пакета               25 = Wite_SIZE + nameSize + data (4)
-//        0, 0, 0, 0, 0, 0, 0, 32,                    // Контрольная сумма тела пакета    32
-//        6,                                          // Длина имени устройства
-//        1,                                          // Номер канала
-//        0,                                          // Флаги
-//        0, 0, 0, 4,                                 // Размер данных
-//        0, 0, 0, 0, 0, 0, 0, 11,                    // Контрольная сумма
-//        'D', 'e', 'v', 'i', 'c', 'e',               // Имя устройства
-//        0, 0, 0, 123                                // Данные
-//    };
 
-//    auto start = std::chrono::system_clock::now();
+}
 
-//    realBufSize = 0;
-//    error = false;
-//    expextedDataSize = 0;
-//    cutDataSize = 0;
+void IOTVP_Header_Embedded_Test::cleanupTestCase()
+{
+    QFile file("test_dataTransmitWriteFragmets.txt");
+    file.open(QIODevice::ReadWrite);
+    QFile file2("test_dataTransmitWriteFragmets_2.txt");
+    file2.open(QIODevice::ReadWrite);
 
-//    for (int x = 0; x < 100'000; ++x)
-//    {
-//        // в transmitBuffer будет ответ на Write по окончанию цикла
-//        for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6 + 4; ++i) // 6 - имя устройства, 4 - данные
-//            dataRecived(dataRaw[i]);
-//    }
-
-//    qDebug() << "IOTVP Embedded protocol - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
-
-//    QByteArray rawData(reinterpret_cast<char*>(dataRaw), HEADER_SIZE + READ_WRITE_SIZE + 6 + 4);
-
-//    start = std::chrono::system_clock::now();
-
-//    for (int x = 0; x < 100'000; ++x)
-//    {
-//        IOTVP_Creator creator(rawData);
-//        creator.createPkgs();
-//        auto header = creator.takeHeader();
-//        //        auto transmit = header->toData();
-//    }
-
-//    qDebug() << "IOTVP protocol - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
+    file.remove();
+    file2.remove();
 }
 
 QTEST_APPLESS_MAIN(IOTVP_Header_Embedded_Test)

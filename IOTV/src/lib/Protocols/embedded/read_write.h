@@ -2,22 +2,17 @@
 #define READ_WRITE_H
 
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "iotv_types.h"
 
 struct Read_Write
 {
-    const ReadWrite_FLAGS flags;
+    uint8_t nameSize;
+    uint8_t channelNumber;
+    uint8_t flags;
 
-    const uint8_t nameSize;
-    const uint8_t channelNumber;
+    uint64_t dataSize;
 
-    const uint64_t dataSize;
-
-    const char * const name;
-    const char *data;
+    char *name;
+    char *data;
 };
 
 uint64_t readWriteCheckSum(const struct Read_Write *body);

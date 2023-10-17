@@ -21,6 +21,7 @@ public:
     void moveTh(QThread *th);
 
     QImage getImage() const;
+    size_t getImageSavedSize() const;
 
 private:
     QCamera *camera;

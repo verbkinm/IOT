@@ -1,4 +1,5 @@
 #include "widget.h"
+#include "qbuffer.h"
 
 #include <QMediaDevices>
 #include <QCameraDevice>
@@ -8,7 +9,7 @@
 #include <QThread>
 
 Widget::Widget(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), _image(QSize(1280, 720), QImage::Format_RGBA8888_Premultiplied)
 {
     timer = new QTimer(this);
 
@@ -36,7 +37,8 @@ Widget::Widget(QObject *parent)
     }
 
     //    QThread::sleep(5);
-    timer->start(100);
+//    timer->start(100);
+    imageCapture.capture();
 
 }
 
@@ -66,6 +68,16 @@ void Widget::moveTh(QThread *th)
 QImage Widget::getImage() const
 {
     return _image;
+}
+
+size_t Widget::getImageSavedSize() const
+{
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    _image.save(&buffer, "JPG");
+
+    return ba.size();
 }
 
 

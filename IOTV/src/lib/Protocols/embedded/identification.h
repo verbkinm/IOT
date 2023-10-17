@@ -2,27 +2,22 @@
 #define IDENTIFICATION_H
 
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "iotv_types.h"
 
 struct Identification
 {
-    Identification_FLAGS flags;
+    uint16_t id;
+    uint16_t descriptionSize;
+    uint8_t nameSize;
 
-    const uint16_t id;
-    const uint8_t nameSize;
-    const uint16_t descriptionSize;
+    uint8_t numberWriteChannel;
+    uint8_t numberReadChannel;
+    uint8_t flags;
 
-    const uint8_t numberWriteChannel;
-    const uint8_t numberReadChannel;
+    char *name;
+    char *description;
 
-    const char *name;
-    const char *description;
-
-    const uint8_t *writeChannelType;
-    const uint8_t *readChannelType;
+    uint8_t *writeChannelType;
+    uint8_t *readChannelType;
 };
 
 uint64_t identificationCheckSum(const struct Identification *);

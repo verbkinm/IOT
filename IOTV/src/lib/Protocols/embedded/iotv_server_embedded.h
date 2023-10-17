@@ -29,21 +29,22 @@ struct RawEmbedded {
 
 struct IOTV_Server_embedded
 {
-    const uint16_t id;
-    const char * const name;
-    const char * const description;
+    uint16_t id;
 
-    const uint8_t numberReadChannel;
-    struct RawEmbedded *readChannel;
-    uint8_t * const readChannelType;
-
-    const uint8_t numberWriteChannel;
-    uint8_t * const writeChannelType;
+    uint8_t numberReadChannel;
+    uint8_t numberWriteChannel;
 
     uint8_t state;
 
-    const uint8_t nameSize;
-    const uint16_t descriptionSize;
+    uint8_t nameSize;
+    uint16_t descriptionSize;
+
+    struct RawEmbedded *readChannel;
+    uint8_t *readChannelType;
+    uint8_t *writeChannelType;
+
+    char *name;
+    char *description;
 };
 
 int8_t dataSizeonDataType(uint8_t type);

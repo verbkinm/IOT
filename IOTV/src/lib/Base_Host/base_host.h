@@ -3,8 +3,7 @@
 #include <QObject>
 
 #include "channel.h"
-#include "creatorpkgs.h"
-#include "IOTV_SH.h"
+#include "iotv_types.h"
 
 class Base_Host : public QObject
 {
