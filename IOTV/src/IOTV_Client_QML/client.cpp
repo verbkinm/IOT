@@ -11,6 +11,7 @@
 #include "tech.h"
 
 #include <iostream>
+#include <fstream>
 
 Client::Client(QObject *parent): QObject{parent},
     _expectedDataSize(0), _counterPing(0)
@@ -445,6 +446,8 @@ void Client::responceState(const struct Header *header)
 
 void Client::responceRead(const struct Header *header)
 {
+//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
+
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -455,8 +458,20 @@ void Client::responceRead(const struct Header *header)
     if (!_devices.contains(name))
         return;
 
-    _devices[name].setData(pkg->channelNumber,
-                           {pkg->data, static_cast<int>(pkg->dataSize)});
+    _devices[name].setData(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
+
+    if (header->fragment == 1 && header->fragments > 1)
+    {
+        std::ofstream file;
+        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
+    }
+
+    if (header->fragments > 1)
+    {
+        std::ofstream file;
+        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+        file.write(pkg->data, pkg->dataSize);
+    }
 }
 
 void Client::responceWrite(const struct Header *header) const
@@ -497,7 +512,8 @@ void Client::responceTech(const Header *header)
 
 void Client::slotReciveData()
 {
-    _recivedBuff += _socket.readAll();
+    while (_socket.bytesAvailable())
+        _recivedBuff += _socket.readAll();
 
     bool error = false;
     uint64_t cutDataSize = 0;

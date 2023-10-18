@@ -69,9 +69,9 @@ void Base_conn_type::slotReadData()
     QByteArray inData = readAll();
 
 //    _host_buffer_data.append(inData);
-    Log::write(_name + ": data response <- " + inData.toHex(':'),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write(_name + ": data response <- " + inData.toHex(':'),
+//               Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
 
 //    if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
 //    {

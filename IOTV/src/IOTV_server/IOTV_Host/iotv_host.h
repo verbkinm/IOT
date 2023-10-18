@@ -86,5 +86,5 @@ private slots:
 
 signals:
     void signalDevicePingTimeOut();
-    void signalStreamRead(uint8_t channel, QByteArray data);
+    void signalStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
 };

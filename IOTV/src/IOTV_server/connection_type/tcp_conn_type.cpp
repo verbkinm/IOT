@@ -17,6 +17,8 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
 
 qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
+//    if (_tcpSocket.bytesAvailable())
+//        return 0;
     if (_tcpSocket.state() != QAbstractSocket::ConnectedState)
         return 0;
 
@@ -31,9 +33,15 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
                ServerLog::DEFAULT_LOG_FILENAME);
 
     if (size == -1)
-        return _tcpSocket.write(data);
+    {
+        auto s = _tcpSocket.write(data);
+        _tcpSocket.flush();
+        return s;
+    }
 
-    return _tcpSocket.write(data.data(), size);
+    auto s = _tcpSocket.write(data.data(), size);
+    _tcpSocket.flush();
+    return s;
 }
 
 void TCP_conn_type::connectToHost()
@@ -52,8 +60,13 @@ void TCP_conn_type::disconnectFromHost()
 
 QByteArray TCP_conn_type::readAll()
 {
-    return _tcpSocket.read(BUFFER_MAX_SIZE);
-//    return _tcpSocket.read(BUFFER_MAX_SIZE - _host_buffer_data.size());// readAll();
+    QByteArray data;
+
+    //!!!
+    while (_tcpSocket.bytesAvailable())
+        data += _tcpSocket.read(BUFFER_MAX_SIZE);
+
+    return data;
 }
 
 void TCP_conn_type::slotNewConnection()
@@ -71,7 +84,6 @@ void TCP_conn_type::slotNewConnection()
 
 void TCP_conn_type::slotSocketDisconnected()
 {
-//    clearDataBuffer();
     expectedDataSize = 0;
 
     Log::write(_name + ": disconnected from " + _tcpSocket.peerAddress().toString()

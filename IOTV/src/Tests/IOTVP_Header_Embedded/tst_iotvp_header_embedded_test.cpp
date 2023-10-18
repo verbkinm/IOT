@@ -9,6 +9,16 @@
 
 const char *name = "Device";
 const char *description = "Description";
+
+uint64_t writeFunc(char *data, uint64_t dataSize, void *obj)
+{
+    Q_UNUSED(data)
+    Q_UNUSED(dataSize)
+    Q_UNUSED(obj)
+
+    return 0;
+}
+
 class IOTVP_Header_Embedded_Test : public QObject
 {
     Q_OBJECT
@@ -65,9 +75,8 @@ private slots:
 
     void test_dataTransmitWriteFragmets();
 
-    void timeCompare();
-
-    void cleanupTestCase();
+    void test_pkgCount();
+    void test_dataPart();
 };
 
 IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
@@ -93,7 +102,13 @@ IOTVP_Header_Embedded_Test::IOTVP_Header_Embedded_Test()
 
 IOTVP_Header_Embedded_Test::~IOTVP_Header_Embedded_Test()
 {
+    QFile file("test_dataTransmitWriteFragmets.txt");
+    file.open(QIODevice::ReadWrite);
+    QFile file2("test_dataTransmitWriteFragmets_2.txt");
+    file2.open(QIODevice::ReadWrite);
 
+    file.remove();
+    file2.remove();
 }
 
 void IOTVP_Header_Embedded_Test::dataRecived(char ch)
@@ -127,7 +142,7 @@ void IOTVP_Header_Embedded_Test::dataRecived(char ch)
         }
         else if(header->assignment == HEADER_ASSIGNMENT_READ)
         {
-            /* uint64_t size = */responseReadData(transmitBuffer, BUFSIZ, &iot, header);
+            /* uint64_t size = */responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, NULL);
             //            socket->write(transmitBuffer, size);
         }
         else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
@@ -178,13 +193,13 @@ void IOTVP_Header_Embedded_Test::test_headerOk()
 
     const struct Header *header = createHeader(dataRaw, HEADER_SIZE, &error, &expextedDataSize, &cutDataSize);
     QCOMPARE(error, false);
-    QCOMPARE(expextedDataSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, uint64_t(HEADER_SIZE));
     QCOMPARE(header->type, HEADER_TYPE_REQUEST);
     QCOMPARE(header->assignment, HEADER_ASSIGNMENT_PING_PONG);
     QCOMPARE(header->flags, 1);
-    QCOMPARE(header->dataSize, 0);
-    QCOMPARE(headerCheckSum(header), 11);
+    QCOMPARE(header->dataSize, (uint64_t)0);
+    QCOMPARE(headerCheckSum(header), (uint64_t)11);
     QCOMPARE(isLittleEndian(), Q_BYTE_ORDER == Q_LITTLE_ENDIAN);
 
     char outData[HEADER_SIZE];
@@ -217,18 +232,18 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedPing()
     for (uint i = 0; i < HEADER_SIZE; ++i)
     {
         if (i > 0)
-            QCOMPARE(expextedDataSize, HEADER_SIZE);
+            QCOMPARE(expextedDataSize, (uint64_t)HEADER_SIZE);
 
         QCOMPARE(realBufSize, i);
-        QCOMPARE(cutDataSize, 0);
+        QCOMPARE(cutDataSize, (uint64_t)0);
         QCOMPARE(error, false);
 
         dataRecived(dataRaw[i]);
     }
 
-    QCOMPARE(expextedDataSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE);
-    QCOMPARE(realBufSize, 0);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)HEADER_SIZE);
+    QCOMPARE(realBufSize, (uint64_t)0);
     QCOMPARE(error, false);
 }
 
@@ -255,18 +270,18 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedIdentefication()
     for (uint i = 0; i < HEADER_SIZE; ++i)
     {
         if (i > 0 && i < HEADER_SIZE)
-            QCOMPARE(expextedDataSize, HEADER_SIZE);
+            QCOMPARE(expextedDataSize, (uint64_t)HEADER_SIZE);
 
-        QCOMPARE(realBufSize, i);
-        QCOMPARE(cutDataSize, 0);
+        QCOMPARE(realBufSize, (uint64_t)i);
+        QCOMPARE(cutDataSize, (uint64_t)0);
         QCOMPARE(error, false);
 
         dataRecived(dataRaw[i]);
     }
 
-    QCOMPARE(expextedDataSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE);
-    QCOMPARE(realBufSize, 0);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)HEADER_SIZE);
+    QCOMPARE(realBufSize, (uint64_t)0);
     QCOMPARE(error, false);
 }
 
@@ -299,7 +314,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
     for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6; ++i) // 6 - имя устройства
     {
         if (i > 0 && i < HEADER_SIZE)
-            QCOMPARE(expextedDataSize, HEADER_SIZE);
+            QCOMPARE(expextedDataSize, (uint64_t)HEADER_SIZE);
 
         //        if (i > HEADER_SIZE && i < HEADER_SIZE + READ_WRITE_SIZE)
         //            QCOMPARE(expextedDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6);
@@ -309,9 +324,9 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedRead()
     }
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, 45);
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)45);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 
     //    QCOMPARE(iot.readChannel[1], 123); //вызывается второй раз из теста write
 }
@@ -346,7 +361,7 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
     for (uint i = 0; i < HEADER_SIZE + READ_WRITE_SIZE + 6 + 2; ++i) // 6 - имя устройства, 2 - данные
     {
         if (i > 0 && i < HEADER_SIZE)
-            QCOMPARE(expextedDataSize, HEADER_SIZE);
+            QCOMPARE(expextedDataSize, (uint64_t)HEADER_SIZE);
 
         //        if (i > HEADER_SIZE && i < HEADER_SIZE + READ_WRITE_SIZE)
         //            QCOMPARE(expextedDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6);
@@ -357,9 +372,9 @@ void IOTVP_Header_Embedded_Test::test_dataRecivedWrite()
 
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, 47);
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)47);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 
     //    QCOMPARE(iot.readChannel[1], 123);
 }
@@ -394,16 +409,16 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         for (uint i = 0; i < HEADER_SIZE + STATE_SIZE + 6; ++i) // 6 - имя устройства
         {
             if (i > 0 && i < HEADER_SIZE)
-                QCOMPARE(expextedDataSize, HEADER_SIZE);
+                QCOMPARE(expextedDataSize, (uint64_t)HEADER_SIZE);
 
             QCOMPARE(error, false);
             dataRecived(dataRaw[i]);
         }
 
         QCOMPARE(error, false);
-        QCOMPARE(realBufSize, 0);
-        QCOMPARE(cutDataSize, 45);
-        QCOMPARE(expextedDataSize, 0);
+        QCOMPARE(realBufSize, (uint64_t)0);
+        QCOMPARE(cutDataSize, (uint64_t)45);
+        QCOMPARE(expextedDataSize, (uint64_t)0);
 
         QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
     }
@@ -457,9 +472,9 @@ void IOTVP_Header_Embedded_Test::test_dataReciveState()
         }
 
         QCOMPARE(error, false);
-        QCOMPARE(realBufSize, 0);
-        QCOMPARE(cutDataSize, 45);
-        QCOMPARE(expextedDataSize, 0);
+        QCOMPARE(realBufSize, (uint64_t)0);
+        QCOMPARE(cutDataSize, (uint64_t)45);
+        QCOMPARE(expextedDataSize, (uint64_t)0);
 
         QCOMPARE(iot.state, State_STATE_ONLINE); //вызывается второй раз из теста write
     }
@@ -487,9 +502,9 @@ void IOTVP_Header_Embedded_Test::test_DataTransmitPing()
         QCOMPARE(outData[i], transmitBuffer[i]);
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE);
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)HEADER_SIZE);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
@@ -527,9 +542,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitIdentification()
         QCOMPARE(outData[i], transmitBuffer[i]);
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE); // осталось от test_dataRecivedIdentefication
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)HEADER_SIZE); // осталось от test_dataRecivedIdentefication
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
@@ -566,9 +581,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitRead()
         QCOMPARE(outData[i], transmitBuffer[i]);
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6 /*Имя устройства*/); // осталось от test_dataTransmitRead
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)(HEADER_SIZE + READ_WRITE_SIZE + 6) /*Имя устройства*/); // осталось от test_dataTransmitRead
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
@@ -603,9 +618,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWrite()
         QCOMPARE(outData[i], transmitBuffer[i]);
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE + READ_WRITE_SIZE + 6 + 2); // осталось от test_dataRecivedWrite 45 = HEADER_SIZE + Wite_SIZE + nameSize + data (2)
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)(HEADER_SIZE + READ_WRITE_SIZE + 6 + 2)); // осталось от test_dataRecivedWrite 45 = HEADER_SIZE + Wite_SIZE + nameSize + data (2)
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataTransmitState()
@@ -640,9 +655,9 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitState()
         QCOMPARE(outData[i], transmitBuffer[i]);
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 0);
-    QCOMPARE(cutDataSize, HEADER_SIZE + STATE_SIZE + 6 /*Имя устройства*/); // осталось от test_dataTransmitState
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)0);
+    QCOMPARE(cutDataSize, (uint64_t)(HEADER_SIZE + STATE_SIZE + 6 /*Имя устройства*/)); // осталось от test_dataTransmitState
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
 void IOTVP_Header_Embedded_Test::test_dataTransmitWriteFragmet()
@@ -719,25 +734,73 @@ void IOTVP_Header_Embedded_Test::test_dataTransmitWriteFragmets()
     }
 
     QCOMPARE(error, false);
-    QCOMPARE(realBufSize, 6898);
-    QCOMPARE(cutDataSize, 6898);
-    QCOMPARE(expextedDataSize, 0);
+    QCOMPARE(realBufSize, (uint64_t)6898);
+    QCOMPARE(cutDataSize, (uint64_t)6898);
+    QCOMPARE(expextedDataSize, (uint64_t)0);
 }
 
-void IOTVP_Header_Embedded_Test::timeCompare()
+void IOTVP_Header_Embedded_Test::test_pkgCount()
 {
+    auto result = pkgCount(1024, 1024, 8);
+    QCOMPARE(result, (uint64_t)2);
 
+    result = pkgCount(1024, 1024, 0);
+    QCOMPARE(result, (uint64_t)1);
+
+    result = pkgCount(1020, 1024, 0);
+    QCOMPARE(result, (uint64_t)1);
+
+    result = pkgCount(1020, 1024, 4);
+    QCOMPARE(result, (uint64_t)1);
+
+    result = pkgCount(1024, 512, 10);
+    QCOMPARE(result, (uint64_t)3);
 }
 
-void IOTVP_Header_Embedded_Test::cleanupTestCase()
+void IOTVP_Header_Embedded_Test::test_dataPart()
 {
     QFile file("test_dataTransmitWriteFragmets.txt");
-    file.open(QIODevice::ReadWrite);
-    QFile file2("test_dataTransmitWriteFragmets_2.txt");
-    file2.open(QIODevice::ReadWrite);
+    file.open(QIODevice::ReadOnly);
 
-    file.remove();
-    file2.remove();
+    uint8_t readType = {DATA_TYPE_STRING};
+
+    struct IOTV_Server_embedded iot = {
+        .id = 1,
+
+        .numberReadChannel = 1,
+        .numberWriteChannel = 0,
+
+        .state = 1,
+
+        .nameSize = static_cast<uint8_t>(strlen(name)),
+        .descriptionSize = static_cast<uint16_t>(strlen(description)),
+
+        .readChannel = NULL,
+        .readChannelType = &readType,
+        .writeChannelType = NULL,
+
+        .name = (char *)name,
+        .description = (char *)description,
+    };
+
+    iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded));
+    iot.readChannel[0].dataSize = file.size();
+
+    iot.readChannel[0].data = file.readAll().data();
+
+    char *data = iot.readChannel[0].data;
+
+    auto pkgsCount = pkgCount(file.size(), 1024, 0);
+    for (uint i = 0; i < pkgsCount - 1; ++i)
+    {
+        auto result = dataPart(data, i, 1024, &iot, 0);
+        QCOMPARE(result, (uint64_t)1024);
+    }
+
+    auto result = dataPart(data, pkgsCount - 1, 1024, &iot, 0);
+    QCOMPARE(result, (uint64_t)file.size() - 1024 * (pkgsCount - 1));
+
+    free(iot.readChannel);
 }
 
 QTEST_APPLESS_MAIN(IOTVP_Header_Embedded_Test)

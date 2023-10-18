@@ -72,6 +72,7 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 
 void IOTV_Host::responceRead(const struct Header *header)
 {
+    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
@@ -81,10 +82,10 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     if (_streamRead.count(channelNumber))
     {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-        file.write(pkg->data, pkg->dataSize);
-        emit signalStreamRead(channelNumber, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
+//        std::ofstream file;
+//        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+//        file.write(pkg->data, pkg->dataSize);
+        emit signalStreamRead(channelNumber, header->fragment, header->fragments, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
         return;
     }
 
@@ -96,10 +97,26 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
     Log::write("R:"
-               + QString::number(pkg->channelNumber)
-               + "="
-               + raw.strData().first,
+                   + QString::number(pkg->channelNumber)
+                   + "="
+                   + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
+
+    _counterPing = 0;
+
+
+    if (header->fragment == 1 && header->fragments > 1)
+    {
+        std::ofstream file;
+        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
+    }
+
+    if (header->fragments > 1)
+    {
+        std::ofstream file;
+        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+        file.write(pkg->data, pkg->dataSize);
+    }
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -177,8 +194,8 @@ void IOTV_Host::slotDataResived(QByteArray data)
         {
             _buff.clear();
             _expectedDataSize = 0;
-//            _conn_type->clearDataBuffer();
-//            _conn_type->expectedDataSize = 0;
+            //            _conn_type->clearDataBuffer();
+            //            _conn_type->expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
             break;
@@ -208,8 +225,8 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
-//            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
-//                ;
+            //            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+            //                ;
 
             clearIOTV_Server(iot);
         }
@@ -240,16 +257,16 @@ void IOTV_Host::setConnectionType()
     if (connType == connectionType::TCP)
     {
         _conn_type = std::make_unique<TCP_conn_type>(_settingsData[hostField::name],
-                _settingsData[hostField::address],
-                _settingsData[hostField::port].toUInt(),
-                this);
+                                                     _settingsData[hostField::address],
+                                                     _settingsData[hostField::port].toUInt(),
+                                                     this);
     }
     else if (connType == connectionType::UDP)
     {
         _conn_type = std::make_unique<Udp_conn_type>(_settingsData[hostField::name],
-                _settingsData[hostField::address],
-                _settingsData[hostField::port].toUInt(),
-                this);
+                                                     _settingsData[hostField::address],
+                                                     _settingsData[hostField::port].toUInt(),
+                                                     this);
     }
     else if (connType == connectionType::COM)
     {
@@ -364,7 +381,7 @@ void IOTV_Host::slotPingTimeOut()
     {
         Log::write(_conn_type->getName() + " WARRNING: ping timeout",
                    Log::Write_Flag::FILE_STDOUT,
-                    ServerLog::DEFAULT_LOG_FILENAME);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         emit signalDevicePingTimeOut();
         _counterPing = 0;
     }
@@ -372,11 +389,11 @@ void IOTV_Host::slotPingTimeOut()
 
 void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
-//    !!! Нужно ли посылать данные на устройство, если они равны текущим данным?
-//    if (getReadChannelData(channelNumber) != data)
-//    {
-        write(channelNumber, data);
-//    }
+    //    !!! Нужно ли посылать данные на устройство, если они равны текущим данным?
+    //    if (getReadChannelData(channelNumber) != data)
+    //    {
+    write(channelNumber, data);
+    //    }
 }
 
 void IOTV_Host::slotConnected()

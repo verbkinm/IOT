@@ -9,7 +9,7 @@
 #include <QThread>
 
 Widget::Widget(QObject *parent)
-    : QObject(parent), _image(QSize(1280, 720), QImage::Format_RGBA8888_Premultiplied)
+    : QObject(parent), _image(nullptr)
 {
     timer = new QTimer(this);
 
@@ -17,6 +17,9 @@ Widget::Widget(QObject *parent)
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::processCapturedImage);
     connect(&imageCapture, &QImageCapture::errorOccurred, this, &Widget::errorCapture);
     connect(timer, &QTimer::timeout, this, &Widget::timerOut, Qt::QueuedConnection);
+
+    connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::signalFirstCapture, Qt::SingleShotConnection);
+
 
     camera = new QCamera(QMediaDevices::defaultVideoInput());
     captureSession.setCamera(camera);
@@ -47,35 +50,22 @@ Widget::~Widget()
 
 }
 
-char* Widget::getData(char *outData, size_t outDataSize) const
+const QImage &Widget::getImage() const
 {
-    outData = (char *)_image.bits();
-//    if (image.sizeInBytes() > outDataSize)
-//        return 0;
-
-//    memcpy(outData, image.bits(), image.sizeInBytes());
-
-//    return image.sizeInBytes();
-}
-
-void Widget::moveTh(QThread *th)
-{
-    this->moveToThread(th);
-    timer->moveToThread(th);
-    timer->start(100);
-}
-
-QImage Widget::getImage() const
-{
-    return _image;
+    return *_image;
 }
 
 size_t Widget::getImageSavedSize() const
 {
+    if (_image == nullptr)
+        return 0;
+
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    _image.save(&buffer, "JPG");
+    _image->save(&buffer, "JPG");
+
+    auto s = ba.size();
 
     return ba.size();
 }
@@ -86,7 +76,17 @@ void Widget::processCapturedImage(int requestId, const QImage &img)
     Q_UNUSED(requestId);
 
     timer->stop();
-    _image = img;
+
+    if (_image != nullptr)
+        delete _image;
+
+    _image = new QImage(img);
+
+    _image->save("Image.jpg", "JPG");
+
+    qDebug() << _image->format();
+
+//    auto s = getImageSavedSize();
 
 //    qDebug() << img.size();
 //    qDebug() << "photo size " << img.sizeInBytes();

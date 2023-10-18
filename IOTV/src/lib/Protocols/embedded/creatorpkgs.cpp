@@ -76,6 +76,12 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
     uint16_t numberOfFragments;
     memcpy(&numberOfFragments, &data[6], 2);
 
+//    if (numberOfFragments > 1)
+//    {
+//        auto f = fragmentNumber;
+//        ;
+//    }
+
     if (fragmentNumber > numberOfFragments)
     {
         *error = true;

@@ -44,13 +44,15 @@ private:
 
     void write(const QByteArray &data, qint64 size = -1) const;
 
+    static uint64_t writeFunc(char *data, uint64_t size, void *obj);
+
 private slots:
     void slotDisconnected();
 
     void slotReadData();
     void slotFetchEventActionDataFromServer(QByteArray data);
 
-    void slotStreamRead(uint8_t channel, QByteArray data);
+    void slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
 
 signals:
     void signalStopThread();

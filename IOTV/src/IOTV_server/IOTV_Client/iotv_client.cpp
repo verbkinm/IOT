@@ -121,7 +121,7 @@ void IOTV_Client::processQueryRead(const Header *header)
     uint64_t size;
     char outData[BUFSIZ];
 
-    size = responseReadData(outData, BUFSIZ, iot, header);
+    size = responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
 
     write({outData, static_cast<int>(size)}, size);
 
@@ -205,6 +205,16 @@ void IOTV_Client::write(const QByteArray &data, qint64 size) const
                    + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
     _socket->write(data.data(), size);
+}
+
+uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
+{
+    QTcpSocket *socket = static_cast<QTcpSocket *>(obj);
+
+    if (socket == NULL)
+        return 0;
+
+    return socket->write(data, size);
 }
 
 void IOTV_Client::slotDisconnected()
@@ -302,7 +312,7 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
     write({outData, static_cast<int>(size)}, size);
 }
 
-void IOTV_Client::slotStreamRead(uint8_t channel, QByteArray data)
+void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data)
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
 
@@ -328,14 +338,13 @@ void IOTV_Client::slotStreamRead(uint8_t channel, QByteArray data)
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_READ,
         .flags = HEADER_FLAGS_NONE,
-        .fragment = 1,
-        .fragments = 1,
-        .dataSize = 0,
+        .fragment = fragment,
+        .fragments = fragments,
+        .dataSize = readWriteSize(&read),
         .pkg = &read
     };
 
-    size = responseReadData(outData, BUFSIZ, iot, &header);
-
+    size = headerToData(&header, outData, BUFSIZ);
     write({outData, static_cast<int>(size)}, size);
 
     clearIOTV_Server(iot);

@@ -17,10 +17,7 @@ public:
     Widget(QObject *parent = nullptr);
     ~Widget();
 
-    char *getData(char *outData, size_t outDataSize) const;
-    void moveTh(QThread *th);
-
-    QImage getImage() const;
+    const QImage &getImage() const;
     size_t getImageSavedSize() const;
 
 private:
@@ -28,12 +25,15 @@ private:
     QMediaCaptureSession captureSession;
     QImageCapture imageCapture;
     QTimer *timer;
-    QImage _image;
+    QImage *_image;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);
     void timerOut();
     void errorCapture(int, QImageCapture::Error err, QString errorStr);
     void readyForCapture(bool);
+
+signals:
+    void signalFirstCapture();
 };
 #endif // WIDGET_H

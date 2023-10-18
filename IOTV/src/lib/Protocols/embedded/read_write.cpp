@@ -38,8 +38,10 @@ uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t 
     uint64_t chSum =  body->nameSize + body->channelNumber + body->flags + body->dataSize;
     memcpy(&outData[7], &chSum, 8);
 
-    memcpy(&outData[READ_WRITE_SIZE], body->name, body->nameSize);
-    memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
+    if (body->nameSize > 0 && body->name != NULL)
+        memcpy(&outData[READ_WRITE_SIZE], body->name, body->nameSize);
+    if (body->dataSize > 0 && body->data != NULL)
+        memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
 
     return READ_WRITE_SIZE + body->nameSize + body->dataSize;
 }

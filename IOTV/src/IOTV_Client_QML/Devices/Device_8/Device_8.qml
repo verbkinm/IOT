@@ -23,35 +23,16 @@ Page {
         height: root.height
         enabled: device.state
 
-        contentHeight: img.height
+//        contentHeight: img.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
             visible: active
         }
 
-        Image {
-            id: img
-            source: "qrc:/img/logo.png"
-            width: 200
-            height: 200
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    switchStream++
-                    if (switchStream % 2 == 0)
-                    {
-                        console.log("close stream")
-                        device.signalCloseReadStream(0)
-                    }
-                    else
-                    {
-                        console.log("open stream")
-                        device.signalOpenReadStream(0)
-                    }
-                }
-            }
+        Loader {
+            id: imgLoader
+//            source: "Image_cam.qml"
         }
     }
 
@@ -67,6 +48,30 @@ Page {
         id: busyRect
         anchors.fill: parent
         visible: !device.state
+    }
+
+    Timer {
+        id: t1
+        interval: 1000;
+        running: true;
+//        repeat: true
+        onTriggered: {
+            imgLoader.source = ""
+            t1.stop()
+            t2.start()
+        }
+    }
+
+    Timer {
+        id: t2
+        interval: 1000;
+        running: false;
+//        repeat: true
+        onTriggered: {
+            imgLoader.source = "Image_cam.qml"
+            t2.stop()
+            t1.start()
+        }
     }
 }
 
