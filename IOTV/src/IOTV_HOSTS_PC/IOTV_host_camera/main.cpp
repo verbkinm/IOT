@@ -15,14 +15,13 @@
 #include "widget.h"
 
 Widget *camera;
-char imageBuffer[1024 * 1024 * 5];
 
-#define BUFSIZE BUFSIZ
+//#define BUFSIZE
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
 
-char recivedBuffer[BUFSIZE], transmitBuffer[BUFSIZE];
+char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
 
 uint64_t expextedDataSize = HEADER_SIZE;
@@ -53,6 +52,10 @@ struct IOTV_Server_embedded iot = {
 uint64_t writeFunc(char *data, uint64_t size, void *obj)
 {
     QTcpSocket *socket = (QTcpSocket *)obj;
+
+    if (socket == nullptr)
+        return 0;
+
     auto s = socket->write(data, size);
     socket->flush();
     return s;
@@ -89,36 +92,27 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
                 struct Read_Write *rwPkg = ((struct Read_Write *)header->pkg);
-                if (rwPkg->channelNumber == 0)
-                {
-                    QByteArray byteArra;
-                    QBuffer buffer(&byteArra);
-                    buffer.open(QIODevice::WriteOnly);
-                    camera->getImage().save(&buffer, "JPG");
+                if (rwPkg->channelNumber == 0 && rwPkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
+                    camera->start();
+                else if (rwPkg->channelNumber == 0 && rwPkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
+                    camera->stop    ();
 
-                    iot.readChannel[0].dataSize = byteArra.size();
-                    iot.readChannel[0].data = byteArra.data();
-
-                    rwPkg->data = iot.readChannel[0].data;
-                    rwPkg->dataSize = iot.readChannel[0].dataSize;
-                }
-
-                responseReadData(transmitBuffer, BUFSIZE, &iot, header, writeFunc, (void *)socket);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZE, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZE);
+                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
@@ -147,6 +141,8 @@ void slotDataRecived()
 //для ПК
 void slotDisconnected()
 {
+    camera->stop();
+
     QString strOut = "disconnected from " + socket->peerAddress().toString()
                      + ":" + QString::number(socket->peerPort());
     std::cout << strOut.toStdString() << std::endl;
@@ -169,8 +165,46 @@ void slotNewConnection()
     QObject::connect(socket, &QTcpSocket::disconnected, &QObject::deleteLater);
 }
 
+//для ПК
+void slotImageCaptured()
+{
+    QByteArray byteArra;
+    QBuffer buffer(&byteArra);
+    buffer.open(QIODevice::WriteOnly);
+//    QImage img = camera->getImage();
+//    img.convertTo(QImage::Format_RGB32);
+    camera->getImage().save(&buffer, "JPG", 100);
+
+    iot.readChannel[0].dataSize = byteArra.size();
+    iot.readChannel[0].data = byteArra.data();
+
+    struct Read_Write readWrite = {
+        .nameSize = iot.nameSize,
+        .channelNumber = 0,
+        .flags = ReadWrite_FLAGS_OPEN_STREAM,
+        .dataSize = iot.readChannel[0].dataSize,
+        .name = iot.name,
+        .data = iot.readChannel[0].data
+    };
+
+    struct Header header = {
+        .version = 2,
+        .type = HEADER_TYPE_RESPONSE,
+        .assignment = HEADER_ASSIGNMENT_READ,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = readWriteSize(&readWrite),
+        .pkg = &readWrite
+    };
+
+    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
+}
+
 void slotInitApp()
 {
+    camera->stop();
+
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 4);
 
     iot.readChannel[0].dataSize = camera->getImageSavedSize();
@@ -193,9 +227,8 @@ void slotInitApp()
 
     server = new QTcpServer;
 
-    QObject::connect(server, &QTcpServer::newConnection, [&](){
-        slotNewConnection();
-    });
+    QObject::connect(server, &QTcpServer::newConnection, slotNewConnection);
+    QObject::connect(camera, &Widget::signalImageCaptured, slotImageCaptured);
 
     server->listen(QHostAddress("127.0.0.1"), 2028);
     std::cout << "Start service on 127.0.0.1:2028" << std::endl;
@@ -208,6 +241,7 @@ int main(int argc, char *argv[])
     camera = new Widget;
 
     QObject::connect(camera, &Widget::signalFirstCapture, slotInitApp);
+
 
     return a.exec();
 }

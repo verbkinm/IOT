@@ -6,12 +6,15 @@
 #include "IOTV_SH.h"
 #include "creatorpkgs.h"
 #include "identification.h"
+#include "qbuffer.h"
+#include "qimage.h"
 #include "state.h"
 #include "read_write.h"
 #include "tech.h"
 
 #include <iostream>
 #include <fstream>
+#include <QTemporaryFile>
 
 Client::Client(QObject *parent): QObject{parent},
     _expectedDataSize(0), _counterPing(0)
@@ -446,32 +449,54 @@ void Client::responceState(const struct Header *header)
 
 void Client::responceRead(const struct Header *header)
 {
-//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
-
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    if (pkg == nullptr)
+        return;
 
+    qDebug() << "PKG " << header->fragment << "(" << pkg->dataSize <<  ") /" << header->fragments ;
+
+    auto channel = pkg->channelNumber;
     QString name(QByteArray{pkg->name, pkg->nameSize});
 
     if (!_devices.contains(name))
         return;
 
-    _devices[name].setData(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
+    if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
+        responceReadStream(header);
+    else
+        _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
+}
 
-    if (header->fragment == 1 && header->fragments > 1)
+void Client::responceReadStream(const Header *header)
+{
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
+    auto channel = pkg->channelNumber;
+    QString name(QByteArray{pkg->name, pkg->nameSize});
+
+    if (header->fragment == 1)
     {
         std::ofstream file;
         file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
+        file.close();
+
+        _devices[name].clearData(channel);
     }
 
-    if (header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-        file.write(pkg->data, pkg->dataSize);
-    }
+    std::ofstream file;
+    file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+    file.write(pkg->data, pkg->dataSize);
+    file.close();
+
+    _devices[name].addData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
+
+    if (header->fragment == header->fragments)
+        emit _devices[name].signalDataPkgComplete(channel, "file:Image.jpg");
 }
 
 void Client::responceWrite(const struct Header *header) const

@@ -113,7 +113,6 @@
         <file>Devices/Setting/Device/Device_4.qml</file>
         <file>Devices/Setting/Device/Device_4/MyDialog.qml</file>
         <file>Devices/Device_8/Device_8.qml</file>
-        <file>Devices/Device_8/Image_cam.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

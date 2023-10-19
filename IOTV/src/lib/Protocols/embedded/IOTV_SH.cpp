@@ -94,6 +94,14 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
         return totalSendByte;
     }
 
+    if (rwPkg->flags != ReadWrite_FLAGS_OPEN_STREAM
+        && (iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_RAW
+            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING
+            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_NONE))
+    {
+        return 0;
+    }
+
     pkgsCount = responceReadWritePkgCount(dataSize, iot, head);
     for (uint16_t i = 0; i < pkgsCount; ++i)
     {
@@ -103,7 +111,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
         struct Read_Write readWrite = {
             .nameSize = iot->nameSize,
             .channelNumber = rwPkg->channelNumber,
-            .flags = ReadWrite_FLAGS_NONE,
+            .flags = rwPkg->flags,
             .dataSize = dataReadSize,
             .name = iot->name,
             .data = it

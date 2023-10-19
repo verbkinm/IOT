@@ -82,6 +82,7 @@ public:
 
     void setType(DATA_TYPE newType);
     void setData(const QByteArray &newData);
+    void addData(const QByteArray &newData);
 
     void push_back(uint8_t byte);
     void clear();

@@ -71,6 +71,18 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
     return true;
 }
 
+bool Device::addData(uint8_t channelNumber, const QByteArray &data)
+{
+    this->addReadChannelData(channelNumber, data);
+    emit signalDataAdded(channelNumber);
+    return true;
+}
+
+void Device::clearData(uint8_t channelNumber)
+{
+    clearReadChannelData(channelNumber);
+}
+
 void Device::setDataFromString(int channelNumber, QString data)
 {
     if (data.isEmpty())

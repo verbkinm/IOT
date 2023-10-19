@@ -315,14 +315,13 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
 void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data)
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
-
     if (host == nullptr)
         return;
 
     auto iot = host->convert();
+    iot->readChannel[channel].dataSize = data.size();
+    iot->readChannel[channel].data = data.data();
 
-    uint64_t size;
-    char outData[BUFSIZ];
 
     struct Read_Write read = {
         .nameSize = iot->nameSize,
@@ -344,8 +343,13 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
         .pkg = &read
     };
 
-    size = headerToData(&header, outData, BUFSIZ);
-    write({outData, static_cast<int>(size)}, size);
+    char outData[BUFSIZ];
+    auto size = headerToData(&header, outData, BUFSIZ);
+    _socket->write(outData, size);
+//    responseReadData(outData, BUFSIZ, iot, &header, &IOTV_Client::writeFunc, _socket);
+
+    iot->readChannel[channel].dataSize = 0;
+    iot->readChannel[channel].data = 0;
 
     clearIOTV_Server(iot);
 }

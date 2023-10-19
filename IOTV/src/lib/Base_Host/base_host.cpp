@@ -29,6 +29,11 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const Raw &data)
     return _readChannel.setData(channelNumber, data);
 }
 
+bool Base_Host::addReadChannelData(uint8_t channelNumber, const QByteArray &data)
+{
+    return _readChannel.addData(channelNumber, {data.data(), data.size()});
+}
+
 bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data)
 {
     bool result = false;
@@ -42,6 +47,11 @@ bool Base_Host::setReadChannelData(uint8_t channelNumber, const QByteArray &data
     emit signalDataRX(channelNumber, data);
 
     return result;
+}
+
+void Base_Host::clearReadChannelData(uint8_t channelNumber)
+{
+    _readChannel.clearData(channelNumber);
 }
 
 bool Base_Host::setWriteChannelData(uint8_t channelNumber, const Raw &data)
@@ -165,20 +175,24 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
     {
-        auto dataSize = dataSizeonDataType(static_cast<uint8_t>(getReadChannelType(i)));
+        auto t = getReadChannelType(i);
+        auto dataSize = dataSizeonDataType(static_cast<uint8_t>(t));
         auto byteArr = getReadChannelData(i);
-        if (numberReadChannel > 0) // что бы не ругался компилятор
+        if (numberReadChannel > 0 /*&& dataSize > 0*/)
         {
-            iot.readChannel[i].data = static_cast<char *>(malloc(dataSize));
-            Q_ASSERT(iot.readChannel[i].data != NULL);
+            if (dataSize > 0)
+                iot.readChannel[i].data = static_cast<char *>(malloc(dataSize));
             iot.readChannel[i].dataSize = dataSize;
 
-            if (byteArr.size() == dataSize)
-                memcpy(iot.readChannel[i].data, byteArr.data(), dataSize);
-            else
-                memset(iot.readChannel[i].data, 0, dataSize);
+            if (dataSize > 0)
+            {
+                if (byteArr.size() == dataSize)
+                    memcpy(iot.readChannel[i].data, byteArr.data(), dataSize);
+                else
+                    memset(iot.readChannel[i].data, 0, dataSize);
+            }
 
-            iot.readChannelType[i] = (uint8_t)getReadChannelType(i);
+            iot.readChannelType[i] = static_cast<uint8_t>(t);
         }
     }
 

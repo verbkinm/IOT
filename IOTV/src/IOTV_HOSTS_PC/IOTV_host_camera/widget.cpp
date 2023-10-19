@@ -13,7 +13,7 @@ Widget::Widget(QObject *parent)
 {
     timer = new QTimer(this);
 
-    connect(&imageCapture, &QImageCapture::readyForCaptureChanged, this, &Widget::readyForCapture);
+//    connect(&imageCapture, &QImageCapture::readyForCaptureChanged, this, &Widget::readyForCapture);
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::processCapturedImage);
     connect(&imageCapture, &QImageCapture::errorOccurred, this, &Widget::errorCapture);
     connect(timer, &QTimer::timeout, this, &Widget::timerOut, Qt::QueuedConnection);
@@ -32,17 +32,9 @@ Widget::Widget(QObject *parent)
         qDebug() << cameraDevice;
         for (auto &el : cameraDevice.videoFormats())
             qDebug() << el.resolution() << ' ' << el.maxFrameRate() << ' ' << el.minFrameRate() << ' ' << el.pixelFormat();
-
-        //        camera = new QCamera(cameraDevice);
-
-        //        captureSession.setCamera(camera);
-        //        captureSession.setImageCapture(&imageCapture);
     }
 
-    //    QThread::sleep(5);
-//    timer->start(100);
     imageCapture.capture();
-
 }
 
 Widget::~Widget()
@@ -50,24 +42,30 @@ Widget::~Widget()
 
 }
 
-const QImage &Widget::getImage() const
+const QImage Widget::getImage() const
 {
-    return *_image;
+    return _image;
 }
 
 size_t Widget::getImageSavedSize() const
 {
-    if (_image == nullptr)
-        return 0;
 
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    _image->save(&buffer, "JPG");
-
-    auto s = ba.size();
+    _image.save(&buffer, "JPG");
 
     return ba.size();
+}
+
+void Widget::start()
+{
+    timer->start(INTERVAL);
+}
+
+void Widget::stop()
+{
+    timer->stop();
 }
 
 
@@ -75,24 +73,28 @@ void Widget::processCapturedImage(int requestId, const QImage &img)
 {
     Q_UNUSED(requestId);
 
+    if (!timer->isActive())
+        return;
+
     timer->stop();
 
-    if (_image != nullptr)
-        delete _image;
+    _image = img;
+    _image.save("Image.jpg", "JPG", 100);
 
-    _image = new QImage(img);
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    _image.save(&buffer, "JPG", 100);
 
-    _image->save("Image.jpg", "JPG");
+    emit signalImageCaptured();
 
-    qDebug() << _image->format();
+//    imageCapture.capture();
 
-//    auto s = getImageSavedSize();
+//    QImage newImage;
+//    newImage.loadFromData(ba, "JPG");
+//    newImage.save("Image_raw.jpg", "JPG", 50);
 
-//    qDebug() << img.size();
-//    qDebug() << "photo size " << img.sizeInBytes();
-    //    ui->label->setPixmap(QPixmap::fromImage(img));
-
-    timer->start(100);
+    timer->start(INTERVAL);
 }
 
 void Widget::timerOut()
@@ -118,6 +120,8 @@ void Widget::errorCapture(int, QImageCapture::Error err, QString errorStr)
 
 void Widget::readyForCapture(bool)
 {
-    timer->start(100);
+    imageCapture.capture();
+    qDebug() << "ready";
+    timer->start(INTERVAL);
 }
 

@@ -13,6 +13,8 @@ public:
 
     bool setData(uint8_t channelNumber, const Raw &data);
     bool setData(uint8_t channelNumber, const QByteArray &data);
+    bool addData(uint8_t channelNumber, const QByteArray &data);
+    void clearData(uint8_t channelNumber);
 
     const QByteArray &getData(uint8_t channelNumber) const;
 

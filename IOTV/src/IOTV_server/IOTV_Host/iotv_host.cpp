@@ -82,9 +82,6 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     if (_streamRead.count(channelNumber))
     {
-//        std::ofstream file;
-//        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-//        file.write(pkg->data, pkg->dataSize);
         emit signalStreamRead(channelNumber, header->fragment, header->fragments, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
         return;
     }

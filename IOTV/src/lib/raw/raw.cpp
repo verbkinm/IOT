@@ -349,6 +349,14 @@ void Raw::setData(const QByteArray &newData)
     _data = newData;
 }
 
+void Raw::addData(const QByteArray &newData)
+{
+    if (_type != DATA_TYPE::STRING && _type != DATA_TYPE::RAW)
+        return;
+
+    _data.append(newData.data(), newData.size());
+}
+
 std::pair<QString, QString> Raw::strData() const
 {
     //!!! Если _data по длине не равняется типу данных, что произойдёт?

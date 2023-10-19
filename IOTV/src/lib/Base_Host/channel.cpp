@@ -75,6 +75,43 @@ bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
     }
 }
 
+bool Channel::addData(uint8_t channelNumber, const QByteArray &data)
+{
+    try
+    {
+        _data.at(channelNumber).addData(data);
+        return true;
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        return false;
+    }
+    catch (std::invalid_argument &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        return false;
+    }
+}
+
+void Channel::clearData(uint8_t channelNumber)
+{
+    try
+    {
+        _data.at(channelNumber).clear();
+    }
+    catch (std::out_of_range &ex)
+    {
+        Log::write(QString(ex.what()) + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+    }
+}
+
 const QByteArray &Channel::getData(uint8_t channelNumber) const
 {
     try

@@ -23,25 +23,63 @@ Page {
         height: root.height
         enabled: device.state
 
-//        contentHeight: img.height
+        //        contentHeight: img.height
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
             visible: active
         }
 
-        Loader {
-            id: imgLoader
-//            source: "Image_cam.qml"
+        Image {
+            id: img
+            anchors.horizontalCenter: parent.horizontalCenter
+            cache: false
+            source: "file:Image.jpg"
+//            sourceSize.width: 200
+//            sourceSize.height: 200
+
+            function reloadImage(stringPath) {
+                var oldSource = source
+                source = ""
+                source = oldSource
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    switchStream++
+                    if (switchStream % 2 == 0)
+                    {
+                        console.log("close stream")
+                        device.signalCloseReadStream(0)
+                    }
+                    else
+                    {
+                        console.log("open stream")
+                        device.signalOpenReadStream(0)
+                    }
+                }
+            }
         }
     }
 
+    Connections {
+        target: device
+        function onSignalDataPkgComplete(channel, data) {
+            if (channel === 0)
+            {
+                img.reloadImage()
+                console.log("onSignalDataPkgComplete")
+            }
+        }
+    }
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
+        device.signalOpenReadStream(0)
     }
 
     Component.onDestruction: {
         console.log("Device 8 destruct: ", objectName)
+        device.signalCloseReadStream(0)
     }
 
     Devices.BusyRect {
@@ -50,28 +88,14 @@ Page {
         visible: !device.state
     }
 
-    Timer {
-        id: t1
-        interval: 1000;
-        running: true;
+//    Timer {
+//        id: t1
+//        interval: 500;
+//        running: true;
 //        repeat: true
-        onTriggered: {
-            imgLoader.source = ""
-            t1.stop()
-            t2.start()
-        }
-    }
-
-    Timer {
-        id: t2
-        interval: 1000;
-        running: false;
-//        repeat: true
-        onTriggered: {
-            imgLoader.source = "Image_cam.qml"
-            t2.stop()
-            t1.start()
-        }
-    }
+//        onTriggered: {
+//            img.reloadImage()
+//        }
+//    }
 }
 

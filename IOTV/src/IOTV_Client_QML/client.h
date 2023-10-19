@@ -65,6 +65,7 @@ private:
     void responceIdentification(const struct Header *header);
     void responceState(const struct Header *header);
     void responceRead(const struct Header* header);
+    void responceReadStream(const struct Header *header);
     void responceWrite(const struct Header *header) const;
     void responcePingPoing(const struct Header *header);
     void responceTech(const struct Header *header);
@@ -114,4 +115,6 @@ signals:
     void autoConnectChanged();
 
     void signalEventAction();
+
+//    void sigm
 };

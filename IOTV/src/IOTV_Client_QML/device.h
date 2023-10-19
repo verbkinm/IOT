@@ -31,6 +31,8 @@ public:
     void setState(bool newState);
 
     bool setData(uint8_t channelNumber, const QByteArray &data);
+    bool addData(uint8_t channelNumber, const QByteArray &data);
+    void clearData(uint8_t channelNumber);
 
     Q_INVOKABLE void setDataFromString(int channelNumber, QString data);
     Q_INVOKABLE QString readData(int channelNumber) const;
@@ -65,6 +67,8 @@ signals:
     void signalAliasNameChanged();
 
     void signalDataChanged(int channel);
+    void signalDataAdded(int channel);
+    void signalDataPkgComplete(int channel, QString data);
 
     void signalOpenReadStream(int channel);
     void signalCloseReadStream(int channel);
