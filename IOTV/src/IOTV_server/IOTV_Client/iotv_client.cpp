@@ -343,10 +343,24 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
         .pkg = &read
     };
 
-    char outData[BUFSIZ];
-    auto size = headerToData(&header, outData, BUFSIZ);
-    _socket->write(outData, size);
-//    responseReadData(outData, BUFSIZ, iot, &header, &IOTV_Client::writeFunc, _socket);
+    auto outDataSize = headerSize(&header);
+    if (outDataSize > BUFSIZ)
+    {
+        char *outData = (char *)malloc(outDataSize);
+        if (outData == nullptr)
+            return;
+
+        auto size = headerToData(&header, outData, outDataSize);
+        _socket->write(outData, size);
+
+        free(outData);
+    }
+    else
+    {
+        char outData[headerSize(&header)];
+        auto size = headerToData(&header, outData, BUFSIZ);
+        _socket->write(outData, size);
+    }
 
     iot->readChannel[channel].dataSize = 0;
     iot->readChannel[channel].data = 0;

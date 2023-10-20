@@ -16,7 +16,7 @@
 
 Widget *camera;
 
-//#define BUFSIZE
+//#define BUFSIZ
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
@@ -171,9 +171,11 @@ void slotImageCaptured()
     QByteArray byteArra;
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
-//    QImage img = camera->getImage();
+    QImage img = camera->getImage();
+    img = img.scaled(320, 240, Qt::KeepAspectRatio);
+    img.save(&buffer, "JPG", 100);
 //    img.convertTo(QImage::Format_RGB32);
-    camera->getImage().save(&buffer, "JPG", 100);
+//    camera->getImage().save(&buffer, "JPG", 100);
 
     iot.readChannel[0].dataSize = byteArra.size();
     iot.readChannel[0].data = byteArra.data();
