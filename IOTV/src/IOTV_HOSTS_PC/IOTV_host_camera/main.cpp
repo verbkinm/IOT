@@ -2,6 +2,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QBuffer>
+#include <QPainter>
 
 #include <iostream>
 #include <fstream>
@@ -12,6 +13,7 @@
 #include "iotv_server_embedded.h"
 
 #include "iotv_types.h"
+#include "qdatetime.h"
 #include "widget.h"
 
 Widget *camera;
@@ -172,8 +174,20 @@ void slotImageCaptured()
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
     QImage img = camera->getImage();
-    img = img.scaled(320, 240, Qt::KeepAspectRatio);
+//    img = img.scaled(320, 240, Qt::KeepAspectRatio);
+
+
+    QPainter p;
+    if (!p.begin(&img))
+        return;
+
+    p.setPen(QPen(Qt::red));
+    p.setFont(QFont("Times", 12));
+    p.drawText(img.rect(), Qt::AlignRight | Qt::AlignBottom, QDateTime::currentDateTime().toString("hh:mm:ss dd.MM.yyyy"));
+    p.end();
+
     img.save(&buffer, "JPG", 100);
+
 //    img.convertTo(QImage::Format_RGB32);
 //    camera->getImage().save(&buffer, "JPG", 100);
 
@@ -205,7 +219,7 @@ void slotImageCaptured()
 
 void slotInitApp()
 {
-    camera->stop();
+//    camera->stop();
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 4);
 

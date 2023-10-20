@@ -34,6 +34,7 @@ private:
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);
+    void processCapturedFrame(int requestId, const QVideoFrame &frame);
     void timerOut();
     void errorCapture(int, QImageCapture::Error err, QString errorStr);
     void readyForCapture(bool);

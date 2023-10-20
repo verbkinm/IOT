@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
 
 import "qrc:/Devices/" as Devices
+import "qrc:/Devices/BaseItem" as BaseItem
 
 Page {
     //Ссылка на Device
@@ -15,6 +16,11 @@ Page {
 
     header: Devices.DeviceHeader {
         id: headerPanel
+    }
+
+    onVisibleChanged: {
+        if (!visible)
+            device.signalCloseReadStream(0)
     }
 
     Flickable {
@@ -30,34 +36,18 @@ Page {
             visible: active
         }
 
-        Image {
-            id: img
+        MyCamRect {
+            id: camRect
+            width: parent.width - 20
+            height: parent.height - (parent.height / 100 * 30)
             anchors.horizontalCenter: parent.horizontalCenter
-            cache: false
-            source: "file:Image.jpg"
-//            sourceSize.width: 200
-//            sourceSize.height: 200
 
-            function reloadImage(stringPath) {
-                var oldSource = source
-                source = ""
-                source = oldSource
+            onPlay: {
+                device.signalOpenReadStream(0)
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    switchStream++
-                    if (switchStream % 2 == 0)
-                    {
-                        console.log("close stream")
-                        device.signalCloseReadStream(0)
-                    }
-                    else
-                    {
-                        console.log("open stream")
-                        device.signalOpenReadStream(0)
-                    }
-                }
+
+            onStop: {
+                device.signalCloseReadStream(0)
             }
         }
     }
@@ -67,14 +57,14 @@ Page {
         function onSignalDataPkgComplete(channel, data) {
             if (channel === 0)
             {
-                img.reloadImage()
+                camRect.reloadImage(data)
                 console.log("onSignalDataPkgComplete")
             }
         }
     }
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
-        device.signalOpenReadStream(0)
+//        device.signalOpenReadStream(0)
     }
 
     Component.onDestruction: {
@@ -88,14 +78,14 @@ Page {
         visible: !device.state
     }
 
-//    Timer {
-//        id: t1
-//        interval: 500;
-//        running: true;
-//        repeat: true
-//        onTriggered: {
-//            img.reloadImage()
-//        }
-//    }
+    //    Timer {
+    //        id: t1
+    //        interval: 500;
+    //        running: true;
+    //        repeat: true
+    //        onTriggered: {
+    //            img.reloadImage()
+    //        }
+    //    }
 }
 
