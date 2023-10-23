@@ -8,6 +8,12 @@ Item {
     signal play()
     signal stop()
 
+    onVisibleChanged: {
+        if (!visible)
+            stopButton.clicked()
+    }
+
+
     Rectangle {
         id: camRect
         width: parent.width
@@ -21,7 +27,7 @@ Item {
 
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
-            source: "file:Image.jpg"
+            source: "image://provider/frame"
             width: parent.width
             height: parent.height
 
@@ -47,7 +53,7 @@ Item {
 
         Row {
             spacing: 5
-            anchors.centerIn: parent//: parent.horizontalCenter
+            anchors.centerIn: parent
 
             BaseItem.AnimRoundButton {
                 id: playButton
@@ -93,8 +99,17 @@ Item {
         }
     }
 
-    function reloadImage(stringPath) {
+    Component.onCompleted: {
+        console.log("MyCamRect construct: ", objectName)
+//        client.addProvider("provider");
+    }
+
+    Component.onDestruction: {
+        console.log("MyCamRect destruct: ", objectName)
+    }
+
+    function reloadImage() {
         img.source = ""
-        img.source = stringPath
+        img.source = "image://provider/frame"
     }
 }

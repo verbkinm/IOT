@@ -16,7 +16,7 @@ Widget::Widget(QObject *parent)
 //    connect(&imageCapture, &QImageCapture::readyForCaptureChanged, this, &Widget::readyForCapture);
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::processCapturedImage);
     connect(&imageCapture, &QImageCapture::errorOccurred, this, &Widget::errorCapture);
-    connect(&imageCapture, &QImageCapture::imageAvailable, this, &Widget::processCapturedFrame);
+//    connect(&imageCapture, &QImageCapture::imageAvailable, this, &Widget::processCapturedFrame);
     connect(timer, &QTimer::timeout, this, &Widget::timerOut, Qt::QueuedConnection);
 
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::signalFirstCapture, Qt::SingleShotConnection);
@@ -35,8 +35,8 @@ Widget::Widget(QObject *parent)
             qDebug() << el.resolution() << ' ' << el.maxFrameRate() << ' ' << el.minFrameRate() << ' ' << el.pixelFormat();
     }
 
+//    timer->start(INTERVAL);
     imageCapture.capture();
-
 }
 
 Widget::~Widget()
@@ -101,7 +101,10 @@ void Widget::processCapturedImage(int requestId, const QImage &img)
 
 void Widget::processCapturedFrame(int requestId, const QVideoFrame &frame)
 {
-    qDebug() << frame << frame.isValid();
+//    Q_UNUSED(requestId);
+//    frame.i
+    qDebug() << requestId << frame << frame.isValid() << frame.isMapped() << frame.isReadable()
+             << frame.isWritable() << frame.startTime() << frame.endTime();
 }
 
 void Widget::timerOut()
@@ -114,7 +117,7 @@ void Widget::timerOut()
 //        imageCapture.setResolution(320, 240);
 //        camera->start();
 
-//        imageCapture.capture();
+        imageCapture.capture();
     }
     else
         camera->setActive(true);

@@ -11,6 +11,7 @@
 
 
 #include "actions/iotv_action.h"
+#include "colorimageprovider.h"
 #include "device.h"
 #include "events/iotv_event.h"
 
@@ -22,7 +23,7 @@ class Client : public QObject
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
     Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
 public:
-    explicit Client(QObject *parent = nullptr);
+    explicit Client(ColorImageProvider &provider, QObject *parent = nullptr);
     ~Client();
 
     int countDevices() const;
@@ -54,6 +55,8 @@ private:
     std::map<QString, Device> _devices;
 
     QList<QList<QVariantMap>> _evAcList;
+
+    ColorImageProvider &_provider;
 
     void queryIdentification();
     void queryState(const QString &name);
@@ -115,6 +118,4 @@ signals:
     void autoConnectChanged();
 
     void signalEventAction();
-
-//    void sigm
 };

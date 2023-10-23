@@ -1,13 +1,12 @@
 #include "client.h"
 
+#include "colorimageprovider.h"
 #include "iotv_event_manager.h"
 #include "event_action_parser.h"
 #include "log.h"
 #include "IOTV_SH.h"
 #include "creatorpkgs.h"
 #include "identification.h"
-#include "qbuffer.h"
-#include "qimage.h"
 #include "state.h"
 #include "read_write.h"
 #include "tech.h"
@@ -16,8 +15,8 @@
 #include <fstream>
 #include <QTemporaryFile>
 
-Client::Client(QObject *parent): QObject{parent},
-    _expectedDataSize(0), _counterPing(0)
+Client::Client(ColorImageProvider &provider, QObject *parent): QObject{parent},
+    _expectedDataSize(0), _counterPing(0), _provider(provider)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -481,22 +480,25 @@ void Client::responceReadStream(const Header *header)
 
     if (header->fragment == 1)
     {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-        file.close();
+//        std::ofstream file;
+//        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
+//        file.close();
 
         _devices[name].clearData(channel);
     }
 
-    std::ofstream file;
-    file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-    file.write(pkg->data, pkg->dataSize);
-    file.close();
+//    std::ofstream file;
+//    file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
+//    file.write(pkg->data, pkg->dataSize);
+//    file.close();
 
     _devices[name].addData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
 
     if (header->fragment == header->fragments)
-        emit _devices[name].signalDataPkgComplete(channel, "file:Image.jpg");
+    {
+        _provider.slotRefreshImage(_devices[name].getReadChannelData(channel));
+        emit _devices[name].signalDataPkgComplete(channel);
+    }
 }
 
 void Client::responceWrite(const struct Header *header) const

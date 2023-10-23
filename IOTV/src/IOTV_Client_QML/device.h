@@ -54,8 +54,6 @@ private:
 
     QTimer _timerRead, _timerState;
 
-//    QByteArray stringToByteArray();
-
 signals:
     void signalQueryIdentification();
     void signalQueryRead();
@@ -68,7 +66,7 @@ signals:
 
     void signalDataChanged(int channel);
     void signalDataAdded(int channel);
-    void signalDataPkgComplete(int channel, QString data);
+    void signalDataPkgComplete(int channel);
 
     void signalOpenReadStream(int channel);
     void signalCloseReadStream(int channel);

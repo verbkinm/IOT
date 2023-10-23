@@ -18,10 +18,10 @@ Page {
         id: headerPanel
     }
 
-    onVisibleChanged: {
-        if (!visible)
-            device.signalCloseReadStream(0)
-    }
+//    onVisibleChanged: {
+//        if (!visible)
+//            device.signalCloseReadStream(0)
+//    }
 
     Flickable {
         id: fl
@@ -54,22 +54,20 @@ Page {
 
     Connections {
         target: device
-        function onSignalDataPkgComplete(channel, data) {
+        function onSignalDataPkgComplete(channel) {
             if (channel === 0)
             {
-                camRect.reloadImage(data)
+                camRect.reloadImage()
                 console.log("onSignalDataPkgComplete")
             }
         }
     }
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
-//        device.signalOpenReadStream(0)
     }
 
     Component.onDestruction: {
         console.log("Device 8 destruct: ", objectName)
-        device.signalCloseReadStream(0)
     }
 
     Devices.BusyRect {

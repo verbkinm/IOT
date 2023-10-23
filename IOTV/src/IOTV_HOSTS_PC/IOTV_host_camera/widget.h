@@ -30,7 +30,7 @@ private:
     QTimer *timer;
     QImage _image;
 
-    static constexpr int INTERVAL = 10;
+    static constexpr int INTERVAL = 50;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);

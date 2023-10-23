@@ -31,22 +31,22 @@ uint64_t cutDataSize = 0;
 bool error = false;
 
 
-uint8_t readType[4] = {DATA_TYPE_RAW, DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_16};
-//uint8_t writeType[3] = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL};
+uint8_t readType[4] = {DATA_TYPE_RAW, DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_8};
+uint8_t writeType[4] = {DATA_TYPE_NONE, DATA_TYPE_INT_16, DATA_TYPE_INT_16, DATA_TYPE_INT_8};
 
 QByteArray buffer;
 
 struct IOTV_Server_embedded iot = {
     .id = 8,
     .numberReadChannel = 4,
-    .numberWriteChannel = 0,
+    .numberWriteChannel = 4,
     .state = 1,
     .nameSize = 6,
     .descriptionSize = 11,
 
     .readChannel = NULL,
     .readChannelType = readType,
-    .writeChannelType = NULL,
+    .writeChannelType = writeType,
     .name = (char *)"Device",
     .description = (char *)"Description",
 };
@@ -174,8 +174,11 @@ void slotImageCaptured()
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
     QImage img = camera->getImage();
-//    img = img.scaled(320, 240, Qt::KeepAspectRatio);
 
+
+    int width = *(int16_t *)iot.readChannel[1].data;
+    int height = *(int16_t *)iot.readChannel[2].data;
+    img = img.scaled(width, height, Qt::KeepAspectRatio);
 
     QPainter p;
     if (!p.begin(&img))
@@ -186,7 +189,7 @@ void slotImageCaptured()
     p.drawText(img.rect(), Qt::AlignRight | Qt::AlignBottom, QDateTime::currentDateTime().toString("hh:mm:ss dd.MM.yyyy"));
     p.end();
 
-    img.save(&buffer, "JPG", 100);
+    img.save(&buffer, "JPG", *(int8_t *)iot.readChannel[3].data);
 
 //    img.convertTo(QImage::Format_RGB32);
 //    camera->getImage().save(&buffer, "JPG", 100);
@@ -219,7 +222,7 @@ void slotImageCaptured()
 
 void slotInitApp()
 {
-//    camera->stop();
+    camera->stop();
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 4);
 
@@ -238,7 +241,7 @@ void slotInitApp()
     memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
     value = 720;
     memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
-    value = 0;
+    value = 50;
     memcpy(iot.readChannel[3].data, &value, iot.readChannel[3].dataSize);
 
     server = new QTcpServer;

@@ -307,12 +307,12 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
     {
         _streamRead[channel] = {client};
         result = true;
+
+        auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
+        writeToRemoteHost({outData, static_cast<int>(size)}, size);
     }
     else
         result = _streamRead[channel].insert(client).second;
-
-    auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
-    writeToRemoteHost({outData, static_cast<int>(size)}, size);
 
     return result;
 }
@@ -334,10 +334,12 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
     _streamRead[channel].erase(client);
 
     if (_streamRead[channel].size() == 0)
+    {
         _streamRead.erase(channel);
+        auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
+        writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    }
 
-    auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
-    writeToRemoteHost({outData, static_cast<int>(size)}, size);
 }
 
 //void IOTV_Host::removeStreamWrite(uint8_t channel)
