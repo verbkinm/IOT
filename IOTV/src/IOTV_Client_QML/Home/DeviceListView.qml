@@ -3,7 +3,7 @@ import QtQuick.Controls 2.5
 
 GridView {
     id: listView
-    cellWidth: 155
+    cellWidth: global_window.width / 2 - global_window.width * 0.1
     cellHeight: 110
 
     anchors {

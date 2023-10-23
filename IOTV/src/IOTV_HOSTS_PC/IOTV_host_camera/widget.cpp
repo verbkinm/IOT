@@ -1,15 +1,15 @@
 #include "widget.h"
 #include "qbuffer.h"
+#include "qurl.h"
 
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QCamera>
 #include <QImageCapture>
 #include <QMediaCaptureSession>
-#include <QThread>
 
 Widget::Widget(QObject *parent)
-    : QObject(parent), _image(nullptr)
+    : QObject(parent), /*_format(QMediaFormat::MPEG4),*/ _image(nullptr)
 {
     timer = new QTimer(this);
 
@@ -23,8 +23,17 @@ Widget::Widget(QObject *parent)
 
 
     camera = new QCamera(QMediaDevices::defaultVideoInput());
+    camera->start();
+
     captureSession.setCamera(camera);
     captureSession.setImageCapture(&imageCapture);
+//    captureSession.setRecorder(&_recorder);
+
+//    _format.setAudioCodec(QMediaFormat::AudioCodec::AAC);
+//    _format.setVideoCodec(QMediaFormat::VideoCodec::H265);
+//    _recorder.setMediaFormat(_format);
+//    _recorder.setOutputLocation(QUrl("mycapture.mp4"));
+//    _recorder.record();
 
     const QList<QCameraDevice> availableCameras = QMediaDevices::videoInputs();
 

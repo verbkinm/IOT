@@ -1,11 +1,13 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
+#include "qmediarecorder.h"
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QCamera>
 #include <QImageCapture>
 #include <QMediaCaptureSession>
+#include <QMediaFormat>
 #include <QTimer>
 
 
@@ -26,6 +28,8 @@ public:
 private:
     QCamera *camera;
     QMediaCaptureSession captureSession;
+//    QMediaRecorder _recorder;
+//    QMediaFormat _format;
     QImageCapture imageCapture;
     QTimer *timer;
     QImage _image;

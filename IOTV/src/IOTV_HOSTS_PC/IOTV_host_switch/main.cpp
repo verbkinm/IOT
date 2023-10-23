@@ -7,6 +7,7 @@
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
+#include "iotv_types.h"
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
@@ -26,18 +27,32 @@ QByteArray buffer;
 
 struct IOTV_Server_embedded iot = {
     .id = 1,
-    .name = "Device",
-    .description = "Description",
     .numberReadChannel = 3,
+    .numberWriteChannel = 3,
+    .state = 1,
+    .nameSize = 6,
+    .descriptionSize = 11,
+
     .readChannel = NULL,
     .readChannelType = readType,
-    .numberWriteChannel = 3,
     .writeChannelType = writeType,
-    .state = 1,
-    .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-    .descriptionSize = static_cast<uint8_t>(strlen(iot.description)),
+
+    .name = (char *)"Device",
+    .description = (char *)"Description",
+
 };
 
+uint64_t writeFunc(char *data, uint64_t size, void *obj)
+{
+    QTcpSocket *socket = (QTcpSocket *)obj;
+
+    if (socket == nullptr)
+        return 0;
+
+    auto s = socket->write(data, size);
+    socket->flush();
+    return s;
+}
 
 void slotDataRecived()
 {
@@ -75,8 +90,7 @@ void slotDataRecived()
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header);
-                socket->write(transmitBuffer, size);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {

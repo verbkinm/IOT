@@ -7,11 +7,8 @@ Item {
     readonly property string statePressed: "pressed"
     readonly property string stateRealesed: "released"
 
-    //    readonly property string stateOnline: "online"
-    //    readonly property string stateOffline: "offline"
-
-    //    state: stateOffline
-    width: 155
+    id: root
+    width: global_window.width / 2 - global_window.width * 0.1
     height: 110
 
     Canvas {
@@ -131,7 +128,7 @@ Item {
         id: componentRect
         anchors.centerIn: parent
 
-        width: 145
+        width: root.width - 10
         height: 100
 
         color: Qt.rgba(255, 255, 255, 1)
