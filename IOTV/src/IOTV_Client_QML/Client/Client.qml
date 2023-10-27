@@ -187,9 +187,9 @@ Page {
         }
         function onSignalConnecting() {
             state = stateConnecting
-            loaderMainItem.setSource("qrc:/PopupWait.qml", {
-                                         "parent": appStack
-                                     })
+//            loaderMainItem.setSource("qrc:/PopupWait.qml", {
+//                                         "parent": appStack
+//                                     })
         }
         function onSignalDisconnected() {
             state = stateDisconnected

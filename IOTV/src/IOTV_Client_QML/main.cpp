@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     ColorImageProvider provider;
     Client client(provider);
     engine.rootContext()->setContextProperty("client", &client);
-    engine.rootContext()->setContextProperty("provider", &provider);
+//    engine.rootContext()->setContextProperty("provider", &provider);
     engine.addImageProvider(QLatin1String("provider"), &provider);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));

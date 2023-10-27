@@ -88,10 +88,7 @@ ApplicationWindow {
         initialItem: homePage
 
         onCurrentItemChanged: {
-            console.log("stackView current item: ",
-                        stackView.currentItem.objectName)
-            //            if (appStack.currentItem == homePage)
-            //                loaderDevice.source = ""
+            console.log("stackView current item: ", stackView.currentItem.objectName)
         }
     }
 

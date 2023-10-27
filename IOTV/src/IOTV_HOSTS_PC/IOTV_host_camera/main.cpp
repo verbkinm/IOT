@@ -4,6 +4,12 @@
 #include <QBuffer>
 #include <QPainter>
 
+
+#include <QAudioDevice>
+#include <QAudioInput>
+#include <QUrl>
+#include <QThread>
+
 #include <iostream>
 #include <fstream>
 
@@ -103,7 +109,7 @@ void slotDataRecived()
                 if (rwPkg->channelNumber == 0 && rwPkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
                     camera->start();
                 else if (rwPkg->channelNumber == 0 && rwPkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
-                    camera->stop    ();
+                    camera->stop();
 
                 responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
             }
@@ -191,6 +197,7 @@ void slotImageCaptured()
 
     img.save(&buffer, "JPG", *(int8_t *)iot.readChannel[3].data);
 
+//    img.save("Image.jpg", "JPG");
 //    img.convertTo(QImage::Format_RGB32);
 //    camera->getImage().save(&buffer, "JPG", 100);
 
@@ -226,7 +233,7 @@ void slotInitApp()
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 4);
 
-    iot.readChannel[0].dataSize = camera->getImageSavedSize();
+    iot.readChannel[0].dataSize = 0;//camera->getImageSavedSize();
     iot.readChannel[1].dataSize = dataSizeonDataType(readType[1]);
     iot.readChannel[2].dataSize = dataSizeonDataType(readType[2]);
     iot.readChannel[3].dataSize = dataSizeonDataType(readType[3]);
