@@ -194,6 +194,12 @@ void Device::setAliasName(const QString &newAliasName)
     emit signalAliasNameChanged();
 }
 
+void Device::testFunc(Wrap_QByteArray *data)
+{
+    qDebug() << "testFunc total data: " << data->data().size();
+//    delete data;
+}
+
 void Device::slotTimerReadTimeOut()
 {
     if (getId() == 0)

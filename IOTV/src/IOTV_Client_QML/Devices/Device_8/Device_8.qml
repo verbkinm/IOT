@@ -18,10 +18,10 @@ Page {
         id: headerPanel
     }
 
-//    onVisibleChanged: {
-//        if (!visible)
-//            device.signalCloseReadStream(0)
-//    }
+    //    onVisibleChanged: {
+    //        if (!visible)
+    //            device.signalCloseReadStream(0)
+    //    }
 
     Flickable {
         id: fl
@@ -44,21 +44,36 @@ Page {
 
             onPlay: {
                 device.signalOpenReadStream(0)
+//                                device.signalOpenReadStream(1)
             }
 
             onStop: {
                 device.signalCloseReadStream(0)
+//                                device.signalCloseReadStream(1)
             }
+
+            //            onVolumeOn: {
+            //                device.signalOpenReadStream(1)
+            //            }
+
+            //            onVolumeOff: {
+            //                device.signalCloseReadStream(1)
+            //            }
         }
     }
 
     Connections {
         target: device
-        function onSignalDataPkgComplete(channel) {
+        function onSignalDataPkgComplete(channel, data) {
             if (channel === 0)
             {
+                client.providerRefreshImage(data)
                 camRect.reloadImage()
                 console.log("onSignalDataPkgComplete")
+            }
+            else if (channel === 1)
+            {
+
             }
         }
     }

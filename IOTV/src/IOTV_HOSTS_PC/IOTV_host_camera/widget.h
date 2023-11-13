@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include "qaudioinput.h"
+#include "qaudiosource.h"
 #include "qmediaplayer.h"
 #include "qmediarecorder.h"
 #include <QMediaDevices>
@@ -40,15 +41,12 @@ private:
 
     QMediaRecorder *recorder;
     QMediaCaptureSession session;
-    QAudioInput *audioInput;
 
-    QAudioFormat desiredFormat;
-    QAudioDecoder *decoder;
-    QAudioOutput *audioOut;
+    QAudioInput *audioIn;
+    QAudioSource *source;
     QAudioSink *audioSink;
-    QMediaPlayer player;
+    QIODevice *devIn;
 
-    QFile sourceFile;
 
 
     static constexpr int INTERVAL = 10;
@@ -60,13 +58,15 @@ public slots:
     void errorCapture(int, QImageCapture::Error err, QString errorStr);
     void readyForCapture(bool);
 
-    void onAudioReadyRead();//
-
 
     void displayErrorMessage();
+
+    void slotReadyRead();
 
 signals:
     void signalFirstCapture();
     void signalImageCaptured();
+
+    void signalAudio(QByteArray data);
 };
 #endif // WIDGET_H

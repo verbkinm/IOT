@@ -7,10 +7,15 @@ import "qrc:/Devices/BaseItem" as BaseItem
 Item {
     signal play()
     signal stop()
+//    signal volumeOn()
+    signal volumeOff()
 
     onVisibleChanged: {
         if (!visible)
+        {
             stopButton.clicked()
+            volumeOff()
+        }
     }
 
 
@@ -41,6 +46,8 @@ Item {
                 }
             }
         }
+
+
     }
 
     Rectangle {
@@ -72,6 +79,7 @@ Item {
 
                     stopButton.highlighted = false
                     play()
+//                    volumeOn()
                 }
             }
 
@@ -94,6 +102,29 @@ Item {
 
                     playButton.highlighted = false
                     stop()
+//                    volumeOff()
+                }
+            }
+
+            BaseItem.AnimRoundButton {
+                id: volumeButton
+
+                highlighted: false
+
+                image_origin: "qrc:/img/id_4/volume.png"
+                image_invert: "qrc:/img/id_4/volume_white.png"
+
+                onClicked: {
+                    if (highlighted)
+                    {
+                        highlighted = false
+//                        volumeOn()
+                    }
+                    else
+                    {
+                        highlighted = true
+//                        volumeOff()
+                    }
                 }
             }
         }
@@ -101,7 +132,6 @@ Item {
 
     Component.onCompleted: {
         console.log("MyCamRect construct: ", objectName)
-//        client.addProvider("provider");
     }
 
     Component.onDestruction: {

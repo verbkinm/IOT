@@ -34,7 +34,8 @@ SOURCES += \
         ../lib/Base_Host/channel.cpp \
         ../lib/Log/log.cpp \
         ../lib/raw/raw.cpp \
-        main.cpp
+        main.cpp \
+        wrap_qbytearray.cpp
 
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
@@ -67,6 +68,7 @@ HEADERS += \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
     ../lib/raw/raw.h \
+    wrap_qbytearray.h
 
 resources.prefix = /$${TARGET}
 RESOURCES += \

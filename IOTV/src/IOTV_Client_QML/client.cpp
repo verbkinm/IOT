@@ -261,6 +261,12 @@ void Client::slotCloseReadStream(int channel)
     write({outData, static_cast<int>(size)});
 }
 
+void Client::providerRefreshImage(Wrap_QByteArray *wdata)
+{
+    _provider.refreshImage(wdata);
+    delete wdata;
+}
+
 QList<QObject *> Client::devList()
 {
     QList<QObject *> list;
@@ -478,26 +484,20 @@ void Client::responceReadStream(const Header *header)
     auto channel = pkg->channelNumber;
     QString name(QByteArray{pkg->name, pkg->nameSize});
 
+    if (!_devices.contains(name))
+        return;
+
     if (header->fragment == 1)
-    {
-//        std::ofstream file;
-//        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-//        file.close();
-
         _devices[name].clearData(channel);
-    }
-
-//    std::ofstream file;
-//    file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-//    file.write(pkg->data, pkg->dataSize);
-//    file.close();
 
     _devices[name].addData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
 
     if (header->fragment == header->fragments)
     {
-        _provider.slotRefreshImage(_devices[name].getReadChannelData(channel));
-        emit _devices[name].signalDataPkgComplete(channel);
+        Wrap_QByteArray *wdata = new Wrap_QByteArray;
+        wdata->setData(_devices[name].getReadChannelData(channel));
+        qDebug() << "PKG total: " << wdata->data().size();
+        emit _devices[name].signalDataPkgComplete(channel, wdata);
     }
 }
 

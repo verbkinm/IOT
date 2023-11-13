@@ -6,6 +6,7 @@
 #include "IOTV_SH.h"
 #include "raw.h"
 #include "iotv_server_embedded.h"
+#include "wrap_qbytearray.h"
 
 class Device : public Base_Host
 {
@@ -48,6 +49,8 @@ public:
     const QString &aliasName() const;
     void setAliasName(const QString &newAliasName);
 
+    Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
+
 private:
     const QString _name;
     QString _aliasName;
@@ -66,7 +69,10 @@ signals:
 
     void signalDataChanged(int channel);
     void signalDataAdded(int channel);
-    void signalDataPkgComplete(int channel);
+
+    void signalDataPkgComplete(int channel, Wrap_QByteArray *data);
+
+    void signalTest(Wrap_QByteArray *data);
 
     void signalOpenReadStream(int channel);
     void signalCloseReadStream(int channel);

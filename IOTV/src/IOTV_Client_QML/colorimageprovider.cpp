@@ -21,11 +21,12 @@ QImage ColorImageProvider::requestImage(const QString &id, QSize *size, const QS
 
 //    _image = img;
 //    img.fill(Qt::red);
+
     return _image;
 }
 
-void ColorImageProvider::slotRefreshImage(QByteArray byteArr)
+void ColorImageProvider::refreshImage(Wrap_QByteArray *wdata)
 {
-    _image.loadFromData(byteArr, "JPG");
+    _image.loadFromData(wdata->data(), "JPG");
 }
 

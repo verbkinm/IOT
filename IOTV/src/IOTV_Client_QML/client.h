@@ -97,6 +97,8 @@ public slots:
     void slotOpenReadStream(int channel);
     void slotCloseReadStream(int channel);
 
+    void providerRefreshImage(Wrap_QByteArray *wdata);
+
 private slots:
     void slotReciveData();
 

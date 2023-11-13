@@ -77,6 +77,16 @@ bool Channel::setData(uint8_t channelNumber, const QByteArray &data)
 
 bool Channel::addData(uint8_t channelNumber, const QByteArray &data)
 {
+    auto type = getType(channelNumber);
+
+    if (type != Raw::DATA_TYPE::RAW && type != Raw::DATA_TYPE::STRING)
+    {
+        Log::write(QString("add data to type != Raw::DATA_TYPE::RAW and type != Raw::DATA_TYPE::RAW ") + " " + QString(Q_FUNC_INFO),
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        return false;
+    }
+
     try
     {
         _data.at(channelNumber).addData(data);
