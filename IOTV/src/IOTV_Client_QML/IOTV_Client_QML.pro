@@ -1,5 +1,4 @@
-QT += quick
-#multimedia
+QT += quick multimedia
 
 CONFIG += c++2a
 
@@ -34,6 +33,7 @@ SOURCES += \
         ../lib/Base_Host/channel.cpp \
         ../lib/Log/log.cpp \
         ../lib/raw/raw.cpp \
+        generalaudiooutput.cpp \
         main.cpp \
         wrap_qbytearray.cpp
 
@@ -68,6 +68,7 @@ HEADERS += \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
     ../lib/raw/raw.h \
+    generalaudiooutput.h \
     wrap_qbytearray.h
 
 resources.prefix = /$${TARGET}

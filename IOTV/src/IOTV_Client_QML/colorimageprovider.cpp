@@ -1,5 +1,8 @@
 #include "colorimageprovider.h"
 
+#include <memory>
+std::mutex _mutex;
+
 ColorImageProvider::ColorImageProvider() : QQuickImageProvider(QQmlImageProviderBase::Image)
 {
 
@@ -22,11 +25,15 @@ QImage ColorImageProvider::requestImage(const QString &id, QSize *size, const QS
 //    _image = img;
 //    img.fill(Qt::red);
 
-    return _image;
+    std::lock_guard lg(_mutex);
+    QImage img = _image;
+
+    return img;
 }
 
 void ColorImageProvider::refreshImage(Wrap_QByteArray *wdata)
 {
+    std::lock_guard lg(_mutex);
     _image.loadFromData(wdata->data(), "JPG");
 }
 

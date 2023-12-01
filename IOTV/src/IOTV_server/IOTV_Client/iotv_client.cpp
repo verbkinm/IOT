@@ -90,10 +90,17 @@ void IOTV_Client::processQueryRead(const Header *header)
         return;
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
                            {
+                               QString name = iotv_host.first->getName();
+                               QString compareName(QByteArray{pkg->name, pkg->nameSize});
+
+                               return name == compareName;
                                //                               const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
-                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                               //                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
                            });
 
     if (it == _hosts.end())
@@ -103,7 +110,10 @@ void IOTV_Client::processQueryRead(const Header *header)
     if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
     {
         if (it->first->addStreamRead(pkg->channelNumber, this))
+        {
+            disconnect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
             connect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead, Qt::QueuedConnection);
+        }
 
         return;
     }
@@ -219,6 +229,7 @@ uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
 
 void IOTV_Client::slotDisconnected()
 {
+    //    qDebug() << "client disconnect";
     emit signalDisconnected();
 }
 

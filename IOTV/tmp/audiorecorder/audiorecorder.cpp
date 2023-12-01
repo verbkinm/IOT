@@ -90,43 +90,43 @@ AudioRecorder::AudioRecorder() : ui(new Ui::AudioRecorder)
     //    audioIn->setVolume(0);
     QAudioOutput *audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput());
 
-//        QAudioSink *sink = new QAudioSink(audioOut->device(), format);
-//        QAudioSource *source = new QAudioSource(audioIn->device(), format);
+    QAudioSink *sink = new QAudioSink(audioOut->device(), format);
+    QAudioSource *source = new QAudioSource(audioIn->device(), format);
 
-//        devIn = source->start();
-//        devOut = sink->start();
+    devIn = source->start();
+    devOut = sink->start();
 
-//        source->setVolume(0.1);
+    source->setVolume(0.1);
 
-//        connect(devIn, &QIODevice::readyRead, this, &AudioRecorder::slotReadyRead);
-//        connect(devOut, &QIODevice::bytesWritten, this, &AudioRecorder::slotBytesWriten);
-
-
+    connect(devIn, &QIODevice::readyRead, this, &AudioRecorder::slotReadyRead);
+    connect(devOut, &QIODevice::bytesWritten, this, &AudioRecorder::slotBytesWriten);
 
 
 
 
 
-    QMediaCaptureSession *captureSession = new QMediaCaptureSession;
-    QCamera *camera = new QCamera;
-
-    for (auto &el : camera->cameraDevice().videoFormats())
-        qDebug() << el.resolution() << ' ' << el.maxFrameRate() << ' ' << el.minFrameRate() << ' ' << el.pixelFormat();
-
-//    camera->setCameraFormat(camera->cameraDevice().videoFormats().last());
-    captureSession->setCamera(camera);
-    captureSession->setAudioInput(audioIn);
-    captureSession->setAudioOutput(audioOut);
-
-    viewfinder = new QVideoWidget;
-    mySink = viewfinder->videoSink();
-    captureSession->setVideoOutput(viewfinder);
-
-    viewfinder->show();
-    camera->start();
 
 
-    connect(mySink, &QVideoSink::videoFrameChanged, this, &AudioRecorder::slotVideFrameChanged);
+    //    QMediaCaptureSession *captureSession = new QMediaCaptureSession;
+    //    QCamera *camera = new QCamera;
+
+    //    for (auto &el : camera->cameraDevice().videoFormats())
+    //        qDebug() << el.resolution() << ' ' << el.maxFrameRate() << ' ' << el.minFrameRate() << ' ' << el.pixelFormat();
+
+    ////    camera->setCameraFormat(camera->cameraDevice().videoFormats().last());
+    //    captureSession->setCamera(camera);
+    //    captureSession->setAudioInput(audioIn);
+    //    captureSession->setAudioOutput(audioOut);
+
+    //    viewfinder = new QVideoWidget;
+    //    mySink = viewfinder->videoSink();
+    //    captureSession->setVideoOutput(viewfinder);
+
+    //    viewfinder->show();
+    //    camera->start();
+
+
+    //    connect(mySink, &QVideoSink::videoFrameChanged, this, &AudioRecorder::slotVideFrameChanged);
 
 }
 
@@ -355,11 +355,11 @@ void AudioRecorder::slotVideFrameChanged(const QVideoFrame &frame)
 
     auto data = vFrame.bits(0);
 
-//    for (int i = 0; i < vFrame.mappedBytes(0); ++i)
-//    {
-//        data[i] = 1;
-//    }
-//    vFrame.setMirrored(true);
+    //    for (int i = 0; i < vFrame.mappedBytes(0); ++i)
+    //    {
+    //        data[i] = 1;
+    //    }
+    //    vFrame.setMirrored(true);
     vFrame.setSubtitleText(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
     vFrame.unmap();
 }

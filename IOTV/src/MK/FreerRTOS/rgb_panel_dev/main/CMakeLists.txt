@@ -1,0 +1,13 @@
+idf_component_register(SRCS "main.c"
+							"TFT_touch_screen.c"
+							"lvgl_demo_ui.c"
+							"I2C/BME280.c"
+							"I2C/i2c.c"
+							"I2C/DS3231"
+							"Global_extern.c"
+							"Local_Lib/local_lib.c"
+							"screen_page/screendefault.c"
+							"screen_page/homepage.c"
+							"screen_page/menupage.c"
+							"screen_page/settingpage"
+                       INCLUDE_DIRS ".")

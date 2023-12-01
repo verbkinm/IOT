@@ -100,20 +100,6 @@ void IOTV_Host::responceRead(const struct Header *header)
                Log::Write_Flag::FILE, _logFile);
 
     _counterPing = 0;
-
-
-    if (header->fragment == 1 && header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-    }
-
-    if (header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-        file.write(pkg->data, pkg->dataSize);
-    }
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const

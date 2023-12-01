@@ -44,12 +44,12 @@ Page {
 
             onPlay: {
                 device.signalOpenReadStream(0)
-//                                device.signalOpenReadStream(1)
+                device.signalOpenReadStream(1)
             }
 
             onStop: {
                 device.signalCloseReadStream(0)
-//                                device.signalCloseReadStream(1)
+                device.signalCloseReadStream(1)
             }
 
             //            onVolumeOn: {

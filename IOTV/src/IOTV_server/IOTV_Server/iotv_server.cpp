@@ -334,6 +334,7 @@ void IOTV_Server::slotDisconnected()
     QString strOut = "Client disconnected";
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
 
+    ///!!!
     _iot_clients[client]->exit();
     _iot_clients[client]->wait();
     _iot_clients[client]->deleteLater();
