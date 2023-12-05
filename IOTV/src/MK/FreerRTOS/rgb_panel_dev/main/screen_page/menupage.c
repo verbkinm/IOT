@@ -10,7 +10,7 @@
 
 extern void homePageInit(void);
 extern void settingPageInit(void);
-extern uint8_t currentPage;
+extern uint8_t glob_currentPage;
 
 static lv_obj_t *btnHome;
 static lv_obj_t *btnSettings;
@@ -20,12 +20,12 @@ static void event_handler(lv_event_t * e)
     if (e->current_target == btnHome)
     {
         homePageInit();
-        currentPage = PAGE_HOME;
+        glob_currentPage = PAGE_HOME;
     }
     else if (e->current_target == btnSettings)
     {
     	settingPageInit();
-        currentPage = PAGE_SETTINGS;
+    	glob_currentPage = PAGE_SETTINGS;
     }
 
 //    lv_event_code_t code = lv_event_get_code(e);
@@ -65,9 +65,9 @@ void menuPageInit(void)
     lv_obj_center(label);
 
     lv_obj_add_style(scr, screenStyleDefault(), 0);
-    lv_scr_load(scr);
+    lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, 1);
 
-    currentPage = PAGE_MENU;
+    glob_currentPage = PAGE_MENU;
     drawMenuPage();
 }
 

@@ -8,12 +8,15 @@
 #include "lvgl.h"
 
 #include "Global_def.h"
+#include "I2C/DS3231.h"
 #include "homepage.h"
 #include "screendefault.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-extern uint8_t currentPage;
+extern uint8_t glob_currentPage;
+extern struct DateTime glob_date_time;
+
 extern void menuPageInit(void);
 
 static lv_obj_t *time_lbl = NULL;
@@ -42,16 +45,13 @@ static void drawLabel(lv_obj_t *lbl, lv_style_t *style, const lv_font_t *font, c
 
 static void drawTime()
 {
-    static uint8_t h = 0, m = 0, s = 0;
-    s++;
-//    char str[9];
-//    sprintf(str, "%.02d:%.02d:%.02d", h, m, s);
-    lv_label_set_text_fmt(time_lbl, "%.02d:%.02d:%.02d", h, m, s);
+	++glob_date_time.seconds;
+    lv_label_set_text_fmt(time_lbl, "%.02d:%.02d:%.02d", glob_date_time.hour, glob_date_time.minutes, glob_date_time.seconds);
 }
 
 static void drawDate()
 {
-    lv_label_set_text_fmt(date_lbl, "01.01.2000");
+    lv_label_set_text_fmt(date_lbl, "%02d.%.02d.%.04d", glob_date_time.date, glob_date_time.month, glob_date_time.year + 1900);
 }
 
 static void drawTemperature()
@@ -99,9 +99,9 @@ void homePageInit(void)
 
     lv_obj_add_event_cb(scr, event_handler, LV_EVENT_CLICKED, NULL);
 
-    lv_scr_load(scr);
-//    lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_MOVE_LEFT, 1000, 1, 1);
-    currentPage = PAGE_HOME;
+//    lv_scr_load(scr);
+    lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, 1);
+    glob_currentPage = PAGE_HOME;
     drawHomePage();
 }
 

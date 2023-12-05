@@ -11,7 +11,7 @@
 #include "screen_page/homepage.h"
 #include "screen_page/menupage.h"
 
-extern uint8_t currentPage;
+extern uint8_t glob_currentPage;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -64,8 +64,8 @@ static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
 		data->point.x = touch_x[0] * 1.666;
 		data->point.y = touch_y[0] * 1.777;
 		data->state = LV_INDEV_STATE_PRESSED;
-		printf("my_input_read coord - x: %d, y: %d\n", (uint)touch_x[0], (uint)touch_y[0]);
-		printf("offset coord - x: %d, y: %d\n", (uint)(touch_x[0] * 1.666), (uint)(touch_y[0] * 1.777));
+//		printf("my_input_read coord - x: %d, y: %d\n", (uint)touch_x[0], (uint)touch_y[0]);
+//		printf("offset coord - x: %d, y: %d\n", (uint)(touch_x[0] * 1.666), (uint)(touch_y[0] * 1.777));
 	}
 	else
 		data->state = LV_INDEV_STATE_RELEASED;
@@ -215,7 +215,7 @@ static void TFT_touch_panel_init(void)
 
 void draw_page(void)
 {
-    switch (currentPage)
+    switch (glob_currentPage)
     {
     case PAGE_MENU:
     	drawMenuPage();
