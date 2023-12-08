@@ -27,5 +27,9 @@ lv_obj_t *create_switch(lv_obj_t * parent, const char * icon, const char * txt, 
 lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_btn);
 lv_obj_t *create_list(lv_obj_t *parent, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_list);
 lv_obj_t *create_calendar(lv_obj_t *parent);
+lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);
+void clear_busy_indicator(lv_obj_t **indicator);
+
+void delete_obj_handler(lv_event_t * e);
 
 #endif /* MAIN_SCREEN_PAGE_SETTING_ELEMENTS_H_ */

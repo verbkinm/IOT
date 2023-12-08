@@ -16,9 +16,13 @@
 
 #include "Global_def.h"
 #include "I2C/DS3231.h"
+#include <lvgl.h>
 
 uint8_t glob_currentPage = PAGE_HOME;
 bool glob_wifi_STA_run = false;
+
+lv_obj_t *glob_busy_indicator = NULL;
+lv_obj_t *glob_msgbox = NULL;
 
 struct DateTime glob_date_time = {
 		.seconds = 0,
@@ -30,3 +34,5 @@ struct DateTime glob_date_time = {
 		.year = 2000 - 1900,
 		.err = false
 };
+
+uint32_t glob_status_reg = 0;

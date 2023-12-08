@@ -10,4 +10,5 @@ idf_component_register(SRCS "main.c"
 							"screen_page/menupage.c"
 							"screen_page/setting/settingpage.c"
 							"screen_page/setting/elements.c"
+							"screen_page/setting/wifi.c"
                        INCLUDE_DIRS ".")

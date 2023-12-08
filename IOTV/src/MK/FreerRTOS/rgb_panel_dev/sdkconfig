@@ -785,7 +785,7 @@ CONFIG_PERIPH_CTRL_FUNC_IN_IRAM=y
 #
 # GDMA Configuration
 #
-# CONFIG_GDMA_CTRL_FUNC_IN_IRAM is not set
+CONFIG_GDMA_CTRL_FUNC_IN_IRAM=y
 # CONFIG_GDMA_ISR_IRAM_SAFE is not set
 # end of GDMA Configuration
 
@@ -811,7 +811,7 @@ CONFIG_XTAL_FREQ=40
 CONFIG_LCD_PANEL_IO_FORMAT_BUF_SIZE=32
 # CONFIG_LCD_ENABLE_DEBUG_LOG is not set
 # CONFIG_LCD_RGB_ISR_IRAM_SAFE is not set
-# CONFIG_LCD_RGB_RESTART_IN_VSYNC is not set
+CONFIG_LCD_RGB_RESTART_IN_VSYNC=y
 # end of LCD Peripheral Configuration
 # end of LCD and Touch Panel
 
@@ -2052,7 +2052,7 @@ CONFIG_LV_USE_SNAPSHOT=y
 #
 # Examples
 #
-CONFIG_LV_BUILD_EXAMPLES=y
+# CONFIG_LV_BUILD_EXAMPLES is not set
 # end of Examples
 
 #

@@ -6,18 +6,11 @@
  */
 
 #include "settingpage.h"
-#include "elements.h"
-#include "esp_wifi.h"
-#include "I2C/DS3231.h"
 
-#include "esp_system.h"
-#include "esp_netif.h"
-#include "esp_eth.h"
 
 extern void menuPageInit(void);
 
 extern uint8_t glob_currentPage;
-extern bool glob_wifi_STA_run;
 
 extern struct DateTime glob_date_time;
 
@@ -28,7 +21,7 @@ static lv_obj_t *root_page;
 
 static lv_obj_t *sub_date_time_page;
 static lv_obj_t *sub_display_page;
-static lv_obj_t *sub_wifi_page;
+lv_obj_t *sub_wifi_page;
 static lv_obj_t *sub_about_page;
 static lv_obj_t *sub_software_info_page;
 static lv_obj_t *sub_legal_info_page;
@@ -41,7 +34,6 @@ static char *wifi_page_title = "WIFI";
 static void back_event_handler(lv_event_t * e);
 static void create_date_time_sub_page(lv_event_t *e);
 static void create_display_sub_page(lv_event_t *e);
-static void create_wifi_sub_page(lv_event_t *e);
 
 static void create_sub_pages(void);
 
@@ -61,7 +53,9 @@ static void back_event_handler(lv_event_t * e)
 		((lv_menu_page_t *)sub_date_time_page)->title = NULL;
 		((lv_menu_page_t *)sub_display_page)->title = NULL;
 		((lv_menu_page_t *)sub_wifi_page)->title = NULL;
+
 		menuPageInit();
+		free_wifi_sub_page();
 	}
 }
 
@@ -91,304 +85,6 @@ static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
 		printf("depth: %d, current obj addr: %p,", depth, lv_obj_get_child(obj, i));
 		printf("children: %d\n", (int)(lv_obj_get_child_cnt(lv_obj_get_child(obj, i))));
 		debug_lv_obj_t_tree(lv_obj_get_child(obj, i), depth + 1);
-	}
-}
-
-static void print_auth_mode(int authmode, char *buff, uint8_t size)
-{
-	switch (authmode)
-	{
-	case WIFI_AUTH_OPEN:
-		snprintf(buff, size, "OPEN");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_OPEN");
-		break;
-	case WIFI_AUTH_OWE:
-		snprintf(buff, size, "OWE");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_OWE");
-		break;
-	case WIFI_AUTH_WEP:
-		snprintf(buff, size, "WEP");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WEP");
-		break;
-	case WIFI_AUTH_WPA_PSK:
-		snprintf(buff, size, "WPA_PSK");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA_PSK");
-		break;
-	case WIFI_AUTH_WPA2_PSK:
-		snprintf(buff, size, "WPA2_PSK");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_PSK");
-		break;
-	case WIFI_AUTH_WPA_WPA2_PSK:
-		snprintf(buff, size, "WPA_WPA2_PSK");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA_WPA2_PSK");
-		break;
-	case WIFI_AUTH_WPA2_ENTERPRISE:
-		snprintf(buff, size, "WPA2_ENTERPRISE");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_ENTERPRISE");
-		break;
-	case WIFI_AUTH_WPA3_PSK:
-		snprintf(buff, size, "WPA3_PSK");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA3_PSK");
-		break;
-	case WIFI_AUTH_WPA2_WPA3_PSK:
-		snprintf(buff, size, "WPA2_WPA3_PSK");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_WPA2_WPA3_PSK");
-		break;
-	default:
-		snprintf(buff, size, "AUTH_UNKNOWN");
-		ESP_LOGI(TAG, "Authmode \tWIFI_AUTH_UNKNOWN");
-		break;
-	}
-}
-
-static void print_cipher_type(int pairwise_cipher, int group_cipher)
-{
-	switch (pairwise_cipher) {
-	case WIFI_CIPHER_TYPE_NONE:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_NONE");
-		break;
-	case WIFI_CIPHER_TYPE_WEP40:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_WEP40");
-		break;
-	case WIFI_CIPHER_TYPE_WEP104:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_WEP104");
-		break;
-	case WIFI_CIPHER_TYPE_TKIP:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_TKIP");
-		break;
-	case WIFI_CIPHER_TYPE_CCMP:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_CCMP");
-		break;
-	case WIFI_CIPHER_TYPE_TKIP_CCMP:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_TKIP_CCMP");
-		break;
-	case WIFI_CIPHER_TYPE_AES_CMAC128:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_AES_CMAC128");
-		break;
-	case WIFI_CIPHER_TYPE_SMS4:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_SMS4");
-		break;
-	case WIFI_CIPHER_TYPE_GCMP:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_GCMP");
-		break;
-	case WIFI_CIPHER_TYPE_GCMP256:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_GCMP256");
-		break;
-	default:
-		ESP_LOGI(TAG, "Pairwise Cipher \tWIFI_CIPHER_TYPE_UNKNOWN");
-		break;
-	}
-
-	switch (group_cipher) {
-	case WIFI_CIPHER_TYPE_NONE:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_NONE");
-		break;
-	case WIFI_CIPHER_TYPE_WEP40:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_WEP40");
-		break;
-	case WIFI_CIPHER_TYPE_WEP104:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_WEP104");
-		break;
-	case WIFI_CIPHER_TYPE_TKIP:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_TKIP");
-		break;
-	case WIFI_CIPHER_TYPE_CCMP:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_CCMP");
-		break;
-	case WIFI_CIPHER_TYPE_TKIP_CCMP:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_TKIP_CCMP");
-		break;
-	case WIFI_CIPHER_TYPE_SMS4:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_SMS4");
-		break;
-	case WIFI_CIPHER_TYPE_GCMP:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_GCMP");
-		break;
-	case WIFI_CIPHER_TYPE_GCMP256:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_GCMP256");
-		break;
-	default:
-		ESP_LOGI(TAG, "Group Cipher \tWIFI_CIPHER_TYPE_UNKNOWN");
-		break;
-	}
-}
-
-static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, const wifi_ap_record_t *ap_record)
-{
-	lv_obj_set_size(*btn, w, h);
-
-	//	wifi_ap_record_t ap_info;
-	//	esp_wifi_sta_get_ap_info(&ap_info);
-
-	lv_obj_t *lbl_ssid = lv_label_create(*btn);
-
-	//	if (memcmp(ap_info.bssid, ap_record->bssid, 6) == 0)
-	lv_label_set_text_fmt(lbl_ssid, "%s %s", LV_SYMBOL_WIFI, ap_record->ssid);
-	//	else
-	//		lv_label_set_text_fmt(lbl_ssid, "%s", ap_record->ssid);
-
-	lv_obj_align(lbl_ssid, LV_ALIGN_LEFT_MID, 0, 0);
-
-	lv_obj_t *lbl_bssid = lv_label_create(*btn);
-	lv_label_set_text_fmt(lbl_bssid, "(%02X:%02X:%02X:%02X:%02X:%02X)",
-			ap_record->bssid[0], ap_record->bssid[1], ap_record->bssid[2],
-			ap_record->bssid[3], ap_record->bssid[4], ap_record->bssid[5]);
-	lv_obj_align_to(lbl_bssid, lbl_ssid, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
-
-	lv_obj_t *lbl_rssi = lv_label_create(*btn);
-	lv_label_set_text_fmt(lbl_rssi, "%d", ap_record->rssi);
-	lv_obj_align(lbl_rssi, LV_ALIGN_RIGHT_MID, 0, 0);
-
-	lv_obj_t *lbl_authmode = lv_label_create(*btn);
-	char buff[16] = {0};
-	print_auth_mode(ap_record->authmode, buff, sizeof(buff));
-	lv_label_set_text_fmt(lbl_authmode, "(%s)", buff);
-	lv_obj_align_to(lbl_authmode, lbl_bssid, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
-}
-
-static void ta_event_cb(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * ta = lv_event_get_target(e);
-    lv_obj_t * kb = lv_event_get_user_data(e);
-    if(code == LV_EVENT_FOCUSED) {
-        lv_keyboard_set_textarea(kb, ta);
-        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
-    }
-
-    if(code == LV_EVENT_DEFOCUSED) {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
-    }
-}
-
-static void close_widget_parent(lv_event_t * e)
-{
-	lv_obj_del(e->user_data);
-}
-
-static void wifi_connect(lv_event_t *e)
-{
-//    static const char * buttons[] = {"Apply", "Close", ""};
-
-    lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
-    lv_obj_set_size(main_widget, 800, 480);
-
-	lv_color_t bg_color = lv_obj_get_style_bg_color(main_widget, 0);
-	if(lv_color_brightness(bg_color) > 127)
-		lv_obj_set_style_bg_color(main_widget, lv_color_darken(lv_obj_get_style_bg_color(main_widget, 0), 20), 0);
-	else
-		lv_obj_set_style_bg_color(main_widget, lv_color_darken(lv_obj_get_style_bg_color(main_widget, 0), 50), 0);
-
-	lv_obj_t *btn_close = lv_btn_create(main_widget);
-	lv_obj_set_size(btn_close, 32, 32);
-	lv_obj_align(btn_close, LV_ALIGN_TOP_RIGHT, 0, 0);
-	lv_obj_add_event_cb(btn_close, close_widget_parent, LV_EVENT_CLICKED, main_widget);
-
-	lv_obj_t *btn_close_lbl = lv_label_create(btn_close);
-	lv_label_set_text(btn_close_lbl, LV_SYMBOL_CLOSE);
-	lv_obj_center(btn_close_lbl);
-
-
-    /*Create a keyboard to use it with an of the text areas*/
-    lv_obj_t *kb = lv_keyboard_create(main_widget);
-    lv_obj_add_event_cb(kb, close_widget_parent, LV_EVENT_CANCEL, main_widget);
-    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
-
-    /*Create a text area. The keyboard will write here*/
-    lv_obj_t * ta;
-    ta = lv_textarea_create(main_widget);
-    lv_obj_align(ta, LV_ALIGN_TOP_LEFT, 10, 50);
-    lv_obj_add_event_cb(ta, ta_event_cb, LV_EVENT_ALL, kb);
-    lv_textarea_set_placeholder_text(ta, "Hello");
-    lv_obj_set_size(ta, 140, 80);
-
-    ta = lv_textarea_create(main_widget);
-    lv_obj_align(ta, LV_ALIGN_TOP_RIGHT, -10, 50);
-    lv_obj_add_event_cb(ta, ta_event_cb, LV_EVENT_ALL, kb);
-    lv_obj_set_size(ta, 140, 80);
-
-    lv_keyboard_set_textarea(kb, ta);
-//
-//	wifi_ap_record_t *ap_info = e->user_data;
-//	printf("%s\n", ap_info->ssid);
-//
-//	wifi_config_t wifi_config = {
-//			.sta = {
-////					.ssid = ap_info->ssid,
-//					.password = "y3z4pfrm",
-//					/* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
-//					 * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
-//					 * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
-//					 * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
-//					 */
-//					.threshold.authmode = ap_info->authmode,//WIFI_AUTH_WPA2_PSK,
-//					//            .sae_pwe_h2e = ESP_WIFI_SAE_MODE,
-//					//            .sae_h2e_identifier = "",
-//			},
-//	};
-//
-//	memcpy(wifi_config.sta.ssid, ap_info->ssid, sizeof(wifi_config.sta.ssid));
-//
-//	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-//	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-//	esp_wifi_disconnect();
-//	ESP_ERROR_CHECK(esp_wifi_connect());
-}
-
-static void wifi_scan_heandler(lv_event_t *e)
-{
-#define SIZE 10
-//	const uint8_t SIZE = 10;
-	uint16_t number = SIZE;
-	static wifi_ap_record_t ap_info[SIZE];
-	uint16_t ap_count = 0;
-	memset(ap_info, 0, sizeof(ap_info));
-
-	//	esp_wifi_clear_ap_list();
-	esp_wifi_scan_start(NULL, true);
-	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
-	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
-	ESP_LOGI("", "Total APs scanned = %u", ap_count);
-
-	lv_obj_t *list = e->user_data;
-	lv_obj_clean(list);
-
-	for (int i = 0; (i < SIZE) && (i < ap_count); i++)
-	{
-		lv_obj_t *btn = lv_list_add_btn(list, 0, 0);
-		wifi_list_item(&btn, 495, 50, &ap_info[i]);
-		lv_obj_add_event_cb(btn, wifi_connect, LV_EVENT_CLICKED, &ap_info[i]);
-		if (ap_info[i].authmode != WIFI_AUTH_WEP) {
-			print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
-		}
-		ESP_LOGI("", "Channel \t\t%d\n", ap_info[i].primary);
-	}
-#undef SIZE
-}
-
-static void wifi_switch_heandler(lv_event_t *e)
-{
-	lv_obj_t *obj_switch = e->target;
-	lv_obj_t *section = e->user_data;
-
-	lv_obj_t *lst = lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 1), 0), 0);
-	lv_obj_t *btn = lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 2), 0), 0);
-
-	if (lv_obj_has_state(obj_switch, LV_STATE_CHECKED))
-	{
-		esp_wifi_start();
-		lv_obj_clear_state(btn, LV_STATE_DISABLED);
-		lv_event_send(btn, LV_EVENT_CLICKED, 0);
-		glob_wifi_STA_run = true;
-	}
-	else
-	{
-		esp_wifi_stop();
-		for (int i = 0; i < lv_obj_get_child_cnt(lst); ++i)
-			lv_obj_del(lv_obj_get_child(lst, 0));
-		lv_obj_add_state(btn, LV_STATE_DISABLED);
-		glob_wifi_STA_run = false;
 	}
 }
 
@@ -475,35 +171,6 @@ static void create_display_sub_page(lv_event_t *e)
 	create_slider(section, LV_SYMBOL_SETTINGS, "Brightness", 0, 150, 100);
 }
 
-static void create_wifi_sub_page(lv_event_t *e)
-{
-	lv_obj_set_style_pad_hor(sub_wifi_page, 20, 0);
-	lv_obj_t *section = lv_menu_section_create(sub_wifi_page);
-
-	lv_obj_t *switch_obj = NULL;
-	lv_obj_t *obj_list = NULL;
-	lv_obj_t *obj_btn = NULL;
-
-	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", glob_wifi_STA_run, &switch_obj);
-	create_list(section, 495, 280, &obj_list);
-	create_button(section, "Scan", 70, 40, &obj_btn);
-
-	if (glob_wifi_STA_run)
-	{
-		lv_obj_clear_state(obj_list, LV_STATE_DISABLED);
-		lv_obj_clear_state(obj_btn, LV_STATE_DISABLED);
-		lv_event_send(obj_btn, LV_EVENT_CLICKED, 0);
-	}
-	else
-	{
-		lv_obj_add_state(obj_list, LV_STATE_DISABLED);
-		lv_obj_add_state(obj_btn, LV_STATE_DISABLED);
-	}
-
-	lv_obj_add_event_cb(obj_btn, wifi_scan_heandler, LV_EVENT_CLICKED, obj_list);
-	lv_obj_add_event_cb(switch_obj, wifi_switch_heandler, LV_EVENT_CLICKED, section);
-}
-
 static void create_date_time_page(lv_obj_t *parent)
 {
 	lv_obj_t *cont = create_text(parent, LV_SYMBOL_LIST, "Date and Time", LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -532,7 +199,6 @@ static void create_other_pages(void)
 	lv_obj_t *cont = create_text(section, NULL, "About", LV_MENU_ITEM_BUILDER_VARIANT_1);
 	lv_menu_set_load_page_event(menu, cont, sub_about_page);
 }
-
 
 void settingPageInit(void)
 {

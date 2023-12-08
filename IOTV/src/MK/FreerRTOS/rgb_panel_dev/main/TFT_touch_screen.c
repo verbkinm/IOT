@@ -10,8 +10,12 @@
 
 #include "screen_page/homepage.h"
 #include "screen_page/menupage.h"
+#include "screen_page/setting/elements.h"
 
 extern uint8_t glob_currentPage;
+extern uint32_t glob_status_reg;
+
+extern lv_obj_t *glob_busy_indicator;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -28,6 +32,7 @@ static void increase_lvgl_tick(void *arg);
 static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data);
 static void TFT_rgb_panel_init(void);
 static void TFT_touch_panel_init(void);
+static void timer_loop(lv_timer_t *timer);
 
 static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data)
 {
@@ -47,7 +52,7 @@ static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
 	lv_disp_flush_ready(drv);
 }
 
-static void increase_lvgl_tick(void *arg)
+IRAM_ATTR static void increase_lvgl_tick(void *arg)
 {
 	/* Tell LVGL how many milliseconds has elapsed */
 	lv_tick_inc(LVGL_TICK_PERIOD_MS);
@@ -150,8 +155,8 @@ static void TFT_rgb_panel_init(void)
 	ESP_LOGI(TAG, "Allocate separate LVGL draw buffers from PSRAM");
 	buf1 = heap_caps_malloc(LCD_H_RES * 100 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
 	assert(buf1);
-	buf2 = heap_caps_malloc(LCD_H_RES * 100 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
-	assert(buf2);
+//	buf2 = heap_caps_malloc(LCD_H_RES * 100 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
+//	assert(buf2);
 	// initialize LVGL draw buffers
 	lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * 100);
 
@@ -232,8 +237,17 @@ void draw_page(void)
     }
 }
 
+static void timer_loop(lv_timer_t *timer)
+{
+	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
+			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
+		clear_busy_indicator(&glob_busy_indicator);
+}
+
 void TFT_draw_page(void *pvParameters)
 {
+	lv_timer_create(timer_loop, 1000, 0);
+
 	while (1)
 	{
 		draw_page();

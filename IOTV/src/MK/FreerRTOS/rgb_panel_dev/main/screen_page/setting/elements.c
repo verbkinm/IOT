@@ -203,3 +203,32 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 
 	return obj;
 }
+
+void delete_obj_handler(lv_event_t * e)
+{
+	lv_obj_del(e->user_data);
+	e->user_data = NULL;
+}
+
+lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa)
+{
+	lv_obj_t *spinner_widget = lv_obj_create(parent);
+	lv_obj_set_size(spinner_widget, bg_w, bg_h);
+	lv_obj_set_style_bg_opa(spinner_widget, opa, 0);
+
+	lv_obj_t *spinner = lv_spinner_create(spinner_widget, 5000, 90);
+	lv_obj_set_size(spinner, i_w, i_h);
+	lv_obj_center(spinner);
+
+	return spinner_widget;
+}
+
+void clear_busy_indicator(lv_obj_t **indicator)
+{
+	if (*indicator == NULL)
+		return;
+
+	lv_obj_clean(*indicator);
+	lv_obj_del(*indicator);
+	*indicator = NULL;
+}

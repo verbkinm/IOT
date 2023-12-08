@@ -132,7 +132,6 @@ enum
 	dig_H5_LSB 		= 0xE5,
 	dig_H5_MSB 		= 0xE6,
 	_dig_H6	 		= 0xE7,
-
 };
 
 // Биты статусов
@@ -149,6 +148,15 @@ enum PAGE_NAME {
     PAGE_MENU,
     PAGE_CHARTS,
     PAGE_SETTINGS
+};
+// Глобалные флаги статусов
+enum STATUS_REG {
+	STATUS_WIFI_STA_START = 0x01,
+	STATUS_WIFI_STA_CONNECTING = 0x02,
+	STATUS_WIFI_STA_CONNECTED = 0x04,
+	STATUS_IP_GOT = 0x08,
+	STATUS_WIFI_SCANNING = 0x10,
+	STATUS_WIFI_SCAN_DONE = 0x20,
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */
