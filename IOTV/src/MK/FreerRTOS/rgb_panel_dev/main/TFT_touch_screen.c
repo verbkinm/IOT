@@ -11,11 +11,13 @@
 #include "screen_page/homepage.h"
 #include "screen_page/menupage.h"
 #include "screen_page/setting/elements.h"
+#include "status_panel/status_panel.h"
 
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
 
 extern lv_obj_t *glob_busy_indicator;
+extern lv_obj_t *glob_status_panel;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -242,6 +244,25 @@ static void timer_loop(lv_timer_t *timer)
 	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
 			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
 		clear_busy_indicator(&glob_busy_indicator);
+
+
+	lv_obj_t *sd_icon = lv_obj_get_child(glob_status_panel, 0);
+	lv_obj_t *wifi_icon = lv_obj_get_child(glob_status_panel, 1);
+	lv_obj_t *heap_lbl = lv_obj_get_child(glob_status_panel, 2);
+
+	lv_img_set_src(sd_icon, SD_ON);
+
+	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+		lv_img_set_src(wifi_icon, WIFI_CONNECTING);
+	else
+	{
+		if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
+			lv_img_set_src(wifi_icon, WIFI_CONNECTED);
+		else
+			lv_img_set_src(wifi_icon, WIFI_DISCONNECTED);
+	}
+
+	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
 }
 
 void TFT_draw_page(void *pvParameters)

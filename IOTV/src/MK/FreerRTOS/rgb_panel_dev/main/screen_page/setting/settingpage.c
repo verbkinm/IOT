@@ -11,6 +11,7 @@
 extern void menuPageInit(void);
 
 extern uint8_t glob_currentPage;
+extern lv_obj_t *glob_status_panel;
 
 extern struct DateTime glob_date_time;
 
@@ -203,10 +204,13 @@ static void create_other_pages(void)
 void settingPageInit(void)
 {
 	lv_obj_t *scr = lv_obj_create(NULL);
+//	lv_obj_set_parent(glob_status_panel, scr);
+//	create_status_panel(scr);
 
 	// Создание объекта Меню
 	menu = lv_menu_create(scr);
-	lv_obj_set_size(menu, 800, 480);
+	lv_obj_set_size(menu, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_y(menu, LCD_PANEL_STATUS_H);
 
 	// Фон немного "сереем"
 	lv_color_t bg_color = lv_obj_get_style_bg_color(menu, 0);
@@ -236,6 +240,7 @@ void settingPageInit(void)
 	lv_menu_set_sidebar_page(menu, root_page);
 
 	lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, 1);
+	create_status_panel(scr);
 
 	glob_currentPage = PAGE_SETTINGS;
 

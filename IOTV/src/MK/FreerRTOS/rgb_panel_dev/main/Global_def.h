@@ -34,6 +34,12 @@
 #define BME280_ADDR                			0x76
 #define DS3231_ADDR							0x68
 
+// SPI
+#define	SPI_NUM_MOSI			11
+#define	SPI_NUM_MISO			13
+#define	SPI_NUM_SCK				12
+#define	SPI_NUM_CS				10
+
 // TFT
 #define LCD_PIXEL_CLOCK_HZ     (18 * 1000 * 1000)
 #define LCD_BK_LIGHT_ON_LEVEL  1
@@ -68,6 +74,14 @@
 #define LCD_NUM_FB             1
 
 #define LVGL_TICK_PERIOD_MS    2
+#define LCD_PANEL_STATUS_H	   30
+
+// FS PATH
+#define	SD_ON				"A:/sdcard/panel/sd_on.png"
+#define	SD_OFF				"A:/sdcard/panel/sd_off.png"
+#define	WIFI_CONNECTED		"A:/sdcard/panel/wifi_on.png"
+#define	WIFI_DISCONNECTED	"A:/sdcard/panel/wifi_off.png"
+#define	WIFI_CONNECTING		"A:/sdcard/panel/wifi.png"
 
 // Регистры BME280
 enum

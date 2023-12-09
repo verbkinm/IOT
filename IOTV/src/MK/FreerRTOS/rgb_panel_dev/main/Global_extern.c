@@ -21,6 +21,7 @@
 uint8_t glob_currentPage = PAGE_HOME;
 bool glob_wifi_STA_run = false;
 
+lv_obj_t *glob_status_panel = NULL;
 lv_obj_t *glob_busy_indicator = NULL;
 lv_obj_t *glob_msgbox = NULL;
 

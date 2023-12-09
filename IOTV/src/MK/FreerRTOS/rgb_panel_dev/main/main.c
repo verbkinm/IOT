@@ -7,6 +7,7 @@
 #include "TFT_touch_screen.h"
 #include "I2C/i2c.h"
 #include "screen_page/setting/elements.h"
+#include "sd/sd_spi.h"
 
 extern uint32_t glob_status_reg;
 
@@ -80,7 +81,6 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
 	esp_event_handler_instance_t instance_any_id;
-	esp_event_handler_instance_t instance_got_ip;
 	ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
 			ESP_EVENT_ANY_ID,
 			&event_handler,
@@ -95,6 +95,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_stop());
 
+    sd_spi_init();
 	i2c_init();
 	TFT_init(); // Перед этой функцией обязательно выполнить i2c_init();
 

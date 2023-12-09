@@ -11,6 +11,7 @@
 extern void homePageInit(void);
 extern void settingPageInit(void);
 extern uint8_t glob_currentPage;
+extern lv_obj_t *glob_status_panel;
 
 static lv_obj_t *btnHome;
 static lv_obj_t *btnSettings;
@@ -41,9 +42,10 @@ static void event_handler(lv_event_t * e)
 void menuPageInit(void)
 {
     uint8_t pad = 20;
-//    LV_IMG_DECLARE(menu_home);
 
-    lv_obj_t *scr = lv_obj_create(NULL);
+	lv_obj_t *scr = lv_obj_create(NULL);
+//	lv_obj_set_parent(glob_status_panel, scr);
+//	create_status_panel(scr);
 
     btnHome = lv_btn_create(scr);
     lv_obj_set_size(btnHome, 128, 128);
@@ -66,6 +68,7 @@ void menuPageInit(void)
 
     lv_obj_add_style(scr, screenStyleDefault(), 0);
     lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, 1);
+	create_status_panel(scr);
 
     glob_currentPage = PAGE_MENU;
     drawMenuPage();

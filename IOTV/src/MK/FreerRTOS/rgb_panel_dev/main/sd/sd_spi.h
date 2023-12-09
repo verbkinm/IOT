@@ -1,0 +1,18 @@
+/*
+ * sd_spi.h
+ *
+ *  Created on: 9 дек. 2023 г.
+ *      Author: user
+ */
+
+#ifndef MAIN_SD_SD_SPI_H_
+#define MAIN_SD_SD_SPI_H_
+
+#include "esp_check.h"
+
+#include "../Global_def.h"
+
+esp_err_t sd_spi_init(void);
+//void sd_spi_deinit(void);
+
+#endif /* MAIN_SD_SD_SPI_H_ */

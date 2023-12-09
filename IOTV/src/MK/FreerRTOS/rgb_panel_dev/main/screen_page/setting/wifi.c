@@ -147,8 +147,6 @@ static void print_cipher_type(int pairwise_cipher, int group_cipher)
 	}
 }
 
-
-
 static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_record_t *ap_record)
 {
 	lv_obj_set_size(*btn, w, h);
@@ -213,7 +211,10 @@ static void wifi_connect_step2(lv_event_t *e)
 	}
 
 	if (glob_busy_indicator == NULL)
-		glob_busy_indicator = create_busy_indicator(lv_scr_act(), LCD_H_RES, LCD_V_RES, 100, 100, LV_OPA_70);
+	{
+		glob_busy_indicator = create_busy_indicator(lv_scr_act(), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
+		lv_obj_set_y(glob_busy_indicator, LCD_PANEL_STATUS_H);
+	}
 
 	wifi_ap_record_t *ap_info = main_widget->user_data;
 	wifi_config_t wifi_config = {
@@ -249,7 +250,8 @@ static void wifi_connect_step1(lv_event_t *e)
 	// основное окно
 	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
 	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
-	lv_obj_set_size(main_widget, 800, 480);
+	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
 
 	lv_color_t bg_color = lv_obj_get_style_bg_color(main_widget, 0);
 	if(lv_color_brightness(bg_color) > 127)
@@ -365,7 +367,7 @@ void create_wifi_sub_page(lv_event_t *e)
 
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
 	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", glob_wifi_STA_run, &(wifi_page_obj->wifi_switch));
-	create_list(section, 495, 280, &(wifi_page_obj->list));
+	create_list(section, 495, 265, &(wifi_page_obj->list));
 	create_button(section, "Scan", 70, 40, &(wifi_page_obj->btn_scan));
 
 	if (glob_wifi_STA_run)

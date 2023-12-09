@@ -8,6 +8,8 @@
 #ifndef MAIN_HOMEPAGE_H_
 #define MAIN_HOMEPAGE_H_
 
+#include "../status_panel/status_panel.h"
+
 void homePageInit(void);
 void drawHomePage(void);
 

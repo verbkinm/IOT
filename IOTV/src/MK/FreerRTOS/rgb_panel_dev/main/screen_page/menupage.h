@@ -11,6 +11,7 @@
 
 #include "lvgl.h"
 #include "screendefault.h"
+#include "../status_panel/status_panel.h"
 #include "Global_def.h"
 
 void menuPageInit(void);
