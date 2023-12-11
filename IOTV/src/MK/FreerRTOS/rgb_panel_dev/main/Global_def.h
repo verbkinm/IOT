@@ -158,7 +158,8 @@ enum
 
 // Страницы дисплея
 enum PAGE_NAME {
-    PAGE_HOME = 0,
+	PAGE_NONE,
+    PAGE_HOME,
     PAGE_MENU,
     PAGE_CHARTS,
     PAGE_SETTINGS

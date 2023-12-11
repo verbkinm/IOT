@@ -9,8 +9,17 @@
 
 lv_style_t *screenStyleDefault()
 {
-    static lv_style_t screen_style;
-    lv_style_init(&screen_style);
-    lv_style_set_bg_color(&screen_style, lv_color_black());
-    return &screen_style;
+	static bool init = false;
+	static lv_style_t style;
+
+	if (init)
+		return &style;
+
+    lv_style_init(&style);
+    lv_style_set_bg_color(&style, lv_color_black());
+	lv_style_set_border_width(&style, 0);
+	lv_style_set_radius(&style, 0);
+
+	init = true;
+    return &style;
 }

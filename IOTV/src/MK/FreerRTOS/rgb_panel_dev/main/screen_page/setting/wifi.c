@@ -10,7 +10,6 @@
 
 #define AP_INFO_ARR_SIZE 10
 
-extern bool glob_wifi_STA_run;
 extern lv_obj_t *sub_wifi_page;
 
 extern lv_obj_t *glob_busy_indicator;
@@ -156,10 +155,14 @@ static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_r
 	lv_obj_align(lbl_icon, LV_ALIGN_LEFT_MID, 0, 0);
 
 	lv_obj_t *lbl_ssid = lv_label_create(*btn);
-	// if (memcmp(ap_info.bssid, ap_record->bssid, 6) == 0)
 	lv_label_set_text_fmt(lbl_ssid, "%s", ap_record->ssid);
-	// else
-	// lv_label_set_text_fmt(lbl_ssid, "%s", ap_record->ssid);
+
+	for (uint8_t i = 0; i < AP_INFO_ARR_SIZE; ++i)
+	{
+		if (memcmp(ap_info[i].bssid, ap_record->bssid, 6) == 0)
+			lv_obj_set_style_text_color(lbl_ssid, lv_color_make(0, 0, 150), 0);
+	}
+
 	lv_obj_align_to(lbl_ssid, lbl_icon, LV_ALIGN_OUT_RIGHT_BOTTOM, 10, -10);
 
 	lv_obj_t *lbl_bssid = lv_label_create(*btn);
@@ -185,14 +188,14 @@ static void wifi_switch_heandler(lv_event_t *e)
 	{
 		esp_wifi_start();
 		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
-		glob_wifi_STA_run = true;
+		glob_status_reg |= STATUS_WIFI_STA_START;
 	}
 	else
 	{
 		esp_wifi_stop();
 		lv_obj_clean(wifi_page_obj->list);
 		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-		glob_wifi_STA_run = false;
+		glob_status_reg &= ~STATUS_WIFI_STA_START;
 	}
 }
 
@@ -248,11 +251,11 @@ static void wifi_connect_step1(lv_event_t *e)
 	wifi_ap_record_t *ap_info = e->user_data;
 
 	// основное окно
-	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
+	lv_obj_t *main_widget = lv_obj_create(lv_obj_get_child(lv_scr_act(), 1));
 	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
 	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
-	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
 
+	// Фон немного "сереем"
 	lv_color_t bg_color = lv_obj_get_style_bg_color(main_widget, 0);
 	if(lv_color_brightness(bg_color) > 127)
 		lv_obj_set_style_bg_color(main_widget, lv_color_darken(lv_obj_get_style_bg_color(main_widget, 0), 20), 0);
@@ -264,6 +267,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	// кнопка закрытия окна
 	lv_obj_t *btn_close = lv_btn_create(main_widget);
 	lv_obj_set_size(btn_close, 32, 32);
+	lv_obj_set_style_radius(btn_close, 90, 0);
 	lv_obj_align(btn_close, LV_ALIGN_TOP_RIGHT, 0, 0);
 	lv_obj_add_event_cb(btn_close, delete_obj_handler, LV_EVENT_CLICKED, main_widget);
 
@@ -340,11 +344,13 @@ static void wifi_scan_done(void)
 	esp_wifi_scan_get_ap_records(&number, ap_info);
 	esp_wifi_scan_get_ap_num(&ap_count);
 	ESP_LOGI(TAG, "Total APs scanned = %u", ap_count);
-	for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++) {
+	for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
+	{
 		ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
 		ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
 		//        print_auth_mode(ap_info[i].authmode);
-		if (ap_info[i].authmode != WIFI_AUTH_WEP) {
+		if (ap_info[i].authmode != WIFI_AUTH_WEP)
+		{
 			print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
 		}
 		ESP_LOGI(TAG, "Channel \t\t%d\n", ap_info[i].primary);
@@ -366,11 +372,11 @@ void create_wifi_sub_page(lv_event_t *e)
 	lv_obj_t *section = lv_menu_section_create(sub_wifi_page);
 
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
-	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", glob_wifi_STA_run, &(wifi_page_obj->wifi_switch));
+	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
 	create_list(section, 495, 265, &(wifi_page_obj->list));
 	create_button(section, "Scan", 70, 40, &(wifi_page_obj->btn_scan));
 
-	if (glob_wifi_STA_run)
+	if (glob_status_reg & STATUS_WIFI_STA_START)
 	{
 		lv_obj_clear_state(wifi_page_obj->list, LV_STATE_DISABLED);
 		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
@@ -388,13 +394,6 @@ void create_wifi_sub_page(lv_event_t *e)
 	ap_info = calloc(AP_INFO_ARR_SIZE, sizeof(wifi_ap_record_t));
 
 	wifi_page_obj->timer = lv_timer_create(timer_loop, 1000, 0);
-
-	//	// не срабатывает unregister
-	//	if (first_start)
-	//	{
-	//		esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_SCAN_DONE, &wifi_scan_done_handler, 0, 0);
-	//		first_start = false;
-	//	}
 }
 
 static void timer_loop(lv_timer_t *timer)

@@ -20,7 +20,7 @@
 static char *TAG = "SD SPI";
 
 
-static esp_err_t s_example_write_file(const char *path, char *data)
+esp_err_t s_write_file(const char *path, char *data)
 {
 	ESP_LOGI(TAG, "Opening file %s", path);
 	FILE *f = fopen(path, "w");
@@ -35,7 +35,7 @@ static esp_err_t s_example_write_file(const char *path, char *data)
 	return ESP_OK;
 }
 
-static esp_err_t s_example_read_file(const char *path)
+static esp_err_t s_read_file(const char *path)
 {
 	ESP_LOGI(TAG, "Reading file %s", path);
 	FILE *f = fopen(path, "r");
@@ -115,23 +115,29 @@ esp_err_t sd_spi_init(void)
 	// Card has been initialized, print its properties
 	sdmmc_card_print_info(stdout, card);
 
-
-//	struct stat st;
-//	const char *f = "/sdcard/panel/sd_on.png";
-//	if (stat(f, &st) == 0)
-//	{
-//		printf("File 1 size: %d\n", (int)st.st_size);
+//	const char *file_hello = MOUNT_POINT"/conf.jsn";
+//	char data[EXAMPLE_MAX_CHAR_SIZE];
+//	snprintf(data, EXAMPLE_MAX_CHAR_SIZE, "%s %s!\n", "Hello", card->cid.name);
+//	ret = s_write_file(file_hello, data);
+//	if (ret != ESP_OK) {
+//		return ret;
 //	}
-//	else
-//		printf("file not exist\n");
-//
-//	const char *f2 = "/sdcard/img/panel/sd_on.png";
-//	if (stat(f2, &st) == 0)
-//	{
-//		printf("File 2 size: %d\n", (int)st.st_size);
-//	}
-//	else
-//		printf("file not exist\n");
+	//	struct stat st;
+	//	const char *f = "/sdcard/panel/sd_on.png";
+	//	if (stat(f, &st) == 0)
+	//	{
+	//		printf("File 1 size: %d\n", (int)st.st_size);
+	//	}
+	//	else
+	//		printf("file not exist\n");
+	//
+	//	const char *f2 = "/sdcard/img/panel/sd_on.png";
+	//	if (stat(f2, &st) == 0)
+	//	{
+	//		printf("File 2 size: %d\n", (int)st.st_size);
+	//	}
+	//	else
+	//		printf("file not exist\n");
 
 
 	//	lv_img_set_src(icon, "S:/sdcard/status_panel/sd_on.png");

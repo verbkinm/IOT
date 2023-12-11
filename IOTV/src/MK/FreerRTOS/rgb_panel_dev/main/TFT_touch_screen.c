@@ -12,12 +12,12 @@
 #include "screen_page/menupage.h"
 #include "screen_page/setting/elements.h"
 #include "status_panel/status_panel.h"
+#include "screen_page/screendefault.h"
 
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
 
 extern lv_obj_t *glob_busy_indicator;
-extern lv_obj_t *glob_status_panel;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -224,6 +224,9 @@ void draw_page(void)
 {
     switch (glob_currentPage)
     {
+    case PAGE_HOME:
+    	drawHomePage();
+        break;
     case PAGE_MENU:
     	drawMenuPage();
         break;
@@ -233,8 +236,8 @@ void draw_page(void)
     case PAGE_SETTINGS:
 //        drawSettingPage();
         break;
+    case PAGE_NONE:
     default:
-        drawHomePage();
         break;
     }
 }
@@ -245,10 +248,9 @@ static void timer_loop(lv_timer_t *timer)
 			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
 		clear_busy_indicator(&glob_busy_indicator);
 
-
-	lv_obj_t *sd_icon = lv_obj_get_child(glob_status_panel, 0);
-	lv_obj_t *wifi_icon = lv_obj_get_child(glob_status_panel, 1);
-	lv_obj_t *heap_lbl = lv_obj_get_child(glob_status_panel, 2);
+	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
+	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
+	lv_obj_t *heap_lbl = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 2);
 
 	lv_img_set_src(sd_icon, SD_ON);
 
@@ -271,6 +273,7 @@ void TFT_draw_page(void *pvParameters)
 
 	while (1)
 	{
+//		menuPageInit();
 		draw_page();
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
@@ -282,7 +285,35 @@ void TFT_init(void)
 	TFT_rgb_panel_init();
 	TFT_touch_panel_init();
 
-	homePageInit();
+	// Статус панель
+	lv_obj_t *status_panel = lv_obj_create(lv_scr_act());
+	lv_obj_set_size(status_panel, LCD_H_RES, LCD_PANEL_STATUS_H);
+	lv_obj_set_scroll_dir(status_panel, LV_DIR_NONE);
+	lv_obj_set_style_pad_all(status_panel, 0, 0);
+	lv_obj_set_flex_flow(status_panel, LV_FLEX_FLOW_ROW);
+	lv_obj_add_style(status_panel, screenStyleDefault(), 0);
+
+	// Статус SD
+	lv_obj_t *icon_sd = lv_img_create(status_panel);
+	lv_obj_set_size(icon_sd, 24, 24);
+
+	// Статус wifi
+	lv_obj_t *icon_wifi = lv_img_create(status_panel);
+	lv_obj_set_size(icon_wifi, 24, 24);
+
+	// Статус кучи
+	lv_label_create(status_panel);
+
+	// Основной виджет
+	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
+	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
+	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
+	lv_obj_set_style_pad_all(main_widget, 0, 0);
+	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
+
+//	homePageInit();
+	menuPageInit();
 
 	xTaskCreate(TFT_draw_page, "TFT_draw_page", 2048, NULL, 10, NULL);
 }
