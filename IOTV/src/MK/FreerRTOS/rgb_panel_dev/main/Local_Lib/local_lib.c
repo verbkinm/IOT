@@ -38,3 +38,13 @@ double inRange(double val, double min, double max)
 	return val;
 }
 
+void strmac_to_arr(const char *str, uint8_t mac[6])
+{
+    int arr[6];
+    sscanf(str, "%x:%x:%x:%x:%x:%x*c",
+           &arr[0], &arr[1], &arr[2],
+           &arr[3], &arr[4], &arr[5]);
+
+    for (uint8_t i = 0; i < 6; ++i)
+        mac[i] = arr[i];
+}

@@ -7,20 +7,26 @@
 
 #include "json_config.h"
 
+#define WIFI_CONF_PATH	"/sdcard/conf.jsn"
+
 bool set_wifi_config_value(const char *key, const char *value)
 {
-    FILE *file = fopen("/sdcard/conf.jsn", "r");
+    FILE *file = fopen(WIFI_CONF_PATH, "r");
     if (!file)
     {
         fprintf(stderr, "File not open\n");
         return false;
     }
 
-    char *content[BUFSIZ] = {0};
+    char *content = calloc(1, BUFSIZ);
+    if (content == NULL)
+        return false;
+
     fread(content, BUFSIZ, 1, file);
     fclose(file);
 
     cJSON *monitor = cJSON_Parse(content);
+    free(content);
 
     cJSON *jwifi = cJSON_GetObjectItemCaseSensitive(monitor, "wifi");
     if (jwifi == NULL)
@@ -42,7 +48,7 @@ bool set_wifi_config_value(const char *key, const char *value)
     if (print == NULL)
         goto bad_end;
 
-    file = fopen("/sdcard/conf.jsn", "w");
+    file = fopen(WIFI_CONF_PATH, "w");
     if (file == NULL)
         goto bad_end;
 
@@ -58,44 +64,50 @@ bad_end:
     return false;
 }
 
-
-char *get_wifi_config_value(const char *monitor, const char *key)
+bool get_wifi_config_value(const char *key, char **value)
 {
-    cJSON *obj = NULL;
-    cJSON *results = NULL;
-    cJSON *monitor_json = cJSON_Parse(monitor);
+	if (key == NULL)
+		return false;
 
-    if (monitor_json == NULL)
+    FILE *file = fopen(WIFI_CONF_PATH, "r");
+    if (!file)
     {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL)
-            fprintf(stdout, "Error before: %s\n", error_ptr);
+        fprintf(stderr, "File not open\n");
+        return false;
     }
 
-    results = cJSON_GetObjectItemCaseSensitive(monitor_json, "wifi");
-    if (results == NULL)
-    {
-        cJSON_Delete(monitor_json);
-        return NULL;
-    }
+    char *content = calloc(1, BUFSIZ);
+    if (content == NULL)
+        return false;
 
-    obj = cJSON_GetObjectItemCaseSensitive(results, key);
-    if (obj == NULL)
-    {
-        cJSON_Delete(monitor_json);
-        return NULL;
-    }
+    fread(content, BUFSIZ, 1, file);
+    fclose(file);
 
-    size_t len = strlen(cJSON_GetStringValue(obj));
+    cJSON *monitor = cJSON_Parse(content);
+    free(content);
+
+    cJSON *jwifi = cJSON_GetObjectItemCaseSensitive(monitor, "wifi");
+    if (jwifi == NULL)
+        goto bad_end;
+
+    cJSON *jkey = cJSON_GetObjectItemCaseSensitive(jwifi, key);
+    if (jkey == NULL)
+        goto bad_end;
+
+    size_t len = strlen(cJSON_GetStringValue(jkey));
     if (len == 0)
-        return 0;
+        goto bad_end;
 
-    char *val = calloc(1, len + 1);
-    if (val == NULL)
-        return NULL;
+    *value = calloc(1, len + 1);
+    if (*value == NULL)
+        goto bad_end;
 
-    memcpy(val, cJSON_GetStringValue(obj), len);
+    memcpy(*value, cJSON_GetStringValue(jkey), len);
 
-    cJSON_Delete(monitor_json);
-    return val;
+    cJSON_Delete(monitor);
+    return true;
+
+bad_end:
+    cJSON_Delete(monitor);
+    return false;
 }

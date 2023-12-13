@@ -14,9 +14,10 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../Global_def.h"
 #include "../Local_Lib/cJSON.h"
 
 bool set_wifi_config_value(const char *key, const char *value);
-char *get_wifi_config_value(const char *monitor, const char *key);
+bool get_wifi_config_value(const char *key, char **value);
 
 #endif /* MAIN_JSON_JSON_CONFIG_H_ */

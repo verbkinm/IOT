@@ -6,6 +6,8 @@
  */
 
 #include <lvgl.h>
+
+#include "../../json/json_config.h"
 #include "elements.h"
 
 void create_wifi_sub_page(lv_event_t *e);

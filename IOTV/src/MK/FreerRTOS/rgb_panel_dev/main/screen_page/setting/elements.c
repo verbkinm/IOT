@@ -85,6 +85,7 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
 	lv_obj_t *wrap = lv_obj_create(obj);
 	lv_obj_set_size(wrap, 495, 45);
+	lv_obj_set_style_pad_all(wrap, 0, 0);
 
 	*obj_btn = lv_btn_create(wrap);
 	lv_obj_set_style_border_color(wrap, lv_color_white(), 0);
@@ -208,6 +209,11 @@ void delete_obj_handler(lv_event_t * e)
 {
 	lv_obj_del(e->user_data);
 	e->user_data = NULL;
+}
+
+void delete_timer_handler(lv_event_t * e)
+{
+	lv_timer_del(e->user_data);
 }
 
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa)

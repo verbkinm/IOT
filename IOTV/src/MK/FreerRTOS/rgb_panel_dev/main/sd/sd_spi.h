@@ -15,6 +15,6 @@
 esp_err_t sd_spi_init(void);
 //void sd_spi_deinit(void);
 
-esp_err_t s_write_file(const char *path, char *data);
+//esp_err_t s_write_file(const char *path, char *data);
 
 #endif /* MAIN_SD_SD_SPI_H_ */

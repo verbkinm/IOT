@@ -31,5 +31,6 @@ lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg
 void clear_busy_indicator(lv_obj_t **indicator);
 
 void delete_obj_handler(lv_event_t * e);
+void delete_timer_handler(lv_event_t * e);
 
 #endif /* MAIN_SCREEN_PAGE_SETTING_ELEMENTS_H_ */

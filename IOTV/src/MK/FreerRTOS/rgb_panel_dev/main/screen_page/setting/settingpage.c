@@ -14,22 +14,23 @@ extern uint8_t glob_currentPage;
 
 extern struct DateTime glob_date_time;
 
-static char* TAG = "settings";
 
 static lv_obj_t *menu;
 static lv_obj_t *root_page;
 
 static lv_obj_t *sub_date_time_page;
 static lv_obj_t *sub_display_page;
-lv_obj_t *sub_wifi_page;
+
 static lv_obj_t *sub_about_page;
-static lv_obj_t *sub_software_info_page;
-static lv_obj_t *sub_legal_info_page;
+//static lv_obj_t *sub_software_info_page;
+//static lv_obj_t *sub_legal_info_page;
 
 static char *root_page_title = "Settings";
 static char *date_time_page_title = "Date and time";
 static char *display_page_title = "Display";
 static char *wifi_page_title = "WIFI";
+
+lv_obj_t *sub_wifi_page;
 
 static void back_event_handler(lv_event_t * e);
 static void create_date_time_sub_page(lv_event_t *e);
@@ -77,17 +78,17 @@ static void save_date_time(lv_event_t *e)
 	//	DS3231_SetDataTime(&glob_date_time);
 }
 
-static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
-{
-	for (int i = 0; i < lv_obj_get_child_cnt(obj); ++i)
-	{
-		for (int j = 0; j < depth; ++j)
-			printf("\t");
-		printf("depth: %d, current obj addr: %p,", depth, lv_obj_get_child(obj, i));
-		printf("children: %d\n", (int)(lv_obj_get_child_cnt(lv_obj_get_child(obj, i))));
-		debug_lv_obj_t_tree(lv_obj_get_child(obj, i), depth + 1);
-	}
-}
+//static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
+//{
+//	for (int i = 0; i < lv_obj_get_child_cnt(obj); ++i)
+//	{
+//		for (int j = 0; j < depth; ++j)
+//			printf("\t");
+//		printf("depth: %d, current obj addr: %p,", depth, lv_obj_get_child(obj, i));
+//		printf("children: %d\n", (int)(lv_obj_get_child_cnt(lv_obj_get_child(obj, i))));
+//		debug_lv_obj_t_tree(lv_obj_get_child(obj, i), depth + 1);
+//	}
+//}
 
 static void create_sub_pages(void)
 {
@@ -158,7 +159,7 @@ static void create_date_time_sub_page(lv_event_t *e)
 	create_calendar(section);
 
 	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Save", 70, 40, &obj_btn);
+	create_button(section, "Save", 128, 40, &obj_btn);
 	lv_obj_add_event_cb(obj_btn, save_date_time, LV_EVENT_CLICKED, section);
 }
 

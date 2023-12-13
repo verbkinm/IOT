@@ -6,6 +6,7 @@
  */
 
 #include "wifi.h"
+#include "lwip/netif.h"
 
 
 #define AP_INFO_ARR_SIZE 10
@@ -14,6 +15,7 @@ extern lv_obj_t *sub_wifi_page;
 
 extern lv_obj_t *glob_busy_indicator;
 extern uint32_t glob_status_reg;
+extern esp_netif_t *sta_netif;
 
 static const char *TAG = "wifi";
 
@@ -35,6 +37,10 @@ static void wifi_switch_heandler(lv_event_t *e);
 static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_record_t *ap_record);
 
 static void timer_loop(lv_timer_t *timer);
+static void conn_step1_timer_loop(lv_timer_t *timer);
+static void wifi_disconnect_handler(lv_event_t * e);
+static void info_handler(lv_event_t * e);
+
 static void wifi_scan_done(void);
 
 static void print_auth_mode(int authmode, char *buff, uint8_t size)
@@ -157,9 +163,12 @@ static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_r
 	lv_obj_t *lbl_ssid = lv_label_create(*btn);
 	lv_label_set_text_fmt(lbl_ssid, "%s", ap_record->ssid);
 
-	for (uint8_t i = 0; i < AP_INFO_ARR_SIZE; ++i)
+	if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
 	{
-		if (memcmp(ap_info[i].bssid, ap_record->bssid, 6) == 0)
+		wifi_config_t wifi_config;
+		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+
+		if (memcmp(ap_record->bssid, wifi_config.sta.bssid, 6) == 0)
 			lv_obj_set_style_text_color(lbl_ssid, lv_color_make(0, 0, 150), 0);
 	}
 
@@ -187,8 +196,12 @@ static void wifi_switch_heandler(lv_event_t *e)
 	if (lv_obj_has_state(wifi_page_obj->wifi_switch, LV_STATE_CHECKED))
 	{
 		esp_wifi_start();
-		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
+//		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
 		glob_status_reg |= STATUS_WIFI_STA_START;
+
+		bool res = set_wifi_config_value("on", "1");
+		if (!res)
+			printf("on not write\n");
 	}
 	else
 	{
@@ -196,6 +209,10 @@ static void wifi_switch_heandler(lv_event_t *e)
 		lv_obj_clean(wifi_page_obj->list);
 		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 		glob_status_reg &= ~STATUS_WIFI_STA_START;
+
+		bool res = set_wifi_config_value("on", "0");
+		if (!res)
+			printf("on not write\n");
 	}
 }
 
@@ -320,6 +337,56 @@ static void wifi_connect_step1(lv_event_t *e)
 			auth,
 			ap_info->rssi);
 	lv_obj_align_to(wifi_info_right, wifi_info_left, LV_ALIGN_OUT_RIGHT_TOP, 30, 0);
+
+
+	// Кнопка подключиться/отклчиться
+	lv_obj_t *btn_con = lv_btn_create(main_widget);
+	lv_obj_set_size(btn_con, 128, 40);
+	lv_obj_align_to(btn_con, ta, LV_ALIGN_OUT_RIGHT_TOP, -128, -40 -10);
+
+	lv_obj_t *btn_con_lbl = lv_label_create(btn_con);
+	lv_label_set_text(btn_con_lbl, "Wait...");
+	lv_obj_center(btn_con_lbl);
+
+	lv_timer_t *timer = lv_timer_create(conn_step1_timer_loop, 500, main_widget);
+	lv_obj_add_event_cb(main_widget, delete_timer_handler, LV_EVENT_DELETE, timer);
+}
+
+static void wifi_disconnect_handler(lv_event_t * e)
+{
+	set_wifi_config_value("auto", "0");
+	glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
+	esp_wifi_disconnect();
+}
+
+static void conn_step1_timer_loop(lv_timer_t *timer)
+{
+	lv_obj_t *main_widget = timer->user_data;
+	lv_obj_t *btn_con = lv_obj_get_child(main_widget, 5);
+	lv_obj_t *btn_con_lbl = lv_obj_get_child(btn_con, 0);
+	wifi_ap_record_t *ap_info = main_widget->user_data;
+
+	// Если устройство подключено к данной точке доступа.
+	if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
+	{
+		wifi_config_t wifi_config;
+		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+
+		if (memcmp(ap_info->bssid, wifi_config.sta.bssid, 6) == 0)
+		{
+			lv_label_set_text(btn_con_lbl, "Disconnect");
+			lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
+			lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
+			lv_obj_add_event_cb(btn_con, wifi_disconnect_handler, LV_EVENT_CLICKED, main_widget);
+		}
+	}
+	else
+	{
+		lv_label_set_text(btn_con_lbl, "Connect");
+		lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
+		lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
+		lv_obj_add_event_cb(btn_con, wifi_connect_step2, LV_EVENT_CLICKED, main_widget);
+	}
 }
 
 static void wifi_scan_starting_heandler(lv_event_t *e)
@@ -366,6 +433,38 @@ static void wifi_scan_done(void)
 	}
 }
 
+static void info_handler(lv_event_t * e)
+{
+	lv_obj_t *mbox = lv_msgbox_create(NULL, "IP INFO", "0", 0, true);
+	lv_obj_t *msg_lbl = lv_msgbox_get_text(mbox);
+	lv_obj_center(mbox);
+
+	char ip[16] = {0};
+	char netmask[16] = {0};
+	char dns_server[16] = {0};
+	char gw[16] = {0};
+
+	esp_netif_ip_info_t ip_info;
+	esp_netif_get_ip_info(sta_netif, &ip_info);
+
+	esp_netif_dns_info_t dns;
+	esp_netif_get_dns_info(sta_netif, ESP_NETIF_DNS_MAIN, &dns);
+	esp_ip_addr_t ipaddr;
+	memcpy(&ipaddr.u_addr.ip4,  &dns.ip, 4);
+
+	esp_ip4addr_ntoa(&ip_info.ip, ip, 15);
+	esp_ip4addr_ntoa(&ip_info.netmask, netmask, 15);
+	esp_ip4addr_ntoa(&ipaddr.u_addr.ip4, dns_server, 15);
+	esp_ip4addr_ntoa(&ip_info.gw, gw, 15);
+
+	lv_label_set_text_fmt(msg_lbl,
+			"addr: %s\n"
+			"netmask: %s\n"
+			"dns: %s\n"
+			"gateway: %s",
+			ip, netmask, dns_server, gw);
+}
+
 void create_wifi_sub_page(lv_event_t *e)
 {
 	lv_obj_set_style_pad_hor(sub_wifi_page, 20, 0);
@@ -374,7 +473,17 @@ void create_wifi_sub_page(lv_event_t *e)
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
 	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
 	create_list(section, 495, 265, &(wifi_page_obj->list));
-	create_button(section, "Scan", 70, 40, &(wifi_page_obj->btn_scan));
+	create_button(section, "Scan", 128, 40, &(wifi_page_obj->btn_scan));
+
+	lv_obj_t *info_btn = lv_btn_create(lv_obj_get_parent(wifi_page_obj->btn_scan));
+	lv_obj_set_size(info_btn, 128, 40);
+	lv_obj_align(info_btn, LV_ALIGN_LEFT_MID, 0, 0);
+
+	lv_obj_add_event_cb(info_btn, info_handler, LV_EVENT_CLICKED, 0);
+
+	lv_obj_t *info_btn_lbl = lv_label_create(info_btn);
+	lv_label_set_text(info_btn_lbl, "Info");
+	lv_obj_center(info_btn_lbl);
 
 	if (glob_status_reg & STATUS_WIFI_STA_START)
 	{

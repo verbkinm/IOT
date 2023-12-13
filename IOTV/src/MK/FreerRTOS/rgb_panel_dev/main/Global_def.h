@@ -79,9 +79,10 @@
 // FS PATH
 #define	SD_ON				"A:/sdcard/panel/sd_on.png"
 #define	SD_OFF				"A:/sdcard/panel/sd_off.png"
-#define	WIFI_CONNECTED		"A:/sdcard/panel/wifi_on.png"
-#define	WIFI_DISCONNECTED	"A:/sdcard/panel/wifi_off.png"
-#define	WIFI_CONNECTING		"A:/sdcard/panel/wifi.png"
+#define	WIFI_CONNECTED		"A:/sdcard/panel/wifi_con.png"
+#define	WIFI_CONNECTING		"A:/sdcard/panel/wifi_ing.png"
+#define	WIFI_DISABLE		"A:/sdcard/panel/wifi_off.png"
+#define	WIFI_ENABLE			"A:/sdcard/panel/wifi_on.png"
 
 // Регистры BME280
 enum
@@ -172,6 +173,7 @@ enum STATUS_REG {
 	STATUS_IP_GOT = 0x08,
 	STATUS_WIFI_SCANNING = 0x10,
 	STATUS_WIFI_SCAN_DONE = 0x20,
+	STATUS_WIFI_AUTOCONNECT = 0x40,
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

@@ -9,7 +9,7 @@
 
 #include "esp_heap_caps.h"
 
-extern uint32_t glob_status_reg;
+//extern uint32_t glob_status_reg;
 extern lv_obj_t *glob_status_panel;
 
 static void creat_panel_status_icon(const char *path)
@@ -57,12 +57,9 @@ lv_obj_t *create_status_panel(lv_obj_t *parent)
 
 	//...
 	creat_panel_status_icon(SD_OFF);
-	creat_panel_status_icon(WIFI_DISCONNECTED);
+	creat_panel_status_icon(WIFI_DISABLE);
 
-	lv_obj_t *heap_lbl = lv_label_create(glob_status_panel);
-//	lv_obj_set_height(heap_lbl, 24);
-//	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
-
+	lv_label_create(glob_status_panel);
 
 	return glob_status_panel;
 }
