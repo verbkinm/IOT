@@ -16,8 +16,8 @@
 typedef uint8_t lv_menu_builder_variant_t;
 
 enum {
-	LV_MENU_ITEM_BUILDER_VARIANT_1,
-	LV_MENU_ITEM_BUILDER_VARIANT_2
+	LV_MENU_ITEM_BUILDER_VAR_1,
+	LV_MENU_ITEM_BUILDER_VAR_2
 };
 
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant);

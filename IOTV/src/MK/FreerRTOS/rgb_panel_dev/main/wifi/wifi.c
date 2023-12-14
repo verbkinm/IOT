@@ -12,14 +12,15 @@ extern uint32_t glob_status_reg;
 
 esp_netif_t *sta_netif;
 
-static TimerHandle_t reconnect_timer;
+//static TimerHandle_t reconnect_timer;
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-static void timer_toggle_callback( TimerHandle_t xTimer);
+//static void timer_toggle_callback( TimerHandle_t xTimer);
 //static void vTaskCode(void *pvParameters);
 
 void wifi_init(void)
 {
+
 	// Initialize NVS
 	esp_err_t ret = nvs_flash_init();
 	ESP_ERROR_CHECK(nvs_flash_erase());
@@ -53,10 +54,12 @@ void wifi_init(void)
 	//	};
 
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-	//	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta));
-	//	esp_wifi_stop();
 
-	//	xTaskCreate(vTaskCode, "task loop", 4096, 0, 10, 0);
+	read_wifi_conf();
+
+//	xTaskCreate(vTaskCode, "task loop", 4096, 0, 10, 0);
+	//	reconnect_timer = xTimerCreate("timer", 7000 / portTICK_PERIOD_MS, pdTRUE, 0, timer_toggle_callback);
+	//	xTimerStart(reconnect_timer, 2000 / portTICK_PERIOD_MS);
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -65,9 +68,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	{
 		printf("wifi sta start\n");
 		glob_status_reg |= STATUS_WIFI_STA_START;
-
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
+		glob_status_reg &= ~STATUS_WIFI_SCANNING;
+		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+		glob_status_reg &= ~STATUS_IP_GOT;
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_STOP)
 	{
@@ -75,6 +80,9 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		glob_status_reg &= ~STATUS_WIFI_STA_START;
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
+		glob_status_reg &= ~STATUS_WIFI_SCANNING;
+		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+		glob_status_reg &= ~STATUS_IP_GOT;
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
 	{
@@ -106,6 +114,9 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		printf("wifi sta disconnect\n");
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
+		//		glob_status_reg &= ~STATUS_WIFI_SCANNING;
+		//		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+		glob_status_reg &= ~STATUS_IP_GOT;
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_SCAN_DONE)
 	{
@@ -117,7 +128,6 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		//		etharp_find_addr(netif, ipaddr, eth_ret, ip_ret)
 
 		glob_status_reg |= STATUS_IP_GOT;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
 		printf("wifi sta got ip\n");
 		//		ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 		//		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
@@ -144,10 +154,10 @@ void read_wifi_conf()
 	char *on = NULL;
 	char *auto_on = NULL;
 	char *ssid = NULL;
-	char *bssid = NULL;
+	//	char *bssid = NULL;
 	char *pwd = NULL;
 
-	uint8_t bssid_arr[6];
+	//	uint8_t bssid_arr[6];
 
 	wifi_config_t wifi_config;
 	esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -171,17 +181,17 @@ void read_wifi_conf()
 		free(ssid);
 	}
 
-	// BSSID точки доступа
-	if (get_wifi_config_value("bssid", &bssid))
-	{
-		printf("read wifi conf. bssid = %s\n", bssid);
-
-		strmac_to_arr(bssid, bssid_arr);
-		memcpy(wifi_config.sta.bssid, bssid_arr, sizeof(bssid_arr));
-		wifi_config.sta.bssid_set = true;
-
-		free(bssid);
-	}
+	//	// BSSID точки доступа
+	//	if (get_wifi_config_value("bssid", &bssid))
+	//	{
+	//		printf("read wifi conf. bssid = %s\n", bssid);
+	//
+	//		strmac_to_arr(bssid, bssid_arr);
+	//		memcpy(wifi_config.sta.bssid, bssid_arr, sizeof(bssid_arr));
+	//		wifi_config.sta.bssid_set = true;
+	//
+	//		free(bssid);
+	//	}
 
 	// Пароль точки доступа
 	if (get_wifi_config_value("pwd", &pwd))
@@ -198,8 +208,6 @@ void read_wifi_conf()
 		if (strcmp("1", auto_on) == 0)
 		{
 			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
-			reconnect_timer = xTimerCreate("timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, timer_toggle_callback);
-			xTimerStart(reconnect_timer, 2000 / portTICK_PERIOD_MS);
 		}
 		else
 			glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
@@ -213,97 +221,96 @@ void read_wifi_conf()
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
 }
 
-static void timer_toggle_callback(TimerHandle_t xTimer)
-{
-	if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
-	{
-//		xTimerStop(reconnect_timer, 0);
-//		xTimerDelete(reconnect_timer, 0);
-		return;
-	}
-
-	if ( !(glob_status_reg & STATUS_WIFI_STA_START))
-		return;
-
-	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
-		return;
-
-	if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
-	{
-		wifi_config_t wifi_config;
-		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-
-		printf("ssid: ");
-		printf("%s", wifi_config.sta.ssid);
-
-		printf("\nbssid: ");
-		printf("%02x:%02x:%02x:%02x:%02x:%02x",
-				wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
-				wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
-
-		printf("\npwd: ");
-		printf("%s", wifi_config.sta.password);
-		printf("\n");
-
-		fflush(stdout);
-
-		//				ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-		//				ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-		//				esp_wifi_disconnect();
-
-		glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
-		esp_wifi_connect();
-	}
-}
+//static void timer_toggle_callback(TimerHandle_t xTimer)
+//{
+//	if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
+//	{
+//		//		xTimerStop(reconnect_timer, 0);
+//		//		xTimerDelete(reconnect_timer, 0);
+//		return;
+//	}
+//
+//	if ( !(glob_status_reg & STATUS_WIFI_STA_START))
+//		return;
+//
+//	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+//		return;
+//
+//	if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+//	{
+//		//		esp_wifi_clear_ap_list();
+//		//		esp_wifi_disconnect();
+//		//		esp_wifi_stop();
+//		//
+//		//		esp_wifi_start();
+//
+//		wifi_config_t wifi_config;
+//		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+//
+//		printf("ssid: ");
+//		printf("%s", wifi_config.sta.ssid);
+//
+//		printf("\nbssid: ");
+//		printf("%02x:%02x:%02x:%02x:%02x:%02x",
+//				wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
+//				wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
+//
+//		printf("\npwd: ");
+//		printf("%s", wifi_config.sta.password);
+//		printf("\n");
+//
+//		esp_wifi_connect();
+//		glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
+//		//		xTimerStop(reconnect_timer, 0);
+//	}
+//}
 
 //static void vTaskCode(void *pvParameters)
 //{
-//	vTaskDelay(2000 / portTICK_PERIOD_MS);
-//
 //	for( ;; )
 //	{
-//		printf("reconnect timer\n");
-//
-//		printf("STATUS_WIFI_STA_CONNECTED: %lu\n", glob_status_reg & STATUS_WIFI_STA_CONNECTED);
-//		printf("STATUS_WIFI_STA_CONNECTING: %lu\n", glob_status_reg & STATUS_WIFI_STA_CONNECTING);
-//		printf("STATUS_WIFI_STA_START: %lu\n", glob_status_reg & STATUS_WIFI_STA_START);
-//
-//		if (glob_status_reg & STATUS_WIFI_STA_START)
+//		if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
 //		{
-//			if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
-//				goto for_end;
+//			//		xTimerStop(reconnect_timer, 0);
+//			//		xTimerDelete(reconnect_timer, 0);
+//			goto for_end;
+//		}
 //
-//			if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
-//			{
-//				wifi_config_t wifi_config;
-//				esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+//		if ( !(glob_status_reg & STATUS_WIFI_STA_START))
+//			goto for_end;
 //
-//				printf("ssid: ");
-//				//				for (int i = 0; i < 32; ++i)
-//				printf("%s", wifi_config.sta.ssid);
+//		if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+//			goto for_end;
 //
-//				printf("\nbssid: ");
-//				printf("%02x:%02x:%02x:%02x:%02x:%02x",
-//						wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
-//						wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
+//		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+//		{
+//			//		esp_wifi_clear_ap_list();
+//			//		esp_wifi_disconnect();
+//			//		esp_wifi_stop();
+//			//
+//			//		esp_wifi_start();
 //
-//				printf("\npwd: ");
-//				//				for (int i = 0; i < 64; ++i)
-//				printf("%s", wifi_config.sta.password);
-//				printf("\n");
+//			wifi_config_t wifi_config;
+//			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 //
-//				fflush(stdout);
+//			printf("ssid: ");
+//			printf("%s", wifi_config.sta.ssid);
 //
-//				//				ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-//				//				ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-//				//				esp_wifi_disconnect();
+//			printf("\nbssid: ");
+//			printf("%02x:%02x:%02x:%02x:%02x:%02x",
+//					wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
+//					wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
 //
-//				//				glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
-//				//				esp_wifi_connect();
-//			}
+//			printf("\npwd: ");
+//			printf("%s", wifi_config.sta.password);
+//			printf("\n");
+//
+//			esp_wifi_connect();
+//			glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
+//			//		xTimerStop(reconnect_timer, 0);
 //		}
 //
 //		for_end:
-//		vTaskDelay(10000 / portTICK_PERIOD_MS);
+//		vTaskDelay(5000 / portTICK_PERIOD_MS);
 //	}
 //}

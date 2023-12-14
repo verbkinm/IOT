@@ -28,7 +28,7 @@ lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv
 		lv_obj_set_flex_grow(label, 1);
 	}
 
-	if(builder_variant == LV_MENU_ITEM_BUILDER_VARIANT_2 && icon && txt) {
+	if(builder_variant == LV_MENU_ITEM_BUILDER_VAR_2 && icon && txt) {
 		lv_obj_add_flag(img, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_swap(img, label);
 	}
@@ -38,7 +38,7 @@ lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv
 
 lv_obj_t * create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val)
 {
-	lv_obj_t * obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VARIANT_2);
+	lv_obj_t * obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VAR_2);
 
 	lv_obj_t * slider = lv_slider_create(obj);
 	lv_obj_set_flex_grow(slider, 1);
@@ -53,7 +53,7 @@ lv_obj_t * create_slider(lv_obj_t * parent, const char * icon, const char * txt,
 
 lv_obj_t *create_switch(lv_obj_t *parent, const char * icon, const char * txt, bool chk, lv_obj_t **switch_obj)
 {
-	lv_obj_t *obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VARIANT_1);
+	lv_obj_t *obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VAR_1);
 
 	*switch_obj = lv_switch_create(obj);
 	lv_obj_add_flag(*switch_obj, LV_OBJ_FLAG_EVENT_BUBBLE);
@@ -186,14 +186,14 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
 
 	lv_obj_t *wrap = lv_obj_create(obj);
-	lv_obj_set_size(wrap, 495, 310);
+	lv_obj_set_size(wrap, 495, 290);
 	lv_obj_set_style_border_color(wrap, lv_color_white(), 0);
 	lv_obj_set_scrollbar_mode(wrap, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_clear_flag(wrap, LV_OBJ_FLAG_SCROLLABLE);
 
 	lv_obj_t  *calendar = lv_calendar_create(wrap);
 
-	lv_obj_set_size(calendar, 300, 300);
+	lv_obj_set_size(calendar, 285, 285);
 	lv_obj_align(calendar, LV_ALIGN_CENTER, 0, 0);
 	lv_obj_add_event_cb(calendar, calendar_event_handler, LV_EVENT_ALL, NULL);
 

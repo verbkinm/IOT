@@ -17,7 +17,6 @@
 #include "netif/etharp.h"
 
 #include "freertos/task.h"
-#include "freertos/timers.h"
 
 #include "../Global_def.h"
 #include "../json/json_config.h"

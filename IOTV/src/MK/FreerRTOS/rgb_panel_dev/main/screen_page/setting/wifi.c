@@ -7,7 +7,7 @@
 
 #include "wifi.h"
 #include "lwip/netif.h"
-
+#include "settingpage.h"
 
 #define AP_INFO_ARR_SIZE 10
 
@@ -20,6 +20,7 @@ extern esp_netif_t *sta_netif;
 static const char *TAG = "wifi";
 
 static wifi_ap_record_t *ap_info = NULL;
+static bool autoconn_pause_from_scan = false;
 
 struct Wifi_page_obj {
 	lv_obj_t *btn_scan;
@@ -196,7 +197,7 @@ static void wifi_switch_heandler(lv_event_t *e)
 	if (lv_obj_has_state(wifi_page_obj->wifi_switch, LV_STATE_CHECKED))
 	{
 		esp_wifi_start();
-//		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
+		//		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
 		glob_status_reg |= STATUS_WIFI_STA_START;
 
 		bool res = set_wifi_config_value("on", "1");
@@ -391,7 +392,32 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 
 static void wifi_scan_starting_heandler(lv_event_t *e)
 {
-	//	esp_wifi_clear_ap_list();
+	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
+	printf("STATUS_WIFI_AUTOCONNECT = %d\n\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
+
+	// Если включено автосоединение - запоминаем его состояние и выключаем его
+	if (glob_status_reg & STATUS_WIFI_AUTOCONNECT)
+	{
+		autoconn_pause_from_scan = (glob_status_reg & STATUS_WIFI_AUTOCONNECT) > 0;
+		glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
+	}
+
+	// Если идёт соединение - останавливаем его.
+	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+	{
+		esp_wifi_disconnect();
+		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
+	}
+
+	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
+	printf("STATUS_WIFI_AUTOCONNECT = %d\n\n\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
+
+//	while ((glob_status_reg & STATUS_WIFI_STA_CONNECTING))
+//	{
+//		printf("wait connecting stop\n");
+//		vTaskDelay(1000 / portTICK_PERIOD_MS);
+//	}
+
 	esp_wifi_scan_start(NULL, false);
 
 	glob_status_reg |= STATUS_WIFI_SCANNING;
@@ -403,6 +429,19 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 
 static void wifi_scan_done(void)
 {
+	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
+	printf("STATUS_WIFI_AUTOCONNECT = %d\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
+
+	// Если была остановка автоподключение перед сканирование, включаем его
+	if (autoconn_pause_from_scan)
+	{
+		glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+		autoconn_pause_from_scan = false;
+	}
+
+	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
+	printf("STATUS_WIFI_AUTOCONNECT = %d\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
+
 	lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 
 	uint16_t number = AP_INFO_ARR_SIZE;
@@ -467,6 +506,9 @@ static void info_handler(lv_event_t * e)
 
 void create_wifi_sub_page(lv_event_t *e)
 {
+	free_wifi_sub_page();
+	clear_all_sub_page_child();
+
 	lv_obj_set_style_pad_hor(sub_wifi_page, 20, 0);
 	lv_obj_t *section = lv_menu_section_create(sub_wifi_page);
 
@@ -501,7 +543,6 @@ void create_wifi_sub_page(lv_event_t *e)
 	lv_obj_add_event_cb(wifi_page_obj->wifi_switch, wifi_switch_heandler, LV_EVENT_CLICKED, 0);
 
 	ap_info = calloc(AP_INFO_ARR_SIZE, sizeof(wifi_ap_record_t));
-
 	wifi_page_obj->timer = lv_timer_create(timer_loop, 1000, 0);
 }
 

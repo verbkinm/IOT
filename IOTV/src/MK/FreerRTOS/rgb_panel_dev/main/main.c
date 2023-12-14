@@ -3,6 +3,8 @@
 #include "I2C/i2c.h"
 #include "sd/sd_spi.h"
 
+#include "service/service.h"
+
 void app_main(void)
 {
 	sd_spi_init();
@@ -11,7 +13,7 @@ void app_main(void)
 
 	wifi_init();
 
-	read_wifi_conf();
+	rgb_panel_start_services();
 
 	while (1)
 	{

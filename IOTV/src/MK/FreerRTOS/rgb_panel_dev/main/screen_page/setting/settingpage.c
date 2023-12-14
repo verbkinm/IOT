@@ -12,28 +12,31 @@ extern void menuPageInit(void);
 
 extern uint8_t glob_currentPage;
 
-extern struct DateTime glob_date_time;
-
-
-static lv_obj_t *menu;
+lv_obj_t *menu;
 static lv_obj_t *root_page;
 
-static lv_obj_t *sub_date_time_page;
-static lv_obj_t *sub_display_page;
 
-static lv_obj_t *sub_about_page;
+lv_obj_t *sub_date_time_page;
+lv_obj_t *sub_sub_time_page;
+lv_obj_t *sub_sub_date_page;
+lv_obj_t *sub_sub_sntp_page;
+
+lv_obj_t *sub_display_page;
+lv_obj_t *sub_wifi_page;
+
+lv_obj_t *sub_about_page;
 //static lv_obj_t *sub_software_info_page;
 //static lv_obj_t *sub_legal_info_page;
 
 static char *root_page_title = "Settings";
 static char *date_time_page_title = "Date and time";
 static char *display_page_title = "Display";
+static char *sntp_page_title = "SNTP";
 static char *wifi_page_title = "WIFI";
-
-lv_obj_t *sub_wifi_page;
+static char *time_page_title = "Time";
+static char *date_page_title = "Date";
 
 static void back_event_handler(lv_event_t * e);
-static void create_date_time_sub_page(lv_event_t *e);
 static void create_display_sub_page(lv_event_t *e);
 
 static void create_sub_pages(void);
@@ -52,30 +55,18 @@ static void back_event_handler(lv_event_t * e)
 	if(lv_menu_back_btn_is_root(_menu, obj))
 	{
 		((lv_menu_page_t *)root_page)->title = NULL;
+
 		((lv_menu_page_t *)sub_date_time_page)->title = NULL;
+		((lv_menu_page_t *)sub_sub_time_page)->title = NULL;
+		((lv_menu_page_t *)sub_sub_date_page)->title = NULL;
+		((lv_menu_page_t *)sub_sub_sntp_page)->title = NULL;
+
 		((lv_menu_page_t *)sub_display_page)->title = NULL;
 		((lv_menu_page_t *)sub_wifi_page)->title = NULL;
 
 		menuPageInit();
 		free_wifi_sub_page();
 	}
-}
-
-static void save_date_time(lv_event_t *e)
-{
-	lv_obj_t *section = (lv_obj_t *)e->user_data;
-
-	glob_date_time.hour = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 1));
-	glob_date_time.minutes = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 1), 0), 1));
-	glob_date_time.seconds = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 2), 0), 0));
-	//
-	lv_calendar_t *calendar = (lv_calendar_t *)lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 3), 0), 0);
-	//	printf("cal today %d\n", calendar->today.year);
-	glob_date_time.year = calendar->today.year - 1900;
-	glob_date_time.month = calendar->today.month;
-	glob_date_time.date = calendar->today.day;
-
-	//	DS3231_SetDataTime(&glob_date_time);
 }
 
 //static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
@@ -93,42 +84,30 @@ static void save_date_time(lv_event_t *e)
 static void create_sub_pages(void)
 {
 	sub_date_time_page = lv_menu_page_create(menu, date_time_page_title);
+	sub_sub_time_page = lv_menu_page_create(menu, time_page_title);
+	sub_sub_date_page = lv_menu_page_create(menu, date_page_title);
+	sub_sub_sntp_page = lv_menu_page_create(menu, sntp_page_title);
+
 	sub_display_page = lv_menu_page_create(menu, display_page_title);
 	sub_wifi_page = lv_menu_page_create(menu, wifi_page_title);
-
-	//	sub_software_info_page = lv_menu_page_create(menu, NULL);
-	//	lv_obj_set_style_pad_hor(sub_software_info_page, 20, 0);
-	//	section = lv_menu_section_create(sub_software_info_page);
-	//	create_text(section, NULL, "Version 1.0", LV_MENU_ITEM_BUILDER_VARIANT_1);
-	//
-	//	sub_legal_info_page = lv_menu_page_create(menu, NULL);
-	//	lv_obj_set_style_pad_hor(sub_legal_info_page, 20, 0);
-	//	section = lv_menu_section_create(sub_legal_info_page);
-	//
-	//	for(uint32_t i = 0; i < 15; i++)
-	//	{
-	//		create_text(section, NULL,
-	//				"This is a long long long long long long long long long text, if it is long enough it may scroll.",
-	//				LV_MENU_ITEM_BUILDER_VARIANT_1);
-	//	}
-	//
-	//	sub_about_page = lv_menu_page_create(menu, NULL);
-	//	lv_obj_set_style_pad_hor(sub_about_page, 20, 0);
-	//	lv_menu_separator_create(sub_about_page);
-	//
-	//	section = lv_menu_section_create(sub_about_page);
-	//
-	//	cont = create_text(section, LV_SYMBOL_RIGHT, "Software information", LV_MENU_ITEM_BUILDER_VARIANT_1);
-	//	lv_menu_set_load_page_event(menu, cont, sub_software_info_page);
-	//
-	//	cont = create_text(section, LV_SYMBOL_RIGHT, "Legal information", LV_MENU_ITEM_BUILDER_VARIANT_1);
-	//	lv_menu_set_load_page_event(menu, cont, sub_legal_info_page);
 }
 
-static void clear_all_sub_page_child(void)
+void clear_all_sub_page_child(void)
 {
 	for (int i = 0; i < lv_obj_get_child_cnt(sub_date_time_page); ++i)
 		lv_obj_del(lv_obj_get_child(sub_date_time_page, 0));
+
+	for (int i = 0; i < lv_obj_get_child_cnt(sub_sub_time_page); ++i)
+		lv_obj_del(lv_obj_get_child(sub_sub_time_page, 0));
+
+	for (int i = 0; i < lv_obj_get_child_cnt(sub_sub_date_page); ++i)
+		lv_obj_del(lv_obj_get_child(sub_sub_date_page, 0));
+
+	for (int i = 0; i < lv_obj_get_child_cnt(sub_sub_sntp_page); ++i)
+		lv_obj_del(lv_obj_get_child(sub_sub_sntp_page, 0));
+
+
+
 
 	for (int i = 0; i < lv_obj_get_child_cnt(sub_display_page); ++i)
 		lv_obj_del(lv_obj_get_child(sub_display_page, 0));
@@ -147,22 +126,6 @@ static void clear_all_sub_page_child(void)
 	//		lv_obj_del(lv_obj_get_child(sub_legal_info_page, 0));
 }
 
-static void create_date_time_sub_page(lv_event_t *e)
-{
-	clear_all_sub_page_child();
-
-	lv_obj_set_style_pad_hor((lv_obj_t *)sub_date_time_page, 20, 0);
-	lv_obj_t *section = lv_menu_section_create((lv_obj_t *)sub_date_time_page);
-	create_spinbox(section, "Hour:\t", glob_date_time.hour, 0, 23);
-	create_spinbox(section, "Minutes:", glob_date_time.minutes, 0, 59);
-	create_spinbox(section, "Seconds:", glob_date_time.seconds, 0, 59);
-	create_calendar(section);
-
-	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Save", 128, 40, &obj_btn);
-	lv_obj_add_event_cb(obj_btn, save_date_time, LV_EVENT_CLICKED, section);
-}
-
 static void create_display_sub_page(lv_event_t *e)
 {
 	clear_all_sub_page_child();
@@ -175,30 +138,30 @@ static void create_display_sub_page(lv_event_t *e)
 
 static void create_date_time_page(lv_obj_t *parent)
 {
-	lv_obj_t *cont = create_text(parent, LV_SYMBOL_LIST, "Date and Time", LV_MENU_ITEM_BUILDER_VARIANT_1);
+	lv_obj_t *cont = create_text(parent, LV_SYMBOL_LIST, "Date and Time", LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_date_time_page);
 	lv_obj_add_event_cb(cont, create_date_time_sub_page, LV_EVENT_CLICKED, cont);
 }
 
 static void create_display_page(lv_obj_t *parent)
 {
-	lv_obj_t *cont = create_text(parent, LV_SYMBOL_SETTINGS, "Display", LV_MENU_ITEM_BUILDER_VARIANT_1);
+	lv_obj_t *cont = create_text(parent, LV_SYMBOL_SETTINGS, "Display", LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_display_page);
 	lv_obj_add_event_cb(cont, create_display_sub_page, LV_EVENT_CLICKED, cont);
 }
 
 static void create_wifi_page(lv_obj_t *parent)
 {
-	lv_obj_t *cont = create_text(parent, LV_SYMBOL_WIFI, "WIFI", LV_MENU_ITEM_BUILDER_VARIANT_1);
+	lv_obj_t *cont = create_text(parent, LV_SYMBOL_WIFI, "WIFI", LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_wifi_page);
 	lv_obj_add_event_cb(cont, create_wifi_sub_page, LV_EVENT_CLICKED, cont);
 }
 
 static void create_other_pages(void)
 {
-	create_text(root_page, NULL, "Others", LV_MENU_ITEM_BUILDER_VARIANT_1);
+	create_text(root_page, NULL, "Others", LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_obj_t *section = lv_menu_section_create(root_page);
-	lv_obj_t *cont = create_text(section, NULL, "About", LV_MENU_ITEM_BUILDER_VARIANT_1);
+	lv_obj_t *cont = create_text(section, NULL, "About", LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_about_page);
 }
 

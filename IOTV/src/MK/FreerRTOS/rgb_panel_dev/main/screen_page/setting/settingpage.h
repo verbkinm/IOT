@@ -21,9 +21,11 @@
 #include "esp_wifi.h"
 #include "I2C/DS3231.h"
 #include "wifi.h"
+#include "date_time.h"
 #include "../../status_panel/status_panel.h"
 
 void settingPageInit(void);
 void drawSettingPage(void);
+void clear_all_sub_page_child(void);
 
 #endif /* MAIN_SCREEN_PAGE_SETTINGPAGE_H_ */

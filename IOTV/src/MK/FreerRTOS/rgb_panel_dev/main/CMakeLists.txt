@@ -15,5 +15,8 @@ idf_component_register(SRCS "main.c"
 							"screen_page/setting/settingpage.c"
 							"screen_page/setting/elements.c"
 							"screen_page/setting/wifi.c"
+							"screen_page/setting/date_time.c"
 							"json/json_config.c"
+							"service/service.c"
+							"service/wifi/wifi.c"
                        INCLUDE_DIRS ".")
