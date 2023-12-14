@@ -103,11 +103,16 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		sprintf(pwd_str, "%s", wifi_config.sta.password);
 		sprintf(ssid_str, "%s", wifi_config.sta.ssid);
 
+		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
+		printf("ap_info->ssid %s\n", ap_info->ssid);
+
 		set_wifi_config_value("ssid", ssid_str);
 		set_wifi_config_value("bssid", mac_str);
-		set_wifi_config_value("pwd", pwd_str);
+		bool res = set_wifi_config_value("pwd", pwd_str);
 		set_wifi_config_value("auto", "1");
 		glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+
+		printf("write pwd %d, pwd = %s\n", (int)res, pwd_str);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
 	{

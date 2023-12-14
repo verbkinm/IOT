@@ -48,7 +48,6 @@ static void create_other_pages(void);
 
 static void back_event_handler(lv_event_t * e)
 {
-	printf("back setting\n");
 	lv_obj_t *obj = lv_event_get_target(e);
 	lv_obj_t *_menu = lv_event_get_user_data(e);
 

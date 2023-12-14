@@ -197,12 +197,14 @@ static void wifi_switch_heandler(lv_event_t *e)
 	if (lv_obj_has_state(wifi_page_obj->wifi_switch, LV_STATE_CHECKED))
 	{
 		esp_wifi_start();
-		//		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
+		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
 		glob_status_reg |= STATUS_WIFI_STA_START;
 
 		bool res = set_wifi_config_value("on", "1");
 		if (!res)
 			printf("on not write\n");
+
+		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 	}
 	else
 	{
@@ -220,11 +222,12 @@ static void wifi_switch_heandler(lv_event_t *e)
 static void wifi_connect_step2(lv_event_t *e)
 {
 	lv_obj_t *main_widget = e->user_data;
+	wifi_ap_record_t *ap_info = main_widget->user_data;
 	lv_obj_t *text_area = lv_obj_get_child(main_widget, 2);
 
 	const char *pwd = lv_textarea_get_text(text_area);
 
-	if (strlen(pwd) < 8)
+	if ( (strlen(pwd) < 8) && (ap_info->authmode != WIFI_AUTH_OPEN) )
 	{
 		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
 		lv_obj_center(mbox1);
@@ -237,7 +240,7 @@ static void wifi_connect_step2(lv_event_t *e)
 		lv_obj_set_y(glob_busy_indicator, LCD_PANEL_STATUS_H);
 	}
 
-	wifi_ap_record_t *ap_info = main_widget->user_data;
+
 	wifi_config_t wifi_config = {
 			.sta = {
 					//					.ssid = ap_info->ssid,
@@ -392,9 +395,6 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 
 static void wifi_scan_starting_heandler(lv_event_t *e)
 {
-	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
-	printf("STATUS_WIFI_AUTOCONNECT = %d\n\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
-
 	// Если включено автосоединение - запоминаем его состояние и выключаем его
 	if (glob_status_reg & STATUS_WIFI_AUTOCONNECT)
 	{
@@ -409,15 +409,6 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
 	}
 
-	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
-	printf("STATUS_WIFI_AUTOCONNECT = %d\n\n\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
-
-//	while ((glob_status_reg & STATUS_WIFI_STA_CONNECTING))
-//	{
-//		printf("wait connecting stop\n");
-//		vTaskDelay(1000 / portTICK_PERIOD_MS);
-//	}
-
 	esp_wifi_scan_start(NULL, false);
 
 	glob_status_reg |= STATUS_WIFI_SCANNING;
@@ -429,18 +420,12 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 
 static void wifi_scan_done(void)
 {
-	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
-	printf("STATUS_WIFI_AUTOCONNECT = %d\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
-
 	// Если была остановка автоподключение перед сканирование, включаем его
 	if (autoconn_pause_from_scan)
 	{
 		glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
 		autoconn_pause_from_scan = false;
 	}
-
-	printf("autoconn_pause_from_scan = %d\n", (int)autoconn_pause_from_scan);
-	printf("STATUS_WIFI_AUTOCONNECT = %d\n", (int)(glob_status_reg & STATUS_WIFI_AUTOCONNECT));
 
 	lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 
@@ -527,23 +512,24 @@ void create_wifi_sub_page(lv_event_t *e)
 	lv_label_set_text(info_btn_lbl, "Info");
 	lv_obj_center(info_btn_lbl);
 
-	if (glob_status_reg & STATUS_WIFI_STA_START)
-	{
-		lv_obj_clear_state(wifi_page_obj->list, LV_STATE_DISABLED);
-		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-		lv_event_send(wifi_page_obj->list, LV_EVENT_CLICKED, 0);
-	}
-	else
-	{
-		lv_obj_add_state(wifi_page_obj->list, LV_STATE_DISABLED);
-		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-	}
-
 	lv_obj_add_event_cb(wifi_page_obj->btn_scan, wifi_scan_starting_heandler, LV_EVENT_CLICKED, 0);
 	lv_obj_add_event_cb(wifi_page_obj->wifi_switch, wifi_switch_heandler, LV_EVENT_CLICKED, 0);
 
+	if (glob_status_reg & STATUS_WIFI_STA_START)
+	{
+//		lv_obj_clear_state(wifi_page_obj->list, LV_STATE_DISABLED);
+		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
+//		wifi_scan_starting_heandler(0);
+		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
+	}
+	else
+	{
+//		lv_obj_add_state(wifi_page_obj->list, LV_STATE_DISABLED);
+		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
+	}
+
 	ap_info = calloc(AP_INFO_ARR_SIZE, sizeof(wifi_ap_record_t));
-	wifi_page_obj->timer = lv_timer_create(timer_loop, 1000, 0);
+	wifi_page_obj->timer = lv_timer_create(timer_loop, 500, 0);
 }
 
 static void timer_loop(lv_timer_t *timer)

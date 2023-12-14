@@ -32,6 +32,7 @@ void wifi_service_task(void *pvParameters)
 			wifi_config_t wifi_config;
 			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
+//			printf("auth mode: %d\n", (int)wifi_config.sta.);
 			printf("ssid: ");
 			printf("%s", wifi_config.sta.ssid);
 
