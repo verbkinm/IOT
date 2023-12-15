@@ -1,8 +1,6 @@
 #ifndef MAIN_GLOBAL_DEF_H_
 #define MAIN_GLOBAL_DEF_H_
 
-#include <stdint.h>
-
 // TCP
 #define PORT                        		8888
 #define KEEPALIVE_IDLE              		5
@@ -11,15 +9,15 @@
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
 // WIFI event
-#define WIFI_CONNECTED_BIT					BIT0
-#define WIFI_DISCONNECTED_BIT 				BIT1
-#define WIFI_FAIL_BIT      					BIT2
+//#define WIFI_CONNECTED_BIT					BIT0
+//#define WIFI_DISCONNECTED_BIT 				BIT1
+//#define WIFI_FAIL_BIT      					BIT2
 
 // WIFI
 //#define WIFI_SSID							"realme 9 Pro+"
 //#define WIFI_PASSWORD						"y3z4pfrm"
-#define WIFI_SSID							"TP-Link_A6BE"
-#define WIFI_PASSWORD						"41706831"
+//#define WIFI_SSID							"TP-Link_A6BE"
+//#define WIFI_PASSWORD						"41706831"
 
 // I2C
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_20				   /*!< GPIO number used for I2C master clock */
@@ -83,6 +81,9 @@
 #define	WIFI_CONNECTING		"A:/sdcard/panel/wifi_ing.png"
 #define	WIFI_DISABLE		"A:/sdcard/panel/wifi_off.png"
 #define	WIFI_ENABLE			"A:/sdcard/panel/wifi_on.png"
+
+#define WIFI_CONF_PATH		"/sdcard/wifi.jsn"
+#define SNTP_CONF_PATH		"/sdcard/sntp.jsn"
 
 // Регистры BME280
 enum
@@ -165,6 +166,7 @@ enum PAGE_NAME {
     PAGE_CHARTS,
     PAGE_SETTINGS
 };
+
 // Глобалные флаги статусов
 enum STATUS_REG {
 	STATUS_WIFI_STA_START = 0x01,

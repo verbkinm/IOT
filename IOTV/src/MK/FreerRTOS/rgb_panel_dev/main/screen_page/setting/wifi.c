@@ -296,6 +296,13 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_label_set_text(btn_close_lbl, LV_SYMBOL_CLOSE);
 	lv_obj_center(btn_close_lbl);
 
+	// поле ввода пароля
+	lv_obj_t *ta;
+	ta = lv_textarea_create(main_widget);
+	lv_obj_set_size(ta, 760, 60);
+	lv_textarea_set_max_length(ta, 64);
+	lv_textarea_set_placeholder_text(ta, "Enter wifi password");
+
 	// клавиатура
 	lv_obj_t *kb = lv_keyboard_create(main_widget);
 	lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
@@ -303,16 +310,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_obj_add_event_cb(kb, delete_obj_handler, LV_EVENT_CANCEL, main_widget);
 	lv_obj_add_event_cb(kb, wifi_connect_step2, LV_EVENT_READY, main_widget);
 
-	// поле ввода пароля
-	lv_obj_t *ta;
-	ta = lv_textarea_create(main_widget);
-	lv_obj_set_size(ta, 760, 60);
 	lv_obj_align_to(ta, kb, LV_ALIGN_OUT_TOP_MID, 0, -10);
-
-	lv_textarea_set_max_length(ta, 64);
-	lv_textarea_set_placeholder_text(ta, "Enter wifi password");
-	//	lv_obj_add_event_cb(ta, ta_event_cb, LV_EVENT_ALL, kb);
-
 	lv_keyboard_set_textarea(kb, ta);
 
 	// текстовые поля с информацией от wifi
@@ -452,6 +450,9 @@ static void wifi_scan_done(void)
 	for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
 	{
 		lv_obj_t *btn = lv_list_add_btn(wifi_page_obj->list, 0, 0);
+//		lv_obj_remove_local_style_prop(btn, LV_LAYOUT_FLEX, 0);
+//		lv_obj_remove_local_style_prop(btn, LV_STYLE_FLEX_FLOW, 0);
+
 		wifi_list_item(&btn, 495, 50, &(ap_info[i]));
 		lv_obj_add_event_cb(btn, wifi_connect_step1, LV_EVENT_CLICKED, &(ap_info[i]));
 	}
@@ -481,12 +482,21 @@ static void info_handler(lv_event_t * e)
 	esp_ip4addr_ntoa(&ipaddr.u_addr.ip4, dns_server, 15);
 	esp_ip4addr_ntoa(&ip_info.gw, gw, 15);
 
+	uint8_t mac[6];
+	esp_read_mac(mac, ESP_MAC_WIFI_STA);
+
+	char mac_str[18] = {0};
+	sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+			mac[0], mac[1], mac[2],
+			mac[3], mac[4], mac[5]);
+
 	lv_label_set_text_fmt(msg_lbl,
+			"mac: %s\n"
 			"addr: %s\n"
 			"netmask: %s\n"
 			"dns: %s\n"
 			"gateway: %s",
-			ip, netmask, dns_server, gw);
+			mac_str, ip, netmask, dns_server, gw);
 }
 
 void create_wifi_sub_page(lv_event_t *e)

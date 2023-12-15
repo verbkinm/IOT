@@ -5,7 +5,6 @@
  *      Author: user
  */
 
-
 #include "wifi.h"
 
 extern uint32_t glob_status_reg;

@@ -6,6 +6,7 @@
  */
 
 #include <lvgl.h>
+#include "esp_mac.h"
 
 #include "../../json/json_config.h"
 #include "elements.h"

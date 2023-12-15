@@ -9,7 +9,7 @@
 #define MAIN_SERVICE_SERVICE_H_
 
 #include "wifi/wifi.h"
-//#include "sntp/sntp.h"
+#include "sntp/sntp.h"
 //
 void rgb_panel_start_services(void);
 

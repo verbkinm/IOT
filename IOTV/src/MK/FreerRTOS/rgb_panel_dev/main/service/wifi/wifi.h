@@ -9,6 +9,7 @@
 #define MAIN_SERVICE_WIFI_WIFI_H_
 
 #include "esp_wifi.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
 #include "../../Global_def.h"

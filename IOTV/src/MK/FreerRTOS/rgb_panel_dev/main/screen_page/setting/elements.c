@@ -36,7 +36,7 @@ lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv
 	return obj;
 }
 
-lv_obj_t * create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val)
+lv_obj_t *create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val)
 {
 	lv_obj_t * obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VAR_2);
 
@@ -66,11 +66,13 @@ lv_obj_t *create_list(lv_obj_t *parent, lv_coord_t width, lv_coord_t height, lv_
 {
 	lv_obj_t *obj = lv_menu_cont_create(parent);
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
+
 	lv_obj_t *wrap = lv_obj_create(obj);
 	lv_obj_set_style_pad_all(wrap, 0, 0);
 	lv_obj_set_scroll_dir(wrap, LV_DIR_NONE);
 	lv_obj_set_size(wrap, width, height);
 	lv_obj_set_style_border_width(wrap, 0, 0);
+
 	*obj_list = lv_list_create(wrap);
 	lv_obj_set_scroll_dir(*obj_list, LV_DIR_VER);
 	lv_obj_set_size(*obj_list, width, height);

@@ -12,15 +12,11 @@ extern uint32_t glob_status_reg;
 
 esp_netif_t *sta_netif;
 
-//static TimerHandle_t reconnect_timer;
-
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-//static void timer_toggle_callback( TimerHandle_t xTimer);
-//static void vTaskCode(void *pvParameters);
+static void check_wifi_conf_file(void);
 
 void wifi_init(void)
 {
-
 	// Initialize NVS
 	esp_err_t ret = nvs_flash_init();
 	ESP_ERROR_CHECK(nvs_flash_erase());
@@ -55,11 +51,8 @@ void wifi_init(void)
 
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
+	check_wifi_conf_file();
 	read_wifi_conf();
-
-//	xTaskCreate(vTaskCode, "task loop", 4096, 0, 10, 0);
-	//	reconnect_timer = xTimerCreate("timer", 7000 / portTICK_PERIOD_MS, pdTRUE, 0, timer_toggle_callback);
-	//	xTimerStart(reconnect_timer, 2000 / portTICK_PERIOD_MS);
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -154,12 +147,47 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		printf("wifi other event: %s\n", event_base);
 }
 
-void read_wifi_conf()
+static void check_wifi_conf_file(void)
+{
+	cJSON *root = cJSON_CreateObject();
+
+	cJSON *wifi = cJSON_CreateObject();
+	cJSON_AddItemToObjectCS(root, "wifi", wifi);
+
+	cJSON *on_obj = cJSON_CreateString("0");
+	cJSON_AddItemToObject(wifi, "on", on_obj);
+
+	cJSON *auto_con_obj = cJSON_CreateString("0");
+	cJSON_AddItemToObjectCS(wifi, "auto", auto_con_obj);
+
+	cJSON *ssid_obj = cJSON_CreateString("");
+	cJSON_AddItemToObjectCS(wifi, "ssid", ssid_obj);
+
+	cJSON *pwd_obj = cJSON_CreateString("");
+	cJSON_AddItemToObjectCS(wifi, "pwd", pwd_obj);
+
+	get_wifi_config_value("on", &on_obj->valuestring);
+	get_wifi_config_value("auto", &auto_con_obj->valuestring);
+	get_wifi_config_value("ssid", &ssid_obj->valuestring);
+	get_wifi_config_value("pwd", &pwd_obj->valuestring);
+
+    FILE *file = fopen(WIFI_CONF_PATH, "w");
+    if (file == NULL)
+        printf("cant write \"%s\" file!\n", WIFI_CONF_PATH);
+    else
+    {
+    	fprintf(file, "%s", cJSON_Print(root));
+    	fclose(file);
+    }
+
+	cJSON_Delete(root);
+}
+
+void read_wifi_conf(void)
 {
 	char *on = NULL;
 	char *auto_on = NULL;
 	char *ssid = NULL;
-	//	char *bssid = NULL;
 	char *pwd = NULL;
 
 	//	uint8_t bssid_arr[6];
@@ -180,142 +208,28 @@ void read_wifi_conf()
 	// SSID точки доступа
 	if (get_wifi_config_value("ssid", &ssid))
 	{
-		printf("read wifi conf. ssid = %s\n", ssid);
 		strcpy((char *)wifi_config.sta.ssid, ssid);
-
+		printf("read wifi conf. ssid = %s\n", ssid);
 		free(ssid);
 	}
-
-	//	// BSSID точки доступа
-	//	if (get_wifi_config_value("bssid", &bssid))
-	//	{
-	//		printf("read wifi conf. bssid = %s\n", bssid);
-	//
-	//		strmac_to_arr(bssid, bssid_arr);
-	//		memcpy(wifi_config.sta.bssid, bssid_arr, sizeof(bssid_arr));
-	//		wifi_config.sta.bssid_set = true;
-	//
-	//		free(bssid);
-	//	}
 
 	// Пароль точки доступа
 	if (get_wifi_config_value("pwd", &pwd))
 	{
-		printf("read wifi conf. pwd = %s\n", pwd);
 		strcpy((char *)wifi_config.sta.password, pwd);
-
+		printf("read wifi conf. pwd = %s\n", pwd);
 		free(pwd);
 	}
 
 	// Автоматическое подключение
 	if (get_wifi_config_value("auto", &auto_on))
 	{
-		if (strcmp("1", auto_on) == 0)
-		{
-			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
-		}
+		if (strcmp("1", auto_on) == 0)			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
 		else
 			glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
-
-
 		printf("read wifi conf. auto = %s\n", auto_on);
-
 		free(auto_on);
 	}
 
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
 }
-
-//static void timer_toggle_callback(TimerHandle_t xTimer)
-//{
-//	if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
-//	{
-//		//		xTimerStop(reconnect_timer, 0);
-//		//		xTimerDelete(reconnect_timer, 0);
-//		return;
-//	}
-//
-//	if ( !(glob_status_reg & STATUS_WIFI_STA_START))
-//		return;
-//
-//	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
-//		return;
-//
-//	if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
-//	{
-//		//		esp_wifi_clear_ap_list();
-//		//		esp_wifi_disconnect();
-//		//		esp_wifi_stop();
-//		//
-//		//		esp_wifi_start();
-//
-//		wifi_config_t wifi_config;
-//		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-//
-//		printf("ssid: ");
-//		printf("%s", wifi_config.sta.ssid);
-//
-//		printf("\nbssid: ");
-//		printf("%02x:%02x:%02x:%02x:%02x:%02x",
-//				wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
-//				wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
-//
-//		printf("\npwd: ");
-//		printf("%s", wifi_config.sta.password);
-//		printf("\n");
-//
-//		esp_wifi_connect();
-//		glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
-//		//		xTimerStop(reconnect_timer, 0);
-//	}
-//}
-
-//static void vTaskCode(void *pvParameters)
-//{
-//	for( ;; )
-//	{
-//		if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
-//		{
-//			//		xTimerStop(reconnect_timer, 0);
-//			//		xTimerDelete(reconnect_timer, 0);
-//			goto for_end;
-//		}
-//
-//		if ( !(glob_status_reg & STATUS_WIFI_STA_START))
-//			goto for_end;
-//
-//		if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
-//			goto for_end;
-//
-//		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
-//		{
-//			//		esp_wifi_clear_ap_list();
-//			//		esp_wifi_disconnect();
-//			//		esp_wifi_stop();
-//			//
-//			//		esp_wifi_start();
-//
-//			wifi_config_t wifi_config;
-//			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-//
-//			printf("ssid: ");
-//			printf("%s", wifi_config.sta.ssid);
-//
-//			printf("\nbssid: ");
-//			printf("%02x:%02x:%02x:%02x:%02x:%02x",
-//					wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
-//					wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
-//
-//			printf("\npwd: ");
-//			printf("%s", wifi_config.sta.password);
-//			printf("\n");
-//
-//			esp_wifi_connect();
-//			glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
-//			//		xTimerStop(reconnect_timer, 0);
-//		}
-//
-//		for_end:
-//		vTaskDelay(5000 / portTICK_PERIOD_MS);
-//	}
-//}

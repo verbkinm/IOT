@@ -7,9 +7,6 @@
 
 #include "json_config.h"
 
-#define WIFI_CONF_PATH	"/sdcard/wifi.jsn"
-#define SNTP_CONF_PATH	"/sdcard/sntp.jsn"
-
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value);
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value);
 
@@ -40,12 +37,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	if (jkey == NULL)
 		goto bad_end;
 
-//	cJSON_
 	cJSON_SetValuestring(jkey, value);
-
-	size_t len = strlen(cJSON_GetStringValue(jkey));
-	if (len == 0)
-		goto bad_end;
 
 	char *print = NULL;
 	print = cJSON_Print(monitor);

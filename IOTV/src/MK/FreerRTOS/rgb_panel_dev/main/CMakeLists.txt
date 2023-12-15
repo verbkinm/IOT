@@ -19,4 +19,5 @@ idf_component_register(SRCS "main.c"
 							"json/json_config.c"
 							"service/service.c"
 							"service/wifi/wifi.c"
+							"service/sntp/sntp.c"
                        INCLUDE_DIRS ".")
