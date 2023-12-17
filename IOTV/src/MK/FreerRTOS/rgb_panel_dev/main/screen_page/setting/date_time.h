@@ -16,4 +16,6 @@ void create_time_page(void);
 void create_date_page(void);
 void create_sntp_page(void);
 
+void free_date_time_sub_page(void);
+
 #endif /* MAIN_SCREEN_PAGE_SETTING_DATE_TIME_H_ */

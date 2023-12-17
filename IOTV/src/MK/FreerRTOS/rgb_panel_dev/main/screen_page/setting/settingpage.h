@@ -25,6 +25,7 @@
 #include "../../status_panel/status_panel.h"
 
 void settingPageInit(void);
+void setting_page_deinit(void);
 void drawSettingPage(void);
 void clear_all_sub_page_child(void);
 

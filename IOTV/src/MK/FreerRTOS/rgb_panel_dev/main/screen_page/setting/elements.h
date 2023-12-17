@@ -11,7 +11,6 @@
 #include "lvgl.h"
 #include "Global_def.h"
 #include "I2C/DS3231.h"
-#include "esp_wifi.h"
 
 typedef uint8_t lv_menu_builder_variant_t;
 
@@ -28,9 +27,16 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 lv_obj_t *create_list(lv_obj_t *parent, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_list);
 lv_obj_t *create_calendar(lv_obj_t *parent);
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);
+lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea,
+		lv_event_cb_t cancel_event_cb,
+		lv_event_cb_t ready_event_cb,
+		lv_event_cb_t defocused_event_cb);
 void clear_busy_indicator(lv_obj_t **indicator);
 
 void delete_obj_handler(lv_event_t * e);
 void delete_timer_handler(lv_event_t * e);
+
+void hide_obj_handler(lv_event_t *e);
+void show_obj_handler(lv_event_t *e);
 
 #endif /* MAIN_SCREEN_PAGE_SETTING_ELEMENTS_H_ */

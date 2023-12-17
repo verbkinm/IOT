@@ -209,13 +209,27 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 
 void delete_obj_handler(lv_event_t * e)
 {
+	printf("delete\n");
 	lv_obj_del(e->user_data);
 	e->user_data = NULL;
 }
 
-void delete_timer_handler(lv_event_t * e)
+void delete_timer_handler(lv_event_t *e)
 {
 	lv_timer_del(e->user_data);
+}
+
+void hide_obj_handler(lv_event_t *e)
+{
+	lv_obj_add_flag(e->user_data, LV_OBJ_FLAG_HIDDEN);
+	printf("obj: %p\n", e->user_data);
+	printf("obj: %p\n", e->current_target);
+	printf("obj: %p\n", e->target);
+}
+
+void show_obj_handler(lv_event_t *e)
+{
+	lv_obj_clear_flag(e->user_data, LV_OBJ_FLAG_HIDDEN);
 }
 
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa)
@@ -231,12 +245,33 @@ lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg
 	return spinner_widget;
 }
 
+lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea,
+		lv_event_cb_t cancel_event_cb,
+		lv_event_cb_t ready_event_cb,
+		lv_event_cb_t defocused_event_cb)
+{
+	// клавиатура
+	lv_obj_t *kb = lv_keyboard_create(parent);
+
+	lv_obj_align(kb, align, 0, 0);
+	lv_keyboard_set_textarea(kb, textarea);
+
+	if (cancel_event_cb != NULL)
+		lv_obj_add_event_cb(kb, cancel_event_cb, LV_EVENT_CANCEL, kb);
+	if (ready_event_cb != NULL)
+		lv_obj_add_event_cb(kb, ready_event_cb, LV_EVENT_READY, kb);
+	if (cancel_event_cb != NULL)
+		lv_obj_add_event_cb(textarea, defocused_event_cb, LV_EVENT_DEFOCUSED, kb);
+
+	return kb;
+}
+
 void clear_busy_indicator(lv_obj_t **indicator)
 {
 	if (*indicator == NULL)
 		return;
 
-	lv_obj_clean(*indicator);
+//	lv_obj_clean(*indicator);
 	lv_obj_del(*indicator);
 	*indicator = NULL;
 }

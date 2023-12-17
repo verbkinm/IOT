@@ -8,13 +8,13 @@
 #include "settingpage.h"
 
 
-extern void menuPageInit(void);
-
 extern uint8_t glob_currentPage;
+extern lv_obj_t *glob_keyboard_indicator;
+
+extern void menuPageInit(void);
 
 lv_obj_t *menu;
 static lv_obj_t *root_page;
-
 
 lv_obj_t *sub_date_time_page;
 lv_obj_t *sub_sub_time_page;
@@ -64,10 +64,15 @@ static void back_event_handler(lv_event_t * e)
 		((lv_menu_page_t *)sub_wifi_page)->title = NULL;
 
 		menuPageInit();
-		free_wifi_sub_page();
+		setting_page_deinit();
 	}
 }
 
+void setting_page_deinit(void)
+{
+	free_wifi_sub_page();
+	free_date_time_sub_page();
+}
 //static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
 //{
 //	for (int i = 0; i < lv_obj_get_child_cnt(obj); ++i)
@@ -104,7 +109,7 @@ void clear_all_sub_page_child(void)
 
 	for (int i = 0; i < lv_obj_get_child_cnt(sub_sub_sntp_page); ++i)
 		lv_obj_del(lv_obj_get_child(sub_sub_sntp_page, 0));
-
+	free_date_time_sub_page();
 
 
 
@@ -113,6 +118,7 @@ void clear_all_sub_page_child(void)
 
 	for (int i = 0; i < lv_obj_get_child_cnt(sub_wifi_page); ++i)
 		lv_obj_del(lv_obj_get_child(sub_wifi_page, 0));
+	free_wifi_sub_page();
 
 
 	//	for (int i = 0; i < lv_obj_get_child_cnt(sub_about_page); ++i)

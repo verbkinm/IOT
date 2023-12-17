@@ -13,7 +13,7 @@
 
 extern lv_obj_t *sub_wifi_page;
 
-extern lv_obj_t *glob_busy_indicator;
+//extern lv_obj_t *glob_busy_indicator;
 extern uint32_t glob_status_reg;
 extern esp_netif_t *sta_netif;
 
@@ -26,9 +26,9 @@ struct Wifi_page_obj {
 	lv_obj_t *btn_scan;
 	lv_obj_t *wifi_switch;
 	lv_obj_t *list;
+	lv_obj_t *busy_ind;
 	lv_timer_t *timer;
 };
-
 static struct Wifi_page_obj *wifi_page_obj = NULL;
 
 static void wifi_scan_starting_heandler(lv_event_t *e);
@@ -227,18 +227,18 @@ static void wifi_connect_step2(lv_event_t *e)
 
 	const char *pwd = lv_textarea_get_text(text_area);
 
-	if ( (strlen(pwd) < 8) && (ap_info->authmode != WIFI_AUTH_OPEN) )
-	{
-		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
-		lv_obj_center(mbox1);
-		return;
-	}
+//	if ( (strlen(pwd) < 8) && (ap_info->authmode != WIFI_AUTH_OPEN) )
+//	{
+//		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
+//		lv_obj_center(mbox1);
+//		return;
+//	}
 
-	if (glob_busy_indicator == NULL)
-	{
-		glob_busy_indicator = create_busy_indicator(lv_scr_act(), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
-		lv_obj_set_y(glob_busy_indicator, LCD_PANEL_STATUS_H);
-	}
+//	if (glob_busy_indicator == NULL)
+//	{
+//		glob_busy_indicator = create_busy_indicator(lv_scr_act(), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
+//		lv_obj_set_y(glob_busy_indicator, LCD_PANEL_STATUS_H);
+//	}
 
 
 	wifi_config_t wifi_config = {
@@ -413,7 +413,7 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 
 	lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 	lv_obj_t *section = wifi_page_obj->list->parent;
-	glob_busy_indicator = create_busy_indicator(section, lv_obj_get_width(section), lv_obj_get_height(section), 80, 80, LV_OPA_70);
+	wifi_page_obj->busy_ind = create_busy_indicator(section, lv_obj_get_width(section), lv_obj_get_height(section), 80, 80, LV_OPA_70);
 }
 
 static void wifi_scan_done(void)
@@ -445,7 +445,8 @@ static void wifi_scan_done(void)
 		ESP_LOGI(TAG, "Channel \t\t%d\n", ap_info[i].primary);
 	}
 
-	lv_obj_clean(wifi_page_obj->list);
+	if (wifi_page_obj != NULL)
+		lv_obj_clean(wifi_page_obj->list);
 
 	for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
 	{
@@ -456,6 +457,8 @@ static void wifi_scan_done(void)
 		wifi_list_item(&btn, 495, 50, &(ap_info[i]));
 		lv_obj_add_event_cb(btn, wifi_connect_step1, LV_EVENT_CLICKED, &(ap_info[i]));
 	}
+
+	clear_busy_indicator(&wifi_page_obj->busy_ind);
 }
 
 static void info_handler(lv_event_t * e)
@@ -501,7 +504,7 @@ static void info_handler(lv_event_t * e)
 
 void create_wifi_sub_page(lv_event_t *e)
 {
-	free_wifi_sub_page();
+//	free_wifi_sub_page();
 	clear_all_sub_page_child();
 
 	lv_obj_set_style_pad_hor(sub_wifi_page, 20, 0);
@@ -527,16 +530,11 @@ void create_wifi_sub_page(lv_event_t *e)
 
 	if (glob_status_reg & STATUS_WIFI_STA_START)
 	{
-//		lv_obj_clear_state(wifi_page_obj->list, LV_STATE_DISABLED);
 		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-//		wifi_scan_starting_heandler(0);
 		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
 	}
 	else
-	{
-//		lv_obj_add_state(wifi_page_obj->list, LV_STATE_DISABLED);
 		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-	}
 
 	ap_info = calloc(AP_INFO_ARR_SIZE, sizeof(wifi_ap_record_t));
 	wifi_page_obj->timer = lv_timer_create(timer_loop, 500, 0);

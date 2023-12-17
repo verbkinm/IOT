@@ -19,7 +19,7 @@ extern lv_obj_t *sub_sub_sntp_page;
 
 static char *time_page_title = "Time";
 static char *date_page_title = "Date";
-static char *sntp_page_title = "SNTP!";
+static char *sntp_page_title = "SNTP";
 
 static void save_time(lv_event_t *e);
 static void save_date(lv_event_t *e);
@@ -27,14 +27,15 @@ static void sntp_switch_handler(lv_event_t * e);
 static void utc_dd_event_handler(lv_event_t * e);
 static void url_event_handler(lv_event_t * e);
 
-//struct Date_time_page_obj {
-//	lv_obj_t *switcher;
-//	lv_obj_t *list;
-//	lv_obj_t *sntp_server;
-//	lv_timer_t *timer;
-//};
-//
-//static struct Date_time_page_obj *DT_page_obj = NULL;
+struct Date_time_page_obj
+{
+	lv_obj_t *switcher;
+	lv_obj_t *list;
+	lv_obj_t *sntp_server_url;
+	lv_obj_t *btn_save;
+	lv_obj_t *keyboard;
+};
+static struct Date_time_page_obj *dt_page_obj = NULL;
 
 void create_time_page(void)
 {
@@ -55,22 +56,29 @@ static void utc_dd_event_handler(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
+    if(code == LV_EVENT_VALUE_CHANGED)
+    {
         char buf[32] = {0};
         lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
         printf("selected :%s\n", buf);
     }
 }
 
-static void url_event_handler(lv_event_t * e)
+static void kb_event_handler(lv_event_t *e)
+{
+	printf("current_target: %p\n", e->current_target);
+	printf("target: %p\n", e->target);
+	printf("user_data: %p\n", e->user_data);
+}
+
+static void url_event_handler(lv_event_t *e)
 {
 	// клавиатура
 	lv_obj_t *kb = lv_keyboard_create(lv_scr_act());
-	lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
 
 	lv_obj_add_event_cb(kb, delete_obj_handler, LV_EVENT_CANCEL, kb);
 	lv_obj_add_event_cb(kb, delete_obj_handler, LV_EVENT_READY, kb);
-	lv_obj_add_event_cb(e->current_target, delete_obj_handler, LV_EVENT_DEFOCUSED, kb);
+	lv_obj_add_event_cb(e->current_target, kb_event_handler, LV_EVENT_DEFOCUSED, kb);
 
 	lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
 	lv_keyboard_set_textarea(kb, e->current_target);
@@ -81,29 +89,30 @@ void create_sntp_page(void)
 	lv_obj_set_style_pad_hor(sub_sub_sntp_page, 20, 0);
 
 	lv_obj_t *section = lv_menu_section_create(sub_sub_sntp_page);
+	lv_obj_set_scroll_dir(section, LV_DIR_NONE);
+	lv_obj_set_scrollbar_mode(section, LV_SCROLLBAR_MODE_OFF);
 
 	// Включить/выключить службу sntp
-	lv_obj_t *switcher;
-	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_SNTP_ON), &switcher);
-	lv_obj_add_event_cb(switcher, sntp_switch_handler, LV_EVENT_CLICKED, section);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_SNTP_ON), &dt_page_obj->switcher);
+	lv_obj_add_event_cb(dt_page_obj->switcher, sntp_switch_handler, LV_EVENT_CLICKED, section);
 
 	lv_obj_t *cont = lv_menu_cont_create(section);
-	lv_obj_set_scroll_dir(cont, LV_DIR_NONE);
-	lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
+//	lv_obj_set_scroll_dir(cont, LV_DIR_NONE);
+//	lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_style_pad_all(cont, 0, 0);
 
 	// Wrap
 	lv_obj_t *wrap = lv_obj_create(section);
 	lv_obj_set_style_pad_all(wrap, 0, 0);
-	lv_obj_set_scrollbar_mode(wrap, LV_SCROLLBAR_MODE_OFF);
-	lv_obj_set_scroll_dir(wrap, LV_DIR_NONE);
+//	lv_obj_set_scrollbar_mode(wrap, LV_SCROLLBAR_MODE_OFF);
+//	lv_obj_set_scroll_dir(wrap, LV_DIR_NONE);
 	lv_obj_set_size(wrap, 520, 100);
 	lv_obj_set_style_border_width(wrap, 0, 0);
 
 	// Выпадающий список UTC
-	lv_obj_t *dd = lv_dropdown_create(wrap);
-	lv_obj_set_size(dd, 128, 40);
-	lv_dropdown_set_options(dd,
+	dt_page_obj->list = lv_dropdown_create(wrap);
+	lv_obj_set_size(dt_page_obj->list, 128, 40);
+	lv_dropdown_set_options(dt_page_obj->list,
 			"UTC-0\n"
 			"UTC-1\n"
 			"UTC-2\n"
@@ -117,31 +126,38 @@ void create_sntp_page(void)
 			"UTC-10\n"
 			"UTC-11\n"
 			"UTC-12\n");
-	lv_obj_align(dd, LV_ALIGN_TOP_RIGHT, -10, 0);
-    lv_obj_add_event_cb(dd, utc_dd_event_handler, LV_EVENT_ALL, NULL);
+	lv_obj_align(dt_page_obj->list, LV_ALIGN_TOP_RIGHT, -10, 0);
+    lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
 
     // Текст для UTC
 	lv_obj_t *lbl_utc = lv_label_create(wrap);
 	lv_label_set_text(lbl_utc, "Time zone:");
-	lv_obj_align_to(lbl_utc, dd, LV_ALIGN_OUT_LEFT_MID, -290, 0);
+	lv_obj_align_to(lbl_utc, dt_page_obj->list, LV_ALIGN_OUT_LEFT_MID, -290, 0);
 
 	// Поле ввода адреса сервера ntp
-	lv_obj_t *text_area = lv_textarea_create(wrap);
-	lv_obj_set_size(text_area, 382, 40);
-	lv_obj_set_scroll_dir(text_area, LV_DIR_NONE);
+	dt_page_obj->sntp_server_url = lv_textarea_create(wrap);
+	lv_obj_set_size(dt_page_obj->sntp_server_url, 382, 40);
+	lv_obj_set_scroll_dir(dt_page_obj->sntp_server_url, LV_DIR_NONE);
 
-	lv_textarea_set_max_length(text_area, 128);
-	lv_textarea_set_placeholder_text(text_area, "Example: ntp0.ntp-servers.net");
-	lv_obj_align_to(text_area, dd, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 15);
-	lv_obj_add_event_cb(text_area, url_event_handler, LV_EVENT_CLICKED, section);
+	lv_textarea_set_max_length(dt_page_obj->sntp_server_url, 128);
+	lv_textarea_set_placeholder_text(dt_page_obj->sntp_server_url, "Example: ntp0.ntp-servers.net");
+	lv_obj_align_to(dt_page_obj->sntp_server_url, dt_page_obj->list, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 15);
 
 	// Текст для адреса сервера
 	lv_obj_t *lbl_url = lv_label_create(wrap);
 	lv_label_set_text(lbl_url, "NTP server:");
-	lv_obj_align_to(lbl_url, text_area, LV_ALIGN_OUT_LEFT_MID, -33, 0);
+	lv_obj_align_to(lbl_url, dt_page_obj->sntp_server_url, LV_ALIGN_OUT_LEFT_MID, -33, 0);
 
-	lv_obj_t *btn_save = NULL;
-	create_button(section, "Save", 128, 40, &btn_save);
+	// Кнопка сохранить
+	create_button(section, "Save", 128, 40, &dt_page_obj->btn_save);
+
+	// клавиатура
+	dt_page_obj->keyboard = create_keyboard(lv_scr_act(), LV_ALIGN_BOTTOM_MID, dt_page_obj->sntp_server_url,
+			hide_obj_handler, hide_obj_handler, hide_obj_handler);
+
+	lv_obj_add_flag(dt_page_obj->keyboard, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_event_cb(dt_page_obj->sntp_server_url, show_obj_handler, LV_EVENT_CLICKED, dt_page_obj->keyboard);
+
 //	lv_obj_add_event_cb(obj_btn, save_time, LV_EVENT_CLICKED, section);
 }
 
@@ -160,7 +176,10 @@ void create_date_page(void)
 
 void create_date_time_sub_page(lv_event_t *e)
 {
+//	free_date_time_sub_page();
 	clear_all_sub_page_child();
+
+	dt_page_obj = malloc(sizeof(struct Date_time_page_obj));
 
 	lv_obj_set_style_pad_hor(sub_date_time_page, 20, 0);
 	//	lv_obj_t *section = lv_menu_section_create((lv_obj_t *)sub_date_time_page);
@@ -177,8 +196,18 @@ void create_date_time_sub_page(lv_event_t *e)
 	cont = create_text(section, LV_SYMBOL_RIGHT, date_page_title, LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_sub_date_page);
 
-	cont = create_text(section, LV_SYMBOL_RIGHT, "SNTP", LV_MENU_ITEM_BUILDER_VAR_1);
+	cont = create_text(section, LV_SYMBOL_RIGHT, sntp_page_title, LV_MENU_ITEM_BUILDER_VAR_1);
 	lv_menu_set_load_page_event(menu, cont, sub_sub_sntp_page);
+}
+
+void free_date_time_sub_page(void)
+{
+	if (dt_page_obj != NULL)
+	{
+		lv_obj_del(dt_page_obj->keyboard);
+		free(dt_page_obj);
+		dt_page_obj = NULL;
+	}
 }
 
 static void sntp_switch_handler(lv_event_t * e)

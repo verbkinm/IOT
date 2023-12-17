@@ -244,9 +244,9 @@ void draw_page(void)
 
 static void timer_loop(lv_timer_t *timer)
 {
-	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
-			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
-		clear_busy_indicator(&glob_busy_indicator);
+//	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
+//			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
+//		clear_busy_indicator(&glob_busy_indicator);
 
 	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
 	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
