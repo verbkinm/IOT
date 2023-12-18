@@ -10,4 +10,5 @@ void rgb_panel_start_services(void)
 {
 	xTaskCreate(wifi_service_task, "wifi_service_task", 4096, 0, 10, 0);
 	xTaskCreate(sntp_service_task, "sntp_service_task", 4096, 0, 10, 0);
+	xTaskCreate(weather_service_task, "weather_service_task", 8192, 0, 10, 0);
 }

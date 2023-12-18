@@ -29,8 +29,8 @@ extern void menuPageInit(void);
 static lv_style_t style_arr[5];
 
 static void drawLabel(lv_obj_t *lbl, lv_style_t *style, const char* str, lv_align_t align, lv_coord_t offset_x, lv_coord_t offset_y);
-static void drawTime();
-static void drawDate();
+static void drawTime(const struct tm *timeinfo);
+static void drawDate(const struct tm *timeinfo);
 static void drawTemperature();
 static void drawHumidity();
 static void drawPressure();
@@ -43,17 +43,19 @@ static void drawLabel(lv_obj_t *lbl, lv_style_t *style, const char* str, lv_alig
 	lv_obj_add_style(lbl, style, 0);
 }
 
-static void drawTime()
+static void drawTime(const struct tm *timeinfo)
 {
 	++glob_date_time.seconds;
 	lv_obj_t *time = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 0);
-	lv_label_set_text_fmt(time, "%.02d:%.02d:%.02d", glob_date_time.hour, glob_date_time.minutes, glob_date_time.seconds);
+//	lv_label_set_text_fmt(time, "%.02d:%.02d:%.02d", glob_date_time.hour, glob_date_time.minutes, glob_date_time.seconds);
+	lv_label_set_text_fmt(time, "%.02d:%.02d:%.02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 }
 
-static void drawDate()
+static void drawDate(const struct tm *timeinfo)
 {
 	lv_obj_t *date = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 1);
-	lv_label_set_text_fmt(date, "%02d.%.02d.%.04d", glob_date_time.date, glob_date_time.month, glob_date_time.year + 1900);
+//	lv_label_set_text_fmt(date, "%02d.%.02d.%.04d", glob_date_time.date, glob_date_time.month, glob_date_time.year + 1900);
+	lv_label_set_text_fmt(date, "%02d.%.02d.%.04d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 }
 
 static void drawTemperature()
@@ -126,8 +128,13 @@ void homePageInit(void)
 
 void drawHomePage(void)
 {
-	drawTime();
-	drawDate();
+	time_t now;
+	struct tm timeinfo;
+	time(&now);
+	localtime_r(&now, &timeinfo);
+
+	drawTime(&timeinfo);
+	drawDate(&timeinfo);
 	drawTemperature();
 	drawHumidity();
 	drawPressure();

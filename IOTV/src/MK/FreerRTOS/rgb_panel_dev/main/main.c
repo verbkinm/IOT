@@ -1,4 +1,3 @@
-#include "wifi/wifi.h"
 #include "TFT_touchscreen/TFT_touch_screen.h"
 #include "I2C/i2c.h"
 #include "sd/sd_spi.h"
@@ -10,8 +9,6 @@ void app_main(void)
 	sd_spi_init();
 	i2c_init();
 	TFT_init(); // Перед этой функцией обязательно выполнить i2c_init();
-
-	wifi_init();
 
 	rgb_panel_start_services();
 

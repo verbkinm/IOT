@@ -10,6 +10,7 @@
 
 #include "wifi/wifi.h"
 #include "sntp/sntp.h"
+#include "weather/weather.h"
 //
 void rgb_panel_start_services(void);
 

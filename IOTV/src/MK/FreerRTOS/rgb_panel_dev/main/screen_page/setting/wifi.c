@@ -31,6 +31,15 @@ struct Wifi_page_obj {
 };
 static struct Wifi_page_obj *wifi_page_obj = NULL;
 
+enum
+{
+	WAIT_FLAG_NONE = 0,
+	WAIT_FLAG_SCAN = 1,
+	WAIT_FLAG_CONN = 2
+};
+
+static uint8_t wait_flag = WAIT_FLAG_NONE;
+
 static void wifi_scan_starting_heandler(lv_event_t *e);
 static void wifi_connect_step1(lv_event_t *e);
 static void wifi_connect_step2(lv_event_t *e);
@@ -221,25 +230,23 @@ static void wifi_switch_heandler(lv_event_t *e)
 
 static void wifi_connect_step2(lv_event_t *e)
 {
-	lv_obj_t *main_widget = e->user_data;
-	wifi_ap_record_t *ap_info = main_widget->user_data;
-	lv_obj_t *text_area = lv_obj_get_child(main_widget, 2);
+	lv_obj_t *widget = e->user_data;
+	wifi_ap_record_t *ap_info = widget->user_data;
+	lv_obj_t *text_area = lv_obj_get_child(widget, 1);
 
 	const char *pwd = lv_textarea_get_text(text_area);
 
-//	if ( (strlen(pwd) < 8) && (ap_info->authmode != WIFI_AUTH_OPEN) )
-//	{
-//		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
-//		lv_obj_center(mbox1);
-//		return;
-//	}
+	if ( (strlen(pwd) < 8) )// || (ap_info->authmode != WIFI_AUTH_OPEN) )
+	{
+		printf("pwd = %s\n", pwd);
+		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
+		lv_obj_center(mbox1);
+		return;
+	}
 
-//	if (glob_busy_indicator == NULL)
-//	{
-//		glob_busy_indicator = create_busy_indicator(lv_scr_act(), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
-//		lv_obj_set_y(glob_busy_indicator, LCD_PANEL_STATUS_H);
-//	}
-
+	if (wifi_page_obj->busy_ind != NULL)
+		clear_busy_indicator(&wifi_page_obj->busy_ind);
+	wifi_page_obj->busy_ind = create_busy_indicator(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
 
 	wifi_config_t wifi_config = {
 			.sta = {
@@ -264,6 +271,7 @@ static void wifi_connect_step2(lv_event_t *e)
 	esp_wifi_disconnect();
 
 	glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
+	wait_flag = WAIT_FLAG_CONN;
 	esp_wifi_connect();
 }
 
@@ -272,25 +280,25 @@ static void wifi_connect_step1(lv_event_t *e)
 	wifi_ap_record_t *ap_info = e->user_data;
 
 	// основное окно
-	lv_obj_t *main_widget = lv_obj_create(lv_obj_get_child(lv_scr_act(), 1));
-	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
-	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_t *widget = lv_obj_create(lv_obj_get_child(lv_scr_act(), 1));
+	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
+	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
 
 	// Фон немного "сереем"
-	lv_color_t bg_color = lv_obj_get_style_bg_color(main_widget, 0);
+	lv_color_t bg_color = lv_obj_get_style_bg_color(widget, 0);
 	if(lv_color_brightness(bg_color) > 127)
-		lv_obj_set_style_bg_color(main_widget, lv_color_darken(lv_obj_get_style_bg_color(main_widget, 0), 20), 0);
+		lv_obj_set_style_bg_color(widget, lv_color_darken(lv_obj_get_style_bg_color(widget, 0), 20), 0);
 	else
-		lv_obj_set_style_bg_color(main_widget, lv_color_darken(lv_obj_get_style_bg_color(main_widget, 0), 50), 0);
+		lv_obj_set_style_bg_color(widget, lv_color_darken(lv_obj_get_style_bg_color(widget, 0), 50), 0);
 
-	lv_obj_set_user_data(main_widget, ap_info);
+	lv_obj_set_user_data(widget, ap_info);
 
 	// кнопка закрытия окна
-	lv_obj_t *btn_close = lv_btn_create(main_widget);
+	lv_obj_t *btn_close = lv_btn_create(widget);
 	lv_obj_set_size(btn_close, 32, 32);
 	lv_obj_set_style_radius(btn_close, 90, 0);
 	lv_obj_align(btn_close, LV_ALIGN_TOP_RIGHT, 0, 0);
-	lv_obj_add_event_cb(btn_close, delete_obj_handler, LV_EVENT_CLICKED, main_widget);
+	lv_obj_add_event_cb(btn_close, delete_obj_handler, LV_EVENT_CLICKED, widget);
 
 	lv_obj_t *btn_close_lbl = lv_label_create(btn_close);
 	lv_label_set_text(btn_close_lbl, LV_SYMBOL_CLOSE);
@@ -298,23 +306,23 @@ static void wifi_connect_step1(lv_event_t *e)
 
 	// поле ввода пароля
 	lv_obj_t *ta;
-	ta = lv_textarea_create(main_widget);
+	ta = lv_textarea_create(widget);
 	lv_obj_set_size(ta, 760, 60);
 	lv_textarea_set_max_length(ta, 64);
 	lv_textarea_set_placeholder_text(ta, "Enter wifi password");
 
 	// клавиатура
-	lv_obj_t *kb = lv_keyboard_create(main_widget);
+	lv_obj_t *kb = lv_keyboard_create(widget);
 	lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
 
-	lv_obj_add_event_cb(kb, delete_obj_handler, LV_EVENT_CANCEL, main_widget);
-	lv_obj_add_event_cb(kb, wifi_connect_step2, LV_EVENT_READY, main_widget);
+	lv_obj_add_event_cb(kb, delete_obj_handler, LV_EVENT_CANCEL, widget);
+	lv_obj_add_event_cb(kb, wifi_connect_step2, LV_EVENT_READY, widget);
 
 	lv_obj_align_to(ta, kb, LV_ALIGN_OUT_TOP_MID, 0, -10);
 	lv_keyboard_set_textarea(kb, ta);
 
 	// текстовые поля с информацией от wifi
-	lv_obj_t *wifi_info_left = lv_label_create(main_widget);
+	lv_obj_t *wifi_info_left = lv_label_create(widget);
 
 	lv_label_set_text(wifi_info_left,
 			"SSID:\n"
@@ -323,7 +331,7 @@ static void wifi_connect_step1(lv_event_t *e)
 			"RSSI:\n");
 	lv_obj_align(wifi_info_left, LV_ALIGN_TOP_LEFT, 0, 0);
 
-	lv_obj_t *wifi_info_right = lv_label_create(main_widget);
+	lv_obj_t *wifi_info_right = lv_label_create(widget);
 
 
 	char auth[16] = {0};
@@ -342,7 +350,7 @@ static void wifi_connect_step1(lv_event_t *e)
 
 
 	// Кнопка подключиться/отклчиться
-	lv_obj_t *btn_con = lv_btn_create(main_widget);
+	lv_obj_t *btn_con = lv_btn_create(widget);
 	lv_obj_set_size(btn_con, 128, 40);
 	lv_obj_align_to(btn_con, ta, LV_ALIGN_OUT_RIGHT_TOP, -128, -40 -10);
 
@@ -350,8 +358,8 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_label_set_text(btn_con_lbl, "Wait...");
 	lv_obj_center(btn_con_lbl);
 
-	lv_timer_t *timer = lv_timer_create(conn_step1_timer_loop, 500, main_widget);
-	lv_obj_add_event_cb(main_widget, delete_timer_handler, LV_EVENT_DELETE, timer);
+	lv_timer_t *timer = lv_timer_create(conn_step1_timer_loop, 500, widget);
+	lv_obj_add_event_cb(widget, delete_timer_handler, LV_EVENT_DELETE, timer);
 }
 
 static void wifi_disconnect_handler(lv_event_t * e)
@@ -363,10 +371,10 @@ static void wifi_disconnect_handler(lv_event_t * e)
 
 static void conn_step1_timer_loop(lv_timer_t *timer)
 {
-	lv_obj_t *main_widget = timer->user_data;
-	lv_obj_t *btn_con = lv_obj_get_child(main_widget, 5);
+	lv_obj_t *widget = timer->user_data;
+	lv_obj_t *btn_con = lv_obj_get_child(widget, 5);
 	lv_obj_t *btn_con_lbl = lv_obj_get_child(btn_con, 0);
-	wifi_ap_record_t *ap_info = main_widget->user_data;
+	wifi_ap_record_t *ap_info = widget->user_data;
 
 	// Если устройство подключено к данной точке доступа.
 	if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
@@ -379,7 +387,7 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 			lv_label_set_text(btn_con_lbl, "Disconnect");
 			lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
 			lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
-			lv_obj_add_event_cb(btn_con, wifi_disconnect_handler, LV_EVENT_CLICKED, main_widget);
+			lv_obj_add_event_cb(btn_con, wifi_disconnect_handler, LV_EVENT_CLICKED, widget);
 		}
 	}
 	else
@@ -387,7 +395,7 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 		lv_label_set_text(btn_con_lbl, "Connect");
 		lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
 		lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
-		lv_obj_add_event_cb(btn_con, wifi_connect_step2, LV_EVENT_CLICKED, main_widget);
+		lv_obj_add_event_cb(btn_con, wifi_connect_step2, LV_EVENT_CLICKED, widget);
 	}
 }
 
@@ -407,12 +415,19 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
 	}
 
+
 	esp_wifi_scan_start(NULL, false);
 
+	glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+	wait_flag = WAIT_FLAG_SCAN;
 	glob_status_reg |= STATUS_WIFI_SCANNING;
 
 	lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 	lv_obj_t *section = wifi_page_obj->list->parent;
+
+	if (wifi_page_obj->busy_ind != NULL)
+		clear_busy_indicator(&wifi_page_obj->busy_ind);
+
 	wifi_page_obj->busy_ind = create_busy_indicator(section, lv_obj_get_width(section), lv_obj_get_height(section), 80, 80, LV_OPA_70);
 }
 
@@ -504,13 +519,14 @@ static void info_handler(lv_event_t * e)
 
 void create_wifi_sub_page(lv_event_t *e)
 {
-//	free_wifi_sub_page();
 	clear_all_sub_page_child();
 
 	lv_obj_set_style_pad_hor(sub_wifi_page, 20, 0);
 	lv_obj_t *section = lv_menu_section_create(sub_wifi_page);
 
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
+	wifi_page_obj->busy_ind = NULL;
+
 	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
 	create_list(section, 495, 265, &(wifi_page_obj->list));
 	create_button(section, "Scan", 128, 40, &(wifi_page_obj->btn_scan));
@@ -542,11 +558,22 @@ void create_wifi_sub_page(lv_event_t *e)
 
 static void timer_loop(lv_timer_t *timer)
 {
-	if (!(glob_status_reg & STATUS_WIFI_SCANNING) &&     // Если не идёт сканирование
-			(glob_status_reg & STATUS_WIFI_SCAN_DONE))    // И сканирование завершено
+	if (wait_flag == WAIT_FLAG_SCAN)
 	{
-		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
-		wifi_scan_done();
+		if (glob_status_reg & STATUS_WIFI_SCAN_DONE)
+		{
+//			glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+			wifi_scan_done();
+			wait_flag = WAIT_FLAG_NONE;
+		}
+	}
+	else if (wait_flag == WAIT_FLAG_CONN)
+	{
+		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTING))
+		{
+			clear_busy_indicator(&wifi_page_obj->busy_ind);
+			wait_flag = WAIT_FLAG_NONE;
+		}
 	}
 }
 
@@ -564,4 +591,6 @@ void free_wifi_sub_page(void)
 		free(wifi_page_obj);
 		wifi_page_obj = NULL;
 	}
+
+	wait_flag = WAIT_FLAG_NONE;
 }
