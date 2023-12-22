@@ -24,6 +24,7 @@ lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, uint8_t data, uint8_t min
 lv_obj_t *create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val);
 lv_obj_t *create_switch(lv_obj_t * parent, const char * icon, const char * txt, bool chk, lv_obj_t **switch_obj);
 lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_btn);
+lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height);
 lv_obj_t *create_list(lv_obj_t *parent, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_list);
 lv_obj_t *create_calendar(lv_obj_t *parent);
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);

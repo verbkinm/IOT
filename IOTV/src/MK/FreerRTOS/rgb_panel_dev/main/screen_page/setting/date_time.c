@@ -20,8 +20,8 @@ extern lv_obj_t *sub_sub_sntp_page;
 extern char *sntp_utc;
 extern char *sntp_server_url;
 
-static char *time_page_title = "Time";
-static char *date_page_title = "Date";
+static char *time_page_title = "Время";
+static char *date_page_title = "Дата";
 static char *sntp_page_title = "SNTP";
 
 static void save_time(lv_event_t *e);
@@ -37,7 +37,6 @@ struct Date_time_page_obj
 	lv_obj_t *list;
 	lv_obj_t *sntp_server_url;
 	lv_obj_t *btn_save;
-//	lv_obj_t *btn_sync;
 	lv_obj_t *keyboard;
 };
 static struct Date_time_page_obj *dt_page_obj = NULL;
@@ -48,25 +47,25 @@ void create_time_page(void)
 
 	lv_obj_t *section = lv_menu_section_create(sub_sub_time_page);
 
-	create_spinbox(section, "Hours:\t", glob_date_time.hour, 0, 23);
-	create_spinbox(section, "Minutes:", glob_date_time.minutes, 0, 59);
-	create_spinbox(section, "Seconds:", glob_date_time.seconds, 0, 59);
+	create_spinbox(section, "Часы:\t", glob_date_time.hour, 0, 23);
+	create_spinbox(section, "Минуты:", glob_date_time.minutes, 0, 59);
+	create_spinbox(section, "Секунды:", glob_date_time.seconds, 0, 59);
 
 	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Save", 128, 40, &obj_btn);
+	create_button(section, "Сохранить", 128, 40, &obj_btn);
 	lv_obj_add_event_cb(obj_btn, save_time, LV_EVENT_CLICKED, section);
 }
 
 static void utc_dd_event_handler(lv_event_t * e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_VALUE_CHANGED)
-    {
-        char buf[32] = {0};
-        lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
-        printf("selected :%s\n", buf);
-    }
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t *obj = lv_event_get_target(e);
+	if(code == LV_EVENT_VALUE_CHANGED)
+	{
+		char buf[32] = {0};
+		lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
+		printf("selected :%s\n", buf);
+	}
 }
 
 static void sntp_save_event_handler(lv_event_t * e)
@@ -83,11 +82,6 @@ static void sntp_save_event_handler(lv_event_t * e)
 	set_sntp_config_value("url", lv_textarea_get_text(dt_page_obj->sntp_server_url));
 }
 
-//static void sntp_sync_event_handler(lv_event_t * e)
-//{
-//	sntp_obtain_time();
-//}
-
 void create_sntp_page(void)
 {
 	lv_obj_set_style_pad_hor(sub_sub_sntp_page, 20, 0);
@@ -97,11 +91,11 @@ void create_sntp_page(void)
 	lv_obj_set_scrollbar_mode(section, LV_SCROLLBAR_MODE_OFF);
 
 	// Включить/выключить службу sntp
-	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_SNTP_ON), &dt_page_obj->switcher);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_status_reg & STATUS_SNTP_ON), &dt_page_obj->switcher);
 	lv_obj_add_event_cb(dt_page_obj->switcher, sntp_switch_handler, LV_EVENT_CLICKED, section);
-
-	lv_obj_t *cont = lv_menu_cont_create(section);
-	lv_obj_set_style_pad_all(cont, 0, 0);
+//
+//	lv_obj_t *cont = lv_menu_cont_create(section);
+//	lv_obj_set_style_pad_all(cont, 0, 0);
 
 	// Wrap
 	lv_obj_t *wrap = lv_obj_create(section);
@@ -127,33 +121,34 @@ void create_sntp_page(void)
 			"UTC-11\n"
 			"UTC-12\n");
 	lv_obj_align(dt_page_obj->list, LV_ALIGN_TOP_RIGHT, -10, 0);
-    lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
+	lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
 
-    int val = 0;
-    sscanf(&sntp_utc[4], "%d", &val);
-    lv_dropdown_set_selected(dt_page_obj->list, val);
+	int val = 0;
+	if (strlen(sntp_utc) > 3)
+		sscanf(&sntp_utc[4], "%d", &val);
+	lv_dropdown_set_selected(dt_page_obj->list, val);
 
-    // Текст для UTC
+	// Текст для UTC
 	lv_obj_t *lbl_utc = lv_label_create(wrap);
-	lv_label_set_text(lbl_utc, "Time zone:");
-	lv_obj_align_to(lbl_utc, dt_page_obj->list, LV_ALIGN_OUT_LEFT_MID, -290, 0);
+	lv_label_set_text(lbl_utc, "Часовой пояс:");
+	lv_obj_align_to(lbl_utc, dt_page_obj->list, LV_ALIGN_OUT_LEFT_MID, -270, 0);
 
 	// Поле ввода адреса сервера ntp
 	dt_page_obj->sntp_server_url = lv_textarea_create(wrap);
 	lv_obj_set_size(dt_page_obj->sntp_server_url, 382, 40);
 	lv_obj_set_scroll_dir(dt_page_obj->sntp_server_url, LV_DIR_NONE);
 	lv_textarea_set_max_length(dt_page_obj->sntp_server_url, 128);
-	lv_textarea_set_placeholder_text(dt_page_obj->sntp_server_url, "Example: ntp0.ntp-servers.net");
+	lv_textarea_set_placeholder_text(dt_page_obj->sntp_server_url, "Пример: ntp0.ntp-servers.net");
 	lv_obj_align_to(dt_page_obj->sntp_server_url, dt_page_obj->list, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 15);
 	lv_textarea_set_text(dt_page_obj->sntp_server_url, sntp_server_url);
 
 	// Текст для адреса сервера
 	lv_obj_t *lbl_url = lv_label_create(wrap);
-	lv_label_set_text(lbl_url, "NTP server:");
+	lv_label_set_text(lbl_url, "NTP сервер:");
 	lv_obj_align_to(lbl_url, dt_page_obj->sntp_server_url, LV_ALIGN_OUT_LEFT_MID, -33, 0);
 
 	// Кнопка сохранить
-	create_button(section, "Save", 128, 40, &dt_page_obj->btn_save);
+	create_button(section, "Сохранить", 128, 40, &dt_page_obj->btn_save);
 	lv_obj_add_event_cb(dt_page_obj->btn_save, sntp_save_event_handler, LV_EVENT_CLICKED, 0);
 
 	// клавиатура
@@ -162,19 +157,6 @@ void create_sntp_page(void)
 
 	lv_obj_add_flag(dt_page_obj->keyboard, LV_OBJ_FLAG_HIDDEN);
 	lv_obj_add_event_cb(dt_page_obj->sntp_server_url, show_obj_handler, LV_EVENT_CLICKED, dt_page_obj->keyboard);
-
-//	// Кнопка Sync
-//	dt_page_obj->btn_sync = lv_btn_create(dt_page_obj->btn_save->parent);
-//	lv_obj_set_size(dt_page_obj->btn_sync, 128, 40);
-//	lv_obj_set_align(dt_page_obj->btn_sync, LV_ALIGN_LEFT_MID);
-//
-//	lv_obj_t *info_btn_lbl = lv_label_create(dt_page_obj->btn_sync);
-//	lv_label_set_text(info_btn_lbl, "Sync");
-//	lv_obj_center(info_btn_lbl);
-//
-//	lv_obj_add_event_cb(dt_page_obj->btn_sync, sntp_sync_event_handler, LV_EVENT_CLICKED, 0);
-
-//	lv_obj_add_event_cb(obj_btn, save_time, LV_EVENT_CLICKED, section);
 }
 
 void create_date_page(void)
@@ -186,7 +168,7 @@ void create_date_page(void)
 	create_calendar(section);
 
 	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Save", 128, 40, &obj_btn);
+	create_button(section, "Сохранить", 128, 40, &obj_btn);
 	lv_obj_add_event_cb(obj_btn, save_date, LV_EVENT_CLICKED, section);
 }
 
@@ -194,10 +176,9 @@ void create_date_time_sub_page(lv_event_t *e)
 {
 	clear_all_sub_page_child();
 
-	dt_page_obj = malloc(sizeof(struct Date_time_page_obj));
+	dt_page_obj = calloc(1, sizeof(struct Date_time_page_obj));
 
 	lv_obj_set_style_pad_hor(sub_date_time_page, 20, 0);
-	//	lv_obj_t *section = lv_menu_section_create((lv_obj_t *)sub_date_time_page);
 
 	create_time_page();
 	create_date_page();

@@ -10,6 +10,7 @@
 
 #include <time.h>
 #include "../status_panel/status_panel.h"
+#include "../json/json_config.h"
 
 void homePageInit(void);
 void drawHomePage(void);

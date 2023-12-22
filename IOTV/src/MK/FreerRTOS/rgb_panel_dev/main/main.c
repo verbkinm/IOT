@@ -21,3 +21,16 @@ void app_main(void)
 		lv_timer_handler();
 	}
 }
+
+/*
+ *
+ *
+а бвгдеёжзийклмнопрстуфхцчшщъыьэюя
+АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
+abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+0123456789
+.,°
+`~!@#$%^&*()_+-=
+!"№;:?<>/\|
+ */

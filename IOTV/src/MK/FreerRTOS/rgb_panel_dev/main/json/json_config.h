@@ -23,4 +23,7 @@ bool get_wifi_config_value(const char *key, char **value);
 bool set_sntp_config_value(const char *key, const char *value);
 bool get_sntp_config_value(const char *key, char **value);
 
+bool set_meteo_config_value(const char *key, const char *value);
+bool get_meteo_config_value(const char *key, char **value);
+
 #endif /* MAIN_JSON_JSON_CONFIG_H_ */

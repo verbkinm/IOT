@@ -11,6 +11,9 @@
 #include "freertos/task.h"
 //#include "freertos/event_groups.h"
 
+extern lv_font_t ubuntu_mono_14;
+//extern lv_font_t monsterat_bold_14;
+
 extern void homePageInit(void);
 extern void settingPageInit(void);
 
@@ -60,7 +63,8 @@ void menuPageInit(void)
     lv_obj_add_event_cb(btnHome, event_handler, LV_EVENT_CLICKED, glob_main_widget);
 
     lv_obj_t *label = lv_label_create(btnHome);
-    lv_label_set_text(label, "Home");
+    lv_label_set_text(label, "Главная");
+    lv_obj_set_style_text_font(label, &ubuntu_mono_14, 0);
     lv_obj_center(label);
 
     btnSettings = lv_btn_create(glob_main_widget);
@@ -69,7 +73,8 @@ void menuPageInit(void)
     lv_obj_add_event_cb(btnSettings, event_handler, LV_EVENT_CLICKED, glob_main_widget);
 
     label = lv_label_create(btnSettings);
-    lv_label_set_text(label, "Setting");
+    lv_label_set_text(label, "Настройки");
+    lv_obj_set_style_text_font(label, &ubuntu_mono_14, 0);
     lv_obj_center(label);
 
     glob_currentPage = PAGE_MENU;

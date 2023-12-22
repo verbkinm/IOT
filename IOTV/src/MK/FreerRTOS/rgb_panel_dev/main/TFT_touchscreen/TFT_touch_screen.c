@@ -10,6 +10,7 @@
 
 #include "screen_page/homepage.h"
 #include "screen_page/menupage.h"
+#include "screen_page/setting/settingpage.h"
 #include "screen_page/setting/elements.h"
 #include "status_panel/status_panel.h"
 #include "screen_page/screendefault.h"
@@ -244,9 +245,9 @@ void draw_page(void)
 
 static void timer_loop(lv_timer_t *timer)
 {
-//	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
-//			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
-//		clear_busy_indicator(&glob_busy_indicator);
+	//	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
+	//			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
+	//		clear_busy_indicator(&glob_busy_indicator);
 
 	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
 	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
@@ -317,8 +318,9 @@ void TFT_init(void)
 	lv_obj_set_style_pad_all(main_widget, 0, 0);
 	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
 
-	//	homePageInit();
-	menuPageInit();
+	homePageInit();
+	//	menuPageInit();
+	//	settingPageInit();
 
 	xTaskCreate(TFT_draw_page, "TFT_draw_page", 2048, NULL, 10, NULL);
 }

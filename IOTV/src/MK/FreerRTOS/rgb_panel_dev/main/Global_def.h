@@ -82,8 +82,44 @@
 #define	WIFI_DISABLE		"A:/sdcard/panel/wifi_off.png"
 #define	WIFI_ENABLE			"A:/sdcard/panel/wifi_on.png"
 
+#define TEMPERATURE			"A:/sdcard/img/t.png"
+#define HUMIDITY			"A:/sdcard/img/h.png"
+#define PRESSURE			"A:/sdcard/img/p.png"
+#define TEMPERATURE32		"A:/sdcard/img/t32.png"
+#define HUMIDITY32			"A:/sdcard/img/h32.png"
+#define PRESSURE32			"A:/sdcard/img/p32.png"
+
+#define CLOUD_COVER_1		"A:/sdcard/img/c_1.png"
+#define CLOUD_COVER_2		"A:/sdcard/img/c_2.png"
+#define CLOUD_COVER_3		"A:/sdcard/img/c_3.png"
+#define CLOUD_COVER_4		"A:/sdcard/img/c_4.png"
+
+#define RAIN_1				"A:/sdcard/img/r_1.png"
+#define RAIN_2				"A:/sdcard/img/r_2.png"
+#define RAIN_3				"A:/sdcard/img/r_3.png"
+#define RAIN_4				"A:/sdcard/img/r_4.png"
+
+#define SNOW_1				"A:/sdcard/img/s_1.png"
+#define SNOW_2				"A:/sdcard/img/s_2.png"
+#define SNOW_3				"A:/sdcard/img/s_3.png"
+#define SNOW_4				"A:/sdcard/img/s_4.png"
+
+#define SNOW_AND_RAIN		"A:/sdcard/img/sr.png"
+#define PRECIPITATION0		"A:/sdcard/img/sr0.png"
+
+#define WIND				"A:/sdcard/img/w.png"
+#define WIND_0				"A:/sdcard/img/w0.png"
+#define WIND_45				"A:/sdcard/img/w45.png"
+#define WIND_90				"A:/sdcard/img/w90.png"
+#define WIND_135			"A:/sdcard/img/w135.png"
+#define WIND_180			"A:/sdcard/img/w180.png"
+#define WIND_225			"A:/sdcard/img/w225.png"
+#define WIND_270			"A:/sdcard/img/w270.png"
+
 #define WIFI_CONF_PATH		"/sdcard/wifi.jsn"
 #define SNTP_CONF_PATH		"/sdcard/sntp.jsn"
+#define METEO_CONF_PATH		"/sdcard/meteo"
+#define METEO_CITY_PATH		"/sdcard/city"
 
 // Регистры BME280
 enum
@@ -177,6 +213,9 @@ enum STATUS_REG {
 	STATUS_WIFI_SCAN_DONE = 0x20,
 	STATUS_WIFI_AUTOCONNECT = 0x40,
 	STATUS_SNTP_ON = 0x80,
+	STATUS_METEO_ON = 0x0100,			//	https://open-meteo.com
+	STATUS_METEO_CITY_SEARCH = 0x0200,
+	STATUS_METEO_CITY_SEARCH_DONE = 0x0400
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

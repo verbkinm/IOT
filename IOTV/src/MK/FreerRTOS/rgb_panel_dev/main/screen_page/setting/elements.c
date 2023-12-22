@@ -9,26 +9,28 @@
 
 extern struct DateTime glob_date_time;
 
-lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant)
+lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char *txt, lv_menu_builder_variant_t builder_variant)
 {
-	lv_obj_t * obj = lv_menu_cont_create(parent);
+	lv_obj_t *obj = lv_menu_cont_create(parent);
 
-	lv_obj_t * img = NULL;
-	lv_obj_t * label = NULL;
+	lv_obj_t *img = NULL;
+	lv_obj_t *label = NULL;
 
-	if(icon) {
+	if (icon)
+	{
 		img = lv_img_create(obj);
 		lv_img_set_src(img, icon);
 	}
 
-	if(txt) {
+	if (txt)
+	{
 		label = lv_label_create(obj);
 		lv_label_set_text(label, txt);
 		//        lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
 		lv_obj_set_flex_grow(label, 1);
 	}
 
-	if(builder_variant == LV_MENU_ITEM_BUILDER_VAR_2 && icon && txt) {
+	if (builder_variant == LV_MENU_ITEM_BUILDER_VAR_2 && icon && txt) {
 		lv_obj_add_flag(img, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_swap(img, label);
 	}
@@ -101,6 +103,22 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 	lv_obj_align(btn_lbl, LV_ALIGN_CENTER, 0, 0);
 
 	return obj;
+}
+
+lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height)
+{
+	lv_obj_t *btn = lv_btn_create(parent);
+	lv_obj_set_size(btn, width, height);
+
+	lv_obj_t *lbl = lv_label_create(btn);
+
+	if (txt != NULL)
+	{
+		lv_label_set_text(lbl, txt);
+		lv_obj_center(lbl);
+	}
+
+	return btn;
 }
 
 void lv_spinbox_increment_event_cb(lv_event_t * e)
@@ -209,9 +227,9 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 
 void delete_obj_handler(lv_event_t * e)
 {
-	printf("delete\n");
+//	printf("delete\n");
 	lv_obj_del(e->user_data);
-	e->user_data = NULL;
+//	e->user_data = NULL;
 }
 
 void delete_timer_handler(lv_event_t *e)
@@ -222,9 +240,6 @@ void delete_timer_handler(lv_event_t *e)
 void hide_obj_handler(lv_event_t *e)
 {
 	lv_obj_add_flag(e->user_data, LV_OBJ_FLAG_HIDDEN);
-	printf("obj: %p\n", e->user_data);
-	printf("obj: %p\n", e->current_target);
-	printf("obj: %p\n", e->target);
 }
 
 void show_obj_handler(lv_event_t *e)

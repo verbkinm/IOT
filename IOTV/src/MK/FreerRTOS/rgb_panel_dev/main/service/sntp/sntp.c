@@ -105,8 +105,6 @@ void sntp_obtain_time(void)
 
 void sntp_service_task(void *pvParameters)
 {
-//	xSemaphore = xSemaphoreCreateMutex();
-
 	check_sntp_conf_file();
 	read_sntp_conf();
 
@@ -118,6 +116,8 @@ void sntp_service_task(void *pvParameters)
 	{
 		if ( !(glob_status_reg & STATUS_SNTP_ON) || !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
 			goto for_end;
+
+		read_sntp_conf();
 
 		time(&now);
 		localtime_r(&now, &timeinfo);

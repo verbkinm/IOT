@@ -10,6 +10,16 @@
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value);
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value);
 
+bool set_meteo_config_value(const char *key, const char *value)
+{
+	return set_config_value(METEO_CONF_PATH, "meteo", key, value);
+}
+
+bool get_meteo_config_value(const char *key, char **value)
+{
+	return get_config_value(METEO_CONF_PATH, "meteo", key, value);
+}
+
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value)
 {
 	FILE *file = fopen(file_path, "r");

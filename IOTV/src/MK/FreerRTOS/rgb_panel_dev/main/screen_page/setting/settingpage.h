@@ -22,6 +22,7 @@
 #include "I2C/DS3231.h"
 #include "wifi.h"
 #include "date_time.h"
+#include "weather.h"
 #include "../../status_panel/status_panel.h"
 
 void settingPageInit(void);

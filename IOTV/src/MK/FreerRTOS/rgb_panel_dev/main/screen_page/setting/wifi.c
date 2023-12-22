@@ -13,7 +13,7 @@
 
 extern lv_obj_t *sub_wifi_page;
 
-//extern lv_obj_t *glob_busy_indicator;
+extern lv_font_t ubuntu_mono_14;
 extern uint32_t glob_status_reg;
 extern esp_netif_t *sta_netif;
 
@@ -239,7 +239,7 @@ static void wifi_connect_step2(lv_event_t *e)
 	if ( (strlen(pwd) < 8) )// || (ap_info->authmode != WIFI_AUTH_OPEN) )
 	{
 		printf("pwd = %s\n", pwd);
-		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Error", "Password size error!", 0, true);
+		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Ошибка", "Размер пароля должен быть больше 8-ми символов!", 0, true);
 		lv_obj_center(mbox1);
 		return;
 	}
@@ -283,6 +283,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_obj_t *widget = lv_obj_create(lv_obj_get_child(lv_scr_act(), 1));
 	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
 	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_style_text_font(widget, &ubuntu_mono_14, 0);
 
 	// Фон немного "сереем"
 	lv_color_t bg_color = lv_obj_get_style_bg_color(widget, 0);
@@ -309,7 +310,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	ta = lv_textarea_create(widget);
 	lv_obj_set_size(ta, 760, 60);
 	lv_textarea_set_max_length(ta, 64);
-	lv_textarea_set_placeholder_text(ta, "Enter wifi password");
+	lv_textarea_set_placeholder_text(ta, "Введите пароль точки доступа wifi");
 
 	// клавиатура
 	lv_obj_t *kb = lv_keyboard_create(widget);
@@ -355,7 +356,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_obj_align_to(btn_con, ta, LV_ALIGN_OUT_RIGHT_TOP, -128, -40 -10);
 
 	lv_obj_t *btn_con_lbl = lv_label_create(btn_con);
-	lv_label_set_text(btn_con_lbl, "Wait...");
+	lv_label_set_text(btn_con_lbl, "Ожидайте...");
 	lv_obj_center(btn_con_lbl);
 
 	lv_timer_t *timer = lv_timer_create(conn_step1_timer_loop, 500, widget);
@@ -384,7 +385,7 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 
 		if (memcmp(ap_info->bssid, wifi_config.sta.bssid, 6) == 0)
 		{
-			lv_label_set_text(btn_con_lbl, "Disconnect");
+			lv_label_set_text(btn_con_lbl, "Отключиться");
 			lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
 			lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
 			lv_obj_add_event_cb(btn_con, wifi_disconnect_handler, LV_EVENT_CLICKED, widget);
@@ -392,7 +393,7 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 	}
 	else
 	{
-		lv_label_set_text(btn_con_lbl, "Connect");
+		lv_label_set_text(btn_con_lbl, "Подключиться");
 		lv_obj_remove_event_cb(btn_con, wifi_disconnect_handler);
 		lv_obj_remove_event_cb(btn_con, wifi_connect_step2);
 		lv_obj_add_event_cb(btn_con, wifi_connect_step2, LV_EVENT_CLICKED, widget);
@@ -527,9 +528,9 @@ void create_wifi_sub_page(lv_event_t *e)
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
 	wifi_page_obj->busy_ind = NULL;
 
-	create_switch(section, LV_SYMBOL_SETTINGS, "Enable", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
+	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
 	create_list(section, 495, 265, &(wifi_page_obj->list));
-	create_button(section, "Scan", 128, 40, &(wifi_page_obj->btn_scan));
+	create_button(section, "Сканировать", 128, 40, &(wifi_page_obj->btn_scan));
 
 	lv_obj_t *info_btn = lv_btn_create(lv_obj_get_parent(wifi_page_obj->btn_scan));
 	lv_obj_set_size(info_btn, 128, 40);
@@ -538,7 +539,7 @@ void create_wifi_sub_page(lv_event_t *e)
 	lv_obj_add_event_cb(info_btn, info_handler, LV_EVENT_CLICKED, 0);
 
 	lv_obj_t *info_btn_lbl = lv_label_create(info_btn);
-	lv_label_set_text(info_btn_lbl, "Info");
+	lv_label_set_text(info_btn_lbl, "Информация");
 	lv_obj_center(info_btn_lbl);
 
 	lv_obj_add_event_cb(wifi_page_obj->btn_scan, wifi_scan_starting_heandler, LV_EVENT_CLICKED, 0);
