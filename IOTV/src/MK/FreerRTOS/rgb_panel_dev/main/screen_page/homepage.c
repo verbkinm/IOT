@@ -5,14 +5,7 @@
  *      Author: user
  */
 
-#include "lvgl.h"
-
-#include "Global_def.h"
-#include "I2C/DS3231.h"
 #include "homepage.h"
-#include "screendefault.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 extern lv_font_t ubuntu_mono_14;
 extern lv_font_t ubuntu_mono_26;
@@ -22,71 +15,99 @@ extern lv_font_t ubuntu_mono_64;
 extern lv_font_t ubuntu_mono_128;
 
 extern uint8_t glob_currentPage;
+extern open_meteo_data_t glob_open_meteo;
 
 extern void menuPageInit(void);
 
-#define	STYLE_TIME 			0
-#define	STYLE_DATE			1
-#define	STYLE_TEMPERATURE	2
-#define	STYLE_HUMIDITY		3
-#define	STYLE_PRESSURE		4
-
-static lv_style_t style_arr[5];
 static char *days_str[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 
-static lv_obj_t *block_0, *block_1, *block_2, *block_3;
+static lv_obj_t *block_0, *block_1, *block_2;
 
-static void drawLabel(lv_obj_t *lbl, lv_style_t *style, const char* str, lv_align_t align, lv_coord_t offset_x, lv_coord_t offset_y);
+//Блок 0
+lv_obj_t *time_lbl, *date_lbl;
+//Блок 1
+lv_obj_t *temperature1_lbl, *humidity_lbl, *pressure_lbl;
+//Блок 2
+lv_obj_t *city_lbl, *last_update_lbl, *cloud_codver_img, *precipitations_img, *wind_direction_img,
+*wind_speed_lbl, *temperature2_lbl, *humidity_lbl, *pressure_lbl, *apparent_temperature_lbl, *precipitation_lbl, *rain_lbl, *wind_gusts_lbl, *showers_lbl, *snow_lbl;
+
 static void drawTime(const struct tm *timeinfo);
 static void drawDate(const struct tm *timeinfo);
-static void drawTemperature();
-static void drawHumidity();
-static void drawPressure();
+static void drawTemperature(void);
+static void drawHumidity(void);
+static void drawPressure(void);
+static void draw_meteo_data(void);
 
+static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h);
 static void init_block_0(lv_obj_t *parent);
 static void init_block_1(lv_obj_t *parent);
 static void init_block_2(lv_obj_t *parent);
-static void init_block_3(lv_obj_t *parent);
+
+static lv_obj_t *init_lbl_obj(lv_obj_t *parent, const char* txt, const lv_obj_t *align_to_obj, lv_align_t align,
+		lv_coord_t x_ofs, lv_coord_t y_ofs, lv_color_t color, lv_font_t *font);
+static lv_obj_t *init_img_obj(lv_obj_t *parent, const char* icon_path, const lv_obj_t *align_to_obj, lv_align_t align,
+		lv_coord_t w, lv_coord_t h, lv_coord_t x_ofs, lv_coord_t y_ofs);
 
 static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h);
 
-static void drawLabel(lv_obj_t *lbl, lv_style_t *style, const char* str, lv_align_t align, lv_coord_t offset_x, lv_coord_t offset_y)
-{
-	lv_label_set_text_fmt(lbl, "%s", str);
-	lv_obj_align(lbl, align, offset_x, offset_y);
-
-	lv_obj_add_style(lbl, style, 0);
-}
-
 static void drawTime(const struct tm *timeinfo)
 {
-	lv_obj_t *time = lv_obj_get_child(block_0, 0);
-	lv_label_set_text_fmt(time, "%.02d:%.02d", timeinfo->tm_hour, timeinfo->tm_min);
+	lv_label_set_text_fmt(time_lbl, "%.02d:%.02d", timeinfo->tm_hour, timeinfo->tm_min);
 }
 
 static void drawDate(const struct tm *timeinfo)
 {
-	lv_obj_t *date = lv_obj_get_child(block_0, 1);
-	lv_label_set_text_fmt(date, "%s. %02d.%.02d.%.04d", days_str[timeinfo->tm_wday], timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+	lv_label_set_text_fmt(date_lbl, "%s. %02d.%.02d.%.04d", days_str[timeinfo->tm_wday], timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 }
 
-static void drawTemperature()
+static void drawTemperature(void)
 {
 	//	lv_obj_t *t = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 2);
 	//	lv_label_set_text_fmt(t, "+25.65 C°");
 	//	lv_obj_set_style_text_color(t, lv_color_make(0xff, 0, 0), 0);
 }
 
-static void drawHumidity()
+static void drawHumidity(void)
 {
 	//	lv_obj_t *h = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 3);
 	//	lv_label_set_text_fmt(h, "53 %%");
 }
 
-static void drawPressure()
+static void drawPressure(void)
 {
 	//	lv_obj_t *p = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 4);
 	//	lv_label_set_text_fmt(p, "743 мм.");
+}
+
+static void draw_meteo_data(void)
+{
+	if (glob_open_meteo.city_name != NULL)
+		lv_label_set_text(city_lbl, glob_open_meteo.city_name);
+
+	lv_label_set_text_fmt(wind_speed_lbl, "%.02f м/с", glob_open_meteo.wind_speed);
+
+	if (glob_open_meteo.temperature > 0)
+		lv_label_set_text_fmt(temperature2_lbl, "+%.02f°C", glob_open_meteo.temperature);
+	else
+		lv_label_set_text_fmt(temperature2_lbl, "%.02f°C", glob_open_meteo.temperature);
+
+	lv_label_set_text_fmt(humidity_lbl, "%d%%", glob_open_meteo.relative_humidity);
+	lv_label_set_text_fmt(pressure_lbl, "%d мм.рт.cт.", (int)glob_open_meteo.surface_pressure);
+
+	if (glob_open_meteo.apparent_temperature > 0)
+		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: +%.02f°C", glob_open_meteo.apparent_temperature);
+	else
+		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: %.02f°C", glob_open_meteo.apparent_temperature);
+
+	lv_label_set_text_fmt(precipitation_lbl, "Осадки: %d мм.", glob_open_meteo.precipitation);
+	lv_label_set_text_fmt(rain_lbl, "Дождь: %d мм.", glob_open_meteo.rain);
+	lv_label_set_text_fmt(wind_gusts_lbl, "Порывы\nветра: %.02f м/c", glob_open_meteo.wind_gusts);
+	lv_label_set_text_fmt(showers_lbl, "Ливни: %d мм.", glob_open_meteo.showers);
+	lv_label_set_text_fmt(snow_lbl, "Снег: %d cм.", glob_open_meteo.snowfall);
+
+//	lv_obj_t *last_update_lbl, *cloud_codver_img, *precipitations_img, *wind_direction_img,
+//	*, *, *, *, *,
+//	*, *, *, *, *;
 }
 
 static void event_handler(lv_event_t * e)
@@ -116,13 +137,42 @@ static void init_block_0(lv_obj_t *parent)
 {
 	block_0 = create_block(parent, LV_ALIGN_BOTTOM_LEFT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
 
-	lv_obj_t *obj = lv_label_create(block_0);
-	drawLabel(obj, &style_arr[STYLE_TIME], "00:00", LV_ALIGN_CENTER, 0, -30);
-
-	obj = lv_label_create(block_0);
-	drawLabel(obj, &style_arr[STYLE_DATE], "00.00.0000", LV_ALIGN_BOTTOM_MID, 0, -0);
+	time_lbl = init_lbl_obj(block_0, "00:00", block_0, LV_ALIGN_DEFAULT, 0, 0, lv_color_white(), &ubuntu_mono_128);
+	lv_obj_align(time_lbl, LV_ALIGN_CENTER, 0, -30);
+	date_lbl = init_lbl_obj(block_0, "пн. 00.00.0000", time_lbl, LV_ALIGN_DEFAULT, 0, 0, lv_color_white(), &ubuntu_mono_48);
+	lv_obj_align(date_lbl, LV_ALIGN_BOTTOM_MID, 0, -15);
 
 	lv_obj_add_event_cb(block_0, event_handler, LV_EVENT_CLICKED, 0);
+}
+
+static lv_obj_t *init_lbl_obj(lv_obj_t *parent, const char* txt,
+		const lv_obj_t *align_to_obj, lv_align_t align,
+		lv_coord_t x_ofs, lv_coord_t y_ofs,
+		lv_color_t color, lv_font_t *font)
+{
+	lv_obj_t *obj = lv_label_create(parent);
+
+	if (txt != NULL)
+		lv_label_set_text_fmt(obj, "%s", txt);
+
+	lv_obj_align_to(obj, align_to_obj, align, x_ofs, y_ofs);
+	lv_obj_set_style_text_color(obj, color, 0);
+	lv_obj_set_style_text_font(obj, font, 0);
+
+	return obj;
+}
+
+static lv_obj_t *init_img_obj(lv_obj_t *parent, const char* icon_path,
+		const lv_obj_t *align_to_obj, lv_align_t align,
+		lv_coord_t w, lv_coord_t h,
+		lv_coord_t x_ofs, lv_coord_t y_ofs)
+{
+	lv_obj_t *obj = lv_img_create(parent);
+	lv_obj_set_size(obj, w, h);
+	lv_img_set_src(obj, icon_path);
+	lv_obj_align_to(obj, align_to_obj, align, x_ofs, y_ofs);
+
+	return obj;
 }
 
 // Блок температура/влажность/давление локальная
@@ -131,51 +181,15 @@ static void init_block_1(lv_obj_t *parent)
 	// Блок
 	block_1 = create_block(parent, LV_ALIGN_TOP_LEFT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
 
-	// Температура картинка
-	lv_obj_t *temperature_img = lv_img_create(block_1);
-	lv_obj_set_size(temperature_img, 64, 64);
-	lv_img_set_src(temperature_img, TEMPERATURE);
-	lv_obj_align(temperature_img, LV_ALIGN_TOP_LEFT, 30, 10);
+	lv_obj_t *temperature_img = init_img_obj(block_1, TEMPERATURE, block_1, LV_ALIGN_TOP_LEFT, 64, 64, 30, 10);
+	temperature1_lbl = init_lbl_obj(block_1, "+25.5°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
-	// Температура текст
-	lv_obj_t *temperature_lbl = lv_label_create(block_1);
-	lv_label_set_text_fmt(temperature_lbl, "%s", "+25.5°C");
-	lv_obj_align_to(temperature_lbl, temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5);
-	lv_obj_set_style_text_color(temperature_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(temperature_lbl, &ubuntu_mono_48, 0);
+	lv_obj_t *humidity_img = init_img_obj(block_1, HUMIDITY, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
+	humidity_lbl = init_lbl_obj(block_1, "55 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
-	// Влажность картинка
-	lv_obj_t *humidity_img = lv_img_create(block_1);
-	lv_obj_set_size(humidity_img, 64, 64);
-	lv_img_set_src(humidity_img, HUMIDITY);
-	lv_obj_align_to(humidity_img, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 5);
-
-	// Влажность текст
-	lv_obj_t *humidity_lbl = lv_label_create(block_1);
-	lv_label_set_text_fmt(humidity_lbl, "%s", "55 %");
-	lv_obj_align_to(humidity_lbl, humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5);
-	lv_obj_set_style_text_color(humidity_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(humidity_lbl, &ubuntu_mono_48, 0);
-
-	// Давление картинка
-	lv_obj_t *pressure_img = lv_img_create(block_1);
-	lv_obj_set_size(pressure_img, 64, 64);
-	lv_img_set_src(pressure_img, PRESSURE);
-	lv_obj_align_to(pressure_img, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 5);
-
-	// Давление текст
-	lv_obj_t *pressure_lbl = lv_label_create(block_1);
-	lv_label_set_text_fmt(pressure_lbl, "%s", "700");
-	lv_obj_align_to(pressure_lbl, pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5);
-	lv_obj_set_style_text_color(pressure_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(pressure_lbl, &ubuntu_mono_48, 0);
-
-	// Давление текст мм.рт.ст.
-	lv_obj_t *pressure_lbl_2 = lv_label_create(block_1);
-	lv_label_set_text(pressure_lbl_2, "мм.рт.ст.");
-	lv_obj_align_to(pressure_lbl_2, pressure_lbl, LV_ALIGN_BOTTOM_RIGHT, 20, -20);
-	lv_obj_set_style_text_color(pressure_lbl_2, lv_color_white(), 0);
-	lv_obj_set_style_text_font(pressure_lbl_2, &ubuntu_mono_26, 0);
+	lv_obj_t *pressure_img = init_img_obj(block_1, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
+	pressure_lbl = init_lbl_obj(block_1, "700", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+	init_lbl_obj(block_1, "мм.рт.ст.", pressure_lbl, LV_ALIGN_BOTTOM_RIGHT, 20, -20, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_add_event_cb(block_1, event_handler, LV_EVENT_CLICKED, 0);
 }
@@ -187,7 +201,7 @@ static void init_block_2(lv_obj_t *parent)
 	block_2 = create_block(parent, LV_ALIGN_TOP_RIGHT, LCD_H_RES / 2, LCD_V_RES - LCD_PANEL_STATUS_H);
 
 	// Город
-	lv_obj_t *city_lbl = lv_label_create(block_2);
+	city_lbl = lv_label_create(block_2);
 	char *city_name = NULL;
 	if (get_meteo_config_value("city", &city_name))
 	{
@@ -204,131 +218,32 @@ static void init_block_2(lv_obj_t *parent)
 	lv_obj_set_style_text_color(city_lbl, lv_color_white(), 0);
 	lv_obj_set_style_text_font(city_lbl, &ubuntu_mono_26, 0);
 
-	// Дата последнего обновления данных погоды
-	lv_obj_t *last_update_lbl = lv_label_create(block_2);
-	lv_label_set_text(last_update_lbl, "Обновлено:\n01.01.1970\n00:00");
-	lv_obj_align_to(last_update_lbl, city_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
-	lv_obj_set_style_text_color(last_update_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(last_update_lbl, &ubuntu_mono_14, 0);
+	last_update_lbl = init_lbl_obj(block_2, "Обновлено:\n01.01.1970\n00:00", city_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
 
-	// Облачность картинка
-	lv_obj_t *cloud_codver_img = lv_img_create(block_2);
-	lv_obj_set_size(cloud_codver_img, 128, 128);
-	lv_img_set_src(cloud_codver_img, CLOUD_COVER_2);
-	lv_obj_align(cloud_codver_img, LV_ALIGN_TOP_LEFT, 10, 10);
+	cloud_codver_img = init_img_obj(block_2, CLOUD_COVER_3, block_2, LV_ALIGN_TOP_LEFT, 128, 128, 10, 10);
+	precipitations_img = init_img_obj(block_2, SNOW_3, cloud_codver_img, LV_ALIGN_OUT_BOTTOM_MID, 128, 64, 0, 0);
 
-	// Осадки картинка
-	lv_obj_t *precipitations_img = lv_img_create(block_2);
-	lv_obj_set_size(precipitations_img, 128, 64);
-	lv_img_set_src(precipitations_img, SNOW_AND_RAIN);
-	lv_obj_align_to(precipitations_img, cloud_codver_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+	wind_direction_img = init_img_obj(block_2, WIND_0, cloud_codver_img, LV_ALIGN_OUT_RIGHT_MID, 128, 128, 20, 0);
+	lv_obj_t *wind_img = init_img_obj(block_2, WIND, wind_direction_img, LV_ALIGN_OUT_BOTTOM_LEFT, 32, 32, 20, 20);
+	wind_speed_lbl = init_lbl_obj(block_2, "3.61 м/с", wind_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6, lv_color_white(), &ubuntu_mono_26);
 
-	// Направление ветера картинка
-	lv_obj_t *wind_direction_img = lv_img_create(block_2);
-	lv_obj_set_size(wind_direction_img, 128, 128);
-	lv_img_set_src(wind_direction_img, WIND_225);
-	lv_obj_align_to(wind_direction_img, cloud_codver_img, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
+	lv_obj_t *temperature_img = init_img_obj(block_2, TEMPERATURE32, precipitations_img, LV_ALIGN_OUT_BOTTOM_MID, 32, 32, 0, 20);
+	temperature2_lbl = init_lbl_obj(block_2, "+20.5°C", temperature_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7, lv_color_white(), &ubuntu_mono_26);
 
-	// Ветер картинка
-	lv_obj_t *wind_img = lv_img_create(block_2);
-	lv_obj_set_size(wind_img, 32, 32);
-	lv_img_set_src(wind_img, WIND);
-	lv_obj_align_to(wind_img, wind_direction_img, LV_ALIGN_OUT_BOTTOM_LEFT, 20, 20);
+	lv_obj_t *humidity_img = init_img_obj(block_2, HUMIDITY32, temperature_img, LV_ALIGN_CENTER, 32, 32, 200, 0);
+	humidity_lbl = init_lbl_obj(block_2, "75%", humidity_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7, lv_color_white(), &ubuntu_mono_26);
 
-	// Ветер текст
-	lv_obj_t *wind_lbl = lv_label_create(block_2);
-	lv_label_set_text(wind_lbl, "3.61 м/с");
-	lv_obj_align_to(wind_lbl, wind_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6);
-	lv_obj_set_style_text_color(wind_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(wind_lbl, &ubuntu_mono_26, 0);
+	lv_obj_t *pressure_img = init_img_obj(block_2, PRESSURE32, temperature_img, LV_ALIGN_OUT_BOTTOM_MID, 32, 32, 0, 10);
+	pressure_lbl = init_lbl_obj(block_2, "685 мм.рт.cт.", pressure_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6, lv_color_white(), &ubuntu_mono_26);
 
-	// Температура картинка
-	lv_obj_t *temperature_img = lv_img_create(block_2);
-	lv_obj_set_size(temperature_img, 32, 32);
-	lv_img_set_src(temperature_img, TEMPERATURE32);
-	lv_obj_align_to(temperature_img, precipitations_img, LV_ALIGN_OUT_BOTTOM_MID, -46, 20);
-
-	// Температура текст
-	lv_obj_t *temperature_lbl = lv_label_create(block_2);
-	lv_label_set_text(temperature_lbl, "+20.5°C");
-	lv_obj_align_to(temperature_lbl, temperature_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7);
-	lv_obj_set_style_text_color(temperature_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(temperature_lbl, &ubuntu_mono_26, 0);
-
-	// Влажность картинка
-	lv_obj_t *humidity_img = lv_img_create(block_2);
-	lv_obj_set_size(humidity_img, 32, 32);
-	lv_img_set_src(humidity_img, HUMIDITY32);
-	lv_obj_align_to(humidity_img, temperature_img, LV_ALIGN_CENTER, 200, 0);
-
-	// Влажность текст
-	lv_obj_t *humidity_lbl = lv_label_create(block_2);
-	lv_label_set_text(humidity_lbl, "75%");
-	lv_obj_align_to(humidity_lbl, humidity_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7);
-	lv_obj_set_style_text_color(humidity_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(humidity_lbl, &ubuntu_mono_26, 0);
-
-	// Давление картинка
-	lv_obj_t *pressure_img = lv_img_create(block_2);
-	lv_obj_set_size(pressure_img, 32, 32);
-	lv_img_set_src(pressure_img, PRESSURE32);
-	lv_obj_align_to(pressure_img, temperature_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-
-	// Давление текст
-	lv_obj_t *pressure_lbl = lv_label_create(block_2);
-	lv_label_set_text(pressure_lbl, "685 мм.рт.мт.");
-	lv_obj_align_to(pressure_lbl, pressure_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6);
-	lv_obj_set_style_text_color(pressure_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(pressure_lbl, &ubuntu_mono_26, 0);
-
-	// Температура ощущается текст
-	lv_obj_t *apparent_temperature_lbl = lv_label_create(block_2);
-	lv_label_set_text(apparent_temperature_lbl, "Температура\nощущается: +20.5°C");
-	lv_obj_align_to(apparent_temperature_lbl, pressure_img, LV_ALIGN_OUT_BOTTOM_LEFT, 40, 30);
-	lv_obj_set_style_text_color(apparent_temperature_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(apparent_temperature_lbl, &ubuntu_mono_14, 0);
-
-	// Осадки текст
-	lv_obj_t *precipitation_lbl = lv_label_create(block_2);
-	lv_label_set_text(precipitation_lbl, "Осадки: 0 мм.");
-	lv_obj_align_to(precipitation_lbl, apparent_temperature_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
-	lv_obj_set_style_text_color(precipitation_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(precipitation_lbl, &ubuntu_mono_14, 0);
-
-	// Дождь текст
-	lv_obj_t *rain_lbl = lv_label_create(block_2);
-	lv_label_set_text(rain_lbl, "Дождь: 0 мм.");
-	lv_obj_align_to(rain_lbl, precipitation_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
-	lv_obj_set_style_text_color(rain_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(rain_lbl, &ubuntu_mono_14, 0);
-
-	// Порывы ветра текст
-	lv_obj_t *wind_gusts = lv_label_create(block_2);
-	lv_label_set_text(wind_gusts, "Порывы\nветра: 0 м/с");
-	lv_obj_align_to(wind_gusts, apparent_temperature_lbl, LV_ALIGN_BOTTOM_RIGHT, 50, 0);
-	lv_obj_set_style_text_color(wind_gusts, lv_color_white(), 0);
-	lv_obj_set_style_text_font(wind_gusts, &ubuntu_mono_14, 0);
-
-	// Ливни текст
-	lv_obj_t *showers_lbl = lv_label_create(block_2);
-	lv_label_set_text(showers_lbl, "Ливни: 0 мм.");
-	lv_obj_align_to(showers_lbl, wind_gusts, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
-	lv_obj_set_style_text_color(showers_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(showers_lbl, &ubuntu_mono_14, 0);
-
-	// Снег текст
-	lv_obj_t *snow_lbl = lv_label_create(block_2);
-	lv_label_set_text(snow_lbl, "Снег: 0 см.");
-	lv_obj_align_to(snow_lbl, showers_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
-	lv_obj_set_style_text_color(snow_lbl, lv_color_white(), 0);
-	lv_obj_set_style_text_font(snow_lbl, &ubuntu_mono_14, 0);
+	apparent_temperature_lbl = init_lbl_obj(block_2, "Температура\nощущается: +20.5°C", pressure_img, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 30, lv_color_white(), &ubuntu_mono_14);
+	precipitation_lbl = init_lbl_obj(block_2, "Осадки: 0 мм.", apparent_temperature_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
+	rain_lbl = init_lbl_obj(block_2, "Дождь: 0 мм.", precipitation_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
+	wind_gusts_lbl = init_lbl_obj(block_2, "Порывы\nветра: 0 м/с", apparent_temperature_lbl, LV_ALIGN_BOTTOM_RIGHT, 50, 0, lv_color_white(), &ubuntu_mono_14);
+	showers_lbl = init_lbl_obj(block_2, "Ливни: 0 мм.", wind_gusts_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
+	snow_lbl = init_lbl_obj(block_2, "Снег: 0 см.", showers_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
 
 	lv_obj_add_event_cb(block_2, event_handler, LV_EVENT_CLICKED, 0);
-}
-
-static void init_block_3(lv_obj_t *parent)
-{
-
 }
 
 void homePageInit(void)
@@ -339,32 +254,9 @@ void homePageInit(void)
 	lv_obj_remove_event_cb(main_widget, event_handler);
 	lv_obj_clean(main_widget);
 
-	static bool init_style = false;
-	if (!init_style)
-	{
-		for (int i = STYLE_TIME; i <= STYLE_PRESSURE; ++i)
-		{
-			lv_style_init(&style_arr[i]);
-			lv_style_set_text_color(&style_arr[i], lv_color_white());
-			lv_style_set_text_font(&style_arr[i], &ubuntu_mono_48);
-		}
-		lv_style_set_text_font(&style_arr[STYLE_TIME], &ubuntu_mono_128);
-	}
-	init_style = true;
-
 	init_block_0(main_widget);
 	init_block_1(main_widget);
 	init_block_2(main_widget);
-
-	//	block_2 = create_block(main_widget, LV_ALIGN_TOP_RIGHT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	//
-	//	block_3 = create_block(main_widget, LV_ALIGN_BOTTOM_RIGHT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	//
-	//	lv_obj_add_event_cb(block_0, event_handler, LV_EVENT_CLICKED, 0);
-	//	lv_obj_add_event_cb(block_1, event_handler, LV_EVENT_CLICKED, 0);
-	//	lv_obj_add_event_cb(block_2, event_handler, LV_EVENT_CLICKED, 0);
-	//	lv_obj_add_event_cb(block_3, event_handler, LV_EVENT_CLICKED, 0);
-	//	lv_obj_add_event_cb(main_widget, event_handler, LV_EVENT_CLICKED, main_widget);
 
 	glob_currentPage = PAGE_HOME;
 
@@ -383,4 +275,5 @@ void drawHomePage(void)
 	drawTemperature();
 	drawHumidity();
 	drawPressure();
+	draw_meteo_data();
 }

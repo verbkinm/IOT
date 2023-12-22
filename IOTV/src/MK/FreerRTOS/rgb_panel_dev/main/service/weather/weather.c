@@ -13,6 +13,7 @@
 #define MAX_HTTP_REC_BUFFER 4096
 
 extern uint32_t glob_status_reg;
+extern open_meteo_data_t glob_open_meteo;
 char *city_search = NULL;
 
 static const char *TAG = "weather";
@@ -288,7 +289,9 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	obj = cJSON_GetObjectItemCaseSensitive(current, "surface_pressure");
 	if (obj != NULL)
-		open_meteo->surface_pressure = cJSON_GetNumberValue(obj);
+	{
+		open_meteo->surface_pressure = cJSON_GetNumberValue(obj) * 0.7501;
+	}
 
 	obj = cJSON_GetObjectItemCaseSensitive(current, "cloud_cover");
 	if (obj != NULL)
@@ -347,34 +350,34 @@ void http_meteo_get(void)
 	printf("ret = %d\n", ret);
 
 	open_meteo_data_t *open_meteo = calloc(1, sizeof(open_meteo_data_t));
-	parse_open_meteo_weather(local_response_buffer, open_meteo);
+	if (parse_open_meteo_weather(local_response_buffer, open_meteo))
+		glob_open_meteo = *open_meteo;
 
-	char *city_name = NULL;
-	get_meteo_config_value("city", &city_name);
-	open_meteo->city_name = city_name;
+	if (glob_open_meteo.city_name != NULL)
+		free(glob_open_meteo.city_name);
+	get_meteo_config_value("city", &glob_open_meteo.city_name);
 
-	printf("Meteo information:\n"
-			"City: %s\n"
-			"latitude: %f\n"
-			"longitude: %f\n"
-			"temperature: %f\n"
-			"apparent_temperature: %f\n"
-			"surface_pressure: %f\n"
-			"relative_humidity: %d\n"
-			"wind_speed: %f\n"
-			"wind_gusts: %f\n"
-			"wind_direction: %d\n"
-			"cloud_cover: %d\n"
-			"precipitation: %d\n"
-			"rain: %d\n"
-			"showers: %d\n"
-			"snowfall: %d\n",
-			open_meteo->city_name, open_meteo->latitude, open_meteo->longitude, open_meteo->temperature, open_meteo->apparent_temperature,
-			open_meteo->surface_pressure, open_meteo->relative_humidity, open_meteo->wind_speed, open_meteo->wind_gusts, open_meteo->wind_direction,
-			open_meteo->cloud_cover, open_meteo->precipitation, open_meteo->rain, open_meteo->showers, open_meteo->snowfall);
+//	printf("Meteo information:\n"
+//			"City: %s\n"
+//			"latitude: %f\n"
+//			"longitude: %f\n"
+//			"temperature: %f\n"
+//			"apparent_temperature: %f\n"
+//			"surface_pressure: %f\n"
+//			"relative_humidity: %d\n"
+//			"wind_speed: %f\n"
+//			"wind_gusts: %f\n"
+//			"wind_direction: %d\n"
+//			"cloud_cover: %d\n"
+//			"precipitation: %d\n"
+//			"rain: %d\n"
+//			"showers: %d\n"
+//			"snowfall: %d\n",
+//			open_meteo->city_name, open_meteo->latitude, open_meteo->longitude, open_meteo->temperature, open_meteo->apparent_temperature,
+//			open_meteo->surface_pressure, open_meteo->relative_humidity, open_meteo->wind_speed, open_meteo->wind_gusts, open_meteo->wind_direction,
+//			open_meteo->cloud_cover, open_meteo->precipitation, open_meteo->rain, open_meteo->showers, open_meteo->snowfall);
 
 	free(url);
-	free(city_name);
 	free(open_meteo);
 	free(local_response_buffer);
 	esp_http_client_cleanup(client);

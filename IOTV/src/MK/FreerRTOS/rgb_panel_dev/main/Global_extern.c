@@ -1,5 +1,6 @@
 #include "Global_def.h"
 #include "I2C/DS3231.h"
+#include "service/weather/weather.h"
 #include <lvgl.h>
 
 uint8_t glob_currentPage = PAGE_HOME;
@@ -20,3 +21,5 @@ uint32_t glob_status_reg = 0;
 // Глобальные lvgl объекты
 lv_obj_t *glob_busy_indicator = NULL;
 lv_obj_t *glob_msgbox = NULL;
+
+open_meteo_data_t glob_open_meteo = {0};
