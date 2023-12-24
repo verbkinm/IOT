@@ -15,10 +15,10 @@
 #include "status_panel/status_panel.h"
 #include "screen_page/screendefault.h"
 
+extern lv_font_t ubuntu_mono_14;
+
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
-
-extern lv_obj_t *glob_busy_indicator;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -291,6 +291,9 @@ void TFT_init(void)
 	TFT_rgb_panel_init();
 	TFT_touch_panel_init();
 
+	// шрифт по умолчанию
+//	lv_obj_set_style_text_font(lv_scr_act(), &ubuntu_mono_14, 0);
+
 	// Статус панель
 	lv_obj_t *status_panel = lv_obj_create(lv_scr_act());
 	lv_obj_set_size(status_panel, LCD_H_RES, LCD_PANEL_STATUS_H);
@@ -322,5 +325,5 @@ void TFT_init(void)
 	//	menuPageInit();
 	//	settingPageInit();
 
-	xTaskCreate(TFT_draw_page, "TFT_draw_page", 2048, NULL, 10, NULL);
+	xTaskCreate(TFT_draw_page, "TFT_draw_page", 4096, NULL, 10, NULL);
 }

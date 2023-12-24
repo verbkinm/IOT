@@ -18,8 +18,8 @@ char *city_search = NULL;
 
 static const char *TAG = "weather";
 
-static const char *city_url = "https://geocoding-api.open-meteo.com/v1/search?count=50&language=ru&format=json&name=";
-static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=ms&timezone=auto&forecast_days=1&latitude=";
+static const char *city_url = "https://geocoding-api.open-meteo.com/v1/search?count=20&language=ru&format=json&name=";
+static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=ms&timeformat=unixtime&timezone=auto&forecast_days=1&latitude=";
 
 static void check_meteo_conf_file(void);
 static void read_meteo_conf(void);
@@ -258,7 +258,7 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 	if (data == NULL || open_meteo == NULL)
 		return false;
 
-	printf("Data: \n%s\n", data);
+//	printf("Data: \n%s\n", data);
 	cJSON *monitor = cJSON_Parse(data);
 	if (monitor == NULL)
 		return false;
@@ -325,6 +325,10 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 	if (obj != NULL)
 		open_meteo->snowfall = cJSON_GetNumberValue(obj);
 
+	obj = cJSON_GetObjectItemCaseSensitive(current, "time");
+	if (obj != NULL)
+		open_meteo->time = cJSON_GetNumberValue(obj);
+
 	cJSON_Delete(monitor);
 	return true;
 
@@ -347,7 +351,7 @@ void http_meteo_get(void)
 	esp_http_client_open(client, 0);
 	esp_http_client_fetch_headers(client);
 	int ret = esp_http_client_read(client, local_response_buffer, MAX_HTTP_REC_BUFFER);
-	printf("ret = %d\n", ret);
+//	printf("ret = %d\n", ret);
 
 	open_meteo_data_t *open_meteo = calloc(1, sizeof(open_meteo_data_t));
 	if (parse_open_meteo_weather(local_response_buffer, open_meteo))

@@ -108,6 +108,7 @@
 #define PRECIPITATION0		"A:/sdcard/img/sr0.png"
 
 #define WIND				"A:/sdcard/img/w.png"
+#define WIND_NO				"A:/sdcard/img/w_no.png"
 #define WIND_0				"A:/sdcard/img/w0.png"
 #define WIND_45				"A:/sdcard/img/w45.png"
 #define WIND_90				"A:/sdcard/img/w90.png"
@@ -115,6 +116,7 @@
 #define WIND_180			"A:/sdcard/img/w180.png"
 #define WIND_225			"A:/sdcard/img/w225.png"
 #define WIND_270			"A:/sdcard/img/w270.png"
+#define WIND_315			"A:/sdcard/img/w315.png"
 
 #define WIFI_CONF_PATH		"/sdcard/wifi.jsn"
 #define SNTP_CONF_PATH		"/sdcard/sntp.jsn"

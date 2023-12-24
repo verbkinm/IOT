@@ -266,8 +266,7 @@ static void timer_loop(lv_timer_t *timer)
 
 	if (size <= 32)
 	{
-		lv_obj_t *mbox = lv_msgbox_create(NULL, "Warning", "Data not found!", 0, true);
-		lv_obj_center(mbox);
+		create_msgbox(NULL, "Внимание", "Данные не найдены!");
 		clear_busy_indicator(&weather_page_obj->busy_ind);
 		return;
 	}
@@ -292,10 +291,7 @@ static void timer_loop(lv_timer_t *timer)
 	if (arr_size > 0)
 		create_city_table(open_meteo_city, arr_size);
 	else
-	{
-		lv_obj_t *mbox = lv_msgbox_create(NULL, "Warning", "Data not found!", 0, true);
-		lv_obj_center(mbox);
-	}
+		create_msgbox(NULL, "Внимание", "Данные не найдены!");
 
 	free(open_meteo_city);
 	clear_busy_indicator(&weather_page_obj->busy_ind);
@@ -305,8 +301,7 @@ static void city_search_handler(lv_event_t *e)
 {
 	if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
 	{
-		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Warning", "There is no network connection!", 0, true);
-		lv_obj_center(mbox1);
+		create_msgbox(NULL, "Внимание", "Сетевое соединение не установлено!");
 		return;
 	}
 
@@ -326,8 +321,7 @@ static void city_save_handler(lv_event_t *e)
 {
 	if (selected_row == 0)
 	{
-		lv_obj_t *mbox = lv_msgbox_create(NULL, "Внимание", "Необходимо выбрать любую строку.", 0, true);
-		lv_obj_center(mbox);
+		create_msgbox(NULL, "Внимание", "Необходимо выбрать любую строку!");
 		return;
 	}
 

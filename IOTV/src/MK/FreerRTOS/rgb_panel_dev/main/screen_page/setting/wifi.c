@@ -238,9 +238,8 @@ static void wifi_connect_step2(lv_event_t *e)
 
 	if ( (strlen(pwd) < 8) )// || (ap_info->authmode != WIFI_AUTH_OPEN) )
 	{
-		printf("pwd = %s\n", pwd);
-		lv_obj_t *mbox1 = lv_msgbox_create(NULL, "Ошибка", "Размер пароля должен быть больше 8-ми символов!", 0, true);
-		lv_obj_center(mbox1);
+//		printf("pwd = %s\n", pwd);
+		create_msgbox(NULL, "Внимание", "Размер пароля должен быть больше 8-ми символов!");
 		return;
 	}
 
@@ -479,7 +478,7 @@ static void wifi_scan_done(void)
 
 static void info_handler(lv_event_t * e)
 {
-	lv_obj_t *mbox = lv_msgbox_create(NULL, "IP INFO", "0", 0, true);
+	lv_obj_t *mbox = create_msgbox(NULL, "IP INFO", "0");
 	lv_obj_t *msg_lbl = lv_msgbox_get_text(mbox);
 	lv_obj_center(mbox);
 

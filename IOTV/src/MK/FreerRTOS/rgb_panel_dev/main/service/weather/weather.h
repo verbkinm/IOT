@@ -33,24 +33,27 @@ typedef struct Open_Meteo_City open_meteo_city_t;
 struct Open_Meteo_Data {
     char *city_name;
 
+    time_t time;
+
     float latitude;
     float longitude;
 
     float temperature;
     float apparent_temperature;
     float surface_pressure;
-    uint8_t relative_humidity;
+
+    float precipitation;
+    float rain;
+    float showers;
+    float snowfall;
 
     float wind_speed;
     float wind_gusts;
 
+    uint8_t relative_humidity;
+
     uint8_t cloud_cover;
     uint16_t wind_direction;
-
-    uint8_t precipitation;
-    uint8_t rain;
-    uint8_t showers;
-    uint8_t snowfall;
 };
 typedef struct Open_Meteo_Data open_meteo_data_t;
 

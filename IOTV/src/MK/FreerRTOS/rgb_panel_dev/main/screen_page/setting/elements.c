@@ -7,6 +7,7 @@
 
 #include "elements.h"
 
+extern lv_font_t ubuntu_mono_14;
 extern struct DateTime glob_date_time;
 
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char *txt, lv_menu_builder_variant_t builder_variant)
@@ -219,10 +220,27 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 
 	lv_calendar_header_dropdown_create(calendar);
 
-	lv_calendar_set_today_date(calendar, glob_date_time.year + 1900, glob_date_time.month, glob_date_time.date);
-	lv_calendar_set_showed_date(calendar, glob_date_time.year + 1900, glob_date_time.month);
+	time_t now;
+	struct tm timeinfo;
+	time(&now);
+	localtime_r(&now, &timeinfo);
 
+	lv_calendar_set_today_date(calendar, timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday);
+	lv_calendar_set_showed_date(calendar, timeinfo.tm_year + 1900, timeinfo.tm_mon + 1);
+	static const char *days_str[] = {"пн", "вт", "ср", "чт", "пт", "сб", "вс"};
+	lv_calendar_set_day_names(calendar, &days_str[0]);
+//	LV_CALENDAR_WEEK_STARTS_MONDAY
 	return obj;
+}
+
+lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt)
+{
+	lv_obj_t *mbox = lv_msgbox_create(parent, title, txt, 0, true);
+	lv_obj_set_style_text_font(lv_msgbox_get_title(mbox), &ubuntu_mono_14, 0);
+	lv_obj_set_style_text_font(lv_msgbox_get_text(mbox), &ubuntu_mono_14, 0);
+	lv_obj_center(mbox);
+
+	return mbox;
 }
 
 void delete_obj_handler(lv_event_t * e)

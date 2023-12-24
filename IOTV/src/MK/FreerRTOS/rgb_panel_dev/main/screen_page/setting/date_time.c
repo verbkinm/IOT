@@ -47,9 +47,14 @@ void create_time_page(void)
 
 	lv_obj_t *section = lv_menu_section_create(sub_sub_time_page);
 
-	create_spinbox(section, "Часы:\t", glob_date_time.hour, 0, 23);
-	create_spinbox(section, "Минуты:", glob_date_time.minutes, 0, 59);
-	create_spinbox(section, "Секунды:", glob_date_time.seconds, 0, 59);
+	time_t now;
+	struct tm timeinfo;
+	time(&now);
+	localtime_r(&now, &timeinfo);
+
+	create_spinbox(section, "Часы:\t", timeinfo.tm_hour, 0, 23);
+	create_spinbox(section, "Минуты:", timeinfo.tm_min, 0, 59);
+	create_spinbox(section, "Секунды:", timeinfo.tm_sec, 0, 59);
 
 	lv_obj_t *obj_btn = NULL;
 	create_button(section, "Сохранить", 128, 40, &obj_btn);
@@ -131,7 +136,7 @@ void create_sntp_page(void)
 	// Текст для UTC
 	lv_obj_t *lbl_utc = lv_label_create(wrap);
 	lv_label_set_text(lbl_utc, "Часовой пояс:");
-	lv_obj_align_to(lbl_utc, dt_page_obj->list, LV_ALIGN_OUT_LEFT_MID, -270, 0);
+	lv_obj_align_to(lbl_utc, dt_page_obj->list, LV_ALIGN_OUT_LEFT_MID, -260, 0);
 
 	// Поле ввода адреса сервера ntp
 	dt_page_obj->sntp_server_url = lv_textarea_create(wrap);
@@ -145,7 +150,7 @@ void create_sntp_page(void)
 	// Текст для адреса сервера
 	lv_obj_t *lbl_url = lv_label_create(wrap);
 	lv_label_set_text(lbl_url, "NTP сервер:");
-	lv_obj_align_to(lbl_url, dt_page_obj->sntp_server_url, LV_ALIGN_OUT_LEFT_MID, -33, 0);
+	lv_obj_align_to(lbl_url, dt_page_obj->sntp_server_url, LV_ALIGN_OUT_LEFT_MID, -28, 0);
 
 	// Кнопка сохранить
 	create_button(section, "Сохранить", 128, 40, &dt_page_obj->btn_save);
@@ -217,6 +222,12 @@ static void sntp_switch_handler(lv_event_t * e)
 
 static void save_time(lv_event_t *e)
 {
+	if (glob_status_reg & STATUS_SNTP_ON)
+	{
+		create_msgbox(NULL, "Внимане", "Невозможно установить время, если включена служба SNTP!");
+		return;
+	}
+
 	lv_obj_t *section = (lv_obj_t *)e->user_data;
 
 	glob_date_time.hour = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 1));
@@ -228,6 +239,12 @@ static void save_time(lv_event_t *e)
 
 static void save_date(lv_event_t *e)
 {
+	if (glob_status_reg & STATUS_SNTP_ON)
+	{
+		create_msgbox(NULL, "Внимане", "Невозможно установить дату, если включена служба SNTP!");
+		return;
+	}
+
 	lv_obj_t *section = (lv_obj_t *)e->user_data;
 
 	lv_calendar_t *calendar = (lv_calendar_t *)lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 0);
