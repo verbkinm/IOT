@@ -58,6 +58,7 @@ struct Open_Meteo_Data {
 typedef struct Open_Meteo_Data open_meteo_data_t;
 
 void weather_service_task(void *pvParameters);
+void service_weather_set_city(const char* city);
 void http_meteo_get(void);
 
 #endif /* MAIN_SERVICE_WEATHER_WEATHER_H_ */

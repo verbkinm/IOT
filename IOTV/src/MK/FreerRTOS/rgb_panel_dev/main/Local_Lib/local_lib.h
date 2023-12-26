@@ -12,6 +12,9 @@
 #include "stdio.h"
 #include "stddef.h"
 #include "stdbool.h"
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 uint8_t bcdToDec(uint8_t val);
 uint8_t decToBcd(uint8_t val);
@@ -20,6 +23,8 @@ void setBitInByte(uint8_t *byte, bool bitValue, uint8_t bitNumber);
 double inRange(double val, double min, double max);
 
 void strmac_to_arr(const char *str, uint8_t mac[6]);
+char *url_encode(const char *s);
+char *url_decode(const char *str);
 
 
 #endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H_ */

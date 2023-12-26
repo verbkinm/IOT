@@ -160,10 +160,10 @@ static void draw_precipitations(void)
 			lv_img_set_src(precipitations_img, RAIN_4);
 	}
 
-	if (glob_open_meteo.snowfall > 0)
-	{
+	if (glob_open_meteo.snowfall > 0.10)
 		lv_img_set_src(precipitations_img, SNOW_4);
-	}
+	else
+		lv_img_set_src(precipitations_img, SNOW_3);
 }
 
 static void draw_wind_direction(void)

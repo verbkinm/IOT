@@ -4,7 +4,6 @@
  *  Created on: 7 дек. 2023 г.
  *      Author: user
  */
-
 #include <lvgl.h>
 #include "esp_mac.h"
 

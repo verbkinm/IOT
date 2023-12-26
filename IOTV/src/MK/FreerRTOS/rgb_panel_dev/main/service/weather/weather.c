@@ -14,7 +14,7 @@
 
 extern uint32_t glob_status_reg;
 extern open_meteo_data_t glob_open_meteo;
-char *city_search = NULL;
+static char *city_search = NULL;
 
 static const char *TAG = "weather";
 
@@ -211,6 +211,7 @@ static void http_city_search(void)
 	fclose(file);
 
 	end:
+	free(url);
 	esp_http_client_cleanup(client);
 	free(response_buffer);
 
@@ -337,6 +338,14 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 	return false;
 }
 
+void service_weather_set_city(const char* city)
+{
+	if (city_search != NULL)
+		free(city_search);
+
+	city_search = url_encode(city);
+}
+
 void http_meteo_get(void)
 {
 	char *local_response_buffer = calloc(1, MAX_HTTP_REC_BUFFER);
@@ -396,7 +405,10 @@ void weather_service_task(void *pvParameters)
 	for( ;; )
 	{
 		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+		{
+			counter = 60;
 			goto for_end;
+		}
 
 		if (glob_status_reg & STATUS_METEO_CITY_SEARCH)
 		{

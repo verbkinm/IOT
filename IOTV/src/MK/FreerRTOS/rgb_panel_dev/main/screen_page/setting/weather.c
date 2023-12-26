@@ -11,8 +11,6 @@ extern lv_font_t ubuntu_mono_14;
 extern uint32_t glob_status_reg;
 extern lv_obj_t *sub_weather_page;
 
-extern char *city_search;
-
 struct Weather_page_obj {
 	lv_obj_t *btn_search;
 	lv_obj_t *textarea;
@@ -305,13 +303,11 @@ static void city_search_handler(lv_event_t *e)
 		return;
 	}
 
-	if (city_search != NULL)
-		free(city_search);
-
-	char *city = lv_textarea_get_text(weather_page_obj->textarea);
-	city_search = calloc(1, strlen(city) + 1);
-	strcpy(city_search, city);
-
+	const char *city = lv_textarea_get_text(weather_page_obj->textarea);
+	char *tmp_city = calloc(1, strlen(city) + 1);
+	strcpy(tmp_city, city);
+	service_weather_set_city(tmp_city);
+	free(tmp_city);
 
 	weather_page_obj->busy_ind = create_busy_indicator(lv_obj_get_child(lv_scr_act(), 1), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
 	glob_status_reg |= STATUS_METEO_CITY_SEARCH;

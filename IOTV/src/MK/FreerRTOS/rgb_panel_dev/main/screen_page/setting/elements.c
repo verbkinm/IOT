@@ -9,6 +9,8 @@
 
 extern lv_font_t ubuntu_mono_14;
 
+//extern lv_obj_t *_lv_keyboard_create(lv_obj_t * parent);
+
 char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count)
 {
 	if (count == NULL)
@@ -370,6 +372,7 @@ lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea
 {
 	// клавиатура
 	lv_obj_t *kb = lv_keyboard_create(parent);
+	lv_obj_set_style_text_font(kb, &ubuntu_mono_14, 0);
 
 	lv_obj_align(kb, align, 0, 0);
 	lv_keyboard_set_textarea(kb, textarea);
