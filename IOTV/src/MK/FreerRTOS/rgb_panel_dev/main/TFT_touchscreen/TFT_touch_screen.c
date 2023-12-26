@@ -6,28 +6,19 @@
  */
 
 #include "TFT_touch_screen.h"
-#include "Global_def.h"
 
-#include "screen_page/homepage.h"
-#include "screen_page/menupage.h"
-#include "screen_page/setting/settingpage.h"
-#include "screen_page/setting/elements.h"
-#include "status_panel/status_panel.h"
-#include "screen_page/screendefault.h"
-
-extern lv_font_t ubuntu_mono_14;
 
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
 
 static const char *TAG = "TFT_touch_screen";
 
-esp_lcd_touch_handle_t tp;
-uint16_t touch_x[1];
-uint16_t touch_y[1];
-uint16_t touch_strength[1];
+static esp_lcd_touch_handle_t tp;
+static uint16_t touch_x[1];
+static uint16_t touch_y[1];
+static uint16_t touch_strength[1];
 
-lv_disp_t *disp;
+static lv_disp_t *disp;
 
 static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data);
 static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map);
@@ -170,6 +161,7 @@ static void TFT_rgb_panel_init(void)
 	disp_drv.flush_cb = lvgl_flush_cb;
 	disp_drv.draw_buf = &disp_buf;
 	disp_drv.user_data = panel_handle;
+	disp_drv.sw_rotate = 1;
 	disp = lv_disp_drv_register(&disp_drv);
 
 	ESP_LOGI(TAG, "Install LVGL tick timer");
@@ -181,7 +173,29 @@ static void TFT_rgb_panel_init(void)
 	ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
 	ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_PERIOD_MS * 1000));
 
-	ESP_LOGI(TAG, "Display lvgl_demo_ui");
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_MODE,
+        .timer_num        = LEDC_TIMER,
+        .duty_resolution  = LEDC_DUTY_RES,
+        .freq_hz          = LEDC_FREQUENCY,
+        .clk_cfg          = LEDC_AUTO_CLK
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+    ledc_channel_config_t ledc_channel = {
+        .speed_mode     = LEDC_MODE,
+        .channel        = LEDC_CHANNEL,
+        .timer_sel      = LEDC_TIMER,
+        .intr_type      = LEDC_INTR_DISABLE,
+        .gpio_num       = LEDC_OUTPUT_IO,
+        .duty           = 0, // Set duty to 0%
+        .hpoint         = 0
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+    ledc_fade_func_install(0);
+//    ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, 255, 200);
+//    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY));
+//    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 }
 
 static void TFT_touch_panel_init(void)
@@ -245,10 +259,6 @@ void draw_page(void)
 
 static void timer_loop(lv_timer_t *timer)
 {
-	//	if (!(glob_status_reg & STATUS_WIFI_STA_CONNECTING) &&   // Если не идёт подключение
-	//			!(glob_status_reg & STATUS_WIFI_SCANNING))		 // И нет сканирования
-	//		clear_busy_indicator(&glob_busy_indicator);
-
 	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
 	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
 	lv_obj_t *heap_lbl = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 2);
@@ -291,9 +301,6 @@ void TFT_init(void)
 	TFT_rgb_panel_init();
 	TFT_touch_panel_init();
 
-	// шрифт по умолчанию
-//	lv_obj_set_style_text_font(lv_scr_act(), &ubuntu_mono_14, 0);
-
 	// Статус панель
 	lv_obj_t *status_panel = lv_obj_create(lv_scr_act());
 	lv_obj_set_size(status_panel, LCD_H_RES, LCD_PANEL_STATUS_H);
@@ -326,4 +333,23 @@ void TFT_init(void)
 	//	settingPageInit();
 
 	xTaskCreate(TFT_draw_page, "TFT_draw_page", 4096, NULL, 10, NULL);
+}
+
+void rotate_display(lv_disp_rot_t rotation)
+{
+	lv_disp_set_rotation(disp, rotation);
+}
+
+lv_disp_rot_t get_rotate_display(void)
+{
+	return lv_disp_get_rotation(disp);
+}
+
+void set_display_brightness(uint8_t value)
+{
+	value = inRange(value, 2, 255);
+
+//	printf("set_display_brightness %d\n", value);
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, value));
+    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 }

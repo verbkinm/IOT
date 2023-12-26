@@ -1,7 +1,7 @@
 {
 	"sntp":	{
-		"on":	"0",
-		"url":	"pool.ntp.org",
-		"utc":	"utc+5"
+		"on":	"1",
+		"utc":	"UTC-5",
+		"url":	"ntp5.ntp-servers.net"
 	}
 }

@@ -18,8 +18,4 @@ struct DateTime glob_date_time = {
 
 uint32_t glob_status_reg = 0;
 
-// Глобальные lvgl объекты
-lv_obj_t *glob_busy_indicator = NULL;
-lv_obj_t *glob_msgbox = NULL;
-
 open_meteo_data_t glob_open_meteo = {0};

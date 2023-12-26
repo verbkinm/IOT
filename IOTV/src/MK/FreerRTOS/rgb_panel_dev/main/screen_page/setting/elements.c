@@ -8,7 +8,35 @@
 #include "elements.h"
 
 extern lv_font_t ubuntu_mono_14;
-extern struct DateTime glob_date_time;
+
+char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count)
+{
+	if (count == NULL)
+		return NULL;
+
+	*count = end - begin + 1;
+	if (*count == 0)
+		goto bad_end;
+
+	char *result = calloc(*count + 1, 5);
+	if (result == NULL)
+		goto bad_end;
+
+	char buf[5];
+	for(uint8_t i = 0; i < (*count - 1); ++i)
+	{
+		snprintf(buf, sizeof(buf), "%.02d\n", i);
+		strcat(result, buf);
+	}
+	snprintf(buf, sizeof(buf), "%.02d", *count - 1);
+	strcat(result, buf);
+
+	return result;
+
+	bad_end:
+	count = 0;
+	return 0;
+}
 
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char *txt, lv_menu_builder_variant_t builder_variant)
 {
@@ -39,17 +67,17 @@ lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char *txt, lv_
 	return obj;
 }
 
-lv_obj_t *create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val)
+lv_obj_t *create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, lv_obj_t **slider)
 {
 	lv_obj_t * obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VAR_2);
 
-	lv_obj_t * slider = lv_slider_create(obj);
-	lv_obj_set_flex_grow(slider, 1);
-	lv_slider_set_range(slider, min, max);
-	lv_slider_set_value(slider, val, LV_ANIM_OFF);
+	*slider = lv_slider_create(obj);
+	lv_obj_set_flex_grow(*slider, 1);
+	lv_slider_set_range(*slider, min, max);
+	lv_slider_set_value(*slider, val, LV_ANIM_OFF);
 
 	if(icon == NULL)
-		lv_obj_add_flag(slider, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_flag(*slider, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 	return obj;
 }
@@ -61,6 +89,63 @@ lv_obj_t *create_switch(lv_obj_t *parent, const char * icon, const char * txt, b
 	*switch_obj = lv_switch_create(obj);
 	lv_obj_add_flag(*switch_obj, LV_OBJ_FLAG_EVENT_BUBBLE);
 	lv_obj_add_state(*switch_obj, chk ? LV_STATE_CHECKED : 0);
+
+	return obj;
+}
+
+lv_obj_t *create_time_block(lv_obj_t *parent, const char *title, lv_coord_t width, lv_coord_t height, time_block_t **time_block)
+{
+	lv_obj_t *obj = lv_menu_cont_create(parent);
+	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
+
+	lv_obj_t *wrap = lv_obj_create(obj);
+	lv_obj_set_style_pad_all(wrap, 0, 0);
+	lv_obj_set_scroll_dir(wrap, LV_DIR_NONE);
+	lv_obj_set_size(wrap, width, height);
+	lv_obj_set_style_border_width(wrap, 0, 0);
+
+	lv_obj_t* lbl = lv_label_create(wrap);
+	lv_label_set_text(lbl, title);
+	lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
+
+	*time_block = calloc(1, sizeof(time_block_t));
+
+	char *buf = NULL;
+	uint8_t counter;
+	buf = generate_dropdown_number(0, 59, &counter);
+//	printf("counter: %d\n", (int)counter);
+//	printf("%s", buf);
+
+	// Секунды
+	(*time_block)->s = lv_dropdown_create(wrap);
+	lv_dropdown_set_options((*time_block)->s, buf);
+	lv_obj_set_size((*time_block)->s, 60, 40);
+	lv_obj_align((*time_block)->s, LV_ALIGN_RIGHT_MID, -10, 0);
+
+	lv_obj_t *lbl_2dot = lv_label_create(wrap);
+	lv_label_set_text(lbl_2dot, ":");
+	lv_obj_align_to(lbl_2dot, (*time_block)->s, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
+	// Минуты
+	(*time_block)->m = lv_dropdown_create(wrap);
+	lv_dropdown_set_options((*time_block)->m, buf);
+	lv_obj_set_size((*time_block)->m, 60, 40);
+	lv_obj_align_to((*time_block)->m, lbl_2dot, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
+	free(buf);
+	buf = generate_dropdown_number(0, 23, &counter);
+
+	lbl_2dot = lv_label_create(wrap);
+	lv_label_set_text(lbl_2dot, ":");
+	lv_obj_align_to(lbl_2dot, (*time_block)->m, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
+	// Часы
+	(*time_block)->h = lv_dropdown_create(wrap);
+	lv_dropdown_set_options((*time_block)->h, buf);
+	lv_obj_set_size((*time_block)->h, 60, 40);
+	lv_obj_align_to((*time_block)->h, lbl_2dot, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
+	free(buf);
 
 	return obj;
 }
@@ -229,7 +314,7 @@ lv_obj_t *create_calendar(lv_obj_t *parent)
 	lv_calendar_set_showed_date(calendar, timeinfo.tm_year + 1900, timeinfo.tm_mon + 1);
 	static const char *days_str[] = {"пн", "вт", "ср", "чт", "пт", "сб", "вс"};
 	lv_calendar_set_day_names(calendar, &days_str[0]);
-//	LV_CALENDAR_WEEK_STARTS_MONDAY
+	//	LV_CALENDAR_WEEK_STARTS_MONDAY
 	return obj;
 }
 
@@ -245,9 +330,9 @@ lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt)
 
 void delete_obj_handler(lv_event_t * e)
 {
-//	printf("delete\n");
+	//	printf("delete\n");
 	lv_obj_del(e->user_data);
-//	e->user_data = NULL;
+	//	e->user_data = NULL;
 }
 
 void delete_timer_handler(lv_event_t *e)
@@ -304,7 +389,7 @@ void clear_busy_indicator(lv_obj_t **indicator)
 	if (*indicator == NULL)
 		return;
 
-//	lv_obj_clean(*indicator);
+	//	lv_obj_clean(*indicator);
 	lv_obj_del(*indicator);
 	*indicator = NULL;
 }

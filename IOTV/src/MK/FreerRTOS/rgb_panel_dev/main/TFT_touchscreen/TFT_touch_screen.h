@@ -14,8 +14,17 @@
 #include "esp_log.h"
 #include "lvgl.h"
 #include "esp_lcd_touch_gt911.h"
+#include "driver/ledc.h"
+
+#include "../json/json_config.h"
+#include "../screen_page/homepage.h"
+#include "../screen_page/menupage.h"
+#include "../screen_page/setting/settingpage.h"
 
 void TFT_init(void);
 void draw_page(void);
+void rotate_display(lv_disp_rot_t rotation);
+lv_disp_rot_t get_rotate_display(void);
+void set_display_brightness(uint8_t value);
 
 #endif /* MAIN_TFT_TOUCH_SCREEN_H_ */

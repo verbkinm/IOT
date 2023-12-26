@@ -9,6 +9,7 @@
 #define MAIN_SCREEN_PAGE_SETTING_DATE_TIME_H_
 
 #include <lvgl.h>
+#include "settingpage.h"
 #include "../../service/sntp/sntp.h"
 #include "elements.h"
 

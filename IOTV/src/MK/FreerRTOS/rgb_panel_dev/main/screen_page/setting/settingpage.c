@@ -40,7 +40,6 @@ static char *date_page_title = "Дата";
 static char *weather_page_title = "Погода";
 
 static void back_event_handler(lv_event_t * e);
-static void create_display_sub_page(lv_event_t *e);
 
 static void create_sub_pages(void);
 
@@ -49,6 +48,12 @@ static void create_display_page(lv_obj_t *parent);
 static void create_wifi_page(lv_obj_t *parent);
 static void create_weather_page(lv_obj_t *parent);
 static lv_obj_t *create_other_pages(void);
+
+void setting_page_deinit(void)
+{
+	free_wifi_sub_page();
+	free_date_time_sub_page();
+}
 
 static void back_event_handler(lv_event_t * e)
 {
@@ -71,12 +76,6 @@ static void back_event_handler(lv_event_t * e)
 		menuPageInit();
 		setting_page_deinit();
 	}
-}
-
-void setting_page_deinit(void)
-{
-	free_wifi_sub_page();
-	free_date_time_sub_page();
 }
 //static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
 //{
@@ -111,22 +110,13 @@ void clear_all_sub_page_child(void)
 	free_date_time_sub_page();
 
 	lv_obj_clean(sub_display_page);
+	free_display_sub_page();
 
 	lv_obj_clean(sub_wifi_page);
 	free_wifi_sub_page();
 
 	lv_obj_clean(sub_weather_page);
 	free_weather_sub_page();
-}
-
-static void create_display_sub_page(lv_event_t *e)
-{
-	clear_all_sub_page_child();
-
-	lv_obj_set_style_pad_hor(sub_display_page, 20, 0);
-	//    lv_obj_t *separ = lv_menu_separator_create(sub_display_page);
-	lv_obj_t *section = lv_menu_section_create(sub_display_page);
-	create_slider(section, LV_SYMBOL_SETTINGS, "Яркость", 0, 150, 100);
 }
 
 static void create_date_time_page(lv_obj_t *parent)

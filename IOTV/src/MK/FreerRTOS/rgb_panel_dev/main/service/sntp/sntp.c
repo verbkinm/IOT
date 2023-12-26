@@ -24,6 +24,7 @@ void time_sync_notification_cb(struct timeval *tv);
 void time_sync_notification_cb(struct timeval *tv)
 {
 	printf("Notification of a time synchronization event\n");
+	glob_status_reg |= STATUS_TIME_SYNC;
 }
 
 static void check_sntp_conf_file(void)

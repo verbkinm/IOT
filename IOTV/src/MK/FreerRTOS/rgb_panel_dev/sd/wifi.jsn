@@ -1,9 +1,8 @@
 {
 	"wifi":	{
 		"on":	"1",
-		"auto":	"1sdaf",
+		"auto":	"1",
 		"ssid":	"realme9Pro",
-		"bssid":	"00:00:00:01:FF:12",
-		"pwd":	"y3z4pfrm"
+		"pwd":	"01234567"
 	}
 }

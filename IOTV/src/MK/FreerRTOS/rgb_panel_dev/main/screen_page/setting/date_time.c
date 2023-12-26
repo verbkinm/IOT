@@ -6,7 +6,7 @@
  */
 
 #include "date_time.h"
-#include "settingpage.h"
+//#include "settingpage.h"
 
 extern uint32_t glob_status_reg;
 extern struct DateTime glob_date_time;
@@ -124,7 +124,7 @@ void create_sntp_page(void)
 			"UTC-9\n"
 			"UTC-10\n"
 			"UTC-11\n"
-			"UTC-12\n");
+			"UTC-12");
 	lv_obj_align(dt_page_obj->list, LV_ALIGN_TOP_RIGHT, -10, 0);
 	lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
 

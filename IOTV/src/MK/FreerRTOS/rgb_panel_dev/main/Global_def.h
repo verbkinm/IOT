@@ -74,6 +74,15 @@
 #define LVGL_TICK_PERIOD_MS    2
 #define LCD_PANEL_STATUS_H	   30
 
+// Для регулировки яркости дисплея
+#define LEDC_TIMER              LEDC_TIMER_0
+#define LEDC_MODE               LEDC_LOW_SPEED_MODE
+#define LEDC_OUTPUT_IO          PIN_NUM_BK_LIGHT
+#define LEDC_CHANNEL            LEDC_CHANNEL_0
+#define LEDC_DUTY_RES           LEDC_TIMER_8_BIT
+#define LEDC_DUTY               (64) // Set duty to 50%. ((2 ** 8) - 1) * 50%
+#define LEDC_FREQUENCY          (120) // Frequency in Hertz.
+
 // FS PATH
 #define	SD_ON				"A:/sdcard/panel/sd_on.png"
 #define	SD_OFF				"A:/sdcard/panel/sd_off.png"
@@ -120,6 +129,7 @@
 
 #define WIFI_CONF_PATH		"/sdcard/wifi.jsn"
 #define SNTP_CONF_PATH		"/sdcard/sntp.jsn"
+#define DISPLAY_PATH		"/sdcard/disp.jsn"
 #define METEO_CONF_PATH		"/sdcard/meteo"
 #define METEO_CITY_PATH		"/sdcard/city"
 
@@ -207,17 +217,29 @@ enum PAGE_NAME {
 
 // Глобалные флаги статусов
 enum STATUS_REG {
-	STATUS_WIFI_STA_START = 0x01,
-	STATUS_WIFI_STA_CONNECTING = 0x02,
-	STATUS_WIFI_STA_CONNECTED = 0x04,
-	STATUS_IP_GOT = 0x08,
-	STATUS_WIFI_SCANNING = 0x10,
-	STATUS_WIFI_SCAN_DONE = 0x20,
-	STATUS_WIFI_AUTOCONNECT = 0x40,
-	STATUS_SNTP_ON = 0x80,
-	STATUS_METEO_ON = 0x0100,			//	https://open-meteo.com
+	STATUS_WIFI_STA_START = 0x0001,
+	STATUS_WIFI_STA_CONNECTING = 0x0002,
+	STATUS_WIFI_STA_CONNECTED = 0x0004,
+	STATUS_IP_GOT = 0x0008,
+	STATUS_WIFI_SCANNING = 0x0010,
+	STATUS_WIFI_SCAN_DONE = 0x0020,
+	STATUS_WIFI_AUTOCONNECT = 0x0040,
+	STATUS_SNTP_ON = 0x0080,
+	STATUS_METEO_ON = 0x0100,
 	STATUS_METEO_CITY_SEARCH = 0x0200,
-	STATUS_METEO_CITY_SEARCH_DONE = 0x0400
+	STATUS_METEO_CITY_SEARCH_DONE = 0x0400,
+	STATUS_DISPLAY_NIGHT_MODE_ON = 0x0800,
+	STATUS_TIME_SYNC = 0x1000,
 };
+
+// json config word
+#define DISPLAY_STR				"display"
+#define ROTATE_STR 				"rotate"
+#define BRIGHTNESS_STR			"brightness"
+#define NIGHT_MODE_STR			"night_mode"
+#define BRIGHTNESS_DAY_STR		"b_day"
+#define BRIGHTNESS_NIGHT_STR	"b_night"
+#define DAY_BEGIN_STR			"d_begin"
+#define NIGHT_BEGIN_STR			"n_begin"
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

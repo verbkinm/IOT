@@ -10,6 +10,16 @@
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value);
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value);
 
+bool set_display_config_value(const char *key, const char *value)
+{
+	return set_config_value(DISPLAY_PATH, "display", key, value);
+}
+
+bool get_display_config_value(const char *key, char **value)
+{
+	return get_config_value(DISPLAY_PATH, "display", key, value);
+}
+
 bool set_meteo_config_value(const char *key, const char *value)
 {
 	return set_config_value(METEO_CONF_PATH, "meteo", key, value);
@@ -29,11 +39,11 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 		return false;
 	}
 
-	char *content = calloc(1, BUFSIZ);
+	char *content = calloc(1, BUFSIZ * 2);
 	if (content == NULL)
 		return false;
 
-	fread(content, BUFSIZ, 1, file);
+	fread(content, BUFSIZ * 2, 1, file);
 	fclose(file);
 
 	cJSON *monitor = cJSON_Parse(content);
@@ -58,7 +68,6 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	file = fopen(file_path, "w");
 	if (file == NULL)
 		goto bad_end;
-
 	fprintf(file, "%s", print);
 	fclose(file);
 
@@ -83,11 +92,11 @@ static bool get_config_value(const char* file_path, const char *group, const cha
 		return false;
 	}
 
-	char *content = calloc(1, BUFSIZ);
+	char *content = calloc(1, BUFSIZ * 2);
 	if (content == NULL)
 		return false;
 
-	fread(content, BUFSIZ, 1, file);
+	fread(content, BUFSIZ * 2, 1, file);
 	fclose(file);
 
 	cJSON *monitor = cJSON_Parse(content);
