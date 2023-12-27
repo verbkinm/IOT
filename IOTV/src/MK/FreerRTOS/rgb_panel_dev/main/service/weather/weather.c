@@ -13,6 +13,8 @@
 #define MAX_HTTP_REC_BUFFER 4096
 
 extern uint32_t glob_status_reg;
+extern uint32_t glob_status_err;
+
 extern open_meteo_data_t glob_open_meteo;
 static char *city_search = NULL;
 
@@ -360,6 +362,10 @@ void http_meteo_get(void)
 	esp_http_client_open(client, 0);
 	esp_http_client_fetch_headers(client);
 	int ret = esp_http_client_read(client, local_response_buffer, MAX_HTTP_REC_BUFFER);
+
+	if (ret == MAX_HTTP_REC_BUFFER)
+		ESP_LOGE(TAG, "http request >= MAX_HTTP_REC_BUFFER");
+
 //	printf("ret = %d\n", ret);
 
 	open_meteo_data_t *open_meteo = calloc(1, sizeof(open_meteo_data_t));
@@ -389,7 +395,6 @@ void http_meteo_get(void)
 //			open_meteo->city_name, open_meteo->latitude, open_meteo->longitude, open_meteo->temperature, open_meteo->apparent_temperature,
 //			open_meteo->surface_pressure, open_meteo->relative_humidity, open_meteo->wind_speed, open_meteo->wind_gusts, open_meteo->wind_direction,
 //			open_meteo->cloud_cover, open_meteo->precipitation, open_meteo->rain, open_meteo->showers, open_meteo->snowfall);
-
 	free(url);
 	free(open_meteo);
 	free(local_response_buffer);
@@ -404,6 +409,9 @@ void weather_service_task(void *pvParameters)
 	int counter = 350; // раз в 5 минут
 	for( ;; )
 	{
+		if (glob_status_err)
+			break;
+
 		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
 		{
 			counter = 350;
@@ -427,4 +435,5 @@ void weather_service_task(void *pvParameters)
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
+	vTaskDelete(NULL);
 }

@@ -16,10 +16,11 @@
 #include "esp_lcd_touch_gt911.h"
 #include "driver/ledc.h"
 
-#include "../json/json_config.h"
-#include "../screen_page/homepage.h"
-#include "../screen_page/menupage.h"
-#include "../screen_page/setting/settingpage.h"
+#include "json/json_config.h"
+#include "screen_page/homepage/homepage.h"
+#include "screen_page/homepage/datetime1/datetime1.h"
+#include "screen_page/menupage.h"
+#include "screen_page/setting/settingpage.h"
 
 void TFT_init(void);
 void draw_page(void);

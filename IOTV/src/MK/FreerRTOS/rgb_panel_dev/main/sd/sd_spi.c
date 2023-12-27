@@ -27,9 +27,30 @@ static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdin
 {
 	esp_err_t ret = sdspi_host_do_transaction(slot, cmdinfo);
 
-	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED && ret != ESP_ERR_TIMEOUT)
+	if (ret == ESP_ERR_TIMEOUT)
 	{
-		ESP_LOGE(TAG, "%d", ret);
+		static time_t old_t = 0;
+		if (old_t == 0)
+		{
+			time(&old_t);
+			return ret;
+		}
+
+		time_t cur_t;
+		time(&cur_t);
+
+		if ((cur_t - old_t) == 0)
+		{
+			glob_status_err |= STATUS_SD_ERROR;
+			ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
+			return ret;
+		}
+		time(&old_t);
+	}
+
+	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED)
+	{
+		ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
 		glob_status_err |= STATUS_SD_ERROR;
 //		spi_bus_free(slot);
 	}

@@ -14,17 +14,16 @@ void app_main(void)
 
 	while (1)
 	{
-		// raise the task priority of LVGL and/or reduce the handler period can improve the performance
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-
-		// The task running lv_timer_handler should have lower priority than that running `lv_tick_inc`
 		lv_timer_handler();
+		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 }
 
-/*
- *
- *
+//Fixme: Режимы отображения часов/даты +
+//Fixme: О продукте
+//Fixme: Графики погоды
+
+/* Online Font Converter https://lvgl.io/tools/fontconverter
 а бвгдеёжзийклмнопрстуфхцчшщъыьэюя
 АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
 abcdefghijklmnopqrstuvwxyz

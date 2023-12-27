@@ -8,6 +8,7 @@
 #include "wifi.h"
 
 extern uint32_t glob_status_reg;
+extern uint32_t glob_status_err;
 
 esp_netif_t *sta_netif;
 
@@ -234,6 +235,9 @@ void wifi_service_task(void *pvParameters)
 
 	for( ;; )
 	{
+		if (glob_status_err)
+			break;
+
 		if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
 		{
 			//		xTimerStop(reconnect_timer, 0);
@@ -273,4 +277,5 @@ void wifi_service_task(void *pvParameters)
 		for_end:
 		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
+	vTaskDelete(NULL);
 }

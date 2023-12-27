@@ -212,7 +212,8 @@ enum PAGE_NAME {
     PAGE_HOME,
     PAGE_MENU,
     PAGE_CHARTS,
-    PAGE_SETTINGS
+    PAGE_SETTINGS,
+	PAGE_DATETIME_1
 };
 
 // Глобалные флаги статусов

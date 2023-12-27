@@ -12,6 +12,7 @@
 #include "settingpage.h"
 #include "../../service/sntp/sntp.h"
 #include "elements.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 void create_date_time_sub_page(lv_event_t *e);
 void create_time_page(void);

@@ -28,6 +28,7 @@ static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data);
 static void TFT_rgb_panel_init(void);
 static void TFT_touch_panel_init(void);
 static void timer_loop(lv_timer_t *timer);
+static void TFT_draw_page_task(void *pvParameters);
 
 static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data)
 {
@@ -252,6 +253,9 @@ void draw_page(void)
 	case PAGE_SETTINGS:
 		//        drawSettingPage();
 		break;
+	case PAGE_DATETIME_1:
+		draw_datetime1_page();
+		break;
 	case PAGE_NONE:
 	default:
 		break;
@@ -269,7 +273,7 @@ static void timer_loop(lv_timer_t *timer)
 
 	if (glob_status_err & STATUS_SD_ERROR)
 	{
-		ESP_LOGE(TAG, "STATUS_SD_ERROR");
+		ESP_LOGE(TAG, "CRITICAL STATUS_SD_ERROR");
 		set_display_brightness(255);
 
 		error_widget = lv_obj_create(lv_scr_act());
@@ -285,6 +289,7 @@ static void timer_loop(lv_timer_t *timer)
 		lv_label_set_text(lbl, "Ошибка SD карты!");
 		lv_obj_align(lbl, LV_ALIGN_BOTTOM_MID, 0, -10);
 		lv_obj_set_style_text_font(lbl, &ubuntu_mono_48, 0);
+		return;
 	}
 
 	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
@@ -311,16 +316,20 @@ static void timer_loop(lv_timer_t *timer)
 	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
 }
 
-void TFT_draw_page(void *pvParameters)
+static void TFT_draw_page_task(void *pvParameters)
 {
 	lv_timer_create(timer_loop, 1000, 0);
 
 	while (1)
 	{
+		if (glob_status_err)
+			break;
+
 		//		menuPageInit();
 		draw_page();
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
+	vTaskDelete(NULL);
 }
 
 // Перед этой функцией обязательно выполнить i2c_init();
@@ -346,7 +355,8 @@ void TFT_init(void)
 	lv_obj_set_size(icon_wifi, 24, 24);
 
 	// Статус кучи
-	lv_label_create(status_panel);
+	lv_obj_t *heap = lv_label_create(status_panel);
+	lv_obj_set_style_text_color(heap, lv_color_white(), 0);
 
 	// Основной виджет
 	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
@@ -360,7 +370,7 @@ void TFT_init(void)
 	//	menuPageInit();
 	//	settingPageInit();
 
-	xTaskCreate(TFT_draw_page, "TFT_draw_page", 4096, NULL, 10, NULL);
+	xTaskCreate(TFT_draw_page_task, "TFT_draw_page_task", 4096, NULL, 10, NULL);
 }
 
 void rotate_display(lv_disp_rot_t rotation)

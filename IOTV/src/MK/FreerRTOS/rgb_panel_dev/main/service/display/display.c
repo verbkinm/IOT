@@ -8,6 +8,7 @@
 #include "display.h"
 
 extern uint32_t glob_status_reg;
+extern uint32_t glob_status_err;
 
 static void check_display_conf_file(void);
 static void read_display_conf(void);
@@ -26,6 +27,9 @@ void service_display_task(void *pvParameters)
 
 	for( ;; )
 	{
+		if (glob_status_err)
+			break;
+
 		if ((glob_status_reg & STATUS_DISPLAY_NIGHT_MODE_ON) && (glob_status_reg & STATUS_TIME_SYNC))
 		{
 			time_t now;
@@ -44,21 +48,22 @@ void service_display_task(void *pvParameters)
 				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_night, 1000);
 				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
 				set_display_brightness(display_service_data.brightness_night);
-				printf("night mode\n");
-				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
+//				printf("night mode\n");
+//				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
 			}
 			else
 			{
 				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_day, 1000);
 				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
 				set_display_brightness(display_service_data.brightness_day);
-				printf("day mode\n");
-				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
+//				printf("day mode\n");
+//				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
 			}
 		}
 
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
+	vTaskDelete(NULL);
 }
 
 static void read_display_conf(void)
