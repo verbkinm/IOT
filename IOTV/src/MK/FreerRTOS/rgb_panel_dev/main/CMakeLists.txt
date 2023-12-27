@@ -29,4 +29,5 @@ idf_component_register(SRCS "main.c"
 							"fonts/ubuntu_mono_48.c"
 							"fonts/ubuntu_mono_64.c"
 							"fonts/ubuntu_mono_128.c"
+							"img_c/sd.c"
                        INCLUDE_DIRS ".")

@@ -34,6 +34,18 @@ static void display_save_event_handler(lv_event_t * e);
 
 static void display_save_event_handler(lv_event_t * e)
 {
+//	int d_h = lv_dropdown_get_selected(display_page_obj->time_block_day->h);
+//	int d_m = lv_dropdown_get_selected(display_page_obj->time_block_day->m);
+//	int d_s = lv_dropdown_get_selected(display_page_obj->time_block_day->s);
+//
+//	d_s = d_s + d_m * 60 + d_h * 3600;
+//
+//	int n_h = lv_dropdown_get_selected(display_page_obj->time_block_night->h);
+//	int n_m = lv_dropdown_get_selected(display_page_obj->time_block_night->m);
+//	int n_s = lv_dropdown_get_selected(display_page_obj->time_block_night->s);
+//
+//	n_s = n_s + n_m * 60 + n_h * 3600;
+
 	char buf[BUFSIZE] = {0};
 	sprintf(buf, "%d", (int)lv_slider_get_value(display_page_obj->slider_brightness));
 	set_display_config_value(BRIGHTNESS_STR, buf);

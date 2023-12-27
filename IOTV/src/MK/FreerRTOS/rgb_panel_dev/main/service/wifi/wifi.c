@@ -217,7 +217,8 @@ static void read_wifi_conf(void)
 	// Автоматическое подключение
 	if (get_wifi_config_value("auto", &auto_on))
 	{
-		if (strcmp("1", auto_on) == 0)			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+		if (strcmp("1", auto_on) == 0)
+			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
 		else
 			glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
 //		printf("read wifi conf. auto = %s\n", auto_on);

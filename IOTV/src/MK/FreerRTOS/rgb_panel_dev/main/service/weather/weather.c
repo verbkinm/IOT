@@ -401,12 +401,12 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
-	int counter = 60;
+	int counter = 350; // раз в 5 минут
 	for( ;; )
 	{
 		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
 		{
-			counter = 60;
+			counter = 350;
 			goto for_end;
 		}
 
@@ -418,7 +418,7 @@ void weather_service_task(void *pvParameters)
 		if (!(glob_status_reg & STATUS_METEO_ON) )
 			goto for_end;
 
-		if (counter++ < 60)
+		if (counter++ < 350)
 			goto for_end;
 		counter = 0;
 

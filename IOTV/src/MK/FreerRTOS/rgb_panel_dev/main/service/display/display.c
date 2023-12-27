@@ -32,21 +32,28 @@ void service_display_task(void *pvParameters)
 			struct tm timeinfo = { 0 };
 			time(&now);
 			localtime_r(&now, &timeinfo);
-			if (timeinfo.tm_hour == display_service_data.day_begin_h
-					&& timeinfo.tm_min == display_service_data.day_begin_m
-					&& timeinfo.tm_sec == display_service_data.day_begin_s)
+
+			int cur_sec = timeinfo.tm_sec + timeinfo.tm_min * 60 + timeinfo.tm_hour * 3600;
+			int day_sec = display_service_data.day_begin_s + display_service_data.day_begin_m * 60 + display_service_data.day_begin_h * 3600;
+			int night_sec = display_service_data.night_begin_s + display_service_data.night_begin_m * 60 + display_service_data.night_begin_h * 3600;
+
+			if ( (cur_sec < night_sec && cur_sec < day_sec)
+					|| (cur_sec > night_sec && cur_sec < day_sec)
+					|| ((cur_sec > night_sec && cur_sec > day_sec) && day_sec < night_sec))
 			{
-				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_day, 500);
-				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
-				set_display_brightness(display_service_data.brightness_day);
-			}
-			else if (timeinfo.tm_hour == display_service_data.night_begin_h
-					&& timeinfo.tm_min == display_service_data.night_begin_m
-					&& timeinfo.tm_sec == display_service_data.night_begin_s)
-			{
-				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_night, 500);
+				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_night, 1000);
 				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
 				set_display_brightness(display_service_data.brightness_night);
+				printf("night mode\n");
+				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
+			}
+			else
+			{
+				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_day, 1000);
+				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
+				set_display_brightness(display_service_data.brightness_day);
+				printf("day mode\n");
+				printf("cur_sec =%d, day_sec=%d, night_sec=%d\n", cur_sec, day_sec, night_sec);
 			}
 		}
 
@@ -78,6 +85,8 @@ static void read_display_conf(void)
 	{
 		if (strcmp(buf, "1") == 0)
 			glob_status_reg |= STATUS_DISPLAY_NIGHT_MODE_ON;
+		else
+			glob_status_reg &= ~STATUS_DISPLAY_NIGHT_MODE_ON;
 		free(buf);
 	}
 

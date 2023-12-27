@@ -17,53 +17,32 @@
 #define MOUNT_POINT "/sdcard"
 #define EXAMPLE_MAX_CHAR_SIZE    64
 
+extern uint32_t glob_status_err;
+
 static char *TAG = "SD SPI";
 
+static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo);
 
-//esp_err_t s_write_file(const char *path, char *data)
-//{
-//	ESP_LOGI(TAG, "Opening file %s", path);
-//	FILE *f = fopen(path, "w");
-//	if (f == NULL) {
-//		ESP_LOGE(TAG, "Failed to open file for writing");
-//		return ESP_FAIL;
-//	}
-//	fprintf(f, data);
-//	fclose(f);
-//	ESP_LOGI(TAG, "File written");
-//
-//	return ESP_OK;
-//}
+static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo)
+{
+	esp_err_t ret = sdspi_host_do_transaction(slot, cmdinfo);
 
-//static esp_err_t s_read_file(const char *path)
-//{
-//	ESP_LOGI(TAG, "Reading file %s", path);
-//	FILE *f = fopen(path, "r");
-//	if (f == NULL) {
-//		ESP_LOGE(TAG, "Failed to open file for reading");
-//		return ESP_FAIL;
-//	}
-//	char line[EXAMPLE_MAX_CHAR_SIZE];
-//	fgets(line, sizeof(line), f);
-//	fclose(f);
-//
-//	// strip newline
-//	char *pos = strchr(line, '\n');
-//	if (pos) {
-//		*pos = '\0';
-//	}
-//	ESP_LOGI(TAG, "Read from file: '%s'", line);
-//
-//	return ESP_OK;
-//}
+	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED && ret != ESP_ERR_TIMEOUT)
+	{
+		ESP_LOGE(TAG, "%d", ret);
+		glob_status_err |= STATUS_SD_ERROR;
+//		spi_bus_free(slot);
+	}
 
+	return ret;
+}
 
 esp_err_t sd_spi_init(void)
 {
 	esp_err_t ret;
 
 	esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-			.format_if_mount_failed = false,
+			.format_if_mount_failed = true,
 			.max_files = 5,
 			.allocation_unit_size = 16 * 1024
 	};
@@ -73,6 +52,8 @@ esp_err_t sd_spi_init(void)
 	ESP_LOGI(TAG, "Using SPI peripheral");
 
 	sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+	host.do_transaction = wrap_sdspi_host_do_transaction;
+
 	spi_bus_config_t bus_cfg = {
 			.mosi_io_num = SPI_NUM_MOSI,
 			.miso_io_num = SPI_NUM_MISO,
@@ -85,6 +66,7 @@ esp_err_t sd_spi_init(void)
 	ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
 	if (ret != ESP_OK)
 	{
+		glob_status_err |= STATUS_SD_ERROR;
 		ESP_LOGE(TAG, "Failed to initialize bus.");
 		return ret;
 	}
@@ -98,6 +80,7 @@ esp_err_t sd_spi_init(void)
 
 	if (ret != ESP_OK)
 	{
+		glob_status_err |= STATUS_SD_ERROR;
 		if (ret == ESP_FAIL)
 		{
 			ESP_LOGE(TAG, "Failed to mount filesystem. "

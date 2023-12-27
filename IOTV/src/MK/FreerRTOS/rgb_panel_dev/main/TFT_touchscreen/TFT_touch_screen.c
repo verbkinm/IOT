@@ -7,9 +7,10 @@
 
 #include "TFT_touch_screen.h"
 
-
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
+extern uint32_t glob_status_err;
+extern lv_font_t ubuntu_mono_48;
 
 static const char *TAG = "TFT_touch_screen";
 
@@ -173,29 +174,29 @@ static void TFT_rgb_panel_init(void)
 	ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
 	ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_PERIOD_MS * 1000));
 
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode       = LEDC_MODE,
-        .timer_num        = LEDC_TIMER,
-        .duty_resolution  = LEDC_DUTY_RES,
-        .freq_hz          = LEDC_FREQUENCY,
-        .clk_cfg          = LEDC_AUTO_CLK
-    };
-    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+	ledc_timer_config_t ledc_timer = {
+			.speed_mode       = LEDC_MODE,
+			.timer_num        = LEDC_TIMER,
+			.duty_resolution  = LEDC_DUTY_RES,
+			.freq_hz          = LEDC_FREQUENCY,
+			.clk_cfg          = LEDC_AUTO_CLK
+	};
+	ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
 
-    ledc_channel_config_t ledc_channel = {
-        .speed_mode     = LEDC_MODE,
-        .channel        = LEDC_CHANNEL,
-        .timer_sel      = LEDC_TIMER,
-        .intr_type      = LEDC_INTR_DISABLE,
-        .gpio_num       = LEDC_OUTPUT_IO,
-        .duty           = 0, // Set duty to 0%
-        .hpoint         = 0
-    };
-    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-    ledc_fade_func_install(0);
-//    ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, 255, 200);
-//    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY));
-//    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+	ledc_channel_config_t ledc_channel = {
+			.speed_mode     = LEDC_MODE,
+			.channel        = LEDC_CHANNEL,
+			.timer_sel      = LEDC_TIMER,
+			.intr_type      = LEDC_INTR_DISABLE,
+			.gpio_num       = LEDC_OUTPUT_IO,
+			.duty           = 0, // Set duty to 0%
+			.hpoint         = 0
+	};
+	ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+	ledc_fade_func_install(0);
+	//    ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, 255, 200);
+	//    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY));
+	//    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 }
 
 static void TFT_touch_panel_init(void)
@@ -259,6 +260,33 @@ void draw_page(void)
 
 static void timer_loop(lv_timer_t *timer)
 {
+	// Виджет для сообщения критических ошибок
+	static lv_obj_t *error_widget = NULL;
+	if (error_widget != NULL)
+		return;
+
+//	printf("STATUS_SD_ERROR %lu\n", glob_status_err & STATUS_SD_ERROR);
+
+	if (glob_status_err & STATUS_SD_ERROR)
+	{
+		ESP_LOGE(TAG, "STATUS_SD_ERROR");
+		set_display_brightness(255);
+
+		error_widget = lv_obj_create(lv_scr_act());
+		lv_obj_set_size(error_widget, LCD_H_RES, LCD_V_RES);
+		lv_obj_set_style_radius(error_widget, 0, 0);
+		lv_obj_t *img_sd = lv_img_create(error_widget);
+		lv_obj_set_size(img_sd, 256, 256);
+		lv_obj_center(img_sd);
+		LV_IMG_DECLARE(sd);
+		lv_img_set_src(img_sd, &sd);
+
+		lv_obj_t *lbl = lv_label_create(error_widget);
+		lv_label_set_text(lbl, "Ошибка SD карты!");
+		lv_obj_align(lbl, LV_ALIGN_BOTTOM_MID, 0, -10);
+		lv_obj_set_style_text_font(lbl, &ubuntu_mono_48, 0);
+	}
+
 	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
 	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
 	lv_obj_t *heap_lbl = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 2);
@@ -349,7 +377,7 @@ void set_display_brightness(uint8_t value)
 {
 	value = inRange(value, 2, 255);
 
-//	printf("set_display_brightness %d\n", value);
-    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, value));
-    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+	//	printf("set_display_brightness %d\n", value);
+	ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, value));
+	ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
 }

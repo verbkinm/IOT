@@ -160,10 +160,16 @@ static void draw_precipitations(void)
 			lv_img_set_src(precipitations_img, RAIN_4);
 	}
 
-	if (glob_open_meteo.snowfall > 0.10)
+	if (glob_open_meteo.snowfall >= 0.20)
 		lv_img_set_src(precipitations_img, SNOW_4);
-	else
+	else if (glob_open_meteo.snowfall >= 0.15)
 		lv_img_set_src(precipitations_img, SNOW_3);
+	else if (glob_open_meteo.snowfall >= 0.10)
+		lv_img_set_src(precipitations_img, SNOW_2);
+	else if (glob_open_meteo.snowfall > 0)
+		lv_img_set_src(precipitations_img, SNOW_1);
+	else
+		lv_img_set_src(precipitations_img, PRECIPITATION0);
 }
 
 static void draw_wind_direction(void)
