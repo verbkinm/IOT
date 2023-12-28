@@ -15,19 +15,20 @@
 extern uint32_t glob_status_reg;
 extern uint32_t glob_status_err;
 
-extern open_meteo_data_t glob_open_meteo;
 static char *city_search = NULL;
 
 static const char *TAG = "weather";
 
+static open_meteo_data_t *open_meteo = NULL;
 static const char *city_url = "https://geocoding-api.open-meteo.com/v1/search?count=20&language=ru&format=json&name=";
-static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=ms&timeformat=unixtime&timezone=auto&forecast_days=1&latitude=";
+static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,snowfall,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timeformat=unixtime&timezone=auto&latitude=";
 
 static void check_meteo_conf_file(void);
 static void read_meteo_conf(void);
 static char *generate_url_meteo(void);
-static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo);
+static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo_week);
 static void http_city_search(void);
+static void http_meteo_to_file(void);
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
@@ -256,81 +257,123 @@ static void read_meteo_conf(void)
 	}
 }
 
-static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo)
+static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo_week)
 {
-	if (data == NULL || open_meteo == NULL)
+	if (data == NULL || open_meteo_week == NULL)
 		return false;
 
-//	printf("Data: \n%s\n", data);
 	cJSON *monitor = cJSON_Parse(data);
 	if (monitor == NULL)
 		return false;
 
-	cJSON *obj = cJSON_GetObjectItemCaseSensitive(monitor, "latitude");
-	if (obj != NULL)
-		open_meteo->latitude = cJSON_GetNumberValue(obj);
-
-	obj = cJSON_GetObjectItemCaseSensitive(monitor, "longitude");
-	if (obj != NULL)
-		open_meteo->longitude = cJSON_GetNumberValue(obj);
-
-	cJSON *current = cJSON_GetObjectItemCaseSensitive(monitor, "current");
-	if (current == NULL)
+	cJSON *obj_parent = cJSON_GetObjectItemCaseSensitive(monitor, "hourly");
+	if (obj_parent == NULL)
 		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "temperature_2m");
-	if (obj != NULL)
-		open_meteo->temperature = cJSON_GetNumberValue(obj);
+	cJSON *obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "time");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "apparent_temperature");
-	if (obj != NULL)
-		open_meteo->apparent_temperature = cJSON_GetNumberValue(obj);
+	cJSON *obj;
+	int i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].time = cJSON_GetNumberValue(obj);
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "relative_humidity_2m");
-	if (obj != NULL)
-		open_meteo->relative_humidity = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "temperature_2m");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "surface_pressure");
-	if (obj != NULL)
-	{
-		open_meteo->surface_pressure = cJSON_GetNumberValue(obj) * 0.7501;
-	}
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].temperature = cJSON_GetNumberValue(obj);
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "cloud_cover");
-	if (obj != NULL)
-		open_meteo->cloud_cover = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "relative_humidity_2m");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "wind_speed_10m");
-	if (obj != NULL)
-		open_meteo->wind_speed = cJSON_GetNumberValue(obj);
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].relative_humidity = cJSON_GetNumberValue(obj);;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "wind_direction_10m");
-	if (obj != NULL)
-		open_meteo->wind_direction = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "apparent_temperature");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "wind_gusts_10m");
-	if (obj != NULL)
-		open_meteo->wind_gusts = cJSON_GetNumberValue(obj);
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].apparent_temperature = cJSON_GetNumberValue(obj);
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "precipitation");
-	if (obj != NULL)
-		open_meteo->precipitation = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "precipitation");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "rain");
-	if (obj != NULL)
-		open_meteo->rain = cJSON_GetNumberValue(obj);
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].precipitation = cJSON_GetNumberValue(obj);
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "showers");
-	if (obj != NULL)
-		open_meteo->showers = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "rain");
+	if (obj_child == NULL)
+		goto bad_end;
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "snowfall");
-	if (obj != NULL)
-		open_meteo->snowfall = cJSON_GetNumberValue(obj);
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].rain = cJSON_GetNumberValue(obj);
 
-	obj = cJSON_GetObjectItemCaseSensitive(current, "time");
-	if (obj != NULL)
-		open_meteo->time = cJSON_GetNumberValue(obj);
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "showers");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].showers = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "snowfall");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].snowfall = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "surface_pressure");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].surface_pressure = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "cloud_cover");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].cloud_cover = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_speed_10m");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].wind_speed = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_direction_10m");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].wind_direction = cJSON_GetNumberValue(obj);
+
+	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_gusts_10m");
+	if (obj_child == NULL)
+		goto bad_end;
+
+	i = 0;
+	cJSON_ArrayForEach(obj, obj_child)
+	open_meteo_week[i++].wind_gusts = cJSON_GetNumberValue(obj);
 
 	cJSON_Delete(monitor);
 	return true;
@@ -338,6 +381,41 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 	bad_end:
 	cJSON_Delete(monitor);
 	return false;
+}
+
+const open_meteo_data_t *service_weather_get_current_meteo_data(void)
+{
+	if (open_meteo == NULL)
+		return NULL;
+
+	time_t now;
+	time(&now);
+
+	if (now < open_meteo[0].time)
+		return &open_meteo[0];
+
+	for (int i = 1; i < OPEN_METEO_WEEK_SIZE - 1; ++i)
+	{
+		if (now > open_meteo[i - 1].time && now < open_meteo[i + 1].time)
+		{
+			if (now > (open_meteo[i + 1].time - (60 * 30)))
+				return &open_meteo[i + 1];
+			else if (now < (open_meteo[i - 1].time + (60 * 30)))
+				return &open_meteo[i - 1];
+			else
+				return &open_meteo[i];
+		}
+	}
+
+	if (now >= open_meteo[OPEN_METEO_WEEK_SIZE - 1].time)
+		return &open_meteo[OPEN_METEO_WEEK_SIZE - 1];
+
+	return NULL;
+}
+
+const open_meteo_data_t *service_weather_get_meteo_data(void)
+{
+	return open_meteo;
 }
 
 void service_weather_set_city(const char* city)
@@ -348,11 +426,28 @@ void service_weather_set_city(const char* city)
 	city_search = url_encode(city);
 }
 
-void http_meteo_get(void)
+const char *service_weather_get_city(void)
 {
-	char *local_response_buffer = calloc(1, MAX_HTTP_REC_BUFFER);
+	return city_search;
+}
+
+static void http_meteo_to_file(void)
+{
+	char *response_buffer = calloc(1, MAX_HTTP_REC_BUFFER);
+	if (response_buffer == NULL)
+	{
+		ESP_LOGE(TAG, "response_buffer = NULL");
+		return;
+	}
 
 	char *url = generate_url_meteo();
+	if (url == NULL)
+	{
+		ESP_LOGE(TAG, "url = NULL");
+		free(response_buffer);
+		return;
+	}
+
 	esp_http_client_config_t config = {
 			.url = url,
 			.crt_bundle_attach = esp_crt_bundle_attach,
@@ -361,44 +456,70 @@ void http_meteo_get(void)
 
 	esp_http_client_open(client, 0);
 	esp_http_client_fetch_headers(client);
-	int ret = esp_http_client_read(client, local_response_buffer, MAX_HTTP_REC_BUFFER);
 
-	if (ret == MAX_HTTP_REC_BUFFER)
-		ESP_LOGE(TAG, "http request >= MAX_HTTP_REC_BUFFER");
+	FILE *file = fopen(METEO_WEEK_PATH, "w");
+	if (file == NULL)
+	{
+		ESP_LOGE(TAG, "cant write \"%s\" file", METEO_WEEK_PATH);
+		goto file_error;
+	}
 
-//	printf("ret = %d\n", ret);
+	while (true)
+	{
+		int ret = esp_http_client_read(client, response_buffer, MAX_HTTP_REC_BUFFER);
+		if (ret < 1)
+			break;
 
-	open_meteo_data_t *open_meteo = calloc(1, sizeof(open_meteo_data_t));
-	if (parse_open_meteo_weather(local_response_buffer, open_meteo))
-		glob_open_meteo = *open_meteo;
-
-	if (glob_open_meteo.city_name != NULL)
-		free(glob_open_meteo.city_name);
-	get_meteo_config_value("city", &glob_open_meteo.city_name);
-
-//	printf("Meteo information:\n"
-//			"City: %s\n"
-//			"latitude: %f\n"
-//			"longitude: %f\n"
-//			"temperature: %f\n"
-//			"apparent_temperature: %f\n"
-//			"surface_pressure: %f\n"
-//			"relative_humidity: %d\n"
-//			"wind_speed: %f\n"
-//			"wind_gusts: %f\n"
-//			"wind_direction: %d\n"
-//			"cloud_cover: %d\n"
-//			"precipitation: %d\n"
-//			"rain: %d\n"
-//			"showers: %d\n"
-//			"snowfall: %d\n",
-//			open_meteo->city_name, open_meteo->latitude, open_meteo->longitude, open_meteo->temperature, open_meteo->apparent_temperature,
-//			open_meteo->surface_pressure, open_meteo->relative_humidity, open_meteo->wind_speed, open_meteo->wind_gusts, open_meteo->wind_direction,
-//			open_meteo->cloud_cover, open_meteo->precipitation, open_meteo->rain, open_meteo->showers, open_meteo->snowfall);
-	free(url);
-	free(open_meteo);
-	free(local_response_buffer);
+		fwrite(response_buffer, ret, 1, file);
+	}
+	fclose(file);
+	file_error:
 	esp_http_client_cleanup(client);
+	free(url);
+	free(response_buffer);
+}
+
+void service_weather_parse_meteo_data(void)
+{
+	struct stat st;
+	stat(METEO_WEEK_PATH, &st);
+	size_t size = st.st_size;
+
+	if (size == 0)
+	{
+		ESP_LOGE(TAG, "size = 0");
+		return;
+	}
+
+	char *content = calloc(1, size);
+	if (content == NULL)
+	{
+		ESP_LOGE(TAG, "content error calloc");
+		return;
+	}
+
+	FILE *file = fopen(METEO_WEEK_PATH, "r");
+	if (file == NULL)
+		ESP_LOGE(TAG, "cant write \"%s\" file", METEO_WEEK_PATH);
+
+	fread(content, size, 1, file);
+	fclose(file);
+
+	if (open_meteo != NULL)
+		free(open_meteo);
+
+	open_meteo = calloc(OPEN_METEO_WEEK_SIZE, sizeof(open_meteo_data_t));
+	if (open_meteo == NULL)
+	{
+		ESP_LOGE(TAG, "open_meteo = NULL");
+		return;
+	}
+
+	if (!parse_open_meteo_weather(content, open_meteo))
+	{
+		ESP_LOGE(TAG, "error parse_open_meteo_weather");
+		return;
+	}
 }
 
 void weather_service_task(void *pvParameters)
@@ -406,7 +527,7 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
-	int counter = 350; // раз в 5 минут
+	int counter = 350; //350 =  раз в 5 минут
 	for( ;; )
 	{
 		if (glob_status_err)
@@ -419,18 +540,17 @@ void weather_service_task(void *pvParameters)
 		}
 
 		if (glob_status_reg & STATUS_METEO_CITY_SEARCH)
-		{
 			http_city_search();
-		}
 
-		if (!(glob_status_reg & STATUS_METEO_ON) )
+		if (!((glob_status_reg & STATUS_METEO_ON) && (glob_status_reg & STATUS_TIME_SYNC)))
 			goto for_end;
 
 		if (counter++ < 350)
 			goto for_end;
 		counter = 0;
 
-		http_meteo_get();
+		http_meteo_to_file();
+		service_weather_parse_meteo_data();
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

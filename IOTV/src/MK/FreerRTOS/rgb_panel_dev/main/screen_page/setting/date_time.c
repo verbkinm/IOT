@@ -9,7 +9,6 @@
 //#include "settingpage.h"
 
 extern uint32_t glob_status_reg;
-extern struct DateTime glob_date_time;
 extern lv_obj_t *menu;
 
 extern lv_obj_t *sub_date_time_page;
@@ -230,9 +229,20 @@ static void save_time(lv_event_t *e)
 
 	lv_obj_t *section = (lv_obj_t *)e->user_data;
 
-	glob_date_time.hour = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 1));
-	glob_date_time.minutes = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 1), 0), 1));
-	glob_date_time.seconds = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 2), 0), 0));
+	time_t now;
+	time(&now);
+
+	struct tm timeinfo = *localtime(&now);
+
+	timeinfo.tm_hour = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 1));
+	timeinfo.tm_min = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 1), 0), 1));
+	timeinfo.tm_sec = lv_spinbox_get_value(lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 2), 0), 1));
+
+	now = mktime(&timeinfo);
+	struct timeval tv = {.tv_sec = now};
+	settimeofday(&tv, NULL);
+
+	glob_status_reg |= STATUS_TIME_SYNC;
 
 	//	DS3231_SetDataTime(&glob_date_time);
 }
@@ -245,12 +255,24 @@ static void save_date(lv_event_t *e)
 		return;
 	}
 
+	time_t now;
+	time(&now);
+
+	struct tm timeinfo = *localtime(&now);
+//	printf("The local date and time is: %s\n", asctime(&timeinfo));
+
 	lv_obj_t *section = (lv_obj_t *)e->user_data;
 
 	lv_calendar_t *calendar = (lv_calendar_t *)lv_obj_get_child(lv_obj_get_child(lv_obj_get_child(section, 0), 0), 0);
-	glob_date_time.year = calendar->today.year - 1900;
-	glob_date_time.month = calendar->today.month;
-	glob_date_time.date = calendar->today.day;
+	timeinfo.tm_year = calendar->today.year - 1900;
+	timeinfo.tm_mon = calendar->today.month - 1;
+	timeinfo.tm_mday = calendar->today.day;
+
+	now = mktime(&timeinfo);
+	struct timeval tv = {.tv_sec = now};
+	settimeofday(&tv, NULL);
+
+	glob_status_reg |= STATUS_TIME_SYNC;
 
 	//	DS3231_SetDataTime(&glob_date_time);
 }

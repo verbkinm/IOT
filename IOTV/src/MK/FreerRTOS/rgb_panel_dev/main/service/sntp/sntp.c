@@ -82,27 +82,15 @@ void read_sntp_conf(void)
 
 void sntp_obtain_time(void)
 {
-//	if (xSemaphoreTake(xSemaphore, 0) == pdFALSE)
-//		return;
-
 	esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(sntp_server_url);
 	config.sync_cb = time_sync_notification_cb;
 	esp_netif_sntp_init(&config);
 
-	// wait for time to be set
-	time_t now = 0;
-	struct tm timeinfo = { 0 };
 	int retry = 0;
 	const int retry_count = 15;
 	while (esp_netif_sntp_sync_wait(2000 / portTICK_PERIOD_MS) == ESP_ERR_TIMEOUT && ++retry < retry_count);
-//		printf("Waiting for system time to be set... (%d/%d)\n", retry, retry_count);
-
-	time(&now);
-	localtime_r(&now, &timeinfo);
 
 	esp_netif_sntp_deinit();
-
-//	xSemaphoreGive(xSemaphore);
 }
 
 void sntp_service_task(void *pvParameters)

@@ -16,10 +16,10 @@ extern lv_font_t ubuntu_mono_128;
 
 extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
-extern open_meteo_data_t glob_open_meteo;
 
 extern void menuPageInit(void);
 
+static const char *TAG = "homepage";
 static lv_obj_t *block_0, *block_1, *block_2;
 
 //Блок 0
@@ -82,35 +82,44 @@ static void draw_meteo_data(void)
 	if ( !(glob_status_reg & STATUS_METEO_ON))
 		return;
 
-	if (glob_open_meteo.city_name != NULL)
-		lv_label_set_text(city_lbl, glob_open_meteo.city_name);
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	if (open_meteo == NULL)
+		ESP_LOGE(TAG, "open_meteo = NULL");
 
-	lv_label_set_text_fmt(wind_speed_lbl, "%.02f м/с", glob_open_meteo.wind_speed);
+	const char *city = service_weather_get_city();
+	if (city != NULL)
+		lv_label_set_text(city_lbl, city);
 
-	if (glob_open_meteo.temperature > 0)
-		lv_label_set_text_fmt(temperature2_lbl, "+%.02f°C", glob_open_meteo.temperature);
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	if (open_meteo == NULL)
+		return;
+
+	lv_label_set_text_fmt(wind_speed_lbl, "%.02f м/с", open_meteo->wind_speed);
+
+	if (open_meteo->temperature > 0)
+		lv_label_set_text_fmt(temperature2_lbl, "+%.02f°C", open_meteo->temperature);
 	else
-		lv_label_set_text_fmt(temperature2_lbl, "%.02f°C", glob_open_meteo.temperature);
+		lv_label_set_text_fmt(temperature2_lbl, "%.02f°C", open_meteo->temperature);
 
-	lv_label_set_text_fmt(humidity_lbl, "%d%%", glob_open_meteo.relative_humidity);
-	lv_label_set_text_fmt(pressure_lbl, "%d мм.рт.cт.", (int)glob_open_meteo.surface_pressure);
+	lv_label_set_text_fmt(humidity_lbl, "%d%%", open_meteo->relative_humidity);
+	lv_label_set_text_fmt(pressure_lbl, "%d мм.рт.cт.", (int)open_meteo->surface_pressure);
 
-	if (glob_open_meteo.apparent_temperature > 0)
-		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: +%.02f°C", glob_open_meteo.apparent_temperature);
+	if (open_meteo->apparent_temperature > 0)
+		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: +%.02f°C", open_meteo->apparent_temperature);
 	else
-		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: %.02f°C", glob_open_meteo.apparent_temperature);
+		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: %.02f°C", open_meteo->apparent_temperature);
 
-	lv_label_set_text_fmt(precipitation_lbl, "Осадки: %.02f мм.", glob_open_meteo.precipitation);
-	lv_label_set_text_fmt(rain_lbl, "Дождь: %.02f мм.", glob_open_meteo.rain);
-	lv_label_set_text_fmt(wind_gusts_lbl, "Порывы\nветра: %.02f м/c", glob_open_meteo.wind_gusts);
-	lv_label_set_text_fmt(showers_lbl, "Ливни: %.02f мм.", glob_open_meteo.showers);
-	lv_label_set_text_fmt(snow_lbl, "Снег: %.02f cм.", glob_open_meteo.snowfall);
-	lv_label_set_text_fmt(cloud_cover_lbl, "Облачность: %d%%", glob_open_meteo.cloud_cover);
-	lv_label_set_text_fmt(wind_direction_lbl, "Ветер: %d°", glob_open_meteo.wind_direction);
+	lv_label_set_text_fmt(precipitation_lbl, "Осадки: %.02f мм.", open_meteo->precipitation);
+	lv_label_set_text_fmt(rain_lbl, "Дождь: %.02f мм.", open_meteo->rain);
+	lv_label_set_text_fmt(wind_gusts_lbl, "Порывы\nветра: %.02f м/c", open_meteo->wind_gusts);
+	lv_label_set_text_fmt(showers_lbl, "Ливни: %.02f мм.", open_meteo->showers);
+	lv_label_set_text_fmt(snow_lbl, "Снег: %.02f cм.", open_meteo->snowfall);
+	lv_label_set_text_fmt(cloud_cover_lbl, "Облачность: %d%%", open_meteo->cloud_cover);
+	lv_label_set_text_fmt(wind_direction_lbl, "Ветер: %d°", open_meteo->wind_direction);
 
 	struct tm timeinfo;
-	localtime_r(&glob_open_meteo.time, &timeinfo);
-	lv_label_set_text_fmt(last_update_lbl, "Обновлено:\n"
+	localtime_r(&open_meteo->time, &timeinfo);
+	lv_label_set_text_fmt(last_update_lbl, "Данные на:\n"
 			"%.02d.%.02d.%.02d\n"
 			"%.02d:%.02d",
 			timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900,
@@ -123,11 +132,15 @@ static void draw_meteo_data(void)
 
 static void draw_cloud_cover(void)
 {
-	if (glob_open_meteo.cloud_cover <= 25)
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	if (open_meteo == NULL)
+		return;
+
+	if (open_meteo->cloud_cover <= 25)
 		lv_img_set_src(cloud_codver_img, CLOUD_COVER_1);
-	else if (glob_open_meteo.cloud_cover <= 50)
+	else if (open_meteo->cloud_cover <= 50)
 		lv_img_set_src(cloud_codver_img, CLOUD_COVER_2);
-	else if (glob_open_meteo.cloud_cover <= 75)
+	else if (open_meteo->cloud_cover <= 75)
 		lv_img_set_src(cloud_codver_img, CLOUD_COVER_3);
 	else
 		lv_img_set_src(cloud_codver_img, CLOUD_COVER_4);
@@ -135,31 +148,35 @@ static void draw_cloud_cover(void)
 
 static void draw_precipitations(void)
 {
-	if ( (glob_open_meteo.rain > 0 || glob_open_meteo.showers > 0) && glob_open_meteo.snowfall > 0)
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	if (open_meteo == NULL)
+		return;
+
+	if ( (open_meteo->rain > 0 || open_meteo->showers > 0) && open_meteo->snowfall > 0)
 	{
 		lv_img_set_src(precipitations_img, SNOW_AND_RAIN);
 		return;
 	}
 
-	if (glob_open_meteo.rain > 0)
+	if (open_meteo->rain > 0)
 	{
-		if (glob_open_meteo.rain <= 5)
+		if (open_meteo->rain <= 5)
 			lv_img_set_src(precipitations_img, RAIN_1);
-		else if (glob_open_meteo.rain <= 20)
+		else if (open_meteo->rain <= 20)
 			lv_img_set_src(precipitations_img, RAIN_2);
-		else if (glob_open_meteo.rain <= 40)
+		else if (open_meteo->rain <= 40)
 			lv_img_set_src(precipitations_img, RAIN_3);
 		else
 			lv_img_set_src(precipitations_img, RAIN_4);
 	}
 
-	if (glob_open_meteo.snowfall >= 0.20)
+	if (open_meteo->snowfall >= 0.20)
 		lv_img_set_src(precipitations_img, SNOW_4);
-	else if (glob_open_meteo.snowfall >= 0.15)
+	else if (open_meteo->snowfall >= 0.15)
 		lv_img_set_src(precipitations_img, SNOW_3);
-	else if (glob_open_meteo.snowfall >= 0.10)
+	else if (open_meteo->snowfall >= 0.10)
 		lv_img_set_src(precipitations_img, SNOW_2);
-	else if (glob_open_meteo.snowfall > 0)
+	else if (open_meteo->snowfall > 0)
 		lv_img_set_src(precipitations_img, SNOW_1);
 	else
 		lv_img_set_src(precipitations_img, PRECIPITATION0);
@@ -167,21 +184,25 @@ static void draw_precipitations(void)
 
 static void draw_wind_direction(void)
 {
-	if (glob_open_meteo.wind_direction >= 338  || (glob_open_meteo.wind_direction <= 22) )
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	if (open_meteo == NULL)
+		return;
+
+	if (open_meteo->wind_direction >= 338  || (open_meteo->wind_direction <= 22) )
 		lv_img_set_src(wind_direction_img, WIND_0);
-	else if (glob_open_meteo.wind_direction >= 23 && glob_open_meteo.wind_direction <= 67)
+	else if (open_meteo->wind_direction >= 23 && open_meteo->wind_direction <= 67)
 		lv_img_set_src(wind_direction_img, WIND_45);
-	else if (glob_open_meteo.wind_direction >= 68 && glob_open_meteo.wind_direction <= 112)
+	else if (open_meteo->wind_direction >= 68 && open_meteo->wind_direction <= 112)
 		lv_img_set_src(wind_direction_img, WIND_90);
-	else if (glob_open_meteo.wind_direction >= 113 && glob_open_meteo.wind_direction <= 167)
+	else if (open_meteo->wind_direction >= 113 && open_meteo->wind_direction <= 167)
 		lv_img_set_src(wind_direction_img, WIND_135);
-	else if (glob_open_meteo.wind_direction >= 168 && glob_open_meteo.wind_direction <= 202)
+	else if (open_meteo->wind_direction >= 168 && open_meteo->wind_direction <= 202)
 		lv_img_set_src(wind_direction_img, WIND_180);
-	else if (glob_open_meteo.wind_direction >= 203 && glob_open_meteo.wind_direction <= 247)
+	else if (open_meteo->wind_direction >= 203 && open_meteo->wind_direction <= 247)
 		lv_img_set_src(wind_direction_img, WIND_225);
-	else if (glob_open_meteo.wind_direction >= 248 && glob_open_meteo.wind_direction <= 292)
+	else if (open_meteo->wind_direction >= 248 && open_meteo->wind_direction <= 292)
 		lv_img_set_src(wind_direction_img, WIND_270);
-	else if (glob_open_meteo.wind_direction >= 293 && glob_open_meteo.wind_direction <= 337)
+	else if (open_meteo->wind_direction >= 293 && open_meteo->wind_direction <= 337)
 		lv_img_set_src(wind_direction_img, WIND_315);
 	else
 		lv_img_set_src(wind_direction_img, WIND_NO);
@@ -272,7 +293,7 @@ static void init_block_2(lv_obj_t *parent)
 	lv_obj_set_style_text_color(city_lbl, lv_color_white(), 0);
 	lv_obj_set_style_text_font(city_lbl, &ubuntu_mono_26, 0);
 
-	last_update_lbl = create_lbl_obj(block_2, "Обновлено:\n--.--.----\n--:--", block_2, LV_ALIGN_TOP_RIGHT, -40, 40, lv_color_white(), &ubuntu_mono_14);
+	last_update_lbl = create_lbl_obj(block_2, "Данные на:\n--.--.----\n--:--", block_2, LV_ALIGN_TOP_RIGHT, -40, 40, lv_color_white(), &ubuntu_mono_14);
 
 	cloud_codver_img = create_img_obj(block_2, CLOUD_COVER_1, block_2, LV_ALIGN_TOP_LEFT, 128, 128, 10, 10);
 	precipitations_img = create_img_obj(block_2, PRECIPITATION0, cloud_codver_img, LV_ALIGN_OUT_BOTTOM_MID, 128, 64, 0, 0);
@@ -328,8 +349,10 @@ void drawHomePage(void)
 
 	drawTime(&timeinfo);
 	drawDate(&timeinfo);
+
 	drawTemperature();
 	drawHumidity();
 	drawPressure();
+
 	draw_meteo_data();
 }

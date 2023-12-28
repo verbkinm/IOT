@@ -132,6 +132,7 @@
 #define DISPLAY_PATH		"/sdcard/disp.jsn"
 #define METEO_CONF_PATH		"/sdcard/meteo"
 #define METEO_CITY_PATH		"/sdcard/city"
+#define METEO_WEEK_PATH		"/sdcard/week"
 
 // Регистры BME280
 enum

@@ -20,23 +20,10 @@
 #include "../../json/json_config.h"
 #include "../../Local_Lib/local_lib.h"
 
-struct Open_Meteo_City {
-    char *country;
-    char *city_name;
-    char *admin1;
-
-    float latitude;
-    float longitude;
-};
-typedef struct Open_Meteo_City open_meteo_city_t;
+#define OPEN_METEO_WEEK_SIZE (7 * 24)
 
 struct Open_Meteo_Data {
-    char *city_name;
-
     time_t time;
-
-    float latitude;
-    float longitude;
 
     float temperature;
     float apparent_temperature;
@@ -57,8 +44,21 @@ struct Open_Meteo_Data {
 };
 typedef struct Open_Meteo_Data open_meteo_data_t;
 
+struct Open_Meteo_City {
+    char *country;
+    char *city_name;
+    char *admin1;
+
+    float latitude;
+    float longitude;
+};
+typedef struct Open_Meteo_City open_meteo_city_t;
+
 void weather_service_task(void *pvParameters);
 void service_weather_set_city(const char* city);
-void http_meteo_get(void);
+const char *service_weather_get_city(void);
+void service_weather_parse_meteo_data(void);
+const open_meteo_data_t *service_weather_get_current_meteo_data(void);
+const open_meteo_data_t *service_weather_get_meteo_data(void);
 
 #endif /* MAIN_SERVICE_WEATHER_WEATHER_H_ */

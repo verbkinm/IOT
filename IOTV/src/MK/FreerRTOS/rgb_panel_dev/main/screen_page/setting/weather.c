@@ -22,6 +22,8 @@ struct Weather_page_obj {
 };
 typedef struct Weather_page_obj weather_page_obj_t;
 
+static char *TAG = "setting_weather";
+
 static weather_page_obj_t *weather_page_obj = NULL;
 
 static uint8_t columns = 5;
@@ -260,8 +262,6 @@ static void timer_loop(lv_timer_t *timer)
 	stat(METEO_CITY_PATH, &st);
 	size_t size = st.st_size;
 
-	printf("file \"%s\" size: %u\n", METEO_CITY_PATH, size);
-
 	if (size <= 32)
 	{
 		create_msgbox(NULL, "Внимание", "Данные не найдены!");
@@ -270,10 +270,16 @@ static void timer_loop(lv_timer_t *timer)
 	}
 
 	FILE *file = fopen(METEO_CITY_PATH, "r");
+	if (file == NULL)
+	{
+		ESP_LOGW(TAG, "file %s not open", METEO_CITY_PATH);
+		return;
+	}
+
 	char *buf = calloc(1, size + 1);
 	if (buf == NULL)
 	{
-		printf("malloc error!\n");
+		ESP_LOGE(TAG, "malloc error");;
 		return;
 	}
 
@@ -340,7 +346,7 @@ static void city_save_handler(lv_event_t *e)
 							longitude == NULL ? "0" : longitude);
 	lv_obj_del(table->parent);
 
-	http_meteo_get();
+//	http_meteo_get();
 }
 
 static void switcher_handler(lv_event_t *e)
