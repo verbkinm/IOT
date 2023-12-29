@@ -228,9 +228,13 @@ static char *generate_url_meteo(void)
 
 	char *latitude = NULL;
 	get_meteo_config_value("latitude", &latitude);
+	if (latitude == NULL)
+		ESP_LOGE(TAG, "latitude error");
 
 	char *longitude = NULL;
 	get_meteo_config_value("longitude", &longitude);
+	if (longitude == NULL)
+		ESP_LOGE(TAG, "longitude error");
 
 	int len = strlen(meteo_url) + strlen(latitude) + strlen(second_part) + strlen(longitude);
 
@@ -472,6 +476,7 @@ static void http_meteo_to_file(void)
 
 		fwrite(response_buffer, ret, 1, file);
 	}
+
 	fclose(file);
 	file_error:
 	esp_http_client_cleanup(client);
@@ -500,7 +505,10 @@ void service_weather_parse_meteo_data(void)
 
 	FILE *file = fopen(METEO_WEEK_PATH, "r");
 	if (file == NULL)
+	{
 		ESP_LOGE(TAG, "cant write \"%s\" file", METEO_WEEK_PATH);
+		goto end;
+	}
 
 	fread(content, size, 1, file);
 	fclose(file);
@@ -512,14 +520,14 @@ void service_weather_parse_meteo_data(void)
 	if (open_meteo == NULL)
 	{
 		ESP_LOGE(TAG, "open_meteo = NULL");
-		return;
+		goto end;
 	}
 
 	if (!parse_open_meteo_weather(content, open_meteo))
-	{
 		ESP_LOGE(TAG, "error parse_open_meteo_weather");
-		return;
-	}
+
+	end:
+	free(content);
 }
 
 void weather_service_task(void *pvParameters)
@@ -527,7 +535,7 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
-	int counter = 350; //350 =  раз в 5 минут
+	int counter = 350; //350 =  1 раз в 5 минут
 	for( ;; )
 	{
 		if (glob_status_err)

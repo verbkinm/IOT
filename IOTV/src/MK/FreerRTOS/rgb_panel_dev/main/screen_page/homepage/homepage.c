@@ -90,7 +90,7 @@ static void draw_meteo_data(void)
 	if (city != NULL)
 		lv_label_set_text(city_lbl, city);
 
-	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+	open_meteo = service_weather_get_current_meteo_data();
 	if (open_meteo == NULL)
 		return;
 
