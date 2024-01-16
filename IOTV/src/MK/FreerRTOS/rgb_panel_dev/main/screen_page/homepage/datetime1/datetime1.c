@@ -10,8 +10,6 @@
 extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_148;
 
-extern uint8_t glob_currentPage;
-
 static lv_obj_t *lbl_time, *lbl_date;
 
 static void draw_time(const struct tm *timeinfo);
@@ -36,7 +34,7 @@ static void event_handler(lv_event_t * e)
 
 void datetime1_page_init(void)
 {
-	glob_currentPage = PAGE_NONE;
+	glob_set_current_page(PAGE_NONE);
 
 	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
 	lv_obj_clean(main_widget);
@@ -51,7 +49,7 @@ void datetime1_page_init(void)
 	lbl_time = create_lbl_obj(widget, "00:00:00", 0, LV_ALIGN_CENTER, 0, -40, lv_color_white(), &ubuntu_mono_148);
 	lbl_date = create_lbl_obj(widget, "Воскресенье 01.06.1986", 0, LV_ALIGN_BOTTOM_MID, 0, -40, lv_color_white(), &ubuntu_mono_48);
 
-	glob_currentPage = PAGE_DATETIME_1;
+	glob_set_current_page(PAGE_DATETIME_1);
 	draw_datetime1_page();
 }
 

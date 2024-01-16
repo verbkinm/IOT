@@ -64,8 +64,8 @@ esp_err_t sd_spi_init(void)
 
 	esp_vfs_fat_sdmmc_mount_config_t mount_config = {
 			.format_if_mount_failed = true,
-			.max_files = 5,
-			.allocation_unit_size = 16 * 1024
+			.max_files = 10,
+			.allocation_unit_size = 32 * 1024
 	};
 	sdmmc_card_t *card;
 	const char mount_point[] = MOUNT_POINT;

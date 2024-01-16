@@ -2,8 +2,6 @@
 #include "I2C/DS3231.h"
 #include <lvgl.h>
 
-uint8_t glob_currentPage = PAGE_HOME;
-
 struct DateTime glob_date_time = {
 		.seconds = 0,
 		.minutes = 0,

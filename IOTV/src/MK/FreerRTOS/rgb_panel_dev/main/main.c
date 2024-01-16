@@ -19,9 +19,9 @@ void app_main(void)
 	}
 }
 
-//Fixme: Режимы отображения часов/даты +
-//Fixme: О продукте
-//Fixme: Графики погоды
+//FIXME: Режимы отображения часов/даты +
+//FIXME: О продукте
+//FIXME: Графики погоды
 
 /* Online Font Converter https://lvgl.io/tools/fontconverter
 а бвгдеёжзийклмнопрстуфхцчшщъыьэюя

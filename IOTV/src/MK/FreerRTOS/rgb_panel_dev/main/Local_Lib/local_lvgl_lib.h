@@ -10,6 +10,7 @@
 
 #include "lvgl.h"
 #include "local_lib.h"
+#include "Global_def.h"
 
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);
 lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea,
@@ -33,5 +34,10 @@ lv_obj_t *create_img_obj(lv_obj_t *parent, const char* icon_path, const lv_obj_t
 
 const char *weekday_name_short(uint8_t day);
 const char *weekday_name_full(uint8_t day);
+
+uint8_t glob_get_page(void);
+void glob_set_current_page(uint8_t page);
+
+void debug_lv_obj_t_tree(lv_obj_t *obj, int depth);
 
 #endif /* MAIN_LOCAL_LIB_LOCAL_LVGL_LIB_H_ */

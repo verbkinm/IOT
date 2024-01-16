@@ -8,7 +8,6 @@
 #include "settingpage.h"
 
 
-extern uint8_t glob_currentPage;
 extern lv_font_t ubuntu_mono_14;
 //extern lv_font_t monsterat_bold_14;
 
@@ -77,17 +76,6 @@ static void back_event_handler(lv_event_t * e)
 		setting_page_deinit();
 	}
 }
-//static void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
-//{
-//	for (int i = 0; i < lv_obj_get_child_cnt(obj); ++i)
-//	{
-//		for (int j = 0; j < depth; ++j)
-//			printf("\t");
-//		printf("depth: %d, current obj addr: %p,", depth, lv_obj_get_child(obj, i));
-//		printf("children: %d\n", (int)(lv_obj_get_child_cnt(lv_obj_get_child(obj, i))));
-//		debug_lv_obj_t_tree(lv_obj_get_child(obj, i), depth + 1);
-//	}
-//}
 
 static void create_sub_pages(void)
 {
@@ -159,7 +147,7 @@ static lv_obj_t *create_other_pages(void)
 
 void settingPageInit(void)
 {
-	glob_currentPage = PAGE_NONE;
+	glob_set_current_page(PAGE_NONE);
 
 	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
 
@@ -196,7 +184,7 @@ void settingPageInit(void)
 
 	lv_menu_set_sidebar_page(menu, root_page);
 
-	glob_currentPage = PAGE_SETTINGS;
+	glob_set_current_page(PAGE_SETTINGS);
 
 	// открыть первый пункт меню
 	lv_event_send(cont, LV_EVENT_CLICKED, NULL);

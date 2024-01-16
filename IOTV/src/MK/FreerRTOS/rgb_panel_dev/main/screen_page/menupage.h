@@ -8,11 +8,14 @@
 #ifndef MAIN_MENUPAGE_H_
 #define MAIN_MENUPAGE_H_
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include "lvgl.h"
 #include "screendefault.h"
 #include "../status_panel/status_panel.h"
 #include "Global_def.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 void menuPageInit(void);
 void drawMenuPage(void);

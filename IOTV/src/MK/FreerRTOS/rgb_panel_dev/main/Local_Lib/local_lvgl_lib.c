@@ -8,6 +8,10 @@
 #include "local_lvgl_lib.h"
 
 extern lv_font_t ubuntu_mono_14;
+
+
+static uint8_t glob_currentPage = PAGE_HOME;
+
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
 
@@ -132,4 +136,26 @@ lv_obj_t *create_img_obj(lv_obj_t *parent, const char* icon_path,
 	lv_obj_align_to(obj, align_to_obj, align, x_ofs, y_ofs);
 
 	return obj;
+}
+
+uint8_t glob_get_page(void)
+{
+	return glob_currentPage;
+}
+
+void glob_set_current_page(uint8_t page)
+{
+	glob_currentPage = page;
+}
+
+void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)
+{
+	for (int i = 0; i < lv_obj_get_child_cnt(obj); ++i)
+	{
+		for (int j = 0; j < depth; ++j)
+			printf("\t");
+		printf("depth: %d, current obj addr: %p,", depth, lv_obj_get_child(obj, i));
+		printf("children: %d\n", (int)(lv_obj_get_child_cnt(lv_obj_get_child(obj, i))));
+		debug_lv_obj_t_tree(lv_obj_get_child(obj, i), depth + 1);
+	}
 }

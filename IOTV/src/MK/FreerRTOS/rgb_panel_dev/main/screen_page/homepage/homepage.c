@@ -14,10 +14,7 @@ extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_64;
 extern lv_font_t ubuntu_mono_128;
 
-extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
-
-extern void menuPageInit(void);
 
 static const char *TAG = "homepage";
 static lv_obj_t *block_0, *block_1, *block_2;
@@ -45,6 +42,10 @@ static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, 
 static void init_block_0(lv_obj_t *parent);
 static void init_block_1(lv_obj_t *parent);
 static void init_block_2(lv_obj_t *parent);
+
+static void event_handler_block_0(lv_event_t *e); // время/дата
+static void event_handler_block_1(lv_event_t *e); // график прогноза
+static void event_handler_block_2(lv_event_t *e); // локальные измерения
 
 static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h);
 
@@ -82,15 +83,15 @@ static void draw_meteo_data(void)
 	if ( !(glob_status_reg & STATUS_METEO_ON))
 		return;
 
-	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
-	if (open_meteo == NULL)
-		ESP_LOGE(TAG, "open_meteo = NULL");
+//	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
+//	if (open_meteo == NULL)
+//		ESP_LOGE(TAG, "open_meteo = NULL");
 
 	const char *city = service_weather_get_city();
 	if (city != NULL)
 		lv_label_set_text(city_lbl, city);
 
-	open_meteo = service_weather_get_current_meteo_data();
+	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
 	if (open_meteo == NULL)
 		return;
 
@@ -208,18 +209,25 @@ static void draw_wind_direction(void)
 		lv_img_set_src(wind_direction_img, WIND_NO);
 }
 
-static void event_handler(lv_event_t * e)
+static void event_handler_block_0(lv_event_t * e)
+{
+	//	lv_obj_remove_event_cb(e->user_data, event_handler);
+	printf("event heandler home page\n");
+	datetime1_page_init();
+}
+
+static void event_handler_block_1(lv_event_t * e)
 {
 	//	lv_obj_remove_event_cb(e->user_data, event_handler);
 	printf("event heandler home page\n");
 	menuPageInit();
 }
 
-static void block0_handler(lv_event_t * e)
+static void event_handler_block_2(lv_event_t * e)
 {
 	//	lv_obj_remove_event_cb(e->user_data, event_handler);
 	printf("event heandler home page\n");
-	datetime1_page_init();
+	meteo_chart_page_init();
 }
 
 static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h)
@@ -247,7 +255,7 @@ static void init_block_0(lv_obj_t *parent)
 	date_lbl = create_lbl_obj(block_0, "пн. 00.00.0000", time_lbl, LV_ALIGN_DEFAULT, 0, 0, lv_color_white(), &ubuntu_mono_48);
 	lv_obj_align(date_lbl, LV_ALIGN_BOTTOM_MID, 0, -15);
 
-	lv_obj_add_event_cb(block_0, block0_handler, LV_EVENT_CLICKED, 0);
+	lv_obj_add_event_cb(block_0, event_handler_block_0, LV_EVENT_CLICKED, 0);
 }
 
 // Блок температура/влажность/давление локальная
@@ -266,7 +274,7 @@ static void init_block_1(lv_obj_t *parent)
 	pressure_lbl = create_lbl_obj(block_1, "700", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 	create_lbl_obj(block_1, "мм.рт.ст.", pressure_lbl, LV_ALIGN_BOTTOM_RIGHT, 20, -20, lv_color_white(), &ubuntu_mono_26);
 
-	lv_obj_add_event_cb(block_1, event_handler, LV_EVENT_CLICKED, 0);
+	lv_obj_add_event_cb(block_1, event_handler_block_1, LV_EVENT_CLICKED, 0);
 }
 
 // Блок температура/влажность/давление локальная
@@ -320,12 +328,12 @@ static void init_block_2(lv_obj_t *parent)
 	snow_lbl = create_lbl_obj(block_2, "Снег: - см.", showers_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5, lv_color_white(), &ubuntu_mono_14);
 	wind_direction_lbl = create_lbl_obj(block_2, "Ветер: -°", snow_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5, lv_color_white(), &ubuntu_mono_14);
 
-	lv_obj_add_event_cb(block_2, event_handler, LV_EVENT_CLICKED, 0);
+	lv_obj_add_event_cb(block_2, event_handler_block_2, LV_EVENT_CLICKED, 0);
 }
 
 void homePageInit(void)
 {
-	glob_currentPage = PAGE_NONE;
+	glob_set_current_page(PAGE_NONE);
 
 	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
 //	lv_obj_remove_event_cb(main_widget, event_handler);
@@ -335,7 +343,7 @@ void homePageInit(void)
 	init_block_1(main_widget);
 	init_block_2(main_widget);
 
-	glob_currentPage = PAGE_HOME;
+	glob_set_current_page(PAGE_HOME);
 
 	drawHomePage();
 }

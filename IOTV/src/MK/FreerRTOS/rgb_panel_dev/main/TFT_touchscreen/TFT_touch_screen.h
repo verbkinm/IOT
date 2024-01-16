@@ -21,6 +21,7 @@
 #include "screen_page/homepage/datetime1/datetime1.h"
 #include "screen_page/menupage.h"
 #include "screen_page/setting/settingpage.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 void TFT_init(void);
 void draw_page(void);

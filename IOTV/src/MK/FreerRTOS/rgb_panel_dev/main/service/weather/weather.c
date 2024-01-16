@@ -7,10 +7,7 @@
 
 #include "weather.h"
 
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-
-#define MAX_HTTP_REC_BUFFER 4096
+//#define MAX_HTTP_REC_BUFFER 4096
 
 extern uint32_t glob_status_reg;
 extern uint32_t glob_status_err;
@@ -21,7 +18,7 @@ static const char *TAG = "weather";
 
 static open_meteo_data_t *open_meteo = NULL;
 static const char *city_url = "https://geocoding-api.open-meteo.com/v1/search?count=20&language=ru&format=json&name=";
-static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,snowfall,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timeformat=unixtime&timezone=auto&latitude=";
+static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?forecast_days=3&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,snowfall,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timeformat=unixtime&timezone=auto&latitude=";
 
 static void check_meteo_conf_file(void);
 static void read_meteo_conf(void);
@@ -180,7 +177,7 @@ static void check_meteo_conf_file(void)
 
 static void http_city_search(void)
 {
-	char *response_buffer = calloc(1, MAX_HTTP_REC_BUFFER);
+	char *response_buffer = calloc(1, BUFSIZ);
 
 	int len = strlen(city_url) + strlen(city_search);
 	char *url = calloc(1, len + 1);
@@ -205,7 +202,7 @@ static void http_city_search(void)
 
 	while (true)
 	{
-		int ret = esp_http_client_read(client, response_buffer, MAX_HTTP_REC_BUFFER);
+		int ret = esp_http_client_read(client, response_buffer, BUFSIZ);
 		if (ret < 1)
 			break;
 
@@ -289,15 +286,23 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].temperature = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].temperature = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
-	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "relative_humidity_2m");
+	obj_child = cJSON_GetObjectItemCaseSensitive(obj_parent, "relative_humidity_2m");
 	if (obj_child == NULL)
 		goto bad_end;
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].relative_humidity = cJSON_GetNumberValue(obj);;
+	{
+		open_meteo_week[i++].relative_humidity = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "apparent_temperature");
 	if (obj_child == NULL)
@@ -305,7 +310,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].apparent_temperature = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].apparent_temperature = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "precipitation");
 	if (obj_child == NULL)
@@ -313,7 +322,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].precipitation = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].precipitation = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "rain");
 	if (obj_child == NULL)
@@ -321,7 +334,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].rain = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].rain = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "showers");
 	if (obj_child == NULL)
@@ -329,7 +346,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].showers = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].showers = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "snowfall");
 	if (obj_child == NULL)
@@ -337,7 +358,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].snowfall = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].snowfall = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "surface_pressure");
 	if (obj_child == NULL)
@@ -345,7 +370,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].surface_pressure = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].surface_pressure = cJSON_GetNumberValue(obj) * 0.75006; // hPa to mm Hg
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "cloud_cover");
 	if (obj_child == NULL)
@@ -353,7 +382,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].cloud_cover = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].cloud_cover = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_speed_10m");
 	if (obj_child == NULL)
@@ -361,7 +394,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].wind_speed = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].wind_speed = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_direction_10m");
 	if (obj_child == NULL)
@@ -369,7 +406,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].wind_direction = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].wind_direction = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	obj_child= cJSON_GetObjectItemCaseSensitive(obj_parent, "wind_gusts_10m");
 	if (obj_child == NULL)
@@ -377,7 +418,11 @@ static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_m
 
 	i = 0;
 	cJSON_ArrayForEach(obj, obj_child)
-	open_meteo_week[i++].wind_gusts = cJSON_GetNumberValue(obj);
+	{
+		open_meteo_week[i++].wind_gusts = cJSON_GetNumberValue(obj);
+		if (i > OPEN_METEO_WEEK_SIZE)
+			goto bad_end;
+	}
 
 	cJSON_Delete(monitor);
 	return true;
@@ -422,6 +467,44 @@ const open_meteo_data_t *service_weather_get_meteo_data(void)
 	return open_meteo;
 }
 
+void service_weather_get_range(open_meteo_data_t *ret_min, open_meteo_data_t *ret_max)
+{
+	if (open_meteo == NULL || ret_min == NULL || ret_max == NULL)
+		return;
+
+	memcpy(ret_min, &open_meteo[0], sizeof(struct Open_Meteo_Data));
+	memcpy(ret_max, &open_meteo[0], sizeof(struct Open_Meteo_Data));
+
+	for (int i = 1; i < OPEN_METEO_WEEK_SIZE; ++i)
+	{
+		ret_max->temperature = MAX(ret_max->temperature, open_meteo[i].temperature);
+		ret_max->apparent_temperature = MAX(ret_max->apparent_temperature, open_meteo[i].apparent_temperature);
+		ret_max->surface_pressure = MAX(ret_max->surface_pressure, open_meteo[i].surface_pressure);
+		ret_max->precipitation = MAX(ret_max->precipitation, open_meteo[i].precipitation);
+		ret_max->rain = MAX(ret_max->rain, open_meteo[i].rain);
+		ret_max->showers = MAX(ret_max->showers, open_meteo[i].showers);
+		ret_max->snowfall = MAX(ret_max->snowfall, open_meteo[i].snowfall);
+		ret_max->wind_speed = MAX(ret_max->wind_speed, open_meteo[i].wind_speed);
+		ret_max->wind_gusts = MAX(ret_max->wind_gusts, open_meteo[i].wind_gusts);
+		ret_max->relative_humidity = MAX(ret_max->relative_humidity, open_meteo[i].relative_humidity);
+		ret_max->cloud_cover = MAX(ret_max->cloud_cover, open_meteo[i].cloud_cover);
+		ret_max->wind_direction = MAX(ret_max->wind_direction, open_meteo[i].wind_direction);
+
+		ret_min->temperature = MIN(ret_min->temperature, open_meteo[i].temperature);
+		ret_min->apparent_temperature = MIN(ret_min->apparent_temperature, open_meteo[i].apparent_temperature);
+		ret_min->surface_pressure = MIN(ret_min->surface_pressure, open_meteo[i].surface_pressure);
+		ret_min->precipitation = MIN(ret_min->precipitation, open_meteo[i].precipitation);
+		ret_min->rain = MIN(ret_min->rain, open_meteo[i].rain);
+		ret_min->showers = MIN(ret_min->showers, open_meteo[i].showers);
+		ret_min->snowfall = MIN(ret_min->snowfall, open_meteo[i].snowfall);
+		ret_min->wind_speed = MIN(ret_min->wind_speed, open_meteo[i].wind_speed);
+		ret_min->wind_gusts = MIN(ret_min->wind_gusts, open_meteo[i].wind_gusts);
+		ret_min->relative_humidity = MIN(ret_min->relative_humidity, open_meteo[i].relative_humidity);
+		ret_min->cloud_cover = MIN(ret_min->cloud_cover, open_meteo[i].cloud_cover);
+		ret_min->wind_direction = MIN(ret_min->wind_direction, open_meteo[i].wind_direction);
+	}
+}
+
 void service_weather_set_city(const char* city)
 {
 	if (city_search != NULL)
@@ -437,7 +520,7 @@ const char *service_weather_get_city(void)
 
 static void http_meteo_to_file(void)
 {
-	char *response_buffer = calloc(1, MAX_HTTP_REC_BUFFER);
+	char *response_buffer = malloc(BUFSIZ);
 	if (response_buffer == NULL)
 	{
 		ESP_LOGE(TAG, "response_buffer = NULL");
@@ -468,14 +551,25 @@ static void http_meteo_to_file(void)
 		goto file_error;
 	}
 
+	int bs = 0;
 	while (true)
 	{
-		int ret = esp_http_client_read(client, response_buffer, MAX_HTTP_REC_BUFFER);
+		int ret = esp_http_client_read(client, response_buffer, BUFSIZ);
 		if (ret < 1)
 			break;
 
+		bs += ret;
+
+		//		response_buffer[ret] = '\0';
 		fwrite(response_buffer, ret, 1, file);
+		//		printf("%s", response_buffer);
+		//		fflush(stdout);
 	}
+	//	printf("\n");
+	//	fflush(stdout);
+
+
+//	ESP_LOGI(TAG, "recive size = %d", bs);
 
 	fclose(file);
 	file_error:
@@ -484,8 +578,10 @@ static void http_meteo_to_file(void)
 	free(response_buffer);
 }
 
-void service_weather_parse_meteo_data(void)
+bool service_weather_parse_meteo_data(void)
 {
+	bool result = false;
+
 	struct stat st;
 	stat(METEO_WEEK_PATH, &st);
 	size_t size = st.st_size;
@@ -493,24 +589,27 @@ void service_weather_parse_meteo_data(void)
 	if (size == 0)
 	{
 		ESP_LOGE(TAG, "size = 0");
-		return;
+		return false;
 	}
 
-	char *content = calloc(1, size);
+	char *content = calloc(1, size + 1);
 	if (content == NULL)
 	{
 		ESP_LOGE(TAG, "content error calloc");
-		return;
+		return false;
 	}
 
 	FILE *file = fopen(METEO_WEEK_PATH, "r");
 	if (file == NULL)
 	{
-		ESP_LOGE(TAG, "cant write \"%s\" file", METEO_WEEK_PATH);
+		ESP_LOGE(TAG, "cant read \"%s\" file", METEO_WEEK_PATH);
 		goto end;
 	}
 
+//	ESP_LOGI(TAG, "file size = %d", size);
+
 	fread(content, size, 1, file);
+	//	printf("%s\n", content);
 	fclose(file);
 
 	if (open_meteo != NULL)
@@ -524,10 +623,31 @@ void service_weather_parse_meteo_data(void)
 	}
 
 	if (!parse_open_meteo_weather(content, open_meteo))
+	{
 		ESP_LOGE(TAG, "error parse_open_meteo_weather");
+		free(open_meteo);
+		open_meteo = NULL;
+		goto end;
+	}
+
+	result = true;
 
 	end:
 	free(content);
+
+	return result;
+}
+
+static void debug_open_meteo()
+{
+	if (open_meteo == NULL)
+		return;
+
+	for (int i = 0; i < OPEN_METEO_WEEK_SIZE; ++i)
+	{
+		printf("%d:\ntime: %lld\n", i, open_meteo[i].time);
+	}
+
 }
 
 void weather_service_task(void *pvParameters)
@@ -557,8 +677,14 @@ void weather_service_task(void *pvParameters)
 			goto for_end;
 		counter = 0;
 
-		http_meteo_to_file();
-		service_weather_parse_meteo_data();
+		do
+		{
+			//			vTaskDelay(500 / portTICK_PERIOD_MS);
+			http_meteo_to_file();
+		}
+		while(service_weather_parse_meteo_data() == false);
+//		debug_open_meteo();
+
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -7,7 +7,6 @@
 
 #include "TFT_touch_screen.h"
 
-extern uint8_t glob_currentPage;
 extern uint32_t glob_status_reg;
 extern uint32_t glob_status_err;
 extern lv_font_t ubuntu_mono_48;
@@ -239,7 +238,7 @@ static void TFT_touch_panel_init(void)
 
 void draw_page(void)
 {
-	switch (glob_currentPage)
+	switch (glob_get_page())
 	{
 	case PAGE_HOME:
 		drawHomePage();
@@ -247,8 +246,8 @@ void draw_page(void)
 	case PAGE_MENU:
 		drawMenuPage();
 		break;
-	case PAGE_CHARTS:
-		//        drawCharsPage();
+	case PAGE_METEO_CHARTS:
+		draw_meteo_chart_page();
 		break;
 	case PAGE_SETTINGS:
 		//        drawSettingPage();
@@ -269,7 +268,7 @@ static void timer_loop(lv_timer_t *timer)
 	if (error_widget != NULL)
 		return;
 
-//	printf("STATUS_SD_ERROR %lu\n", glob_status_err & STATUS_SD_ERROR);
+	//	printf("STATUS_SD_ERROR %lu\n", glob_status_err & STATUS_SD_ERROR);
 
 	if (glob_status_err & STATUS_SD_ERROR)
 	{

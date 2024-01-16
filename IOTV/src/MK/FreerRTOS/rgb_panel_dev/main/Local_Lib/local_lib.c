@@ -111,3 +111,8 @@ char *url_decode(const char *str)
 
 	return dStr;
 }
+
+double convert_range(double value, double From1, double From2, double To1, double To2)
+{
+      return (value-From1)/(From2-From1)*(To2-To1)+To1;
+}

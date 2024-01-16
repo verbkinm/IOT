@@ -127,12 +127,13 @@
 #define WIND_270			"A:/sdcard/img/w270.png"
 #define WIND_315			"A:/sdcard/img/w315.png"
 
-#define WIFI_CONF_PATH		"/sdcard/wifi.jsn"
-#define SNTP_CONF_PATH		"/sdcard/sntp.jsn"
-#define DISPLAY_PATH		"/sdcard/disp.jsn"
-#define METEO_CONF_PATH		"/sdcard/meteo"
-#define METEO_CITY_PATH		"/sdcard/city"
-#define METEO_WEEK_PATH		"/sdcard/week"
+#define WIFI_CONF_PATH		"/sdcard/wifi.json"
+#define SNTP_CONF_PATH		"/sdcard/sntp.json"
+#define DISPLAY_PATH		"/sdcard/disp.json"
+#define METEO_CONF_PATH		"/sdcard/meteo.json"
+#define METEO_CHART_PATH	"/sdcard/meteo_chart.json"
+#define METEO_CITY_PATH		"/sdcard/city.json"
+#define METEO_WEEK_PATH		"/sdcard/week.json"
 
 // Регистры BME280
 enum
@@ -212,7 +213,7 @@ enum PAGE_NAME {
 	PAGE_NONE,
     PAGE_HOME,
     PAGE_MENU,
-    PAGE_CHARTS,
+    PAGE_METEO_CHARTS,
     PAGE_SETTINGS,
 	PAGE_DATETIME_1
 };
