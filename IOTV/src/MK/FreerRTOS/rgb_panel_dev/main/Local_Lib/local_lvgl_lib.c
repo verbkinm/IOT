@@ -11,6 +11,8 @@ extern lv_font_t ubuntu_mono_14;
 
 
 static uint8_t glob_currentPage = PAGE_HOME;
+static uint32_t glob_status_reg = 0;
+static uint32_t glob_status_err = 0;
 
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
@@ -146,6 +148,46 @@ uint8_t glob_get_page(void)
 void glob_set_current_page(uint8_t page)
 {
 	glob_currentPage = page;
+}
+
+uint32_t glob_get_status_reg(void)
+{
+	return glob_status_reg;
+}
+
+void glob_set_status_reg(uint32_t reg)
+{
+	glob_status_reg = reg;
+}
+
+void glob_set_bits_status_reg(uint32_t bits)
+{
+	glob_status_reg |= bits;
+}
+
+void glob_clear_bits_status_reg(uint32_t bits)
+{
+	glob_status_reg &= ~bits;
+}
+
+uint32_t glob_get_status_err(void)
+{
+	return glob_status_err;
+}
+
+void glob_set_status_err(uint32_t reg)
+{
+	glob_status_err = reg;
+}
+
+void glob_set_bits_status_err(uint32_t bits)
+{
+	glob_status_err |= bits;
+}
+
+void glob_clear_bits_status_err(uint32_t bits)
+{
+	glob_status_err &= ~bits;
 }
 
 void debug_lv_obj_t_tree(lv_obj_t *obj, int depth)

@@ -11,8 +11,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "../../json/json_config.h"
-#include "../../TFT_touchscreen/TFT_touch_screen.h"
+#include "json/json_config.h"
+#include "TFT_touchscreen/TFT_touch_screen.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 struct Service_display{
 	uint8_t brightnes;

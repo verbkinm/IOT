@@ -10,7 +10,8 @@
 
 #include "esp_check.h"
 
-#include "../Global_def.h"
+#include "Global_def.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 esp_err_t sd_spi_init(void);
 //void sd_spi_deinit(void);

@@ -16,9 +16,9 @@
 #include "nvs_flash.h"
 #include "netif/etharp.h"
 
-#include "../Global_def.h"
-#include "../json/json_config.h"
-#include "../Local_Lib/local_lib.h"
+#include "Global_def.h"
+#include "json/json_config.h"
+#include "Local_Lib/local_lib.h"
 
 void wifi_init(void);
 void read_wifi_conf(void);

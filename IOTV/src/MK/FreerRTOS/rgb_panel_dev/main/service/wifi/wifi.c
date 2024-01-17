@@ -7,9 +7,6 @@
 
 #include "wifi.h"
 
-extern uint32_t glob_status_reg;
-extern uint32_t glob_status_err;
-
 esp_netif_t *sta_netif;
 
 static void wifi_init(void);
@@ -54,28 +51,28 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
 	{
 		printf("wifi sta start\n");
-		glob_status_reg |= STATUS_WIFI_STA_START;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
-		glob_status_reg &= ~STATUS_WIFI_SCANNING;
-		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
-		glob_status_reg &= ~STATUS_IP_GOT;
+		glob_set_bits_status_reg(STATUS_WIFI_STA_START);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
+		glob_clear_bits_status_reg(STATUS_WIFI_SCANNING);
+		glob_clear_bits_status_reg(STATUS_WIFI_SCAN_DONE);
+		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_STOP)
 	{
 		printf("wifi sta stop\n");
-		glob_status_reg &= ~STATUS_WIFI_STA_START;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
-		glob_status_reg &= ~STATUS_WIFI_SCANNING;
-		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
-		glob_status_reg &= ~STATUS_IP_GOT;
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_START);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
+		glob_clear_bits_status_reg(STATUS_WIFI_SCANNING);
+		glob_clear_bits_status_reg(STATUS_WIFI_SCAN_DONE);
+		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
 	{
 		printf("wifi sta connected\n");
-		glob_status_reg |= STATUS_WIFI_STA_CONNECTED;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
+		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 
 		wifi_config_t wifi_config;
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -97,29 +94,29 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		set_wifi_config_value("bssid", mac_str);
 		bool res = set_wifi_config_value("pwd", pwd_str);
 		set_wifi_config_value("auto", "1");
-		glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+		glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
 		printf("write pwd %d, pwd = %s\n", (int)res, pwd_str);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
 	{
 		printf("wifi sta disconnect\n");
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTED;
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		//		glob_status_reg &= ~STATUS_WIFI_SCANNING;
 		//		glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
-		glob_status_reg &= ~STATUS_IP_GOT;
+		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_SCAN_DONE)
 	{
-		glob_status_reg &= ~STATUS_WIFI_SCANNING;
-		glob_status_reg |= STATUS_WIFI_SCAN_DONE;
+		glob_clear_bits_status_reg(STATUS_WIFI_SCANNING);
+		glob_set_bits_status_reg(STATUS_WIFI_SCAN_DONE);
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
 		//		etharp_find_addr(netif, ipaddr, eth_ret, ip_ret)
 
-		glob_status_reg |= STATUS_IP_GOT;
+		glob_set_bits_status_reg(STATUS_IP_GOT);
 		printf("wifi sta got ip\n");
 		//		ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 		//		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
@@ -135,7 +132,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP)
 	{
 		printf("wifi sta ip lost\n");
-		glob_status_reg &= ~STATUS_IP_GOT;
+		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_base == WIFI_EVENT)
 		printf("wifi other event: %s\n", event_base);
@@ -219,9 +216,9 @@ static void read_wifi_conf(void)
 	if (get_wifi_config_value("auto", &auto_on))
 	{
 		if (strcmp("1", auto_on) == 0)
-			glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+			glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 		else
-			glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
+			glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 //		printf("read wifi conf. auto = %s\n", auto_on);
 		free(auto_on);
 	}
@@ -235,23 +232,23 @@ void wifi_service_task(void *pvParameters)
 
 	for( ;; )
 	{
-		if (glob_status_err)
+		if (glob_get_status_err())
 			break;
 
-		if ( !(glob_status_reg & STATUS_WIFI_AUTOCONNECT))
+		if ( !(glob_get_status_reg() & STATUS_WIFI_AUTOCONNECT))
 		{
 			//		xTimerStop(reconnect_timer, 0);
 			//		xTimerDelete(reconnect_timer, 0);
 			goto for_end;
 		}
 
-		if ( !(glob_status_reg & STATUS_WIFI_STA_START))
+		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_START))
 			goto for_end;
 
-		if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+		if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
 			goto for_end;
 
-		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 		{
 			wifi_config_t wifi_config;
 			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -270,7 +267,7 @@ void wifi_service_task(void *pvParameters)
 //			printf("\n");
 
 			esp_wifi_connect();
-			glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
+			glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 			//		xTimerStop(reconnect_timer, 0);
 		}
 

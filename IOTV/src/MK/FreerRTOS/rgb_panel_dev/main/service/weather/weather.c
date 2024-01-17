@@ -7,11 +7,6 @@
 
 #include "weather.h"
 
-//#define MAX_HTTP_REC_BUFFER 4096
-
-extern uint32_t glob_status_reg;
-extern uint32_t glob_status_err;
-
 static char *city_search = NULL;
 
 static const char *TAG = "weather";
@@ -215,7 +210,7 @@ static void http_city_search(void)
 	esp_http_client_cleanup(client);
 	free(response_buffer);
 
-	glob_status_reg |= STATUS_METEO_CITY_SEARCH_DONE;
+	glob_set_bits_status_reg(STATUS_METEO_CITY_SEARCH_DONE);
 }
 
 static char *generate_url_meteo(void)
@@ -253,7 +248,7 @@ static void read_meteo_conf(void)
 	if (get_meteo_config_value("on", &on))
 	{
 		if (strcmp(on, "1") == 0)
-			glob_status_reg |= STATUS_METEO_ON;
+			glob_set_bits_status_reg(STATUS_METEO_ON);
 		free(on);
 	}
 }
@@ -658,19 +653,19 @@ void weather_service_task(void *pvParameters)
 	int counter = 350; //350 =  1 раз в 5 минут
 	for( ;; )
 	{
-		if (glob_status_err)
+		if (glob_get_status_err())
 			break;
 
-		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 		{
 			counter = 350;
 			goto for_end;
 		}
 
-		if (glob_status_reg & STATUS_METEO_CITY_SEARCH)
+		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
 
-		if (!((glob_status_reg & STATUS_METEO_ON) && (glob_status_reg & STATUS_TIME_SYNC)))
+		if (!((glob_get_status_reg() & STATUS_METEO_ON) && (glob_get_status_reg() & STATUS_TIME_SYNC)))
 			goto for_end;
 
 		if (counter++ < 350)

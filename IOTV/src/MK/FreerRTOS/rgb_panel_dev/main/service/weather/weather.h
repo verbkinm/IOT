@@ -20,6 +20,7 @@
 #include "Global_def.h"
 #include "json/json_config.h"
 #include "Local_Lib/local_lib.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 #define OPEN_METEO_WEEK_SIZE (3 * 24)
 

@@ -8,7 +8,6 @@
 #include "weather.h"
 
 extern lv_font_t ubuntu_mono_14;
-extern uint32_t glob_status_reg;
 extern lv_obj_t *sub_weather_page;
 
 struct Weather_page_obj {
@@ -252,11 +251,11 @@ static bool parse_open_meteo_city(const char *data, open_meteo_city_t **open_met
 
 static void timer_loop(lv_timer_t *timer)
 {
-	if ( !(glob_status_reg & STATUS_METEO_CITY_SEARCH_DONE) )
+	if ( !(glob_get_status_reg() & STATUS_METEO_CITY_SEARCH_DONE) )
 		return;
 
-	glob_status_reg &= ~STATUS_METEO_CITY_SEARCH_DONE;
-	glob_status_reg &= ~STATUS_METEO_CITY_SEARCH;
+	glob_clear_bits_status_reg(STATUS_METEO_CITY_SEARCH_DONE);
+	glob_clear_bits_status_reg(STATUS_METEO_CITY_SEARCH);
 
 	struct stat st;
 	stat(METEO_CITY_PATH, &st);
@@ -303,7 +302,7 @@ static void timer_loop(lv_timer_t *timer)
 
 static void city_search_handler(lv_event_t *e)
 {
-	if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+	if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 	{
 		create_msgbox(NULL, "Внимание", "Сетевое соединение не установлено!");
 		return;
@@ -316,7 +315,7 @@ static void city_search_handler(lv_event_t *e)
 	free(tmp_city);
 
 	weather_page_obj->busy_ind = create_busy_indicator(lv_obj_get_child(lv_scr_act(), 1), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
-	glob_status_reg |= STATUS_METEO_CITY_SEARCH;
+	glob_set_bits_status_reg(STATUS_METEO_CITY_SEARCH);
 }
 
 static void city_save_handler(lv_event_t *e)
@@ -356,11 +355,11 @@ static void switcher_handler(lv_event_t *e)
 		if (!set_meteo_config_value("on", "1"))
 			printf("on not write\n");
 
-		glob_status_reg |= STATUS_METEO_ON;
+		glob_set_bits_status_reg(STATUS_METEO_ON);
 	}
 	else
 	{
-		glob_status_reg &= ~STATUS_METEO_ON;
+		glob_clear_bits_status_reg(STATUS_METEO_ON);
 		if (!set_meteo_config_value("on", "0"))
 			printf("on not write\n");
 	}
@@ -378,7 +377,7 @@ void create_weather_sub_page(lv_event_t *e)
 	lv_obj_set_scrollbar_mode(section, LV_SCROLLBAR_MODE_OFF);
 
 	// Вкл./Выкл. службу погоды
-	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_status_reg & STATUS_METEO_ON), &weather_page_obj->switcher);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_get_status_reg() & STATUS_METEO_ON), &weather_page_obj->switcher);
 	lv_obj_add_event_cb(weather_page_obj->switcher, switcher_handler, LV_EVENT_CLICKED, 0);
 
 	// Кнопка Search

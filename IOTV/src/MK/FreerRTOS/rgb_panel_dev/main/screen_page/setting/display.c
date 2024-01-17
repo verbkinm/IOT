@@ -8,8 +8,6 @@
 #include "display.h"
 //#include "settingpage.h"
 
-extern uint32_t glob_status_reg;
-
 extern lv_obj_t *sub_display_page;;
 extern service_display_t display_service_data;
 
@@ -141,7 +139,7 @@ void create_display_sub_page(lv_event_t *e)
 	lv_obj_add_event_cb(display_page_obj->switcher_rotate, display_switcher_event_handler, LV_EVENT_CLICKED, 0);
 
 	// Ночной режим по времени
-	create_switch(section, LV_SYMBOL_EYE_OPEN, "Ночной режим", (glob_status_reg & STATUS_DISPLAY_NIGHT_MODE_ON), &display_page_obj->switcher_night_mode);
+	create_switch(section, LV_SYMBOL_EYE_OPEN, "Ночной режим", (glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON), &display_page_obj->switcher_night_mode);
 	lv_obj_add_event_cb(display_page_obj->switcher_night_mode, display_night_mode_event_handler, LV_EVENT_CLICKED, 0);
 
 	// Яркость днём

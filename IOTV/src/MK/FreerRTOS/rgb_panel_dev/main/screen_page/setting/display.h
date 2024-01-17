@@ -11,8 +11,8 @@
 #include <lvgl.h>
 #include "settingpage.h"
 #include "elements.h"
-#include "../../json/json_config.h"
-#include "../../service/display/display.h"
+#include "json/json_config.h"
+#include "service/display/display.h"
 
 void create_display_sub_page(lv_event_t *e);
 

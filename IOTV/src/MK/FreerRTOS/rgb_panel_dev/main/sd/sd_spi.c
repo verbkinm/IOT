@@ -17,8 +17,6 @@
 #define MOUNT_POINT "/sdcard"
 #define EXAMPLE_MAX_CHAR_SIZE    64
 
-extern uint32_t glob_status_err;
-
 static char *TAG = "SD SPI";
 
 static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo);
@@ -41,7 +39,7 @@ static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdin
 
 		if ((cur_t - old_t) == 0)
 		{
-			glob_status_err |= STATUS_SD_ERROR;
+			glob_set_bits_status_err(STATUS_SD_ERROR);
 			ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
 			return ret;
 		}
@@ -51,7 +49,7 @@ static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdin
 	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED)
 	{
 		ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
-		glob_status_err |= STATUS_SD_ERROR;
+		glob_set_bits_status_err(STATUS_SD_ERROR);
 //		spi_bus_free(slot);
 	}
 
@@ -87,7 +85,7 @@ esp_err_t sd_spi_init(void)
 	ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
 	if (ret != ESP_OK)
 	{
-		glob_status_err |= STATUS_SD_ERROR;
+		glob_set_bits_status_err(STATUS_SD_ERROR);
 		ESP_LOGE(TAG, "Failed to initialize bus.");
 		return ret;
 	}
@@ -101,7 +99,7 @@ esp_err_t sd_spi_init(void)
 
 	if (ret != ESP_OK)
 	{
-		glob_status_err |= STATUS_SD_ERROR;
+		glob_set_bits_status_err(STATUS_SD_ERROR);
 		if (ret == ESP_FAIL)
 		{
 			ESP_LOGE(TAG, "Failed to mount filesystem. "

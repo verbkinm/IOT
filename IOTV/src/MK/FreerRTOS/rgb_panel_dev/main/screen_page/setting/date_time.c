@@ -8,7 +8,6 @@
 #include "date_time.h"
 //#include "settingpage.h"
 
-extern uint32_t glob_status_reg;
 extern lv_obj_t *menu;
 
 extern lv_obj_t *sub_date_time_page;
@@ -95,7 +94,7 @@ void create_sntp_page(void)
 	lv_obj_set_scrollbar_mode(section, LV_SCROLLBAR_MODE_OFF);
 
 	// Включить/выключить службу sntp
-	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_status_reg & STATUS_SNTP_ON), &dt_page_obj->switcher);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_get_status_reg() & STATUS_SNTP_ON), &dt_page_obj->switcher);
 	lv_obj_add_event_cb(dt_page_obj->switcher, sntp_switch_handler, LV_EVENT_CLICKED, section);
 //
 //	lv_obj_t *cont = lv_menu_cont_create(section);
@@ -214,14 +213,14 @@ static void sntp_switch_handler(lv_event_t * e)
 {
 	lv_obj_t *switcher = e->target;
 	if (lv_obj_has_state(switcher, LV_STATE_CHECKED))
-		glob_status_reg |= STATUS_SNTP_ON;
+		glob_set_bits_status_reg(STATUS_SNTP_ON);
 	else
-		glob_status_reg &= ~STATUS_SNTP_ON;
+		glob_clear_bits_status_reg(STATUS_SNTP_ON);
 }
 
 static void save_time(lv_event_t *e)
 {
-	if (glob_status_reg & STATUS_SNTP_ON)
+	if (glob_get_status_reg() & STATUS_SNTP_ON)
 	{
 		create_msgbox(NULL, "Внимане", "Невозможно установить время, если включена служба SNTP!");
 		return;
@@ -242,14 +241,14 @@ static void save_time(lv_event_t *e)
 	struct timeval tv = {.tv_sec = now};
 	settimeofday(&tv, NULL);
 
-	glob_status_reg |= STATUS_TIME_SYNC;
+	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 
 	//	DS3231_SetDataTime(&glob_date_time);
 }
 
 static void save_date(lv_event_t *e)
 {
-	if (glob_status_reg & STATUS_SNTP_ON)
+	if (glob_get_status_reg() & STATUS_SNTP_ON)
 	{
 		create_msgbox(NULL, "Внимане", "Невозможно установить дату, если включена служба SNTP!");
 		return;
@@ -272,7 +271,7 @@ static void save_date(lv_event_t *e)
 	struct timeval tv = {.tv_sec = now};
 	settimeofday(&tv, NULL);
 
-	glob_status_reg |= STATUS_TIME_SYNC;
+	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 
 	//	DS3231_SetDataTime(&glob_date_time);
 }

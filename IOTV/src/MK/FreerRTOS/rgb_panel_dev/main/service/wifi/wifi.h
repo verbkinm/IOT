@@ -18,9 +18,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "../../Global_def.h"
-#include "../../json/json_config.h"
-#include "../../Local_Lib/local_lib.h"
+#include "Global_def.h"
+#include "json/json_config.h"
+#include "Local_Lib/local_lib.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 void wifi_service_task(void *pvParameters);
 

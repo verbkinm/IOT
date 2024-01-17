@@ -14,7 +14,6 @@
 extern lv_obj_t *sub_wifi_page;
 
 extern lv_font_t ubuntu_mono_14;
-extern uint32_t glob_status_reg;
 extern esp_netif_t *sta_netif;
 
 static const char *TAG = "wifi";
@@ -173,7 +172,7 @@ static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_r
 	lv_obj_t *lbl_ssid = lv_label_create(*btn);
 	lv_label_set_text_fmt(lbl_ssid, "%s", ap_record->ssid);
 
-	if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
+	if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED)
 	{
 		wifi_config_t wifi_config;
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -207,7 +206,7 @@ static void wifi_switch_heandler(lv_event_t *e)
 	{
 		esp_wifi_start();
 		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
-		glob_status_reg |= STATUS_WIFI_STA_START;
+		glob_set_bits_status_reg(STATUS_WIFI_STA_START);
 
 		bool res = set_wifi_config_value("on", "1");
 		if (!res)
@@ -220,7 +219,7 @@ static void wifi_switch_heandler(lv_event_t *e)
 		esp_wifi_stop();
 		lv_obj_clean(wifi_page_obj->list);
 		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
-		glob_status_reg &= ~STATUS_WIFI_STA_START;
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_START);
 
 		bool res = set_wifi_config_value("on", "0");
 		if (!res)
@@ -269,7 +268,7 @@ static void wifi_connect_step2(lv_event_t *e)
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
 	esp_wifi_disconnect();
 
-	glob_status_reg |= STATUS_WIFI_STA_CONNECTING;
+	glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 	wait_flag = WAIT_FLAG_CONN;
 	esp_wifi_connect();
 }
@@ -365,7 +364,7 @@ static void wifi_connect_step1(lv_event_t *e)
 static void wifi_disconnect_handler(lv_event_t * e)
 {
 	set_wifi_config_value("auto", "0");
-	glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
+	glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 	esp_wifi_disconnect();
 }
 
@@ -377,7 +376,7 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 	wifi_ap_record_t *ap_info = widget->user_data;
 
 	// Если устройство подключено к данной точке доступа.
-	if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
+	if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED)
 	{
 		wifi_config_t wifi_config;
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -402,25 +401,25 @@ static void conn_step1_timer_loop(lv_timer_t *timer)
 static void wifi_scan_starting_heandler(lv_event_t *e)
 {
 	// Если включено автосоединение - запоминаем его состояние и выключаем его
-	if (glob_status_reg & STATUS_WIFI_AUTOCONNECT)
+	if (glob_get_status_reg() & STATUS_WIFI_AUTOCONNECT)
 	{
-		autoconn_pause_from_scan = (glob_status_reg & STATUS_WIFI_AUTOCONNECT) > 0;
-		glob_status_reg &= ~STATUS_WIFI_AUTOCONNECT;
+		autoconn_pause_from_scan = (glob_get_status_reg() & STATUS_WIFI_AUTOCONNECT) > 0;
+		glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 	}
 
 	// Если идёт соединение - останавливаем его.
-	if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+	if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
 	{
 		esp_wifi_disconnect();
-		glob_status_reg &= ~STATUS_WIFI_STA_CONNECTING;
+		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 	}
 
 
 	esp_wifi_scan_start(NULL, false);
 
-	glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
+	glob_clear_bits_status_reg(STATUS_WIFI_SCAN_DONE);
 	wait_flag = WAIT_FLAG_SCAN;
-	glob_status_reg |= STATUS_WIFI_SCANNING;
+	glob_set_bits_status_reg(STATUS_WIFI_SCANNING);
 
 	lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 	lv_obj_t *section = wifi_page_obj->list->parent;
@@ -436,7 +435,8 @@ static void wifi_scan_done(void)
 	// Если была остановка автоподключение перед сканирование, включаем его
 	if (autoconn_pause_from_scan)
 	{
-		glob_status_reg |= STATUS_WIFI_AUTOCONNECT;
+
+		glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 		autoconn_pause_from_scan = false;
 	}
 
@@ -527,7 +527,7 @@ void create_wifi_sub_page(lv_event_t *e)
 	wifi_page_obj = malloc(sizeof(struct Wifi_page_obj));
 	wifi_page_obj->busy_ind = NULL;
 
-	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_status_reg & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
+	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_get_status_reg() & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
 	create_list(section, 495, 265, &(wifi_page_obj->list));
 	create_button(section, "Сканировать", 128, 40, &(wifi_page_obj->btn_scan));
 
@@ -544,7 +544,7 @@ void create_wifi_sub_page(lv_event_t *e)
 	lv_obj_add_event_cb(wifi_page_obj->btn_scan, wifi_scan_starting_heandler, LV_EVENT_CLICKED, 0);
 	lv_obj_add_event_cb(wifi_page_obj->wifi_switch, wifi_switch_heandler, LV_EVENT_CLICKED, 0);
 
-	if (glob_status_reg & STATUS_WIFI_STA_START)
+	if (glob_get_status_reg() & STATUS_WIFI_STA_START)
 	{
 		lv_obj_clear_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
@@ -560,7 +560,7 @@ static void timer_loop(lv_timer_t *timer)
 {
 	if (wait_flag == WAIT_FLAG_SCAN)
 	{
-		if (glob_status_reg & STATUS_WIFI_SCAN_DONE)
+		if (glob_get_status_reg() & STATUS_WIFI_SCAN_DONE)
 		{
 //			glob_status_reg &= ~STATUS_WIFI_SCAN_DONE;
 			wifi_scan_done();
@@ -569,7 +569,7 @@ static void timer_loop(lv_timer_t *timer)
 	}
 	else if (wait_flag == WAIT_FLAG_CONN)
 	{
-		if ( !(glob_status_reg & STATUS_WIFI_STA_CONNECTING))
+		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING))
 		{
 			clear_busy_indicator(&wifi_page_obj->busy_ind);
 			wait_flag = WAIT_FLAG_NONE;

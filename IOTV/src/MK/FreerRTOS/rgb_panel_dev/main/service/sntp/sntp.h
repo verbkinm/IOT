@@ -14,8 +14,9 @@
 #include "esp_netif_sntp.h"
 //#include "freertos/semphr.h"
 
-#include "../../Global_def.h"
-#include "../../json/json_config.h"
+#include "Global_def.h"
+#include "json/json_config.h"
+#include "Local_Lib/local_lvgl_lib.h"
 
 void sntp_service_task(void *pvParameters);
 void read_sntp_conf(void);

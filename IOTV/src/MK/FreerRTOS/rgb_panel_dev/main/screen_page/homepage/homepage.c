@@ -14,8 +14,6 @@ extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_64;
 extern lv_font_t ubuntu_mono_128;
 
-extern uint32_t glob_status_reg;
-
 static const char *TAG = "homepage";
 static lv_obj_t *block_0, *block_1, *block_2;
 
@@ -80,7 +78,7 @@ static void drawPressure(void)
 
 static void draw_meteo_data(void)
 {
-	if ( !(glob_status_reg & STATUS_METEO_ON))
+	if ( !(glob_get_status_reg() & STATUS_METEO_ON))
 		return;
 
 //	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();

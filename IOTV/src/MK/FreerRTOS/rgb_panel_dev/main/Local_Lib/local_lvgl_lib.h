@@ -38,6 +38,16 @@ const char *weekday_name_full(uint8_t day);
 uint8_t glob_get_page(void);
 void glob_set_current_page(uint8_t page);
 
+uint32_t glob_get_status_reg(void);
+void glob_set_status_reg(uint32_t reg);
+void glob_set_bits_status_reg(uint32_t bits);
+void glob_clear_bits_status_reg(uint32_t bits);
+
+uint32_t glob_get_status_err(void);
+void glob_set_status_err(uint32_t reg);
+void glob_set_bits_status_err(uint32_t bits);
+void glob_clear_bits_status_err(uint32_t bits);
+
 void debug_lv_obj_t_tree(lv_obj_t *obj, int depth);
 
 #endif /* MAIN_LOCAL_LIB_LOCAL_LVGL_LIB_H_ */

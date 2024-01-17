@@ -7,9 +7,6 @@
 
 #include "sntp.h"
 
-extern uint32_t glob_status_reg;
-extern uint32_t glob_status_err;
-
 //static SemaphoreHandle_t xSemaphore;
 
 char *sntp_utc;
@@ -25,7 +22,7 @@ void time_sync_notification_cb(struct timeval *tv);
 void time_sync_notification_cb(struct timeval *tv)
 {
 //	printf("Notification of a time synchronization event\n");
-	glob_status_reg |= STATUS_TIME_SYNC;
+	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 }
 
 static void check_sntp_conf_file(void)
@@ -67,9 +64,9 @@ void read_sntp_conf(void)
 	if (get_sntp_config_value("on", &on))
 	{
 		if (strcmp(on, "1") == 0)
-			glob_status_reg |= STATUS_SNTP_ON;
+			glob_set_bits_status_reg(STATUS_SNTP_ON);
 		else
-			glob_status_reg &= STATUS_SNTP_ON;
+			glob_clear_bits_status_reg(STATUS_SNTP_ON);
 		free(on);
 	}
 
@@ -104,10 +101,10 @@ void sntp_service_task(void *pvParameters)
 
 	while(true)
 	{
-		if (glob_status_err)
+		if (glob_get_status_err())
 			break;
 
-		if ( !(glob_status_reg & STATUS_SNTP_ON) || !(glob_status_reg & STATUS_WIFI_STA_CONNECTED) )
+		if ( !(glob_get_status_reg() & STATUS_SNTP_ON) || !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 			goto for_end;
 
 		read_sntp_conf();

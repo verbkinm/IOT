@@ -7,9 +7,6 @@
 
 #include "display.h"
 
-extern uint32_t glob_status_reg;
-extern uint32_t glob_status_err;
-
 static void check_display_conf_file(void);
 static void read_display_conf(void);
 
@@ -27,10 +24,10 @@ void service_display_task(void *pvParameters)
 
 	for( ;; )
 	{
-		if (glob_status_err)
+		if (glob_get_status_err())
 			break;
 
-		if ((glob_status_reg & STATUS_DISPLAY_NIGHT_MODE_ON) && (glob_status_reg & STATUS_TIME_SYNC))
+		if ((glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON) && (glob_get_status_reg() & STATUS_TIME_SYNC))
 		{
 			time_t now;
 			struct tm timeinfo = { 0 };
@@ -89,9 +86,9 @@ static void read_display_conf(void)
 	if (get_display_config_value(NIGHT_MODE_STR, &buf))
 	{
 		if (strcmp(buf, "1") == 0)
-			glob_status_reg |= STATUS_DISPLAY_NIGHT_MODE_ON;
+			glob_set_bits_status_reg(STATUS_DISPLAY_NIGHT_MODE_ON);
 		else
-			glob_status_reg &= ~STATUS_DISPLAY_NIGHT_MODE_ON;
+			glob_clear_bits_status_reg(STATUS_DISPLAY_NIGHT_MODE_ON);
 		free(buf);
 	}
 

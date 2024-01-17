@@ -7,8 +7,6 @@
 
 #include "TFT_touch_screen.h"
 
-extern uint32_t glob_status_reg;
-extern uint32_t glob_status_err;
 extern lv_font_t ubuntu_mono_48;
 
 static const char *TAG = "TFT_touch_screen";
@@ -270,7 +268,7 @@ static void timer_loop(lv_timer_t *timer)
 
 	//	printf("STATUS_SD_ERROR %lu\n", glob_status_err & STATUS_SD_ERROR);
 
-	if (glob_status_err & STATUS_SD_ERROR)
+	if (glob_get_status_err() & STATUS_SD_ERROR)
 	{
 		ESP_LOGE(TAG, "CRITICAL STATUS_SD_ERROR");
 		set_display_brightness(255);
@@ -297,13 +295,13 @@ static void timer_loop(lv_timer_t *timer)
 
 	lv_img_set_src(sd_icon, SD_ON);
 
-	if (glob_status_reg & STATUS_WIFI_STA_START)
+	if (glob_get_status_reg() & STATUS_WIFI_STA_START)
 	{
-		if (glob_status_reg & STATUS_WIFI_STA_CONNECTING)
+		if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
 			lv_img_set_src(wifi_icon, WIFI_CONNECTING);
 		else
 		{
-			if (glob_status_reg & STATUS_WIFI_STA_CONNECTED)
+			if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED)
 				lv_img_set_src(wifi_icon, WIFI_CONNECTED);
 			else
 				lv_img_set_src(wifi_icon, WIFI_ENABLE);
@@ -321,7 +319,7 @@ static void TFT_draw_page_task(void *pvParameters)
 
 	while (1)
 	{
-		if (glob_status_err)
+		if (glob_get_status_err())
 			break;
 
 		//		menuPageInit();
