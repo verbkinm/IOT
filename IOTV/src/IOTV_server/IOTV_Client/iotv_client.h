@@ -30,7 +30,7 @@ private:
 
     QTimer _silenceTimer;
 
-    static constexpr uint _silenceInterval = 6000;
+    static constexpr uint _silenceInterval = 15000;
 
     uint64_t _expectedDataSize;
 

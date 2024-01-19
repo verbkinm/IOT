@@ -106,7 +106,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
     for (uint16_t i = 0; i < pkgsCount; ++i)
     {
         char *it = NULL;
-        uint64_t dataReadSize = dataPart(it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
+        uint64_t dataReadSize = dataPart(&it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
 
         struct Read_Write readWrite = {
             .nameSize = iot->nameSize,

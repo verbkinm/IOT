@@ -80,6 +80,20 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     uint8_t channelNumber = pkg->channelNumber;
 
+//    if (header->fragments > 1)
+//    {
+//        if (header->fragment == 1)
+//        {
+//            std::ofstream file("image.jpg");
+//            file.write(pkg->data, pkg->dataSize);
+//        }
+//        else
+//        {
+//            std::ofstream file("image.jpg", std::ios_base::app);
+//            file.write(pkg->data, pkg->dataSize);
+//        }
+//    }
+
     if (_streamRead.count(channelNumber))
     {
         emit signalStreamRead(channelNumber, header->fragment, header->fragments, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
@@ -164,6 +178,9 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
+    _counterPing = 0;
+    _counterState = 0;
+
     bool error = false;
     uint64_t cutDataSize = 0;
 
@@ -205,6 +222,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 responcePingPoing(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
+
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
@@ -389,4 +407,6 @@ void IOTV_Host::slotConnected()
 
     _counterPing = 0;
     _counterState = 0;
+    _expectedDataSize = 0;
+    _buff.clear();
 }

@@ -10,7 +10,7 @@ void app_main(void)
 	i2c_init();
 	TFT_init(); // Перед этой функцией обязательно выполнить i2c_init();
 
-	rgb_panel_start_services();
+	start_services();
 
 	while (1)
 	{

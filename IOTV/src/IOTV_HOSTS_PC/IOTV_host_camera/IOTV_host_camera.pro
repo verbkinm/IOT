@@ -3,6 +3,7 @@ QT += gui network multimedia widgets
 
 CONFIG += c++17
 CONFIG -= app_bundle
+#LIBS += -lssl -lcrypto
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

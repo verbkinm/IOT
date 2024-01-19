@@ -200,13 +200,13 @@ enum
 	_dig_H6	 		= 0xE7,
 };
 
-// Биты статусов
-enum
-{
-	MY_STATUS_WIFI = 1,
-	MY_STATUS_TCP = 2,
-	MY_STATUS_RELE = 4
-};
+//// Биты статусов
+//enum
+//{
+//	MY_STATUS_WIFI = 1,
+//	MY_STATUS_TCP = 2,
+//	MY_STATUS_RELE = 4
+//};
 
 // Страницы дисплея
 enum PAGE_NAME {
