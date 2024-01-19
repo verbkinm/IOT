@@ -113,7 +113,7 @@ void IOTV_Host::responceRead(const struct Header *header)
                    + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
 
-    _counterPing = 0;
+//    _counterPing = 0;
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -178,8 +178,8 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-    _counterPing = 0;
-    _counterState = 0;
+//    _counterPing = 0;
+//    _counterState = 0;
 
     bool error = false;
     uint64_t cutDataSize = 0;
