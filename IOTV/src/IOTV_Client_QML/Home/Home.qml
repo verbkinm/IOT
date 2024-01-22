@@ -55,7 +55,7 @@ Page {
 
     function imageById(id)
     {
-        if (id > 0 && id <= 5)
+        if (id > 0 && id <= 8)
             return "qrc:/img/id/" + id + ".png"
 
 //        if (id === 1)

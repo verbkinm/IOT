@@ -3,9 +3,15 @@ import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
 import QtMultimedia
 
+import "qrc:/Devices/" as Devices
 import "qrc:/Devices/BaseItem" as BaseItem
+import Producer
+
 
 Item {
+    //Ссылка на Device
+    required property var device
+
     signal play()
     signal stop()
 //    signal volumeOn()
@@ -30,13 +36,15 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
 
-        Image {
-            id: img
-            cache: false
-
+        Producer{
+            id: producer
+            videoSink: videoOutput.videoSink
+        }
+        VideoOutput {
+            id: videoOutput
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
-            source: "image://provider/frame"
+
             width: parent.width
             height: parent.height
 
@@ -50,8 +58,6 @@ Item {
                 }
             }
         }
-
-
     }
 
     Rectangle {
@@ -69,8 +75,8 @@ Item {
             BaseItem.AnimRoundButton {
                 id: playButton
 
-                image_origin: "qrc:/img/id_4/play.png"
-                image_invert: "qrc:/img/id_4/play_white.png"
+                image_origin: "qrc:/img/id_8/play.png"
+                image_invert: "qrc:/img/id_8/play_white.png"
 
                 onClicked: {
                     if (highlighted)
@@ -92,8 +98,8 @@ Item {
 
                 highlighted: true
 
-                image_origin: "qrc:/img/id_4/stop.png"
-                image_invert: "qrc:/img/id_4/stop_white.png"
+                image_origin: "qrc:/img/id_8/stop.png"
+                image_invert: "qrc:/img/id_8/stop_white.png"
 
                 onClicked: {
                     if (highlighted)
@@ -112,11 +118,11 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: volumeButton
-
+                enabled: false
                 highlighted: false
 
-                image_origin: "qrc:/img/id_4/volume.png"
-                image_invert: "qrc:/img/id_4/volume_white.png"
+                image_origin: "qrc:/img/id_8/volume.png"
+                image_invert: "qrc:/img/id_8/volume_white.png"
 
                 onClicked: {
                     if (highlighted)
@@ -131,6 +137,57 @@ Item {
                     }
                 }
             }
+
+            BaseItem.AnimRoundButton {
+                id: rotateButton
+                highlighted: false
+
+                image_origin: "qrc:/img/id_8/repeate_on.png"
+                image_invert: "qrc:/img/id_8/repeate_on_white.png"
+
+                onClicked: {
+                    videoOutput.orientation += 90
+                }
+            }
+
+            BaseItem.AnimRoundButton {
+                id: mirrorButton
+                highlighted: false
+
+                image_origin: "qrc:/img/id_8/mirror.png"
+                image_invert: "qrc:/img/id_8/mirror_white.png"
+
+                onClicked: {
+                    if (highlighted)
+                    {
+                        highlighted = false
+                        producer.slotMirrored(false)
+                    }
+                    else
+                    {
+                        highlighted = true
+                        producer.slotMirrored(true)
+                    }
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: device
+        function onSignalDataPkgComplete(channel, data) {
+            if (channel === 0)
+            {
+                var width = parseInt(device.readData(2), 10)
+                var height = parseInt(device.readData(3), 10)
+                producer.slotDataVideoFrame(width, height, data)
+//                        camRect.pkgComplete(data);
+                console.log("onSignalDataPkgComplete")
+            }
+            else if (channel === 1)
+            {
+
+            }
         }
     }
 
@@ -140,10 +197,5 @@ Item {
 
     Component.onDestruction: {
         console.log("MyCamRect destruct: ", objectName)
-    }
-
-    function reloadImage() {
-        img.source = ""
-        img.source = "image://provider/frame"
     }
 }

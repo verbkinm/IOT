@@ -179,7 +179,8 @@ void slotImageCaptured()
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
     QImage img = camera->getImage();
-
+//    img = img.convertToFormat(QImage::Format_RGBA8888);
+//    qDebug() << img.format();
 
     int width = *(int16_t *)iot.readChannel[2].data;
     int height = *(int16_t *)iot.readChannel[3].data;

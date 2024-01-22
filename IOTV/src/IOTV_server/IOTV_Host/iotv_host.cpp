@@ -178,7 +178,7 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-//    _counterPing = 0;
+    _counterPing = 0;
 //    _counterState = 0;
 
     bool error = false;

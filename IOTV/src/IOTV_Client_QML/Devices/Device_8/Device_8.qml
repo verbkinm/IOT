@@ -18,11 +18,6 @@ Page {
         id: headerPanel
     }
 
-    //    onVisibleChanged: {
-    //        if (!visible)
-    //            device.signalCloseReadStream(0)
-    //    }
-
     Flickable {
         id: fl
         width: root.width
@@ -38,6 +33,7 @@ Page {
 
         MyCamRect {
             id: camRect
+            device: root.device
             width: parent.width - 20
             height: parent.height - (parent.height / 100 * 30)
             anchors.horizontalCenter: parent.horizontalCenter
@@ -62,21 +58,6 @@ Page {
         }
     }
 
-    Connections {
-        target: device
-        function onSignalDataPkgComplete(channel, data) {
-            if (channel === 0)
-            {
-                client.providerRefreshImage(data)
-                camRect.reloadImage()
-                console.log("onSignalDataPkgComplete")
-            }
-            else if (channel === 1)
-            {
-
-            }
-        }
-    }
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
     }
@@ -90,15 +71,5 @@ Page {
         anchors.fill: parent
         visible: !device.state
     }
-
-    //    Timer {
-    //        id: t1
-    //        interval: 500;
-    //        running: true;
-    //        repeat: true
-    //        onTriggered: {
-    //            img.reloadImage()
-    //        }
-    //    }
 }
 

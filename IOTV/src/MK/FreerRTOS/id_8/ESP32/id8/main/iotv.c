@@ -1,5 +1,7 @@
 #include "iotv.h"
 
+#define STREAM_BUF_SIZE 8192
+
 static const char *TAG = "iotv";
 
 static uint64_t realBufSize = 0;
@@ -197,7 +199,7 @@ void iotv_service_task(void *pvParameters)
 		esp_restart();
 	}
 
-	char *buf = calloc(1, BUFSIZE * 2);
+	char *buf = calloc(1, STREAM_BUF_SIZE);
 
 	for( ;; )
 	{
@@ -242,7 +244,7 @@ void iotv_service_task(void *pvParameters)
 				.dataSize = readWriteSize(&readWrite),
 				.pkg = &readWrite
 		};
-		responseReadData((char *)buf, BUFSIZE * 2, &iot, &header, iotv_write_func, (void *)&last_client_socket);
+		responseReadData((char *)buf, STREAM_BUF_SIZE, &iot, &header, iotv_write_func, (void *)&last_client_socket);
 //		if (responseReadData((char *)transmitBuffer, BUFSIZE, &iot, &header, iotv_write_func, (void *)&last_client_socket) < 1)
 //			camera_stop();
 
@@ -252,7 +254,7 @@ void iotv_service_task(void *pvParameters)
 
 		iot.readChannel[CH_CAM_DATA].dataSize = 0;
 		iot.readChannel[CH_CAM_DATA].data = NULL;
-		vTaskDelay(10 / portTICK_PERIOD_MS);
+		vTaskDelay(20 / portTICK_PERIOD_MS);
 	}
 
 	ESP_LOGI(TAG, "iotv_service_task stop");

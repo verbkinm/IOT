@@ -27,7 +27,6 @@ SOURCES += \
         ../lib/Protocols/embedded/state.cpp \
         ../lib/Protocols/embedded/tech.cpp \
         client.cpp \
-        colorimageprovider.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
         ../lib/Base_Host/channel.cpp \
@@ -35,6 +34,7 @@ SOURCES += \
         ../lib/raw/raw.cpp \
         generalaudiooutput.cpp \
         main.cpp \
+        producer.cpp \
         wrap_qbytearray.cpp
 
 HEADERS += \
@@ -62,13 +62,13 @@ HEADERS += \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/tech.h \
     client.h \
-    colorimageprovider.h \
     device.h \
     ../lib/Base_Host/base_host.h \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
     ../lib/raw/raw.h \
     generalaudiooutput.h \
+    producer.h \
     wrap_qbytearray.h
 
 resources.prefix = /$${TARGET}

@@ -1,6 +1,5 @@
 #include "client.h"
 
-#include "colorimageprovider.h"
 #include "iotv_event_manager.h"
 #include "event_action_parser.h"
 #include "log.h"
@@ -15,8 +14,8 @@
 #include <fstream>
 #include <QTemporaryFile>
 
-Client::Client(ColorImageProvider &provider, QObject *parent): QObject{parent},
-    _expectedDataSize(0), _counterPing(0), _provider(provider)
+Client::Client(QObject *parent): QObject{parent},
+    _expectedDataSize(0), _counterPing(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -259,12 +258,6 @@ void Client::slotCloseReadStream(int channel)
     auto size = queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
 
     write({outData, static_cast<int>(size)});
-}
-
-void Client::providerRefreshImage(Wrap_QByteArray *wdata)
-{
-    _provider.refreshImage(wdata);
-    delete wdata;
 }
 
 QList<QObject *> Client::devList()
