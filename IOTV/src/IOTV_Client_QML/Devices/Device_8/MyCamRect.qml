@@ -181,12 +181,11 @@ Item {
                 var width = parseInt(device.readData(2), 10)
                 var height = parseInt(device.readData(3), 10)
                 producer.slotDataVideoFrame(width, height, data)
-//                        camRect.pkgComplete(data);
-                console.log("onSignalDataPkgComplete")
+//                console.log("onSignalDataPkgComplete")
             }
             else if (channel === 1)
             {
-
+                producer.slotDataAudioFrame(data);
             }
         }
     }

@@ -11,6 +11,13 @@
 #include <QVideoFrame>
 #include <QBuffer>
 
+#include <QAudioDevice>
+#include <QAudioOutput>
+#include <QAudioSink>
+#include <QAudioSource>
+#include <QMediaDevices>
+#include <QMediaFormat>
+
 #include <QRandomGenerator>
 #include <QDateTime>
 
@@ -29,6 +36,7 @@ public:
 
 private:
     QPointer<QVideoSink> m_videoSink;
+    QIODevice *devOut;
     bool _mirrored;
 
     void handleTimeout();

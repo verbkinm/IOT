@@ -32,6 +32,8 @@ Widget::Widget(QObject *parent)
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::signalFirstCapture, Qt::SingleShotConnection);
 
 
+
+
     camera = new QCamera(/*QMediaDevices::videoInputs().at(1)*/QMediaDevices::defaultVideoInput());
     camera->start();
 
@@ -41,12 +43,14 @@ Widget::Widget(QObject *parent)
     QAudioFormat format;
     format.setSampleRate(44100);
     format.setChannelCount(1);
-    format.setSampleFormat(QAudioFormat::Float);
+    format.setSampleFormat(QAudioFormat::Int32);
 
-    audioIn = new QAudioInput(QMediaDevices::audioInputs().at(1));
+    audioIn = new QAudioInput(QMediaDevices::defaultAudioInput());
     source = new QAudioSource(audioIn->device(), format);
     source->setVolume(1);
     devIn = source->start();
+
+    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 
     imageCapture.capture();
 }
@@ -76,13 +80,13 @@ size_t Widget::getImageSavedSize() const
 void Widget::start()
 {
     timer->start(INTERVAL);
-    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+//    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 void Widget::stop()
 {
     timer->stop();
-    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+//    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 
