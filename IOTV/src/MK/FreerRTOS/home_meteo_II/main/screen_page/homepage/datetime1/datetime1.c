@@ -11,7 +11,6 @@ extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_148;
 
 static lv_obj_t *lbl_time, *lbl_date;
-
 static lv_timer_t *timer = NULL;
 
 static void draw_time(const struct tm *timeinfo);
@@ -32,8 +31,7 @@ static void draw_date(const struct tm *timeinfo)
 
 static void event_handler(lv_event_t * e)
 {
-	lv_timer_del(timer);
-	menuPageInit();
+	datetime2_page_init();
 }
 
 static void timer_handler(lv_timer_t *timer)
@@ -55,9 +53,11 @@ static void timer_handler(lv_timer_t *timer)
 
 void datetime1_page_init(void)
 {
-	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
-	lv_obj_clean(main_widget);
-	lv_obj_t *widget = lv_obj_create(main_widget);
+	page_t *page = current_page();
+	page->deinit();
+	page->deinit = datetime1_page_deinit;
+
+	lv_obj_t *widget = lv_obj_create(page->widget);
 	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
 	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
 	lv_obj_set_style_pad_all(widget, 0, 0);
@@ -72,13 +72,8 @@ void datetime1_page_init(void)
 	lv_timer_ready(timer);
 }
 
-void draw_datetime1_page(void)
+void datetime1_page_deinit(void)
 {
-	time_t now;
-	struct tm timeinfo;
-	time(&now);
-	localtime_r(&now, &timeinfo);
-
-	draw_time(&timeinfo);
-	draw_date(&timeinfo);
+	default_page_deinit();
+	lv_timer_del(timer);
 }

@@ -25,6 +25,7 @@
 #include "display.h"
 #include "update.h"
 #include "TFT_touchscreen/TFT_touch_screen.h"
+#include "screen_page/page.h"
 
 void settingPageInit(void);
 void setting_page_deinit(void);

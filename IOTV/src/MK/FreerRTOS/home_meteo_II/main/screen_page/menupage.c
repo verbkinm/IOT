@@ -19,7 +19,9 @@ extern void settingPageInit(void);
 static lv_obj_t *btnHome;
 static lv_obj_t *btnSettings;
 
-static void event_handler(lv_event_t * e)
+static void event_handler(lv_event_t *e);
+
+static void event_handler(lv_event_t *e)
 {
 	printf("event heandler menu page\n");
 
@@ -27,34 +29,44 @@ static void event_handler(lv_event_t * e)
         homePageInit();
     else if (e->current_target == btnSettings)
     	settingPageInit();
-
-    lv_obj_remove_event_cb(e->user_data, event_handler);
 }
 
 void menuPageInit(void)
 {
+	page_t *page = current_page();
+	page->deinit();
+	page->deinit = menu_page_deinit;
+
     uint8_t pad = 20;
 
-    lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
-    lv_obj_clean(main_widget);
+    lv_obj_t *widget = lv_obj_create(page->widget);
+	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
+	lv_obj_set_style_pad_all(widget, 0, 0);
+	lv_obj_add_style(widget, screenStyleDefault(), 0);
 
-    btnHome = lv_btn_create(main_widget);
+    btnHome = lv_btn_create(widget);
     lv_obj_set_size(btnHome, 128, 128);
     lv_obj_align(btnHome, LV_ALIGN_CENTER, -128 - pad, 0);
-    lv_obj_add_event_cb(btnHome, event_handler, LV_EVENT_CLICKED, main_widget);
+    lv_obj_add_event_cb(btnHome, event_handler, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *label = lv_label_create(btnHome);
     lv_label_set_text(label, "Главная");
     lv_obj_set_style_text_font(label, &ubuntu_mono_14, 0);
     lv_obj_center(label);
 
-    btnSettings = lv_btn_create(main_widget);
+    btnSettings = lv_btn_create(widget);
     lv_obj_set_size(btnSettings, 128, 128);
     lv_obj_align(btnSettings, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_add_event_cb(btnSettings, event_handler, LV_EVENT_CLICKED, main_widget);
+    lv_obj_add_event_cb(btnSettings, event_handler, LV_EVENT_CLICKED, NULL);
 
     label = lv_label_create(btnSettings);
     lv_label_set_text(label, "Настройки");
     lv_obj_set_style_text_font(label, &ubuntu_mono_14, 0);
     lv_obj_center(label);
+}
+
+void menu_page_deinit(void)
+{
+	default_page_deinit();
 }

@@ -7,10 +7,6 @@
 
 #include "elements.h"
 
-extern lv_font_t ubuntu_mono_14;
-
-//extern lv_obj_t *_lv_keyboard_create(lv_obj_t * parent);
-
 char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count)
 {
 	if (count == NULL)
@@ -176,7 +172,7 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 	lv_obj_t *obj = lv_menu_cont_create(parent);
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
 	lv_obj_t *wrap = lv_obj_create(obj);
-	lv_obj_set_size(wrap, 495, 45);
+	lv_obj_set_size(wrap, 495, height + 5);
 	lv_obj_set_style_pad_all(wrap, 0, 0);
 
 	*obj_btn = lv_btn_create(wrap);
@@ -198,10 +194,9 @@ lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t wid
 	lv_obj_t *btn = lv_btn_create(parent);
 	lv_obj_set_size(btn, width, height);
 
-	lv_obj_t *lbl = lv_label_create(btn);
-
 	if (txt != NULL)
 	{
+		lv_obj_t *lbl = lv_label_create(btn);
 		lv_label_set_text(lbl, txt);
 		lv_obj_center(lbl);
 	}

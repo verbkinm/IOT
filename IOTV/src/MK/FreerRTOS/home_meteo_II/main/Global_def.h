@@ -61,7 +61,7 @@
 #define LCD_NUM_FB             1
 
 #define LVGL_TICK_PERIOD_MS    5
-#define LCD_PANEL_STATUS_H	   30
+#define LCD_PANEL_STATUS_H	   42
 
 // Для регулировки яркости дисплея
 #define LEDC_TIMER              LEDC_TIMER_0

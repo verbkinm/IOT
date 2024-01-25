@@ -9,9 +9,6 @@
 
 
 extern lv_font_t ubuntu_mono_14;
-//extern lv_font_t monsterat_bold_14;
-
-extern void menuPageInit(void);
 
 lv_obj_t *menu;
 static lv_obj_t *root_page;
@@ -26,10 +23,6 @@ lv_obj_t *sub_wifi_page;
 lv_obj_t *sub_weather_page;
 lv_obj_t *sub_update_page;
 
-lv_obj_t *sub_about_page;
-//static lv_obj_t *sub_software_info_page;
-//static lv_obj_t *sub_legal_info_page;
-
 static const char *root_page_title = "Настройки";
 static const char *date_time_page_title = "Дата/Время";
 static const char *display_page_title = "Дисплей";
@@ -38,10 +31,7 @@ static const char *wifi_page_title = "WIFI";
 static const char *time_page_title = "Время";
 static const char *date_page_title = "Дата";
 static const char *weather_page_title = "Погода";
-static const char *about = "О продукте";
 static const char *update_page_title = "Обновление";
-
-static void back_event_handler(lv_event_t * e);
 
 static void create_sub_pages(void);
 
@@ -50,37 +40,30 @@ static void create_display_page(lv_obj_t *parent);
 static void create_wifi_page(lv_obj_t *parent);
 static void create_weather_page(lv_obj_t *parent);
 static void create_update_page(lv_obj_t *parent);
-static lv_obj_t *create_other_pages(void);
 
-void setting_page_deinit(void)
-{
-	free_wifi_sub_page();
-	free_date_time_sub_page();
-}
-
-static void back_event_handler(lv_event_t * e)
-{
-	lv_obj_t *obj = lv_event_get_target(e);
-	lv_obj_t *_menu = lv_event_get_user_data(e);
-
-	if(lv_menu_back_btn_is_root(_menu, obj))
-	{
-		((lv_menu_page_t *)root_page)->title = NULL;
-
-		((lv_menu_page_t *)sub_date_time_page)->title = NULL;
-		((lv_menu_page_t *)sub_sub_time_page)->title = NULL;
-		((lv_menu_page_t *)sub_sub_date_page)->title = NULL;
-		((lv_menu_page_t *)sub_sub_sntp_page)->title = NULL;
-
-		((lv_menu_page_t *)sub_display_page)->title = NULL;
-		((lv_menu_page_t *)sub_wifi_page)->title = NULL;
-		((lv_menu_page_t *)sub_weather_page)->title = NULL;
-		((lv_menu_page_t *)sub_update_page)->title = NULL;
-
-		menuPageInit();
-		setting_page_deinit();
-	}
-}
+//static void back_event_handler(lv_event_t * e)
+//{
+//	lv_obj_t *obj = lv_event_get_target(e);
+//	lv_obj_t *_menu = lv_event_get_user_data(e);
+//
+//	if(lv_menu_back_btn_is_root(_menu, obj))
+//	{
+//		((lv_menu_page_t *)root_page)->title = NULL;
+//
+//		((lv_menu_page_t *)sub_date_time_page)->title = NULL;
+//		((lv_menu_page_t *)sub_sub_time_page)->title = NULL;
+//		((lv_menu_page_t *)sub_sub_date_page)->title = NULL;
+//		((lv_menu_page_t *)sub_sub_sntp_page)->title = NULL;
+//
+//		((lv_menu_page_t *)sub_display_page)->title = NULL;
+//		((lv_menu_page_t *)sub_wifi_page)->title = NULL;
+//		((lv_menu_page_t *)sub_weather_page)->title = NULL;
+//		((lv_menu_page_t *)sub_update_page)->title = NULL;
+//
+//		menuPageInit();
+//		setting_page_deinit();
+//	}
+//}
 
 static void create_sub_pages(void)
 {
@@ -151,22 +134,20 @@ static void create_update_page(lv_obj_t *parent)
 	lv_obj_add_event_cb(cont, create_update_sub_page, LV_EVENT_CLICKED, cont);
 }
 
-static lv_obj_t *create_other_pages(void)
-{
-	create_text(root_page, NULL, "Другое", LV_MENU_ITEM_BUILDER_VAR_1);
-	lv_obj_t *section = lv_menu_section_create(root_page);
-	lv_obj_t *cont = create_text(section, NULL, about, LV_MENU_ITEM_BUILDER_VAR_1);
-	lv_menu_set_load_page_event(menu, cont, sub_about_page);
-
-	return cont;
-}
-
 void settingPageInit(void)
 {
-	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
+	page_t *page = current_page();
+	page->deinit();
+	page->deinit = setting_page_deinit;
+
+	lv_obj_t *widget = lv_obj_create(page->widget);
+	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
+	lv_obj_set_style_pad_all(widget, 0, 0);
+	lv_obj_add_style(widget, screenStyleDefault(), 0);
 
 	// Создание объекта Меню
-	menu = lv_menu_create(main_widget);
+	menu = lv_menu_create(widget);
 	lv_obj_set_style_text_font(menu, &ubuntu_mono_14, 0);
 	lv_obj_set_size(menu, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
 
@@ -178,8 +159,8 @@ void settingPageInit(void)
 		lv_obj_set_style_bg_color(menu, lv_color_darken(lv_obj_get_style_bg_color(menu, 0), 50), 0);
 
 	// Кнопка меню BACK и связывание события нажатия на эту кнопку
-	lv_menu_set_mode_root_back_btn(menu, LV_MENU_ROOT_BACK_BTN_ENABLED);
-	lv_obj_add_event_cb(menu, back_event_handler, LV_EVENT_CLICKED, menu);
+//	lv_menu_set_mode_root_back_btn(menu, LV_MENU_ROOT_BACK_BTN_ENABLED);
+//	lv_obj_add_event_cb(menu, back_event_handler, LV_EVENT_CLICKED, menu);
 
 	create_sub_pages();
 
@@ -195,11 +176,26 @@ void settingPageInit(void)
 	create_wifi_page(section);
 	create_weather_page(section);
 	create_update_page(section);
-	lv_obj_t *cont = create_other_pages();
 
 	lv_menu_set_sidebar_page(menu, root_page);
-
-	// открыть первый пункт меню
-	lv_event_send(cont, LV_EVENT_CLICKED, NULL);
 }
 
+void setting_page_deinit(void)
+{
+	free_wifi_sub_page();
+	free_date_time_sub_page();
+
+	((lv_menu_page_t *)root_page)->title = NULL;
+
+	((lv_menu_page_t *)sub_date_time_page)->title = NULL;
+	((lv_menu_page_t *)sub_sub_time_page)->title = NULL;
+	((lv_menu_page_t *)sub_sub_date_page)->title = NULL;
+	((lv_menu_page_t *)sub_sub_sntp_page)->title = NULL;
+
+	((lv_menu_page_t *)sub_display_page)->title = NULL;
+	((lv_menu_page_t *)sub_wifi_page)->title = NULL;
+	((lv_menu_page_t *)sub_weather_page)->title = NULL;
+	((lv_menu_page_t *)sub_update_page)->title = NULL;
+
+	default_page_deinit();
+}

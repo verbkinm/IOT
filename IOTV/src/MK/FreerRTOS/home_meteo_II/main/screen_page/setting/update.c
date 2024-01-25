@@ -7,18 +7,16 @@
 
 #include "update.h"
 
-extern lv_font_t ubuntu_mono_14;
-
 extern lv_obj_t *sub_update_page;
 
 static const char *TAG = "update";
 
 static lv_obj_t *btn_check_update;
 static lv_obj_t *btn_update;
+static lv_obj_t *btn_facrory_reset;
 static lv_obj_t *busy_ind = NULL;
 static lv_timer_t *timer = NULL;
 static lv_obj_t *new_version_lbl = NULL;
-static lv_obj_t *update_widget;
 
 static lv_obj_t *dialog_box;
 static const char *btns_txt[] = {"Да", "Нет", NULL};
@@ -33,6 +31,8 @@ static char *url_update = NULL;
 static void update_check_handler(lv_event_t *e);
 static void update_handler(lv_event_t *e);
 static void apply_update_handler(lv_event_t * e);
+static void factory_reset_handler(lv_event_t * e);
+static void apply_factory_reset_handler(lv_event_t * e);
 static esp_err_t http_event_handler(esp_http_client_event_t *evt);
 
 static void timer_loop(lv_timer_t *timer);
@@ -42,7 +42,7 @@ static bool parse_http_response(const char* content);
 
 static esp_err_t http_event_handler(esp_http_client_event_t *evt)
 {
-//	esp_http_client_handle_t client = evt->client;
+	//	esp_http_client_handle_t client = evt->client;
 	switch (evt->event_id)
 	{
 	case HTTP_EVENT_ERROR:
@@ -93,23 +93,41 @@ static void update_handler(lv_event_t *e)
 		return;
 	}
 
-    dialog_box = create_dialog_box(NULL, ATTENTION_STR, "Вы подтверждаете обновление программного обеспечения устройства?", btns_txt);
-    lv_obj_add_event_cb(dialog_box, apply_update_handler, LV_EVENT_VALUE_CHANGED, NULL);
+	dialog_box = create_dialog_box(NULL, ATTENTION_STR, "Вы подтверждаете обновление программного обеспечения устройства?", btns_txt);
+	lv_obj_add_event_cb(dialog_box, apply_update_handler, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
 static void apply_update_handler(lv_event_t * e)
 {
-    lv_obj_t *obj = lv_event_get_current_target(e);
+	lv_obj_t *obj = lv_event_get_current_target(e);
 
-    if (strcmp(lv_msgbox_get_active_btn_text(obj), btns_txt[0]) == 0)
-    {
-    	glob_set_bits_status_reg(STATUS_UPDATE);
+	if (strcmp(lv_msgbox_get_active_btn_text(obj), btns_txt[0]) == 0)
+	{
+		glob_set_bits_status_reg(STATUS_UPDATE);
 
-    	update_widget = update_page_init();
-    	lv_timer_create(timer_once_loop, 1000, 0);
-    }
+		full_screen_page_init("Обновление...", UPDATE_IMG);
+		lv_timer_create(timer_once_loop, 1000, 0);
+	}
 
-    lv_msgbox_close(dialog_box);
+	lv_msgbox_close(dialog_box);
+}
+
+static void factory_reset_handler(lv_event_t * e)
+{
+	dialog_box = create_dialog_box(NULL, ATTENTION_STR, "Выполнить сброс устройства на заводские настройки?", btns_txt);
+	lv_obj_add_event_cb(dialog_box, apply_factory_reset_handler, LV_EVENT_VALUE_CHANGED, NULL);
+}
+
+static void apply_factory_reset_handler(lv_event_t * e)
+{
+	lv_obj_t *obj = lv_event_get_current_target(e);
+	if (strcmp(lv_msgbox_get_active_btn_text(obj), btns_txt[0]) == 0)
+	{
+		if (backtofactory() == ESP_OK)
+			esp_restart();
+	}
+
+	create_msgbox(NULL, ERROR_STR, "Ошибка сброса на заводские настройки. На устройстве отсутствует заводской раздел.");
 }
 
 static void timer_loop(lv_timer_t *timer)
@@ -150,19 +168,12 @@ static void timer_once_loop(lv_timer_t *timer)
 
 	esp_err_t ret = ota_firmware(url_update);
 
-	lv_obj_t *img = lv_obj_get_child(update_widget, 0);
-	lv_obj_t *lbl = lv_obj_get_child(update_widget, 1);
-
 	if (ret == ESP_OK)
-	{
-		lv_img_set_src(img, UPDATE_OK);
-		lv_label_set_text(lbl, "Перезагрузите устройство.");
-	}
+		full_screen_page_init("Перезагрузите устройство...", UPDATE_OK);
 	else
 	{
 		glob_set_bits_status_err(STATUS_UPDATE_ERROR);
-		lv_img_set_src(img, UPDATE_FAIL);
-		lv_label_set_text(lbl, "Ошибка обновления!");
+		full_screen_page_init("Ошибка обновления!", UPDATE_FAIL);
 	}
 
 	glob_clear_bits_status_reg(STATUS_UPDATE);
@@ -235,12 +246,15 @@ void create_update_sub_page(lv_event_t *e)
 	lv_obj_t *obj = create_text(section, NULL, new_version_str, LV_MENU_ITEM_BUILDER_VAR_1);
 	new_version_lbl = lv_obj_get_child(obj, 0);
 
-	create_button(section, "Проверить доступную версию", 220, 40, &btn_check_update);
+	create_button(section, "Доступная версия", 220, 40, &btn_check_update);
 	create_button(section, "Обновить", 220, 40, &btn_update);
 	lv_obj_add_state(btn_update, LV_STATE_DISABLED);
+	create_button(section, "Заводские настройки", 220, 40, &btn_facrory_reset);
+	lv_obj_set_style_bg_color(btn_facrory_reset, lv_color_make(255, 0, 0), 0);
 
 	lv_obj_add_event_cb(btn_check_update, update_check_handler, LV_EVENT_CLICKED, 0);
 	lv_obj_add_event_cb(btn_update, update_handler, LV_EVENT_CLICKED, 0);
+	lv_obj_add_event_cb(btn_facrory_reset, factory_reset_handler, LV_EVENT_CLICKED, 0);
 
 	free(date);
 	free(cur_ver);

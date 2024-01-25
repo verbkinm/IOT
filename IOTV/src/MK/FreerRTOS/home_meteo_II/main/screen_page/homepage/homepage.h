@@ -21,7 +21,9 @@
 #include "json/json_config.h"
 #include "service/weather/weather.h"
 #include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/page.h"
 
 void homePageInit(void);
+void home_page_deinit(void);
 
 #endif /* MAIN_HOMEPAGE_H_ */

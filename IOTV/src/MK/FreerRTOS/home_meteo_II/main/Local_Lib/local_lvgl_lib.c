@@ -15,6 +15,20 @@ static uint32_t glob_status_err = 0;
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
 
+static page_t glob_current_page;
+
+page_t *current_page(void)
+{
+	return &glob_current_page;
+}
+
+void default_page_deinit(void)
+{
+	page_t *page = current_page();
+	lv_obj_clean(page->widget);
+}
+
+
 const char *weekday_name_short(uint8_t day)
 {
 	day = inRange(day, 0, 6);
@@ -153,16 +167,6 @@ lv_obj_t *create_img_obj(lv_obj_t *parent, const char* icon_path,
 
 	return obj;
 }
-
-//uint8_t glob_get_page(void)
-//{
-//	return glob_currentPage;
-//}
-//
-//void glob_set_current_page(uint8_t page)
-//{
-//	glob_currentPage = page;
-//}
 
 uint32_t glob_get_status_reg(void)
 {

@@ -25,6 +25,7 @@ static void TFT_rgb_panel_init(void);
 static void TFT_touch_panel_init(void);
 // Обработка сообщений из вне LVGL
 static void timer_handler(lv_timer_t *timer);
+static void caps_deinit(){}
 
 static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data)
 {
@@ -175,14 +176,6 @@ static void TFT_rgb_panel_init(void)
 	ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
 	ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_PERIOD_MS * 1000));
 
-
-//	const esp_timer_create_args_t lvgl_handler_timer_args = {
-//			.callback = &increase_lvgl_handler_tick,
-//	};
-//	esp_timer_handle_t lvgl_handler_timer = NULL;
-//	ESP_ERROR_CHECK(esp_timer_create(&lvgl_handler_timer_args, &lvgl_handler_timer));
-//	ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_handler_timer, 5 * 1000));
-
 	ledc_timer_config_t ledc_timer = {
 			.speed_mode       = LEDC_MODE,
 			.timer_num        = LEDC_TIMER,
@@ -223,8 +216,6 @@ static void TFT_touch_panel_init(void)
 					.mirror_x = 0,
 					.mirror_y = 0,
 			},
-			//.process_coordinates = prc_coord,
-			//			.interrupt_callback = callb_b,
 	};
 
 	esp_lcd_panel_io_handle_t io_handle = NULL;
@@ -239,7 +230,6 @@ static void TFT_touch_panel_init(void)
 	indev_drv.type = LV_INDEV_TYPE_POINTER;
 	indev_drv.read_cb = TFT_input_read;
 	indev_drv.disp = disp;
-	//	indev_drv.read_timer = lv_timer_create(timer_tick, 50,  NULL);
 	/*Register the driver in LVGL and save the created input device object*/
 	lv_indev_drv_register(&indev_drv);
 }
@@ -249,7 +239,8 @@ static void timer_handler(lv_timer_t *timer)
 	if (glob_get_status_err() & STATUS_SD_ERROR)
 	{
 		lv_timer_del(timer);
-		sd_error_page_init();
+		LV_IMG_DECLARE(sd);
+		full_screen_page_init("Ошибка SD карты!", (void *)&sd);
 		return;
 	}
 
@@ -259,31 +250,7 @@ static void timer_handler(lv_timer_t *timer)
 		return;
 	}
 
-	if (gpio_get_level(GPIO_NUM_0) == 0)
-		ESP_LOGI(TAG, "GPIO_NUM_0 = %d", gpio_get_level(GPIO_NUM_0));
-
-	lv_obj_t *sd_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 0);
-	lv_obj_t *wifi_icon = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 1);
-	lv_obj_t *heap_lbl = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 0), 2);
-
-	lv_img_set_src(sd_icon, SD_ON);
-
-	if (glob_get_status_reg() & STATUS_WIFI_STA_START)
-	{
-		if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
-			lv_img_set_src(wifi_icon, WIFI_CONNECTING);
-		else
-		{
-			if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED)
-				lv_img_set_src(wifi_icon, WIFI_CONNECTED);
-			else
-				lv_img_set_src(wifi_icon, WIFI_ENABLE);
-		}
-	}
-	else
-		lv_img_set_src(wifi_icon, WIFI_DISABLE);
-
-	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
+	status_panel_update();
 }
 
 // Перед этой функцией обязательно выполнить i2c_init();
@@ -292,25 +259,10 @@ void TFT_init(void)
 	TFT_rgb_panel_init();
 	TFT_touch_panel_init();
 
-	// Статус панель
-	lv_obj_t *status_panel = lv_obj_create(lv_scr_act());
-	lv_obj_set_size(status_panel, LCD_H_RES, LCD_PANEL_STATUS_H);
-	lv_obj_set_scroll_dir(status_panel, LV_DIR_NONE);
-	lv_obj_set_style_pad_all(status_panel, 0, 0);
-	lv_obj_set_flex_flow(status_panel, LV_FLEX_FLOW_ROW);
-	lv_obj_add_style(status_panel, screenStyleDefault(), 0);
+	lv_obj_set_style_pad_all(lv_scr_act(), 0, 0);
 
-	// Статус SD
-	lv_obj_t *icon_sd = lv_img_create(status_panel);
-	lv_obj_set_size(icon_sd, 24, 24);
-
-	// Статус wifi
-	lv_obj_t *icon_wifi = lv_img_create(status_panel);
-	lv_obj_set_size(icon_wifi, 24, 24);
-
-	// Статус кучи
-	lv_obj_t *heap = lv_label_create(status_panel);
-	lv_obj_set_style_text_color(heap, lv_color_white(), 0);
+	// Верхняя панель
+	status_panel_init();
 
 	// Основной виджет
 	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
@@ -319,6 +271,11 @@ void TFT_init(void)
 	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
 	lv_obj_set_style_pad_all(main_widget, 0, 0);
 	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
+
+	page_t *page = current_page();
+	page->title = NULL;
+	page->widget = main_widget;
+	page->deinit = caps_deinit;
 
 	homePageInit();
 

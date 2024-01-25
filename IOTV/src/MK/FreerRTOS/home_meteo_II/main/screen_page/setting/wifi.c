@@ -178,7 +178,7 @@ static void wifi_list_item(lv_obj_t **btn, lv_coord_t w, lv_coord_t h, wifi_ap_r
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
 		if (memcmp(ap_record->bssid, wifi_config.sta.bssid, 6) == 0)
-			lv_obj_set_style_text_color(lbl_ssid, lv_color_make(0, 0, 150), 0);
+			lv_obj_set_style_text_color(lbl_ssid, lv_color_make(0, 200, 00), 0);
 	}
 
 	lv_obj_align_to(lbl_ssid, lbl_icon, LV_ALIGN_OUT_RIGHT_BOTTOM, 10, -10);
@@ -348,7 +348,7 @@ static void wifi_connect_step1(lv_event_t *e)
 	lv_obj_align_to(wifi_info_right, wifi_info_left, LV_ALIGN_OUT_RIGHT_TOP, 30, 0);
 
 
-	// Кнопка подключиться/отклчиться
+	// Кнопка подключиться/отключиться
 	lv_obj_t *btn_con = lv_btn_create(widget);
 	lv_obj_set_size(btn_con, 128, 40);
 	lv_obj_align_to(btn_con, ta, LV_ALIGN_OUT_RIGHT_TOP, -128, -40 -10);
@@ -414,7 +414,6 @@ static void wifi_scan_starting_heandler(lv_event_t *e)
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 	}
 
-
 	esp_wifi_scan_start(NULL, false);
 
 	glob_clear_bits_status_reg(STATUS_WIFI_SCAN_DONE);
@@ -435,7 +434,6 @@ static void wifi_scan_done(void)
 	// Если была остановка автоподключение перед сканирование, включаем его
 	if (autoconn_pause_from_scan)
 	{
-
 		glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 		autoconn_pause_from_scan = false;
 	}
@@ -452,11 +450,9 @@ static void wifi_scan_done(void)
 	{
 		ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
 		ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
-		//        print_auth_mode(ap_info[i].authmode);
 		if (ap_info[i].authmode != WIFI_AUTH_WEP)
-		{
 			print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
-		}
+
 		ESP_LOGI(TAG, "Channel \t\t%d\n", ap_info[i].primary);
 	}
 
@@ -465,9 +461,7 @@ static void wifi_scan_done(void)
 
 	for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
 	{
-		lv_obj_t *btn = lv_list_add_btn(wifi_page_obj->list, 0, 0);
-//		lv_obj_remove_local_style_prop(btn, LV_LAYOUT_FLEX, 0);
-//		lv_obj_remove_local_style_prop(btn, LV_STYLE_FLEX_FLOW, 0);
+		lv_obj_t *btn = lv_list_add_btn(wifi_page_obj->list, 0, 0); //!!!
 
 		wifi_list_item(&btn, 495, 50, &(ap_info[i]));
 		lv_obj_add_event_cb(btn, wifi_connect_step1, LV_EVENT_CLICKED, &(ap_info[i]));
@@ -528,7 +522,7 @@ void create_wifi_sub_page(lv_event_t *e)
 	wifi_page_obj->busy_ind = NULL;
 
 	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_get_status_reg() & STATUS_WIFI_STA_START), &(wifi_page_obj->wifi_switch));
-	create_list(section, 495, 265, &(wifi_page_obj->list));
+	create_list(section, 495, 255, &(wifi_page_obj->list));
 	create_button(section, "Сканировать", 128, 40, &(wifi_page_obj->btn_scan));
 
 	lv_obj_t *info_btn = lv_btn_create(lv_obj_get_parent(wifi_page_obj->btn_scan));

@@ -12,19 +12,17 @@
 
 extern lv_font_t ubuntu_mono_14;
 
-static const char *TAG = __FILE_NAME__;
+static const char *TAG = "METEO_CHART";
 static lv_obj_t *chart;
 static char *words[SERIES_COUNT] = {"Температура", "Температура\nощущается", "Давление", "Осдаки", "Дождь", "Ливни", "Снег", "Скорость\nветра", "Порывы\nветра", "Влажность", "Облачность", "Направление\nветра"};
 
 static void check_meteo_chart_file(void);
-//static void read_meteo_chart_file(void);
 
 static lv_obj_t *create_ser_chkbox(lv_obj_t *parent, lv_chart_series_t *ser, const char *txt);
 static lv_obj_t *create_line_values_range(lv_obj_t *parent, float min, float max, const lv_obj_t *align_to, lv_coord_t x_ofs, lv_coord_t y_ofs, const char *postfix,
 		const char *fmt0, const char *fmt1, const char *fmt2, const char *fmt3, const char *fmt4);
 static void create_lines_value_range(lv_obj_t *parent, const open_meteo_data_t *meteo_min, const open_meteo_data_t *meteo_max);
 
-static void event_handler(lv_event_t *e);
 static void draw_event_cb(lv_event_t *e);
 static void show_hide_ser_event_cb(lv_event_t *e);
 
@@ -55,17 +53,6 @@ static void check_meteo_chart_file(void)
 	}
 
 	cJSON_Delete(root);
-}
-
-//static void read_meteo_chart_file(void)
-//{
-//
-//}
-
-static void event_handler(lv_event_t * e)
-{
-	printf("event heandler PAGE_DATETIME_1 page\n");
-	menuPageInit();
 }
 
 static void draw_event_cb(lv_event_t * e)
@@ -149,7 +136,7 @@ static lv_obj_t *create_line_values_range(lv_obj_t *parent, float min, float max
 	lv_obj_align_to(lbls[0], align_to_obj, LV_ALIGN_OUT_LEFT_TOP, x_ofs, y_ofs);
 
 	for (int i = 1; i < LABEL_COUNT - 1; ++i)
-		lv_obj_align_to(lbls[i], lbls[i - 1], LV_ALIGN_OUT_BOTTOM_MID, 0, 60);
+		lv_obj_align_to(lbls[i], lbls[i - 1], LV_ALIGN_OUT_BOTTOM_MID, 0, 52);
 
 	lv_obj_align_to(lbls[5], lbls[4], LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
 
@@ -177,8 +164,6 @@ static void create_lines_value_range(lv_obj_t *parent, const open_meteo_data_t *
 	obj = create_line_values_range(parent, min, max, obj, -10, 0, "мм", _2_fmt, _2_fmt, _2_fmt, _2_fmt, _2_fmt);
 	obj = create_line_values_range(parent, meteo_min->snowfall, meteo_max->snowfall, obj, -10, 0, "см", _2_fmt, _2_fmt, _2_fmt, _2_fmt, _2_fmt);
 
-	printf("snowfall: %f - %f\n", meteo_min->snowfall, meteo_max->snowfall);
-
 	min = MIN(meteo_min->wind_speed, meteo_min->wind_gusts);
 	max = MAX(meteo_max->wind_speed, meteo_max->wind_gusts);
 
@@ -192,18 +177,18 @@ void meteo_chart_page_init(void)
 {
 	check_meteo_chart_file();
 
-	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
-	lv_obj_clean(main_widget);
+	page_t *page = current_page();
+	page->deinit();
+	page->deinit = meteo_chart_page_deinit;
 
-	lv_obj_t *widget = lv_obj_create(main_widget);
+	lv_obj_t *widget = lv_obj_create(page->widget);
 	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
 	lv_obj_set_scroll_dir(widget, LV_DIR_NONE);
 	lv_obj_set_style_pad_all(widget, 0, 0);
-	//	lv_obj_add_style(widget, screenStyleDefault(), 0);
+	lv_obj_set_style_radius(widget, 0, 0);
 
 	/*Create a chart*/
 	chart = lv_chart_create(widget);
-	lv_obj_add_event_cb(chart, event_handler, LV_EVENT_CLICKED, 0);
 	//	lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
 	lv_chart_set_point_count(chart, OPEN_METEO_WEEK_SIZE);
 	lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
@@ -211,7 +196,7 @@ void meteo_chart_page_init(void)
 	lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
 
 	lv_obj_set_style_size(chart, 0, LV_PART_INDICATOR); // размер точек
-	lv_obj_set_size(chart, 550, 335);
+	lv_obj_set_size(chart, 550, 305);
 	lv_obj_align(chart, LV_ALIGN_TOP_RIGHT, 0, 0);
 
 	lv_obj_refresh_ext_draw_size(chart);
@@ -223,7 +208,7 @@ void meteo_chart_page_init(void)
 
 	// Создание chart series
 	lv_chart_series_t *sers[12];
-	int x = 20, y = 375;
+	int x = 20, y = 355;
 	for (int i = 0; i < SERIES_COUNT; ++i)
 	{
 		sers[i] = lv_chart_add_series(chart, lv_palette_main(i), LV_CHART_AXIS_PRIMARY_Y);
@@ -232,7 +217,7 @@ void meteo_chart_page_init(void)
 		if (i == 6)
 		{
 			x = 20;
-			y = 410;
+			y = 395;
 		}
 
 		lv_obj_set_pos(chkbox, x, y);
@@ -281,4 +266,9 @@ void meteo_chart_page_init(void)
 	}
 	else
 		ESP_LOGE(TAG, "open_meteo = NULL");
+}
+
+void meteo_chart_page_deinit(void)
+{
+	default_page_deinit();
 }

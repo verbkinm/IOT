@@ -18,7 +18,7 @@
 #include "settingpage.h"
 #include "elements.h"
 #include "ota/ota.h"
-#include "screen_page/update.h"
+#include "screen_page/full_screen_page/full_screen_page.h"
 
 void create_update_sub_page(lv_event_t *e);
 void free_update_sub_page(void);

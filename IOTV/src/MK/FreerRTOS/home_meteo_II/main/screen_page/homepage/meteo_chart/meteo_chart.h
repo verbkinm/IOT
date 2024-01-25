@@ -15,7 +15,9 @@
 #include "screen_page/screendefault.h"
 #include "screen_page/menupage.h"
 #include "service/weather/weather.h"
+#include "screen_page/page.h"
 
 void meteo_chart_page_init(void);
+void meteo_chart_page_deinit(void);
 
 #endif /* MAIN_SCREEN_PAGE_METEO_CHART_METEO_CHART_H_ */

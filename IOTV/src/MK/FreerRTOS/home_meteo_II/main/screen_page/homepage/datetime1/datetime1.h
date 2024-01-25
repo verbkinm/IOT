@@ -15,9 +15,10 @@
 #include "Global_def.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "screen_page/screendefault.h"
-#include "screen_page/menupage.h"
+#include "screen_page/homepage/datetime2/datetime2.h"
+#include "screen_page/page.h"
 
 void datetime1_page_init(void);
-void draw_datetime1_page(void);
+void datetime1_page_deinit(void);
 
 #endif /* MAIN_SCREEN_PAGE_DATETIME1_DATETIME1_H_ */

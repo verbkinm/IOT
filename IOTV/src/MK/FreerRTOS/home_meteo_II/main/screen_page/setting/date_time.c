@@ -222,7 +222,7 @@ static void save_time(lv_event_t *e)
 {
 	if (glob_get_status_reg() & STATUS_SNTP_ON)
 	{
-		create_msgbox(NULL, "Внимане", "Невозможно установить время, если включена служба SNTP!");
+		create_msgbox(NULL, ATTENTION_STR, "Невозможно установить время, если включена служба SNTP!");
 		return;
 	}
 
@@ -250,7 +250,7 @@ static void save_date(lv_event_t *e)
 {
 	if (glob_get_status_reg() & STATUS_SNTP_ON)
 	{
-		create_msgbox(NULL, "Внимане", "Невозможно установить дату, если включена служба SNTP!");
+		create_msgbox(NULL, ATTENTION_STR, "Невозможно установить дату, если включена служба SNTP!");
 		return;
 	}
 
@@ -258,7 +258,6 @@ static void save_date(lv_event_t *e)
 	time(&now);
 
 	struct tm timeinfo = *localtime(&now);
-//	printf("The local date and time is: %s\n", asctime(&timeinfo));
 
 	lv_obj_t *section = (lv_obj_t *)e->user_data;
 

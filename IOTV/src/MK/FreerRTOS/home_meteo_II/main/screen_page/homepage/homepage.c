@@ -13,6 +13,7 @@ extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_128;
 
 //static const char *TAG = "homepage";
+
 static lv_obj_t *block_0, *block_1, *block_2;
 
 //Блок 0
@@ -82,10 +83,6 @@ static void draw_meteo_data(void)
 {
 	if ( !(glob_get_status_reg() & STATUS_METEO_ON))
 		return;
-
-//	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
-//	if (open_meteo == NULL)
-//		ESP_LOGE(TAG, "open_meteo = NULL");
 
 	const char *city = service_weather_get_city();
 	if (city != NULL)
@@ -211,19 +208,19 @@ static void draw_wind_direction(void)
 
 static void event_handler_block_0(lv_event_t * e)
 {
-	lv_timer_del(timer);
+//	lv_timer_del(timer);
 	datetime1_page_init();
 }
 
 static void event_handler_block_1(lv_event_t * e)
 {
-	lv_timer_del(timer);
+//	lv_timer_del(timer);
 	menuPageInit();
 }
 
 static void event_handler_block_2(lv_event_t * e)
 {
-	lv_timer_del(timer);
+//	lv_timer_del(timer);
 	meteo_chart_page_init();
 }
 
@@ -351,15 +348,22 @@ static void init_block_2(lv_obj_t *parent)
 	lv_obj_add_event_cb(block_2, event_handler_block_2, LV_EVENT_CLICKED, 0);
 }
 
-void homePageInit(void)
+void homePageInit()
 {
-	lv_obj_t *main_widget = lv_obj_get_child(lv_scr_act(), 1);
-	lv_obj_clean(main_widget);
+	page_t *page = current_page();
+	page->deinit();
+	page->deinit = home_page_deinit;
 
-	init_block_0(main_widget);
-	init_block_1(main_widget);
-	init_block_2(main_widget);
+	init_block_0(page->widget);
+	init_block_1(page->widget);
+	init_block_2(page->widget);
 
 	timer = lv_timer_create(timer_handler, 1000, NULL);
 	lv_timer_ready(timer);
+}
+
+void home_page_deinit(void)
+{
+	default_page_deinit();
+	lv_timer_del(timer);
 }

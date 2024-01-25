@@ -436,7 +436,7 @@ const char *service_weather_get_city(void)
 
 static void http_meteo_to_file(void)
 {
-	char *response_buffer = malloc(BUFSIZ);
+	char *response_buffer = malloc(BUFSIZE);
 	if (response_buffer == NULL)
 	{
 		ESP_LOGE(TAG, "response_buffer = NULL");
@@ -471,22 +471,14 @@ static void http_meteo_to_file(void)
 	int bs = 0;
 	while (true)
 	{
-		int ret = esp_http_client_read(client, response_buffer, BUFSIZ);
+		int ret = esp_http_client_read(client, response_buffer, BUFSIZE);
 		if (ret < 1)
 			break;
 
 		bs += ret;
 
-		//		response_buffer[ret] = '\0';
 		fwrite(response_buffer, ret, 1, file);
-		//		printf("%s", response_buffer);
-		//		fflush(stdout);
 	}
-	//	printf("\n");
-	//	fflush(stdout);
-
-
-//	ESP_LOGI(TAG, "recive size = %d", bs);
 
 	fclose(file);
 	file_error:
@@ -523,10 +515,7 @@ bool service_weather_parse_meteo_data(void)
 		goto end;
 	}
 
-//	ESP_LOGI(TAG, "file size = %d", size);
-
 	fread(content, size, 1, file);
-	//	printf("%s\n", content);
 	fclose(file);
 
 	if (open_meteo != NULL)
@@ -564,7 +553,6 @@ static void debug_open_meteo()
 	{
 		printf("%d:\ntime: %lld\n", i, open_meteo[i].time);
 	}
-
 }
 
 void weather_service_task(void *pvParameters)
@@ -572,7 +560,6 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
-	int counter = 350; //350 =  1 раз в 5 минут
 	for( ;; )
 	{
 		if (glob_get_status_err())
@@ -582,10 +569,7 @@ void weather_service_task(void *pvParameters)
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
-		{
-			counter = 350;
 			goto for_end;
-		}
 
 		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
@@ -593,16 +577,13 @@ void weather_service_task(void *pvParameters)
 		if (!((glob_get_status_reg() & STATUS_METEO_ON) && (glob_get_status_reg() & STATUS_TIME_SYNC)))
 			goto for_end;
 
-		if (counter++ < 350)
-			goto for_end;
-		counter = 0;
-
 		do
 		{
 			http_meteo_to_file();
 		}
 		while(service_weather_parse_meteo_data() == false);
-//		debug_open_meteo();
+
+		vTaskDelay(300000 / portTICK_PERIOD_MS); // 5 минут
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

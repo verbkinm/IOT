@@ -130,14 +130,11 @@ void sntp_service_task(void *pvParameters)
 			while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS)
 			{
 				adjtime(NULL, &outdelta);
-//				printf("Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us\n",
-//						(intmax_t)outdelta.tv_sec,
-//						outdelta.tv_usec/1000,
-//						outdelta.tv_usec%1000);
 				vTaskDelay(2000 / portTICK_PERIOD_MS);
 			}
 		}
 		vTaskDelay(60000 / portTICK_PERIOD_MS);
+
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}

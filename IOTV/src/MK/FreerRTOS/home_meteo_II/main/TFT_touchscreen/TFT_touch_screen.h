@@ -17,12 +17,14 @@
 #include "driver/ledc.h"
 
 #include "json/json_config.h"
+#include "status_panel/status_panel.h"
 #include "screen_page/homepage/homepage.h"
 #include "screen_page/homepage/datetime1/datetime1.h"
 #include "screen_page/menupage.h"
 #include "screen_page/setting/settingpage.h"
-#include "screen_page/errors/sd_error.h"
+#include "screen_page/full_screen_page/full_screen_page.h"
 #include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/page.h"
 
 void TFT_init(void);
 void rotate_display(lv_disp_rot_t rotation);
