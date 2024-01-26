@@ -173,7 +173,7 @@ void create_display_sub_page(lv_event_t *e)
 	}
 
 	// Кнопка - Сохранить
-	create_button(section, "Сохранить", 128, 40, &display_page_obj->btn_save);
+	create_button(section, SAVE_STR, 128, 40, &display_page_obj->btn_save);
 	lv_obj_add_event_cb(display_page_obj->btn_save, display_save_event_handler, LV_EVENT_CLICKED, 0);
 }
 

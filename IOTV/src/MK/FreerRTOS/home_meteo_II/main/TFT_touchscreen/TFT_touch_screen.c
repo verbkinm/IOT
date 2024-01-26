@@ -23,6 +23,7 @@ static void increase_lvgl_tick(void *arg);
 static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data);
 static void TFT_rgb_panel_init(void);
 static void TFT_touch_panel_init(void);
+
 // Обработка сообщений из вне LVGL
 static void timer_handler(lv_timer_t *timer);
 static void caps_deinit(){}
@@ -49,11 +50,6 @@ IRAM_ATTR static void increase_lvgl_tick(void *arg)
 {
 	lv_tick_inc(LVGL_TICK_PERIOD_MS);
 }
-
-//IRAM_ATTR static void increase_lvgl_handler_tick(void *arg)
-//{
-//	lv_timer_handler();
-//}
 
 static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
 {
@@ -127,7 +123,7 @@ static void TFT_rgb_panel_init(void)
 					.vsync_front_porch = 4,
 					.vsync_pulse_width = 1,
 					.flags.pclk_active_neg = true,
-//					.bounce_buffer_size_px = 20,
+					//					.bounce_buffer_size_px = 20,
 			},
 			.flags.fb_in_psram = true, // allocate frame buffer in PSRAM
 	};
@@ -153,8 +149,8 @@ static void TFT_rgb_panel_init(void)
 	ESP_LOGI(TAG, "Allocate separate LVGL draw buffers from PSRAM");
 	buf1 = heap_caps_malloc(LCD_H_RES * 1000 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
 	assert(buf1);
-//	buf2 = heap_caps_malloc(LCD_H_RES * 1000 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
-//	assert(buf2);
+	//	buf2 = heap_caps_malloc(LCD_H_RES * 1000 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
+	//	assert(buf2);
 	// initialize LVGL draw buffers
 	lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * 1000);
 
@@ -244,11 +240,32 @@ static void timer_handler(lv_timer_t *timer)
 		return;
 	}
 
-	if (glob_get_status_reg() & STATUS_UPDATE)
+	if (glob_get_status_reg() & STATUS_UPDATING)
 	{
-		lv_timer_del(timer);
+		//		lv_timer_del(timer);
 		return;
 	}
+
+	if (glob_get_status_err() & STATUS_UPDATE_ERROR)
+	{
+		lv_timer_del(timer);
+		full_screen_page_init("Ошибка обновления!", UPDATE_FAIL);
+		return;
+	}
+
+	if (glob_get_status_reg() & STATUS_UPDATE_DONE)
+	{
+		lv_timer_del(timer);
+		full_screen_page_init("Перезагрузите устройство...", UPDATE_OK);
+		return;
+	}
+
+//	if (glob_get_status_reg() & STATUS_UPDATE_AVAILABLE)
+//	{
+////		create_single_msg_box(NULL,  ATTENTION_STR, "Доступно новое обновление. Произвести установку?");
+//		//		lv_timer_del(timer);
+//		return;
+//	}
 
 	status_panel_update();
 }

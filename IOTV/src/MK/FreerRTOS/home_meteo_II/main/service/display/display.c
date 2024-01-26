@@ -27,7 +27,7 @@ void service_display_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATE)
+		if (glob_get_status_reg() & STATUS_UPDATING)
 			break;
 
 		if ((glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON))// && (glob_get_status_reg() & STATUS_TIME_SYNC))
@@ -152,13 +152,13 @@ static void check_display_conf_file(void)
 	cJSON *brightness_day_obj = cJSON_CreateString("255");
 	cJSON_AddItemToObject(display, BRIGHTNESS_DAY_STR, brightness_day_obj);
 
-	cJSON *brightness_night_obj = cJSON_CreateString("255");
+	cJSON *brightness_night_obj = cJSON_CreateString("150");
 	cJSON_AddItemToObject(display, BRIGHTNESS_NIGHT_STR, brightness_night_obj);
 
-	cJSON *day_begin_obj = cJSON_CreateString("20:00:00");
+	cJSON *day_begin_obj = cJSON_CreateString("08:00:00");
 	cJSON_AddItemToObject(display, DAY_BEGIN_STR, day_begin_obj);
 
-	cJSON *night_begin_obj = cJSON_CreateString("08:00:00");
+	cJSON *night_begin_obj = cJSON_CreateString("20:00:00");
 	cJSON_AddItemToObject(display, NIGHT_BEGIN_STR, night_begin_obj);
 
 	get_display_config_value(ROTATE_STR, &rotate_obj->valuestring);

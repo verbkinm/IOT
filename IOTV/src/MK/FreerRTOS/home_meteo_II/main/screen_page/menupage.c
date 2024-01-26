@@ -23,8 +23,6 @@ static void event_handler(lv_event_t *e);
 
 static void event_handler(lv_event_t *e)
 {
-	printf("event heandler menu page\n");
-
     if (e->current_target == btnHome)
         homePageInit();
     else if (e->current_target == btnSettings)

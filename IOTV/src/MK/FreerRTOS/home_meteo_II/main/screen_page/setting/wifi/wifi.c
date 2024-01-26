@@ -6,8 +6,6 @@
  */
 
 #include "wifi.h"
-#include "lwip/netif.h"
-#include "settingpage.h"
 
 #define AP_INFO_ARR_SIZE 10
 

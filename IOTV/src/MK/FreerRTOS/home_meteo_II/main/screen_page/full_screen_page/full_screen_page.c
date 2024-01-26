@@ -15,8 +15,9 @@ void full_screen_page_init(const char *txt, void *img)
 	page->deinit();
 	page->deinit = full_screen_page_deinit;
 
+	lv_obj_clean(lv_scr_act());
+	lv_obj_clean(lv_layer_top());
 	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
-	lv_obj_clean(main_widget);
 	page->widget = main_widget;
 
 	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES);

@@ -175,11 +175,11 @@ static void create_city_table(const open_meteo_city_t *open_meteo_city, uint8_t 
 		lv_obj_center(lbl);
 	}
 
-	lv_obj_t *btn_cancel = create_button_simply(main_widget, "Отмена", 128, 40);
+	lv_obj_t *btn_cancel = create_button_simply(main_widget, CANCEL_STR, 128, 40);
 	lv_obj_align(btn_cancel, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
 	lv_obj_add_event_cb(btn_cancel, delete_obj_handler, LV_EVENT_CLICKED, main_widget);
 
-	lv_obj_t *btn_save = create_button_simply(main_widget, "Сохранить", 128, 40);
+	lv_obj_t *btn_save = create_button_simply(main_widget, SAVE_STR, 128, 40);
 	lv_obj_align_to(btn_save, btn_cancel, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 	lv_obj_add_event_cb(btn_save, city_save_handler, LV_EVENT_CLICKED, widget);
 }
@@ -336,6 +336,7 @@ static void city_save_handler(lv_event_t *e)
 	char *longitude = lv_label_get_text(lv_obj_get_child(longitude_cell, 0));
 
 	set_meteo_config_value("city", city_name);
+	service_weather_set_city(city_name);
 	set_meteo_config_value("latitude", latitude);
 	set_meteo_config_value("longitude", longitude);
 
@@ -345,7 +346,7 @@ static void city_save_handler(lv_event_t *e)
 							longitude == NULL ? "0" : longitude);
 	lv_obj_del(table->parent);
 
-//	http_meteo_get();
+	glob_set_bits_status_reg(STATUS_METEO_UPDATE_NOW);
 }
 
 static void switcher_handler(lv_event_t *e)
@@ -394,7 +395,8 @@ void create_weather_sub_page(lv_event_t *e)
 	//	lv_textarea_set_text(weather_page_obj->textarea, ???);
 
 	// клавиатура
-	weather_page_obj->keyboard = create_keyboard(lv_scr_act(), LV_ALIGN_BOTTOM_MID, weather_page_obj->textarea,
+	weather_page_obj->keyboard = create_keyboard(lv_scr_act(), LV_ALIGN_BOTTOM_MID,
+			weather_page_obj->textarea,
 			hide_obj_handler, hide_obj_handler, hide_obj_handler);
 
 	lv_obj_add_flag(weather_page_obj->keyboard, LV_OBJ_FLAG_HIDDEN);

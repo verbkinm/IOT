@@ -12,7 +12,8 @@
 #include "sntp/sntp.h"
 #include "weather/weather.h"
 #include "display/display.h"
-#include "factory_reset/factory_reset.h"
+#include "bme280/bme280.h"
+#include "update/update.h"
 
 void start_services(void);
 

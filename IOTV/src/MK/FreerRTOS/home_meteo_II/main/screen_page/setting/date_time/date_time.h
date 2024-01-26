@@ -9,9 +9,9 @@
 #define MAIN_SCREEN_PAGE_SETTING_DATE_TIME_H_
 
 #include <lvgl.h>
-#include "settingpage.h"
-#include "../../service/sntp/sntp.h"
-#include "elements.h"
+#include "screen_page/setting/settingpage.h"
+#include "service/sntp/sntp.h"
+#include "screen_page/setting/elements.h"
 #include "Local_Lib/local_lvgl_lib.h"
 
 void create_date_time_sub_page(lv_event_t *e);

@@ -8,7 +8,9 @@
 #include "esp_mac.h"
 
 #include "json/json_config.h"
-#include "elements.h"
+#include "screen_page/setting/elements.h"
+#include "lwip/netif.h"
+#include "screen_page/setting/settingpage.h"
 
 void create_wifi_sub_page(lv_event_t *e);
 void free_wifi_sub_page(void);

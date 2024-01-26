@@ -30,7 +30,7 @@ struct DateTime DS3231_DataTime(void)
 
 void DS3231_SetDataTime(const struct DateTime *dt)
 {
-	if (dt == NULL)
+	if (dt == NULL || dt->err == true)
 		return;
 
 	struct DateTime copy_dt;
@@ -44,9 +44,25 @@ void DS3231_SetDataTime(const struct DateTime *dt)
 	{
 		uint8_t data[2] = {reg, data_write[reg]};
 		if (i2c_master_write_to_device(I2C_MASTER_NUM, DS3231_ADDR, data, 2, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS) != ESP_OK)
-		{
-			;
 			ESP_LOGE(TAG, "write error");
-		}
 	}
+}
+
+void DS3231_SetDataTime_tm(const struct tm *t)
+{
+	if (t == NULL)
+		return;
+
+	struct DateTime dt = {
+			.seconds = t->tm_sec,
+			.minutes = t->tm_min,
+			.hour = t->tm_hour,
+			.day = t->tm_wday,
+			.date = t->tm_mday,
+			.month = t->tm_mon,
+			.year = (t->tm_year + 1900) - 2000,
+			.err = false
+	};
+
+	DS3231_SetDataTime(&dt);
 }

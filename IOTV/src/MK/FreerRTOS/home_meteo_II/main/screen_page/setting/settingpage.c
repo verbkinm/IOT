@@ -182,8 +182,7 @@ void settingPageInit(void)
 
 void setting_page_deinit(void)
 {
-	free_wifi_sub_page();
-	free_date_time_sub_page();
+	clear_all_sub_page_child();
 
 	((lv_menu_page_t *)root_page)->title = NULL;
 

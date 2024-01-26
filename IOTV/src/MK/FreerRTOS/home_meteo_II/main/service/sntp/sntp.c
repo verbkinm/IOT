@@ -7,7 +7,7 @@
 
 #include "sntp.h"
 
-//static SemaphoreHandle_t xSemaphore;
+const char *TAG = "SNTP";
 
 char *sntp_utc;
 char *sntp_server_url;
@@ -22,6 +22,15 @@ void time_sync_notification_cb(struct timeval *tv);
 void time_sync_notification_cb(struct timeval *tv)
 {
 	glob_set_bits_status_reg(STATUS_TIME_SYNC);
+
+	time_t now;
+	struct tm timeinfo;
+	char strftime_buf[64];
+
+	time(&now);
+	localtime_r(&now, &timeinfo);
+	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
 }
 
 static void check_sntp_conf_file(void)
@@ -96,14 +105,13 @@ void sntp_service_task(void *pvParameters)
 
 	time_t now;
 	struct tm timeinfo;
-	char strftime_buf[64];
 
 	while(true)
 	{
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATE)
+		if (glob_get_status_reg() & STATUS_UPDATING)
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_SNTP_ON) || !(glob_get_status_reg() & STATUS_IP_GOT) )
@@ -114,15 +122,12 @@ void sntp_service_task(void *pvParameters)
 		time(&now);
 		localtime_r(&now, &timeinfo);
 		sntp_obtain_time();
-		// update 'now' variable with current time
 		time(&now);
 
-		// Set timezone to China Standard Time
+		// Set timezone
 		setenv("TZ", sntp_utc, 1);
 		tzset();
 		localtime_r(&now, &timeinfo);
-		strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-		printf("The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
 
 		if (sntp_get_sync_mode() == SNTP_SYNC_MODE_SMOOTH)
 		{
@@ -133,7 +138,7 @@ void sntp_service_task(void *pvParameters)
 				vTaskDelay(2000 / portTICK_PERIOD_MS);
 			}
 		}
-		vTaskDelay(60000 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 * (1 * 60 * 60) / portTICK_PERIOD_MS); // раз в 1 час
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -15,7 +15,12 @@ static uint32_t glob_status_err = 0;
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
 
+static lv_obj_t *single_mbox = NULL;
+
 static page_t glob_current_page;
+
+static void single_mbox_clear(lv_event_t * e);
+
 
 page_t *current_page(void)
 {
@@ -27,7 +32,6 @@ void default_page_deinit(void)
 	page_t *page = current_page();
 	lv_obj_clean(page->widget);
 }
-
 
 const char *weekday_name_short(uint8_t day)
 {
@@ -78,9 +82,7 @@ lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea
 
 void delete_obj_handler(lv_event_t * e)
 {
-	//	printf("delete\n");
 	lv_obj_del(e->user_data);
-	//	e->user_data = NULL;
 }
 
 void delete_timer_handler(lv_event_t *e)
@@ -109,6 +111,23 @@ lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt)
 	return mbox;
 }
 
+static void single_mbox_clear(lv_event_t * e)
+{
+	single_mbox = NULL;
+}
+
+lv_obj_t *create_single_msg_box(lv_obj_t *parent, const char *title, const char *txt)
+{
+//	if (single_mbox != NULL)
+//		lv_msgbox_close(single_mbox);
+//
+//	single_mbox = create_msgbox(parent, title, txt);
+//
+//	lv_obj_add_event_cb(single_mbox, single_mbox_clear, LV_EVENT_CL, user_data)
+
+	return single_mbox;
+}
+
 lv_obj_t *create_msgbox_not_connected(void)
 {
 	return create_msgbox(NULL, ATTENTION_STR, "Сетевое соединение не установлено!");
@@ -130,7 +149,6 @@ void clear_busy_indicator(lv_obj_t **indicator)
 	if (*indicator == NULL)
 		return;
 
-	//	lv_obj_clean(*indicator);
 	lv_obj_del(*indicator);
 	*indicator = NULL;
 }

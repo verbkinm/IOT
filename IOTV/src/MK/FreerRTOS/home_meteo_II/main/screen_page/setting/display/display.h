@@ -9,8 +9,8 @@
 #define MAIN_SCREEN_PAGE_SETTING_DISPLAY_H_
 
 #include <lvgl.h>
-#include "settingpage.h"
-#include "elements.h"
+#include "screen_page/setting/settingpage.h"
+#include "screen_page/setting/elements.h"
 #include "json/json_config.h"
 #include "service/display/display.h"
 

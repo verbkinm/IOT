@@ -27,7 +27,6 @@ static void save_date(lv_event_t *e);
 static void sntp_switch_handler(lv_event_t * e);
 static void utc_dd_event_handler(lv_event_t * e);
 static void sntp_save_event_handler(lv_event_t * e);
-//static void sntp_sync_event_handler(lv_event_t * e);
 
 struct Date_time_page_obj
 {
@@ -37,6 +36,7 @@ struct Date_time_page_obj
 	lv_obj_t *btn_save;
 	lv_obj_t *keyboard;
 };
+
 static struct Date_time_page_obj *dt_page_obj = NULL;
 
 void create_time_page(void)
@@ -55,7 +55,7 @@ void create_time_page(void)
 	create_spinbox(section, "Секунды:", timeinfo.tm_sec, 0, 59);
 
 	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Сохранить", 128, 40, &obj_btn);
+	create_button(section, SAVE_STR, 128, 40, &obj_btn);
 	lv_obj_add_event_cb(obj_btn, save_time, LV_EVENT_CLICKED, section);
 }
 
@@ -67,7 +67,6 @@ static void utc_dd_event_handler(lv_event_t * e)
 	{
 		char buf[32] = {0};
 		lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
-		printf("selected :%s\n", buf);
 	}
 }
 
@@ -96,9 +95,9 @@ void create_sntp_page(void)
 	// Включить/выключить службу sntp
 	create_switch(section, LV_SYMBOL_SETTINGS, "Включить", (glob_get_status_reg() & STATUS_SNTP_ON), &dt_page_obj->switcher);
 	lv_obj_add_event_cb(dt_page_obj->switcher, sntp_switch_handler, LV_EVENT_CLICKED, section);
-//
-//	lv_obj_t *cont = lv_menu_cont_create(section);
-//	lv_obj_set_style_pad_all(cont, 0, 0);
+	//
+	//	lv_obj_t *cont = lv_menu_cont_create(section);
+	//	lv_obj_set_style_pad_all(cont, 0, 0);
 
 	// Wrap
 	lv_obj_t *wrap = lv_obj_create(section);
@@ -151,7 +150,7 @@ void create_sntp_page(void)
 	lv_obj_align_to(lbl_url, dt_page_obj->sntp_server_url, LV_ALIGN_OUT_LEFT_MID, -28, 0);
 
 	// Кнопка сохранить
-	create_button(section, "Сохранить", 128, 40, &dt_page_obj->btn_save);
+	create_button(section, SAVE_STR, 128, 40, &dt_page_obj->btn_save);
 	lv_obj_add_event_cb(dt_page_obj->btn_save, sntp_save_event_handler, LV_EVENT_CLICKED, 0);
 
 	// клавиатура
@@ -171,7 +170,7 @@ void create_date_page(void)
 	create_calendar(section);
 
 	lv_obj_t *obj_btn = NULL;
-	create_button(section, "Сохранить", 128, 40, &obj_btn);
+	create_button(section, SAVE_STR, 128, 40, &obj_btn);
 	lv_obj_add_event_cb(obj_btn, save_date, LV_EVENT_CLICKED, section);
 }
 
@@ -241,9 +240,8 @@ static void save_time(lv_event_t *e)
 	struct timeval tv = {.tv_sec = now};
 	settimeofday(&tv, NULL);
 
-	glob_set_bits_status_reg(STATUS_TIME_SYNC);
-
-	//	DS3231_SetDataTime(&glob_date_time);
+	DS3231_SetDataTime_tm(&timeinfo);
+//	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 }
 
 static void save_date(lv_event_t *e)
@@ -270,7 +268,6 @@ static void save_date(lv_event_t *e)
 	struct timeval tv = {.tv_sec = now};
 	settimeofday(&tv, NULL);
 
-	glob_set_bits_status_reg(STATUS_TIME_SYNC);
-
-	//	DS3231_SetDataTime(&glob_date_time);
+	DS3231_SetDataTime_tm(&timeinfo);
+//	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 }

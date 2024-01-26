@@ -19,19 +19,16 @@ static lv_obj_t *block_0, *block_1, *block_2;
 //Блок 0
 lv_obj_t *time_lbl, *date_lbl;
 //Блок 1
-lv_obj_t *temperature1_lbl, *humidity_lbl, *pressure_lbl;
+lv_obj_t *temperature1_lbl, *humidity1_lbl, *pressure1_lbl;
 //Блок 2
 lv_obj_t *city_lbl, *last_update_lbl, *cloud_codver_img, *precipitations_img, *wind_direction_img,
-*cloud_cover_lbl, *wind_speed_lbl, *wind_direction_lbl, *temperature2_lbl, *humidity_lbl, *pressure_lbl,
+*cloud_cover_lbl, *wind_speed_lbl, *wind_direction_lbl, *temperature2_lbl, *humidity2_lbl, *pressure2_lbl,
 *apparent_temperature_lbl, *precipitation_lbl, *rain_lbl, *wind_gusts_lbl, *showers_lbl, *snow_lbl;
 
 static lv_timer_t *timer = NULL;
 
 static void drawTime(const struct tm *timeinfo);
 static void drawDate(const struct tm *timeinfo);
-static void drawTemperature(void);
-static void drawHumidity(void);
-static void drawPressure(void);
 static void draw_meteo_data(void);
 static void draw_cloud_cover(void);
 static void draw_precipitations(void);
@@ -60,31 +57,13 @@ static void drawDate(const struct tm *timeinfo)
 	lv_label_set_text_fmt(date_lbl, "%s. %02d.%.02d.%.04d", weekday_name_short(timeinfo->tm_wday), timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 }
 
-static void drawTemperature(void)
-{
-	//	lv_obj_t *t = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 2);
-	//	lv_label_set_text_fmt(t, "+25.65 C°");
-	//	lv_obj_set_style_text_color(t, lv_color_make(0xff, 0, 0), 0);
-}
-
-static void drawHumidity(void)
-{
-	//	lv_obj_t *h = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 3);
-	//	lv_label_set_text_fmt(h, "53 %%");
-}
-
-static void drawPressure(void)
-{
-	//	lv_obj_t *p = lv_obj_get_child(lv_obj_get_child(lv_scr_act(), 1), 4);
-	//	lv_label_set_text_fmt(p, "743 мм.");
-}
-
 static void draw_meteo_data(void)
 {
 	if ( !(glob_get_status_reg() & STATUS_METEO_ON))
 		return;
 
-	const char *city = service_weather_get_city();
+	char *city = NULL;
+	get_meteo_config_value("city", &city);
 	if (city != NULL)
 		lv_label_set_text(city_lbl, city);
 
@@ -99,8 +78,8 @@ static void draw_meteo_data(void)
 	else
 		lv_label_set_text_fmt(temperature2_lbl, "%.02f°C", open_meteo->temperature);
 
-	lv_label_set_text_fmt(humidity_lbl, "%d%%", open_meteo->relative_humidity);
-	lv_label_set_text_fmt(pressure_lbl, "%d мм.рт.cт.", (int)open_meteo->surface_pressure);
+	lv_label_set_text_fmt(humidity2_lbl, "%d%%", open_meteo->relative_humidity);
+	lv_label_set_text_fmt(pressure2_lbl, "%d мм.рт.cт.", (int)open_meteo->surface_pressure);
 
 	if (open_meteo->apparent_temperature > 0)
 		lv_label_set_text_fmt(apparent_temperature_lbl, "Температура\nощущается: +%.02f°C", open_meteo->apparent_temperature);
@@ -208,19 +187,16 @@ static void draw_wind_direction(void)
 
 static void event_handler_block_0(lv_event_t * e)
 {
-//	lv_timer_del(timer);
 	datetime1_page_init();
 }
 
 static void event_handler_block_1(lv_event_t * e)
 {
-//	lv_timer_del(timer);
 	menuPageInit();
 }
 
 static void event_handler_block_2(lv_event_t * e)
 {
-//	lv_timer_del(timer);
 	meteo_chart_page_init();
 }
 
@@ -255,9 +231,10 @@ static void timer_handler(lv_timer_t *timer)
 	drawTime(&timeinfo);
 	drawDate(&timeinfo);
 
-	drawTemperature();
-	drawHumidity();
-	drawPressure();
+	const struct THP *thp = BME280_service_get_value();
+	lv_label_set_text_fmt(temperature1_lbl, "%+.1f°C", thp->temperature);
+	lv_label_set_text_fmt(humidity1_lbl, "%.0f %%", thp->humidity);
+	lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->humidity);
 
 	draw_meteo_data();
 }
@@ -282,19 +259,19 @@ static void init_block_1(lv_obj_t *parent)
 	block_1 = create_block(parent, LV_ALIGN_TOP_LEFT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
 
 	lv_obj_t *temperature_img = create_img_obj(block_1, TEMPERATURE, block_1, LV_ALIGN_TOP_LEFT, 64, 64, 30, 10);
-	temperature1_lbl = create_lbl_obj(block_1, "+25.5°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+	temperature1_lbl = create_lbl_obj(block_1, "0.0°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
 	lv_obj_t *humidity_img = create_img_obj(block_1, HUMIDITY, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
-	humidity_lbl = create_lbl_obj(block_1, "55 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+	humidity1_lbl = create_lbl_obj(block_1, "0 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
 	lv_obj_t *pressure_img = create_img_obj(block_1, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
-	pressure_lbl = create_lbl_obj(block_1, "700", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-	create_lbl_obj(block_1, "мм.рт.ст.", pressure_lbl, LV_ALIGN_BOTTOM_RIGHT, 20, -20, lv_color_white(), &ubuntu_mono_26);
+	pressure1_lbl = create_lbl_obj(block_1, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+	create_lbl_obj(block_1, "мм.рт.ст.", pressure1_lbl, LV_ALIGN_OUT_BOTTOM_RIGHT, 70, -35, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_add_event_cb(block_1, event_handler_block_1, LV_EVENT_CLICKED, 0);
 }
 
-// Блок температура/влажность/давление локальная
+// Блок метео данные
 static void init_block_2(lv_obj_t *parent)
 {
 	// Блок
@@ -312,7 +289,7 @@ static void init_block_2(lv_obj_t *parent)
 		}
 	}
 	else
-		lv_label_set_text_fmt(city_lbl, "%s", "Город");
+		lv_label_set_text(city_lbl, "-");
 
 	lv_obj_align(city_lbl, LV_ALIGN_TOP_RIGHT, -5, 0);
 	lv_obj_set_style_text_color(city_lbl, lv_color_white(), 0);
@@ -331,10 +308,10 @@ static void init_block_2(lv_obj_t *parent)
 	temperature2_lbl = create_lbl_obj(block_2, "-°C", temperature_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_t *humidity_img = create_img_obj(block_2, HUMIDITY32, temperature_img, LV_ALIGN_CENTER, 32, 32, 200, 0);
-	humidity_lbl = create_lbl_obj(block_2, "-%", humidity_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7, lv_color_white(), &ubuntu_mono_26);
+	humidity2_lbl = create_lbl_obj(block_2, "-%", humidity_img, LV_ALIGN_OUT_RIGHT_MID, 20, -7, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_t *pressure_img = create_img_obj(block_2, PRESSURE32, temperature_img, LV_ALIGN_OUT_BOTTOM_MID, 32, 32, 0, 10);
-	pressure_lbl = create_lbl_obj(block_2, "- мм.рт.cт.", pressure_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6, lv_color_white(), &ubuntu_mono_26);
+	pressure2_lbl = create_lbl_obj(block_2, "- мм.рт.cт.", pressure_img, LV_ALIGN_OUT_RIGHT_MID, 20, -6, lv_color_white(), &ubuntu_mono_26);
 
 	apparent_temperature_lbl = create_lbl_obj(block_2, "Температура\nощущается: -°C", pressure_img, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20, lv_color_white(), &ubuntu_mono_14);
 	precipitation_lbl = create_lbl_obj(block_2, "Осадки: - мм.", apparent_temperature_lbl, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5, lv_color_white(), &ubuntu_mono_14);

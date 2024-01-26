@@ -21,6 +21,7 @@ static char *generate_url_meteo(void);
 static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo_week);
 static void http_city_search(void);
 static void http_meteo_to_file(void);
+static bool service_weather_parse_meteo_data(void);
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
@@ -58,20 +59,20 @@ static void check_meteo_conf_file(void)
 {
 	cJSON *root = cJSON_CreateObject();
 
-	cJSON *sntp = cJSON_CreateObject();
-	cJSON_AddItemToObjectCS(root, "meteo", sntp);
+	cJSON *meto = cJSON_CreateObject();
+	cJSON_AddItemToObjectCS(root, "meteo", meto);
 
 	cJSON *on_obj = cJSON_CreateString("0");
-	cJSON_AddItemToObject(sntp, "on", on_obj);
+	cJSON_AddItemToObject(meto, "on", on_obj);
 
-	cJSON *city_obj = cJSON_CreateString("Moskva");
-	cJSON_AddItemToObjectCS(sntp, "city", city_obj);
+	cJSON *city_obj = cJSON_CreateString("Москва");
+	cJSON_AddItemToObjectCS(meto, "city", city_obj);
 
 	cJSON *latitude_obj = cJSON_CreateString("55.75222");
-	cJSON_AddItemToObjectCS(sntp, "latitude", latitude_obj);
+	cJSON_AddItemToObjectCS(meto, "latitude", latitude_obj);
 
 	cJSON *longitude_obj = cJSON_CreateString("37.61556");
-	cJSON_AddItemToObjectCS(sntp, "longitude", longitude_obj);
+	cJSON_AddItemToObjectCS(meto, "longitude", longitude_obj);
 
 	get_meteo_config_value("on", &on_obj->valuestring);
 	get_meteo_config_value("city", &city_obj->valuestring);
@@ -92,12 +93,17 @@ static void check_meteo_conf_file(void)
 
 static void http_city_search(void)
 {
+	ESP_LOGI(TAG, "http_city_search");
+
 	char *response_buffer = calloc(1, BUFSIZ);
 
-	int len = strlen(city_url) + strlen(city_search);
+	char *city = url_encode(city_search);
+	int len = strlen(city_url) + strlen(city);
+
 	char *url = calloc(1, len + 1);
 	strcat(url, city_url);
-	strcat(url, city_search);
+	strcat(url, city);
+	free(city);
 
 	esp_http_client_config_t config = {
 			.url = url,
@@ -116,6 +122,7 @@ static void http_city_search(void)
 		goto end;
 	}
 
+	int counter = 0;
 	while (true)
 	{
 		int ret = esp_http_client_read(client, response_buffer, BUFSIZ);
@@ -123,8 +130,16 @@ static void http_city_search(void)
 			break;
 
 		fwrite(response_buffer, ret, 1, file);
+		if (counter++ > 250)
+			break;
 	}
 	fclose(file);
+
+	// Восстановить написание города (Язык, Заглавна первая буква)
+//	city = NULL;
+//	get_meteo_config_value("city", &city);
+//	service_weather_set_city(city);
+//	free(city);
 
 	end:
 	free(url);
@@ -171,6 +186,16 @@ static void read_meteo_conf(void)
 		if (strcmp(on, "1") == 0)
 			glob_set_bits_status_reg(STATUS_METEO_ON);
 		free(on);
+	}
+
+	char *city = NULL;
+	if (get_meteo_config_value("city", &city))
+	{
+		if (city != NULL)
+		{
+			service_weather_set_city(city);
+			free(city);
+		}
 	}
 }
 
@@ -426,7 +451,8 @@ void service_weather_set_city(const char* city)
 	if (city_search != NULL)
 		free(city_search);
 
-	city_search = url_encode(city);
+	city_search = calloc(1, strlen(city) + 1);
+	strcpy(city_search, city);
 }
 
 const char *service_weather_get_city(void)
@@ -469,6 +495,7 @@ static void http_meteo_to_file(void)
 	}
 
 	int bs = 0;
+	int counter = 0;
 	while (true)
 	{
 		int ret = esp_http_client_read(client, response_buffer, BUFSIZE);
@@ -478,6 +505,10 @@ static void http_meteo_to_file(void)
 		bs += ret;
 
 		fwrite(response_buffer, ret, 1, file);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+
+		if (counter++ > 250)
+			break;
 	}
 
 	fclose(file);
@@ -487,7 +518,7 @@ static void http_meteo_to_file(void)
 	free(response_buffer);
 }
 
-bool service_weather_parse_meteo_data(void)
+static bool service_weather_parse_meteo_data(void)
 {
 	bool result = false;
 
@@ -560,12 +591,15 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
+	const uint8_t COUNTER_WEATHER = 60;
+	uint8_t counter = COUNTER_WEATHER;
+
 	for( ;; )
 	{
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATE)
+		if (glob_get_status_reg() & STATUS_UPDATING)
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
@@ -574,16 +608,23 @@ void weather_service_task(void *pvParameters)
 		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
 
-		if (!((glob_get_status_reg() & STATUS_METEO_ON) && (glob_get_status_reg() & STATUS_TIME_SYNC)))
+		if (!(glob_get_status_reg() & STATUS_METEO_ON)) // && (glob_get_status_reg() & STATUS_TIME_SYNC)))
 			goto for_end;
 
-		do
+		if (glob_get_status_reg() & STATUS_METEO_UPDATE_NOW)
 		{
-			http_meteo_to_file();
+			glob_clear_bits_status_reg(STATUS_METEO_UPDATE_NOW);
+			counter = COUNTER_WEATHER;
 		}
-		while(service_weather_parse_meteo_data() == false);
 
-		vTaskDelay(300000 / portTICK_PERIOD_MS); // 5 минут
+		if (counter++ < COUNTER_WEATHER)
+			goto for_end;
+
+		counter = 0;
+
+		http_meteo_to_file();
+		if (service_weather_parse_meteo_data() == false)
+			counter = 60;
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

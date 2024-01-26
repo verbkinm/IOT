@@ -15,6 +15,10 @@
 
 #define ATTENTION_STR 	"Внимание!"
 #define ERROR_STR 		"Ошибка!"
+#define SAVE_STR 		"Сохранить"
+#define CANCEL_STR 		"Отмена"
+#define YES_STR 		"Да"
+#define NO_STR 			"Нет"
 
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);
 lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea,
@@ -22,6 +26,7 @@ lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea
 		lv_event_cb_t ready_event_cb,
 		lv_event_cb_t defocused_event_cb);
 lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt);
+lv_obj_t *create_single_msg_box(lv_obj_t *parent, const char *title, const char *txt);
 lv_obj_t *create_msgbox_not_connected(void);
 lv_obj_t *create_dialog_box(lv_obj_t *parent, const char *title, const char *txt, const char **btns_txt);
 

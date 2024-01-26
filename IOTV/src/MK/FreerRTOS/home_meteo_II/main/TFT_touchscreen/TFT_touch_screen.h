@@ -19,7 +19,7 @@
 #include "json/json_config.h"
 #include "status_panel/status_panel.h"
 #include "screen_page/homepage/homepage.h"
-#include "screen_page/homepage/datetime1/datetime1.h"
+#include "screen_page/datetime1/datetime1.h"
 #include "screen_page/menupage.h"
 #include "screen_page/setting/settingpage.h"
 #include "screen_page/full_screen_page/full_screen_page.h"
