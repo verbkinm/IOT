@@ -12,10 +12,11 @@
 #include "Global_def.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "Local_Lib/local_lib.h"
-#include "screen_page/screendefault.h"
+#include "status_panel/status_panel.h"
+#include "screen_page/menupage.h"
+#include "screen_page/menupage.h"
 #include "screen_page/menupage.h"
 #include "service/weather/weather.h"
-#include "screen_page/page.h"
 
 void meteo_chart_page_init(void);
 void meteo_chart_page_deinit(void);

@@ -111,7 +111,7 @@ void sntp_service_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATING)
+		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_SNTP_ON) || !(glob_get_status_reg() & STATUS_IP_GOT) )

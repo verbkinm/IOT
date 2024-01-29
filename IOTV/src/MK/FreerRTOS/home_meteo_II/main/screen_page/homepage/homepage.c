@@ -65,7 +65,10 @@ static void draw_meteo_data(void)
 	char *city = NULL;
 	get_meteo_config_value("city", &city);
 	if (city != NULL)
+	{
 		lv_label_set_text(city_lbl, city);
+		free(city);
+	}
 
 	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
 	if (open_meteo == NULL)
@@ -219,7 +222,7 @@ static void timer_handler(lv_timer_t *timer)
 {
 	if (glob_get_status_err())
 	{
-		lv_timer_pause(timer);
+		lv_timer_del(timer);
 		return;
 	}
 
@@ -330,6 +333,8 @@ void homePageInit()
 	page_t *page = current_page();
 	page->deinit();
 	page->deinit = home_page_deinit;
+	page->title = page_title(MAIN_PAGE_TITLE);
+	status_panel_update();
 
 	init_block_0(page->widget);
 	init_block_1(page->widget);

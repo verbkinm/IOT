@@ -17,6 +17,7 @@
 #include "screen_page/screendefault.h"
 #include "screen_page/datetime1/datetime1.h"
 #include "screen_page/page.h"
+#include "status_panel/status_panel.h"
 
 void datetime2_page_init(void);
 void datetime2_page_deinit(void);

@@ -3,6 +3,7 @@
 #include "sd/sd_spi.h"
 
 #include "service/service.h"
+#include "GUI_manager/GUI_manager.h"
 
 void app_main(void)
 {
@@ -11,6 +12,8 @@ void app_main(void)
 	TFT_init(); // Перед этой функцией обязательно выполнить i2c_init();
 
 	start_services();
+
+	GUI_manager_init();
 
 	while (1)
 	{

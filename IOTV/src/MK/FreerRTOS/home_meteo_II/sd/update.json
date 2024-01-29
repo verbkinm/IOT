@@ -1,0 +1,7 @@
+{
+	"update":	{
+		"on":	"1",
+		"interval":	"",
+		"url":	"https://ota.verbkinm.ru/other/esp32/meteo_home_II/update_info.json"
+	}
+}

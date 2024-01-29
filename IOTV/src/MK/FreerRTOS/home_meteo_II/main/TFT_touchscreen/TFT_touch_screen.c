@@ -24,10 +24,6 @@ static void TFT_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data);
 static void TFT_rgb_panel_init(void);
 static void TFT_touch_panel_init(void);
 
-// Обработка сообщений из вне LVGL
-static void timer_handler(lv_timer_t *timer);
-static void caps_deinit(){}
-
 static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data)
 {
 	BaseType_t high_task_awoken = pdFALSE;
@@ -230,74 +226,11 @@ static void TFT_touch_panel_init(void)
 	lv_indev_drv_register(&indev_drv);
 }
 
-static void timer_handler(lv_timer_t *timer)
-{
-	if (glob_get_status_err() & STATUS_SD_ERROR)
-	{
-		lv_timer_del(timer);
-		LV_IMG_DECLARE(sd);
-		full_screen_page_init("Ошибка SD карты!", (void *)&sd);
-		return;
-	}
-
-	if (glob_get_status_reg() & STATUS_UPDATING)
-	{
-		//		lv_timer_del(timer);
-		return;
-	}
-
-	if (glob_get_status_err() & STATUS_UPDATE_ERROR)
-	{
-		lv_timer_del(timer);
-		full_screen_page_init("Ошибка обновления!", UPDATE_FAIL);
-		return;
-	}
-
-	if (glob_get_status_reg() & STATUS_UPDATE_DONE)
-	{
-		lv_timer_del(timer);
-		full_screen_page_init("Перезагрузите устройство...", UPDATE_OK);
-		return;
-	}
-
-//	if (glob_get_status_reg() & STATUS_UPDATE_AVAILABLE)
-//	{
-////		create_single_msg_box(NULL,  ATTENTION_STR, "Доступно новое обновление. Произвести установку?");
-//		//		lv_timer_del(timer);
-//		return;
-//	}
-
-	status_panel_update();
-}
-
 // Перед этой функцией обязательно выполнить i2c_init();
 void TFT_init(void)
 {
 	TFT_rgb_panel_init();
 	TFT_touch_panel_init();
-
-	lv_obj_set_style_pad_all(lv_scr_act(), 0, 0);
-
-	// Верхняя панель
-	status_panel_init();
-
-	// Основной виджет
-	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
-	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
-	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
-	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
-	lv_obj_set_style_pad_all(main_widget, 0, 0);
-	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
-
-	page_t *page = current_page();
-	page->title = NULL;
-	page->widget = main_widget;
-	page->deinit = caps_deinit;
-
-	homePageInit();
-
-	lv_timer_t *timer = lv_timer_create(timer_handler, 1000, 0);
-	lv_timer_ready(timer);
 }
 
 void rotate_display(lv_disp_rot_t rotation)

@@ -26,9 +26,8 @@ lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea
 		lv_event_cb_t ready_event_cb,
 		lv_event_cb_t defocused_event_cb);
 lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt);
-lv_obj_t *create_single_msg_box(lv_obj_t *parent, const char *title, const char *txt);
 lv_obj_t *create_msgbox_not_connected(void);
-lv_obj_t *create_dialog_box(lv_obj_t *parent, const char *title, const char *txt, const char **btns_txt);
+lv_obj_t *create_dialog_box(lv_obj_t *parent, const char *title, const char *txt, const char **btns_txt, void (*accept)());
 
 void clear_busy_indicator(lv_obj_t **indicator);
 
@@ -46,18 +45,22 @@ lv_obj_t *create_img_obj(lv_obj_t *parent, const char* icon_path, const lv_obj_t
 const char *weekday_name_short(uint8_t day);
 const char *weekday_name_full(uint8_t day);
 
-page_t *current_page(void);
-void default_page_deinit(void);
-
 uint32_t glob_get_status_reg(void);
 void glob_set_status_reg(uint32_t reg);
 void glob_set_bits_status_reg(uint32_t bits);
 void glob_clear_bits_status_reg(uint32_t bits);
 
+uint32_t glob_get_update_reg(void);
+void glob_set_update_reg(uint32_t reg);
+void glob_set_bits_update_reg(uint32_t bits);
+void glob_clear_bits_update_reg(uint32_t bits);
+
 uint32_t glob_get_status_err(void);
 void glob_set_status_err(uint32_t reg);
 void glob_set_bits_status_err(uint32_t bits);
 void glob_clear_bits_status_err(uint32_t bits);
+
+const char **btns_yes_no_matrix(void);
 
 void debug_lv_obj_t_tree(lv_obj_t *obj, int depth);
 

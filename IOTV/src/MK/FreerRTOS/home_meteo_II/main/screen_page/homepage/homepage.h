@@ -23,6 +23,7 @@
 #include "service/weather/weather.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "screen_page/page.h"
+#include "status_panel/status_panel.h"
 
 void homePageInit(void);
 void home_page_deinit(void);

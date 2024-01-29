@@ -7,10 +7,13 @@
 
 #include "status_panel.h"
 
+extern lv_font_t ubuntu_mono_14;
+
 static lv_obj_t *icon_wifi;
 static lv_obj_t *icon_sd;
 static lv_obj_t *heap_lbl;
 static lv_obj_t *menu_btn;
+static lv_obj_t *title_lbl;
 
 static void event_handler(lv_event_t *e);
 
@@ -38,16 +41,17 @@ void status_panel_init(void)
 	lv_obj_set_size(icon_sd, 24, 24);
 	lv_obj_align_to(icon_sd, icon_wifi, LV_ALIGN_OUT_LEFT_MID, -5, 0);
 
-	// Статус кучи
-	heap_lbl = lv_label_create(status_panel);
-	lv_obj_set_style_text_color(heap_lbl, lv_color_white(), 0);
-	lv_obj_center(heap_lbl);
+	// Название страницы
+	title_lbl = create_lbl_obj(status_panel, current_page()->title, NULL, LV_ALIGN_CENTER, 0, 0, lv_color_white(), &ubuntu_mono_14);
 
-	// Кнопку вызова страницы меню
+	// Кнопка вызова страницы меню
 	menu_btn = create_button_simply(status_panel, LV_SYMBOL_LIST, 64, LCD_PANEL_STATUS_H - 8);
 	lv_obj_align(menu_btn, LV_ALIGN_LEFT_MID, 5, 0);
 
 	lv_obj_add_event_cb(menu_btn, event_handler, LV_EVENT_CLICKED, 0);
+
+	// Статус кучи
+	heap_lbl = create_lbl_obj(status_panel, NULL, menu_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0, lv_color_white(), &ubuntu_mono_14);
 }
 
 void status_panel_update(void)
@@ -69,5 +73,6 @@ void status_panel_update(void)
 	else
 		lv_img_set_src(icon_wifi, WIFI_DISABLE);
 
+	lv_label_set_text_fmt(title_lbl, "%s", current_page()->title);
 	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
 }

@@ -19,9 +19,60 @@ static char *url_update = NULL;
 
 static char available_version[64];
 
+static void check_update_conf_file(void);
+static void read_update_conf(void);
 static void chek_update(void);
 static void update(void);
 static bool parse_http_response(const char* content);
+
+static void check_update_conf_file(void)
+{
+	cJSON *root = cJSON_CreateObject();
+
+	cJSON *update = cJSON_CreateObject();
+	cJSON_AddItemToObjectCS(root, "update", update);
+
+	cJSON *on_obj = cJSON_CreateString("1");
+	cJSON_AddItemToObject(update, "on", on_obj);
+
+	cJSON *url_obj = cJSON_CreateString(url_update_info);
+	cJSON_AddItemToObjectCS(update, "url", url_obj);
+
+	get_update_config_value("on", &on_obj->valuestring);
+	get_update_config_value("url", &url_obj->valuestring);
+
+	FILE *file = fopen(UPDATE_PATH, "w");
+	if (file == NULL)
+		ESP_LOGE(TAG, "cant write \"%s\" file!\n", UPDATE_PATH);
+	else
+	{
+		fprintf(file, "%s", cJSON_Print(root));
+		fclose(file);
+	}
+
+	cJSON_Delete(root);
+}
+
+static void read_update_conf(void)
+{
+	char *on = NULL;
+	if (get_update_config_value("on", &on))
+	{
+		if (strcmp(on, "1") == 0)
+			glob_set_bits_update_reg(UPDATE_NOTIFICATION);
+		free(on);
+	}
+
+	char *url = NULL;
+	if (get_meteo_config_value("url", &url))
+	{
+		if (url != NULL)
+		{
+//			service_weather_set_city(url);
+			free(url);
+		}
+	}
+}
 
 static bool parse_http_response(const char* content)
 {
@@ -60,9 +111,9 @@ static bool parse_http_response(const char* content)
 
 	const esp_app_desc_t *esp_desc = esp_app_get_description();
 	if (strcmp(new_version_from_server, esp_desc->version) > 0)
-		glob_set_bits_status_reg(STATUS_UPDATE_AVAILABLE);
+		glob_set_bits_update_reg(UPDATE_AVAILABLE);
 	else
-		glob_clear_bits_status_reg(STATUS_UPDATE_AVAILABLE);
+		glob_clear_bits_update_reg(UPDATE_AVAILABLE);
 
 	strcpy(available_version, new_version_from_server);
 
@@ -71,7 +122,7 @@ static bool parse_http_response(const char* content)
 
 	bad_end:
 	strcpy(available_version, error_version);
-	glob_clear_bits_status_reg(STATUS_UPDATE_AVAILABLE);
+	glob_clear_bits_update_reg(UPDATE_AVAILABLE);
 
 	cJSON_Delete(root);
 	return false;
@@ -97,7 +148,7 @@ static void chek_update(void)
 
 	esp_http_client_cleanup(client);
 
-	glob_clear_bits_status_reg(STATUS_UPDATE_CHECK);
+	glob_clear_bits_update_reg(UPDATE_CHECK);
 }
 
 static void update(void)
@@ -105,11 +156,11 @@ static void update(void)
 	esp_err_t ret = ota_firmware(url_update);
 
 	if (ret == ESP_OK)
-		glob_set_bits_status_reg(STATUS_UPDATE_DONE);
+		glob_set_bits_update_reg(UPDATE_DONE);
 	else
 		glob_set_bits_status_err(STATUS_UPDATE_ERROR);
 
-	glob_clear_bits_status_reg(STATUS_UPDATING);
+	glob_clear_bits_update_reg(UPDATE_NOW);
 }
 
 char *update_service_get_available_version(void)
@@ -119,7 +170,13 @@ char *update_service_get_available_version(void)
 
 void update_service_task(void *pvParameters)
 {
+	check_update_conf_file();
+	read_update_conf();
+
 	strcpy(available_version, default_version);
+
+	const uint16_t COUNTER_CHECK_UPDATE = 60 * 60;
+	uint16_t counter = COUNTER_CHECK_UPDATE;
 
 	for( ;; )
 	{
@@ -129,14 +186,27 @@ void update_service_task(void *pvParameters)
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT))
 			goto for_end;
 
-		if (glob_get_status_reg() & STATUS_UPDATING)
+		if (glob_get_update_reg() & UPDATE_NOW)
 		{
 			update();
 			break;
 		}
 
-		if (glob_get_status_reg() & STATUS_UPDATE_CHECK)
+		// Проверить версию доступного обновления. Запускается из Настройик - Обновления
+		if (glob_get_update_reg() & UPDATE_CHECK)
 			chek_update();
+
+		// Фоновая проверка нового обновления. В lvgl потоке будет показано сообщение, если есть новая версия обновления
+		if (glob_get_update_reg() & UPDATE_NOTIFICATION)
+		{
+			if (counter++ > COUNTER_CHECK_UPDATE)
+			{
+				counter = 0;
+				chek_update();
+				if (glob_get_update_reg() & UPDATE_AVAILABLE)
+					glob_set_bits_update_reg(UPDATE_MESSAGE);
+			}
+		}
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

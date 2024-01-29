@@ -23,7 +23,7 @@ void BME280_service_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATING)
+		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
 		thp = BME280_readValues();

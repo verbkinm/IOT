@@ -56,6 +56,8 @@ void datetime1_page_init(void)
 	page_t *page = current_page();
 	page->deinit();
 	page->deinit = datetime1_page_deinit;
+	page->title = page_title(DATETIME1_PAGE_TITLE);
+	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
 	lv_obj_set_size(widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);

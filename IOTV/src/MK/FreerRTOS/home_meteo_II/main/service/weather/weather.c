@@ -81,7 +81,7 @@ static void check_meteo_conf_file(void)
 
 	FILE *file = fopen(METEO_CONF_PATH, "w");
 	if (file == NULL)
-		printf("cant write \"%s\" file!\n", METEO_CONF_PATH);
+		ESP_LOGE(TAG, "cant write \"%s\" file!\n", METEO_CONF_PATH);
 	else
 	{
 		fprintf(file, "%s", cJSON_Print(root));
@@ -599,7 +599,7 @@ void weather_service_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATING)
+		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )

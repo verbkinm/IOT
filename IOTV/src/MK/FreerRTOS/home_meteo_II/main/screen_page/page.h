@@ -10,12 +10,27 @@
 
 #include "lvgl.h"
 
-//const char *page_title[] = {"Главный экран", "Меню", "Настройки"};
+enum {
+	EMPTY_PAGE_TITE = 0,
+	MAIN_PAGE_TITLE,
+	MENU_PAGE_TITLE,
+	DATETIME1_PAGE_TITLE,
+	DATETIME2_PAGE_TITLE,
+	SETTING_PAGE_TITLE,
+	METEO_CHART_PAGE_TITLE,
+
+	END_PAGE_TITLE
+};
 
 typedef struct Page {
 	char *title;
 	lv_obj_t *widget;
 	void (*deinit)(void);
 } page_t;
+
+char* page_title(uint8_t num);
+
+page_t *current_page(void);
+void default_page_deinit(void);
 
 #endif /* MAIN_SCREEN_PAGE_PAGE_H_ */

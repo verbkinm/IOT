@@ -7,6 +7,8 @@
 
 #include "json_config.h"
 
+static const char *TAG = "JSON";
+
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value);
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value);
 
@@ -18,6 +20,16 @@ bool set_meteo_chart_config_value(const char *key, const char *value)
 bool get_meteo_chart_config_value(const char *key, char **value)
 {
 	return get_config_value(METEO_CHART_PATH, "visible", key, value);
+}
+
+bool set_update_config_value(const char *key, const char *value)
+{
+	return set_config_value(UPDATE_PATH, "update", key, value);
+}
+
+bool get_update_config_value(const char *key, char **value)
+{
+	return get_config_value(UPDATE_PATH, "update", key, value);
 }
 
 bool set_display_config_value(const char *key, const char *value)
@@ -45,7 +57,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	FILE *file = fopen(file_path, "r");
 	if (!file)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		ESP_LOGE(TAG, "File %s not open\n", file_path);
 		return false;
 	}
 
@@ -78,7 +90,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	file = fopen(file_path, "w");
 	if (file == NULL)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		ESP_LOGE(TAG, "File %s not open\n", file_path);
 		goto bad_end;
 	}
 	fprintf(file, "%s", print);
@@ -101,7 +113,7 @@ static bool get_config_value(const char* file_path, const char *group, const cha
 	FILE *file = fopen(file_path, "r");
 	if (!file)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		ESP_LOGE(TAG, "File %s not open\n", file_path);
 		return false;
 	}
 

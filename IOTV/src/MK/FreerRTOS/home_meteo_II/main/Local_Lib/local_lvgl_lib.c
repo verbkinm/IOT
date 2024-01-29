@@ -11,26 +11,17 @@ extern lv_font_t ubuntu_mono_14;
 
 static uint32_t glob_status_reg = 0;
 static uint32_t glob_status_err = 0;
+static uint32_t glob_update_reg = 0;
 
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
+static char *btns_txt[] = {YES_STR, NO_STR, NULL};
 
-static lv_obj_t *single_mbox = NULL;
+static void create_dialog_box_accept_handler(lv_event_t * e);
 
-static page_t glob_current_page;
-
-static void single_mbox_clear(lv_event_t * e);
-
-
-page_t *current_page(void)
+const char **btns_yes_no_matrix(void)
 {
-	return &glob_current_page;
-}
-
-void default_page_deinit(void)
-{
-	page_t *page = current_page();
-	lv_obj_clean(page->widget);
+	return btns_txt;
 }
 
 const char *weekday_name_short(uint8_t day)
@@ -111,35 +102,35 @@ lv_obj_t *create_msgbox(lv_obj_t *parent, const char *title, const char *txt)
 	return mbox;
 }
 
-static void single_mbox_clear(lv_event_t * e)
-{
-	single_mbox = NULL;
-}
-
-lv_obj_t *create_single_msg_box(lv_obj_t *parent, const char *title, const char *txt)
-{
-//	if (single_mbox != NULL)
-//		lv_msgbox_close(single_mbox);
-//
-//	single_mbox = create_msgbox(parent, title, txt);
-//
-//	lv_obj_add_event_cb(single_mbox, single_mbox_clear, LV_EVENT_CL, user_data)
-
-	return single_mbox;
-}
-
 lv_obj_t *create_msgbox_not_connected(void)
 {
 	return create_msgbox(NULL, ATTENTION_STR, "Сетевое соединение не установлено!");
 }
 
-lv_obj_t *create_dialog_box(lv_obj_t *parent, const char *title, const char *txt, const char **btns_txt)
+static void create_dialog_box_accept_handler(lv_event_t * e)
+{
+	lv_obj_t *dialog_box = lv_event_get_current_target(e);
+
+	if (strcmp(lv_msgbox_get_active_btn_text(dialog_box), YES_STR) == 0 && e->user_data != NULL)
+	{
+		void (*fn)();
+		fn = e->user_data;
+		fn();
+	}
+	else
+		lv_msgbox_close(dialog_box);
+}
+
+lv_obj_t *create_dialog_box(lv_obj_t *parent, const char *title, const char *txt, const char **btns_txt, void (*accept)())
 {
 	lv_obj_t *mbox = lv_msgbox_create(parent, title, txt, btns_txt, true);
 	lv_obj_set_style_text_font(lv_msgbox_get_title(mbox), &ubuntu_mono_14, 0);
 	lv_obj_set_style_text_font(lv_msgbox_get_text(mbox), &ubuntu_mono_14, 0);
 	lv_obj_set_style_text_font(lv_msgbox_get_btns(mbox), &ubuntu_mono_14, 0);
 	lv_obj_center(mbox);
+
+	if (accept != NULL)
+		lv_obj_add_event_cb(mbox, create_dialog_box_accept_handler, LV_EVENT_VALUE_CHANGED, accept);
 
 	return mbox;
 }
@@ -167,6 +158,7 @@ lv_obj_t *create_lbl_obj(lv_obj_t *parent, const char* txt,
 		lv_obj_align(obj, align, x_ofs, y_ofs);
 	else
 		lv_obj_align_to(obj, align_to_obj, align, x_ofs, y_ofs);
+
 	lv_obj_set_style_text_color(obj, color, 0);
 	lv_obj_set_style_text_font(obj, font, 0);
 
@@ -204,6 +196,26 @@ void glob_set_bits_status_reg(uint32_t bits)
 void glob_clear_bits_status_reg(uint32_t bits)
 {
 	glob_status_reg &= ~bits;
+}
+
+uint32_t glob_get_update_reg(void)
+{
+	return glob_update_reg;
+}
+
+void glob_set_update_reg(uint32_t reg)
+{
+	glob_update_reg = reg;
+}
+
+void glob_set_bits_update_reg(uint32_t bits)
+{
+	glob_update_reg |= bits;
+}
+
+void glob_clear_bits_update_reg(uint32_t bits)
+{
+	glob_update_reg &= ~bits;
 }
 
 uint32_t glob_get_status_err(void)

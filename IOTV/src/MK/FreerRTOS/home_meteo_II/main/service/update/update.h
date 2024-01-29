@@ -18,6 +18,7 @@
 #include "esp_app_desc.h"
 #include "ota/ota.h"
 
+#include "json/json_config.h"
 #include "Local_Lib/local_lvgl_lib.h"
 
 void update_service_task(void *pvParameters);

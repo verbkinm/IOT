@@ -108,6 +108,8 @@ void datetime2_page_init(void)
 	page_t *page = current_page();
 	page->deinit();
 	page->deinit = datetime2_page_deinit;
+	page->title = page_title(DATETIME2_PAGE_TITLE);
+	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
 

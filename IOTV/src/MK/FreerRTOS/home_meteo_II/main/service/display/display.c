@@ -27,7 +27,7 @@ void service_display_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_UPDATING)
+		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
 		if ((glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON))// && (glob_get_status_reg() & STATUS_TIME_SYNC))

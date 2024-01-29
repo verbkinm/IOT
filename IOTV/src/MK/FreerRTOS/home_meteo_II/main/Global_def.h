@@ -127,6 +127,7 @@
 #define METEO_CHART_PATH	"/sdcard/meteo_chart.json"
 #define METEO_CITY_PATH		"/sdcard/city.json"
 #define METEO_WEEK_PATH		"/sdcard/week.json"
+#define UPDATE_PATH			"/sdcard/update.json"
 
 // Регистры BME280
 enum
@@ -209,10 +210,6 @@ enum STATUS_REG {
 	STATUS_METEO_UPDATE_NOW = 0x0800,
 	STATUS_DISPLAY_NIGHT_MODE_ON = 0x1000,
 	STATUS_TIME_SYNC = 0x2000,
-	STATUS_UPDATING = 0x4000,
-	STATUS_UPDATE_CHECK = 0x8000,
-	STATUS_UPDATE_AVAILABLE = 0x010000,
-	STATUS_UPDATE_DONE = 0x020000,
 };
 
 // Глобалные флаги ошибок
@@ -221,6 +218,17 @@ enum STATUS_ERROR {
 	STATUS_UPDATE_ERROR = 0x0002,
 };
 
+// Глобалные флаги обновления
+
+enum UPDATE_FLAGS {
+	UPDATE_NOW = 0x01,
+	UPDATE_CHECK = 0x02,
+	UPDATE_AVAILABLE = 0x04,
+	UPDATE_DONE = 0x08,
+	UPDATE_MESSAGE = 0x10,
+	UPDATE_MESSAGE_NOW = 0x20,
+	UPDATE_NOTIFICATION = 0x40,
+};
 // json config word
 #define DISPLAY_STR				"display"
 #define ROTATE_STR 				"rotate"

@@ -34,6 +34,8 @@ void menuPageInit(void)
 	page_t *page = current_page();
 	page->deinit();
 	page->deinit = menu_page_deinit;
+	page->title = page_title(MENU_PAGE_TITLE);
+	status_panel_update();
 
     uint8_t pad = 20;
 
