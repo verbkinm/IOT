@@ -116,3 +116,34 @@ double convert_range(double value, double From1, double From2, double To1, doubl
 {
       return (value-From1)/(From2-From1)*(To2-To1)+To1;
 }
+
+void remove_char(char *str, char t)
+{
+	if (str == NULL)
+		return;
+
+    int i, j;
+    i = 0;
+    while( i < strlen(str))
+    {
+        if (str[i] == t)
+        {
+            for (j = i; j < strlen(str); ++j)
+                str[j] = str[j + 1];
+        }
+        else
+            ++i;
+    }
+}
+
+void replace_char(char *str, char from, char to)
+{
+    if (str == NULL)
+        return;
+
+    for (int i = 0; i < strlen(str); ++i)
+    {
+        if (str[i] == from)
+            str[i] = to;
+    }
+}

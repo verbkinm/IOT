@@ -8,7 +8,7 @@
 #include "page.h"
 
 static page_t glob_current_page;
-static char *page_title_str[] = {" ", "Главный экран", "Меню", "Цифровые часы", "Бинарные часы", "Настройки", "График погоды"};
+static char *page_title_str[] = {" ", "Меню", "Главный экран", "Цифровые часы", "Бинарные часы", "Настройки", "График погоды"};
 
 char* page_title(uint8_t num)
 {

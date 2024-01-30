@@ -32,14 +32,14 @@ static void check_update_conf_file(void)
 	cJSON *update = cJSON_CreateObject();
 	cJSON_AddItemToObjectCS(root, "update", update);
 
-	cJSON *on_obj = cJSON_CreateString("1");
-	cJSON_AddItemToObject(update, "on", on_obj);
+	cJSON *update_notification = cJSON_CreateString("1");
+	cJSON_AddItemToObject(update, "notification", update_notification);
 
 	cJSON *url_obj = cJSON_CreateString(url_update_info);
 	cJSON_AddItemToObjectCS(update, "url", url_obj);
 
-	get_update_config_value("on", &on_obj->valuestring);
 	get_update_config_value("url", &url_obj->valuestring);
+	get_update_config_value("notification", &update_notification->valuestring);
 
 	FILE *file = fopen(UPDATE_PATH, "w");
 	if (file == NULL)
@@ -55,21 +55,20 @@ static void check_update_conf_file(void)
 
 static void read_update_conf(void)
 {
-	char *on = NULL;
-	if (get_update_config_value("on", &on))
+	char *buf = NULL;
+	if (get_update_config_value("notification", &buf))
 	{
-		if (strcmp(on, "1") == 0)
+		if (strcmp(buf, "1") == 0)
 			glob_set_bits_update_reg(UPDATE_NOTIFICATION);
-		free(on);
+		free(buf);
 	}
 
-	char *url = NULL;
-	if (get_meteo_config_value("url", &url))
+	if (get_meteo_config_value("url", &buf))
 	{
-		if (url != NULL)
+		if (buf != NULL)
 		{
 //			service_weather_set_city(url);
-			free(url);
+			free(buf);
 		}
 	}
 }

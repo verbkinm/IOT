@@ -111,8 +111,8 @@ lv_obj_t *create_time_block(lv_obj_t *parent, const char *title, lv_coord_t widt
 	char *buf = NULL;
 	uint8_t counter;
 	buf = generate_dropdown_number(0, 59, &counter);
-//	printf("counter: %d\n", (int)counter);
-//	printf("%s", buf);
+	//	printf("counter: %d\n", (int)counter);
+	//	printf("%s", buf);
 
 	// Секунды
 	(*time_block)->s = lv_dropdown_create(wrap);
@@ -189,7 +189,7 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 	return obj;
 }
 
-lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height)
+lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height,  lv_font_t *font)
 {
 	lv_obj_t *btn = lv_btn_create(parent);
 	lv_obj_set_size(btn, width, height);
@@ -197,6 +197,10 @@ lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t wid
 	if (txt != NULL)
 	{
 		lv_obj_t *lbl = lv_label_create(btn);
+		lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
+		lv_obj_set_width(lbl, width);
+		lv_obj_set_style_text_font(lbl, font, 0);
+		lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
 		lv_label_set_text(lbl, txt);
 		lv_obj_center(lbl);
 	}

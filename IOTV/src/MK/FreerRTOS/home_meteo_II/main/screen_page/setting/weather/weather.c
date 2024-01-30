@@ -175,11 +175,11 @@ static void create_city_table(const open_meteo_city_t *open_meteo_city, uint8_t 
 		lv_obj_center(lbl);
 	}
 
-	lv_obj_t *btn_cancel = create_button_simply(main_widget, CANCEL_STR, 128, 40);
+	lv_obj_t *btn_cancel = create_button_simply(main_widget, CANCEL_STR, 128, 40, &ubuntu_mono_14);
 	lv_obj_align(btn_cancel, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
 	lv_obj_add_event_cb(btn_cancel, delete_obj_handler, LV_EVENT_CLICKED, main_widget);
 
-	lv_obj_t *btn_save = create_button_simply(main_widget, SAVE_STR, 128, 40);
+	lv_obj_t *btn_save = create_button_simply(main_widget, SAVE_STR, 128, 40, &ubuntu_mono_14);
 	lv_obj_align_to(btn_save, btn_cancel, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 	lv_obj_add_event_cb(btn_save, city_save_handler, LV_EVENT_CLICKED, widget);
 }

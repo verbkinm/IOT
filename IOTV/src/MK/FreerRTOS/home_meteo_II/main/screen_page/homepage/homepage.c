@@ -222,7 +222,7 @@ static void timer_handler(lv_timer_t *timer)
 {
 	if (glob_get_status_err())
 	{
-		lv_timer_del(timer);
+		lv_timer_pause(timer);
 		return;
 	}
 

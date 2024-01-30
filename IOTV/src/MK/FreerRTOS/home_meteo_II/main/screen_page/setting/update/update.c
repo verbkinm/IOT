@@ -99,13 +99,13 @@ static void switcher_handler(lv_event_t *e)
 
 	if (lv_obj_has_state(switcher_update_notification, LV_STATE_CHECKED))
 	{
-		ret = set_meteo_config_value("update_notification", "1");
+		ret = set_update_config_value("notification", "1");
 		glob_set_bits_update_reg(UPDATE_NOTIFICATION);
 	}
 	else
 	{
 		glob_clear_bits_update_reg(UPDATE_NOTIFICATION);
-		ret = set_meteo_config_value("update_notification", "0");
+		ret = set_update_config_value("notification", "0");
 	}
 
 	if (!ret)

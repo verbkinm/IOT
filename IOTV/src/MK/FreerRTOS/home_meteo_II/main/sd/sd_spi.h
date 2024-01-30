@@ -14,6 +14,7 @@
 #include "Local_Lib/local_lvgl_lib.h"
 
 esp_err_t sd_spi_init(void);
+void sd_spi_space_info(uint32_t *totalKB, uint32_t *availableKB);
 //void sd_spi_deinit(void);
 
 //esp_err_t s_write_file(const char *path, char *data);

@@ -119,6 +119,27 @@ esp_err_t sd_spi_init(void)
 	return ret;
 }
 
+void sd_spi_space_info(uint32_t *totalKB, uint32_t *availableKB)
+{
+	if (totalKB == NULL || availableKB == NULL)
+		return;
+
+	FATFS *fs;
+	uint32_t fre_clust, fre_sect, tot_sect;
+
+	/* Get volume information and free clusters of drive 0 */
+	f_getfree("0:", &fre_clust, &fs);
+	/* Get total sectors and free sectors */
+	tot_sect = (fs->n_fatent - 2) * fs->csize;
+	fre_sect = fre_clust * fs->csize;
+
+	/* Print the free space (assuming 512 bytes/sector) */
+//	printf("%10lu KiB total drive space.\n%10lu KiB available.\n", tot_sect / 2, fre_sect / 2);
+
+	*totalKB = tot_sect / 2;
+	*availableKB = fre_sect / 2;
+}
+
 //void sd_spi_deinit(void)
 //{
 //	const char mount_point[] = MOUNT_POINT;

@@ -15,7 +15,7 @@ static uint32_t glob_update_reg = 0;
 
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
-static char *btns_txt[] = {YES_STR, NO_STR, NULL};
+static const char *btns_txt[] = {YES_STR, NO_STR, NULL};
 
 static void create_dialog_box_accept_handler(lv_event_t * e);
 
@@ -161,6 +161,7 @@ lv_obj_t *create_lbl_obj(lv_obj_t *parent, const char* txt,
 
 	lv_obj_set_style_text_color(obj, color, 0);
 	lv_obj_set_style_text_font(obj, font, 0);
+	lv_obj_set_style_text_align(obj, LV_ALIGN_CENTER, 0);
 
 	return obj;
 }

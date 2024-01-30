@@ -31,6 +31,7 @@ char *url_encode(const char *s);
 char *url_decode(const char *str);
 
 double convert_range(double value, double From1, double From2, double To1, double To2);
-
+void remove_char(char *str, char t);
+void replace_char(char *str, char from, char to);
 
 #endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H_ */

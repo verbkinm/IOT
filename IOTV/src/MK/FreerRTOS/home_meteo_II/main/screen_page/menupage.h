@@ -16,6 +16,9 @@
 #include "Global_def.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "screen_page/page.h"
+#include "screen_page/datetime1/datetime1.h"
+#include "screen_page/datetime2/datetime2.h"
+#include "screen_page/meteo_chart/meteo_chart.h"
 #include "status_panel/status_panel.h"
 
 void menuPageInit(void);

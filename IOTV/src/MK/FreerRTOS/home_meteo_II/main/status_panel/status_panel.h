@@ -13,6 +13,7 @@
 #include "screen_page/menupage.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "screen_page/setting/elements.h"
+#include "sd/sd_spi.h"
 
 void status_panel_init(void);
 void status_panel_update(void);

@@ -12,8 +12,10 @@
 #include "Global_def.h"
 #include "Local_Lib/local_lib.h"
 #include "status_panel/status_panel.h"
+#include "screen_page/startscreen/startscreen.h"
 #include "screen_page/homepage/homepage.h"
 #include "screen_page/full_screen_page/full_screen_page.h"
+#include "service/service.h"
 
 void GUI_manager_init(void);
 

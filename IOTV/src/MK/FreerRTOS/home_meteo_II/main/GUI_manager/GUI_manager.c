@@ -12,6 +12,8 @@ static lv_obj_t *singel_msgbox;
 
 // Обработка сообщений из вне LVGL
 static void timer_handler(lv_timer_t *timer);
+static void timer_startscreen_end_handler(lv_timer_t *timer);
+
 static void update_handler(lv_event_t * e);
 static void msgbox_close_handler(lv_event_t * e);
 
@@ -33,6 +35,36 @@ static void update_handler(lv_event_t * e)
 	}
 	else
 		lv_msgbox_close(dialog_box);
+}
+
+static void timer_startscreen_end_handler(lv_timer_t *timer)
+{
+	lv_timer_del(timer);
+	lv_obj_del(lv_obj_get_child(lv_scr_act(), 0));
+
+	lv_obj_set_style_pad_all(lv_scr_act(), 0, 0);
+
+	// Верхняя панель
+	status_panel_init();
+
+	// Основной виджет
+	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
+	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
+	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
+	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
+	lv_obj_set_style_pad_all(main_widget, 0, 0);
+	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
+
+	page_t *page = current_page();
+	page->title = NULL;
+	page->widget = main_widget;
+	page->deinit = default_page_deinit;
+
+	start_services();
+	homePageInit();
+
+	lv_timer_t *gui_manager_timer = lv_timer_create(timer_handler, 1000, 0);
+	lv_timer_ready(gui_manager_timer);
 }
 
 static void timer_handler(lv_timer_t *timer)
@@ -83,26 +115,6 @@ static void msgbox_close_handler(lv_event_t * e)
 
 void GUI_manager_init(void)
 {
-	lv_obj_set_style_pad_all(lv_scr_act(), 0, 0);
-
-	// Верхняя панель
-	status_panel_init();
-
-	// Основной виджет
-	lv_obj_t *main_widget = lv_obj_create(lv_scr_act());
-	lv_obj_set_size(main_widget, LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H);
-	lv_obj_set_y(main_widget, LCD_PANEL_STATUS_H);
-	lv_obj_set_scroll_dir(main_widget, LV_DIR_NONE);
-	lv_obj_set_style_pad_all(main_widget, 0, 0);
-	lv_obj_add_style(main_widget, screenStyleDefault(), 0);
-
-	page_t *page = current_page();
-	page->title = NULL;
-	page->widget = main_widget;
-	page->deinit = default_page_deinit;
-
-	homePageInit();
-
-	lv_timer_t *timer = lv_timer_create(timer_handler, 1000, 0);
-	lv_timer_ready(timer);
+	startscreen_init();
+	lv_timer_create(timer_startscreen_end_handler, 8000, 0);
 }
