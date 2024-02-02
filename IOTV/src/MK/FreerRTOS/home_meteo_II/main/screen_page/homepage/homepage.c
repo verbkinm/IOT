@@ -19,7 +19,7 @@ static lv_obj_t *block_0, *block_1, *block_2;
 //Блок 0
 lv_obj_t *time_lbl, *date_lbl;
 //Блок 1
-lv_obj_t *temperature1_lbl, *humidity1_lbl, *pressure1_lbl;
+lv_obj_t *temperature1_lbl, *humidity1_lbl, *pressure1_lbl, *pressure1_lbl_prefix;
 //Блок 2
 lv_obj_t *city_lbl, *last_update_lbl, *cloud_codver_img, *precipitations_img, *wind_direction_img,
 *cloud_cover_lbl, *wind_speed_lbl, *wind_direction_lbl, *temperature2_lbl, *humidity2_lbl, *pressure2_lbl,
@@ -237,7 +237,8 @@ static void timer_handler(lv_timer_t *timer)
 	const struct THP *thp = BME280_service_get_value();
 	lv_label_set_text_fmt(temperature1_lbl, "%+.1f°C", thp->temperature);
 	lv_label_set_text_fmt(humidity1_lbl, "%.0f %%", thp->humidity);
-	lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->humidity);
+	lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
+	lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
 
 	draw_meteo_data();
 }
@@ -269,7 +270,7 @@ static void init_block_1(lv_obj_t *parent)
 
 	lv_obj_t *pressure_img = create_img_obj(block_1, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
 	pressure1_lbl = create_lbl_obj(block_1, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-	create_lbl_obj(block_1, "мм.рт.ст.", pressure1_lbl, LV_ALIGN_OUT_BOTTOM_RIGHT, 70, -35, lv_color_white(), &ubuntu_mono_26);
+	pressure1_lbl_prefix = create_lbl_obj(block_1, "мм.рт.ст.", pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_add_event_cb(block_1, event_handler_block_1, LV_EVENT_CLICKED, 0);
 }
