@@ -197,11 +197,11 @@ static void TFT_touch_panel_init(void)
 	const esp_lcd_touch_config_t tp_cfg = {
 			.x_max = LCD_H_RES,
 			.y_max = LCD_V_RES,
-			.rst_gpio_num = GPIO_NUM_38,
-			.int_gpio_num = GPIO_NUM_18,
+			.rst_gpio_num = PIN_TOUCH_RST,
+			.int_gpio_num = GPIO_NUM_NC,
 			.levels = {
 					.reset = 0,
-					.interrupt = 1,
+					.interrupt = 0,
 			},
 			.flags = {
 					.swap_xy = 0,

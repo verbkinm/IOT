@@ -13,6 +13,6 @@ void start_services(void)
 	xTaskCreate(weather_service_task, "weather_service_task", 8192, 0, 10, 0);
 	xTaskCreate(service_display_task, "display_service_task", 4096, 0, 10, 0);
 
-//	xTaskCreate(BME280_service_task, "BME280_service_task", 4096, 0, 10, 0);
+	xTaskCreate(BME280_service_task, "BME280_service_task", 4096, 0, 10, 0);
 	xTaskCreate(update_service_task, "update_service_task", 4096, 0, 1, 0);
 }

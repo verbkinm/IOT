@@ -28,7 +28,7 @@ void BME280_service_task(void *pvParameters)
 
 		thp = BME280_readValues();
 
-		vTaskDelay(5000 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

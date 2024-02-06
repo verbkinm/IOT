@@ -17,60 +17,65 @@
 #define I2C_MASTER_RX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_TIMEOUT_MS      			1000
 
+// P3
+#define	P3_VCC								GPIO_NUM_17
+#define	P3_GND								GPIO_NUM_18
+
 // Адреса i2c устройств
 #define BME280_ADDR                			0x76
 #define DS3231_ADDR							0x68
 
 // SPI
-#define	SPI_NUM_MOSI			11
-#define	SPI_NUM_MISO			13
-#define	SPI_NUM_SCK				12
-#define	SPI_NUM_CS				10
+#define	SPI_NUM_CS							10
+#define	SPI_NUM_MOSI						11
+#define	SPI_NUM_MISO						13
+#define	SPI_NUM_SCK							12
 
 // TFT
-#define LCD_PIXEL_CLOCK_HZ     (18 * 1000 * 1000)
-#define LCD_BK_LIGHT_ON_LEVEL  1
-#define LCD_BK_LIGHT_OFF_LEVEL !LCD_BK_LIGHT_ON_LEVEL
-#define PIN_NUM_BK_LIGHT       2
-#define PIN_NUM_HSYNC          39
-#define PIN_NUM_VSYNC          41
-#define PIN_NUM_DE             40
-#define PIN_NUM_PCLK           42
-#define PIN_NUM_DATA0          8  // B0
-#define PIN_NUM_DATA1          3  // B1
-#define PIN_NUM_DATA2          46 // B2
-#define PIN_NUM_DATA3          9  // B3
-#define PIN_NUM_DATA4          1  // B4
-#define PIN_NUM_DATA5          5  // G0
-#define PIN_NUM_DATA6          6  // G1
-#define PIN_NUM_DATA7          7  // G2
-#define PIN_NUM_DATA8          15 // G3
-#define PIN_NUM_DATA9          16 // G4
-#define PIN_NUM_DATA10         4  // G5
-#define PIN_NUM_DATA11         45 // R0
-#define PIN_NUM_DATA12         48 // R1
-#define PIN_NUM_DATA13         47 // R2
-#define PIN_NUM_DATA14         21 // R3
-#define PIN_NUM_DATA15         14 // R4
-#define PIN_NUM_DISP_EN        -1
+#define LCD_PIXEL_CLOCK_HZ     				(18 * 1000 * 1000)
+#define LCD_BK_LIGHT_ON_LEVEL 				1
+#define LCD_BK_LIGHT_OFF_LEVEL 				!LCD_BK_LIGHT_ON_LEVEL
+#define PIN_NUM_BK_LIGHT       				GPIO_NUM_2
+#define PIN_NUM_HSYNC          				GPIO_NUM_39
+#define PIN_NUM_VSYNC          				GPIO_NUM_41
+#define PIN_NUM_DE             				GPIO_NUM_40
+#define PIN_NUM_PCLK           				GPIO_NUM_42
+#define PIN_NUM_DATA0          				GPIO_NUM_8  // B0
+#define PIN_NUM_DATA1          				GPIO_NUM_3  // B1
+#define PIN_NUM_DATA2          				GPIO_NUM_46 // B2
+#define PIN_NUM_DATA3          				GPIO_NUM_9  // B3
+#define PIN_NUM_DATA4          				GPIO_NUM_1  // B4
+#define PIN_NUM_DATA5          				GPIO_NUM_5  // G0
+#define PIN_NUM_DATA6          				GPIO_NUM_6  // G1
+#define PIN_NUM_DATA7        				GPIO_NUM_7  // G2
+#define PIN_NUM_DATA8          				GPIO_NUM_15 // G3
+#define PIN_NUM_DATA9          				GPIO_NUM_16 // G4
+#define PIN_NUM_DATA10         				GPIO_NUM_4  // G5
+#define PIN_NUM_DATA11         				GPIO_NUM_45 // R0
+#define PIN_NUM_DATA12        				GPIO_NUM_48 // R1
+#define PIN_NUM_DATA13         				GPIO_NUM_47 // R2
+#define PIN_NUM_DATA14         				GPIO_NUM_21 // R3
+#define PIN_NUM_DATA15         				GPIO_NUM_14 // R4
+#define PIN_NUM_DISP_EN        				GPIO_NUM_NC
+#define PIN_TOUCH_RST						GPIO_NUM_38
 
 // The pixel number in horizontal and vertical
-#define LCD_H_RES              800
-#define LCD_V_RES              480
+#define LCD_H_RES              				800
+#define LCD_V_RES              				480
 
-#define LCD_NUM_FB             1
+#define LCD_NUM_FB             				1
 
-#define LVGL_TICK_PERIOD_MS    5
-#define LCD_PANEL_STATUS_H	   42
+#define LVGL_TICK_PERIOD_MS    				5
+#define LCD_PANEL_STATUS_H	   				42
 
 // Для регулировки яркости дисплея
-#define LEDC_TIMER              LEDC_TIMER_0
-#define LEDC_MODE               LEDC_LOW_SPEED_MODE
-#define LEDC_OUTPUT_IO          PIN_NUM_BK_LIGHT
-#define LEDC_CHANNEL            LEDC_CHANNEL_0
-#define LEDC_DUTY_RES           LEDC_TIMER_8_BIT
-#define LEDC_DUTY               (64) // Set duty to 50%. ((2 ** 8) - 1) * 50%
-#define LEDC_FREQUENCY          (120) // Frequency in Hertz.
+#define LEDC_TIMER             				LEDC_TIMER_0
+#define LEDC_MODE              				LEDC_LOW_SPEED_MODE
+#define LEDC_OUTPUT_IO          			PIN_NUM_BK_LIGHT
+#define LEDC_CHANNEL            			LEDC_CHANNEL_0
+#define LEDC_DUTY_RES           			LEDC_TIMER_8_BIT
+#define LEDC_DUTY               			(64) // Set duty to 50%. ((2 ** 8) - 1) * 50%
+#define LEDC_FREQUENCY          			(120) // Frequency in Hertz.
 
 // FS PATH
 #define	SD_ON				"A:/sdcard/panel/sd_on.png"

@@ -235,8 +235,8 @@ static void timer_handler(lv_timer_t *timer)
 	drawDate(&timeinfo);
 
 	const struct THP *thp = BME280_service_get_value();
-	lv_label_set_text_fmt(temperature1_lbl, "%+.1f°C", thp->temperature);
-	lv_label_set_text_fmt(humidity1_lbl, "%.0f %%", thp->humidity);
+	lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
+	lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
 	lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
 	lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
 
@@ -266,11 +266,11 @@ static void init_block_1(lv_obj_t *parent)
 	temperature1_lbl = create_lbl_obj(block_1, "0.0°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
 	lv_obj_t *humidity_img = create_img_obj(block_1, HUMIDITY, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
-	humidity1_lbl = create_lbl_obj(block_1, "0 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+	humidity1_lbl = create_lbl_obj(block_1, "0 %%", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
 	lv_obj_t *pressure_img = create_img_obj(block_1, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
 	pressure1_lbl = create_lbl_obj(block_1, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-	pressure1_lbl_prefix = create_lbl_obj(block_1, "мм.рт.ст.", pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
+	pressure1_lbl_prefix = create_lbl_obj(block_1, "мм рт.ст.", pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_add_event_cb(block_1, event_handler_block_1, LV_EVENT_CLICKED, 0);
 }
