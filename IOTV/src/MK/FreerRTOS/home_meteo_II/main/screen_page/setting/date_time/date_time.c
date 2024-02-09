@@ -6,7 +6,6 @@
  */
 
 #include "date_time.h"
-//#include "settingpage.h"
 
 extern lv_obj_t *menu;
 

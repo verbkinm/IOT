@@ -35,12 +35,9 @@ static void timer_loop(lv_timer_t *timer)
 {
 	struct THP thp = BME280_readValues_without_calibration();
 
-	if (thp.err != true)
-	{
-		thp.temperature += thp.temperature / 100 * tmp_temperature_calib_per;
-		thp.humidity += thp.humidity / 100 * tmp_humidity_calib_per;
-		thp.pressure += thp.pressure / 100 * tmp_pressure_calib_per;
-	}
+	thp.temperature += thp.temperature / 100 * tmp_temperature_calib_per;
+	thp.humidity += thp.humidity / 100 * tmp_humidity_calib_per;
+	thp.pressure += thp.pressure / 100 * tmp_pressure_calib_per;
 
 	lv_label_set_text_fmt(lbl_cur_temp, "%+.2f°C", thp.temperature);
 	lv_label_set_text_fmt(lbl_cur_hum, "%.2f %%", thp.humidity);

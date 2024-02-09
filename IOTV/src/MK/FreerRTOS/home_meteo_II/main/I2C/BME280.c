@@ -125,6 +125,7 @@ struct THP BME280_readValues_without_calibration()
 		thp.humidity = INFINITY;
 		thp.pressure = INFINITY;
 		thp.err = true;
+
 		return thp;
 	}
 

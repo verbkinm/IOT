@@ -66,3 +66,28 @@ void DS3231_SetDataTime_tm(const struct tm *t)
 
 	DS3231_SetDataTime(&dt);
 }
+
+void DS3231_set_system_time(void)
+{
+	struct DateTime dt = DS3231_DataTime();
+
+	if (dt.err)
+		return;
+
+	time_t now;
+	time(&now);
+
+	struct tm timeinfo = *localtime(&now);
+
+	timeinfo.tm_sec = dt.seconds;
+	timeinfo.tm_min = dt.minutes;
+	timeinfo.tm_hour = dt.hour;
+	timeinfo.tm_mday = dt.date;
+	timeinfo.tm_mon = dt.month;
+	timeinfo.tm_year = dt.year + 2000 - 1900;
+	timeinfo.tm_wday = dt.day;
+
+	now = mktime(&timeinfo);
+	struct timeval tv = {.tv_sec = now};
+	settimeofday(&tv, NULL);
+}
