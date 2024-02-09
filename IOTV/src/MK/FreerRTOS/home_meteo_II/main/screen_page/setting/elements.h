@@ -30,7 +30,8 @@ typedef struct Time_block time_block_t;
 
 char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count);
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant);
-lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, uint8_t data, uint8_t min, uint8_t max);
+lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, int16_t data, int16_t min, int16_t max,
+		lv_obj_t **spin_box, lv_obj_t **btn_minus, lv_obj_t **btn_plus);
 lv_obj_t *create_slider(lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, lv_obj_t **slider);
 lv_obj_t *create_switch(lv_obj_t * parent, const char * icon, const char * txt, bool chk, lv_obj_t **switch_obj);
 lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height, lv_obj_t **obj_btn);

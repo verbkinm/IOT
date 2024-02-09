@@ -52,6 +52,16 @@ bool get_meteo_config_value(const char *key, char **value)
 	return get_config_value(METEO_CONF_PATH, "meteo", key, value);
 }
 
+bool set_bme280_config_value(const char *key, const char *value)
+{
+	return set_config_value(SENSORS_PATH, THP_STR, key, value);
+}
+
+bool get_bme280_config_value(const char *key, char **value)
+{
+	return get_config_value(SENSORS_PATH, THP_STR, key, value);
+}
+
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value)
 {
 	FILE *file = fopen(file_path, "r");

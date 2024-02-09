@@ -24,6 +24,7 @@
 #include "screen_page/setting/weather/weather.h"
 #include "screen_page/setting/display/display.h"
 #include "screen_page/setting/update/update.h"
+#include "screen_page/setting/sensors/sensors.h"
 #include "TFT_touchscreen/TFT_touch_screen.h"
 #include "screen_page/page.h"
 #include "status_panel/status_panel.h"

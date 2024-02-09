@@ -232,7 +232,8 @@ void lv_spinbox_decrement_event_cb(lv_event_t * e)
 	}
 }
 
-lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, uint8_t data, uint8_t min, uint8_t max)
+lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, int16_t data, int16_t min, int16_t max,
+		lv_obj_t **spin_box, lv_obj_t **btn_minus, lv_obj_t **btn_plus)
 {
 	lv_obj_t *obj = lv_menu_cont_create(parent);
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
@@ -247,26 +248,26 @@ lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, uint8_t data, uint8_t min
 	lv_label_set_text(lbl, text);
 	lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
 
-	lv_obj_t *spin_box = lv_spinbox_create(wrap);
-	lv_obj_set_width(spin_box, 50);
-	lv_spinbox_set_range(spin_box, min, max);
-	lv_spinbox_set_digit_format(spin_box, 2, 0);
-	lv_spinbox_set_value(spin_box, data);
+	*spin_box = lv_spinbox_create(wrap);
+	lv_obj_set_width(*spin_box, 50);
+	lv_spinbox_set_range(*spin_box, min, max);
+	lv_spinbox_set_digit_format(*spin_box, 2, 0);
+	lv_spinbox_set_value(*spin_box, data);
 	//	lv_spinbox_step_prev(spin_box);
-	lv_obj_center(spin_box);
-	int32_t h = lv_obj_get_height(spin_box);
+	lv_obj_center(*spin_box);
+	int32_t h = lv_obj_get_height(*spin_box);
 
-	lv_obj_t *btn = lv_btn_create(wrap);
-	lv_obj_set_size(btn, h, h);
-	lv_obj_align_to(btn, spin_box, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
-	lv_obj_set_style_bg_img_src(btn, LV_SYMBOL_PLUS, 0);
-	lv_obj_add_event_cb(btn, lv_spinbox_increment_event_cb, LV_EVENT_ALL,  spin_box);
+	*btn_plus = lv_btn_create(wrap);
+	lv_obj_set_size(*btn_plus, h, h);
+	lv_obj_align_to(*btn_plus, *spin_box, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
+	lv_obj_set_style_bg_img_src(*btn_plus, LV_SYMBOL_PLUS, 0);
+	lv_obj_add_event_cb(*btn_plus, lv_spinbox_increment_event_cb, LV_EVENT_ALL,  *spin_box);
 
-	btn = lv_btn_create(wrap);
-	lv_obj_set_size(btn, h, h);
-	lv_obj_align_to(btn, spin_box, LV_ALIGN_OUT_LEFT_MID, -5, 0);
-	lv_obj_set_style_bg_img_src(btn, LV_SYMBOL_MINUS, 0);
-	lv_obj_add_event_cb(btn, lv_spinbox_decrement_event_cb, LV_EVENT_ALL, spin_box);
+	*btn_minus = lv_btn_create(wrap);
+	lv_obj_set_size(*btn_minus, h, h);
+	lv_obj_align_to(*btn_minus, *spin_box, LV_ALIGN_OUT_LEFT_MID, -5, 0);
+	lv_obj_set_style_bg_img_src(*btn_minus, LV_SYMBOL_MINUS, 0);
+	lv_obj_add_event_cb(*btn_minus, lv_spinbox_decrement_event_cb, LV_EVENT_ALL, *spin_box);
 
 	return obj;
 }

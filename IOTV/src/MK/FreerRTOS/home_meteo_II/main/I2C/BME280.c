@@ -5,6 +5,10 @@ static const char *TAG = "BME280";
 static int32_t _t_fine;
 static bool BME280_state = false;
 
+static int8_t temperature_calib_per;
+static int8_t humidity_calib_per;
+static int8_t pressure_calib_per;
+
 static void BME280_writeReg(uint8_t reg, uint8_t value);
 static uint8_t BME280_readReg(uint8_t reg);
 
@@ -80,6 +84,35 @@ static uint8_t BME280_readReg(uint8_t reg)
 }
 
 struct THP BME280_readValues()
+{
+	struct THP thp = {.err = false};
+
+	if (BME280_state == false)
+		BME280_init();
+
+	if (BME280_state == false)
+	{
+		thp.temperature = INFINITY;
+		thp.humidity = INFINITY;
+		thp.pressure = INFINITY;
+		thp.err = true;
+		return thp;
+	}
+
+	thp.temperature = BME280_temperature();
+	thp.temperature += thp.temperature / 100 * temperature_calib_per;
+
+	thp.humidity = BME280_humidity();
+	thp.humidity += thp.humidity / 100 * humidity_calib_per;
+
+	thp.pressure = BME280_pressure();
+	thp.pressure += thp.pressure / 100 * pressure_calib_per;
+	thp.pressure *= 0.0075; // паскали в мм рт.ст.
+
+	return thp;
+}
+
+struct THP BME280_readValues_without_calibration()
 {
 	struct THP thp = {.err = false};
 
@@ -225,3 +258,34 @@ static double BME280_humidity(void)
 
 	return var_H;
 }
+
+int8_t BME280_get_calib_temperature()
+{
+	return temperature_calib_per;
+}
+
+int8_t BME280_get_calib_humidity()
+{
+	return humidity_calib_per;
+}
+
+int8_t BME280_get_calib_pressure()
+{
+	return pressure_calib_per;
+}
+
+void BME280_set_calib_temperature(int8_t val)
+{
+	temperature_calib_per = val;
+}
+
+void BME280_set_calib_humidity(int8_t val)
+{
+	humidity_calib_per = val;
+}
+
+void BME280_set_calib_pressure(int8_t val)
+{
+	pressure_calib_per = val;
+}
+

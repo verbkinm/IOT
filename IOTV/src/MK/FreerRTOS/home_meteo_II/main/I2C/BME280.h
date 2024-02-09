@@ -18,5 +18,14 @@ void BME280_init(void);
 void BME280_deinit(void);
 
 struct THP BME280_readValues();
+struct THP BME280_readValues_without_calibration();
+
+int8_t BME280_get_calib_temperature();
+int8_t BME280_get_calib_humidity();
+int8_t BME280_get_calib_pressure();
+
+void BME280_set_calib_temperature(int8_t val);
+void BME280_set_calib_humidity(int8_t val);
+void BME280_set_calib_pressure(int8_t val);
 
 #endif /* MAIN_BME280_H_ */

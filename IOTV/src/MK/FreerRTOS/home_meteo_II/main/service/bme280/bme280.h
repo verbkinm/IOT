@@ -11,11 +11,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "Global_def.h"
+#include "json/json_config.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "I2C/BME280.h"
 
 void BME280_service_task(void *pvParameters);
 const struct THP *BME280_service_get_value(void);
+
+void BME280_service_save_calibrations(void);
 
 #endif /* MAIN_SERVICE_BME280_BME280_H_ */

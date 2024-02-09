@@ -69,6 +69,7 @@
 #define LCD_PANEL_STATUS_H	   				42
 
 // Для регулировки яркости дисплея
+
 #define LEDC_TIMER             				LEDC_TIMER_0
 #define LEDC_MODE              				LEDC_LOW_SPEED_MODE
 #define LEDC_OUTPUT_IO          			PIN_NUM_BK_LIGHT
@@ -125,6 +126,7 @@
 #define UPDATE_OK			"A:/sdcard/img/update_ok.png"
 #define UPDATE_FAIL			"A:/sdcard/img/update_fail.png"
 
+// Пути конфигурационных файлов
 #define WIFI_CONF_PATH		"/sdcard/wifi.json"
 #define SNTP_CONF_PATH		"/sdcard/sntp.json"
 #define DISPLAY_PATH		"/sdcard/disp.json"
@@ -133,6 +135,7 @@
 #define METEO_CITY_PATH		"/sdcard/city.json"
 #define METEO_WEEK_PATH		"/sdcard/week.json"
 #define UPDATE_PATH			"/sdcard/update.json"
+#define SENSORS_PATH		"/sdcard/sensors.json"
 
 // Регистры BME280
 enum
@@ -234,7 +237,9 @@ enum UPDATE_FLAGS {
 	UPDATE_MESSAGE_NOW = 0x20,
 	UPDATE_NOTIFICATION = 0x40,
 };
+
 // json config word
+
 #define DISPLAY_STR				"display"
 #define ROTATE_STR 				"rotate"
 #define BRIGHTNESS_STR			"brightness"
@@ -243,5 +248,10 @@ enum UPDATE_FLAGS {
 #define BRIGHTNESS_NIGHT_STR	"b_night"
 #define DAY_BEGIN_STR			"d_begin"
 #define NIGHT_BEGIN_STR			"n_begin"
+
+#define THP_STR					"thp"
+#define THP_T_CALIB_STR			"t_calib"
+#define THP_H_CALIB_STR			"h_calib"
+#define THP_P_CALIB_STR			"p_calib"
 
 #endif /* MAIN_GLOBAL_DEF_H_ */
