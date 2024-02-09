@@ -591,8 +591,8 @@ void weather_service_task(void *pvParameters)
 	check_meteo_conf_file();
 	read_meteo_conf();
 
-	const uint8_t COUNTER_WEATHER = 60;
-	uint8_t counter = COUNTER_WEATHER;
+	const uint16_t COUNTER_WEATHER = 60 * 15; // раз в 15 минут
+	uint16_t counter = COUNTER_WEATHER;
 
 	for( ;; )
 	{

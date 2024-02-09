@@ -174,7 +174,7 @@ void update_service_task(void *pvParameters)
 
 	strcpy(available_version, default_version);
 
-	const uint16_t COUNTER_CHECK_UPDATE = 60 * 60;
+	const uint16_t COUNTER_CHECK_UPDATE = 60 * 60; // раз в 1 час
 	uint16_t counter = COUNTER_CHECK_UPDATE;
 
 	for( ;; )
