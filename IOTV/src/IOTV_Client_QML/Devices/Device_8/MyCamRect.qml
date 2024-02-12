@@ -74,6 +74,8 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: playButton
+                height: 64
+                width: 64
 
                 image_origin: "qrc:/img/id_8/play.png"
                 image_invert: "qrc:/img/id_8/play_white.png"
@@ -95,6 +97,8 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: stopButton
+                height: 64
+                width: 64
 
                 highlighted: true
 
@@ -118,6 +122,9 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: volumeButton
+                height: 64
+                width: 64
+
                 enabled: false
                 highlighted: false
 
@@ -140,6 +147,9 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: rotateButton
+                height: 64
+                width: 64
+
                 highlighted: false
 
                 image_origin: "qrc:/img/id_8/repeate_on.png"
@@ -152,6 +162,10 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: mirrorButton
+
+                height: 64
+                width: 64
+
                 highlighted: false
 
                 image_origin: "qrc:/img/id_8/mirror.png"
