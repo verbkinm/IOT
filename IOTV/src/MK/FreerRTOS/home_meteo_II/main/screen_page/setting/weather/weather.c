@@ -335,13 +335,13 @@ static void city_save_handler(lv_event_t *e)
 	char *latitude = lv_label_get_text(lv_obj_get_child(latitude_cell, 0));
 	char *longitude = lv_label_get_text(lv_obj_get_child(longitude_cell, 0));
 
-	set_meteo_config_value("city", city_name);
+	set_meteo_config_value(CITY_STR, city_name);
 	service_weather_set_city(city_name);
 	set_meteo_config_value("latitude", latitude);
 	set_meteo_config_value("longitude", longitude);
 
 	lv_label_set_text_fmt(weather_page_obj->cur_data_lbl, "%s\n%s\n%s",
-			city_name == NULL ? "city" : city_name,
+			city_name == NULL ? CITY_STR : city_name,
 					latitude == NULL ? "0" : latitude,
 							longitude == NULL ? "0" : longitude);
 	lv_obj_del(table->parent);
@@ -410,12 +410,12 @@ void create_weather_sub_page(lv_event_t *e)
 	char *latitude = NULL;
 	char *longitude = NULL;
 
-	get_meteo_config_value("city", &city);
+	get_meteo_config_value(CITY_STR, &city);
 	get_meteo_config_value("latitude", &latitude);
 	get_meteo_config_value("longitude", &longitude);
 
 	lv_label_set_text_fmt(weather_page_obj->cur_data_lbl, "%s\n%s\n%s",
-			city == NULL ? "city" : city,
+			city == NULL ? CITY_STR : city,
 					latitude == NULL ? "0" : latitude,
 							longitude == NULL ? "0" : longitude);
 

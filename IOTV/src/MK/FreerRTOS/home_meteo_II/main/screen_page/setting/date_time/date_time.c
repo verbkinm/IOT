@@ -50,9 +50,9 @@ void create_time_page(void)
 	localtime_r(&now, &timeinfo);
 
 	lv_obj_t *obj, *btn_minus, *btn_plus;;
-	create_spinbox(section, "Часы:", timeinfo.tm_hour, 0, 23, &obj, &btn_minus, &btn_plus);
-	create_spinbox(section, "Минуты:", timeinfo.tm_min, 0, 59, &obj, &btn_minus, &btn_plus);
-	create_spinbox(section, "Секунды:", timeinfo.tm_sec, 0, 59, &obj, &btn_minus, &btn_plus);
+	create_spinbox(section, "Часы:", timeinfo.tm_hour, 0, 23, 2, 0, &obj, &btn_minus, &btn_plus, 50, 45);
+	create_spinbox(section, "Минуты:", timeinfo.tm_min, 0, 59, 2, 0, &obj, &btn_minus, &btn_plus, 50, 45);
+	create_spinbox(section, "Секунды:", timeinfo.tm_sec, 0, 59, 2, 0, &obj, &btn_minus, &btn_plus, 50, 45);
 
 	lv_obj_t *obj_btn = NULL;
 	create_button(section, SAVE_STR, 128, 40, &obj_btn);

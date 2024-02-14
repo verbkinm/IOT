@@ -20,6 +20,8 @@
 #define YES_STR 		"Да"
 #define NO_STR 			"Нет"
 #define RESET_STR		"Сбросить"
+#define HG_STR			"мм рт.ст."
+#define CITY_STR		"city"
 
 lv_obj_t *create_busy_indicator(lv_obj_t *parent, lv_coord_t bg_w, lv_coord_t bg_h, lv_coord_t i_w, lv_coord_t i_h, lv_opa_t opa);
 lv_obj_t *create_keyboard(lv_obj_t *parent, lv_align_t align, lv_obj_t *textarea,

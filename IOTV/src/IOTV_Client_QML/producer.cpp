@@ -1,19 +1,49 @@
 #include "producer.h"
-//#include "fstream"
+#include "qmediarecorder.h"
+
 
 Producer::Producer(QObject *parent):QObject(parent), _mirrored(false)
 {
-    QAudioFormat format;
-    // Set up the format, eg.
-    format.setSampleRate(44100);
-    format.setChannelCount(1);
-    format.setSampleFormat(QAudioFormat::Int32);
+    //    QAudioFormat format;
+    //    // Set up the format, eg.
+    //    format.setSampleRate(44100);
+    //    format.setChannelCount(1);
+    //    format.setSampleFormat(QAudioFormat::Int32);
 
-    QAudioOutput *audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
-    QAudioSink *sink = new QAudioSink(audioOut->device(), format, this);
+    //    QAudioOutput *audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
+    //    QAudioSink *sink = new QAudioSink(audioOut->device(), format, this);
 
-    devOut = sink->start();
-    audioOut->setVolume(1.0);
+    //    devOut = sink->start();
+    //    audioOut->setVolume(1.0);
+
+
+    session = new QMediaCaptureSession;
+    session->setVideoSink(m_videoSink);
+    //    session->setCamera(camera);
+    recorder = new QMediaRecorder(this);//(camera);
+    session->setRecorder(recorder);
+
+    //    camera->start();
+
+    // setup output format for the recorder
+    QMediaFormat format;
+    format.setVideoCodec(QMediaFormat::VideoCodec::H264);
+    //    format.setAudioCodec(QMediaFormat::AudioCodec::MP3);
+    format.setFileFormat(QMediaFormat::AVI);
+    //    recorder->setVideoResolution({1280, 720});
+    //    recorder->setVideoBitRate(3800);
+    //    recorder->setVideoFrameRate(0);
+    //    recorder->setQuality(QMediaRecorder::VeryHighQuality);
+    recorder->setMediaFormat(format);
+
+    //on shutter button pressed
+    recorder->record();
+
+}
+
+Producer::~Producer()
+{
+    recorder->stop();
 }
 
 QVideoSink *Producer::videoSink() const
@@ -34,6 +64,7 @@ void Producer::handleTimeout()
 {
     if(!m_videoSink)
         return;
+
     QVideoFrame video_frame(QVideoFrameFormat(QSize(640, 480),QVideoFrameFormat::Format_BGRA8888));
     if(!video_frame.isValid() || !video_frame.map(QVideoFrame::WriteOnly)){
         qWarning() << "QVideoFrame is not valid or not writable";
@@ -57,13 +88,13 @@ void Producer::handleTimeout()
 
 void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
 {
-    qDebug() << "data" << w << h << data->data().size();
-
     if (w == 0 || h == 0 || data == nullptr)
         return;
 
-//    std::ofstream file("image2.jpg");
-//    file.write(data->data().data(), data->data().size());
+    qDebug() << "data" << w << h << data->data().size();
+
+    //    std::ofstream file("image2.jpg");
+    //    file.write(data->data().data(), data->data().size());
 
     QByteArray ba = data->data();
     QBuffer buf(&ba);
@@ -71,7 +102,26 @@ void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
 
     QImage img;
     img.loadFromData(ba);
-//    img.save("image.jpg");
+
+//    imageCapture->imageCaptured(0, img);
+
+
+    int _w = img.width();
+    int _h = img.height();
+
+    for (int y = 0; y < _h; ++y)
+    {
+        for(int x = 0; x < _w; ++x)
+        {
+            QColor pixel = img.pixel(x, y);
+            int newVal = std::clamp(pixel.hue() + 0, 0, 255);
+            pixel.setHsl(pixel.hue(), pixel.saturation(), pixel.lightness() , pixel.alpha());
+            img.setPixel(x, y, pixel.rgba());
+        }
+    }
+
+
+    //    img.save("image.jpg");
 
 
     QVideoFrame video_frame(QVideoFrameFormat(img.size(), QVideoFrameFormat::pixelFormatFromImageFormat(img.format())));
@@ -94,6 +144,8 @@ void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
         video_frame.setMirrored(_mirrored);
 
     m_videoSink->setVideoFrame(video_frame);
+
+//    imageCapture->imageAvailable(0, video_frame);
 }
 
 void Producer::slotDataAudioFrame(Wrap_QByteArray *data)

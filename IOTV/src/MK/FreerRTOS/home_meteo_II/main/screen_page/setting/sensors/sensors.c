@@ -12,9 +12,9 @@ extern lv_obj_t *sub_sensors_page;
 
 static char *txt = "Калибровка датчика температуры, влажности и давления:";
 
-static int8_t tmp_temperature_calib_per;
-static int8_t tmp_humidity_calib_per;
-static int8_t tmp_pressure_calib_per;
+static int tmp_temperature_calib_per;
+static int tmp_humidity_calib_per;
+static int tmp_pressure_calib_per;
 
 static lv_obj_t *spinbox_temp;
 static lv_obj_t *spinbox_hum;
@@ -33,15 +33,15 @@ static void timer_loop(lv_timer_t *timer);
 
 static void timer_loop(lv_timer_t *timer)
 {
-	struct THP thp = BME280_readValues_without_calibration();
+	struct THP thp = *BME280_service_get_value_without_calibration();
 
-	thp.temperature += thp.temperature / 100 * tmp_temperature_calib_per;
-	thp.humidity += thp.humidity / 100 * tmp_humidity_calib_per;
-	thp.pressure += thp.pressure / 100 * tmp_pressure_calib_per;
+	thp.temperature += thp.temperature / 1000 * tmp_temperature_calib_per;
+	thp.humidity += thp.humidity / 1000 * tmp_humidity_calib_per;
+	thp.pressure += thp.pressure / 1000 * tmp_pressure_calib_per;
 
 	lv_label_set_text_fmt(lbl_cur_temp, "%+.2f°C", thp.temperature);
 	lv_label_set_text_fmt(lbl_cur_hum, "%.2f %%", thp.humidity);
-	lv_label_set_text_fmt(lbl_cur_press, "%.0f мм рт.ст.", thp.pressure);
+	lv_label_set_text_fmt(lbl_cur_press, "%.0f %s", thp.pressure, HG_STR);
 }
 
 static void save(lv_event_t *e)
@@ -90,7 +90,9 @@ void create_sensors_sub_page(lv_event_t *e)
 
 	lv_obj_t *btn_minus, *btn_plus;
 
-	lv_obj_t *cont = create_spinbox(section, "Температура(%):", tmp_temperature_calib_per, -50, 50, &spinbox_temp, &btn_minus, &btn_plus);
+	lv_obj_t *cont = create_spinbox(section, "Температура(0.1%):", tmp_temperature_calib_per, -999, 999, 3, 2,
+			&spinbox_temp, &btn_minus, &btn_plus,
+			70, 45);
 
 	lv_obj_add_event_cb(btn_minus, change_calib_val, LV_EVENT_CLICKED, section);
 	lv_obj_add_event_cb(btn_plus, change_calib_val, LV_EVENT_CLICKED, section);
@@ -99,7 +101,9 @@ void create_sensors_sub_page(lv_event_t *e)
 	lv_obj_align_to(lbl_cur_temp, spinbox_temp, LV_ALIGN_OUT_RIGHT_MID, 110, 0);
 
 
-	cont = create_spinbox(section, "Влажность(%):", tmp_humidity_calib_per, -50, 50, &spinbox_hum, &btn_minus, &btn_plus);
+	cont = create_spinbox(section, "Влажность(0.1%):", tmp_humidity_calib_per, -999, 999, 3, 2, &spinbox_hum,
+			&btn_minus, &btn_plus,
+			70, 45);
 
 	lv_obj_add_event_cb(btn_minus, change_calib_val, LV_EVENT_CLICKED, section);
 	lv_obj_add_event_cb(btn_plus, change_calib_val, LV_EVENT_CLICKED, section);
@@ -108,7 +112,9 @@ void create_sensors_sub_page(lv_event_t *e)
 	lv_obj_align_to(lbl_cur_hum, spinbox_hum, LV_ALIGN_OUT_RIGHT_MID, 110, 0);
 
 
-	cont = create_spinbox(section, "Давление(%):", tmp_pressure_calib_per, -50, 50, &spinbox_press, &btn_minus, &btn_plus);
+	cont = create_spinbox(section, "Давление(0.1%):", tmp_pressure_calib_per, -999, 999, 3, 2, &spinbox_press,
+			&btn_minus, &btn_plus,
+			70, 45);
 
 	lv_obj_add_event_cb(btn_minus, change_calib_val, LV_EVENT_CLICKED, section);
 	lv_obj_add_event_cb(btn_plus, change_calib_val, LV_EVENT_CLICKED, section);

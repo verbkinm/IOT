@@ -211,29 +211,19 @@ lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t wid
 void lv_spinbox_increment_event_cb(lv_event_t * e)
 {
 	if(e->code == LV_EVENT_SHORT_CLICKED || e->code  == LV_EVENT_LONG_PRESSED_REPEAT)
-	{
-		lv_spinbox_t *spinbox = (lv_spinbox_t *)e->user_data;
-		if (spinbox->value == spinbox->range_max)
-			lv_spinbox_set_value(e->user_data, spinbox->range_min);
-		else
-			lv_spinbox_increment(e->user_data);
-	}
+		lv_spinbox_increment(e->user_data);
 }
 
 void lv_spinbox_decrement_event_cb(lv_event_t * e)
 {
 	if(e->code == LV_EVENT_SHORT_CLICKED || e->code == LV_EVENT_LONG_PRESSED_REPEAT)
-	{
-		lv_spinbox_t *spinbox = (lv_spinbox_t *)e->user_data;
-		if (spinbox->value == spinbox->range_min)
-			lv_spinbox_set_value(e->user_data, spinbox->range_max);
-		else
-			lv_spinbox_decrement(e->user_data);
-	}
+		lv_spinbox_decrement(e->user_data);
 }
 
 lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, int16_t data, int16_t min, int16_t max,
-		lv_obj_t **spin_box, lv_obj_t **btn_minus, lv_obj_t **btn_plus)
+		uint8_t digit_count, uint8_t separator_position,
+		lv_obj_t **spin_box, lv_obj_t **btn_minus, lv_obj_t **btn_plus,
+		lv_coord_t w, lv_coord_t h)
 {
 	lv_obj_t *obj = lv_menu_cont_create(parent);
 	lv_obj_set_scroll_dir(obj, LV_DIR_NONE);
@@ -246,16 +236,15 @@ lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, int16_t data, int16_t min
 
 	lv_obj_t *lbl = lv_label_create(wrap);
 	lv_label_set_text(lbl, text);
-	lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
+	lv_obj_align(lbl, LV_ALIGN_LEFT_MID, -10, 0);
 
 	*spin_box = lv_spinbox_create(wrap);
-	lv_obj_set_width(*spin_box, 50);
+	lv_spinbox_set_rollover(*spin_box, true);
+	lv_obj_set_size(*spin_box, w, h);
+	lv_spinbox_set_digit_format(*spin_box, digit_count, separator_position);
 	lv_spinbox_set_range(*spin_box, min, max);
-	lv_spinbox_set_digit_format(*spin_box, 2, 0);
 	lv_spinbox_set_value(*spin_box, data);
-	//	lv_spinbox_step_prev(spin_box);
 	lv_obj_center(*spin_box);
-	int32_t h = lv_obj_get_height(*spin_box);
 
 	*btn_plus = lv_btn_create(wrap);
 	lv_obj_set_size(*btn_plus, h, h);

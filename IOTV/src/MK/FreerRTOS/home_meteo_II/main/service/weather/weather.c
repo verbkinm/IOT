@@ -66,7 +66,7 @@ static void check_meteo_conf_file(void)
 	cJSON_AddItemToObject(meto, "on", on_obj);
 
 	cJSON *city_obj = cJSON_CreateString("Москва");
-	cJSON_AddItemToObjectCS(meto, "city", city_obj);
+	cJSON_AddItemToObjectCS(meto, CITY_STR, city_obj);
 
 	cJSON *latitude_obj = cJSON_CreateString("55.75222");
 	cJSON_AddItemToObjectCS(meto, "latitude", latitude_obj);
@@ -75,7 +75,7 @@ static void check_meteo_conf_file(void)
 	cJSON_AddItemToObjectCS(meto, "longitude", longitude_obj);
 
 	get_meteo_config_value("on", &on_obj->valuestring);
-	get_meteo_config_value("city", &city_obj->valuestring);
+	get_meteo_config_value(CITY_STR, &city_obj->valuestring);
 	get_meteo_config_value("latitude", &latitude_obj->valuestring);
 	get_meteo_config_value("longitude", &longitude_obj->valuestring);
 
@@ -189,7 +189,7 @@ static void read_meteo_conf(void)
 	}
 
 	char *city = NULL;
-	if (get_meteo_config_value("city", &city))
+	if (get_meteo_config_value(CITY_STR, &city))
 	{
 		if (city != NULL)
 		{
@@ -624,7 +624,7 @@ void weather_service_task(void *pvParameters)
 
 		http_meteo_to_file();
 		if (service_weather_parse_meteo_data() == false)
-			counter = 60;
+			counter = COUNTER_WEATHER;
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -12,7 +12,6 @@
 #include "screen_page/setting/settingpage.h"
 #include "screen_page/setting/elements.h"
 #include "Local_Lib/local_lvgl_lib.h"
-#include "I2C/BME280.h"
 #include "service/bme280/bme280.h"
 
 void create_sensors_sub_page(lv_event_t *e);

@@ -17,6 +17,7 @@
 
 void BME280_service_task(void *pvParameters);
 const struct THP *BME280_service_get_value(void);
+const struct THP *BME280_service_get_value_without_calibration(void);
 
 void BME280_service_save_calibrations(void);
 

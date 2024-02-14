@@ -7,6 +7,9 @@
 
 #include "homepage.h"
 
+#define BLOCK1_COUNTER_SEC	5
+#define BLOCK2_COUNTER_SEC	60
+
 extern lv_font_t ubuntu_mono_14;
 extern lv_font_t ubuntu_mono_26;
 extern lv_font_t ubuntu_mono_48;
@@ -29,7 +32,7 @@ static lv_timer_t *timer = NULL;
 
 static void drawTime(const struct tm *timeinfo);
 static void drawDate(const struct tm *timeinfo);
-static void draw_meteo_data(void);
+static bool draw_meteo_data(void);
 static void draw_cloud_cover(void);
 static void draw_precipitations(void);
 static void draw_wind_direction(void);
@@ -57,13 +60,13 @@ static void drawDate(const struct tm *timeinfo)
 	lv_label_set_text_fmt(date_lbl, "%s. %02d.%.02d.%.04d", weekday_name_short(timeinfo->tm_wday), timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 }
 
-static void draw_meteo_data(void)
+static bool draw_meteo_data(void)
 {
 	if ( !(glob_get_status_reg() & STATUS_METEO_ON))
-		return;
+		return false;
 
 	char *city = NULL;
-	get_meteo_config_value("city", &city);
+	get_meteo_config_value(CITY_STR, &city);
 	if (city != NULL)
 	{
 		lv_label_set_text(city_lbl, city);
@@ -72,7 +75,7 @@ static void draw_meteo_data(void)
 
 	const open_meteo_data_t *open_meteo = service_weather_get_current_meteo_data();
 	if (open_meteo == NULL)
-		return;
+		return false;
 
 	lv_label_set_text_fmt(wind_speed_lbl, "%.02f м/с", open_meteo->wind_speed);
 
@@ -108,6 +111,8 @@ static void draw_meteo_data(void)
 	draw_cloud_cover();
 	draw_precipitations();
 	draw_wind_direction();
+
+	return true;
 }
 
 static void draw_cloud_cover(void)
@@ -234,13 +239,25 @@ static void timer_handler(lv_timer_t *timer)
 	drawTime(&timeinfo);
 	drawDate(&timeinfo);
 
-	const struct THP *thp = BME280_service_get_value();
-	lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
-	lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
-	lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
-	lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
+	static uint8_t counter_thp = BLOCK1_COUNTER_SEC;
+	if (++counter_thp > BLOCK1_COUNTER_SEC) // раз в 5 секунд
+	{
+		counter_thp = 0;
 
-	draw_meteo_data();
+		const struct THP *thp = BME280_service_get_value();
+		lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
+		lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
+		lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
+		lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
+	}
+
+	static uint8_t meteo_thp = BLOCK2_COUNTER_SEC;
+	if (++meteo_thp > BLOCK2_COUNTER_SEC) // раз в 1 минуту
+	{
+		meteo_thp = 0;
+		if (!draw_meteo_data())
+			meteo_thp = BLOCK2_COUNTER_SEC;
+	}
 }
 
 // Блок время/дата
@@ -270,7 +287,7 @@ static void init_block_1(lv_obj_t *parent)
 
 	lv_obj_t *pressure_img = create_img_obj(block_1, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
 	pressure1_lbl = create_lbl_obj(block_1, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-	pressure1_lbl_prefix = create_lbl_obj(block_1, "мм рт.ст.", pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
+	pressure1_lbl_prefix = create_lbl_obj(block_1, HG_STR, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
 
 	lv_obj_add_event_cb(block_1, event_handler_block_1, LV_EVENT_CLICKED, 0);
 }
@@ -284,7 +301,7 @@ static void init_block_2(lv_obj_t *parent)
 	// Город
 	city_lbl = lv_label_create(block_2);
 	char *city_name = NULL;
-	if (get_meteo_config_value("city", &city_name))
+	if (get_meteo_config_value(CITY_STR, &city_name))
 	{
 		if (city_name != NULL)
 		{
