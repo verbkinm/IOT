@@ -18,8 +18,8 @@
 #define I2C_MASTER_TIMEOUT_MS      			1000
 
 // P3
-#define	P3_VCC								GPIO_NUM_17
-#define	P3_GND								GPIO_NUM_18
+//#define	P3_VCC								GPIO_NUM_17
+//#define	P3_GND								GPIO_NUM_18
 
 // Адреса i2c устройств
 #define BME280_ADDR                			0x76
@@ -137,71 +137,6 @@
 #define UPDATE_PATH			"/sdcard/update.json"
 #define SENSORS_PATH		"/sdcard/sensors.json"
 
-// Регистры BME280
-enum
-{
-	HUM_LSB			= 0xFE,
-	HUM_MSB			= 0xFD,
-
-	TEMP_XLSB		= 0xFC,
-	TEMP_LSB		= 0xFB,
-	TEMP_MSB		= 0xFA,
-
-	PRESS_XLSB		= 0xF9,
-	PRESS_LSB_		= 0xF8,
-	PRESS_MSB		= 0xF7,
-
-	CONFIG			= 0xF5,
-	CTRL_MEAS		= 0xF4,
-	_STATUS			= 0xF3,
-	CTRL_HUM		= 0xF2,
-
-	RESET			= 0xE0,
-	ID				= 0xD0,
-
-	/* CALIB26..CALIB41 = 0xE1..0xF0 */
-	/* CALIB00..CALIB25 = 0x88..0xA1 */
-
-	dig_T1_LSB 		= 0x88,
-	dig_T1_MSB 		= 0x89,
-	dig_T2_LSB 		= 0x8A,
-	dig_T2_MSB 		= 0x8B,
-	dig_T3_LSB 		= 0x8C,
-	dig_T3_MSB 		= 0x8D,
-
-	dig_P1_LSB 		= 0x8E,
-	dig_P1_MSB 		= 0x8F,
-	dig_P2_LSB 		= 0x90,
-	dig_P2_MSB 		= 0x91,
-	dig_P3_LSB 		= 0x92,
-	dig_P3_MSB 		= 0x93,
-	dig_P4_LSB 		= 0x94,
-	dig_P4_MSB 		= 0x95,
-	dig_P5_LSB 		= 0x96,
-	dig_P5_MSB 		= 0x97,
-	dig_P6_LSB 		= 0x98,
-	dig_P6_MSB 		= 0x99,
-	dig_P7_LSB 		= 0x9A,
-	dig_P7_MSB 		= 0x9B,
-	dig_P8_LSB 		= 0x9C,
-	dig_P8_MSB 		= 0x9D,
-	dig_P9_LSB 		= 0x9E,
-	dig_P9_MSB 		= 0x9F,
-
-	_dig_H1	 		= 0xA1,
-	dig_H2_LSB 		= 0xE1,
-	dig_H2_MSB 		= 0xE2,
-	_dig_H3	 		= 0xE3,
-
-	//	0xE4 / 0xE5[3:0] 	dig_H4 [11:4] / [3:0]
-	//	0xE5[7:4] / 0xE6	dig_H5 [3:0] / [11:4]
-	dig_H4_LSB 		= 0xE4,
-	dig_H4_MSB 		= 0xE5,
-	dig_H5_LSB 		= 0xE5,
-	dig_H5_MSB 		= 0xE6,
-	_dig_H6	 		= 0xE7,
-};
-
 // Глобалные флаги статусов
 enum STATUS_REG {
 	STATUS_WIFI_STA_START = 0x0001,
@@ -238,7 +173,7 @@ enum UPDATE_FLAGS {
 	UPDATE_NOTIFICATION = 0x40,
 };
 
-// json config word
+// Повторяющиеся строки текста в коде
 
 #define DISPLAY_STR				"display"
 #define ROTATE_STR 				"rotate"
@@ -253,5 +188,16 @@ enum UPDATE_FLAGS {
 #define THP_T_CALIB_STR			"t_calib"
 #define THP_H_CALIB_STR			"h_calib"
 #define THP_P_CALIB_STR			"p_calib"
+
+#define ATTENTION_STR 			"Внимание!"
+#define ERROR_STR 				"Ошибка!"
+#define SAVE_STR 				"Сохранить"
+#define CANCEL_STR 				"Отмена"
+#define YES_STR 				"Да"
+#define NO_STR 					"Нет"
+#define RESET_STR				"Сбросить"
+#define HG_STR					"мм рт.ст."
+#define CITY_STR				"city"
+
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

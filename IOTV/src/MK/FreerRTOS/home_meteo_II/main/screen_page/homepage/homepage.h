@@ -19,6 +19,7 @@
 #include "screen_page/screendefault.h"
 #include "screen_page/datetime1/datetime1.h"
 #include "screen_page/meteo_chart/meteo_chart.h"
+#include "screen_page/home_meteo/home_meteo.h"
 #include "json/json_config.h"
 #include "service/weather/weather.h"
 #include "Local_Lib/local_lvgl_lib.h"

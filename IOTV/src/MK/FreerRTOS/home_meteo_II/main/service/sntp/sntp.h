@@ -17,6 +17,7 @@
 #include "Global_def.h"
 #include "json/json_config.h"
 #include "Local_Lib/local_lvgl_lib.h"
+#include "I2C/DS3231.h"
 
 void sntp_service_task(void *pvParameters);
 void read_sntp_conf(void);

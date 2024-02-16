@@ -191,7 +191,7 @@ void update_service_task(void *pvParameters)
 			break;
 		}
 
-		// Проверить версию доступного обновления. Запускается из Настройик - Обновления
+		// Проверить версию доступного обновления. Запускается из Настройки - Обновления
 		if (glob_get_update_reg() & UPDATE_CHECK)
 			chek_update();
 

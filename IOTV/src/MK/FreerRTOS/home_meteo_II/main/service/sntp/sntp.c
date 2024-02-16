@@ -28,9 +28,13 @@ void time_sync_notification_cb(struct timeval *tv)
 	char strftime_buf[64];
 
 	time(&now);
+	setenv("TZ", sntp_utc, 1);
+	tzset();
 	localtime_r(&now, &timeinfo);
 	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
 	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
+
+	DS3231_SetDataTime_tm(&timeinfo);
 }
 
 static void check_sntp_conf_file(void)
@@ -138,7 +142,7 @@ void sntp_service_task(void *pvParameters)
 				vTaskDelay(2000 / portTICK_PERIOD_MS);
 			}
 		}
-		vTaskDelay(1000 * (1 * 60 * 60) / portTICK_PERIOD_MS); // раз в 1 час
+		vTaskDelay(1000 * (1 * 60) / portTICK_PERIOD_MS); // раз в 1 минуту
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

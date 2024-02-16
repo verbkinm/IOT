@@ -10,6 +10,8 @@
 #define BLOCK1_COUNTER_SEC	5
 #define BLOCK2_COUNTER_SEC	60
 
+static uint8_t counter_thp;
+
 extern lv_font_t ubuntu_mono_14;
 extern lv_font_t ubuntu_mono_26;
 extern lv_font_t ubuntu_mono_48;
@@ -19,11 +21,13 @@ extern lv_font_t ubuntu_mono_128;
 
 static lv_obj_t *block_0, *block_1, *block_2;
 
-//Блок 0
+//Блок 0 - дата и время
 lv_obj_t *time_lbl, *date_lbl;
-//Блок 1
+
+//Блок 1 - локальная температура влажность и давление
 lv_obj_t *temperature1_lbl, *humidity1_lbl, *pressure1_lbl, *pressure1_lbl_prefix;
-//Блок 2
+
+//Блок 2 - погода
 lv_obj_t *city_lbl, *last_update_lbl, *cloud_codver_img, *precipitations_img, *wind_direction_img,
 *cloud_cover_lbl, *wind_speed_lbl, *wind_direction_lbl, *temperature2_lbl, *humidity2_lbl, *pressure2_lbl,
 *apparent_temperature_lbl, *precipitation_lbl, *rain_lbl, *wind_gusts_lbl, *showers_lbl, *snow_lbl;
@@ -200,7 +204,7 @@ static void event_handler_block_0(lv_event_t * e)
 
 static void event_handler_block_1(lv_event_t * e)
 {
-	menuPageInit();
+	home_meteo_page_init();
 }
 
 static void event_handler_block_2(lv_event_t * e)
@@ -239,7 +243,6 @@ static void timer_handler(lv_timer_t *timer)
 	drawTime(&timeinfo);
 	drawDate(&timeinfo);
 
-	static uint8_t counter_thp = BLOCK1_COUNTER_SEC;
 	if (++counter_thp > BLOCK1_COUNTER_SEC) // раз в 5 секунд
 	{
 		counter_thp = 0;
@@ -251,13 +254,14 @@ static void timer_handler(lv_timer_t *timer)
 		lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
 	}
 
-	static uint8_t meteo_thp = BLOCK2_COUNTER_SEC;
-	if (++meteo_thp > BLOCK2_COUNTER_SEC) // раз в 1 минуту
-	{
-		meteo_thp = 0;
-		if (!draw_meteo_data())
-			meteo_thp = BLOCK2_COUNTER_SEC;
-	}
+//	static uint8_t meteo_thp = BLOCK2_COUNTER_SEC;
+//	if (++meteo_thp > BLOCK2_COUNTER_SEC) // раз в 1 минуту
+//	{
+//		meteo_thp = 0;
+		draw_meteo_data();
+//		if (!draw_meteo_data())
+//			meteo_thp = BLOCK2_COUNTER_SEC;
+//	}
 }
 
 // Блок время/дата
@@ -276,6 +280,8 @@ static void init_block_0(lv_obj_t *parent)
 // Блок температура/влажность/давление локальная
 static void init_block_1(lv_obj_t *parent)
 {
+	counter_thp = BLOCK1_COUNTER_SEC;
+
 	// Блок
 	block_1 = create_block(parent, LV_ALIGN_TOP_LEFT, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
 
