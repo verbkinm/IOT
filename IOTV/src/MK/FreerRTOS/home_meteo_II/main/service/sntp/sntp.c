@@ -104,6 +104,8 @@ void sntp_obtain_time(void)
 
 void sntp_service_task(void *pvParameters)
 {
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	check_sntp_conf_file();
 	read_sntp_conf();
 

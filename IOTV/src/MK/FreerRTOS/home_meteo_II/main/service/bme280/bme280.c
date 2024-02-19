@@ -97,6 +97,8 @@ const struct THP *BME280_service_get_value_without_calibration(void)
 
 void BME280_service_task(void *pvParameters)
 {
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	check_conf_file();
 	read_conf();
 

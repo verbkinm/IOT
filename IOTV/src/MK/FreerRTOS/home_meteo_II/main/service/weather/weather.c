@@ -588,6 +588,8 @@ static void debug_open_meteo()
 
 void weather_service_task(void *pvParameters)
 {
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	check_meteo_conf_file();
 	read_meteo_conf();
 

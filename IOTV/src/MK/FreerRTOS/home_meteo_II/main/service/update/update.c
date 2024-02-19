@@ -169,6 +169,8 @@ char *update_service_get_available_version(void)
 
 void update_service_task(void *pvParameters)
 {
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	check_update_conf_file();
 	read_update_conf();
 

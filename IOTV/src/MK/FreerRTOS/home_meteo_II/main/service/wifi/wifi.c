@@ -221,7 +221,7 @@ static void read_wifi_conf(void)
 
 void wifi_service_task(void *pvParameters)
 {
-	vTaskDelay(5000 / portTICK_PERIOD_MS);
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 	wifi_init();
 
 	for( ;; )

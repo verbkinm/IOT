@@ -1,6 +1,10 @@
 #ifndef MAIN_GLOBAL_DEF_H_
 #define MAIN_GLOBAL_DEF_H_
 
+// Отложенный запуск сервисов
+
+#define DELAYED_LAUNCH						10000
+
 // TCP
 #define PORT                        		8888
 #define KEEPALIVE_IDLE              		5

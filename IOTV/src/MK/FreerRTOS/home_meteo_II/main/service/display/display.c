@@ -19,6 +19,8 @@ void service_display_read_conf(void)
 
 void service_display_task(void *pvParameters)
 {
+//	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	check_display_conf_file();
 	read_display_conf();
 
@@ -69,6 +71,9 @@ static void read_display_conf(void)
 	{
 		if (strcmp(buf, "1") == 0)
 			rotate_display(LV_DISP_ROT_180);
+		else
+			rotate_display(LV_DISP_ROT_NONE);
+
 		free(buf);
 	}
 

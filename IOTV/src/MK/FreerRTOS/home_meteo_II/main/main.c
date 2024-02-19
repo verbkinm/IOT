@@ -13,6 +13,8 @@ void app_main(void)
 
 	TFT_init(); // Перед этой функцией обязательно выполнить i2c_init();
 
+	start_services();
+
 	GUI_manager_init();
 
 	while (1)

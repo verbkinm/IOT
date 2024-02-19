@@ -60,7 +60,7 @@ static void timer_startscreen_end_handler(lv_timer_t *timer)
 	page->widget = main_widget;
 	page->deinit = default_page_deinit;
 
-	start_services();
+//	start_services();
 	homePageInit();
 
 	lv_timer_t *gui_manager_timer = lv_timer_create(timer_handler, 1000, 0);

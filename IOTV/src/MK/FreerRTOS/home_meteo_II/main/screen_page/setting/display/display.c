@@ -11,6 +11,8 @@
 extern lv_obj_t *sub_display_page;;
 extern service_display_t display_service_data;
 
+static lv_disp_rot_t rotate_display_tmp;
+
 struct Display_page_obj
 {
 	lv_obj_t *switcher_rotate;
@@ -37,6 +39,11 @@ static void display_save_event_handler(lv_event_t * e)
 	set_display_config_value(BRIGHTNESS_STR, buf);
 
 	set_display_config_value(ROTATE_STR, lv_obj_has_state(display_page_obj->switcher_rotate, LV_STATE_CHECKED) ? "1" : "0");
+	if (lv_obj_has_state(display_page_obj->switcher_rotate, LV_STATE_CHECKED))
+		rotate_display_tmp = LV_DISP_ROT_180;
+	else
+		rotate_display_tmp = LV_DISP_ROT_NONE;
+
 	set_display_config_value(NIGHT_MODE_STR, lv_obj_has_state(display_page_obj->switcher_night_mode, LV_STATE_CHECKED) ? "1" : "0");
 
 	memset(buf, 0, sizeof(buf));
@@ -104,9 +111,15 @@ static void display_switcher_event_handler(lv_event_t * e)
 {
 	lv_obj_t *switcher = e->target;
 	if (lv_obj_has_state(switcher, LV_STATE_CHECKED))
+	{
 		rotate_display(LV_DISP_ROT_180);
+		rotate_display_tmp = LV_DISP_ROT_NONE;
+	}
 	else
+	{
 		rotate_display(LV_DISP_ROT_NONE);
+		rotate_display_tmp = LV_DISP_ROT_180;
+	}
 }
 
 void create_display_sub_page(lv_event_t *e)
@@ -125,6 +138,7 @@ void create_display_sub_page(lv_event_t *e)
 	// Поворот дисплея на 180
 	create_switch(section, LV_SYMBOL_LOOP, "Поворот", get_rotate_display() == LV_DISP_ROT_NONE ? false : true, &display_page_obj->switcher_rotate);
 	lv_obj_add_event_cb(display_page_obj->switcher_rotate, display_switcher_event_handler, LV_EVENT_CLICKED, 0);
+	rotate_display_tmp = get_rotate_display();
 
 	// Ночной режим по времени
 	create_switch(section, LV_SYMBOL_EYE_OPEN, "Ночной режим", (glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON), &display_page_obj->switcher_night_mode);
@@ -173,5 +187,7 @@ void free_display_sub_page(void)
 		free(display_page_obj->time_block_night);
 		free(display_page_obj);
 		display_page_obj = NULL;
+
+		rotate_display(rotate_display_tmp);
 	}
 }
