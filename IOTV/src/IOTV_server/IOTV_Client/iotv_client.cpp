@@ -237,23 +237,34 @@ void IOTV_Client::slotDisconnected()
 void IOTV_Client::slotReadData()
 {
     _silenceTimer.start();
-    recivedBuff += _socket->readAll();
+    _recivedBuff += _socket->readAll();
+
+    //!!! Определится с максимальным размером буфера
+    if (_recivedBuff.size() >= BUFSIZ * 10)
+    {
+        Log::write("slotDataResived CLIENT переполнение буфера!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        _recivedBuff.clear();
+        _socket->abort();
+        return;
+    }
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
                    + QString::number(socket()->peerPort())
-                   + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
     uint64_t cutDataSize = 0;
 
-    while (recivedBuff.size() > 0)
+    while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(recivedBuff.data()), recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
-            recivedBuff.clear();
+            _recivedBuff.clear();
             _expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
@@ -290,7 +301,7 @@ void IOTV_Client::slotReadData()
                 processQueryTech(header);
         }
 
-        recivedBuff = recivedBuff.mid(cutDataSize);
+        _recivedBuff = _recivedBuff.mid(cutDataSize);
 
         clearHeader(header);
     }

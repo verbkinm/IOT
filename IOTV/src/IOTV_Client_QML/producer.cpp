@@ -17,33 +17,33 @@ Producer::Producer(QObject *parent):QObject(parent), _mirrored(false)
 //        audioOut->setVolume(1.0);
 
 
-    session = new QMediaCaptureSession;
-    session->setVideoSink(m_videoSink);
-    //    session->setCamera(camera);
-    recorder = new QMediaRecorder(this);//(camera);
-    session->setRecorder(recorder);
+//    session = new QMediaCaptureSession;
+//    session->setVideoSink(m_videoSink);
+//    //    session->setCamera(camera);
+//    recorder = new QMediaRecorder(this);//(camera);
+//    session->setRecorder(recorder);
 
     //    camera->start();
 
     // setup output format for the recorder
-    QMediaFormat format;
-    format.setVideoCodec(QMediaFormat::VideoCodec::H264);
-    //    format.setAudioCodec(QMediaFormat::AudioCodec::MP3);
-    format.setFileFormat(QMediaFormat::AVI);
-    //    recorder->setVideoResolution({1280, 720});
-    //    recorder->setVideoBitRate(3800);
-    //    recorder->setVideoFrameRate(0);
-    //    recorder->setQuality(QMediaRecorder::VeryHighQuality);
-    recorder->setMediaFormat(format);
+//    QMediaFormat format;
+//    format.setVideoCodec(QMediaFormat::VideoCodec::H264);
+//    //    format.setAudioCodec(QMediaFormat::AudioCodec::MP3);
+//    format.setFileFormat(QMediaFormat::AVI);
+//    //    recorder->setVideoResolution({1280, 720});
+//    //    recorder->setVideoBitRate(3800);
+//    //    recorder->setVideoFrameRate(0);
+//    //    recorder->setQuality(QMediaRecorder::VeryHighQuality);
+//    recorder->setMediaFormat(format);
 
-    //on shutter button pressed
-    recorder->record();
+//    //on shutter button pressed
+//    recorder->record();
 
 }
 
 Producer::~Producer()
 {
-    recorder->stop();
+//    recorder->stop();
 }
 
 QVideoSink *Producer::videoSink() const
@@ -58,6 +58,18 @@ void Producer::setVideoSink(QVideoSink *newVideoSink)
 
     m_videoSink = newVideoSink;
     emit videoSinkChanged();
+}
+
+Device *Producer::getDevice()
+{
+    return _device;
+}
+
+void Producer::setDevice(Device *dev)
+{
+    _device = dev;
+
+    connect(_device, &Device::signalDataPkgComplete, this, &Producer::slotDataPkgComplete);
 }
 
 void Producer::handleTimeout()
@@ -86,22 +98,33 @@ void Producer::handleTimeout()
     m_videoSink->setVideoFrame(video_frame);
 }
 
-void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
+void Producer::slotDataPkgComplete(int channel, const QByteArray &data)
+{
+    if (channel != 0)
+        return;
+
+    int w = _device->readData(2).toInt();
+    int h = _device->readData(3).toInt();
+
+    slotDataVideoFrame(w, h, data);
+}
+
+void Producer::slotDataVideoFrame(int w, int h, const QByteArray &data)
 {
     if (w == 0 || h == 0 || data == nullptr)
         return;
 
-    qDebug() << "data" << w << h << data->data().size();
+    qDebug() << "data" << w << h << data.size();
 
     //    std::ofstream file("image2.jpg");
     //    file.write(data->data().data(), data->data().size());
 
-    QByteArray ba = data->data();
-    QBuffer buf(&ba);
-    buf.open(QIODevice::ReadOnly);
+//    QByteArray ba = data->data();
+//    QBuffer buf(&ba);
+//    buf.open(QIODevice::ReadOnly);
 
     QImage img;
-    img.loadFromData(ba);
+    img.loadFromData(data);
 
 //    imageCapture->imageCaptured(0, img);
 

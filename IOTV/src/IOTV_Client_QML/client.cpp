@@ -487,10 +487,9 @@ void Client::responceReadStream(const Header *header)
 
     if (header->fragment == header->fragments)
     {
-        Wrap_QByteArray *wdata = new Wrap_QByteArray;
-        wdata->setData(_devices[name].getReadChannelData(channel));
-        qDebug() << "PKG total: " << wdata->data().size();
-        emit _devices[name].signalDataPkgComplete(channel, wdata);
+        QByteArray data = _devices[name].getReadChannelData(channel);
+        qDebug() << "PKG total: " << data.size();
+        emit _devices[name].signalDataPkgComplete(channel, std::move(data));
     }
 }
 

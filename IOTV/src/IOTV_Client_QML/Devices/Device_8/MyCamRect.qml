@@ -17,6 +17,8 @@ Item {
 //    signal volumeOn()
     signal volumeOff()
 
+    id: root
+
     onVisibleChanged: {
         if (!visible)
         {
@@ -25,9 +27,9 @@ Item {
         }
     }
 
-    AudioOutput {
+//    AudioOutput {
 
-    }
+//    }
 
     Rectangle {
         id: camRect
@@ -39,6 +41,7 @@ Item {
         Producer{
             id: producer
             videoSink: videoOutput.videoSink
+            video_device: root.device
         }
         VideoOutput {
             id: videoOutput
@@ -187,22 +190,22 @@ Item {
         }
     }
 
-    Connections {
-        target: device
-        function onSignalDataPkgComplete(channel, data) {
-            if (channel === 0)
-            {
-                var width = parseInt(device.readData(2), 10)
-                var height = parseInt(device.readData(3), 10)
-                producer.slotDataVideoFrame(width, height, data)
-//                console.log("onSignalDataPkgComplete")
-            }
-            else if (channel === 1)
-            {
-                producer.slotDataAudioFrame(data);
-            }
-        }
-    }
+//    Connections {
+//        target: device
+//        function onSignalDataPkgComplete(channel, data) {
+//            if (channel === 0)
+//            {
+//                var width = parseInt(device.readData(2), 10)
+//                var height = parseInt(device.readData(3), 10)
+//                producer.slotDataVideoFrame(width, height, data)
+////                console.log("onSignalDataPkgComplete")
+//            }
+//            else if (channel === 1)
+//            {
+//                producer.slotDataAudioFrame(data);
+//            }
+//        }
+//    }
 
     Component.onCompleted: {
         console.log("MyCamRect construct: ", objectName)

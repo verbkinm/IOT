@@ -26,12 +26,14 @@
 #include "qmediarecorder.h"
 
 #include "wrap_qbytearray.h"
+#include "device.h"
 
 class Producer : public QObject
 {
     Q_OBJECT
 //    QML_ELEMENT
     Q_PROPERTY(QVideoSink* videoSink READ videoSink WRITE setVideoSink NOTIFY videoSinkChanged)
+    Q_PROPERTY(Device* video_device READ getDevice WRITE setDevice)
 
 public:
     explicit Producer(QObject *parent = nullptr);
@@ -39,6 +41,9 @@ public:
 
     QVideoSink *videoSink() const;
     void setVideoSink(QVideoSink *newVideoSink);
+
+    Device *getDevice();
+    void setDevice(Device *dev);
 
 private:
     QPointer<QVideoSink> m_videoSink;
@@ -48,6 +53,8 @@ private:
     QMediaCaptureSession *session;
     QMediaRecorder *recorder;
 
+    Device *_device;
+
     bool _mirrored;
 
     void handleTimeout();
@@ -56,7 +63,8 @@ signals:
     void videoSinkChanged();
 
 public slots:
-    void slotDataVideoFrame(int w, int h, Wrap_QByteArray *data);
+    void slotDataPkgComplete(int channel, const QByteArray &data);
+    void slotDataVideoFrame(int w, int h, const QByteArray &data);
     void slotDataAudioFrame(Wrap_QByteArray *data);
 
     void slotMirrored(bool val);

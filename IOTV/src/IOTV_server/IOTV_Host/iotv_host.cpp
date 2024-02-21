@@ -166,13 +166,21 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-    _counterPing = 0;
-//    _counterState = 0;
-
     bool error;
     uint64_t cutDataSize, expectedDataSize;
 
     _buff += data;
+
+    //!!! Определится с максимальным размером буфера
+    if (_buff.size() >= BUFSIZ * 1000)
+    {
+        Log::write("slotDataResived HOST переполнение буфера!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        _buff.clear();
+        _conn_type->disconnectFromHost();
+        return;
+    }
 
     while (_buff.size() > 0)
     {

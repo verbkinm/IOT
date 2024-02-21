@@ -26,7 +26,7 @@ private:
 
     const std::unordered_map<IOTV_Host *, QThread *> &_hosts;
 
-    QByteArray recivedBuff;
+    QByteArray _recivedBuff;
 
     QTimer _silenceTimer;
 

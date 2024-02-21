@@ -70,7 +70,7 @@ signals:
     void signalDataChanged(int channel);
     void signalDataAdded(int channel);
 
-    void signalDataPkgComplete(int channel, Wrap_QByteArray *data);
+    void signalDataPkgComplete(int channel, const QByteArray &data);
 
     void signalTest(Wrap_QByteArray *data);
 
