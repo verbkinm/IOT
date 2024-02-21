@@ -532,10 +532,10 @@ void Client::responceTech(const Header *header)
 
 void Client::slotReciveData()
 {
-//    while (_socket.bytesAvailable())
-//        _recivedBuff += _socket.readAll();
+    while (_socket.bytesAvailable())
+        _recivedBuff += _socket.readAll();
 
-    _recivedBuff = _socket.readAll();
+//    _recivedBuff = _socket.readAll();
 
     bool error = false;
     uint64_t cutDataSize = 0;

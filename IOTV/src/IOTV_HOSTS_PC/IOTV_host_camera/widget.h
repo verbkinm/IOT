@@ -49,7 +49,7 @@ private:
 
 
 
-    static constexpr int INTERVAL = 10;
+    static constexpr int INTERVAL = 100;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);
