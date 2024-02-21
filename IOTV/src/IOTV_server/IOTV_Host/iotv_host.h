@@ -71,7 +71,6 @@ private:
     std::map<uint8_t, std::set<QObject *>> _streamRead, _streamWrite;
 
     QByteArray _buff;
-    uint64_t _expectedDataSize;
 
 private slots:
     void slotDataResived(QByteArray data);

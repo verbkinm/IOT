@@ -473,14 +473,10 @@ void IOTV_Server::slotPendingDatagrams()
     {
         dataGram = _udpSocket->receiveDatagram();
         data = dataGram.data();
-
-        //        datagram.resize(int(_udpSocket->pendingDatagramSize()));
-        //        _udpSocket->readDatagram(datagram.data(), datagram.size());
-        //        qDebug() << "Received datagram: " << dataGram.senderAddress() << dataGram.senderPort() << dataGram.data();
     }
 
-    bool error = false;
-    uint64_t cutDataSize = 0, expectedDataSize = 0;
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
 
     struct Header *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
 
@@ -565,6 +561,9 @@ void IOTV_Server::slotPendingDatagrams()
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
     clearHeader(header);
+
+    for ( std::pair<IOTV_Client*, QThread*> client : _iot_clients)
+        emit client.first->signalUpdateHosts();
 }
 
 void IOTV_Server::slotTest()

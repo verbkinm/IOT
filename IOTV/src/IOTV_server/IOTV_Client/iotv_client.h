@@ -62,4 +62,7 @@ signals:
     void signalQueryEventActionData();
     void signalFetchEventActionDataFromServer(QByteArray data);
 
+    // Высылается сервером, при добавлении новых устройств
+    void signalUpdateHosts();
+
 };

@@ -47,9 +47,7 @@ private:
     QAudioSink *audioSink;
     QIODevice *devIn;
 
-
-
-    static constexpr int INTERVAL = 100;
+    static constexpr int INTERVAL = 25;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);

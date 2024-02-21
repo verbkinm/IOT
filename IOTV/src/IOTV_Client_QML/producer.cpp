@@ -106,19 +106,19 @@ void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
 //    imageCapture->imageCaptured(0, img);
 
 
-    int _w = img.width();
-    int _h = img.height();
+//    int _w = img.width();
+//    int _h = img.height();
 
-    for (int y = 0; y < _h; ++y)
-    {
-        for(int x = 0; x < _w; ++x)
-        {
-            QColor pixel = img.pixel(x, y);
-            int newVal = std::clamp(pixel.hue() + 0, 0, 255);
-            pixel.setHsl(pixel.hue(), pixel.saturation(), pixel.lightness() , pixel.alpha());
-            img.setPixel(x, y, pixel.rgba());
-        }
-    }
+//    for (int y = 0; y < _h; ++y)
+//    {
+//        for(int x = 0; x < _w; ++x)
+//        {
+//            QColor pixel = img.pixel(x, y);
+//            int newVal = std::clamp(pixel.hue() + 0, 0, 255);
+//            pixel.setHsl(pixel.hue(), pixel.saturation(), pixel.lightness() , pixel.alpha());
+//            img.setPixel(x, y, pixel.rgba());
+//        }
+//    }
 
 
     //    img.save("image.jpg");

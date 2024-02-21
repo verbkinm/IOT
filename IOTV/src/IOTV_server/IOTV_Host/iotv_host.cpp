@@ -169,26 +169,24 @@ void IOTV_Host::slotDataResived(QByteArray data)
     _counterPing = 0;
 //    _counterState = 0;
 
-    bool error = false;
-    uint64_t cutDataSize = 0;
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
 
     _buff += data;
 
     while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
             _buff.clear();
-            _expectedDataSize = 0;
-            cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_expectedDataSize > 0)
+        if (expectedDataSize > 0)
         {
             clearHeader(header);
             break;
@@ -398,7 +396,6 @@ void IOTV_Host::slotConnected()
 
     _counterPing = 0;
     _counterState = 0;
-    _expectedDataSize = 0;
     _buff.clear();
 
     _streamRead.clear();

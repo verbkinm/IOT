@@ -8,12 +8,13 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     _socket->setParent(this);
     _silenceTimer.setParent(this);
 
-    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost, Qt::QueuedConnection);
-    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData, Qt::QueuedConnection);
-    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected, Qt::QueuedConnection);
+    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
+    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
+    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
 
     connect(this, &IOTV_Client::signalFetchEventActionDataFromServer, this, &IOTV_Client::slotFetchEventActionDataFromServer, Qt::QueuedConnection);
 
+    connect(this, &IOTV_Client::signalUpdateHosts, this, &IOTV_Client::processQueryIdentification, Qt::QueuedConnection);
 
     _silenceTimer.setInterval(_silenceInterval);
     _silenceTimer.start();
