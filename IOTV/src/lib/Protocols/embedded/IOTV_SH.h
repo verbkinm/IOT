@@ -15,7 +15,6 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
 uint64_t responseStateData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot);
 uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, uint64_t inDataSize, const struct Header *head);
 
-
 // Формируем запросы сразу в сыром виде в outData
 uint64_t queryIdentificationData(char *outData, uint64_t dataSize);
 uint64_t queryPingData(char *outData, uint64_t dataSize);

@@ -19,7 +19,6 @@ class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
-//    IOTV_Host() = default;
     explicit IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
     ~IOTV_Host();
 
@@ -36,6 +35,8 @@ public:
     void removeStreamRead(uint8_t channel, QObject *client);
     void removeStreamWrite(uint8_t channel);
 
+    QString getAddress() const;
+
 private:
     qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);
     qint64 readAll();
@@ -47,7 +48,7 @@ private:
     void responceState(const struct IOTV_Server_embedded *iot);
     void responceRead(const struct Header* header);
     void responceWrite(const struct IOTV_Server_embedded *iot) const;
-    void responcePingPoing(const struct IOTV_Server_embedded *iot);
+    void responcePingPong(const struct IOTV_Server_embedded *iot);
 
     std::unique_ptr<Base_conn_type> _conn_type;
     const QString _logFile;

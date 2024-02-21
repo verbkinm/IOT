@@ -19,13 +19,16 @@
 #include "iotv_server_embedded.h"
 
 #include "iotv_types.h"
+#include "qudpsocket.h"
 #include "widget.h"
 
 Widget *camera;
+QTimer *timer;
 
 //#define BUFSIZ
 
 QTcpServer *server = nullptr;
+QUdpSocket udp;
 QTcpSocket *socket = nullptr;
 
 char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
@@ -158,11 +161,14 @@ void slotDisconnected()
     error = false;
     cutDataSize = 0;
     expextedDataSize = 0;
+
+    timer->start();
 }
 
 //для ПК
 void slotNewConnection()
 {
+    timer->stop();
     socket = server->nextPendingConnection();
     QString strOut = "new connection: "+ socket->peerAddress().toString() + QString::number(socket->peerPort());
     std::cout << strOut.toStdString() << std::endl;
@@ -179,8 +185,8 @@ void slotImageCaptured()
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
     QImage img = camera->getImage();
-//    img = img.convertToFormat(QImage::Format_RGBA8888);
-//    qDebug() << img.format();
+    //    img = img.convertToFormat(QImage::Format_RGBA8888);
+    //    qDebug() << img.format();
 
     int width = *(int16_t *)iot.readChannel[2].data;
     int height = *(int16_t *)iot.readChannel[3].data;
@@ -192,10 +198,10 @@ void slotImageCaptured()
     iot.readChannel[0].data = byteArra.data();
 
     struct Read_Write readWrite = {
+        .dataSize = iot.readChannel[0].dataSize,
         .nameSize = iot.nameSize,
         .channelNumber = 0,
         .flags = ReadWrite_FLAGS_OPEN_STREAM,
-        .dataSize = iot.readChannel[0].dataSize,
         .name = iot.name,
         .data = iot.readChannel[0].data
     };
@@ -221,10 +227,10 @@ void slotAudio(QByteArray data)
     iot.readChannel[1].data = data.data();
 
     struct Read_Write readWrite = {
+        .dataSize = iot.readChannel[1].dataSize,
         .nameSize = iot.nameSize,
         .channelNumber = 1,
         .flags = ReadWrite_FLAGS_OPEN_STREAM,
-        .dataSize = iot.readChannel[1].dataSize,
         .name = iot.name,
         .data = iot.readChannel[1].data
     };
@@ -273,10 +279,39 @@ void slotInitApp()
 
     QObject::connect(server, &QTcpServer::newConnection, slotNewConnection);
     QObject::connect(camera, &Widget::signalImageCaptured, slotImageCaptured);
-    QObject::connect(camera, &Widget::signalAudio, slotAudio);
+    //    QObject::connect(camera, &Widget::signalAudio, slotAudio);
 
     server->listen(QHostAddress("127.0.0.1"), 2028);
     std::cout << "Start service on 127.0.0.1:2028" << std::endl;
+}
+
+void slotTimeOut()
+{
+    struct Host_Broadcast hb = {
+        .address = QHostAddress("127.0.0.1").toIPv4Address(),
+        .port = 2028,
+        .nameSize = iot.nameSize,
+        .flags = 0,
+        .name = iot.name
+    };
+
+    struct Header header = {
+        .version = 2,
+        .type = HEADER_TYPE_RESPONSE,
+        .assignment = HEADER_ASSIGNMENT_HOST_BROADCAST,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = hostBroadCastSize(&hb),
+        .pkg = &hb
+    };
+
+    char data[BUFSIZ] = {0};
+    auto size = headerToData(&header, data, BUFSIZ);
+
+    udp.writeDatagram(data, size, QHostAddress::Broadcast, 2022);
+
+    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
 }
 
 int main(int argc, char *argv[])
@@ -287,6 +322,11 @@ int main(int argc, char *argv[])
 
     QObject::connect(camera, &Widget::signalFirstCapture, slotInitApp);
 
+    timer = new QTimer;
+
+    QObject::connect(timer, &QTimer::timeout, slotTimeOut);
+
+    timer->start(1000);
 
     return a.exec();
 }

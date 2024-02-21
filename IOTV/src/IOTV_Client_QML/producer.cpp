@@ -4,17 +4,17 @@
 
 Producer::Producer(QObject *parent):QObject(parent), _mirrored(false)
 {
-    //    QAudioFormat format;
-    //    // Set up the format, eg.
-    //    format.setSampleRate(44100);
-    //    format.setChannelCount(1);
-    //    format.setSampleFormat(QAudioFormat::Int32);
+//        QAudioFormat audio_format;
+//        // Set up the format, eg.
+//        audio_format.setSampleRate(44100);
+//        audio_format.setChannelCount(1);
+//        audio_format.setSampleFormat(QAudioFormat::Int32);
 
-    //    QAudioOutput *audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
-    //    QAudioSink *sink = new QAudioSink(audioOut->device(), format, this);
+//        QAudioOutput *audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
+//        QAudioSink *sink = new QAudioSink(audioOut->device(), audio_format, this);
 
-    //    devOut = sink->start();
-    //    audioOut->setVolume(1.0);
+//        devOut = sink->start();
+//        audioOut->setVolume(1.0);
 
 
     session = new QMediaCaptureSession;
@@ -150,8 +150,8 @@ void Producer::slotDataVideoFrame(int w, int h, Wrap_QByteArray *data)
 
 void Producer::slotDataAudioFrame(Wrap_QByteArray *data)
 {
-    qDebug() << "write audio data";
-    devOut->write(data->data());
+//    qDebug() << "write audio data";
+//    devOut->write(data->data());
 }
 
 void Producer::slotMirrored(bool val)

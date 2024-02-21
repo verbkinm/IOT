@@ -4,6 +4,7 @@
 #include "tech.h"
 #include "identification.h"
 #include "read_write.h"
+#include "host_broadcast.h"
 #include "state.h"
 
 #include <stdbool.h>
@@ -92,6 +93,9 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
             break;
         case HEADER_ASSIGNMENT_TECH:
             result += techToData((const struct Tech *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
+        case HEADER_ASSIGNMENT_HOST_BROADCAST:
+            result += hostBroadCastToData((const struct Host_Broadcast *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
             break;
         default:
             break;

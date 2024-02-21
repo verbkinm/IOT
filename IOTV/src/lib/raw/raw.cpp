@@ -96,7 +96,7 @@ Raw::Raw(DATA_TYPE type, const QByteArray &data)
 {
     if (type == Raw::DATA_TYPE::BOOL)
     {
-        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data == "false"))
+        if (data.size() > 0 && (data.at(0) == 0 || data.at(0) == '0' || data.toUpper() == "FALSE"))
             *this = Raw(false);
         else
             *this = Raw(true);
@@ -194,7 +194,7 @@ Raw::Raw(DATA_TYPE type, const QString &data)
 {
     if (type == Raw::DATA_TYPE::BOOL)
     {
-        if (data.size() > 0 && (data == "0" || data == "false"))
+        if (data.size() > 0 && (data == "0" || data.toUpper() == "FALSE"))
             *this = Raw(false);
         else
             *this = Raw(true);
@@ -359,7 +359,11 @@ void Raw::addData(const QByteArray &newData)
 
 std::pair<QString, QString> Raw::strData() const
 {
-    //!!! Если _data по длине не равняется типу данных, что произойдёт?
+    std::pair<QString, QString> err = {"", Json_Event_Action::DATA_TYPE_NONE};
+    if (!isValid())
+        return err;
+
+    //!!! Если _data по длине не равняется типу данных, что произойдёт? - isValid делает эту проверку!
     switch (_type)
     {
     case DATA_TYPE::INT_8:
@@ -390,11 +394,11 @@ std::pair<QString, QString> Raw::strData() const
         return {_data.toHex(':'), Json_Event_Action::DATA_TYPE_RAW};
         break;
     default:
-        return {"", Json_Event_Action::DATA_TYPE_NONE};
+        return err;
         break;
     }
 
-    return {};
+    return err;
 }
 
 std::pair<QString, QString> Raw::strData(const QByteArray &data, DATA_TYPE type)
@@ -550,21 +554,12 @@ bool Raw::isBool() const
 
 bool Raw::isInt() const
 {
-    if (type() == DATA_TYPE::INT_8 ||
-            type() == DATA_TYPE::INT_16 ||
-            type() == DATA_TYPE::INT_32 ||
-            type() == DATA_TYPE::INT_64)
-        return true;
-
-    return false;
+    return (type() == DATA_TYPE::INT_8 || type() == DATA_TYPE::INT_16 || type() == DATA_TYPE::INT_32 || type() == DATA_TYPE::INT_64);
 }
 
 bool Raw::isReal() const
 {
-    if (type() == DATA_TYPE::FLOAT_32 || type() == DATA_TYPE::DOUBLE_64)
-        return true;
-
-    return false;
+    return (type() == DATA_TYPE::FLOAT_32 || type() == DATA_TYPE::DOUBLE_64);
 }
 
 bool Raw::isString() const
@@ -691,6 +686,7 @@ bool compare(const Raw &lhs, const Raw &rhs, C cmp = C{})
     {
         if ((lhs.isInt() || lhs.isReal() || lhs.isBool()) && (rhs.isInt() || rhs.isReal() || rhs.isBool()))
         {
+            //!!! Почему toDouble?
             bool ok1, ok2;
             double lhsArg = lhs.strData().first.toDouble(&ok1);
             double rhsArg = rhs.strData().first.toDouble(&ok2);
@@ -723,6 +719,7 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
                 return {};
 
             double result = op(lhsArg, rhsArg);
+            //!!! Необходимо Raw привести к типу lhs или rhs, а не просто к double
             return Raw(result);
         }
         else if (lhs.type() == Raw::DATA_TYPE::STRING || lhs.type() == Raw::DATA_TYPE::RAW || lhs.type() == Raw::DATA_TYPE::NONE)
@@ -745,6 +742,7 @@ Raw operation(const Raw &lhs, const Raw &rhs, T op = T{})
                 return {};
 
             double result = op(lhsArg, rhsArg);
+            //!!! Необходимо Raw привести к типу lhs или rhs, а не просто к double
             return Raw{result};
         }
     }

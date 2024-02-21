@@ -14,6 +14,7 @@ const QString connectionType::UDP = "UDP";
 
 const QString serverField::address = "address";
 const QString serverField::port = "port";
+const QString serverField::broadCastListenerPort = "broadcastListener";
 const QString serverField::maxClient = "max_client";
 
 QString ServerLog::TCP_LOG_FILENAME = "tcp_server.log";

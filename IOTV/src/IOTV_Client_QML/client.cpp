@@ -454,7 +454,7 @@ void Client::responceRead(const struct Header *header)
     if (pkg == nullptr)
         return;
 
-    qDebug() << "PKG " << header->fragment << "(" << pkg->dataSize <<  ") /" << header->fragments ;
+//    qDebug() << "PKG " << header->fragment << "(" << pkg->dataSize <<  ") /" << header->fragments ;
 
     auto channel = pkg->channelNumber;
     QString name(QByteArray{pkg->name, pkg->nameSize});
@@ -532,8 +532,10 @@ void Client::responceTech(const Header *header)
 
 void Client::slotReciveData()
 {
-    while (_socket.bytesAvailable())
-        _recivedBuff += _socket.readAll();
+//    while (_socket.bytesAvailable())
+//        _recivedBuff += _socket.readAll();
+
+    _recivedBuff = _socket.readAll();
 
     bool error = false;
     uint64_t cutDataSize = 0;

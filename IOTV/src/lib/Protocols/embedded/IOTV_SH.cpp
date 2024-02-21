@@ -109,10 +109,10 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
         uint64_t dataReadSize = dataPart(&it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
 
         struct Read_Write readWrite = {
+            .dataSize = dataReadSize,
             .nameSize = iot->nameSize,
             .channelNumber = rwPkg->channelNumber,
             .flags = rwPkg->flags,
-            .dataSize = dataReadSize,
             .name = iot->name,
             .data = it
         };
@@ -224,10 +224,10 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
     }
 
     struct Read_Write readWrite = {
+        .dataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize,
         .nameSize = iot->nameSize,
         .channelNumber = ptrReadWrite->channelNumber,
         .flags = ReadWrite_FLAGS_NONE,
-        .dataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize,
         .name = iot->name,
         .data = iot->readChannel[ptrReadWrite->channelNumber].data
     };
@@ -318,10 +318,10 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
         return 0;
 
     struct Read_Write readWrite = {
+        .dataSize = dataWriteSize,
         .nameSize = (uint8_t)strlen(name),
         .channelNumber = channelNumber,
         .flags =ReadWrite_FLAGS_NONE,
-        .dataSize = dataWriteSize,
         .name = (char *)name,
         .data = (char *)dataToWrite
     };
@@ -346,10 +346,10 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
         return 0;
 
     struct Read_Write readWrite = {
+        .dataSize = 0,
         .nameSize = (uint8_t)strlen(name),
         .channelNumber = channelNumber,
         .flags = flags,
-        .dataSize = 0,
         .name = (char *)name,
         .data = NULL
     };

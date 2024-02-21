@@ -1,6 +1,6 @@
 #include "iotv_host.h"
 
-#include <fstream>
+//#include <fstream>
 
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
@@ -72,27 +72,13 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 
 void IOTV_Host::responceRead(const struct Header *header)
 {
-    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
+//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     uint8_t channelNumber = pkg->channelNumber;
-
-//    if (header->fragments > 1)
-//    {
-//        if (header->fragment == 1)
-//        {
-//            std::ofstream file("image.jpg");
-//            file.write(pkg->data, pkg->dataSize);
-//        }
-//        else
-//        {
-//            std::ofstream file("image.jpg", std::ios_base::app);
-//            file.write(pkg->data, pkg->dataSize);
-//        }
-//    }
 
     if (_streamRead.count(channelNumber))
     {
@@ -106,14 +92,16 @@ void IOTV_Host::responceRead(const struct Header *header)
     if (_logFile.isEmpty())
         return;
 
+    // Не записываем в лог сырые данные
+    if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
+        return;
+
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
     Log::write("R:"
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
-
-//    _counterPing = 0;
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -122,7 +110,7 @@ void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPong(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
     _counterPing = 0;
@@ -194,8 +182,6 @@ void IOTV_Host::slotDataResived(QByteArray data)
         {
             _buff.clear();
             _expectedDataSize = 0;
-            //            _conn_type->clearDataBuffer();
-            //            _conn_type->expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
             break;
@@ -219,7 +205,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                responcePingPoing(iot);
+                responcePingPong(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
 
@@ -346,6 +332,11 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 
 }
 
+QString IOTV_Host::getAddress() const
+{
+    return _conn_type->getAddress();
+}
+
 //void IOTV_Host::removeStreamWrite(uint8_t channel)
 //{
 //    std::lock_guard lg(_mutexStreamWrite);
@@ -409,4 +400,7 @@ void IOTV_Host::slotConnected()
     _counterState = 0;
     _expectedDataSize = 0;
     _buff.clear();
+
+    _streamRead.clear();
+    _streamWrite.clear();
 }

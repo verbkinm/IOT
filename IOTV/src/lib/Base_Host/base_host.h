@@ -37,8 +37,10 @@ public:
 
 protected:
     bool setReadChannelData(uint8_t channelNumber, const Raw &data);
-    bool addReadChannelData(uint8_t channelNumber, const QByteArray &data);
     bool setReadChannelData(uint8_t channelNumber, const QByteArray &data);
+
+    bool addReadChannelData(uint8_t channelNumber, const QByteArray &data);
+
     void clearReadChannelData(uint8_t channelNumber);
 
     bool setWriteChannelData(uint8_t channelNumber, const Raw &data);

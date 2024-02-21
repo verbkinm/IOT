@@ -335,10 +335,10 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
 
 
     struct Read_Write read = {
+        .dataSize = static_cast<uint64_t>(data.size()),
         .nameSize = iot->nameSize,
         .channelNumber = channel,
         .flags = ReadWrite_FLAGS_OPEN_STREAM,
-        .dataSize = static_cast<uint64_t>(data.size()),
         .name = iot->name,
         .data = data.data()
     };

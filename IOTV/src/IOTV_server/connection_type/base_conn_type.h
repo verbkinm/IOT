@@ -32,9 +32,6 @@ public:
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 
-//    void clearDataBuffer();
-//    void setDataBuffer(const QByteArray &data);
-
     static QString ConnTypeToString(Conn_type conn_type);
 
     uint64_t expectedDataSize;
