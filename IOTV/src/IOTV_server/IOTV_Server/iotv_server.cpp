@@ -124,10 +124,9 @@ void IOTV_Server::readHostSetting()
                            " Error: Can't run IOT_Host in new thread",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
-            exit(1);
+//            exit(1);
+            continue;
         }
-
-        //        connect (host, &Base_Host::signalIdentRecived, this, &IOTV_Server::slotTest);
 
         _settingsHosts.endGroup();
     }
@@ -344,7 +343,8 @@ void IOTV_Server::slotNewConnection()
         Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
-        exit(1);
+//        exit(1);
+        return;
     }
 
     connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotDisconnected, Qt::QueuedConnection);
@@ -521,6 +521,8 @@ void IOTV_Server::slotPendingDatagrams()
         if (setting[hostField::connection_type] == connectionType::TCP || setting[hostField::connection_type] == connectionType::UDP)
             setting[hostField::port] = QString::number(hb->port);
 
+        clearHeader(header);
+
         auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&setting](const auto &pair){
             return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
         });
@@ -550,9 +552,13 @@ void IOTV_Server::slotPendingDatagrams()
                            " Error: Can't run IOT_Host in new thread",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
-            exit(1);
+//            exit(1);
+            return;
         }
 
+        // Оповестить клиентов об обновлении устройств
+        for (auto client : _iot_clients)
+            emit client.first->signalUpdateHosts();
     }
     else
     {
@@ -560,10 +566,6 @@ void IOTV_Server::slotPendingDatagrams()
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
-    clearHeader(header);
-
-    for ( std::pair<IOTV_Client*, QThread*> client : _iot_clients)
-        emit client.first->signalUpdateHosts();
 }
 
 void IOTV_Server::slotTest()
