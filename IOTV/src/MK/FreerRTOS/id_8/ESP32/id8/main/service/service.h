@@ -8,8 +8,9 @@
 #ifndef MAIN_SERVICE_SERVICE_H_
 #define MAIN_SERVICE_SERVICE_H_
 
-#include "wifi/wifi.h"
-#include "Net/Tcp.h"
+#include "service/wifi/wifi.h"
+#include "service/update/update.h"
+#include "service/tcp/tcp.h"
 #include "iotv.h"
 
 void start_services(void);

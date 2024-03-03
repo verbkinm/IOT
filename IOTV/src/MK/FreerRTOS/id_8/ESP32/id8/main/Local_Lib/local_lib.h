@@ -5,8 +5,8 @@
  *      Author: user
  */
 
-#ifndef MAIN_LOCAL_LIB_LOCAL_LIB_H_
-#define MAIN_LOCAL_LIB_LOCAL_LIB_H_
+#ifndef MAIN_LOCAL_LIB_LOCAL_LIB_H
+#define MAIN_LOCAL_LIB_LOCAL_LIB_H
 
 #include "stdint.h"
 #include "stdio.h"
@@ -42,4 +42,4 @@ void glob_set_status_err(uint32_t reg);
 void glob_set_bits_status_err(uint32_t bits);
 void glob_clear_bits_status_err(uint32_t bits);
 
-#endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H_ */
+#endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H */

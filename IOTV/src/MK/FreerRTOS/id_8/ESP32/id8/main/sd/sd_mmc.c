@@ -10,7 +10,8 @@
 #define MOUNT_POINT "/sdcard"
 #define EXAMPLE_MAX_CHAR_SIZE    64
 
-static char *TAG = "SD MMC";
+const static char *TAG = "SD MMC";
+const static char *status_sd_err_str = "STATUS_SD_ERROR";
 
 static esp_err_t wrap_sdmmc_host_do_transaction(int slot, sdmmc_command_t *cmdinfo);
 
@@ -33,7 +34,7 @@ static esp_err_t wrap_sdmmc_host_do_transaction(int slot, sdmmc_command_t *cmdin
 		if ((cur_t - old_t) == 0)
 		{
 			glob_set_bits_status_err(STATUS_SD_ERROR);
-			ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
+			printf("%s %s %d", TAG, status_sd_err_str, ret);
 			return ret;
 		}
 		time(&old_t);
@@ -41,7 +42,8 @@ static esp_err_t wrap_sdmmc_host_do_transaction(int slot, sdmmc_command_t *cmdin
 
 	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED)
 	{
-		ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
+		printf("%s %s %d", TAG, status_sd_err_str, ret);
+//		ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
 		glob_set_bits_status_err(STATUS_SD_ERROR);
 		//		spi_bus_free(slot);
 	}
@@ -60,8 +62,7 @@ esp_err_t sd_mmc_init(void)
 	};
 	sdmmc_card_t *card;
 	const char mount_point[] = MOUNT_POINT;
-	ESP_LOGI(TAG, "Initializing SD card");
-	ESP_LOGI(TAG, "Using SDMMC peripheral");
+	printf("%s Initializing SD card\nUsing SDMMC peripheral", TAG);
 
 	sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 	host.do_transaction = wrap_sdmmc_host_do_transaction;
@@ -69,25 +70,20 @@ esp_err_t sd_mmc_init(void)
 	sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
 	slot_config.width = 4;
 
-	// Enable internal pullups on enabled pins. The internal pullups
-	// are insufficient however, please make sure 10k external pullups are
-	// connected on the bus. This is for debug / example purpose only.
-//	slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
-
-	ESP_LOGI(TAG, "Mounting filesystem");
+	printf("%s Mounting filesystem\n", TAG);
 	ret = esp_vfs_fat_sdmmc_mount(mount_point, &host, &slot_config, &mount_config, &card);
 
 	if (ret != ESP_OK)
 	{
 		glob_set_bits_status_err(STATUS_SD_ERROR);
 		if (ret == ESP_FAIL)
-			ESP_LOGE(TAG, "Failed to mount filesystem. If you want the card to be formatted, set the EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
+			printf("%s Failed to mount filesystem\n", TAG);
 		else
-			ESP_LOGE(TAG, "Failed to initialize the card (%s). Make sure SD card lines have pull-up resistors in place.", esp_err_to_name(ret));
+			printf("%s Failed to initialize the card (%s)\n", TAG, esp_err_to_name(ret));
 
 		return ret;
 	}
-	ESP_LOGI(TAG, "Filesystem mounted");
+	printf("%s Filesystem mounted\n", TAG);
 
 	// Card has been initialized, print its properties
 	sdmmc_card_print_info(stdout, card);

@@ -14,14 +14,11 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "esp_log.h"
+#include "cJSON.h"
+
 #include "Global_def.h"
-#include "Local_Lib/cJSON.h"
 
 bool set_wifi_config_value(const char *key, const char *value);
 bool get_wifi_config_value(const char *key, char **value);
-
-bool set_meteo_chart_config_value(const char *key, const char *value);
-bool get_meteo_chart_config_value(const char *key, char **value);
 
 #endif /* MAIN_JSON_JSON_CONFIG_H_ */

@@ -7,6 +7,8 @@
 
 #include "json_config.h"
 
+static const char *template = "File %s not open\n";
+
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value);
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value);
 
@@ -15,7 +17,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	FILE *file = fopen(file_path, "r");
 	if (!file)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		fprintf(stderr, template, file_path);
 		return false;
 	}
 
@@ -48,7 +50,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 	file = fopen(file_path, "w");
 	if (file == NULL)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		fprintf(stderr, template, file_path);
 		goto bad_end;
 	}
 	fprintf(file, "%s", print);
@@ -71,7 +73,7 @@ static bool get_config_value(const char* file_path, const char *group, const cha
 	FILE *file = fopen(file_path, "r");
 	if (!file)
 	{
-		fprintf(stderr, "File %s not open\n", file_path);
+		fprintf(stderr, template, file_path);
 		return false;
 	}
 
@@ -113,10 +115,10 @@ static bool get_config_value(const char* file_path, const char *group, const cha
 
 bool set_wifi_config_value(const char *key, const char *value)
 {
-	return set_config_value(WIFI_CONF_PATH, "wifi", key, value);
+	return set_config_value(WIFI_CONF_PATH, WIFI_STR, key, value);
 }
 
 bool get_wifi_config_value(const char *key, char **value)
 {
-	return get_config_value(WIFI_CONF_PATH, "wifi", key, value);
+	return get_config_value(WIFI_CONF_PATH, WIFI_STR, key, value);
 }

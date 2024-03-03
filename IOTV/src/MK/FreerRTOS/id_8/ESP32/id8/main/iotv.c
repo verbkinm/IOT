@@ -3,15 +3,12 @@
 #define STREAM_BUF_SIZE 8192
 
 static const char *TAG = "iotv";
+static const char *task_name = "iotv_service_task";
 
 static uint64_t realBufSize = 0;
-static uint64_t expextedDataSize = 20;
 
 static char recivedBuffer[BUFSIZE];
 static char transmitBuffer[BUFSIZE];
-
-static uint64_t cutDataSize = 0;
-static bool error = false;
 
 static int last_client_socket = 0;
 
@@ -56,28 +53,19 @@ static uint64_t iotv_write_func(char *data, uint64_t size, void *obj)
 
 	int socket = *(int *)obj;
 
-//	ESP_LOGI(TAG, "Data send");
-//	for (int i = 0; i < size; ++i)
-//	{
-//		printf("%02x:", data[i]);
-//	}
-//	printf("\n");
-
 	return send(socket, data, size, 0);
 }
 
 void iotv_clear_buf_data(void)
 {
 	realBufSize = 0;
-	expextedDataSize = 0;
-	cutDataSize = 0;
 	last_client_socket = 0;
 	camera_stop();
 }
 
 static void iotv_init(void)
 {
-	ESP_LOGI(TAG, "iotv_init start");
+	printf("%s iotv_init start\n", TAG);
 
 	iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 5);
 
@@ -102,11 +90,14 @@ static void iotv_init(void)
 
 	iot.state = 1;
 
-	ESP_LOGI(TAG, "iotv_init complete");
+	printf("%s iotv_init complete\n", TAG);
 }
 
 void iotv_data_recived(const char *data, int size, int sock)
 {
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
+
 	last_client_socket = sock;
 
 	if (data == NULL)
@@ -116,38 +107,32 @@ void iotv_data_recived(const char *data, int size, int sock)
 	if ((realBufSize + size) >= BUFSIZE)
 	{
 		iotv_clear_buf_data();
-		ESP_LOGE(TAG, "Buffer overflow");
+		printf("%s Buffer overflow\n", TAG);
 		return;
 	}
 
 	memcpy(&recivedBuffer[realBufSize], data, size);
 	realBufSize += size;
 
-	if (realBufSize < expextedDataSize)
-	{
-		ESP_LOGE(TAG, "realBufSize < expextedDataSize");
-		return;
-	}
-
 	while (realBufSize > 0)
 	{
 		uint64_t size = 0;
 
-		struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+		struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expectedDataSize, &cutDataSize);
 
 		if (header == NULL)
-			ESP_LOGE(TAG, "header == NULL");
+			printf("%s header == NULL\n", TAG);
 
 		if (error == true)
 		{
 			iotv_clear_buf_data();
-			ESP_LOGE(TAG, "Data error");
+			printf("%s Data error\n", TAG);
 			break;
 		}
 
-		if (expextedDataSize > 0)
+		if (expectedDataSize > 0)
 		{
-			ESP_LOGE(TAG, "expextedDataSize %d", (int)expextedDataSize);
+			printf("%s expextedDataSize %d\n", TAG, (int)expectedDataSize);
 			return;
 		}
 
@@ -171,10 +156,7 @@ void iotv_data_recived(const char *data, int size, int sock)
 			else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
 				size = responsePingData(transmitBuffer, BUFSIZE);
 			else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-			{
 				size = responseStateData(transmitBuffer, BUFSIZE, &iot);
-//				ESP_LOGI(TAG, "responseStateData. size = %d, state = %d", (int)size, (int)iot.state);
-			}
 		}
 
 		if (size)
@@ -189,13 +171,14 @@ void iotv_data_recived(const char *data, int size, int sock)
 
 void iotv_service_task(void *pvParameters)
 {
-	ESP_LOGI(TAG, "iotv_service_task start");
+	printf("%s %s start\n", TAG, task_name);
 
 	iotv_init();
 
 	if (camera_init() != ESP_OK)
 	{
 		glob_set_bits_status_err(STATUS_CAMERA_ERROR);
+		printf("%s camera_init error\n", TAG);
 		esp_restart();
 	}
 
@@ -203,8 +186,8 @@ void iotv_service_task(void *pvParameters)
 
 	for( ;; )
 	{
-		if (glob_get_status_err())
-			break;
+//		if (glob_get_status_err())
+//			break;
 
 		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 			goto for_end;
@@ -213,7 +196,6 @@ void iotv_service_task(void *pvParameters)
 			goto for_end;
 
 		camera_fb_t *pic = esp_camera_fb_get();
-		ESP_LOGI(TAG, "Picture taken! Its size was: %zu bytes", pic->len);
 
 		int16_t width = pic->width;
 		int16_t height = pic->height;
@@ -245,8 +227,6 @@ void iotv_service_task(void *pvParameters)
 				.pkg = &readWrite
 		};
 		responseReadData((char *)buf, STREAM_BUF_SIZE, &iot, &header, iotv_write_func, (void *)&last_client_socket);
-//		if (responseReadData((char *)transmitBuffer, BUFSIZE, &iot, &header, iotv_write_func, (void *)&last_client_socket) < 1)
-//			camera_stop();
 
 		esp_camera_fb_return(pic);
 
@@ -254,10 +234,10 @@ void iotv_service_task(void *pvParameters)
 
 		iot.readChannel[CH_CAM_DATA].dataSize = 0;
 		iot.readChannel[CH_CAM_DATA].data = NULL;
-		vTaskDelay(20 / portTICK_PERIOD_MS);
+		vTaskDelay(30 / portTICK_PERIOD_MS);
 	}
 
-	ESP_LOGI(TAG, "iotv_service_task stop");
+	printf("%s %s stop\n", TAG, task_name);
 	vTaskDelete(NULL);
 	free(buf);
 }
