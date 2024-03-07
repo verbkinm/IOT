@@ -2,18 +2,15 @@
 
 //extern QueueHandle_t xQueueInData, xQueueOutData;
 
-extern uint64_t realBufSize;
-extern uint64_t expextedDataSize;
-extern uint8_t glob_status;
+static uint64_t realBufSize = 0;
 
 static const char *TAG = "iotv";
+static const char *task_name = "iotv_service_task";
 
-static uint8_t recivedBuffer[BUFSIZE];
-uint8_t transmitBuffer[BUFSIZE];
-int transmitBufferSize = 0;
+static char recivedBuffer[BUFSIZE];
+static char transmitBuffer[BUFSIZE];
 
-static uint64_t cutDataSize = 0;
-static bool error = false;
+static int last_client_socket = 0;
 
 static uint8_t readType[15] = {
 		DATA_TYPE_BOOL,			// состояние реле
@@ -65,13 +62,32 @@ static struct IOTV_Server_embedded iot = {
 		.descriptionSize = 11,
 };
 
+
 static int16_t readBorderDistanceFromNVS(void);
 static void writeBorderDistanceToNVS(int16_t value);
 
 static uint8_t readDisplayOrientationFromNVS(void);
 static void writeDisplayOrientationToNVS(uint8_t value);
 
-void iotvInit(void)
+static uint64_t iotv_write_func(char *data, uint64_t size, void *obj);
+
+static uint64_t iotv_write_func(char *data, uint64_t size, void *obj)
+{
+	if (obj == NULL || data == NULL)
+		return 0;
+
+	int socket = *(int *)obj;
+
+	return send(socket, data, size, 0);
+}
+
+void iotv_clear_buf_data(void)
+{
+	realBufSize = 0;
+	last_client_socket = 0;
+}
+
+void iotv_init(void)
 {
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
@@ -88,55 +104,63 @@ void iotvInit(void)
 	iot.state = 1;
 }
 
-//static void dataRecived(const struct DataPkg *pkg)
-void dataRecived(const uint8_t *data, int size)
+void iotv_data_recived(const char *data, int size, int sock)
 {
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
+
+	last_client_socket = sock;
+
 	if (data == NULL)
 		return;
 
 	//страховка
 	if ((realBufSize + size) >= BUFSIZE)
 	{
-		realBufSize = 0;
-		expextedDataSize = 0;
-		cutDataSize = 0;
-		ESP_LOGE(TAG, "Buffer overflow");
+		iotv_clear_buf_data();
+		printf("%s Buffer overflow\n", TAG);
 		return;
 	}
 
 	memcpy(&recivedBuffer[realBufSize], data, size);
 	realBufSize += size;
 
-	if (realBufSize < expextedDataSize)
-		return;
-
 	while (realBufSize > 0)
 	{
-		struct Header *header = createPkgs(recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+		uint64_t size = 0;
+
+		struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expectedDataSize, &cutDataSize);
+
+		if (header == NULL)
+			printf("%s header == NULL\n", TAG);
 
 		if (error == true)
 		{
-			realBufSize = 0;
-			expextedDataSize = 0;
-			cutDataSize = 0;
+			iotv_clear_buf_data();
+			printf("%s Data error\n", TAG);
 			break;
 		}
 
-		if (expextedDataSize > 0)
-			break;
+		if (expectedDataSize > 0)
+		{
+			printf("%s expextedDataSize %d\n", TAG, (int)expectedDataSize);
+			return;
+		}
 
 		if (header->type == HEADER_TYPE_REQUEST)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-				transmitBufferSize += responseIdentificationData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
+				size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
-				transmitBufferSize = responseReadData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
-			else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
-				int len = responseWriteData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
-				transmitBufferSize += len;
+				responseReadData(transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock);
+				size = 0;
+			}
+			else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
+			{
+				size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
 
-				if (len > 0)
+				if (size > 0)
 				{
 					uint8_t channelNumber = ((struct Read_Write *)header->pkg)->channelNumber;
 					int8_t *val = (int8_t *)iot.readChannel[channelNumber].data;
@@ -152,6 +176,7 @@ void dataRecived(const uint8_t *data, int size)
 						}
 						else
 						{
+							glob_set_bits_status_reg(STATUS_RELE);
 							setBitInByte(&glob_status, *rele_state, MY_STATUS_RELE);
 							printf("Rele state: %s, remote switch\n", (*rele_state ? "ON" : "OFF"));
 						}
@@ -334,7 +359,10 @@ void Vl6180X_Task(void *pvParameters)
 				{
 					*releState ^= 1;
 					printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), *range);
-					setBitInByte(&glob_status, *releState, MY_STATUS_RELE);
+					if (*releState)
+						glob_set_bits_status_reg(STATUS_RELE);
+					else
+						glob_clear_bits_status_reg(STATUS_RELE);
 				}
 				else
 					ESP_LOGE(TAG, "Can't switch relay");
@@ -442,5 +470,3 @@ void OLED_Task(void *pvParameters)
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
-
-

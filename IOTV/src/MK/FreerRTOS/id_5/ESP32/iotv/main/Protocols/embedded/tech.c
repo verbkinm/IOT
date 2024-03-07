@@ -1,5 +1,8 @@
 #include "tech.h"
-#include <stdint.h>
+#include "iotv_types.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 uint64_t techCheckSum(const struct Tech *body)
 {

@@ -23,31 +23,34 @@ enum DATA_TYPE
 };
 
 struct RawEmbedded {
-    uint32_t dataSize;
+    uint64_t dataSize;
     char *data;
 };
 
 struct IOTV_Server_embedded
 {
-    const uint16_t id;
-    const char * const name;
-    const char * const description;
+    uint16_t id;
 
-    const uint8_t numberReadChannel;
-    struct RawEmbedded *readChannel;
-    uint8_t * const readChannelType;
-
-    const uint8_t numberWriteChannel;
-    uint8_t * const writeChannelType;
+    uint8_t numberReadChannel;
+    uint8_t numberWriteChannel;
 
     uint8_t state;
 
-    const uint8_t nameSize;
-    const uint16_t descriptionSize;
+    uint8_t nameSize;
+    uint16_t descriptionSize;
+
+    struct RawEmbedded *readChannel;
+    uint8_t *readChannelType;
+    uint8_t *writeChannelType;
+
+    char *name;
+    char *description;
 };
 
 int8_t dataSizeonDataType(uint8_t type);
 bool byteOrderReversebleData(uint8_t type);
 void clearIOTV_Server(struct IOTV_Server_embedded *iot);
+
+uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const struct IOTV_Server_embedded *iot, uint8_t channelNumber);
 
 #endif // IOTV_SERVER_EMBEDDED_H
