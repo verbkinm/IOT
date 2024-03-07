@@ -12,7 +12,7 @@ const char *TAG = "SNTP";
 //const char *sntp_utc_default = "UTC-3";
 //const char *sntp_server_url_default = "pool.ntp.org";
 
-const char *sntp_utc = "UTC-3";
+const char *sntp_utc = "UTC-5";
 const char *sntp_server_url = "pool.ntp.org";
 
 void time_sync_notification_cb(struct timeval *tv);
@@ -54,6 +54,8 @@ void sntp_service_task(void *pvParameters)
 
 	time_t now;
 	struct tm timeinfo;
+
+	glob_set_status_reg(STATUS_SNTP_ON);
 
 	while(true)
 	{

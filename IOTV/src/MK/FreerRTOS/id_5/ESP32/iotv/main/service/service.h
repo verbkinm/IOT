@@ -13,6 +13,7 @@
 #include "bme280/bme280.h"
 #include "update/update.h"
 #include "tcp/tcp.h"
+#include "oled/oled.h"
 
 void start_services(void);
 

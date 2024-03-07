@@ -12,6 +12,7 @@
 #include "freertos/task.h"
 
 #include "I2C/BME280.h"
+#include "iotv.h"
 
 void BME280_service_task(void *pvParameters);
 const struct THP *BME280_service_get_value(void);

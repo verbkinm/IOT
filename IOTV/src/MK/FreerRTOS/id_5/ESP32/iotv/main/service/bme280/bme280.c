@@ -20,6 +20,8 @@ void BME280_service_task(void *pvParameters)
 
 	BME280_init();
 
+	struct IOTV_Server_embedded *iot = iotv_get();
+
 	for( ;; )
 	{
 		if (glob_get_status_err())
@@ -29,8 +31,11 @@ void BME280_service_task(void *pvParameters)
 			break;
 
 		thp = BME280_readValues();
+		*(double *)iot->readChannel[CH_TEMP].data = thp.temperature;
+		*(double *)iot->readChannel[CH_PRES].data = thp.pressure;
+		*(double *)iot->readChannel[CH_HUM].data = thp.humidity;
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

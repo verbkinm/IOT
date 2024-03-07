@@ -34,7 +34,7 @@ void tcp_server_task(void *pvParameters)
 
 		if (!(glob_get_status_reg() & STATUS_IP_GOT))
 		{
-			taskYIELD();
+			vTaskDelay(1000 / portTICK_PERIOD_MS);
 			continue;
 		}
 

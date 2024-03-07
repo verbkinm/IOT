@@ -12,5 +12,6 @@ void start_services(void)
 	xTaskCreate(wifi_service_task, "wifi_service_task", 4096, 0, 10, 0);
 	xTaskCreate(sntp_service_task, "sntp_service_task", 4096, 0, 10, 0);
 	xTaskCreate(BME280_service_task, "BME280_service_task", 4096, 0, 10, 0);
-	xTaskCreate(update_service_task, "update_service_task", 4096, 0, 10, 0);
+//	xTaskCreate(update_service_task, "update_service_task", 4096, 0, 10, 0);
+	xTaskCreate(OLED_Task, "oled_task", 4096, NULL, 10, NULL);
 }

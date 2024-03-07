@@ -40,21 +40,21 @@
 #define BORDER_DISTANCE_DEFAULT 			150
 #define DISPLAY_ORIENTATION_DEFAULT			0
 
-#define CH_RELAY_STATE 	0
-#define CH_BORDER		1
-#define CH_SEC			2
-#define CH_MIN			3
-#define	CH_HOUR			4
-#define	CH_DAY			5
-#define CH_DATE			6
-#define CH_MONTH		7
-#define CH_YEAR			8
-#define CH_DISP_ORNT	9
-#define CH_RANGE		10
-#define CH_LUX			11
-#define CH_TEMP			12
-#define CH_HUM			13
-#define CH_PRES			14
+#define CH_RELAY_STATE 						0
+#define CH_BORDER							1
+#define CH_SEC								2
+#define CH_MIN								3
+#define	CH_HOUR								4
+#define	CH_DAY								5
+#define CH_DATE								6
+#define CH_MONTH							7
+#define CH_YEAR								8
+#define CH_DISP_ORNT						9
+#define CH_RANGE							10
+#define CH_LUX								11
+#define CH_TEMP								12
+#define CH_HUM								13
+#define CH_PRES								14
 
 // OLED
 #define OLED_PIN_NUM_RST           			-1
@@ -63,7 +63,6 @@
 #define OLED_LCD_CMD_BITS           		8
 #define OLED_LCD_PARAM_BITS         		8
 
-#define OLED_LVGL_TICK_PERIOD_MS    		1
 #define OLED_BOOT_SCREEN_TIME				5000
 
 // Глобалные флаги статусов
@@ -81,15 +80,15 @@ enum STATUS_REG {
 
 // Глобалные флаги ошибок
 enum STATUS_ERROR {
-	STATUS_UPDATE_ERROR = 0x0002,
+	STATUS_UPDATE_ERROR 		= 0x0002,
 };
 
 // Глобалные флаги обновления
 enum UPDATE_FLAGS {
-	UPDATE_NOW = 0x01,
-	UPDATE_CHECK = 0x02,
-	UPDATE_AVAILABLE = 0x04,
-	UPDATE_DONE = 0x08,
+	UPDATE_NOW 					= 0x01,
+	UPDATE_CHECK 				= 0x02,
+	UPDATE_AVAILABLE 			= 0x04,
+	UPDATE_DONE 				= 0x08,
 };
 
 #endif /* MAIN_GLOBAL_DEF_H_ */
