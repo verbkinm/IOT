@@ -18,9 +18,10 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-	iotv_init();
 	i2c_init();
-	DS3231_set_system_time();
+//	DS3231_set_system_time();
+
+	iotv_init();
 
 	start_services();
 }

@@ -14,6 +14,7 @@
 #include "update/update.h"
 #include "tcp/tcp.h"
 #include "oled/oled.h"
+#include "vl6180x/vl6180x.h"
 
 void start_services(void);
 

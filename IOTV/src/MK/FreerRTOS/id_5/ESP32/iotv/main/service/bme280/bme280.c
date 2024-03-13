@@ -31,9 +31,12 @@ void BME280_service_task(void *pvParameters)
 			break;
 
 		thp = BME280_readValues();
-		*(double *)iot->readChannel[CH_TEMP].data = thp.temperature;
-		*(double *)iot->readChannel[CH_PRES].data = thp.pressure;
-		*(double *)iot->readChannel[CH_HUM].data = thp.humidity;
+		if (!thp.err)
+		{
+			*(double *)iot->readChannel[CH_TEMP].data = thp.temperature;
+			*(double *)iot->readChannel[CH_PRES].data = thp.pressure;
+			*(double *)iot->readChannel[CH_HUM].data = thp.humidity;
+		}
 
 		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}

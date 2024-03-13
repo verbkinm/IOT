@@ -100,7 +100,7 @@ static void chek_update(void)
 	printf("available_version - %s\n", available_version);
 	if (strcmp(available_version, esp_app->version) > 0)
 	{
-		printf("new version available\n");
+		printf("new version available - %s\n", available_version);
 		update();
 	}
 }

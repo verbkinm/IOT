@@ -32,7 +32,7 @@ void time_sync_notification_cb(struct timeval *tv)
 	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
 	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
 
-	DS3231_SetDataTime_tm(&timeinfo);
+//	DS3231_SetDataTime_tm(&timeinfo);
 }
 
 void sntp_obtain_time(void)
