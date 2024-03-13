@@ -165,6 +165,7 @@ struct THP BME280_readValues(void)
 	thp.humidity = BME280_humidity();
 	thp.pressure = BME280_pressure();
 	thp.pressure *= 0.0075; // паскали в мм рт.ст.
+	thp.err = false;
 
 	return thp;
 }

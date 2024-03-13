@@ -382,6 +382,11 @@ static void OLED_init(void)
 	glob_disp = disp;
 }
 
+void OLED_set_disp_rotation(lv_disp_rot_t rotation)
+{
+	lv_disp_set_rotation(glob_disp, rotation);
+}
+
 static void anim_x_cb(void * var, int32_t v)
 {
 	lv_obj_set_x(var, v);

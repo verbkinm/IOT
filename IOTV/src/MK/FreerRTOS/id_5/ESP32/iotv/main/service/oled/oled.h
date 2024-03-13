@@ -35,5 +35,6 @@
 #include "iotv.h"
 
 void OLED_Task(void *pvParameters);
+void OLED_set_disp_rotation(lv_disp_rot_t rotation);
 
 #endif /* MAIN_SERVICE_OLED_OLED_H_ */
