@@ -1,6 +1,5 @@
 #include "client.h"
 
-#include "colorimageprovider.h"
 #include "iotv_event_manager.h"
 #include "event_action_parser.h"
 #include "log.h"
@@ -15,8 +14,8 @@
 #include <fstream>
 #include <QTemporaryFile>
 
-Client::Client(ColorImageProvider &provider, QObject *parent): QObject{parent},
-    _expectedDataSize(0), _counterPing(0), _provider(provider)
+Client::Client(QObject *parent): QObject{parent},
+    _expectedDataSize(0), _counterPing(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -455,7 +454,7 @@ void Client::responceRead(const struct Header *header)
     if (pkg == nullptr)
         return;
 
-    qDebug() << "PKG " << header->fragment << "(" << pkg->dataSize <<  ") /" << header->fragments ;
+//    qDebug() << "PKG " << header->fragment << "(" << pkg->dataSize <<  ") /" << header->fragments ;
 
     auto channel = pkg->channelNumber;
     QString name(QByteArray{pkg->name, pkg->nameSize});
@@ -478,26 +477,19 @@ void Client::responceReadStream(const Header *header)
     auto channel = pkg->channelNumber;
     QString name(QByteArray{pkg->name, pkg->nameSize});
 
+    if (!_devices.contains(name))
+        return;
+
     if (header->fragment == 1)
-    {
-//        std::ofstream file;
-//        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-//        file.close();
-
         _devices[name].clearData(channel);
-    }
-
-//    std::ofstream file;
-//    file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-//    file.write(pkg->data, pkg->dataSize);
-//    file.close();
 
     _devices[name].addData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
 
     if (header->fragment == header->fragments)
     {
-        _provider.slotRefreshImage(_devices[name].getReadChannelData(channel));
-        emit _devices[name].signalDataPkgComplete(channel);
+        QByteArray data = _devices[name].getReadChannelData(channel);
+        qDebug() << "PKG total: " << data.size();
+        emit _devices[name].signalDataPkgComplete(channel, std::move(data));
     }
 }
 
@@ -541,6 +533,8 @@ void Client::slotReciveData()
 {
     while (_socket.bytesAvailable())
         _recivedBuff += _socket.readAll();
+
+//    _recivedBuff = _socket.readAll();
 
     bool error = false;
     uint64_t cutDataSize = 0;

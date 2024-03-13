@@ -1,7 +1,7 @@
 #ifndef IOTV_TYPES_H
 #define IOTV_TYPES_H
 
-#define HEADER_SIZE 20
+#define HEADER_SIZE 24
 #define IDENTIFICATION_SIZE  16
 #define STATE_SIZE  15
 #define READ_WRITE_SIZE 15
@@ -40,6 +40,8 @@ typedef enum
 {
     ReadWrite_FLAGS_NONE = 0,
     ReadWrite_FLAGS_IGNORE_CH = 0x01,
+    ReadWrite_FLAGS_OPEN_STREAM = 0x02,
+    ReadWrite_FLAGS_CLOSE_STREAM = 0x03,
     ReadWrite_FLAGS_ERROR = 0xFF
 } ReadWrite_FLAGS;
 
@@ -66,6 +68,5 @@ typedef enum
     Tech_FLAGS_NONE = 0,
     Tech_FLAGS_ERROR = 0xFF
 } Tech_FLAGS;
-
 
 #endif // IOTV_TYPES_H

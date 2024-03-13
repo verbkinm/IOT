@@ -2,13 +2,12 @@
 
 #include <QSettings>
 #include <QTcpServer>
+#include <QUdpSocket>
 #include <QFileInfo>
 #include <QDir>
 #include <QTimer>
 #include <QThread>
 #include <QCoreApplication>
-
-
 
 #include <list>
 #include <fstream>
@@ -38,6 +37,7 @@ private:
     void writeEventActionJson(const QByteArray &data);
 
     void startTCPServer();
+    void startBroadCastListener();
 
     void clientOnlineFile() const;
 
@@ -57,12 +57,17 @@ private:
 
     QString _address;
     quint16 _port;
+    quint16 _broadcasrListenerPort;
 
     QTimer _reconnectTimer;
 
     uint _maxClientCount;
+    uint _maxHostCount = 10;
 
     IOTV_Event_Manager *_eventManager;
+
+    // широковещательный слушатель!
+    QUdpSocket *_udpSocket;
 
 private slots:
     void slotNewConnection();
@@ -73,5 +78,6 @@ private slots:
     void slotFetchEventActionData(QByteArray data);
     void slotQueryEventActionData();
 
+    void slotPendingDatagrams();
     void slotTest();
 };

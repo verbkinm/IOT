@@ -154,11 +154,13 @@ void Device::setReadInterval(int interval)
 void Device::setState(bool newState)
 {
     Base_Host *host = this;
-    host->setState(static_cast<State_STATE>(newState));
 
-    //!!!
-    if (state() == static_cast<State_STATE>(newState))
+    //!!! Дублируются сигналы в Device и в Base_Host
+    if (state() != static_cast<State_STATE>(newState))
+    {
+        host->setState(static_cast<State_STATE>(newState));
         emit signalStateChanged();
+    }
 }
 
 bool operator==(const Device &lhs, const Device &rhs)
@@ -192,6 +194,12 @@ void Device::setAliasName(const QString &newAliasName)
         return;
     _aliasName = newAliasName;
     emit signalAliasNameChanged();
+}
+
+void Device::testFunc(Wrap_QByteArray *data)
+{
+    qDebug() << "testFunc total data: " << data->data().size();
+    //    delete data;
 }
 
 void Device::slotTimerReadTimeOut()

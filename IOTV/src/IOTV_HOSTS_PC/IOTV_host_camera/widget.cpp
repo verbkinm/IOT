@@ -1,56 +1,64 @@
 #include "widget.h"
 #include "qbuffer.h"
-#include "qurl.h"
+#include "qmediarecorder.h"
 
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QCamera>
 #include <QImageCapture>
 #include <QMediaCaptureSession>
+#include <QMediaPlayer>
+
+#include <QAudioInput>
+#include <QAudioOutput>
+#include <QAudioSink>
+#include <QAudioSource>
+
+#include <QAudioDevice>
+#include <QAudioInput>
+#include <QUrl>
+#include <QAudioDecoder>
 
 Widget::Widget(QObject *parent)
     : QObject(parent), /*_format(QMediaFormat::MPEG4),*/ _image(nullptr)
 {
     timer = new QTimer(this);
 
-//    connect(&imageCapture, &QImageCapture::readyForCaptureChanged, this, &Widget::readyForCapture);
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::processCapturedImage);
     connect(&imageCapture, &QImageCapture::errorOccurred, this, &Widget::errorCapture);
-//    connect(&imageCapture, &QImageCapture::imageAvailable, this, &Widget::processCapturedFrame);
+    //    connect(&imageCapture, &QImageCapture::imageAvailable, this, &Widget::processCapturedFrame);
     connect(timer, &QTimer::timeout, this, &Widget::timerOut, Qt::QueuedConnection);
 
     connect(&imageCapture, &QImageCapture::imageCaptured, this, &Widget::signalFirstCapture, Qt::SingleShotConnection);
 
 
-    camera = new QCamera(QMediaDevices::defaultVideoInput());
+
+
+    camera = new QCamera(/*QMediaDevices::videoInputs().at(1)*/QMediaDevices::defaultVideoInput());
     camera->start();
 
     captureSession.setCamera(camera);
     captureSession.setImageCapture(&imageCapture);
-//    captureSession.setRecorder(&_recorder);
 
-//    _format.setAudioCodec(QMediaFormat::AudioCodec::AAC);
-//    _format.setVideoCodec(QMediaFormat::VideoCodec::H265);
-//    _recorder.setMediaFormat(_format);
-//    _recorder.setOutputLocation(QUrl("mycapture.mp4"));
-//    _recorder.record();
+    QAudioFormat format;
+    format.setSampleRate(44100);
+    format.setChannelCount(1);
+    format.setSampleFormat(QAudioFormat::Int32);
 
-    const QList<QCameraDevice> availableCameras = QMediaDevices::videoInputs();
+    audioIn = new QAudioInput(QMediaDevices::defaultAudioInput());
+    source = new QAudioSource(audioIn->device(), format);
+    source->setVolume(1);
+    devIn = source->start();
 
-    for (const QCameraDevice &cameraDevice : availableCameras)
-    {
-        qDebug() << cameraDevice;
-        for (auto &el : cameraDevice.videoFormats())
-            qDebug() << el.resolution() << ' ' << el.maxFrameRate() << ' ' << el.minFrameRate() << ' ' << el.pixelFormat();
-    }
+    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 
-//    timer->start(INTERVAL);
     imageCapture.capture();
 }
 
 Widget::~Widget()
 {
-
+    qDebug() << "destruct";
+    recorder->stop();
 }
 
 const QImage Widget::getImage() const
@@ -72,20 +80,19 @@ size_t Widget::getImageSavedSize() const
 void Widget::start()
 {
     timer->start(INTERVAL);
+//    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 void Widget::stop()
 {
     timer->stop();
+//    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 
 void Widget::processCapturedImage(int requestId, const QImage &img)
 {
     Q_UNUSED(requestId);
-
-    if (!timer->isActive())
-        return;
 
     timer->stop();
 
@@ -98,20 +105,13 @@ void Widget::processCapturedImage(int requestId, const QImage &img)
     _image.save(&buffer, "JPG", 100);
 
     emit signalImageCaptured();
-
-//    imageCapture.capture();
-
-//    QImage newImage;
-//    newImage.loadFromData(ba, "JPG");
-//    newImage.save("Image_raw.jpg", "JPG", 50);
-
     timer->start(INTERVAL);
 }
 
 void Widget::processCapturedFrame(int requestId, const QVideoFrame &frame)
 {
-//    Q_UNUSED(requestId);
-//    frame.i
+    //    Q_UNUSED(requestId);
+    //    frame.i
     qDebug() << requestId << frame << frame.isValid() << frame.isMapped() << frame.isReadable()
              << frame.isWritable() << frame.startTime() << frame.endTime();
 }
@@ -120,11 +120,11 @@ void Widget::timerOut()
 {
     if (imageCapture.isReadyForCapture())
     {
-//        camera->stop();
-//        imageCapture.setQuality(QImageCapture::LowQuality);
-//        imageCapture.setFileFormat(QImageCapture::FileFormat::JPEG);
-//        imageCapture.setResolution(320, 240);
-//        camera->start();
+        //        camera->stop();
+        //        imageCapture.setQuality(QImageCapture::LowQuality);
+        //        imageCapture.setFileFormat(QImageCapture::FileFormat::JPEG);
+        //        imageCapture.setResolution(320, 240);
+        //        camera->start();
 
         imageCapture.capture();
     }
@@ -142,5 +142,15 @@ void Widget::readyForCapture(bool)
     imageCapture.capture();
     qDebug() << "ready";
     timer->start(INTERVAL);
+}
+
+void Widget::displayErrorMessage()
+{
+    qDebug() << recorder->errorString();
+}
+
+void Widget::slotReadyRead()
+{
+    emit signalAudio(devIn->readAll());
 }
 

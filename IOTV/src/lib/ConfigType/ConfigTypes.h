@@ -24,6 +24,7 @@ struct serverField
 {
     static const QString address;
     static const QString port;
+    static const QString broadCastListenerPort;
     static const QString maxClient;
 };
 

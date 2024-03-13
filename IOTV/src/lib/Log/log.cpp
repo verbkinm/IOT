@@ -3,6 +3,8 @@
 const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss:zzz - ";
 std::mutex Log::_mutex;
 
+const int MAX_STRING_SIZE = 100;
+
 void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
 {
     if (writeFlags.testFlag(Write_Flag::FILE))
@@ -25,7 +27,9 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     }
 
     QTextStream out(&file);
-    out << QDateTime::currentDateTime().toString(_FORMAT) << data << '\n';
+    out << QDateTime::currentDateTime().toString(_FORMAT)
+        << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE) : data)
+        << '\n';
     out.flush();
 
     file.close();
@@ -34,11 +38,13 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 void Log::writeToStdOut(const QString &data)
 {
     std::lock_guard lg(_mutex);
-    qDebug() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str() << data.toStdString().c_str();
+    qDebug() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
+             << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
 }
 
 void Log::writeToStdErr(const QString &data)
 {
     std::lock_guard lg(_mutex);
-    qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str() << data.toStdString().c_str();
+    qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
+               << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
 }

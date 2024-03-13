@@ -1,4 +1,8 @@
 #include "identification.h"
+#include "iotv_types.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 uint64_t identificationCheckSum(const struct Identification *body)
 {

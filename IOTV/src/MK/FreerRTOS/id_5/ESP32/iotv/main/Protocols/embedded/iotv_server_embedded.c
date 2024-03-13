@@ -73,3 +73,33 @@ void clearIOTV_Server(struct IOTV_Server_embedded *iot)
     free(iot);
 }
 
+
+uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const struct IOTV_Server_embedded *iot, uint8_t channelNumber)
+{
+    if (iot == NULL || iot->readChannel == NULL || channelNumber >= iot->numberReadChannel)
+    {
+        *data = NULL;
+        return 0;
+    }
+
+    char *dataChannel = iot->readChannel[channelNumber].data;
+    uint64_t dataSize = iot->readChannel[channelNumber].dataSize;
+    char *endData = dataChannel + dataSize;
+
+    *data = dataChannel + partSize * partNumber;
+
+    // Выход за пределы
+    if (*data >= endData)
+    {
+        *data = NULL;
+        return 0;
+    }
+
+    // Осталось данных от текущего указателя data
+    uint64_t sizeLeft = endData - *data;
+
+    if (sizeLeft < partSize)
+        return sizeLeft;
+
+    return partSize;
+}

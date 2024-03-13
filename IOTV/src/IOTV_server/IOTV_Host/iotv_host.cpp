@@ -1,6 +1,6 @@
 #include "iotv_host.h"
 
-#include <fstream>
+//#include <fstream>
 
 
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
@@ -72,7 +72,7 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 
 void IOTV_Host::responceRead(const struct Header *header)
 {
-    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
+//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
@@ -92,28 +92,16 @@ void IOTV_Host::responceRead(const struct Header *header)
     if (_logFile.isEmpty())
         return;
 
+    // Не записываем в лог сырые данные
+    if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
+        return;
+
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
     Log::write("R:"
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
-
-    _counterPing = 0;
-
-
-    if (header->fragment == 1 && header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-    }
-
-    if (header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-        file.write(pkg->data, pkg->dataSize);
-    }
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -122,7 +110,7 @@ void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPong(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
     _counterPing = 0;
@@ -178,28 +166,35 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-    bool error = false;
-    uint64_t cutDataSize = 0;
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
 
     _buff += data;
 
+    //!!! Определится с максимальным размером буфера
+    if (_buff.size() >= BUFSIZ * 1000)
+    {
+        Log::write("slotDataResived HOST переполнение буфера!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        _buff.clear();
+        _conn_type->disconnectFromHost();
+        return;
+    }
+
     while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
             _buff.clear();
-            _expectedDataSize = 0;
-            //            _conn_type->clearDataBuffer();
-            //            _conn_type->expectedDataSize = 0;
-            cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_expectedDataSize > 0)
+        if (expectedDataSize > 0)
         {
             clearHeader(header);
             break;
@@ -216,9 +211,10 @@ void IOTV_Host::slotDataResived(QByteArray data)
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                responcePingPoing(iot);
+                responcePingPong(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
+
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
@@ -342,6 +338,11 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 
 }
 
+QString IOTV_Host::getAddress() const
+{
+    return _conn_type->getAddress();
+}
+
 //void IOTV_Host::removeStreamWrite(uint8_t channel)
 //{
 //    std::lock_guard lg(_mutexStreamWrite);
@@ -403,4 +404,8 @@ void IOTV_Host::slotConnected()
 
     _counterPing = 0;
     _counterState = 0;
+    _buff.clear();
+
+    _streamRead.clear();
+    _streamWrite.clear();
 }

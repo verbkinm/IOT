@@ -1,5 +1,8 @@
 #include "state.h"
-#include <stdint.h>
+#include "iotv_types.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 uint64_t stateCheckSum(const struct State *body)
 {

@@ -8,6 +8,7 @@
 #ifndef MAIN_I2C_DS3231_H_
 #define MAIN_I2C_DS3231_H_
 
+#include <sys/time.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
 
@@ -30,5 +31,8 @@ struct DateTime {
 
 struct DateTime DS3231_DataTime(void);
 void DS3231_SetDataTime(const struct DateTime *dt);
+void DS3231_SetDataTime_tm(const struct tm *t);
+
+void DS3231_set_system_time(void);
 
 #endif /* MAIN_I2C_DS3231_H_ */

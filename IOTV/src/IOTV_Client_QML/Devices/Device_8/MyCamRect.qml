@@ -1,18 +1,35 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
+import QtMultimedia
 
+import "qrc:/Devices/" as Devices
 import "qrc:/Devices/BaseItem" as BaseItem
+import Producer
+
 
 Item {
+    //Ссылка на Device
+    required property var device
+
     signal play()
     signal stop()
+//    signal volumeOn()
+    signal volumeOff()
+
+    id: root
 
     onVisibleChanged: {
         if (!visible)
+        {
             stopButton.clicked()
+            volumeOff()
+        }
     }
 
+//    AudioOutput {
+
+//    }
 
     Rectangle {
         id: camRect
@@ -21,13 +38,16 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
 
-        Image {
-            id: img
-            cache: false
-
+        Producer{
+            id: producer
+            videoSink: videoOutput.videoSink
+            video_device: root.device
+        }
+        VideoOutput {
+            id: videoOutput
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
-            source: "image://provider/frame"
+
             width: parent.width
             height: parent.height
 
@@ -57,9 +77,11 @@ Item {
 
             BaseItem.AnimRoundButton {
                 id: playButton
+                height: 64
+                width: 64
 
-                image_origin: "qrc:/img/id_4/play.png"
-                image_invert: "qrc:/img/id_4/play_white.png"
+                image_origin: "qrc:/img/id_8/play.png"
+                image_invert: "qrc:/img/id_8/play_white.png"
 
                 onClicked: {
                     if (highlighted)
@@ -72,16 +94,19 @@ Item {
 
                     stopButton.highlighted = false
                     play()
+//                    volumeOn()
                 }
             }
 
             BaseItem.AnimRoundButton {
                 id: stopButton
+                height: 64
+                width: 64
 
                 highlighted: true
 
-                image_origin: "qrc:/img/id_4/stop.png"
-                image_invert: "qrc:/img/id_4/stop_white.png"
+                image_origin: "qrc:/img/id_8/stop.png"
+                image_invert: "qrc:/img/id_8/stop_white.png"
 
                 onClicked: {
                     if (highlighted)
@@ -94,22 +119,99 @@ Item {
 
                     playButton.highlighted = false
                     stop()
+//                    volumeOff()
+                }
+            }
+
+            BaseItem.AnimRoundButton {
+                id: volumeButton
+                height: 64
+                width: 64
+
+                enabled: false
+                highlighted: false
+
+                image_origin: "qrc:/img/id_8/volume.png"
+                image_invert: "qrc:/img/id_8/volume_white.png"
+
+                onClicked: {
+                    if (highlighted)
+                    {
+                        highlighted = false
+//                        volumeOn()
+                    }
+                    else
+                    {
+                        highlighted = true
+//                        volumeOff()
+                    }
+                }
+            }
+
+            BaseItem.AnimRoundButton {
+                id: rotateButton
+                height: 64
+                width: 64
+
+                highlighted: false
+
+                image_origin: "qrc:/img/id_8/repeate_on.png"
+                image_invert: "qrc:/img/id_8/repeate_on_white.png"
+
+                onClicked: {
+                    videoOutput.orientation += 90
+                }
+            }
+
+            BaseItem.AnimRoundButton {
+                id: mirrorButton
+
+                height: 64
+                width: 64
+
+                highlighted: false
+
+                image_origin: "qrc:/img/id_8/mirror.png"
+                image_invert: "qrc:/img/id_8/mirror_white.png"
+
+                onClicked: {
+                    if (highlighted)
+                    {
+                        highlighted = false
+                        producer.slotMirrored(false)
+                    }
+                    else
+                    {
+                        highlighted = true
+                        producer.slotMirrored(true)
+                    }
                 }
             }
         }
     }
 
+//    Connections {
+//        target: device
+//        function onSignalDataPkgComplete(channel, data) {
+//            if (channel === 0)
+//            {
+//                var width = parseInt(device.readData(2), 10)
+//                var height = parseInt(device.readData(3), 10)
+//                producer.slotDataVideoFrame(width, height, data)
+////                console.log("onSignalDataPkgComplete")
+//            }
+//            else if (channel === 1)
+//            {
+//                producer.slotDataAudioFrame(data);
+//            }
+//        }
+//    }
+
     Component.onCompleted: {
         console.log("MyCamRect construct: ", objectName)
-//        client.addProvider("provider");
     }
 
     Component.onDestruction: {
         console.log("MyCamRect destruct: ", objectName)
-    }
-
-    function reloadImage() {
-        img.source = ""
-        img.source = "image://provider/frame"
     }
 }

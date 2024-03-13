@@ -1,6 +1,10 @@
 #ifndef CREATORPKGS_H
 #define CREATORPKGS_H
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
 #include "state.h"
 #include "read_write.h"
 #include "identification.h"

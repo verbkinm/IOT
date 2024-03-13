@@ -1,0 +1,11 @@
+{
+	"display":	{
+		"rotate":	"0",
+		"brightness":	"255",
+		"night_mode":	"1",
+		"b_day":	"255",
+		"b_night":	"83",
+		"d_begin":	"08:50:00",
+		"n_begin":	"17:40:00"
+	}
+}

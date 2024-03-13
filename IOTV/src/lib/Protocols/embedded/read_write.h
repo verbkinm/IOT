@@ -5,11 +5,12 @@
 
 struct Read_Write
 {
+    uint64_t dataSize;
+
     uint8_t nameSize;
     uint8_t channelNumber;
     uint8_t flags;
 
-    uint64_t dataSize;
 
     char *name;
     char *data;
