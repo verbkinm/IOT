@@ -180,30 +180,16 @@ Page {
         target: client
         function onSignalConnected() {
             state = stateConnected
-            loaderMainItem.setSource("qrc:/Notification.qml", {
-                                         "parent": appStack,
-                                         "text": "cоединение установлено"
-                                     })
+            glob_notification.set_text("cоединение установлено")
         }
         function onSignalConnecting() {
             state = stateConnecting
-//            loaderMainItem.setSource("qrc:/PopupWait.qml", {
-//                                         "parent": appStack
-//                                     })
         }
         function onSignalDisconnected() {
             state = stateDisconnected
-            loaderMainItem.setSource("qrc:/Notification.qml", {
-                                         "parent": appStack,
-                                         "text": "cоединение сброшено"
-                                     })
-            if (appStack.currentItem.objectName !== root.objectName)
-                appStack.pop(homePage)
-            else {
-                appStack.clear()
-                appStack.push(homePage)
-                appStack.push(clientPage)
-            }
+            glob_notification.set_text("cоединение сброшено")
+            appStack.clear()
+            appStack.push(homePage)
         }
     }
 

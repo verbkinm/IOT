@@ -114,10 +114,7 @@ BaseItem.ItemShadow {
         repeat: false
         onTriggered: {
             notWait()
-            loaderMainItem.setSource("qrc:/Notification.qml", {
-                                         "parent": appStack,
-                                         "text": userDescription.text + "\nответ не получен"
-                                     })
+             glob_notification.set_text(userDescription.text + "\nответ не получен")
         }
     }
 

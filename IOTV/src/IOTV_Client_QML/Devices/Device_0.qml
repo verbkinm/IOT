@@ -94,10 +94,7 @@ Page {
                         textField.copy()
                         textField.deselect()
 
-                        loaderMainItem.setSource("qrc:/Notification.qml", {
-                                                     "parent": appStack,
-                                                     "text": "скопировано в буфер"
-                                                 })
+                        glob_notification.set_text("скопировано в буфер")
                     }
 
                     Connections {

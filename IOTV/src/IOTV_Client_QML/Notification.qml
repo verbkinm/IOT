@@ -2,9 +2,8 @@ import QtQuick 2.2
 import QtQuick.Controls 2.2
 
 Rectangle {
-    property alias text: lbl.text
-
     id: notify
+
     width: parent.width * 0.8
     height: lbl.height + 20
 
@@ -14,7 +13,7 @@ Rectangle {
     color: "#e4e4e4"
     z:1
 
-    visible: opacity != 0
+    visible: opacity !== 0
 
     border.width: 1
     border.color: "black"
@@ -48,9 +47,17 @@ Rectangle {
         onReleased: anim.running = true
     }
 
-    function open()
+    function set_text(text)
     {
-        console.log("open")
+        anim.running = false
         opacity = 1
+        lbl.text = text
+        anim.running = true
     }
+
+//    function open()
+//    {
+//        console.log("open")
+//        opacity = 1
+//    }
 }

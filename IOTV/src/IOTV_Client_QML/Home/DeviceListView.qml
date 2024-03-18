@@ -31,13 +31,6 @@ GridView {
         PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
     }
 
-    // Загружаются устройства
-    Loader {
-        property string title
-        id: loaderDevice
-        source: ""
-    }
-
     Component.onCompleted: {
         listModel.clear()
         for( var i = 0; i < client.totalDevice; i++)

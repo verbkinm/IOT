@@ -22,9 +22,7 @@ Item {
     onVisibleChanged: {
         if (!visible)
         {
-            stop()
-            volumeOff()
-            fullScreeRect.visible = false
+            disableStream()
         }
     }
 
@@ -160,73 +158,73 @@ Item {
                 }
             }
 
-//            BaseItem.AnimRoundButton {
-//                id: fullScreen
+            //            BaseItem.AnimRoundButton {
+            //                id: fullScreen
 
-//                height: 64
-//                width: 64
+            //                height: 64
+            //                width: 64
 
-//                highlighted: false
+            //                highlighted: false
 
-//                image_origin: "qrc:/img/id_8/mirror.png"
-//                image_invert: "qrc:/img/id_8/mirror_white.png"
+            //                image_origin: "qrc:/img/id_8/mirror.png"
+            //                image_invert: "qrc:/img/id_8/mirror_white.png"
 
-//                onClicked: {
-//                    if (highlighted)
-//                    {
-//                        highlighted = false
-//                        producer.slotMirrored(false)
-//                    }
-//                    else
-//                    {
-//                        highlighted = true
-//                        producer.slotMirrored(true)
-//                    }
-//                }
-//            }
+            //                onClicked: {
+            //                    if (highlighted)
+            //                    {
+            //                        highlighted = false
+            //                        producer.slotMirrored(false)
+            //                    }
+            //                    else
+            //                    {
+            //                        highlighted = true
+            //                        producer.slotMirrored(true)
+            //                    }
+            //                }
+            //            }
         }
     }
 
-//    Dialog {
-//        id: fullScreeRect
-//        modal: true
+    //    Dialog {
+    //        id: fullScreeRect
+    //        modal: true
 
-//        width: global_window.width
-//        height: global_window.height
+    //        width: global_window.width
+    //        height: global_window.height
 
-//        x: Math.round((parent.width - width) / 2)
-//        y: Math.round((parent.height - height) / 2)
+    //        x: Math.round((parent.width - width) / 2)
+    //        y: Math.round((parent.height - height) / 2)
 
-//        visible: true
+    //        visible: true
 
-//        Rectangle{
-//            width: global_window.width
-//            height: global_window.height
+    //        Rectangle{
+    //            width: global_window.width
+    //            height: global_window.height
 
-//            Producer{
-//                id: producer2
-//                videoSink: videoOutput2.videoSink
-//                video_device: root.device
-//            }
-//            VideoOutput {
-//                id: videoOutput2
-//                rotation: 90
-//                anchors.fill: parent
-//                //            anchors.centerIn: parent
-//                fillMode: Image.PreserveAspectFit
+    //            Producer{
+    //                id: producer2
+    //                videoSink: videoOutput2.videoSink
+    //                video_device: root.device
+    //            }
+    //            VideoOutput {
+    //                id: videoOutput2
+    //                rotation: 90
+    //                anchors.fill: parent
+    //                //            anchors.centerIn: parent
+    //                fillMode: Image.PreserveAspectFit
 
-//                width: parent.width
-//                height: parent.height
+    //                width: parent.width
+    //                height: parent.height
 
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onClicked: {
-//                        playButton.clicked()
-//                    }
-//                }
-//            }
-//        }
-//    }
+    //                MouseArea {
+    //                    anchors.fill: parent
+    //                    onClicked: {
+    //                        playButton.clicked()
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
 
     //    Connections {
     //        target: device
@@ -250,6 +248,14 @@ Item {
     }
 
     Component.onDestruction: {
+        disableStream()
         console.log("MyCamRect destruct: ", objectName)
+    }
+
+    function disableStream()
+    {
+        playButton.highlighted = false
+        stop()
+        volumeOff()
     }
 }

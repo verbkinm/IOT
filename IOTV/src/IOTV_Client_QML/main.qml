@@ -15,7 +15,7 @@ ApplicationWindow {
     title: qsTr("IOTV Client")
 
     minimumWidth: 400
-//    minimumHeight: 520
+    //    minimumHeight: 520
 
     //! [orientation]
     readonly property bool inPortrait: global_window.width < global_window.height
@@ -82,31 +82,57 @@ ApplicationWindow {
         y: overlayHeader.height
     }
 
-    StackView {
-        id: stackView
-        anchors.fill: parent
-        initialItem: homePage
+    SwipeView{
+        id: swipeView
 
-        onCurrentItemChanged: {
-            console.log("stackView current item: ", stackView.currentItem.objectName)
+        currentIndex: 0
+        anchors.fill: parent
+
+        // Список устройств
+        Item {
+            StackView {
+                id: stackView
+                anchors.fill: parent
+                initialItem: homePage
+
+                onCurrentItemChanged: {
+                    console.log("stackView current item: ", stackView.currentItem.objectName)
+                }
+
+                HomePageModule.Home {
+                    id: homePage
+                    objectName: "Home"
+                }
+            }
+        }
+
+        // Список событий
+        Item {
+            EventsPageModule.Events {
+                anchors.fill: parent
+                id: eventsPage
+                objectName: "Events"
+            }
+        }
+
+        // Настройки подключения
+        Item {
+            ClientPageModule.Client {
+                anchors.fill: parent
+                id: clientPage
+                objectName: "Client"
+            }
         }
     }
 
-    HomePageModule.Home {
-        id: homePage
-        objectName: "Home"
-    }
+    PageIndicator {
+        id: indicator
 
-    EventsPageModule.Events {
-        id: eventsPage
-        objectName: "Events"
-        visible: false
-    }
+        count: swipeView.count
+        currentIndex: swipeView.currentIndex
 
-    ClientPageModule.Client {
-        id: clientPage
-        objectName: "Client"
-        visible: false
+        anchors.bottom: swipeView.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     footer: ToolBar {
@@ -122,7 +148,8 @@ ApplicationWindow {
                     source: "qrc:/img/home.png"
                 }
                 onClicked: {
-                    appStack.pop(homePage)
+                    swipeView.setCurrentIndex(0)
+//                    appStack.pop(homePage)
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -133,14 +160,15 @@ ApplicationWindow {
                     source: "qrc:/img/calendar_white.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem == eventsPage)
-                        return
+                    swipeView.setCurrentIndex(1)
+//                    if (appStack.currentItem == eventsPage)
+//                        return
 
-                    if (appStack.push(eventsPage) === null) {
-                        appStack.pop(homePage, StackView.PopTransition)
-                        homePage.visible = false
-                        appStack.push(eventsPage, StackView.PushTransition)
-                    }
+//                    if (appStack.push(eventsPage) === null) {
+//                        appStack.pop(homePage, StackView.PopTransition)
+//                        homePage.visible = false
+//                        appStack.push(eventsPage, StackView.PushTransition)
+//                    }
                 }
                 //                }
                 Layout.alignment: Qt.AlignCenter
@@ -152,33 +180,56 @@ ApplicationWindow {
                     source: "qrc:/img/settings_white.png"
                 }
                 onClicked: {
-                    if (appStack.currentItem == clientPage)
-                        return
+                    swipeView.setCurrentIndex(2)
+//                    if (appStack.currentItem == clientPage)
+//                        return
 
-                    if (appStack.push(clientPage) === null) {
-                        appStack.pop(homePage, StackView.PopTransition)
-                        homePage.visible = false
-                        appStack.push(clientPage, StackView.PushTransition)
-                    }
+//                    if (appStack.push(clientPage) === null) {
+//                        appStack.pop(homePage, StackView.PopTransition)
+//                        homePage.visible = false
+//                        appStack.push(clientPage, StackView.PushTransition)
+//                    }
                 }
                 Layout.alignment: Qt.AlignCenter
             }
         }
     }
 
-    // Загружаются DialogShared и Notification со всей программы
+    // Для глобальных уведомлений
+    Notification {
+        id: glob_notification
+    }
+
+    // Загружаются DialogShared со всей программы
     Loader {
         id: loaderMainItem
+        source: ""
+        anchors.fill: parent
+    }
+
+    // Загружаются устройства
+    Loader {
+        property string title
+        id: loaderDevice
         source: ""
     }
 
     onClosing: {
         close.accepted = false
-        if (appStack.currentItem == homePage)
-            loaderMainItem.setSource("qrc:/DialogExit.qml", {
-                                         "parent": appStack
-                                     })
-        else
+        if (swipeView.currentIndex === 0 && appStack.currentItem == homePage)
+        {
+            loaderMainItem.setSource("qrc:/DialogExit.qml", {"parent": appStack})
+        }
+        else if (swipeView.currentIndex === 0)
+        {
+//            swipeView.setCurrentIndex(0)
             appStack.pop()
+//            if (appStack.currentItem == homePage)
+//                loaderDevice.setSource("", {})
+        }
+        else
+        {
+            swipeView.setCurrentIndex(0)
+        }
     }
 }
