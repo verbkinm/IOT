@@ -14,7 +14,7 @@ Item {
 
     signal play()
     signal stop()
-//    signal volumeOn()
+    //    signal volumeOn()
     signal volumeOff()
 
     id: root
@@ -22,14 +22,15 @@ Item {
     onVisibleChanged: {
         if (!visible)
         {
-            stopButton.clicked()
+            stop()
             volumeOff()
+            fullScreeRect.visible = false
         }
     }
 
-//    AudioOutput {
+    //    AudioOutput {
 
-//    }
+    //    }
 
     Rectangle {
         id: camRect
@@ -54,10 +55,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if (playButton.highlighted)
-                        stopButton.clicked()
-                    else
-                        playButton.clicked()
+                    playButton.clicked()
                 }
             }
         }
@@ -80,46 +78,20 @@ Item {
                 height: 64
                 width: 64
 
-                image_origin: "qrc:/img/id_8/play.png"
+                image_origin: "qrc:/img/id_8/stop.png"
                 image_invert: "qrc:/img/id_8/play_white.png"
 
                 onClicked: {
                     if (highlighted)
                     {
+                        stop()
                         highlighted = false
-                        highlighted = true
                     }
                     else
-                        highlighted = true
-
-                    stopButton.highlighted = false
-                    play()
-//                    volumeOn()
-                }
-            }
-
-            BaseItem.AnimRoundButton {
-                id: stopButton
-                height: 64
-                width: 64
-
-                highlighted: true
-
-                image_origin: "qrc:/img/id_8/stop.png"
-                image_invert: "qrc:/img/id_8/stop_white.png"
-
-                onClicked: {
-                    if (highlighted)
                     {
-                        highlighted = false
+                        play()
                         highlighted = true
                     }
-                    else
-                        highlighted = true
-
-                    playButton.highlighted = false
-                    stop()
-//                    volumeOff()
                 }
             }
 
@@ -138,12 +110,12 @@ Item {
                     if (highlighted)
                     {
                         highlighted = false
-//                        volumeOn()
+                        //                        volumeOn()
                     }
                     else
                     {
                         highlighted = true
-//                        volumeOff()
+                        //                        volumeOff()
                     }
                 }
             }
@@ -187,25 +159,91 @@ Item {
                     }
                 }
             }
+
+//            BaseItem.AnimRoundButton {
+//                id: fullScreen
+
+//                height: 64
+//                width: 64
+
+//                highlighted: false
+
+//                image_origin: "qrc:/img/id_8/mirror.png"
+//                image_invert: "qrc:/img/id_8/mirror_white.png"
+
+//                onClicked: {
+//                    if (highlighted)
+//                    {
+//                        highlighted = false
+//                        producer.slotMirrored(false)
+//                    }
+//                    else
+//                    {
+//                        highlighted = true
+//                        producer.slotMirrored(true)
+//                    }
+//                }
+//            }
         }
     }
 
-//    Connections {
-//        target: device
-//        function onSignalDataPkgComplete(channel, data) {
-//            if (channel === 0)
-//            {
-//                var width = parseInt(device.readData(2), 10)
-//                var height = parseInt(device.readData(3), 10)
-//                producer.slotDataVideoFrame(width, height, data)
-////                console.log("onSignalDataPkgComplete")
+//    Dialog {
+//        id: fullScreeRect
+//        modal: true
+
+//        width: global_window.width
+//        height: global_window.height
+
+//        x: Math.round((parent.width - width) / 2)
+//        y: Math.round((parent.height - height) / 2)
+
+//        visible: true
+
+//        Rectangle{
+//            width: global_window.width
+//            height: global_window.height
+
+//            Producer{
+//                id: producer2
+//                videoSink: videoOutput2.videoSink
+//                video_device: root.device
 //            }
-//            else if (channel === 1)
-//            {
-//                producer.slotDataAudioFrame(data);
+//            VideoOutput {
+//                id: videoOutput2
+//                rotation: 90
+//                anchors.fill: parent
+//                //            anchors.centerIn: parent
+//                fillMode: Image.PreserveAspectFit
+
+//                width: parent.width
+//                height: parent.height
+
+//                MouseArea {
+//                    anchors.fill: parent
+//                    onClicked: {
+//                        playButton.clicked()
+//                    }
+//                }
 //            }
 //        }
 //    }
+
+    //    Connections {
+    //        target: device
+    //        function onSignalDataPkgComplete(channel, data) {
+    //            if (channel === 0)
+    //            {
+    //                var width = parseInt(device.readData(2), 10)
+    //                var height = parseInt(device.readData(3), 10)
+    //                producer.slotDataVideoFrame(width, height, data)
+    ////                console.log("onSignalDataPkgComplete")
+    //            }
+    //            else if (channel === 1)
+    //            {
+    //                producer.slotDataAudioFrame(data);
+    //            }
+    //        }
+    //    }
 
     Component.onCompleted: {
         console.log("MyCamRect construct: ", objectName)

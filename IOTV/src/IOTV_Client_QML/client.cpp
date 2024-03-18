@@ -398,7 +398,14 @@ void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
 void Client::responceIdentification(const Header *header)
 {
     Q_ASSERT(header != NULL);
-    Q_ASSERT(header->pkg != NULL);
+//    Q_ASSERT(header->pkg != NULL);
+
+    //Пустой список устройств
+    if (header->pkg == NULL)
+    {
+        _devices.clear();
+        return;
+    }
 
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 

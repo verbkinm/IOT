@@ -18,6 +18,10 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
     {
         if (header->dataSize == 0)
         {
+            // В случае с пустым списком устройств
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+                return header;
+
             *error = true;
             return header;
         }

@@ -4,7 +4,6 @@
 #include <QBuffer>
 #include <QPainter>
 
-
 #include <QAudioDevice>
 #include <QAudioInput>
 #include <QUrl>

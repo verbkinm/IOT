@@ -22,6 +22,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 
 IOTV_Client::~IOTV_Client()
 {
+    qDebug() << "client destruct";
     ///!!! закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {

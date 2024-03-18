@@ -43,12 +43,10 @@ private:
 
     Base_Host *baseHostFromName(const QString &name) const;
 
+    void clientHostsUpdate() const;
+
     //! Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
-    //    void parseJson(const QByteArray &data);
-    //    IOTV_Event *parseEvent(const QJsonObject &jobj) const;
-    //    IOTV_Action *parseAction(const QJsonObject &jobj) const;
-    //    QByteArray toData() const;
 
     std::unordered_map<IOTV_Host* , QThread*> _iot_hosts;
     std::unordered_map<IOTV_Client*, QThread*> _iot_clients;
@@ -79,5 +77,8 @@ private slots:
     void slotQueryEventActionData();
 
     void slotPendingDatagrams();
+
+    void slotBroadcastDevicePingTimeout();
+
     void slotTest();
 };

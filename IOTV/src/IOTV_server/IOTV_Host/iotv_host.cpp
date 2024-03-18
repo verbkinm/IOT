@@ -32,7 +32,7 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
 
 IOTV_Host::~IOTV_Host()
 {
-
+    qDebug() << "IOTV_Host destruct";
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)

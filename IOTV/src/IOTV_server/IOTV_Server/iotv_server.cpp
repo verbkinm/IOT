@@ -21,7 +21,7 @@ IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
 
 IOTV_Server::~IOTV_Server()
 {
-    for(auto &[_, thread] : _iot_clients)
+    for(auto &[client, thread] : _iot_clients)
     {
         thread->exit();
         thread->wait();
@@ -30,7 +30,7 @@ IOTV_Server::~IOTV_Server()
 
     _iot_clients.clear();
 
-    for(auto &[_, thread] : _iot_hosts)
+    for(auto &[hosts, thread] : _iot_hosts)
     {
         thread->exit();
         thread->wait();
@@ -124,7 +124,7 @@ void IOTV_Server::readHostSetting()
                            " Error: Can't run IOT_Host in new thread",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
-//            exit(1);
+            //            exit(1);
             continue;
         }
 
@@ -255,6 +255,13 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
     return nullptr;
 }
 
+void IOTV_Server::clientHostsUpdate() const
+{
+    // Оповестить клиентов об обновлении устройств
+    for (const auto &client : _iot_clients)
+        emit client.first->signalUpdateHosts();
+}
+
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
 {
     std::forward_list<const Base_Host *> result;
@@ -343,7 +350,7 @@ void IOTV_Server::slotNewConnection()
         Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
-//        exit(1);
+        //        exit(1);
         return;
     }
 
@@ -513,7 +520,8 @@ void IOTV_Server::slotPendingDatagrams()
 
         setting[hostField::name] = QString(QByteArray(hb->name, hb->nameSize)).toLatin1();
         setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
-        setting[hostField::connection_type] = connectionType::TCP;//_settingsHosts.value(hostField::connection_type, "TCP").toString();
+        setting[hostField::name] += " " + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.z");
+        setting[hostField::connection_type] = connectionType::TCP;
         setting[hostField::address] = QHostAddress(hb->address).toString();
         setting[hostField::interval] = "1000";
         setting[hostField::logFile] = hostField::logFile + setting[hostField::name] + ".log";
@@ -552,13 +560,14 @@ void IOTV_Server::slotPendingDatagrams()
                            " Error: Can't run IOT_Host in new thread",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
-//            exit(1);
+            //            exit(1);
             return;
         }
 
+        connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotBroadcastDevicePingTimeout);
+
         // Оповестить клиентов об обновлении устройств
-        for (auto client : _iot_clients)
-            emit client.first->signalUpdateHosts();
+        clientHostsUpdate();
     }
     else
     {
@@ -566,6 +575,21 @@ void IOTV_Server::slotPendingDatagrams()
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
+}
+
+void IOTV_Server::slotBroadcastDevicePingTimeout()
+{
+    IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
+
+    if (host == nullptr)
+        return;
+
+    _iot_hosts[host]->exit();
+    _iot_hosts[host]->wait();
+    _iot_hosts[host]->deleteLater();
+    _iot_hosts.erase(host);
+
+    clientHostsUpdate();
 }
 
 void IOTV_Server::slotTest()
