@@ -114,14 +114,12 @@ ApplicationWindow {
         currentIndex: 0
         anchors.fill: parent
 
-        Keys.onEscapePressed: {
-            console.log("esc")
-            global_window.close()
-            event.accepted = true;
-        }
+        Keys.onEscapePressed: (event) =>{
+                                  global_window.close()
+                              }
 
         onCurrentIndexChanged: {
-            glob_swipeView.focus = true
+            glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
         }
 
         // Список устройств
@@ -244,6 +242,11 @@ ApplicationWindow {
     Notification {
         id: notification
     }
+//    MultiEffect {
+//        source: notification
+//        anchors.fill: notification
+//        shadowEnabled: true
+//    }
 
     // Для глобальных диалогов
     DialogShared {
@@ -251,34 +254,34 @@ ApplicationWindow {
         visible: false
     }
 
-    onClosing: {
-        close.accepted = false
+    onClosing: (close)=> {
+                   close.accepted = false
 
-        glob_dialogShared.defaultAcceptedExit()
+                   glob_dialogShared.defaultAcceptedExit()
 
-        if (drawer.visible)
-            drawer.visible = 0
-        else if (glob_dialogShared.visible)
-            glob_dialogShared.close()
-        else if (glob_swipeView.currentIndex === 0)
-        {
-            if (glob_deviceStackView.currentItem == homePage)
-                glob_dialogShared.open()
-            else
-                glob_deviceStackView.pop()
-        }
-        else if (glob_swipeView.currentIndex === 1)
-        {
-            if (glob_eventStackView.currentItem == eventsPage)
-                glob_swipeView.setCurrentIndex(0)
-            else
-                glob_eventStackView.pop()
-        }
-        else if (glob_swipeView.currentIndex === 2)
-        {
-            glob_swipeView.setCurrentIndex(0)
-        }
-    }
+                   if (drawer.visible)
+                   drawer.visible = 0
+                   else if (glob_dialogShared.visible)
+                   glob_dialogShared.close()
+                   else if (glob_swipeView.currentIndex === 0)
+                   {
+                       if (glob_deviceStackView.currentItem == homePage)
+                       glob_dialogShared.open()
+                       else
+                       glob_deviceStackView.pop()
+                   }
+                   else if (glob_swipeView.currentIndex === 1)
+                   {
+                       if (glob_eventStackView.currentItem == eventsPage)
+                       glob_swipeView.setCurrentIndex(0)
+                       else
+                       glob_eventStackView.pop()
+                   }
+                   else if (glob_swipeView.currentIndex === 2)
+                   {
+                       glob_swipeView.setCurrentIndex(0)
+                   }
+               }
 
     Component.onCompleted: {
 

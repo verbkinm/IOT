@@ -1,6 +1,8 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import Qt.labs.settings 1.1
+import QtCore
+import QtQuick.Effects
+
 import "qrc:/Devices/BaseItem" as BaseItem
 
 Item {
@@ -16,33 +18,6 @@ Item {
         property string title
         id: loaderDevice
         source: ""
-    }
-
-    Canvas {
-        id: shadow
-        width: parent.width
-        height: parent.height
-        smooth: true
-
-        //        z: -1
-        onPaint: {
-            var x = componentRect.x
-            var y = componentRect.y
-            var r = 5
-            var w = componentRect.width
-            var h = componentRect.height
-            var ctx = getContext("2d")
-            ctx.strokeStyle = "#aaa"
-            ctx.beginPath()
-            ctx.moveTo(x + r, y)
-            ctx.arcTo(x + w, y, x + w, y + h, r)
-            ctx.arcTo(x + w, y + h, x, y + h, r)
-            ctx.arcTo(x, y + h, x, y, r)
-            ctx.arcTo(x, y, x + w, y, r)
-            ctx.closePath()
-            ctx.shadowBlur = 5
-            ctx.fill()
-        }
     }
 
     MouseArea {
@@ -71,20 +46,12 @@ Item {
                 target: componentRect
                 scale: 0.95
             }
-            PropertyChanges {
-                target: shadow
-                scale: 0.95
-            }
         },
         State {
             name: stateRealesed
             when: !mouseArea.pressed
             PropertyChanges {
                 target: componentRect
-                scale: 1.0
-            }
-            PropertyChanges {
-                target: shadow
                 scale: 1.0
             }
         }
@@ -102,7 +69,7 @@ Item {
                     duration: 50
                 }
                 PropertyAnimation {
-                    target: shadow
+                    target: shadowEff
                     property: "scale"
                     from: 1.0
                     to: 0.95
@@ -121,7 +88,7 @@ Item {
                     duration: 100
                 }
                 PropertyAnimation {
-                    target: shadow
+                    target: shadowEff
                     property: "scale"
                     from: 0.95
                     to: 1.0
@@ -203,6 +170,14 @@ Item {
                 model.source = imageById(target.id)
             }
         }
+    }
+
+    MultiEffect {
+        id: shadowEff
+        source: componentRect
+        anchors.fill: componentRect
+        shadowEnabled: true
+        shadowOpacity: 0.7
     }
 
     function createDeviceBy(id) {

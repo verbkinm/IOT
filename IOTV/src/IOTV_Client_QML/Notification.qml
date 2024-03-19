@@ -11,14 +11,12 @@ Rectangle {
     y: Math.round((parent.height - height) - 20)
 
     color: "#e4e4e4"
-    z:1
 
     visible: opacity !== 0
 
     border.width: 1
     border.color: "black"
-    radius: 3
-
+    radius: 5
 
     Label {
         id: lbl

@@ -1,9 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.3
 
-import "Home" as HomePageModule
+//import "Home" as HomePageModule
 import "Client" as ClientPageModule
 
 Drawer {
@@ -52,8 +50,7 @@ Drawer {
                         if (index === 0)
                         {
                             glob_swipeView.setCurrentIndex(0)
-                            glob_deviceStackView.clear()
-                            glob_deviceStackView.push(homePage)
+                            glob_deviceStackView.pop(homePage)
                         }
                         else if (index === 1)
                         {
@@ -79,6 +76,15 @@ Drawer {
             }
         }
     }
+
+
+
+//    MessageDialog {
+//        id: msgDialog
+//        modality: Qt.WindowModal
+
+//        onA
+//    }
 
     ListView {
         id: listView

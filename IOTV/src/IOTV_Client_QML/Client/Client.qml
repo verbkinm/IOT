@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import Qt.labs.settings 1.1
+import QtCore
 
 Page {
     id: root
@@ -189,11 +189,11 @@ Page {
             state = stateDisconnected
             glob_notification.set_text("cоединение сброшено")
 
-//            glob_deviceStackView.clear()
-//            glob_deviceStackView.push(homePage)
+            //            glob_deviceStackView.clear()
+            //            glob_deviceStackView.push(homePage)
 
-//            glob_eventStackView.clear()
-//            glob_eventStackView.push(eventsPage)
+            //            glob_eventStackView.clear()
+            //            glob_eventStackView.push(eventsPage)
         }
     }
 
