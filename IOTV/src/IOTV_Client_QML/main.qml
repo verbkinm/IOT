@@ -19,9 +19,17 @@ ApplicationWindow {
 
     //! [orientation]
     readonly property bool inPortrait: global_window.width < global_window.height
-
     //! [orientation]
-    property alias appStack: stackView
+
+    property alias glob_swipeView: swipeView
+
+    property alias glob_deviceStackView: stackView_1
+    property alias glob_eventStackView: stackView_2
+    property alias glob_clientStackView: stackView_3
+
+    property alias glob_dialogShared: dialogShared
+    property alias glob_notification: notification
+
 
     header: ToolBar {
         height: 50
@@ -45,12 +53,29 @@ ApplicationWindow {
                 else
                     global_window.close()
             }
+            visible: {
+                switch(glob_swipeView.currentIndex)
+                {
+                case 0: return (glob_deviceStackView.currentItem != homePage)
+                case 1: return (glob_eventStackView.currentItem != eventsPage)
+                case 2: return false
+                }
+                return false
+            }
         }
 
         Label {
             width: parent.width
             height: parent.height
-            text: stackView.currentItem.title
+            text: {
+                switch(glob_swipeView.currentIndex)
+                {
+                case 0: return glob_deviceStackView.currentItem.title
+                case 1: return glob_eventStackView.currentItem.title
+                case 2: return glob_clientStackView.currentItem.title
+                }
+                return "Title"
+            }
             elide: Text.ElideRight
             font.pixelSize: 18
             verticalAlignment: Text.AlignVCenter
@@ -80,6 +105,7 @@ ApplicationWindow {
     MainMenu {
         id: drawer
         y: overlayHeader.height
+        onClosed: glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
     }
 
     SwipeView{
@@ -88,15 +114,26 @@ ApplicationWindow {
         currentIndex: 0
         anchors.fill: parent
 
+        Keys.onEscapePressed: {
+            console.log("esc")
+            global_window.close()
+            event.accepted = true;
+        }
+
+        onCurrentIndexChanged: {
+            glob_swipeView.focus = true
+        }
+
         // Список устройств
         Item {
             StackView {
-                id: stackView
+                id: stackView_1
                 anchors.fill: parent
                 initialItem: homePage
 
                 onCurrentItemChanged: {
-                    console.log("stackView current item: ", stackView.currentItem.objectName)
+                    console.log("stackView_1 current item: ", stackView_1.currentItem.objectName)
+                    glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
                 }
 
                 HomePageModule.Home {
@@ -108,19 +145,44 @@ ApplicationWindow {
 
         // Список событий
         Item {
-            EventsPageModule.Events {
+            StackView
+            {
+                id: stackView_2
                 anchors.fill: parent
-                id: eventsPage
-                objectName: "Events"
+                initialItem: eventsPage
+
+                onCurrentItemChanged: {
+                    console.log("stackView_2 current item: ", stackView_2.currentItem.objectName)
+                    glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
+                }
+
+                EventsPageModule.Events {
+                    anchors.fill: parent
+                    id: eventsPage
+                    objectName: "Events"
+
+                }
             }
         }
 
         // Настройки подключения
         Item {
-            ClientPageModule.Client {
+            StackView
+            {
+                id: stackView_3
                 anchors.fill: parent
-                id: clientPage
-                objectName: "Client"
+                initialItem: clientPage
+
+                onCurrentItemChanged: {
+                    console.log("stackView_3 current item: ", stackView_3.currentItem.objectName)
+                    glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
+                }
+
+                ClientPageModule.Client {
+                    anchors.fill: parent
+                    id: clientPage
+                    objectName: "Client"
+                }
             }
         }
     }
@@ -128,10 +190,10 @@ ApplicationWindow {
     PageIndicator {
         id: indicator
 
-        count: swipeView.count
-        currentIndex: swipeView.currentIndex
+        count: glob_swipeView.count
+        currentIndex: glob_swipeView.currentIndex
 
-        anchors.bottom: swipeView.bottom
+        anchors.bottom: glob_swipeView.bottom
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
@@ -148,8 +210,7 @@ ApplicationWindow {
                     source: "qrc:/img/home.png"
                 }
                 onClicked: {
-                    swipeView.setCurrentIndex(0)
-//                    appStack.pop(homePage)
+                    glob_swipeView.setCurrentIndex(0)
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -160,15 +221,7 @@ ApplicationWindow {
                     source: "qrc:/img/calendar_white.png"
                 }
                 onClicked: {
-                    swipeView.setCurrentIndex(1)
-//                    if (appStack.currentItem == eventsPage)
-//                        return
-
-//                    if (appStack.push(eventsPage) === null) {
-//                        appStack.pop(homePage, StackView.PopTransition)
-//                        homePage.visible = false
-//                        appStack.push(eventsPage, StackView.PushTransition)
-//                    }
+                    glob_swipeView.setCurrentIndex(1)
                 }
                 //                }
                 Layout.alignment: Qt.AlignCenter
@@ -180,15 +233,7 @@ ApplicationWindow {
                     source: "qrc:/img/settings_white.png"
                 }
                 onClicked: {
-                    swipeView.setCurrentIndex(2)
-//                    if (appStack.currentItem == clientPage)
-//                        return
-
-//                    if (appStack.push(clientPage) === null) {
-//                        appStack.pop(homePage, StackView.PopTransition)
-//                        homePage.visible = false
-//                        appStack.push(clientPage, StackView.PushTransition)
-//                    }
+                    glob_swipeView.setCurrentIndex(2)
                 }
                 Layout.alignment: Qt.AlignCenter
             }
@@ -197,39 +242,41 @@ ApplicationWindow {
 
     // Для глобальных уведомлений
     Notification {
-        id: glob_notification
+        id: notification
     }
 
-    // Загружаются DialogShared со всей программы
-    Loader {
-        id: loaderMainItem
-        source: ""
-        anchors.fill: parent
-    }
-
-    // Загружаются устройства
-    Loader {
-        property string title
-        id: loaderDevice
-        source: ""
+    // Для глобальных диалогов
+    DialogShared {
+        id: dialogShared
+        visible: false
     }
 
     onClosing: {
         close.accepted = false
-        if (swipeView.currentIndex === 0 && appStack.currentItem == homePage)
+
+        glob_dialogShared.defaultAcceptedExit()
+
+        if (drawer.visible)
+            drawer.visible = 0
+        else if (glob_dialogShared.visible)
+            glob_dialogShared.close()
+        else if (glob_swipeView.currentIndex === 0)
         {
-            loaderMainItem.setSource("qrc:/DialogExit.qml", {"parent": appStack})
+            if (glob_deviceStackView.currentItem == homePage)
+                glob_dialogShared.open()
+            else
+                glob_deviceStackView.pop()
         }
-        else if (swipeView.currentIndex === 0)
+        else if (glob_swipeView.currentIndex === 1)
         {
-//            swipeView.setCurrentIndex(0)
-            appStack.pop()
-//            if (appStack.currentItem == homePage)
-//                loaderDevice.setSource("", {})
+            if (glob_eventStackView.currentItem == eventsPage)
+                glob_swipeView.setCurrentIndex(0)
+            else
+                glob_eventStackView.pop()
         }
-        else
+        else if (glob_swipeView.currentIndex === 2)
         {
-            swipeView.setCurrentIndex(0)
+            glob_swipeView.setCurrentIndex(0)
         }
     }
 }

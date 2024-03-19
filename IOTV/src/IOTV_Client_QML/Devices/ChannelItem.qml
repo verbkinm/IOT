@@ -25,22 +25,6 @@ Item {
         verticalAlignment: Text.AlignVCenter
     }
 
-//    Label {
-//        id: typeName
-//        width: 60
-//        text: "type"
-//        font.pixelSize: 12
-//        anchors {
-//            left: lb1.right
-//            top: parent.top
-//            bottom: parent.bottom
-//            leftMargin: 10
-//            rightMargin: 10
-//        }
-//        horizontalAlignment: Text.AlignHCenter
-//        verticalAlignment: Text.AlignVCenter
-//    }
-
     TextField {
         id: txtField
         height: 52

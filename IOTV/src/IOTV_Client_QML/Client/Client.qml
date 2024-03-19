@@ -132,8 +132,8 @@ Page {
                 text: "отключиться"
             }
             PropertyChanges {
-                target: loaderMainItem
-                source: ""
+                target: glob_dialogShared
+                visible: false
             }
         },
         State {
@@ -162,8 +162,8 @@ Page {
                 text: "подключиться"
             }
             PropertyChanges {
-                target: loaderMainItem
-                source: ""
+                target: glob_dialogShared
+                visible: false
             }
         }
     ]
@@ -188,8 +188,8 @@ Page {
         function onSignalDisconnected() {
             state = stateDisconnected
             glob_notification.set_text("cоединение сброшено")
-            appStack.clear()
-            appStack.push(homePage)
+            glob_deviceStackView.clear()
+            glob_deviceStackView.push(homePage)
         }
     }
 

@@ -32,14 +32,14 @@ Item {
         leftMargin: 15
         rightMargin: 15
 
-        width: appStack.width - leftMargin - rightMargin
+        width: glob_deviceStackView.width - leftMargin - rightMargin
         height: 240
 
         visible: false
 
         onVisibleChanged: {
             if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+                y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - timerSetting.height / 2
         }
 
         Item {
@@ -132,12 +132,12 @@ Item {
     }
 
     Connections {
-        target: appStack
+        target: glob_deviceStackView
         function onHeightChanged() {
-            timerSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+            timerSetting.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - timerSetting.height / 2
         }
         function onWidthChanged() {
-            timerSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+            timerSetting.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - timerSetting.height / 2
         }
     }
 

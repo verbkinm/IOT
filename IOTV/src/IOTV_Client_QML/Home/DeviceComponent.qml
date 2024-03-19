@@ -11,6 +11,13 @@ Item {
     width: global_window.width / 2 - global_window.width * 0.1
     height: 110
 
+    // Для загрузки единичного экземпляра устройства
+    Loader {
+        property string title
+        id: loaderDevice
+        source: ""
+    }
+
     Canvas {
         id: shadow
         width: parent.width
@@ -52,7 +59,7 @@ Item {
                         function () {
                             return client.deviceByName(model.name).aliasName
                         })
-            appStack.push(loaderDevice)
+            glob_deviceStackView.push(loaderDevice)
         }
     }
 
@@ -71,7 +78,7 @@ Item {
         },
         State {
             name: stateRealesed
-            when: !mouseArea.pressed //mouseArea.exited() || mouseArea.canceled()
+            when: !mouseArea.pressed
             PropertyChanges {
                 target: componentRect
                 scale: 1.0
@@ -199,17 +206,15 @@ Item {
     }
 
     function createDeviceBy(id) {
-        if (id === 1)
-            return "/Devices/Device_1/Device_1.qml"
-        else if (id === 2)
-            return "/Devices/Device_2/Device_2.qml"
-        else if (id === 4)
-            return "/Devices/Device_4/Device_4.qml"
-        else if (id === 5)
-            return "/Devices/Device_5/Device_5.qml"
-        else if (id === 8)
-            return "/Devices/Device_8/Device_8.qml"
-        else
-            return "/Devices/Device_0.qml"
+        switch(id)
+        {
+            case 1: return "/Devices/Device_1/Device_1.qml"
+            case 2: return "/Devices/Device_2/Device_2.qml"
+            case 4: return "/Devices/Device_4/Device_4.qml"
+            case 5: return "/Devices/Device_5/Device_5.qml"
+            case 8: return "/Devices/Device_8/Device_8.qml"
+        }
+
+        return "/Devices/Device_0.qml"
     }
 }

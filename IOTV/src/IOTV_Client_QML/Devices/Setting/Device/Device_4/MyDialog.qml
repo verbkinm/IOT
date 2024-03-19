@@ -10,7 +10,7 @@ Dialog {
     leftMargin: 15
     rightMargin: 15
 
-    width: appStack.width - leftMargin - rightMargin
+    width: glob_deviceStackView.width - leftMargin - rightMargin
     height: 100
 
     standardButtons: Dialog.Close
@@ -19,16 +19,16 @@ Dialog {
 
     onVisibleChanged: {
         if (visible)
-            y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - root.height / 2
+            y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - root.height / 2
     }
 
     Connections {
-        target: appStack
+        target: glob_deviceStackView
         function onHeightChanged() {
-            root.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - root.height / 2
+            root.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - root.height / 2
         }
         function onWidthChanged() {
-            root.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - root.height / 2
+            root.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - root.height / 2
         }
     }
 

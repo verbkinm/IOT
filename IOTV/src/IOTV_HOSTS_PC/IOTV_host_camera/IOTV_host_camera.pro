@@ -37,7 +37,7 @@ HEADERS += \
     ../../lib/Protocols/embedded/state.h \
     ../../lib/Protocols/embedded/tech.h \
     ../../lib/Protocols/embedded/host_broadcast.h  \
-    iot_server.h \
+#    iot_server.h \
     widget.h
 
 INCLUDEPATH += ../../lib/Protocols/embedded/

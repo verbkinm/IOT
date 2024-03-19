@@ -7,14 +7,13 @@ Page {
     id: root
     title: "Настройки событий"
 
-    onVisibleChanged: {
-        if (visible)
-        {
-            client.queryEventAction()
-            timer.start()
-            popup.open()
-        }
-    }
+    //        if (visible)
+    //        {
+    //            client.queryEventAction()
+    //            timer.start()
+    //            popup.open()
+    //        }
+    //    }
 
     Flickable {
         id: flickable
@@ -53,7 +52,7 @@ Page {
                     if (component.status === Component.Ready)
                     {
                         var obj = component.createObject(null, {btnDeleteVisible: false})
-                        appStack.push(obj)
+                        glob_eventStackView.push(obj)
                     }
                 }
             }
@@ -76,6 +75,8 @@ Page {
 
     Component.onCompleted: {
         console.log("Events page construct: ", objectName)
+        client.queryEventAction()
+        timer.start()
     }
 
     Component.onDestruction: {

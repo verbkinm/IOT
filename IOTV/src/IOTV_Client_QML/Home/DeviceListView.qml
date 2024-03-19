@@ -24,7 +24,6 @@ GridView {
     add: Transition {
         NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
         NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
-//        NumberAnimation { properties: "x,y"; duration: 1000; easing.type: Easing.OutBounce}
     }
     // Удаление элемента
     remove: Transition {

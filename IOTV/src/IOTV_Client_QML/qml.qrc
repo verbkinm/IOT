@@ -53,7 +53,6 @@
         <file>Events/AddEvent.qml</file>
         <file>img/settings_white.png</file>
         <file>img/calendar_white.png</file>
-        <file>DialogExit.qml</file>
         <file>Events/BaseItem/ActionDataTX.qml</file>
         <file>Events/BaseItem/ActionDataTX_Ref.qml</file>
         <file>Events/BaseItem/ActionType.qml</file>

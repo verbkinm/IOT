@@ -31,14 +31,14 @@ Item {
         leftMargin: 15
         rightMargin: 15
 
-        width: appStack.width - leftMargin - rightMargin
+        width: glob_deviceStackView.width - leftMargin - rightMargin
         height: item1.height + item2.height + 70
 
         visible: false
 
         onVisibleChanged: {
             if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+                y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - alarmSetting.height / 2
         }
 
         Item {
@@ -124,12 +124,12 @@ Item {
     }
 
     Connections {
-        target: appStack
+        target: glob_deviceStackView
         function onHeightChanged() {
-            alarmSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+            alarmSetting.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - alarmSetting.height / 2
         }
         function onWidthChanged() {
-            alarmSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+            alarmSetting.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - alarmSetting.height / 2
         }
     }
 

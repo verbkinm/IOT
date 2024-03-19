@@ -29,7 +29,7 @@ Rectangle {
                 var object = component.createObject(null, {_event: model.event, _action: model.action, title: model.name})
 //                for(var el in model.action)
 //                    console.log(el, " = ", model.action[el])
-                appStack.push(object)
+                glob_eventStackView.push(object)
             }
         }
     }

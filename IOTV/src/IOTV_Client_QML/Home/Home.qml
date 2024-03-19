@@ -20,13 +20,6 @@ Page {
         function onSignalDisconnected()
         {
             loaderHome.setSource("Home_Connector.qml")
-
-            //            //!!!
-            //            var flag = appStack.currentItem == clientPage
-            //            appStack.pop(homePage)
-
-            //            if (flag)
-            //                appStack.push(clientPage)
         }
     }
 

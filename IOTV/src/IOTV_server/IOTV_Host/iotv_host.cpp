@@ -166,6 +166,9 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
+    _counterPing = 0;
+    _counterState = 0;
+
     bool error;
     uint64_t cutDataSize, expectedDataSize;
 
@@ -356,7 +359,7 @@ void IOTV_Host::slotReReadTimeOut()
 
 void IOTV_Host::slotStateTimeOut()
 {
-    _counterState++;
+    ++_counterState;
 
     char outData[BUFSIZ];
     auto size = queryStateData(outData, BUFSIZ, getName().toStdString().c_str());
@@ -371,7 +374,7 @@ void IOTV_Host::slotStateTimeOut()
 
 void IOTV_Host::slotPingTimeOut()
 {
-    _counterPing++;
+    ++_counterPing;
 
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);

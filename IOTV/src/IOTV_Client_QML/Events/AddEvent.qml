@@ -159,7 +159,7 @@ Page {
 
                     onClicked: {
                         client.removeEventAction(title)
-                        appStack.pop()
+                        glob_deviceStackView.pop()
                     }
                 }
 
@@ -182,12 +182,10 @@ Page {
                     onClicked: {
                         if (name.text === "")
                         {
-                            loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                                     {parent: appStack,
-                                                         visible: true,
-                                                         title: "Внимание",
-                                                         standardButtons: Dialog.Ok,
-                                                         text: "Имя события не может быть пустым!"})
+                            glob_dialogShared.defaultAcceptedMessage()
+                            glob_dialogShared.title = "Внимание"
+                            glob_dialogShared.text = "Имя события не может быть пустым!"
+                            glob_dialogShared.open()
                             return
                         }
 
@@ -199,12 +197,10 @@ Page {
                                 var obj = list[i][0]
                                 if (obj["name"] === name.text)
                                 {
-                                    loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                                             {parent: appStack,
-                                                                 visible: true,
-                                                                 title: "Внимание",
-                                                                 standardButtons: Dialog.Ok,
-                                                                 text: "Событие с таким именем уже существует"})
+                                    glob_dialogShared.defaultAcceptedMessage()
+                                    glob_dialogShared.title = "Внимание"
+                                    glob_dialogShared.text = "Событие с таким именем уже существует!"
+                                    glob_dialogShared.open()
                                     return
                                 }
                             }
@@ -255,15 +251,9 @@ Page {
                         }
 
                         client.saveEventAction(event, action, title)
-                        appStack.pop()
-                        //                        console.log(event)
-                        //                        for(var el in event)
-                        //                            console.log(el, " = ", event[el])
+                        client.queryEventAction()
 
-                        //                        console.log()
-
-                        //                        for(el in action)
-                        //                            console.log(el, " = ", action[el])
+                        glob_eventStackView.pop()
                     }
                 }
             }
