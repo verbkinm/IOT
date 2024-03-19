@@ -26,7 +26,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 18
         wrapMode: Text.Wrap
-        text: "Example text"
+        text: "IOTV Client " + Qt.application.version
     }
 
     NumberAnimation on opacity {
@@ -54,10 +54,4 @@ Rectangle {
         lbl.text = text
         anim.running = true
     }
-
-//    function open()
-//    {
-//        console.log("open")
-//        opacity = 1
-//    }
 }

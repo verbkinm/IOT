@@ -19,6 +19,7 @@ Page {
         }
         function onSignalDisconnected()
         {
+            glob_deviceStackView.pop(homePage)
             loaderHome.setSource("Home_Connector.qml")
         }
     }

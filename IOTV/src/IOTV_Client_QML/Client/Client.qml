@@ -188,8 +188,12 @@ Page {
         function onSignalDisconnected() {
             state = stateDisconnected
             glob_notification.set_text("cоединение сброшено")
-            glob_deviceStackView.clear()
-            glob_deviceStackView.push(homePage)
+
+//            glob_deviceStackView.clear()
+//            glob_deviceStackView.push(homePage)
+
+//            glob_eventStackView.clear()
+//            glob_eventStackView.push(eventsPage)
         }
     }
 

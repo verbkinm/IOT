@@ -279,4 +279,8 @@ ApplicationWindow {
             glob_swipeView.setCurrentIndex(0)
         }
     }
+
+    Component.onCompleted: {
+
+    }
 }

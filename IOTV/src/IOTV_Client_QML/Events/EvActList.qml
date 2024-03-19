@@ -35,7 +35,6 @@ ListView {
     Connections {
         target: client
         function onSignalEventAction() {
-            popup.close()
             timer.stop()
 
             listModel.clear()
@@ -56,6 +55,11 @@ ListView {
                 listModel.append(object)
             }
             listView.height = list.length * 100
+        }
+        function onSignalDisconnected() {
+            glob_eventStackView.pop(eventsPage)
+            timer.start()
+            listModel.clear()
         }
     }
 }

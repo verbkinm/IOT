@@ -7,14 +7,6 @@ Page {
     id: root
     title: "Настройки событий"
 
-    //        if (visible)
-    //        {
-    //            client.queryEventAction()
-    //            timer.start()
-    //            popup.open()
-    //        }
-    //    }
-
     Flickable {
         id: flickable
         width: parent.width
@@ -70,7 +62,7 @@ Page {
     Devices.BusyRect {
         id: popup
         anchors.fill: parent
-        visible: true
+        visible: timer.running
     }
 
     Component.onCompleted: {
