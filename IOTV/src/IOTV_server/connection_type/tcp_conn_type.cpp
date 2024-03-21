@@ -20,7 +20,6 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
     if (_tcpSocket.state() != QAbstractSocket::ConnectedState)
         return 0;
 
-    //!!! При больших сырых данных засоряется вывод!
     Log::write(_name +
                ": data transmit to " +
                _tcpSocket.peerAddress().toString() +
@@ -59,15 +58,6 @@ void TCP_conn_type::disconnectFromHost()
 QByteArray TCP_conn_type::readAll()
 {
     return _tcpSocket.readAll();
-//    QByteArray data;
-
-//    //!!!
-//    while (_tcpSocket.bytesAvailable())
-//        data += _tcpSocket.read(BUFFER_MAX_SIZE);
-
-//    return data;
-
-//    return _tcpSocket.read(BUFFER_MAX_SIZE);
 }
 
 void TCP_conn_type::slotNewConnection()

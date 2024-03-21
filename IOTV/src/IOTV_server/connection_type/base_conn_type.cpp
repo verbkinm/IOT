@@ -71,7 +71,6 @@ void Base_conn_type::slotReadData()
 
     QByteArray inData = readAll();
 
-    //!!! При больших сырых данных засоряется вывод!
     Log::write(_name + ": data response <- " + inData. toHex(':'),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);

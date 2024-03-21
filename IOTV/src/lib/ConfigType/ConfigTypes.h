@@ -15,6 +15,7 @@ struct hostField
 struct connectionType
 {
     static const QString TCP;
+    static const QString TCP_REVERSE;
     static const QString FILE;
     static const QString COM;
     static const QString UDP;
@@ -27,6 +28,7 @@ struct serverField
     static const QString portHosts;
     static const QString broadCastListenerPort;
     static const QString maxClient;
+    static const QString maxHost;
 };
 
 struct ServerLog

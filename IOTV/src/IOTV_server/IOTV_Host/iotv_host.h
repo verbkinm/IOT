@@ -6,20 +6,19 @@
 #include <set>
 
 #include "connection_type/tcp_conn_type.h"
+#include "connection_type/tcp_reverse_conn_type.h"
 #include "connection_type/udp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
 #include "base_host.h"
-//#include "ConfigTypes.h"
 #include "IOTV_SH.h"
-
-#include "iotvp_print.h"
 
 class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
-    explicit IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
+    IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
+    IOTV_Host(std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent = nullptr);
     ~IOTV_Host();
 
     QString getName() const override;
@@ -38,11 +37,12 @@ public:
     QString getAddress() const;
 
 private:
+    void shareConstructor();
     qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);
     qint64 readAll();
     qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
-    void setConnectionType();
+    void makeConnType();
 
     void responceIdentification(const struct Header *header);
     void responceState(const struct IOTV_Server_embedded *iot);
@@ -64,7 +64,7 @@ private:
     // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
     static constexpr int COUNTER_STATE_COUNT = 3;
     int _counterState;
-
+    // Тоже самое для ping пакетов
     static constexpr int COUNTER_PING_COUNT = 3;
     int _counterPing;
 

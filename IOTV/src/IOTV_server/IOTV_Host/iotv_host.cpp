@@ -1,11 +1,23 @@
 #include "iotv_host.h"
 
-//#include <fstream>
-
-
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
+{
+    shareConstructor();
+    makeConnType();
+}
+
+IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
+    _counterState(0), _counterPing(0)
+{
+    shareConstructor();
+    _conn_type = std::make_unique<TCP_REVERSE_conn_type>(_settingsData[hostField::name], reverse_socket, this);
+    makeConnType();
+}
+
+void IOTV_Host::shareConstructor()
 {
     _timerState.setParent(this);
     _timerReRead.setParent(this);
@@ -26,8 +38,6 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
-
-    setConnectionType();
 }
 
 IOTV_Host::~IOTV_Host()
@@ -247,7 +257,7 @@ QString IOTV_Host::getName() const
 }
 
 //!!!
-void IOTV_Host::setConnectionType()
+void IOTV_Host::makeConnType()
 {
     const auto &connType = _settingsData[hostField::connection_type];
     if (connType == connectionType::TCP)
@@ -256,6 +266,10 @@ void IOTV_Host::setConnectionType()
                                                      _settingsData[hostField::address],
                                                      _settingsData[hostField::port].toUInt(),
                                                      this);
+    }
+    else if (connType == connectionType::TCP_REVERSE)
+    {
+        ;
     }
     else if (connType == connectionType::UDP)
     {
@@ -281,10 +295,12 @@ void IOTV_Host::setConnectionType()
     }
     else if (connType == connectionType::FILE)
         _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
+    else
+        Q_ASSERT(false);
 
-    //!!!
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &Base_Host::signalConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &Base_Host::signalDisconnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 

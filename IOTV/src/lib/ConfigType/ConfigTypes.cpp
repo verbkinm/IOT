@@ -8,6 +8,7 @@ const QString hostField::logFile = "log_file";
 const QString hostField::port = "port";
 
 const QString connectionType::TCP = "TCP";
+const QString connectionType::TCP_REVERSE = "TCP_REVERSE";
 const QString connectionType::FILE = "FILE";
 const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
@@ -17,6 +18,7 @@ const QString serverField::portClients = "portClients";
 const QString serverField::portHosts = "portHosts";
 const QString serverField::broadCastListenerPort = "broadcastListener";
 const QString serverField::maxClient = "max_client";
+const QString serverField::maxHost = "max_host";
 
 QString ServerLog::TCP_LOG_FILENAME = "tcp_server.log";
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";

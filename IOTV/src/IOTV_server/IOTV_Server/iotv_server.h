@@ -32,10 +32,12 @@ private:
     void checkSettingsFileExist();
     void readServerSettings();
     void readHostSetting();
+    IOTV_Host *createHost(std::unordered_map<QString, QString> &setting, QTcpSocket *reverse_socket);
     void readEventActionJson();
     void writeEventActionJson(const QByteArray &data);
 
-    void startTCPServer();
+    void startTCPServers();
+    void startTCP(QTcpServer *socket, quint16 port, const QString &lbl);
     void startBroadCastListener();
 
     void clientOnlineFile() const;
@@ -44,7 +46,7 @@ private:
 
     void clientHostsUpdate() const;
 
-    //! Возвращает список Base_Host* из _iot_hosts
+    // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
 
     std::unordered_map<IOTV_Host* , QThread*> _iot_hosts;
@@ -59,19 +61,21 @@ private:
     QTimer _reconnectTimer;
 
     uint _maxClientCount;
-    uint _maxHostCount = 10;
+    uint _maxHostCount;
 
     IOTV_Event_Manager *_eventManager;
 
     QTcpServer *_socketForClients;
-    QTcpServer *_socketForHosts;
+    QTcpServer *_socketForHosts; // Hosts TCP_REVERSE conn type
 
     // широковещательный слушатель!
     QUdpSocket *_udpSocket;
 
 private slots:
-    void slotNewConnection();
-    void slotDisconnected();
+    void slotNewClientConnection();
+    void slotClientDisconnected();
+
+    void slotNewHostConnection();
 
     void slotError(QAbstractSocket::SocketError error);
 
@@ -80,7 +84,7 @@ private slots:
 
     void slotPendingDatagrams();
 
-    void slotBroadcastDevicePingTimeout();
+    void slotDevicePingTimeout();
 
     void slotTest();
 };

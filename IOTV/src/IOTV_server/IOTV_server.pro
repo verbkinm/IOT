@@ -42,6 +42,7 @@ SOURCES += \
         connection_type/com_conn_type.cpp \
         connection_type/file_conn_type.cpp \
         connection_type/tcp_conn_type.cpp \
+    connection_type/tcp_reverse_conn_type.cpp \
         main.cpp \
         connection_type/udp_conn_type.cpp \
         wrapper.cpp \
@@ -82,6 +83,7 @@ HEADERS += \
     connection_type/com_conn_type.h \
     connection_type/file_conn_type.h \
     connection_type/tcp_conn_type.h \
+    connection_type/tcp_reverse_conn_type.h \
     connection_type/udp_conn_type.h \
     wrapper.h \
     ../lib/Base_Host/base_host.h \
