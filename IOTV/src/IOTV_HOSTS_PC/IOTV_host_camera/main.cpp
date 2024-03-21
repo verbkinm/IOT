@@ -101,7 +101,7 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)

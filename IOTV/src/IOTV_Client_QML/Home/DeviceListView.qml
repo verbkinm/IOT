@@ -22,12 +22,13 @@ GridView {
     }
     // Анимация добавления элементов
     add: Transition {
-        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
-        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
+        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 500 }
+        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 500; alwaysRunToEnd: true }
     }
     // Удаление элемента
     remove: Transition {
         PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
+        PropertyAnimation{ property: "scale"; to: 0; duration: 500; alwaysRunToEnd: true}
     }
 
     Component.onCompleted: {

@@ -28,6 +28,7 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     _timerState.start();
 }
 
+//!!!
 void Device::update(const IOTV_Server_embedded *dev)
 {
     Q_ASSERT(dev != nullptr);

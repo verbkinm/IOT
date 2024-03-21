@@ -5,7 +5,7 @@
 #include "iotv_server_embedded.h"
 
 // Ответы на запросы. Ответы сразу в сырые данные.
-uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot);
+uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot, uint8_t ident_flags);
 uint64_t responsePingData(char *outData, uint64_t dataSize);
 
 //uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Server_embedded *iot, const struct Header *head);

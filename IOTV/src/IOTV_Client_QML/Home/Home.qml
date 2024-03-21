@@ -22,6 +22,10 @@ Page {
             glob_deviceStackView.pop(homePage)
             loaderHome.setSource("Home_Connector.qml")
         }
+        function onCountDeviceChanged()
+        {
+            glob_deviceStackView.pop(homePage)
+        }
     }
 
     Component.onCompleted: {

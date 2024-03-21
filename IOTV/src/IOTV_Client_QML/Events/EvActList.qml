@@ -61,5 +61,12 @@ ListView {
             timer.start()
             listModel.clear()
         }
+        function onCountDeviceChanged()
+        {
+            glob_eventStackView.pop(eventsPage)
+            glob_eventStackView.pop(eventsPage)
+            timer.start()
+            listModel.clear()
+        }
     }
 }

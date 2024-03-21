@@ -15,6 +15,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     connect(this, &IOTV_Client::signalFetchEventActionDataFromServer, this, &IOTV_Client::slotFetchEventActionDataFromServer, Qt::QueuedConnection);
 
     connect(this, &IOTV_Client::signalUpdateHosts, this, &IOTV_Client::processQueryIdentification, Qt::QueuedConnection);
+    connect(this, &IOTV_Client::signalClearAndUpdateHosts, this, &IOTV_Client::processQueryIdentification_2, Qt::QueuedConnection);
 
     _silenceTimer.setInterval(_silenceInterval);
     _silenceTimer.start();
@@ -46,7 +47,7 @@ void IOTV_Client::processQueryIdentification()
 
     if (_hosts.size() == 0)
     {
-        auto size = responseIdentificationData(outData, BUFSIZ, NULL);
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
         write({outData, static_cast<int>(size)}, size);
         return;
     }
@@ -54,11 +55,23 @@ void IOTV_Client::processQueryIdentification()
     for (const auto &host : _hosts)
     {
         struct IOTV_Server_embedded *iot = host.first->convert();
-        auto size = responseIdentificationData(outData, BUFSIZ, iot);
+
+        auto size = responseIdentificationData(outData, BUFSIZ, iot, 0);
 
         write({outData, static_cast<int>(size)}, size);
         clearIOTV_Server(iot);
     }
+}
+
+void IOTV_Client::processQueryIdentification_2()
+{
+    // В начале удаляем все устройства
+    char outData[BUFSIZ];
+    auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
+    write({outData, static_cast<int>(size)}, size);
+
+    // Потом обновляем весь список
+    processQueryIdentification();
 }
 
 void IOTV_Client::processQueryState(const Header *header)

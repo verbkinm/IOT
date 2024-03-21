@@ -408,9 +408,16 @@ void Client::responceIdentification(const Header *header)
     }
 
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
+    QString name(QByteArray{pkg->name, pkg->nameSize});
+
+//    // Устройство на удаление
+//    if (pkg->flags & Identification_FLAGS_DELETE)
+//    {
+//        _devices.erase(name);
+//        return;
+//    }
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
-    QString name(QByteArray{pkg->name, pkg->nameSize});
 
     if (!_devices.contains(name))
     {

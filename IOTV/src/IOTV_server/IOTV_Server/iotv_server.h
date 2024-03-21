@@ -17,10 +17,9 @@
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
 
-
 #include "iotv_event_manager.h"
 
-class IOTV_Server : public QTcpServer
+class IOTV_Server : public QObject
 {
     Q_OBJECT
 public:
@@ -54,7 +53,7 @@ private:
     QSettings _settingsServer, _settingsHosts;
 
     QString _address;
-    quint16 _port;
+    quint16 _portForClients, _portForHosts;
     quint16 _broadcasrListenerPort;
 
     QTimer _reconnectTimer;
@@ -63,6 +62,9 @@ private:
     uint _maxHostCount = 10;
 
     IOTV_Event_Manager *_eventManager;
+
+    QTcpServer *_socketForClients;
+    QTcpServer *_socketForHosts;
 
     // широковещательный слушатель!
     QUdpSocket *_udpSocket;

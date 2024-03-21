@@ -35,6 +35,5 @@ HEADERS += \
     ../../lib/Protocols/embedded/read_write.h \
     ../../lib/Protocols/embedded/state.h \
     ../../lib/Protocols/embedded/tech.h \
-#    iot_server.h
 
 INCLUDEPATH += ../../lib/Protocols/embedded/

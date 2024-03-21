@@ -23,7 +23,8 @@ struct connectionType
 struct serverField
 {
     static const QString address;
-    static const QString port;
+    static const QString portClients;
+    static const QString portHosts;
     static const QString broadCastListenerPort;
     static const QString maxClient;
 };

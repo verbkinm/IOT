@@ -34,7 +34,8 @@ typedef enum
 
 typedef enum
 {
-    Identification_FLAGS_NONE = 0,
+    Identification_FLAGS_NONE = 0x00,
+    Identification_FLAGS_DELETE = 0x01,
     Identification_FLAGS_ERROR = 0xFF
 } Identification_FLAGS;
 

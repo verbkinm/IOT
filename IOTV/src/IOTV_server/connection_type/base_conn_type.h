@@ -16,6 +16,7 @@ public:
         NONE,
         COM,
         TCP,
+        TCP_REVERSE,
         UDP,
         FILE
     };

@@ -2,10 +2,11 @@
 
 #include "event_action_parser.h"
 
-IOTV_Server::IOTV_Server(QObject *parent) : QTcpServer(parent),
+IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
-    _eventManager(nullptr)
+    _eventManager(nullptr),
+    _socketForClients(new QTcpServer(this)), _socketForHosts(new QTcpServer(this))
 {
     checkSettingsFileExist();
 
@@ -40,9 +41,9 @@ IOTV_Server::~IOTV_Server()
     _iot_hosts.clear();
 
 
-    while (isListening())
+    while (_socketForClients->isListening())
     {
-        close();
+        _socketForClients->close();
 
         QThread::usleep(10);
     }
@@ -58,7 +59,8 @@ void IOTV_Server::readServerSettings()
 {       
     _settingsServer.beginGroup("Server");
     _address = _settingsServer.value(serverField::address, "127.0.0.1").toString();
-    _port = _settingsServer.value(serverField::port, 2022).toUInt();
+    _portForClients = _settingsServer.value(serverField::portClients, 2022).toUInt();
+    _portForHosts = _settingsServer.value(serverField::portHosts, 2023).toUInt();
     _broadcasrListenerPort = _settingsServer.value(serverField::broadCastListenerPort, 2022).toUInt();
     _maxClientCount = _settingsServer.value(serverField::maxClient, 5).toUInt();
     ServerLog::TCP_LOG_FILENAME = _settingsServer.value(ServerLog::TCP_LOG, ServerLog::TCP_LOG_FILENAME).toString();
@@ -184,18 +186,18 @@ void IOTV_Server::writeEventActionJson(const QByteArray &data)
 
 void IOTV_Server::startTCPServer()
 {
-    connect(this, &QTcpServer::newConnection, this, &IOTV_Server::slotNewConnection);
+    connect(_socketForClients, &QTcpServer::newConnection, this, &IOTV_Server::slotNewConnection);
 
-    if (!listen(QHostAddress(_address), _port))
+    if (!_socketForClients->listen(QHostAddress(_address), _portForClients))
     {
-        QString str = "Error start TCP server, " + _address + ":" + QString::number(_port);
+        QString str = "Error start TCP server, " + _address + ":" + QString::number(_portForClients);
         Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
         _reconnectTimer.start(TCP_conn_type::SERVER_RECONNECT_INTERVAL);
     }
     else
     {
         _reconnectTimer.stop();
-        QString str = "Start TCP server, " + _address + ":" + QString::number(_port);
+        QString str = "Start TCP server, " + _address + ":" + QString::number(_portForClients);
         Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
     }
 }
@@ -265,16 +267,6 @@ void IOTV_Server::clientHostsUpdate() const
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
 {
     std::forward_list<const Base_Host *> result;
-
-    //    auto start = std::chrono::system_clock::now();
-
-    //    for(const auto &pair : _iot_hosts)
-    //        result.push_front(pair.first);
-
-    //    qDebug() << "insertionSort - " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start).count();
-
-    //    result.clear();
-
     std::transform(_iot_hosts.begin(), _iot_hosts.end(), std::front_inserter(result), [](auto const &pair){
         return pair.first;
     });
@@ -288,7 +280,7 @@ void IOTV_Server::checkSettingsFileExist()
     {
         _settingsServer.beginGroup("Server");
         _settingsServer.setValue(serverField::address, "127.0.0.1");
-        _settingsServer.setValue(serverField::port, 2022);
+        _settingsServer.setValue(serverField::portClients, 2022);
         _settingsServer.setValue(serverField::broadCastListenerPort, 2022);
         _settingsServer.setValue(serverField::maxClient, _maxClientCount);
         _settingsServer.setValue(ServerLog::TCP_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::TCP_LOG_FILENAME).absoluteFilePath());
@@ -312,7 +304,7 @@ void IOTV_Server::checkSettingsFileExist()
 
 void IOTV_Server::slotNewConnection()
 {
-    QTcpSocket* socket = this->nextPendingConnection();
+    QTcpSocket* socket = _socketForClients->nextPendingConnection();
 
     if (!socket)
     {
@@ -520,7 +512,7 @@ void IOTV_Server::slotPendingDatagrams()
 
         setting[hostField::name] = QString(QByteArray(hb->name, hb->nameSize)).toLatin1();
         setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
-        setting[hostField::name] += " " + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.z");
+        setting[hostField::name] += " " + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss");
         setting[hostField::connection_type] = connectionType::TCP;
         setting[hostField::address] = QHostAddress(hb->address).toString();
         setting[hostField::interval] = "1000";
@@ -532,20 +524,18 @@ void IOTV_Server::slotPendingDatagrams()
         clearHeader(header);
 
         auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&setting](const auto &pair){
-            return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
+            return (/*pair.first->settingsData().at(hostField::name) == setting[hostField::name] &&*/
+                   pair.first->settingsData().at(hostField::address) == setting[hostField::address] &&
+                   pair.first->settingsData().at(hostField::port) == setting[hostField::port]);
         });
 
         if (it != _iot_hosts.end())
         {
-            const IOTV_Host *host = it->first;
-            if (host->getAddress() == setting[hostField::address])
-            {
-                Log::write(QString(Q_FUNC_INFO) +
-                               ", Error: Double host name from broadcast - " + setting[hostField::name],
-                           Log::Write_Flag::FILE_STDERR,
-                           ServerLog::DEFAULT_LOG_FILENAME);
-                return;
-            }
+            Log::write(QString(Q_FUNC_INFO) +
+                           ", Error: Double address and port from broadcast - " + setting[hostField::name],
+                       Log::Write_Flag::FILE_STDERR,
+                       ServerLog::DEFAULT_LOG_FILENAME);
+            return;
         }
 
         QThread *th = new QThread(this);
@@ -564,7 +554,7 @@ void IOTV_Server::slotPendingDatagrams()
             return;
         }
 
-        connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotBroadcastDevicePingTimeout);
+        connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotBroadcastDevicePingTimeout, Qt::QueuedConnection);
 
         // Оповестить клиентов об обновлении устройств
         clientHostsUpdate();
@@ -589,7 +579,8 @@ void IOTV_Server::slotBroadcastDevicePingTimeout()
     _iot_hosts[host]->deleteLater();
     _iot_hosts.erase(host);
 
-    clientHostsUpdate();
+    for (const auto &client : _iot_clients)
+        emit client.first->signalClearAndUpdateHosts();
 }
 
 void IOTV_Server::slotTest()
