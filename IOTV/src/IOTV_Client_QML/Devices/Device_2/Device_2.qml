@@ -55,7 +55,6 @@ Page {
 
             onPositioningComplete: {
                 fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
-//                console.log(column.height)
 
             }
         }

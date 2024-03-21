@@ -1,31 +1,28 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
- import QtCore
+import QtCore
+import QtQuick.Effects
 
 import "qrc:/Devices/" as Devices
 import "qrc:/Devices/BaseItem" as BaseItem
 
-BaseItem.ItemShadow {
+Item {
     required property var device
     required property int channel
 
-    //    signal signalDataRX(var data, int channel)
     id: root
-    width: parent.width
     height: 80
-
-    radius: 5
 
     anchors {
         left: parent.left
         right: parent.right
+        leftMargin: parent.width - parent.width * 0.9
+        rightMargin: parent.width - parent.width * 0.9
     }
 
     Rectangle {
-        // для тени id должно называться rectangle
         id: rectangle
-        height: 70
-        width: parent.width * 0.8
+        anchors.fill: parent
 
         radius: 5
 
@@ -96,6 +93,14 @@ BaseItem.ItemShadow {
         }
     }
 
+    MultiEffect {
+        id: shadowEff
+        source: rectangle
+        anchors.fill: rectangle
+        shadowEnabled: true
+        shadowOpacity: 0.7
+    }
+
     Connections {
         target: device
         function onSignalDataChanged(ch) {
@@ -114,7 +119,7 @@ BaseItem.ItemShadow {
         repeat: false
         onTriggered: {
             notWait()
-             glob_notification.set_text(userDescription.text + "\nответ не получен")
+            glob_notification.set_text(userDescription.text + "\nответ не получен")
         }
     }
 

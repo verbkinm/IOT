@@ -75,7 +75,6 @@
         <file>img/question_mark_white.png</file>
         <file>img/copy_white.png</file>
         <file>img/send_white.png</file>
-        <file>Devices/BaseItem/ItemShadow.qml</file>
         <file>Events/BaseItem/TimerType.qml</file>
         <file>img/id_4/cloud_off.png</file>
         <file>img/id_4/cloud_on.png</file>

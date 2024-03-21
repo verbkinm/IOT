@@ -7,13 +7,12 @@
 #include "creatorpkgs.h"
 #include "IOTV_SH.h"
 #include "iotv_server_embedded.h"
-
-#define BUFSIZE 8
+#include "iotv_types.h"
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
 
-char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZE];
+char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
 
 uint64_t expextedDataSize = HEADER_SIZE;
@@ -28,18 +27,31 @@ QByteArray buffer;
 
 struct IOTV_Server_embedded iot = {
     .id = 2,
-    .name = "bme-280",
-    .description = "Главней всего, погода в доме",
     .numberReadChannel = 3,
+    .numberWriteChannel = 0,
+    .state = 1,
+    .nameSize = 7,
+    .descriptionSize = 51,
+
     .readChannel = NULL,
     .readChannelType = readType,
-    .numberWriteChannel = 0,
     .writeChannelType = NULL,
-    .state = 1,
-    .nameSize = static_cast<uint8_t>(strlen(iot.name)),
-    .descriptionSize = static_cast<uint8_t>(strlen(iot.description)),
+
+    .name = (char *)"bme-280",
+    .description = (char *)"Главней всего, погода в доме",
 };
 
+uint64_t writeFunc(char *data, uint64_t size, void *obj)
+{
+    QTcpSocket *socket = (QTcpSocket *)obj;
+
+    if (socket == nullptr)
+        return 0;
+
+    auto s = socket->write(data, size);
+    socket->flush();
+    return s;
+}
 
 void slotDataRecived()
 {
@@ -52,10 +64,9 @@ void slotDataRecived()
 
     while (buffer.size() > 0)
     {
-        auto bufSize = (buffer.size() > BUFSIZE) ? BUFSIZE : buffer.size();
-        memcpy(recivedBuffer, buffer.data(), bufSize);
+        memcpy(recivedBuffer, buffer.data(), buffer.size());
 
-        struct Header* header = createPkgs((uint8_t*)recivedBuffer, bufSize, &error, &expextedDataSize, &cutDataSize);
+        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -73,46 +84,32 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                uint64_t size = responseReadData(transmitBuffer, BUFSIZE, &iot, header);
-                socket->write(transmitBuffer, size);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZE, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZE);
+                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-                uint64_t size = responseStateData(transmitBuffer, BUFSIZE, &iot);
+                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
                 socket->write(transmitBuffer, size);
             }
         }
 
         buffer = buffer.mid(cutDataSize);
     }
-
-    //    //!!!
-    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZE - cutDataSize);
-    //    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
-
-    //    //страховка
-    //    if (realBufSize >= BUFSIZE)
-    //    {
-    //        realBufSize = 0;
-    //        expextedDataSize = 0;
-    //        cutDataSize = 0;
-    //    }
-
 }
 //для ПК
 void slotDisconnected()
@@ -154,11 +151,11 @@ int main(int argc, char *argv[])
     memcpy(iot.readChannel[0].data, &value, iot.readChannel[0].dataSize);
 
     iot.readChannel[1].data = (char *)malloc(iot.readChannel[1].dataSize);
-    value = 530.2323;
+    value = 78.69369;
     memcpy(iot.readChannel[1].data, &value, iot.readChannel[1].dataSize);
 
     iot.readChannel[2].data = (char *)malloc(iot.readChannel[2].dataSize);
-    value = 97.5;
+    value = 570.639;
     memcpy(iot.readChannel[2].data, &value, iot.readChannel[2].dataSize);
 
     server = new QTcpServer;

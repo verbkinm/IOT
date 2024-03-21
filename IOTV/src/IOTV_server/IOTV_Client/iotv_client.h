@@ -36,6 +36,9 @@ private:
 
     // Пришел запрос от клиента
     void processQueryIdentification();
+    // Удаление всех устройств, а потом обновление всего списка!
+    void processQueryIdentification_2();
+
     void processQueryState(const struct Header* header);
     void processQueryRead(const struct Header* header);
     void processQueryWrite(const struct Header* header);
@@ -64,5 +67,6 @@ signals:
 
     // Высылается сервером, при добавлении новых устройств
     void signalUpdateHosts();
-
+    // Высылается сервером, при уделении устройства
+    void signalClearAndUpdateHosts();
 };

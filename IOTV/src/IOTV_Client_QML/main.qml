@@ -242,11 +242,6 @@ ApplicationWindow {
     Notification {
         id: notification
     }
-//    MultiEffect {
-//        source: notification
-//        anchors.fill: notification
-//        shadowEnabled: true
-//    }
 
     // Для глобальных диалогов
     DialogShared {

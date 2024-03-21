@@ -13,7 +13,8 @@ const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
 
 const QString serverField::address = "address";
-const QString serverField::port = "port";
+const QString serverField::portClients = "portClients";
+const QString serverField::portHosts = "portHosts";
 const QString serverField::broadCastListenerPort = "broadcastListener";
 const QString serverField::maxClient = "max_client";
 

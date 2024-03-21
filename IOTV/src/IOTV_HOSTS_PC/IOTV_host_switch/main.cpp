@@ -85,7 +85,7 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
@@ -111,19 +111,6 @@ void slotDataRecived()
 
         buffer = buffer.mid(cutDataSize);
     }
-
-    //    //!!!
-    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
-    //    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
-
-    //    //страховка
-    //    if (realBufSize >= BUFSIZ)
-    //    {
-    //        realBufSize = 0;
-    //        expextedDataSize = 0;
-    //        cutDataSize = 0;
-    //    }
-
 }
 //для ПК
 void slotDisconnected()
