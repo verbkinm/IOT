@@ -43,4 +43,12 @@ Page {
 
         return "qrc:/img/id/0.png"
     }
+
+    function destroyDev()
+    {
+        if (loaderHome.source == "qrc:/Home/DeviceListView.qml")
+        {
+            loaderHome.item.destroyDev()
+        }
+    }
 }

@@ -8,9 +8,6 @@ Rectangle {
     visible: true
 
     color: Qt.rgba(0, 0, 0, 0)
-//    border.width: 1
-//    border.color: Qt.rgba(0, 0, 0, 0.1)
-//    radius: 5
 
     readonly property string stateHide: "hide"
     readonly property string stateShow: "show"

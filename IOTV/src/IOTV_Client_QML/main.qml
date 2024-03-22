@@ -130,6 +130,11 @@ ApplicationWindow {
                 initialItem: homePage
 
                 onCurrentItemChanged: {
+                    if (stackView_1.currentItem == homePage)
+                    {
+                        homePage.destroyDev()
+                    }
+
                     console.log("stackView_1 current item: ", stackView_1.currentItem.objectName)
                     glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
                 }
@@ -150,6 +155,11 @@ ApplicationWindow {
                 initialItem: eventsPage
 
                 onCurrentItemChanged: {
+                    if (stackView_2.currentItem == eventsPage)
+                    {
+                        eventsPage.destroyEv()
+                    }
+
                     console.log("stackView_2 current item: ", stackView_2.currentItem.objectName)
                     glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
                 }
@@ -255,22 +265,22 @@ ApplicationWindow {
                    glob_dialogShared.defaultAcceptedExit()
 
                    if (drawer.visible)
-                   drawer.visible = 0
+                   {
+                       drawer.visible = 0
+                   }
                    else if (glob_dialogShared.visible)
-                   glob_dialogShared.close()
+                   {
+                       glob_dialogShared.close()
+                   }
                    else if (glob_swipeView.currentIndex === 0)
                    {
-                       if (glob_deviceStackView.currentItem == homePage)
-                       glob_dialogShared.open()
-                       else
-                       glob_deviceStackView.pop()
+                       if (glob_deviceStackView.currentItem == homePage) glob_dialogShared.open()
+                       else glob_deviceStackView.pop()
                    }
                    else if (glob_swipeView.currentIndex === 1)
                    {
-                       if (glob_eventStackView.currentItem == eventsPage)
-                       glob_swipeView.setCurrentIndex(0)
-                       else
-                       glob_eventStackView.pop()
+                       if (glob_eventStackView.currentItem == eventsPage) glob_swipeView.setCurrentIndex(0)
+                       else glob_eventStackView.pop()
                    }
                    else if (glob_swipeView.currentIndex === 2)
                    {

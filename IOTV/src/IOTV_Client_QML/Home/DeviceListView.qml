@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
+ import QtQuick
 
 GridView {
     id: listView
@@ -13,8 +14,34 @@ GridView {
         topMargin: 15
     }
 
+    // Для загрузки единичного экземпляра устройства
+    Loader {
+        property string title
+        id: loaderDevice
+    }
+
     model: ListModel { id: listModel }
-    delegate: DeviceComponent { id: componentRect }
+    delegate: DeviceComponent {
+        id: componentRect
+
+        onSignalClick: {
+            loaderDevice.setSource(createDeviceBy(client.deviceByName(model.name).id), {
+                                       "device": client.deviceByName(model.name)
+                                   })
+            loaderDevice.title = loaderDevice.objectName = Qt.binding(
+                        function () {
+                            return client.deviceByName(model.name).aliasName
+                        })
+            glob_deviceStackView.push(loaderDevice)
+        }
+
+        Connections {
+            target: client.deviceByName(name)
+            function onSignalUpdate() {
+                model.source = imageById(target.id)
+            }
+        }
+    }
 
     // Анимация появления элементов модели
     populate: Transition {
@@ -32,33 +59,46 @@ GridView {
     }
 
     Component.onCompleted: {
-        listModel.clear()
-        for( var i = 0; i < client.totalDevice; i++)
-        {
-            var _device = client.devList()[i];
-            var object = {
-                name: _device.name,
-                source: imageById(_device.id),
-                device: _device
-            }
-            listModel.append(object)
-        }
+        updateList()
     }
 
     Connections {
         target: client
         function onCountDeviceChanged()
         {
-            listModel.clear()
-            for( var i = 0; i < target.totalDevice; i++)
-            {
-                var device = target.devList()[i];
-                var object = {
-                    name: device.name,
-                    source: imageById(device.id)
-                }
-                listModel.append(object)
-            }
+            updateList()
         }
+    }
+
+    function updateList()
+    {
+        listModel.clear()
+        for( var i = 0; i < client.totalDevice; i++)
+        {
+            var device = client.devList()[i];
+            var object = {
+                name: device.name,
+                source: imageById(device.id)
+            }
+            listModel.append(object)
+        }
+    }
+
+    function createDeviceBy(id) {
+        switch(id)
+        {
+            case 1: return "/Devices/Device_1/Device_1.qml"
+            case 2: return "/Devices/Device_2/Device_2.qml"
+            case 4: return "/Devices/Device_4/Device_4.qml"
+            case 5: return "/Devices/Device_5/Device_5.qml"
+            case 8: return "/Devices/Device_8/Device_8.qml"
+        }
+
+        return "/Devices/Device_0.qml"
+    }
+
+    function destroyDev()
+    {
+        loaderDevice.setSource("")
     }
 }

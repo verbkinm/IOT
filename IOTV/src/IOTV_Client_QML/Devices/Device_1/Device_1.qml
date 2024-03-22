@@ -39,14 +39,10 @@ Page {
                 id: repeater
                 model: device.readChannelLength
 
-                //!!!
                 Device_1_switch {
                     required property int index
                     device: root.device
                     channel: index
-                    //                    onSignalDataRX: {
-                    //                        firstRX = true
-                    //                    }
                 }
             }
         }

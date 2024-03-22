@@ -9,33 +9,92 @@ Item {
     readonly property string statePressed: "pressed"
     readonly property string stateRealesed: "released"
 
+    signal signalClick()
+
     id: root
+
     width: global_window.width / 2 - global_window.width * 0.1
     height: 110
-
-    // Для загрузки единичного экземпляра устройства
-    Loader {
-        property string title
-        id: loaderDevice
-        source: ""
-    }
 
     MouseArea {
         id: mouseArea
         anchors.fill: parent
+        onClicked: signalClick()
+    }
 
-        onClicked: {
-            console.log("clicked")
-            loaderDevice.setSource(createDeviceBy(client.deviceByName(
-                                                      model.name).id), {
-                                       "device": client.deviceByName(model.name)
-                                   })
-            loaderDevice.title = loaderDevice.objectName = Qt.binding(
-                        function () {
-                            return client.deviceByName(model.name).aliasName
-                        })
-            glob_deviceStackView.push(loaderDevice)
+    Rectangle {
+        id: componentRect
+        anchors.centerIn: parent
+
+        width: root.width - 15
+        height: 100
+
+        color: Qt.rgba(255, 255, 255, 1)
+        radius: 5
+
+        Image {
+            id: icon
+            source: model.source
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+                topMargin: 10
+            }
+            width: 54
+            height: 54
+            fillMode: Image.PreserveAspectFit
         }
+
+        Label {
+            id: devName
+            text: (client != null) ? (client.deviceByName(model.name).aliasName) : ""
+            font.pixelSize: 16
+
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: icon.bottom
+                bottom: parent.bottom
+                leftMargin: 10
+                rightMargin: 10
+            }
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+            elide: Text.ElideRight
+
+            Settings {
+                id: setting
+                category: model.name
+                property string name
+
+                Component.onCompleted: {
+                    if (this.name.length === 0)
+                        this.name = model.name
+
+                    var dev = client.deviceByName(model.name)
+                    dev.aliasName = this.name
+                }
+            }
+        }
+
+        BaseItem.Led_state {
+            deviceName: model.name
+            anchors {
+                right: parent.right
+                top: parent.top
+                rightMargin: 10
+                topMargin: 10
+            }
+        }
+    }
+
+    MultiEffect {
+        id: shadowEff
+        source: componentRect
+        anchors.fill: componentRect
+        shadowEnabled: true
+        shadowOpacity: 0.7
     }
 
     states: [
@@ -97,99 +156,4 @@ Item {
             }
         }
     ]
-
-    Rectangle {
-        id: componentRect
-        anchors.centerIn: parent
-
-        width: root.width - 10
-        height: 100
-
-        color: Qt.rgba(255, 255, 255, 1)
-        radius: 5
-
-        Image {
-            id: icon
-            source: model.source
-            anchors {
-                top: parent.top
-                horizontalCenter: parent.horizontalCenter
-                topMargin: 10
-            }
-            width: 54
-            height: 54
-            fillMode: Image.PreserveAspectFit
-        }
-
-        Label {
-            id: devName
-            text: (client != null) ? (client.deviceByName(
-                                          model.name).aliasName) : ""
-            font.pixelSize: 16
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: icon.bottom
-                bottom: parent.bottom
-                leftMargin: 10
-                rightMargin: 10
-            }
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            wrapMode: Text.Wrap
-            elide: Text.ElideRight
-
-            Settings {
-                id: setting
-                category: model.name
-                property string name
-
-                Component.onCompleted: {
-                    if (this.name.length === 0)
-                        this.name = model.name
-
-                    var dev = client.deviceByName(model.name)
-                    dev.aliasName = this.name
-                }
-            }
-        }
-
-        BaseItem.Led_state {
-            deviceName: model.name
-            anchors {
-                right: parent.right
-                top: parent.top
-                rightMargin: 10
-                topMargin: 10
-            }
-        }
-
-        Connections {
-            target: client.deviceByName(name)
-            function onSignalUpdate() {
-                model.source = imageById(target.id)
-            }
-        }
-    }
-
-    MultiEffect {
-        id: shadowEff
-        source: componentRect
-        anchors.fill: componentRect
-        shadowEnabled: true
-        shadowOpacity: 0.7
-    }
-
-    function createDeviceBy(id) {
-        switch(id)
-        {
-            case 1: return "/Devices/Device_1/Device_1.qml"
-            case 2: return "/Devices/Device_2/Device_2.qml"
-            case 4: return "/Devices/Device_4/Device_4.qml"
-            case 5: return "/Devices/Device_5/Device_5.qml"
-            case 8: return "/Devices/Device_8/Device_8.qml"
-        }
-
-        return "/Devices/Device_0.qml"
-    }
 }

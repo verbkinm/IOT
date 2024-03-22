@@ -33,7 +33,10 @@ Dialog {
 
     function defaultAcceptedExit()
     {
-        func_accepted = function (){Qt.exit(0)}
+        func_accepted = function (){
+            glob_deviceStackView.pop(homePage)
+            Qt.exit(0)
+        }
         standardButtons = Dialog.Yes | Dialog.No
         title = "Выход"
         text = "Вы действительно хотите выйти?"

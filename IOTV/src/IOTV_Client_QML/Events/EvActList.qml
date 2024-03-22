@@ -3,11 +3,28 @@ import QtQuick.Controls 2.5
 
 import "qrc:/Devices/" as Devices
 
-ListView {
+GridView {
     id: listView
-    width: parent.width
-    spacing: 15
-//    interactive: false
+    cellWidth: global_window.width / 2 - global_window.width * 0.1
+    cellHeight: 110
+
+    // Для загрузки единичного экземпляра устройства
+    Loader {
+        property string title
+        id: acEvLoader
+    }
+
+    model: ListModel { id: listModel }
+    delegate: EvActComponent {
+        id: evActDelegate
+
+        onSignalClick: {
+            acEvLoader.setSource("qrc:/Events/AddEvent.qml",
+                                 {_event: model.event, _action: model.action, title: model.name})
+            acEvLoader.title = model.name
+            glob_eventStackView.push(acEvLoader)
+        }
+    }
 
     // Анимация появления элементов модели
     populate: Transition {
@@ -15,18 +32,14 @@ ListView {
     }
     // Анимация добавления элементов
     add: Transition {
-        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
-        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
-        //                    NumberAnimation { properties: "x,y"; duration: 1500; easing.type: Easing.OutBounce}
+        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 500 }
+        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 500; alwaysRunToEnd: true }
     }
     // Удаление элемента
     remove: Transition {
-        NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 400 }
-        NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 300 }
+        PropertyAnimation{ property: "opacity"; to: 0; duration: 500}
+        PropertyAnimation{ property: "scale"; to: 0; duration: 500; alwaysRunToEnd: true}
     }
-
-    model: ListModel { id: listModel }
-    delegate: EvActComponent { id: evActDelegate }
 
     Component.onCompleted: {
         listModel.clear()
@@ -49,7 +62,8 @@ ListView {
                 var object = {
                     name: event["name"],
                     event: event,
-                    action: action
+                    action: action,
+                    source: actionImageByEventType(event["type"])
                 }
 
                 listModel.append(object)
@@ -68,5 +82,31 @@ ListView {
             timer.start()
             listModel.clear()
         }
+    }
+
+    function actionImageByEventType(eventType)
+    {
+        switch (eventType)
+        {
+        case "connection":
+            return "qrc:/img/events/connected.png"
+        case "disconnection":
+            return "qrc:/img/events/disconnected.png"
+        case "state":
+            return "qrc:/img/id/0.png"
+        case "data":
+            return "qrc:/img/events/data.png"
+        case "alarm":
+            return "qrc:/img/events/alarm.png"
+        case "timer":
+            return "qrc:/img/events/timer.png"
+        }
+
+        return "qrc:/img/id/0.png"
+    }
+
+    function destroyEv()
+    {
+        acEvLoader.setSource("")
     }
 }

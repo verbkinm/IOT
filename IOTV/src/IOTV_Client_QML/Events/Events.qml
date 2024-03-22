@@ -7,55 +7,47 @@ Page {
     id: root
     title: "Настройки событий"
 
-    Flickable {
-        id: flickable
-        width: parent.width
-        height: parent.height
+    RoundButton {
+        id: addEvent
+        width: 64
+        height: 64
+        radius: width / 2
 
-        ScrollBar.vertical: ScrollBar {
-            id: scroll
-            visible: active
+        text: "+"
+        highlighted: true
+        font.pixelSize: 36
+
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            margins: 15
         }
+        z: 1
 
-        Column {
-            id: column
-            width: parent.width
-            anchors {
-                top: parent.top
-                topMargin: 20
+        onClicked: {
+            var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
+            if (component.status === Component.Ready)
+            {
+                var obj = component.createObject(null, {btnDeleteVisible: false})
+                glob_eventStackView.push(obj)
             }
-            spacing: 15
+        }
+    }
 
-            Button {
-                id: addEvent
-                width: parent.width * 0.8
-                height: 60
+    EvActList {
+        id: listView
 
-                text: "Добавить событие"
-                highlighted: true
-                font.pixelSize: 18
+        anchors {
+            leftMargin: parent.width * 0.1
+            rightMargin: parent.width * 0.1
+            topMargin: 15
+            bottomMargin: 25
 
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                }
-
-                onClicked: {
-                    var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
-                    if (component.status === Component.Ready)
-                    {
-                        var obj = component.createObject(null, {btnDeleteVisible: false})
-                        glob_eventStackView.push(obj)
-                    }
-                }
-            }
-
-            EvActList {
-                id: listView
-
-                onContentHeightChanged: {
-                    flickable.contentHeight = listView.contentHeight + addEvent.height + 45
-                }
-            }
+//            top: addEvent.bottom
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
         }
     }
 
@@ -83,5 +75,10 @@ Page {
         onTriggered: {
             client.queryEventAction()
         }
+    }
+
+    function destroyEv()
+    {
+        listView.destroyEv()
     }
 }
