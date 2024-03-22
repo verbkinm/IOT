@@ -12,14 +12,18 @@ Udp_conn_type::Udp_conn_type(const QString &name, const QString &address, quint1
     connect(&_udpSocket, &QAbstractSocket::errorOccurred, this, &Udp_conn_type::slotError);
     connect(&_udpSocket, &QAbstractSocket::readyRead, this, &Udp_conn_type::slotReadData, Qt::DirectConnection);
 
-    if (!_udpSocket.bind(QHostAddress::LocalHost))
+    if (!_udpSocket.bind(QHostAddress::AnyIPv4))
     {
-        QTextStream msg;
-        msg << "Error bind address\n";
-        qFatal("%s", msg.string()->toStdString().c_str());
-//        abort();
+        Log::write(_name + ": Error bind address",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
     }
-
+    else
+    {
+        Log::write(_name + ": Bind address " + _udpSocket.localAddress().toString() + ":" + QString::number(_udpSocket.localPort()),
+                   Log::Write_Flag::FILE_STDOUT,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+    }
 }
 
 qint64 Udp_conn_type::write(const QByteArray &data, qint64 size)

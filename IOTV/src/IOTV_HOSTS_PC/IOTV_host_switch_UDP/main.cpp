@@ -95,7 +95,7 @@ void slotDataRecived()
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                uint64_t size = responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {

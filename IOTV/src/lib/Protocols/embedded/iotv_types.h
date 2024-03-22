@@ -72,4 +72,12 @@ typedef enum
     Tech_FLAGS_ERROR = 0xFF
 } Tech_FLAGS;
 
+typedef enum
+{
+    Host_Broadcast_FLAGS_NONE = 0,
+    Host_Broadcast_FLAGS_TCP_CONN = 1,
+    Host_Broadcast_FLAGS_UDP_CONN = 2,
+    Host_Broadcast_FLAGS_ERROR = 0xFF
+} Host_Broadcast_FLAGS;
+
 #endif // IOTV_TYPES_H

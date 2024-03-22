@@ -143,7 +143,7 @@ void IOTV_Server::readHostSetting()
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
         setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, setting[hostField::name] + ".log").toString();
 
-        if (setting[hostField::connection_type] == connectionType::TCP || setting[hostField::connection_type] == connectionType::UDP)
+        if (ipConnectionType(setting[hostField::connection_type]))
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
         //!!!
@@ -236,7 +236,7 @@ void IOTV_Server::startTCPServers()
 
 void IOTV_Server::startBroadCastListener()
 {
-    if (_udpSocket->bind(_broadcasrListenerPort, QAbstractSocket::ReuseAddressHint))
+    if (_udpSocket->bind(QHostAddress::AnyIPv4, _broadcasrListenerPort, QAbstractSocket::ReuseAddressHint))
     {
         QString str = "Start broadcast listener, " + _address + ":" + QString::number(_broadcasrListenerPort);
         Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
@@ -291,6 +291,14 @@ void IOTV_Server::clientHostsUpdate() const
     // Оповестить клиентов об обновлении устройств
     for (const auto &client : _iot_clients)
         emit client.first->signalUpdateHosts();
+}
+
+bool IOTV_Server::ipConnectionType(const QString &str) const
+{
+    if (str == connectionType::TCP || str == connectionType::UDP || str == connectionType::TCP_REVERSE)
+        return true;
+
+    return false;
 }
 
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
@@ -589,12 +597,22 @@ void IOTV_Server::slotPendingDatagrams()
         setting[hostField::name] = QString(QByteArray(hb->name, hb->nameSize)).toLatin1();
         setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
         setting[hostField::name] += " " + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss");
-        setting[hostField::connection_type] = connectionType::TCP;
+
+        switch(hb->flags)
+        {
+        case Host_Broadcast_FLAGS_UDP_CONN:
+            setting[hostField::connection_type] = connectionType::UDP;
+            break;
+        case Host_Broadcast_FLAGS_TCP_CONN:
+        default:
+            setting[hostField::connection_type] = connectionType::TCP;
+        }
+
         setting[hostField::address] = QHostAddress(hb->address).toString();
         setting[hostField::interval] = "1000";
         setting[hostField::logFile] = hostField::logFile + setting[hostField::name] + ".log";
 
-        if (setting[hostField::connection_type] == connectionType::TCP || setting[hostField::connection_type] == connectionType::UDP)
+        if (ipConnectionType(setting[hostField::connection_type]))
             setting[hostField::port] = QString::number(hb->port);
 
         clearHeader(header);

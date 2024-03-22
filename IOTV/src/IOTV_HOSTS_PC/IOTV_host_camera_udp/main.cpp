@@ -18,17 +18,18 @@
 #include "iotv_server_embedded.h"
 
 #include "iotv_types.h"
+#include "qnetworkdatagram.h"
 #include "qudpsocket.h"
 #include "widget.h"
 
 Widget *camera;
 QTimer *timer_broadcast;
 
-//#define BUFSIZ
+QUdpSocket *udp_broadcast_send, *udp_socket;
 
-QTcpServer *server = nullptr;
-QUdpSocket udp_broadcast_send;
-QTcpSocket *socket = nullptr;
+QHostAddress serverAddr;
+quint16 serverPort;
+
 
 char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
@@ -60,19 +61,22 @@ struct IOTV_Server_embedded iot = {
 
 uint64_t writeFunc(char *data, uint64_t size, void *obj)
 {
-    QTcpSocket *socket = (QTcpSocket *)obj;
+    QNetworkDatagram *datagram = (QNetworkDatagram *)obj;
 
-    if (socket == nullptr)
+    if (datagram == nullptr)
         return 0;
 
-    auto s = socket->write(data, size);
-    socket->flush();
+    QHostAddress peerHost = datagram->senderAddress();
+    quint16 peerPort = datagram->senderPort();
+
+    auto s = udp_socket->writeDatagram(data, size, peerHost, peerPort);
     return s;
 }
 
 void slotDataRecived()
 {
-    buffer += socket->readAll();
+    QNetworkDatagram datagram = udp_socket->receiveDatagram();
+    buffer.append(datagram.data());
 
     qDebug() << buffer.toHex(':') << '\n';
 
@@ -99,10 +103,13 @@ void slotDataRecived()
 
         if (header->type == HEADER_TYPE_REQUEST)
         {
+            serverAddr = datagram.senderAddress();
+            serverPort = datagram.senderPort();
+
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
                 uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
-                socket->write(transmitBuffer, size);
+                udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
@@ -112,78 +119,35 @@ void slotDataRecived()
                 else if ((rwPkg->channelNumber == 0 || rwPkg->channelNumber == 1) && rwPkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
                     camera->stop();
 
-                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
                 uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
-                socket->write(transmitBuffer, size);
+                udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
                 uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
-                socket->write(transmitBuffer, size);
+                udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
                 uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
-                socket->write(transmitBuffer, size);
+                udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
         }
-
         buffer = buffer.mid(cutDataSize);
     }
-
-    //    //!!!
-    ////    memmove((void*)recivedBuffer, (void*)&recivedBuffer[cutDataSize], BUFSIZ - cutDataSize);
-    //    realBufSize -= cutDataSize; // тут всегда должно уходить в ноль, если приём идёт по 1 байту!
-
-    //    //страховка
-    //    if (realBufSize >= BUFSIZ)
-    //    {
-    //        realBufSize = 0;
-    //        expextedDataSize = 0;
-    //        cutDataSize = 0;
-    //    }
-
-}
-//для ПК
-void slotDisconnected()
-{
-    camera->stop();
-
-    QString strOut = "disconnected from " + socket->peerAddress().toString()
-                     + ":" + QString::number(socket->peerPort());
-    std::cout << strOut.toStdString() << std::endl;
-
-    buffer.clear();
-    error = false;
-    cutDataSize = 0;
-    expextedDataSize = 0;
-    
-    timer_broadcast->start();
 }
 
 //для ПК
-void slotNewConnection()
-{
-    timer_broadcast->stop();
-    socket = server->nextPendingConnection();
-    QString strOut = "new connection: "+ socket->peerAddress().toString() + QString::number(socket->peerPort());
-    std::cout << strOut.toStdString() << std::endl;
-
-    QObject::connect(socket, &QTcpSocket::readyRead, slotDataRecived);
-    QObject::connect(socket, &QTcpSocket::disconnected, slotDisconnected);
-    QObject::connect(socket, &QTcpSocket::disconnected, &QObject::deleteLater);
-}
-
-//для ПК
-void slotImageCaptured()
+void slotImageCaptured(QImage img)
 {
     QByteArray byteArra;
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
-    QImage img = camera->getImage();
+//    QImage img = camera->getImage();
     //    img = img.convertToFormat(QImage::Format_RGBA8888);
     //    qDebug() << img.format();
 
@@ -216,7 +180,9 @@ void slotImageCaptured()
         .pkg = &readWrite
     };
 
-    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
+    QNetworkDatagram dataGram;
+    dataGram.setSender(serverAddr, serverPort);
+    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)&dataGram);
 }
 
 //для ПК
@@ -245,7 +211,7 @@ void slotAudio(QByteArray data)
         .pkg = &readWrite
     };
 
-    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
+//    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
 }
 
 void slotInitApp()
@@ -274,14 +240,18 @@ void slotInitApp()
     value = 50;
     memcpy(iot.readChannel[4].data, &value, iot.readChannel[4].dataSize);
 
-    server = new QTcpServer;
+    udp_socket = new QUdpSocket;
+    if (!(udp_socket->bind(QHostAddress::AnyIPv4, 2028, QAbstractSocket::ShareAddress)))
+    {
+        std::cerr << "Error bind\n";
+        exit(1);
+    }
 
-    QObject::connect(server, &QTcpServer::newConnection, slotNewConnection);
+    std::cout << "Start service on 127.0.0.1:2028" << std::endl;
+
+    QObject::connect(udp_socket, &QUdpSocket::readyRead, slotDataRecived);
     QObject::connect(camera, &Widget::signalImageCaptured, slotImageCaptured);
     //    QObject::connect(camera, &Widget::signalAudio, slotAudio);
-
-    server->listen(QHostAddress("127.0.0.1"), 2028);
-    std::cout << "Start service on 127.0.0.1:2028" << std::endl;
 }
 
 void slotTimeOut()
@@ -290,7 +260,7 @@ void slotTimeOut()
         .address = QHostAddress("127.0.0.1").toIPv4Address(),
         .port = 2028,
         .nameSize = iot.nameSize,
-        .flags = 0,
+        .flags = Host_Broadcast_FLAGS_UDP_CONN,
         .name = iot.name
     };
 
@@ -307,25 +277,22 @@ void slotTimeOut()
 
     char data[BUFSIZ] = {0};
     auto size = headerToData(&header, data, BUFSIZ);
-    
-    udp_broadcast_send.writeDatagram(data, size, QHostAddress::Broadcast, 2022);
 
-    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket);
+    udp_broadcast_send->writeDatagram(data, size, QHostAddress::Broadcast, 2022);
 }
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    udp_broadcast_send = new QUdpSocket;
     camera = new Widget;
 
     QObject::connect(camera, &Widget::signalFirstCapture, slotInitApp);
-    
+
     timer_broadcast = new QTimer;
-    
     QObject::connect(timer_broadcast, &QTimer::timeout, slotTimeOut);
-    
-    timer_broadcast->start(1000);
+    timer_broadcast->start(5000);
 
     return a.exec();
 }
