@@ -38,7 +38,8 @@ private:
 
     void startTCPServers();
     void startTCP(QTcpServer *socket, quint16 port, const QString &lbl);
-    void startBroadCastListener();
+    void startUDPServers();
+    void startUDP(QUdpSocket *socket, const QString &addr, quint16 port, const QString &lbl);
 
     void clientOnlineFile() const;
 
@@ -57,8 +58,8 @@ private:
     QSettings _settingsServer, _settingsHosts;
 
     QString _address;
-    quint16 _portForClients, _portForHosts;
-    quint16 _broadcasrListenerPort;
+    quint16 _portForClients, _portTcpHosts;
+    quint16 _broadcasrListenerPort, _portUdpHosts;
 
     QTimer _reconnectTimer;
 
@@ -67,12 +68,12 @@ private:
 
     IOTV_Event_Manager *_eventManager;
 
-    QTcpServer *_socketForClients;
-    QTcpServer *_socketForHosts; // Hosts TCP_REVERSE conn type
-    QUdpSocket *_udpSocketForHosts; // Hosts UDP_REVERSE conn type
+    QTcpServer *_tcpClient;
+    QTcpServer *_tcpReverseHost; // Hosts TCP_REVERSE conn type
+    QUdpSocket *_udpReverseHost; // Hosts UDP_REVERSE conn type
 
     // широковещательный слушатель!
-    QUdpSocket *_udpSocket;
+    QUdpSocket *_udpBroadcast;
 
 private slots:
     void slotNewClientConnection();

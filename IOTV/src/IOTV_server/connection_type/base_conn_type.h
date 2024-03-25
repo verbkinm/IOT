@@ -18,7 +18,6 @@ public:
         TCP,
         TCP_REVERSE,
         UDP,
-        UDP_REVERSE,
         FILE
     };
 
