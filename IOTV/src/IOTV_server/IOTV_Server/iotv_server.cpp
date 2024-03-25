@@ -14,20 +14,20 @@ IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
     checkSettingsFileExist();
     readServerSettings();
 
-    _socketForClients = new QTcpServer(this);
-    _socketForHosts = new QTcpServer(this);
-    _udpSocket = new QUdpSocket(this);
+    _tcpClient = new QTcpServer(this);
+    _tcpReverseHost = new QTcpServer(this);
+    _udpBroadcast = new QUdpSocket(this);
 
-    Q_ASSERT(_socketForClients);
-    Q_ASSERT(_socketForHosts);
-    Q_ASSERT(_udpSocket);
+    Q_ASSERT(_tcpClient);
+    Q_ASSERT(_tcpReverseHost);
+    Q_ASSERT(_udpBroadcast);
 
-    connect(_socketForClients, &QTcpServer::newConnection, this, &IOTV_Server::slotNewClientConnection);
-    connect(_socketForHosts, &QTcpServer::newConnection, this, &IOTV_Server::slotNewHostConnection);
-    connect(_udpSocket, &QUdpSocket::readyRead, this, &IOTV_Server::slotPendingDatagrams);
+    connect(_tcpClient, &QTcpServer::newConnection, this, &IOTV_Server::slotNewClientConnection);
+    connect(_tcpReverseHost, &QTcpServer::newConnection, this, &IOTV_Server::slotNewHostConnection);
+    connect(_udpBroadcast, &QUdpSocket::readyRead, this, &IOTV_Server::slotPendingDatagrams);
 
     startTCPServers();
-    startBroadCastListener();
+    startUDPServers();
 
     readHostSetting();
     readEventActionJson();
@@ -56,9 +56,9 @@ IOTV_Server::~IOTV_Server()
     _iot_hosts.clear();
 
 
-    while (_socketForClients->isListening())
+    while (_tcpClient->isListening())
     {
-        _socketForClients->close();
+        _tcpClient->close();
 
         QThread::usleep(10);
     }
@@ -75,7 +75,7 @@ void IOTV_Server::readServerSettings()
     _settingsServer.beginGroup("Server");
     _address = _settingsServer.value(serverField::address, "127.0.0.1").toString();
     _portForClients = _settingsServer.value(serverField::portClients, 2022).toUInt();
-    _portForHosts = _settingsServer.value(serverField::portHosts, 2023).toUInt();
+    _portTcpHosts = _settingsServer.value(serverField::portHosts, 2023).toUInt();
     _broadcasrListenerPort = _settingsServer.value(serverField::broadCastListenerPort, 2022).toUInt();
     _maxClientCount = _settingsServer.value(serverField::maxClient, 5).toUInt();
     _maxHostCount = _settingsServer.value(serverField::maxHost, 10).toUInt();
@@ -223,29 +223,46 @@ void IOTV_Server::startTCP(QTcpServer *socket, quint16 port, const QString &lbl)
     }
 }
 
+void IOTV_Server::startUDP(QUdpSocket *socket, const QString &addr, quint16 port, const QString &lbl)
+{
+    if (socket->bind(QHostAddress(addr), port, QAbstractSocket::ReuseAddressHint))
+    {
+        QString str = "Start UDP server for " + lbl + addr + ":" + QString::number(port);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+    }
+    else
+    {
+        QString str = "Error start UDP server for " + lbl + " " + addr + ":" + QString::number(port);;
+        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
+    }
+}
+
 void IOTV_Server::startTCPServers()
 {
-    startTCP(_socketForClients, _portForClients, "clients");
-    startTCP(_socketForHosts, _portForHosts, "hosts");
+    startTCP(_tcpClient, _portForClients, "clients");
+    startTCP(_tcpReverseHost, _portTcpHosts, "hosts");
 
-    if (_socketForClients->isListening() && _socketForHosts->isListening())
+    if (_tcpClient->isListening() && _tcpReverseHost->isListening())
         _reconnectTimer.stop();
     else
         _reconnectTimer.start(TCP_conn_type::SERVER_RECONNECT_INTERVAL);
 }
 
-void IOTV_Server::startBroadCastListener()
+void IOTV_Server::startUDPServers()
 {
-    if (_udpSocket->bind(QHostAddress::AnyIPv4, _broadcasrListenerPort, QAbstractSocket::ReuseAddressHint))
-    {
-        QString str = "Start broadcast listener, " + _address + ":" + QString::number(_broadcasrListenerPort);
-        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
-    }
-    else
-    {
-        QString str = "Error bind UDP socket";
-        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
-    }
+    startUDP(_udpBroadcast, "255.255.255.255", _broadcasrListenerPort, "broadcast");
+    startUDP(_udpReverseHost, _address, _portUdpHosts, "UDP reverse"
+                                                       "");
+//    if (_udpBroadcast->bind(QHostAddress::AnyIPv4, _broadcasrListenerPort, QAbstractSocket::ReuseAddressHint))
+//    {
+//        QString str = "Start broadcast listener, " + _address + ":" + QString::number(_broadcasrListenerPort);
+//        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+//    }
+//    else
+//    {
+//        QString str = "Error bind UDP socket";
+//        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
+//    }
 }
 
 void IOTV_Server::clientOnlineFile() const
@@ -343,7 +360,7 @@ void IOTV_Server::checkSettingsFileExist()
 
 void IOTV_Server::slotNewClientConnection()
 {
-    QTcpSocket* socket = _socketForClients->nextPendingConnection();
+    QTcpSocket* socket = _tcpClient->nextPendingConnection();
 
     if (!socket)
     {
@@ -410,7 +427,7 @@ void IOTV_Server::slotClientDisconnected()
 
 void IOTV_Server::slotNewHostConnection()
 {
-    QTcpSocket* socket = _socketForHosts->nextPendingConnection();
+    QTcpSocket* socket = _tcpReverseHost->nextPendingConnection();
 
     if (!socket)
     {
@@ -440,8 +457,7 @@ void IOTV_Server::slotNewHostConnection()
     std::unordered_map<QString, QString> setting;
     setting[hostField::connection_type] = connectionType::TCP_REVERSE;
     setting[hostField::address] = socket->peerAddress().toString();
-    setting[hostField::port] = QString::number(socket->peerPort())
-        ;
+    setting[hostField::port] = QString::number(socket->peerPort());
     setting[hostField::interval] = "1000";
     setting[hostField::logFile] = setting[hostField::address] + ":" + setting[hostField::port] + ".log";
     setting[hostField::name] = socket->peerName() + ":" + setting[hostField::address] + ":" + setting[hostField::port];
@@ -552,9 +568,9 @@ void IOTV_Server::slotPendingDatagrams()
     QByteArray data;
     QNetworkDatagram dataGram;
 
-    if (_udpSocket->hasPendingDatagrams())
+    if (_udpBroadcast->hasPendingDatagrams())
     {
-        dataGram = _udpSocket->receiveDatagram();
+        dataGram = _udpBroadcast->receiveDatagram();
         data = dataGram.data();
     }
 
@@ -618,8 +634,7 @@ void IOTV_Server::slotPendingDatagrams()
         clearHeader(header);
 
         auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&setting](const auto &pair){
-            return (/*pair.first->settingsData().at(hostField::name) == setting[hostField::name] &&*/
-                        pair.first->settingsData().at(hostField::address) == setting[hostField::address] &&
+            return (pair.first->settingsData().at(hostField::address) == setting[hostField::address] &&
                     pair.first->settingsData().at(hostField::port) == setting[hostField::port]);
         });
 

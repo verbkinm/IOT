@@ -271,6 +271,10 @@ void IOTV_Host::makeConnType()
     {
         ;
     }
+    else if (connType == connectionType::UDP_REVERSE)
+    {
+        ;
+    }
     else if (connType == connectionType::UDP)
     {
         _conn_type = std::make_unique<Udp_conn_type>(_settingsData[hostField::name],

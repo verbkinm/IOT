@@ -19,6 +19,7 @@ struct connectionType
     static const QString FILE;
     static const QString COM;
     static const QString UDP;
+    static const QString UDP_REVERSE;
 };
 
 struct serverField
