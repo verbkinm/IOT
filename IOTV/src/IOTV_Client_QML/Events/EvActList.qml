@@ -8,7 +8,7 @@ GridView {
     cellWidth: global_window.width / 2 - global_window.width * 0.1
     cellHeight: 110
 
-    // Для загрузки единичного экземпляра устройства
+    // Для загрузки единичного экземпляра события
     Loader {
         property string title
         id: acEvLoader
@@ -48,8 +48,8 @@ GridView {
     Connections {
         target: client
         function onSignalEventAction() {
+            glob_eventStackView.pop(eventsPage)
             timer.stop()
-
             listModel.clear()
 
             var list = target.evAcList()
@@ -70,22 +70,19 @@ GridView {
             }
             listView.height = list.length * 100
         }
+
         function onSignalDisconnected() {
             glob_eventStackView.pop(eventsPage)
             timer.start()
             listModel.clear()
         }
-        function onCountDeviceChanged()
-        {
-            glob_eventStackView.pop(eventsPage)
-            glob_eventStackView.pop(eventsPage)
-            timer.start()
-            listModel.clear()
+
+        function onCountDeviceChanged() {
+            onSignalDisconnected()
         }
     }
 
-    function actionImageByEventType(eventType)
-    {
+    function actionImageByEventType(eventType) {
         switch (eventType)
         {
         case "connection":
@@ -105,8 +102,8 @@ GridView {
         return "qrc:/img/id/0.png"
     }
 
-    function destroyEv()
-    {
+    function destroyEv() {
+        listModel.clear()
         acEvLoader.setSource("")
     }
 }

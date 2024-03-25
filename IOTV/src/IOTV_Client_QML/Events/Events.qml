@@ -7,6 +7,12 @@ Page {
     id: root
     title: "Настройки событий"
 
+    // Добавление нового события
+    Loader {
+        property string title
+        id: addAcEvLoader
+    }
+
     RoundButton {
         id: addEvent
         width: 64
@@ -25,12 +31,9 @@ Page {
         z: 1
 
         onClicked: {
-            var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
-            if (component.status === Component.Ready)
-            {
-                var obj = component.createObject(null, {btnDeleteVisible: false})
-                glob_eventStackView.push(obj)
-            }
+            addAcEvLoader.setSource("qrc:/Events/AddEvent.qml", {btnDeleteVisible: false})
+            addAcEvLoader.title = "Новое событие"
+            glob_eventStackView.push(addAcEvLoader)
         }
     }
 
@@ -43,7 +46,6 @@ Page {
             topMargin: 15
             bottomMargin: 25
 
-//            top: addEvent.bottom
             top: parent.top
             left: parent.left
             right: parent.right
@@ -69,7 +71,7 @@ Page {
 
     Timer {
         id: timer
-        interval: 2000
+        interval: 500
         repeat: true
         running: false
         onTriggered: {
@@ -79,6 +81,8 @@ Page {
 
     function destroyEv()
     {
+        timer.start()
         listView.destroyEv()
+        addAcEvLoader.setSource("")
     }
 }

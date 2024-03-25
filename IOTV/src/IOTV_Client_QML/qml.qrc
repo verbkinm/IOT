@@ -122,6 +122,8 @@
         <file>img/events/disconnected.png</file>
         <file>img/events/alarm.png</file>
         <file>img/events/timer.png</file>
+        <file>img/save_white.png</file>
+        <file>img/delete_white.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

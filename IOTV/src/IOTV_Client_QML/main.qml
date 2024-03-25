@@ -15,7 +15,7 @@ ApplicationWindow {
     title: qsTr("IOTV Client")
 
     minimumWidth: 400
-    //    minimumHeight: 520
+    minimumHeight: 640
 
     //! [orientation]
     readonly property bool inPortrait: global_window.width < global_window.height
@@ -165,7 +165,7 @@ ApplicationWindow {
                 }
 
                 EventsPageModule.Events {
-                    anchors.fill: parent
+                    //                    anchors.fill: parent
                     id: eventsPage
                     objectName: "Events"
 
