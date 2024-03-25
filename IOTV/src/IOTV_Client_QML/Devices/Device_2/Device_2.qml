@@ -25,9 +25,6 @@ Page {
         height: root.height
         enabled: device.state
 
-//        contentHeight: meteoBlock.height + column.topPadding + column.spacing + overlayHeader.height
-//        contentHeight: contentItem.childrenRect.height
-
         ScrollBar.vertical: ScrollBar {
             id: scroll
             visible: active
@@ -55,7 +52,6 @@ Page {
 
             onPositioningComplete: {
                 fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
-//                console.log(column.height)
 
             }
         }

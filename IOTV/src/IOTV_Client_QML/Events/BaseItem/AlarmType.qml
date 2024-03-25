@@ -6,17 +6,31 @@ Item {
     height: 50
     width: 400
 
+    // days устанавливается из данных полученных с сервера. При сохранении на сервер так же считываются данные с days
     property string days: "0000000"
+    // days_complete необходим для промежуточного хранения при открытии диалогового окна.
+    property string days_complete: "0000000"
+
     property alias h: hours.currentIndex
     property alias m: minutes.currentIndex
 
-    Button {
-        text: "Настроить будильник"
-        height: 60
-        width: parent.width * 0.8
-        font.pixelSize: 18
-        anchors.centerIn: parent
+    RoundButton {
+        width: 64
+        height: 64
         highlighted: true
+
+        anchors {
+            right: parent.right
+            rightMargin: 20
+        }
+
+        Image {
+            anchors.centerIn: parent
+            source: "qrc:/img/settings_white.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit
+        }
 
         onClicked: {
             alarmSetting.visible = true
@@ -26,19 +40,34 @@ Item {
     Dialog {
         id: alarmSetting
         modal: true
-        standardButtons: Dialog.Ok
+        standardButtons: Dialog.Save | Dialog.Cancel
 
         leftMargin: 15
         rightMargin: 15
 
-        width: appStack.width - leftMargin - rightMargin
+        width: glob_eventStackView.width - leftMargin - rightMargin
         height: item1.height + item2.height + 70
 
         visible: false
 
         onVisibleChanged: {
             if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+            {
+                y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - alarmSetting.height / 2
+                days_complete = days
+            }
+        }
+
+        onAccepted: {
+            days = days_complete
+        }
+
+        onRejected: {
+            var childs = rowDays.children
+            for (var i = 0; i < 7; ++i)
+                childs[i].highlighted = days[i] === "1"
+
+            days_complete = days
         }
 
         Item {
@@ -112,10 +141,11 @@ Item {
                         height: width
                         checkable: true
                         text: modelData
-                        highlighted: days[model.index] === "1"
+                        highlighted: days_complete[model.index] === "1"
                         onClicked: {
                             highlighted = !highlighted
-                            days = days.slice(0, model.index) +  (highlighted ? "1" : "0") + days.slice(model.index + 1)
+                            days_complete = days_complete.slice(0, model.index) + (highlighted ? "1" : "0") + days_complete.slice(model.index + 1)
+//                            days_complete[model.index] = (highlighted ? "1" : "0") не работает!
                         }
                     }
                 }
@@ -124,12 +154,12 @@ Item {
     }
 
     Connections {
-        target: appStack
+        target: glob_eventStackView
         function onHeightChanged() {
-            alarmSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+            alarmSetting.y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - alarmSetting.height / 2
         }
         function onWidthChanged() {
-            alarmSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - alarmSetting.height / 2
+            alarmSetting.y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - alarmSetting.height / 2
         }
     }
 

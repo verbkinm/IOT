@@ -6,18 +6,28 @@ Item {
     height: 50
     width: 400
 
-    property int seconds: 0
+    property int totalSeconds: 0
     property int h: 0
     property int m: 0
     property int s: 0
 
-    Button {
-        text: "Настроить таймер"
-        height: 60
-        width: parent.width * 0.8
-        font.pixelSize: 18
-        anchors.centerIn: parent
+    RoundButton {
+        width: 64
+        height: 64
         highlighted: true
+
+        anchors {
+            right: parent.right
+            rightMargin: 20
+        }
+
+        Image {
+            anchors.centerIn: parent
+            source: "qrc:/img/settings_white.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit
+        }
 
         onClicked: {
             timerSetting.visible = true
@@ -27,19 +37,28 @@ Item {
     Dialog {
         id: timerSetting
         modal: true
-        standardButtons: Dialog.Ok
+        standardButtons: Dialog.Save | Dialog.Cancel
 
         leftMargin: 15
         rightMargin: 15
 
-        width: appStack.width - leftMargin - rightMargin
+        width: glob_deviceStackView.width - leftMargin - rightMargin
         height: 240
 
         visible: false
 
         onVisibleChanged: {
             if (visible)
-                y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+                y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - timerSetting.height / 2
+        }
+
+        onAccepted: {
+        }
+
+        onRejected: {
+            hoursTumbler.currentIndex = h
+            minutesTumbler.currentIndex = m
+            secondsTumbler.currentIndex = s
         }
 
         Item {
@@ -112,8 +131,7 @@ Item {
     }
 
     Component.onCompleted: {
-
-        if (seconds >= 60 * 60 * 24)
+        if (totalSeconds >= 60 * 60 * 24)
         {
             h = 23
             m = 59
@@ -121,9 +139,9 @@ Item {
         }
         else
         {
-            h = seconds / 3600;
-            m = seconds / 60 - h * 60;
-            s = seconds - m * 60 - h * 3600;
+            h = totalSeconds / 3600;
+            m = totalSeconds / 60 - h * 60;
+            s = totalSeconds - m * 60 - h * 3600;
         }
 
         hoursTumbler.currentIndex = h
@@ -132,16 +150,16 @@ Item {
     }
 
     Connections {
-        target: appStack
+        target: glob_deviceStackView
         function onHeightChanged() {
-            timerSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+            timerSetting.y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - timerSetting.height / 2
         }
         function onWidthChanged() {
-            timerSetting.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - timerSetting.height / 2
+            timerSetting.y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - timerSetting.height / 2
         }
     }
 
-    function totalSeconds() {
+    function getTotalSeconds() {
         return hoursTumbler.currentIndex * 3600 + minutesTumbler.currentIndex * 60 + secondsTumbler.currentIndex
     }
 }

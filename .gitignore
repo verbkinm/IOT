@@ -40,3 +40,9 @@ build*
 *MakeFile
 
 IOTV/src/MK/.directory
+
+IOTV/src/MK/FreerRTOS/home_meteo_II/.cproject
+
+IOTV/src/MK/FreerRTOS/home_meteo_II/.settings/
+
+IOTV/src/MK/FreerRTOS/home_meteo_II/.project

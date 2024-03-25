@@ -232,12 +232,12 @@ Page {
     }
 
     Connections {
-        target: appStack
+        target: glob_deviceStackView
         function onHeightChanged() {
-            item_eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - item_eqDialog.height / 2
+            item_eqDialog.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - item_eqDialog.height / 2
         }
         function onWidthChanged() {
-            item_eqDialog.y = mapFromItem(appStack, 0, 0).y + appStack.height / 2 - item_eqDialog.height / 2
+            item_eqDialog.y = mapFromItem(glob_deviceStackView, 0, 0).y + glob_deviceStackView.height / 2 - item_eqDialog.height / 2
         }
     }
     Connections {

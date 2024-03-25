@@ -18,6 +18,10 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
     {
         if (header->dataSize == 0)
         {
+            // В случае с пустым списком устройств
+            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+                return header;
+
             *error = true;
             return header;
         }
@@ -29,10 +33,12 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
         else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment ==HEADER_ASSIGNMENT_WRITE)
             header->pkg = createReadWrite(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_TECH)
-            header->pkg = createTech(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);;
+            header->pkg = createTech(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+        else if (header->assignment == HEADER_ASSIGNMENT_HOST_BROADCAST)
+            header->pkg = createHostBroadCast(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
 
         // Если cutDataSize > 0, то пакет body сформирован
-        // Но если он не равен тому, что ожидает header->dataSize, то это ошибка
+        // Но если он НЕ равен тому, что ожидает header->dataSize, то это ошибка
         if ( (*error == true) || (*cutDataSize != header->dataSize) )
         {
             *cutDataSize = 0;
@@ -64,6 +70,9 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
     uint64_t bodySize;
     memcpy(&bodySize, &data[8], 8); // 8 - размер тела пакета (документация)
 
+    //    if (bodySize > 5000)
+    //        return NULL;
+
     if (size < (HEADER_SIZE + bodySize))
     {
         *expectedDataSize = HEADER_SIZE + bodySize;
@@ -76,11 +85,11 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
     uint16_t numberOfFragments;
     memcpy(&numberOfFragments, &data[6], 2);
 
-//    if (numberOfFragments > 1)
-//    {
-//        auto f = fragmentNumber;
-//        ;
-//    }
+    //    if (numberOfFragments > 1)
+    //    {
+    //        auto f = fragmentNumber;
+    //        ;
+    //    }
 
     if (fragmentNumber > numberOfFragments)
     {
@@ -442,6 +451,7 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
         case HEADER_ASSIGNMENT_READ :
         case HEADER_ASSIGNMENT_WRITE :
         case HEADER_ASSIGNMENT_TECH :
+        case HEADER_ASSIGNMENT_HOST_BROADCAST :
             return true;
         }
     }
@@ -458,4 +468,73 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
     }
 
     return false;
+}
+
+Host_Broadcast *createHostBroadCast(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+{
+    if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
+        return NULL;
+
+    *error = false;
+    *expectedDataSize = 0;
+    *cutDataSize = 0;
+
+    if (size < HOST_BROADCAST_SIZE)
+    {
+        *expectedDataSize = HOST_BROADCAST_SIZE;
+        return NULL;
+    }
+
+    uint8_t nameSize = data[0];
+
+    if (size < uint64_t(HOST_BROADCAST_SIZE + nameSize))
+    {
+        *expectedDataSize = HOST_BROADCAST_SIZE + nameSize;
+        return NULL;
+    }
+
+    uint32_t address = 0;
+    memcpy(&address, &data[1], 4); // 4 - документация
+
+    uint8_t flags = data[5];
+
+    uint16_t port = 0;
+    memcpy(&port, &data[6], 2); // 2 - документация
+
+    uint64_t sum = nameSize + address + flags + port;
+    uint64_t chSum = 0;
+    memcpy(&chSum, &data[8], 8); // Размер контрольной суммы пакета (документация)
+
+    if (sum != chSum)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    struct Host_Broadcast *hostBroadcastResult = (struct Host_Broadcast *)malloc(sizeof(struct Host_Broadcast));
+    if (hostBroadcastResult == NULL)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    hostBroadcastResult->nameSize = nameSize;
+    hostBroadcastResult->address = address;
+    hostBroadcastResult->flags = flags;
+    hostBroadcastResult->port = port;
+    hostBroadcastResult->name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL;
+
+    if ((nameSize > 0) && (hostBroadcastResult->name == NULL))
+    {
+        *error = true;
+        clearHostBroadCast(hostBroadcastResult);
+        return NULL;
+    }
+
+    if (nameSize > 0)
+        memcpy((void *)hostBroadcastResult->name, &data[HOST_BROADCAST_SIZE], nameSize);
+
+    *cutDataSize = hostBroadCastSize(hostBroadcastResult);
+
+    return hostBroadcastResult;
 }

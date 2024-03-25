@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.15
-import Qt.labs.settings 1.1
+ import QtCore
 
 Rectangle {
     //Ссылка на Device
@@ -72,8 +72,8 @@ Rectangle {
                         w = 320
                         h = 240
                     }
-                    device.setDataFromString(1, w.toString())
-                    device.setDataFromString(2, h.toString())
+                    device.setDataFromString(2, w.toString())
+                    device.setDataFromString(3, h.toString())
                 }
             }
         }
@@ -105,7 +105,7 @@ Rectangle {
                 id: sliderBorder
                 from: 0
                 to: 100
-                value: parseFloat(device.readData(3))
+                value: parseFloat(device.readData(4))
 
                 anchors {
                     left: parent.left
@@ -115,7 +115,7 @@ Rectangle {
                 }
                 onPressedChanged: {
                     if (!pressed)
-                        device.setDataFromString(3, parseInt(value).toString())
+                        device.setDataFromString(4, parseInt(value).toString())
                 }
             }
 

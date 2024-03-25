@@ -1,11 +1,23 @@
 #include "iotv_host.h"
 
-#include <fstream>
-
-
 IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
+{
+    shareConstructor();
+    makeConnType();
+}
+
+IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
+    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
+    _counterState(0), _counterPing(0)
+{
+    shareConstructor();
+    _conn_type = std::make_unique<TCP_REVERSE_conn_type>(_settingsData[hostField::name], reverse_socket, this);
+    makeConnType();
+}
+
+void IOTV_Host::shareConstructor()
 {
     _timerState.setParent(this);
     _timerReRead.setParent(this);
@@ -26,13 +38,11 @@ IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
-
-    setConnectionType();
 }
 
 IOTV_Host::~IOTV_Host()
 {
-
+    qDebug() << "IOTV_Host destruct";
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)
@@ -72,7 +82,7 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 
 void IOTV_Host::responceRead(const struct Header *header)
 {
-    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
+//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
@@ -92,28 +102,16 @@ void IOTV_Host::responceRead(const struct Header *header)
     if (_logFile.isEmpty())
         return;
 
+    // Не записываем в лог сырые данные
+    if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
+        return;
+
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
     Log::write("R:"
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
                Log::Write_Flag::FILE, _logFile);
-
-    _counterPing = 0;
-
-
-    if (header->fragment == 1 && header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::trunc);
-    }
-
-    if (header->fragments > 1)
-    {
-        std::ofstream file;
-        file.open("Image.jpg", std::ios_base::binary | std::ios_base::app);
-        file.write(pkg->data, pkg->dataSize);
-    }
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -122,7 +120,7 @@ void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPoing(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPong(const struct IOTV_Server_embedded *iot)
 {
     Q_ASSERT(iot != nullptr);
     _counterPing = 0;
@@ -178,28 +176,38 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 
 void IOTV_Host::slotDataResived(QByteArray data)
 {
-    bool error = false;
-    uint64_t cutDataSize = 0;
+    _counterPing = 0;
+    _counterState = 0;
+
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
 
     _buff += data;
 
+    //!!! Определится с максимальным размером буфера
+    if (_buff.size() >= BUFSIZ * 1000)
+    {
+        Log::write("slotDataResived HOST переполнение буфера!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        _buff.clear();
+        _conn_type->disconnectFromHost();
+        return;
+    }
+
     while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
             _buff.clear();
-            _expectedDataSize = 0;
-            //            _conn_type->clearDataBuffer();
-            //            _conn_type->expectedDataSize = 0;
-            cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_expectedDataSize > 0)
+        if (expectedDataSize > 0)
         {
             clearHeader(header);
             break;
@@ -216,9 +224,10 @@ void IOTV_Host::slotDataResived(QByteArray data)
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
                 responceWrite(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                responcePingPoing(iot);
+                responcePingPong(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
+
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
@@ -248,7 +257,7 @@ QString IOTV_Host::getName() const
 }
 
 //!!!
-void IOTV_Host::setConnectionType()
+void IOTV_Host::makeConnType()
 {
     const auto &connType = _settingsData[hostField::connection_type];
     if (connType == connectionType::TCP)
@@ -257,6 +266,10 @@ void IOTV_Host::setConnectionType()
                                                      _settingsData[hostField::address],
                                                      _settingsData[hostField::port].toUInt(),
                                                      this);
+    }
+    else if (connType == connectionType::TCP_REVERSE)
+    {
+        ;
     }
     else if (connType == connectionType::UDP)
     {
@@ -282,10 +295,12 @@ void IOTV_Host::setConnectionType()
     }
     else if (connType == connectionType::FILE)
         _conn_type = std::make_unique<File_conn_type>(_settingsData["name"], _settingsData["address"], this);
+    else
+        Q_ASSERT(false);
 
-    //!!!
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &Base_Host::signalConnected, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &Base_Host::signalDisconnected, Qt::QueuedConnection);
     connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
 
@@ -342,6 +357,11 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 
 }
 
+QString IOTV_Host::getAddress() const
+{
+    return _conn_type->getAddress();
+}
+
 //void IOTV_Host::removeStreamWrite(uint8_t channel)
 //{
 //    std::lock_guard lg(_mutexStreamWrite);
@@ -355,7 +375,7 @@ void IOTV_Host::slotReReadTimeOut()
 
 void IOTV_Host::slotStateTimeOut()
 {
-    _counterState++;
+    ++_counterState;
 
     char outData[BUFSIZ];
     auto size = queryStateData(outData, BUFSIZ, getName().toStdString().c_str());
@@ -370,7 +390,7 @@ void IOTV_Host::slotStateTimeOut()
 
 void IOTV_Host::slotPingTimeOut()
 {
-    _counterPing++;
+    ++_counterPing;
 
     char outData[BUFSIZ];
     auto size = queryPingData(outData, BUFSIZ);
@@ -403,4 +423,8 @@ void IOTV_Host::slotConnected()
 
     _counterPing = 0;
     _counterState = 0;
+    _buff.clear();
+
+    _streamRead.clear();
+    _streamWrite.clear();
 }

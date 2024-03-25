@@ -29,9 +29,4 @@ private:
 private slots:
     void slotError(QAbstractSocket::SocketError error);
     void slotSocketStateChange(QAbstractSocket::SocketState socketState);
-    //    void slotNewConnection();
-    //    void slotSocketDisconnected();
-    //    void slotSocketStateChanged(QAbstractSocket::SocketState socketState);
-
-    //    void slotError(QAbstractSocket::SocketError error);
 };

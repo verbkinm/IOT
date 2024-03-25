@@ -1,0 +1,6 @@
+dependencies:
+  # idf: ">=4.4"
+  lvgl/lvgl: "~8.2.0"
+  esp_lcd_touch_gt911: ">=1.0.0"
+  # cJSON: ">=1.0"
+  # lvgl_esp32_drivers: ">=1.0.0"

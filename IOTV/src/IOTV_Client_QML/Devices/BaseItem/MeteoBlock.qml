@@ -71,7 +71,7 @@ Item {
 
     function pressureValue()
     {
-        var p = Number(device.readData(channelPressure)) * 7.50062 * 0.001
+        var p = Number(device.readData(channelPressure))
         return  p.toFixed(2) + " м.р.с."
     }
 

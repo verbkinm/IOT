@@ -43,7 +43,7 @@ Rectangle {
             loaderDebug.setSource("/Devices/Setting/Setting.qml", {
                                       "device": device
                                   })
-            appStack.push(loaderDebug)
+            glob_deviceStackView.push(loaderDebug)
         }
     }
 
@@ -72,7 +72,7 @@ Rectangle {
             loaderDebug.setSource("/Devices/Device_0.qml", {
                                       "device": device
                                   })
-            appStack.push(loaderDebug)
+            glob_deviceStackView.push(loaderDebug)
         }
     }
 
@@ -97,13 +97,10 @@ Rectangle {
         }
 
         onClicked: {
-            loaderMainItem.setSource("qrc:/DialogShared.qml", {
-                                         "parent": appStack,
-                                         "visible": true,
-                                         "title": "Описание",
-                                         "standardButtons": Dialog.Ok,
-                                         "text": device.description
-                                     })
+            glob_dialogShared.defaultAcceptedMessage()
+            glob_dialogShared.title = "Описание"
+            glob_dialogShared.text = device.description
+            glob_dialogShared.open()
         }
     }
 

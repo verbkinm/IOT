@@ -39,14 +39,10 @@ Page {
                 id: repeater
                 model: device.readChannelLength
 
-                //!!!
                 Device_1_switch {
                     required property int index
                     device: root.device
                     channel: index
-                    //                    onSignalDataRX: {
-                    //                        firstRX = true
-                    //                    }
                 }
             }
         }
@@ -56,24 +52,22 @@ Page {
         console.log("Device 1 construct: ", objectName)
         if (device.readChannelLength < device.writeChannelLength) {
             column.destroy()
-            loaderMainItem.setSource("qrc:/DialogShared.qml", {
-                                         "parent": appStack,
-                                         "visible": true,
-                                         "title": "Ошибка устройства",
-                                         "text": "каналов чтения меньше чем каналов записи",
-                                         "standardButtons": Dialog.Ok
-                                     })
+
+            glob_dialogShared.defaultAcceptedMessage()
+            glob_dialogShared.title = "Ошибка устройства"
+            glob_dialogShared.text = "каналов чтения меньше чем каналов записи"
+            glob_dialogShared.open()
+
             busyRect.visible = true
         }
         if (device.readChannelLength === 0) {
             column.destroy()
-            loaderMainItem.setSource("qrc:/DialogShared.qml", {
-                                         "parent": appStack,
-                                         "visible": true,
-                                         "title": "Ошибка устройства",
-                                         "text": "каналы чтения отсутствуют",
-                                         "standardButtons": Dialog.Ok
-                                     })
+
+            glob_dialogShared.defaultAcceptedMessage()
+            glob_dialogShared.title = "Ошибка устройства"
+            glob_dialogShared.text = "каналы чтения отсутствуют"
+            glob_dialogShared.open()
+
             busyRect.visible = true
         }
     }

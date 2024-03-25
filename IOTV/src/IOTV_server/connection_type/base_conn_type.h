@@ -16,6 +16,7 @@ public:
         NONE,
         COM,
         TCP,
+        TCP_REVERSE,
         UDP,
         FILE
     };
@@ -31,9 +32,6 @@ public:
     virtual qint64 write(const QByteArray &data, qint64 size = -1) = 0;
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
-
-//    void clearDataBuffer();
-//    void setDataBuffer(const QByteArray &data);
 
     static QString ConnTypeToString(Conn_type conn_type);
 

@@ -17,8 +17,6 @@ TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint1
 
 qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
-//    if (_tcpSocket.bytesAvailable())
-//        return 0;
     if (_tcpSocket.state() != QAbstractSocket::ConnectedState)
         return 0;
 
@@ -46,7 +44,7 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 
 void TCP_conn_type::connectToHost()
 {
-    _tcpSocket.abort();
+    disconnectFromHost();
     Log::write(_name + ": try to connect...", Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
     _tcpSocket.connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
@@ -54,19 +52,12 @@ void TCP_conn_type::connectToHost()
 
 void TCP_conn_type::disconnectFromHost()
 {
-
-    _tcpSocket.abort();//disconnectFromHost();
+    _tcpSocket.abort();
 }
 
 QByteArray TCP_conn_type::readAll()
 {
-    QByteArray data;
-
-    //!!!
-    while (_tcpSocket.bytesAvailable())
-        data += _tcpSocket.read(BUFFER_MAX_SIZE);
-
-    return data;
+    return _tcpSocket.readAll();
 }
 
 void TCP_conn_type::slotNewConnection()

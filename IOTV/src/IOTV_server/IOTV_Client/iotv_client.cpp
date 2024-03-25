@@ -8,12 +8,14 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     _socket->setParent(this);
     _silenceTimer.setParent(this);
 
-    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost, Qt::QueuedConnection);
-    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData, Qt::QueuedConnection);
-    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected, Qt::QueuedConnection);
+    connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
+    connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
+    connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
 
     connect(this, &IOTV_Client::signalFetchEventActionDataFromServer, this, &IOTV_Client::slotFetchEventActionDataFromServer, Qt::QueuedConnection);
 
+    connect(this, &IOTV_Client::signalUpdateHosts, this, &IOTV_Client::processQueryIdentification, Qt::QueuedConnection);
+    connect(this, &IOTV_Client::signalClearAndUpdateHosts, this, &IOTV_Client::processQueryIdentification_2, Qt::QueuedConnection);
 
     _silenceTimer.setInterval(_silenceInterval);
     _silenceTimer.start();
@@ -21,6 +23,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 
 IOTV_Client::~IOTV_Client()
 {
+    qDebug() << "client destruct";
     ///!!! закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {
@@ -44,7 +47,7 @@ void IOTV_Client::processQueryIdentification()
 
     if (_hosts.size() == 0)
     {
-        auto size = responseIdentificationData(outData, BUFSIZ, NULL);
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
         write({outData, static_cast<int>(size)}, size);
         return;
     }
@@ -52,11 +55,23 @@ void IOTV_Client::processQueryIdentification()
     for (const auto &host : _hosts)
     {
         struct IOTV_Server_embedded *iot = host.first->convert();
-        auto size = responseIdentificationData(outData, BUFSIZ, iot);
+
+        auto size = responseIdentificationData(outData, BUFSIZ, iot, 0);
 
         write({outData, static_cast<int>(size)}, size);
         clearIOTV_Server(iot);
     }
+}
+
+void IOTV_Client::processQueryIdentification_2()
+{
+    // В начале удаляем все устройства
+    char outData[BUFSIZ];
+    auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
+    write({outData, static_cast<int>(size)}, size);
+
+    // Потом обновляем весь список
+    processQueryIdentification();
 }
 
 void IOTV_Client::processQueryState(const Header *header)
@@ -90,10 +105,17 @@ void IOTV_Client::processQueryRead(const Header *header)
         return;
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host)
                            {
+                               QString name = iotv_host.first->getName();
+                               QString compareName(QByteArray{pkg->name, pkg->nameSize});
+
+                               return name == compareName;
                                //                               const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
-                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                               //                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
                            });
 
     if (it == _hosts.end())
@@ -103,7 +125,10 @@ void IOTV_Client::processQueryRead(const Header *header)
     if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
     {
         if (it->first->addStreamRead(pkg->channelNumber, this))
+        {
+            disconnect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
             connect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead, Qt::QueuedConnection);
+        }
 
         return;
     }
@@ -219,29 +244,41 @@ uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
 
 void IOTV_Client::slotDisconnected()
 {
+    //    qDebug() << "client disconnect";
     emit signalDisconnected();
 }
 
 void IOTV_Client::slotReadData()
 {
     _silenceTimer.start();
-    recivedBuff += _socket->readAll();
+    _recivedBuff += _socket->readAll();
+
+    //!!! Определится с максимальным размером буфера
+    if (_recivedBuff.size() >= BUFSIZ * 10)
+    {
+        Log::write("slotDataResived CLIENT переполнение буфера!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+        _recivedBuff.clear();
+        _socket->abort();
+        return;
+    }
 
     Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
                    + QString::number(socket()->peerPort())
-                   + " <- " + recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
     uint64_t cutDataSize = 0;
 
-    while (recivedBuff.size() > 0)
+    while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(recivedBuff.data()), recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
-            recivedBuff.clear();
+            _recivedBuff.clear();
             _expectedDataSize = 0;
             cutDataSize = 0;
             clearHeader(header);
@@ -278,7 +315,7 @@ void IOTV_Client::slotReadData()
                 processQueryTech(header);
         }
 
-        recivedBuff = recivedBuff.mid(cutDataSize);
+        _recivedBuff = _recivedBuff.mid(cutDataSize);
 
         clearHeader(header);
     }
@@ -324,10 +361,10 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
 
 
     struct Read_Write read = {
+        .dataSize = static_cast<uint64_t>(data.size()),
         .nameSize = iot->nameSize,
         .channelNumber = channel,
         .flags = ReadWrite_FLAGS_OPEN_STREAM,
-        .dataSize = static_cast<uint64_t>(data.size()),
         .name = iot->name,
         .data = data.data()
     };

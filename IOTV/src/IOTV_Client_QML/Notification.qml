@@ -2,9 +2,8 @@ import QtQuick 2.2
 import QtQuick.Controls 2.2
 
 Rectangle {
-    property alias text: lbl.text
-
     id: notify
+
     width: parent.width * 0.8
     height: lbl.height + 20
 
@@ -12,14 +11,12 @@ Rectangle {
     y: Math.round((parent.height - height) - 20)
 
     color: "#e4e4e4"
-    z:1
 
-    visible: opacity != 0
+    visible: opacity !== 0
 
     border.width: 1
     border.color: "black"
-    radius: 3
-
+    radius: 5
 
     Label {
         id: lbl
@@ -27,7 +24,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 18
         wrapMode: Text.Wrap
-        text: "Example text"
+        text: "IOTV Client " + Qt.application.version
     }
 
     NumberAnimation on opacity {
@@ -48,9 +45,11 @@ Rectangle {
         onReleased: anim.running = true
     }
 
-    function open()
+    function set_text(text)
     {
-        console.log("open")
+        anim.running = false
         opacity = 1
+        lbl.text = text
+        anim.running = true
     }
 }

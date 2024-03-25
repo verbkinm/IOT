@@ -1,36 +1,155 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
+import QtQuick.Effects
 
-Rectangle {
-    id: componentRect
-    width: parent.width * 0.8
-    height: 80
+Item {
+    readonly property string statePressed: "pressed"
+    readonly property string stateRealesed: "released"
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    signal signalClick()
 
-    color: Qt.rgba(0, 0, 0, 0)
-    radius: 5
+    id: root
 
-    border.width: 1
-    border.color: "green"
-
-    Text {
-        anchors.centerIn: parent
-        text: model.name
-    }
+    width: global_window.width / 2 - global_window.width * 0.1
+    height: 110
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        onClicked: signalClick()
+    }
 
-        onClicked: {
-            var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
-            if (component.status === Component.Ready)
-            {
-                var object = component.createObject(null, {_event: model.event, _action: model.action, title: model.name})
-//                for(var el in model.action)
-//                    console.log(el, " = ", model.action[el])
-                appStack.push(object)
+    Rectangle {
+        id: componentRect
+        anchors.centerIn: parent
+
+        width: root.width - 15
+        height: 100
+
+        color: Qt.rgba(255, 255, 255, 1)
+        radius: 5
+
+        Image {
+            id: icon
+            source: model.source
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+                topMargin: 10
+            }
+            width: 54
+            height: 54
+            fillMode: Image.PreserveAspectFit
+        }
+
+        Label {
+            id: evName
+            text: model.name
+            font.pixelSize: 16
+
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: icon.bottom
+                bottom: parent.bottom
+                leftMargin: 10
+                rightMargin: 10
+            }
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.Wrap
+            elide: Text.ElideRight
+        }
+
+        //        MouseArea {
+        //            anchors.fill: parent
+
+        //            onClicked: {
+        //                var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
+        //                if (component.status === Component.Ready)
+        //                {
+        //                    var object = component.createObject(null, {_event: model.event, _action: model.action, title: model.name})
+        //                    //                for(var el in model.action)
+        //                    //                    console.log(el, " = ", model.action[el])
+        //                    glob_eventStackView.push(object)
+        //                }
+        //            }
+        //        }
+    }
+
+    MultiEffect {
+        id: shadowEff
+        source: componentRect
+        anchors.fill: componentRect
+        shadowEnabled: true
+        shadowOpacity: 0.7
+    }
+
+    states: [
+        State {
+            name: statePressed
+            when: mouseArea.pressed
+            PropertyChanges {
+                target: componentRect
+                scale: 0.95
+            }
+        },
+        State {
+            name: stateRealesed
+            when: !mouseArea.pressed
+            PropertyChanges {
+                target: componentRect
+                scale: 1.0
             }
         }
-    }
+    ]
+
+    transitions: [
+        Transition {
+            to: statePressed
+            ParallelAnimation {
+                PropertyAnimation {
+                    target: componentRect
+                    property: "scale"
+                    from: 1.0
+                    to: 0.95
+                    duration: 50
+                }
+                PropertyAnimation {
+                    target: shadowEff
+                    property: "scale"
+                    from: 1.0
+                    to: 0.95
+                    duration: 50
+                }
+            }
+        },
+        Transition {
+            to: stateRealesed
+            ParallelAnimation {
+                PropertyAnimation {
+                    target: componentRect
+                    property: "scale"
+                    from: 0.95
+                    to: 1.0
+                    duration: 100
+                }
+                PropertyAnimation {
+                    target: shadowEff
+                    property: "scale"
+                    from: 0.95
+                    to: 1.0
+                    duration: 100
+                }
+            }
+        }
+    ]
+
+//    Component.onCompleted: {
+//        console.log("EvAct construct")
+//    }
+
+//    Component.onDestruction: {
+//        console.log("EvAct destruction")
+//    }
 }

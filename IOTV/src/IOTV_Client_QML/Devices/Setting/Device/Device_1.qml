@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import Qt.labs.settings 1.1
+ import QtCore
 
 Rectangle {
     //Ссылка на Device

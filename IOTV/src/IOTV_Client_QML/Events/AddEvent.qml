@@ -36,7 +36,7 @@ Page {
                 Text {
                     id: eventTitle
                     text: "Событие:"
-                    font.pixelSize: 16
+                    font.pixelSize: 14
 
                     anchors {
                         centerIn: parent
@@ -106,7 +106,7 @@ Page {
                 Text {
                     id: actionTitle
                     text: "Действие:"
-                    font.pixelSize: 16
+                    font.pixelSize: 14
 
                     anchors {
                         centerIn: parent
@@ -143,35 +143,35 @@ Page {
                 width: parent.width
                 height: 70
 
-                Button {
+                RoundButton {
                     id: deleteEvent
-                    width: 160
-                    height: 60
-                    font.pixelSize: 18
-                    antialiasing: true
-
-                    text: "Удалить"
+                    width: 64
+                    height: 64
                     highlighted: true
+
                     anchors {
                         right: save.left
                         rightMargin: 20
                     }
 
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/delete_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
                     onClicked: {
                         client.removeEventAction(title)
-                        appStack.pop()
+                        glob_eventStackView.pop(eventsPage)
                     }
                 }
 
-                Button {
+                RoundButton {
                     id: save
-                    text: "Сохранить"
-                    width: deleteEvent.width
-                    height: deleteEvent.height
-
-                    font.pixelSize: 18
-                    antialiasing: true
-
+                    width: 64
+                    height: 64
                     highlighted: true
 
                     anchors {
@@ -179,15 +179,21 @@ Page {
                         rightMargin: 20
                     }
 
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/save_white.png"
+                        height: 22
+                        width: 22
+                        fillMode: Image.PreserveAspectFit
+                    }
+
                     onClicked: {
                         if (name.text === "")
                         {
-                            loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                                     {parent: appStack,
-                                                         visible: true,
-                                                         title: "Внимание",
-                                                         standardButtons: Dialog.Ok,
-                                                         text: "Имя события не может быть пустым!"})
+                            glob_dialogShared.defaultAcceptedMessage()
+                            glob_dialogShared.title = "Внимание"
+                            glob_dialogShared.text = "Имя события не может быть пустым!"
+                            glob_dialogShared.open()
                             return
                         }
 
@@ -199,12 +205,10 @@ Page {
                                 var obj = list[i][0]
                                 if (obj["name"] === name.text)
                                 {
-                                    loaderMainItem.setSource("qrc:/DialogShared.qml",
-                                                             {parent: appStack,
-                                                                 visible: true,
-                                                                 title: "Внимание",
-                                                                 standardButtons: Dialog.Ok,
-                                                                 text: "Событие с таким именем уже существует"})
+                                    glob_dialogShared.defaultAcceptedMessage()
+                                    glob_dialogShared.title = "Внимание"
+                                    glob_dialogShared.text = "Событие с таким именем уже существует!"
+                                    glob_dialogShared.open()
                                     return
                                 }
                             }
@@ -235,7 +239,7 @@ Page {
                         }
                         else if(event["type"] === eventTypeItem.model[5])
                         {
-                            event["seconds"] = eventTypeLoader.item.totalSeconds()
+                            event["seconds"] = eventTypeLoader.item.getTotalSeconds()
                         }
 
                         var action = new Map
@@ -255,15 +259,9 @@ Page {
                         }
 
                         client.saveEventAction(event, action, title)
-                        appStack.pop()
-                        //                        console.log(event)
-                        //                        for(var el in event)
-                        //                            console.log(el, " = ", event[el])
+                        client.queryEventAction()
 
-                        //                        console.log()
-
-                        //                        for(el in action)
-                        //                            console.log(el, " = ", action[el])
+                        glob_eventStackView.pop(eventsPage)
                     }
                 }
             }
@@ -272,6 +270,7 @@ Page {
 
     Component.onCompleted: {
         console.log("Add Events page construct: ", objectName)
+        focusChanged(true)
     }
 
     Component.onDestruction: {
@@ -311,6 +310,8 @@ Page {
             else if (actionType === "data_tx_ref")
                 dataTX_Ref()
         }
+
+        focus = true
     }
 
     function stateProperty()
@@ -340,7 +341,7 @@ Page {
     function timerPoperty()
     {
         var _seconds = _event["seconds"]
-        eventTypeLoader.setSource("qrc:/Events/BaseItem/TimerType.qml", {seconds: _seconds})
+        eventTypeLoader.setSource("qrc:/Events/BaseItem/TimerType.qml", {totalSeconds: _seconds})
     }
 
     function dataTX()

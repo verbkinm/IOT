@@ -1,9 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.3
 
-import "Home" as HomePageModule
+//import "Home" as HomePageModule
 import "Client" as ClientPageModule
 
 Drawer {
@@ -13,9 +11,6 @@ Drawer {
     height: global_window.height - overlayHeader.height
 
     modal: inPortrait
-//    interactive: inPortrait
-//    position: inPortrait ? 0 : 1
-//    visible: !inPortrait
 
 
     ListModel {
@@ -53,30 +48,43 @@ Drawer {
                     }
                     onClicked: {
                         if (index === 0)
-                            appStack.pop(homePage)
-                        else if (index === 1 && appStack.currentItem != clientPage)
-                            appStack.push(clientPage)
+                        {
+                            glob_swipeView.setCurrentIndex(0)
+                            glob_deviceStackView.pop(homePage)
+                        }
+                        else if (index === 1)
+                        {
+                            glob_swipeView.setCurrentIndex(2)
+                            glob_clientStackView.pop(clientPage)
+                        }
                         else if (index === 2)
                         {
-                            loaderMainItem.setSource("DialogShared.qml",
-                                                     {parent: appStack,
-                                                         visible: true,
-                                                         standardButtons: Dialog.Ok,
-                                                         title: "Версия",
-                                                         text: "Клиент IOTV " + Qt.application.version})
+                            glob_dialogShared.defaultAcceptedMessage()
+                            glob_dialogShared.title = "Клиент IOTV"
+                            glob_dialogShared.text = "Версия: " + Qt.application.version
+                            glob_dialogShared.open()
+                        }
+                        else if (index === 3)
+                        {
+                            glob_dialogShared.defaultAcceptedExit()
+                            glob_dialogShared.open()
                         }
 
-                        else if (index === 3)
-                            loaderMainItem.setSource("qrc:/DialogExit.qml", {
-                                                         "parent": appStack
-                                                     })
-
-                        drawer.visible = 0
+                        drawer.close()
                     }
                 }
             }
         }
     }
+
+
+
+//    MessageDialog {
+//        id: msgDialog
+//        modality: Qt.WindowModal
+
+//        onA
+//    }
 
     ListView {
         id: listView

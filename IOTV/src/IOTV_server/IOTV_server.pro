@@ -33,6 +33,7 @@ SOURCES += \
     ../lib/Protocols/embedded/state.cpp \
     ../lib/Protocols/embedded/iotvp_print.cpp \
     ../lib/Protocols/embedded/tech.cpp \
+    ../lib/Protocols/embedded/host_broadcast.cpp  \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
         connection_type/com_conn_type.cpp \
         connection_type/file_conn_type.cpp \
         connection_type/tcp_conn_type.cpp \
+    connection_type/tcp_reverse_conn_type.cpp \
         main.cpp \
         connection_type/udp_conn_type.cpp \
         wrapper.cpp \
@@ -73,6 +75,7 @@ HEADERS += \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/iotvp_print.h \
     ../lib/Protocols/embedded/tech.h \
+    ../lib/Protocols/embedded/host_broadcast.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
     IOTV_Client/iotv_client.h \
@@ -80,6 +83,7 @@ HEADERS += \
     connection_type/com_conn_type.h \
     connection_type/file_conn_type.h \
     connection_type/tcp_conn_type.h \
+    connection_type/tcp_reverse_conn_type.h \
     connection_type/udp_conn_type.h \
     wrapper.h \
     ../lib/Base_Host/base_host.h \

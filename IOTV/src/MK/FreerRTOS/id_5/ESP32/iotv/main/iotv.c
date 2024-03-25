@@ -2,18 +2,14 @@
 
 //extern QueueHandle_t xQueueInData, xQueueOutData;
 
-extern uint64_t realBufSize;
-extern uint64_t expextedDataSize;
-extern uint8_t glob_status;
+static uint64_t realBufSize = 0;
 
 static const char *TAG = "iotv";
 
-static uint8_t recivedBuffer[BUFSIZE];
-uint8_t transmitBuffer[BUFSIZE];
-int transmitBufferSize = 0;
+static char recivedBuffer[BUFSIZE];
+static char transmitBuffer[BUFSIZE];
 
-static uint64_t cutDataSize = 0;
-static bool error = false;
+static int last_client_socket = 0;
 
 static uint8_t readType[15] = {
 		DATA_TYPE_BOOL,			// состояние реле
@@ -65,13 +61,30 @@ static struct IOTV_Server_embedded iot = {
 		.descriptionSize = 11,
 };
 
-static int16_t readBorderDistanceFromNVS(void);
-static void writeBorderDistanceToNVS(int16_t value);
+static uint64_t iotv_write_func(char *data, uint64_t size, void *obj);
 
-static uint8_t readDisplayOrientationFromNVS(void);
-static void writeDisplayOrientationToNVS(uint8_t value);
+static uint64_t iotv_write_func(char *data, uint64_t size, void *obj)
+{
+	if (obj == NULL || data == NULL)
+		return 0;
 
-void iotvInit(void)
+	int socket = *(int *)obj;
+
+	return send(socket, data, size, 0);
+}
+
+void iotv_clear_buf_data(void)
+{
+	realBufSize = 0;
+	last_client_socket = 0;
+}
+
+struct IOTV_Server_embedded *iotv_get(void)
+{
+	return &iot;
+}
+
+void iotv_init(void)
 {
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
@@ -88,55 +101,63 @@ void iotvInit(void)
 	iot.state = 1;
 }
 
-//static void dataRecived(const struct DataPkg *pkg)
-void dataRecived(const uint8_t *data, int size)
+void iotv_data_recived(const char *data, int size, int sock)
 {
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
+
+	last_client_socket = sock;
+
 	if (data == NULL)
 		return;
 
 	//страховка
 	if ((realBufSize + size) >= BUFSIZE)
 	{
-		realBufSize = 0;
-		expextedDataSize = 0;
-		cutDataSize = 0;
-		ESP_LOGE(TAG, "Buffer overflow");
+		iotv_clear_buf_data();
+		printf("%s Buffer overflow\n", TAG);
 		return;
 	}
 
 	memcpy(&recivedBuffer[realBufSize], data, size);
 	realBufSize += size;
 
-	if (realBufSize < expextedDataSize)
-		return;
-
 	while (realBufSize > 0)
 	{
-		struct Header *header = createPkgs(recivedBuffer, realBufSize, &error, &expextedDataSize, &cutDataSize);
+		uint64_t size = 0;
+
+		struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expectedDataSize, &cutDataSize);
+
+		if (header == NULL)
+			printf("%s header == NULL\n", TAG);
 
 		if (error == true)
 		{
-			realBufSize = 0;
-			expextedDataSize = 0;
-			cutDataSize = 0;
+			iotv_clear_buf_data();
+			printf("%s Data error\n", TAG);
 			break;
 		}
 
-		if (expextedDataSize > 0)
-			break;
+		if (expectedDataSize > 0)
+		{
+			printf("%s expextedDataSize %d\n", TAG, (int)expectedDataSize);
+			return;
+		}
 
 		if (header->type == HEADER_TYPE_REQUEST)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-				transmitBufferSize += responseIdentificationData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
+				size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
-				transmitBufferSize = responseReadData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
-			else if(header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
-				int len = responseWriteData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot, header);
-				transmitBufferSize += len;
+				responseReadData(transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock);
+				size = 0;
+			}
+			else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
+			{
+				size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
 
-				if (len > 0)
+				if (size > 0)
 				{
 					uint8_t channelNumber = ((struct Read_Write *)header->pkg)->channelNumber;
 					int8_t *val = (int8_t *)iot.readChannel[channelNumber].data;
@@ -152,7 +173,10 @@ void dataRecived(const uint8_t *data, int size)
 						}
 						else
 						{
-							setBitInByte(&glob_status, *rele_state, MY_STATUS_RELE);
+							if (*rele_state)
+								glob_set_bits_status_reg(STATUS_RELE);
+							else
+								glob_clear_bits_status_reg(STATUS_RELE);
 							printf("Rele state: %s, remote switch\n", (*rele_state ? "ON" : "OFF"));
 						}
 
@@ -183,11 +207,9 @@ void dataRecived(const uint8_t *data, int size)
 						*val = inRange(*val, 0, 99);
 						break;
 					case CH_DISP_ORNT:
-						// проверка!!!
-						printf("orientation: %d\n", *val);
 						*val = inRange(*val, 0, 3);
-						printf("orientation: %d\n", *val);
 						writeDisplayOrientationToNVS(*val);
+						OLED_set_disp_rotation(*val);
 						break;
 					default:
 						break;
@@ -204,10 +226,13 @@ void dataRecived(const uint8_t *data, int size)
 				}
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-				transmitBufferSize += responsePingData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE);
+				size = responsePingData(transmitBuffer, BUFSIZE);
 			else if(header->assignment == HEADER_ASSIGNMENT_STATE)
-				transmitBufferSize += responseStateData((char *)(transmitBuffer + transmitBufferSize), BUFSIZE, &iot);
+				size = responseStateData(transmitBuffer, BUFSIZE, &iot);
 		}
+
+		if (size)
+			iotv_write_func((char *)transmitBuffer, size, (void *)&sock);
 
 		memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZE - cutDataSize);
 		realBufSize -= cutDataSize;
@@ -216,231 +241,34 @@ void dataRecived(const uint8_t *data, int size)
 	}
 }
 
-static int16_t readBorderDistanceFromNVS(void)
-{
-	int16_t borderDistance = BORDER_DISTANCE_DEFAULT; // значение по умолчанию
-
-	// Open
-	nvs_handle_t my_handle;
-	if (nvs_open("VL6180X", NVS_READONLY, &my_handle) != ESP_OK)
-	{
-		ESP_LOGE(TAG, "Error nvs_open");
-		return borderDistance;
-	}
-
-	// Read
-	if (nvs_get_i16(my_handle, "borderDistance", &borderDistance) != ESP_OK)
-		ESP_LOGE(TAG, "Error nvs_get_i16");
-
-	nvs_close(my_handle);
-	return borderDistance;
-}
-
-static void writeBorderDistanceToNVS(int16_t value)
-{
-	// Open
-	nvs_handle_t my_handle;
-	if (nvs_open("VL6180X", NVS_READWRITE, &my_handle) != ESP_OK)
-	{
-		ESP_LOGE(TAG, "BorderDistanceToNVS open failed");
-		return;
-	}
-
-	// Write
-	if (nvs_set_i16(my_handle, "borderDistance", value) != ESP_OK)
-		ESP_LOGE(TAG, "writeBorderDistanceToNVS write failed");
-
-	// Commit written value.
-	if (nvs_commit(my_handle) != ESP_OK)
-		ESP_LOGE(TAG, "writeBorderDistanceToNVS commit failed");
-
-	// Close
-	nvs_close(my_handle);
-}
-
-static uint8_t readDisplayOrientationFromNVS(void)
-{
-	uint8_t displayOrientation = DISPLAY_ORIENTATION_DEFAULT; // значение по умолчанию
-
-	// Open
-	nvs_handle_t my_handle;
-	if (nvs_open("DISP", NVS_READONLY, &my_handle) != ESP_OK)
-	{
-		ESP_LOGE(TAG, "Error nvs_open");
-		return displayOrientation;
-	}
-
-	// Read
-	if (nvs_get_u8(my_handle, "dispOrientation", &displayOrientation) != ESP_OK)
-		ESP_LOGE(TAG, "Error nvs_get_u8");
-
-	nvs_close(my_handle);
-	return displayOrientation;
-}
-
-static void writeDisplayOrientationToNVS(uint8_t value)
-{
-	// Open
-	nvs_handle_t my_handle;
-	if (nvs_open("DISP", NVS_READWRITE, &my_handle) != ESP_OK)
-	{
-		ESP_LOGE(TAG, "displayOrientation open failed");
-		return;
-	}
-
-	// Write
-	if (nvs_set_u8(my_handle, "dispOrientation", value) != ESP_OK)
-		ESP_LOGE(TAG, "displayOrientation write failed");
-
-	// Commit written value.
-	if (nvs_commit(my_handle) != ESP_OK)
-		ESP_LOGE(TAG, "displayOrientation commit failed");
-
-	// Close
-	nvs_close(my_handle);
-}
-
-void Vl6180X_Task(void *pvParameters)
-{
-	while(iot.state == 0)
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	ESP_LOGW(TAG, "Vl6180X task created");
-
-	char *releState;
-	releState = iot.readChannel[CH_RELAY_STATE].data;
-
-	int16_t *border = (int16_t *)iot.readChannel[CH_BORDER].data;
-	int16_t *range = (int16_t *)iot.readChannel[CH_RANGE].data;
-
-	gpio_set_direction(RELE_PIN, GPIO_MODE_INPUT_OUTPUT);
-
-	VL6180X_init();
-
-	while(true)
-	{
-		*range = VL6180X_simpleRange();
-		//		*(double *)iot.readChannel[3].data = VL6180X_simpleALS(VL6180X_ALS_GAIN_5);
-		//		printf("ALS: %d\n", VL6180X_simpleALS(VL6180X_ALS_GAIN_5));
-
-		if (*range < *border)
-		{
-			vTaskDelay(10 / portTICK_PERIOD_MS);
-			*range = VL6180X_simpleRange();
-			if (*range < *border)
-			{
-				gpio_set_level(RELE_PIN, !(*releState));
-				if (*releState != gpio_get_level(RELE_PIN))
-				{
-					*releState ^= 1;
-					printf("Rele state: %s, StateRange: %d\n", (*releState ? "ON" : "OFF"), *range);
-					setBitInByte(&glob_status, *releState, MY_STATUS_RELE);
-				}
-				else
-					ESP_LOGE(TAG, "Can't switch relay");
-
-				vTaskDelay(1000 / portTICK_PERIOD_MS);
-			}
-		}
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
-}
-
-void BME280_Task(void *pvParameters)
-{
-	while(iot.state == 0)
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	ESP_LOGW(TAG, "BME280 task created");
-
-	BME280_init();
-
-	while(true)
-	{
-		struct THP values = BME280_readValues();
-		if (values.err)
-		{
-			*(double *)iot.readChannel[CH_TEMP].data = INFINITY;
-			*(double *)iot.readChannel[CH_PRES].data = INFINITY;
-			*(double *)iot.readChannel[CH_HUM].data = INFINITY;
-		}
-		else
-		{
-			*(double *)iot.readChannel[CH_TEMP].data = values.temperature;
-			*(double *)iot.readChannel[CH_PRES].data = values.pressure;
-			*(double *)iot.readChannel[CH_HUM].data = values.humidity;
-		}
-		vTaskDelay(5000 / portTICK_PERIOD_MS);
-	}
-}
-
-void DS3231_Task(void *pvParameters)
-{
-	while(iot.state == 0)
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	ESP_LOGW(TAG, "DS3231 task created");
-
-	struct DateTime dt;
 
 
-	while(true)
-	{
-		dt = DS3231_DataTime();
 
-		if (dt.err)
-		{
-			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
-				*(uint8_t *)iot.readChannel[i].data = 255;
-		}
-		else
-		{
-			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
-				*(uint8_t *)iot.readChannel[i].data = ((uint8_t *)&dt)[j];
-		}
-
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
-	}
-}
-
-void OLED_Task(void *pvParameters)
-{
-	while(iot.state == 0)
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-
-	ESP_LOGW(TAG, "OLED task created");
-
-	OLED_init2(readDisplayOrientationFromNVS());
-	OLED_boot_screen();
-	OLED_init_draw_element(); // после boot_screen
-
-	struct DateTime dt;
-	struct THP thp;
-
-	while(true)
-	{
-		// на 32 байта меньше, чем поэлементное присваивание,
-		// но при добавлении каналов вмежду CH_SEC и CH_YEAR нужно не забыть исправить.
-		for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
-			((uint8_t *)&dt)[j] = *(uint8_t *)iot.readChannel[i].data;
-
-		//		dt.seconds = *(uint8_t *)iot.readChannel[CH_SEC].data;
-		//		dt.minutes = *(uint8_t *)iot.readChannel[CH_MIN].data;
-		//		dt.hour = *(uint8_t *)iot.readChannel[CH_HOUR].data;
-		//		dt.day = *(uint8_t *)iot.readChannel[CH_DAY].data;
-		//		dt.date = *(uint8_t *)iot.readChannel[CH_DATE].data;
-		//		dt.month = *(uint8_t *)iot.readChannel[CH_MONTH].data;
-		//		dt.year = *(uint8_t *)iot.readChannel[CH_YEAR].data;
-		dt.err = (dt.seconds == 255) ? true : false; // если данные не считались, то все значения для dt = 255. Смотри DS3231_Task if (dt.err)
-
-		thp.temperature = *(double *)iot.readChannel[CH_TEMP].data;
-		thp.humidity = *(double *)iot.readChannel[CH_HUM].data;
-		thp.pressure = *(double *)iot.readChannel[CH_PRES].data;
-		thp.err = thp.temperature == INFINITY ? true : false; // если данные не считались, то все значения для thp = INFINITY. Смотри BME280_Task if (values.err)
-
-		OLED_Draw_Page(&thp, &dt, glob_status);
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
-	}
-}
-
-
+//void DS3231_Task(void *pvParameters)
+//{
+//	while(iot.state == 0)
+//		vTaskDelay(100 / portTICK_PERIOD_MS);
+//
+//	ESP_LOGW(TAG, "DS3231 task created");
+//
+//	struct DateTime dt;
+//
+//
+//	while(true)
+//	{
+//		dt = DS3231_DataTime();
+//
+//		if (dt.err)
+//		{
+//			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
+//				*(uint8_t *)iot.readChannel[i].data = 255;
+//		}
+//		else
+//		{
+//			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
+//				*(uint8_t *)iot.readChannel[i].data = ((uint8_t *)&dt)[j];
+//		}
+//
+//		vTaskDelay(1000 / portTICK_PERIOD_MS);
+//	}
+//}

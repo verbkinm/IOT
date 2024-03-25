@@ -26,16 +26,19 @@ private:
 
     const std::unordered_map<IOTV_Host *, QThread *> &_hosts;
 
-    QByteArray recivedBuff;
+    QByteArray _recivedBuff;
 
     QTimer _silenceTimer;
 
-    static constexpr uint _silenceInterval = 6000;
+    static constexpr uint _silenceInterval = 15000;
 
     uint64_t _expectedDataSize;
 
     // Пришел запрос от клиента
     void processQueryIdentification();
+    // Удаление всех устройств, а потом обновление всего списка!
+    void processQueryIdentification_2();
+
     void processQueryState(const struct Header* header);
     void processQueryRead(const struct Header* header);
     void processQueryWrite(const struct Header* header);
@@ -62,4 +65,8 @@ signals:
     void signalQueryEventActionData();
     void signalFetchEventActionDataFromServer(QByteArray data);
 
+    // Высылается сервером, при добавлении новых устройств
+    void signalUpdateHosts();
+    // Высылается сервером, при уделении устройства
+    void signalClearAndUpdateHosts();
 };

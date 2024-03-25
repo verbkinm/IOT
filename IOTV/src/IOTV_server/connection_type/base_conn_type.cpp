@@ -23,38 +23,41 @@ void Base_conn_type::setAddress(const QString &address)
     _address = address;
 }
 
-//qint64 Base_conn_type::write(const QByteArray &data, qint64 size)
-//{
-//    Q_UNUSED(data);
-//    Q_UNUSED(size)
-
-//    return -1;
-//}
-
-//void Base_conn_type::clearDataBuffer()
-//{
-//    std::lock_guard lg(_hostBuffMutex);
-//    _host_buffer_data.clear();
-//}
-
-//void Base_conn_type::setDataBuffer(const QByteArray &data)
-//{
-//    std::lock_guard lg(_hostBuffMutex);
-////    _host_buffer_data = data;
-//}
-
 QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
 {
-    if (conn_type == Conn_type::NONE)
+    switch (conn_type)
+    {
+    case Conn_type::NONE:
         return "NONE";
-    else if (conn_type == Conn_type::COM)
+        break;
+    case Conn_type::COM:
         return "COM";
-    else if (conn_type == Conn_type::TCP)
+        break;
+    case Conn_type::TCP:
         return "TCP";
-    else if (conn_type == Conn_type::FILE)
+        break;
+    case Conn_type::UDP:
+        return "UDP";
+        break;
+    case Conn_type::FILE:
         return "FILE";
+        break;
+    default:
+        return "UNKNOW";
+        break;
+    }
+    //    if (conn_type == Conn_type::NONE)
+    //        return "NONE";
+    //    else if (conn_type == Conn_type::COM)
+    //        return "COM";
+    //    else if (conn_type == Conn_type::TCP)
+    //        return "TCP";
+    //    else if (conn_type == Conn_type::UDP)
+    //        return "UDP";
+    //    else if (conn_type == Conn_type::FILE)
+    //        return "FILE";
 
-    return "UNKNOW";
+    //    return "UNKNOW";
 }
 
 QByteArray Base_conn_type::readAll()
@@ -68,21 +71,10 @@ void Base_conn_type::slotReadData()
 
     QByteArray inData = readAll();
 
-//    _host_buffer_data.append(inData);
-//    Log::write(_name + ": data response <- " + inData.toHex(':'),
-//               Log::Write_Flag::FILE_STDOUT,
-//               ServerLog::DEFAULT_LOG_FILENAME);
+    Log::write(_name + ": data response <- " + inData. toHex(':'),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
-//    if (_host_buffer_data.size() >= BUFFER_MAX_SIZE)
-//    {
-//        _host_buffer_data.clear();
-//        Log::write(_name + ": buffer cleared!",
-//                   Log::Write_Flag::FILE_STDOUT,
-//                   ServerLog::DEFAULT_LOG_FILENAME);
-//        return;
-//    }
-
-//    emit signalDataRiceved(_host_buffer_data);
     emit signalDataRiceved(inData);
 }
 

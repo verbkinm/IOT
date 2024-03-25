@@ -19,6 +19,7 @@ SOURCES += \
     ../../lib/Protocols/embedded/read_write.cpp \
     ../../lib/Protocols/embedded/state.cpp \
     ../../lib/Protocols/embedded/tech.cpp \
+    ../../lib/Protocols/embedded/host_broadcast.cpp  \
     ../../lib/raw/raw.cpp \
     main.cpp \
     mainwindow.cpp
@@ -34,6 +35,7 @@ HEADERS += \
     ../../lib/Protocols/embedded/read_write.h \
     ../../lib/Protocols/embedded/state.h \
     ../../lib/Protocols/embedded/tech.h \
+    ../../lib/Protocols/embedded/host_broadcast.h  \
     ../../lib/raw/raw.h \
     mainwindow.h
 

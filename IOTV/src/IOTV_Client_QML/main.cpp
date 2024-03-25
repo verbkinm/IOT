@@ -3,23 +3,22 @@
 #include <QQmlContext>
 
 #include "client.h"
-#include "colorimageprovider.h"
+#include "producer.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     app.setOrganizationName("VMS");
     app.setApplicationName("IOTV_Client");
-    app.setApplicationVersion("0.8");
+    app.setApplicationVersion("0.13");
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");
 
-    ColorImageProvider provider;
-    Client client(provider);
+    Client client;
     engine.rootContext()->setContextProperty("client", &client);
-    engine.rootContext()->setContextProperty("provider", &provider);
-    engine.addImageProvider(QLatin1String("provider"), &provider);
+
+    qmlRegisterType<Producer>("Producer", 1, 0, "Producer");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

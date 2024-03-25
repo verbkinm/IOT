@@ -18,11 +18,6 @@ Page {
         id: headerPanel
     }
 
-//    onVisibleChanged: {
-//        if (!visible)
-//            device.signalCloseReadStream(0)
-//    }
-
     Flickable {
         id: fl
         width: root.width
@@ -38,30 +33,31 @@ Page {
 
         MyCamRect {
             id: camRect
+            device: root.device
             width: parent.width - 20
             height: parent.height - (parent.height / 100 * 30)
             anchors.horizontalCenter: parent.horizontalCenter
 
             onPlay: {
                 device.signalOpenReadStream(0)
+                device.signalOpenReadStream(1)
             }
 
             onStop: {
                 device.signalCloseReadStream(0)
+                device.signalCloseReadStream(1)
             }
+
+            //            onVolumeOn: {
+            //                device.signalOpenReadStream(1)
+            //            }
+
+            //            onVolumeOff: {
+            //                device.signalCloseReadStream(1)
+            //            }
         }
     }
 
-    Connections {
-        target: device
-        function onSignalDataPkgComplete(channel) {
-            if (channel === 0)
-            {
-                camRect.reloadImage()
-                console.log("onSignalDataPkgComplete")
-            }
-        }
-    }
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
     }
@@ -75,15 +71,5 @@ Page {
         anchors.fill: parent
         visible: !device.state
     }
-
-    //    Timer {
-    //        id: t1
-    //        interval: 500;
-    //        running: true;
-    //        repeat: true
-    //        onTriggered: {
-    //            img.reloadImage()
-    //        }
-    //    }
 }
 
