@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QIcon>
 
 #include "client.h"
 #include "producer.h"
@@ -11,6 +12,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("VMS");
     app.setApplicationName("IOTV_Client");
     app.setApplicationVersion("0.13");
+    app.setWindowIcon(QIcon(":/img/logo.png"));
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");

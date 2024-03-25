@@ -8,7 +8,8 @@ SUBDIRS += \
     src/IOTV_server
 
 DISTFILES += \
-    IOTV_Client.supp
+    IOTV_Client.supp \
+    readme.md
 
 message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
