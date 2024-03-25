@@ -51,10 +51,10 @@ public:
     explicit Raw(DATA_TYPE type, const QByteArray &data);
     explicit Raw(DATA_TYPE type, const QString &data);
 
-    //! Массив данных полностью состоит их нулей
+    // Массив данных полностью состоит из нулей
     bool isZeroOnly() const;
 
-    //! Длина данных соответствует типу. String и Raw всегда истинны, None всегда ложь
+    // Длина данных соответствует типу. String и Raw всегда истинны, None всегда ложь
     bool isValid() const;
 
     bool isBool() const;
@@ -75,8 +75,6 @@ public:
     friend Raw operator-(const Raw &lhs, const Raw &rhs);
     friend Raw operator*(const Raw &lhs, const Raw &rhs);
     friend Raw operator/(const Raw &lhs, const Raw &rhs);
-
-//    friend std::ostream &operator<<(std::ostream& os, const Raw &raw);
 
     uint16_t size() const;
 
