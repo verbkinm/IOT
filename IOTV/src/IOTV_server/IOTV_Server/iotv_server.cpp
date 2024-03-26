@@ -251,18 +251,6 @@ void IOTV_Server::startTCPServers()
 void IOTV_Server::startUDPServers()
 {
     startUDP(_udpBroadcast, "255.255.255.255", _broadcasrListenerPort, "broadcast");
-    startUDP(_udpReverseHost, _address, _portUdpHosts, "UDP reverse"
-                                                       "");
-//    if (_udpBroadcast->bind(QHostAddress::AnyIPv4, _broadcasrListenerPort, QAbstractSocket::ReuseAddressHint))
-//    {
-//        QString str = "Start broadcast listener, " + _address + ":" + QString::number(_broadcasrListenerPort);
-//        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
-//    }
-//    else
-//    {
-//        QString str = "Error bind UDP socket";
-//        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
-//    }
 }
 
 void IOTV_Server::clientOnlineFile() const

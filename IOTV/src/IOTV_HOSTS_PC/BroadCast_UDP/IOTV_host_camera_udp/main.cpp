@@ -30,7 +30,6 @@ QUdpSocket *udp_broadcast_send, *udp_socket;
 QHostAddress serverAddr;
 quint16 serverPort;
 
-
 char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
 

@@ -70,7 +70,6 @@ private:
 
     QTcpServer *_tcpClient;
     QTcpServer *_tcpReverseHost; // Hosts TCP_REVERSE conn type
-    QUdpSocket *_udpReverseHost; // Hosts UDP_REVERSE conn type
 
     // широковещательный слушатель!
     QUdpSocket *_udpBroadcast;
