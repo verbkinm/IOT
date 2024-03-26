@@ -9,7 +9,6 @@ const QString hostField::port = "port";
 
 const QString connectionType::TCP = "TCP";
 const QString connectionType::TCP_REVERSE = "TCP_REVERSE";
-const QString connectionType::UDP_REVERSE = "UDP_REVERSE";
 const QString connectionType::FILE = "FILE";
 const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
