@@ -102,6 +102,8 @@ void slotDataRecived()
 
         if (header->type == HEADER_TYPE_REQUEST)
         {
+            timer_broadcast->start();
+
             serverAddr = datagram.senderAddress();
             serverPort = datagram.senderPort();
 

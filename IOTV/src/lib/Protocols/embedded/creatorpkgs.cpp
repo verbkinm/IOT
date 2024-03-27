@@ -70,9 +70,6 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
     uint64_t bodySize;
     memcpy(&bodySize, &data[8], 8); // 8 - размер тела пакета (документация)
 
-    //    if (bodySize > 5000)
-    //        return NULL;
-
     if (size < (HEADER_SIZE + bodySize))
     {
         *expectedDataSize = HEADER_SIZE + bodySize;
@@ -84,12 +81,6 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
 
     uint16_t numberOfFragments;
     memcpy(&numberOfFragments, &data[6], 2);
-
-    //    if (numberOfFragments > 1)
-    //    {
-    //        auto f = fragmentNumber;
-    //        ;
-    //    }
 
     if (fragmentNumber > numberOfFragments)
     {

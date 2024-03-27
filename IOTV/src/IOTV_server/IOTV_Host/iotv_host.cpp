@@ -1,15 +1,15 @@
 #include "iotv_host.h"
 
-IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
+IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
+    _logFile(settingsData.at(hostField::logFile)), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
     shareConstructor();
     makeConnType();
 }
 
-IOTV_Host::IOTV_Host(std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData[hostField::logFile]), _settingsData(settingsData),
+IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
+    _logFile(settingsData.at(hostField::logFile)), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
     shareConstructor();
@@ -42,7 +42,7 @@ void IOTV_Host::shareConstructor()
 
 IOTV_Host::~IOTV_Host()
 {
-    qDebug() << "IOTV_Host destruct";
+//    qDebug() << "IOTV_Host destruct";
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)
@@ -427,4 +427,9 @@ void IOTV_Host::slotConnected()
 
     _streamRead.clear();
     _streamWrite.clear();
+}
+
+void IOTV_Host::slotDisconnected()
+{
+    _conn_type->disconnectFromHost();
 }

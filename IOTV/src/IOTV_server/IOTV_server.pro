@@ -37,6 +37,7 @@ SOURCES += \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
+    IOTV_Server/maker_iotv.cpp \
     \
         connection_type/base_conn_type.cpp \
         connection_type/com_conn_type.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
     IOTV_Client/iotv_client.h \
+    IOTV_Server/maker_iotv.h \
     connection_type/base_conn_type.h \
     connection_type/com_conn_type.h \
     connection_type/file_conn_type.h \

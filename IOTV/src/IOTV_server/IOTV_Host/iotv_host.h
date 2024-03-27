@@ -17,8 +17,8 @@ class IOTV_Host : public Base_Host
 {
     Q_OBJECT
 public:
-    IOTV_Host(std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
-    IOTV_Host(std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent = nullptr);
+    IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
+    IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent = nullptr);
     ~IOTV_Host();
 
     QString getName() const override;
@@ -71,6 +71,9 @@ private:
     std::map<uint8_t, std::set<QObject *>> _streamRead, _streamWrite;
 
     QByteArray _buff;
+
+public slots:
+    void slotDisconnected();
 
 private slots:
     void slotDataResived(QByteArray data);

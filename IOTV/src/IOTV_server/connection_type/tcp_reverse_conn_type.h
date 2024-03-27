@@ -8,6 +8,7 @@ class TCP_REVERSE_conn_type : public Base_conn_type
     Q_OBJECT
 public:
     TCP_REVERSE_conn_type(const QString& name, QTcpSocket *socket, QObject *parent);
+    ~TCP_REVERSE_conn_type();
 
 public:
     virtual qint64 write(const QByteArray &data, qint64 size) override;
@@ -19,5 +20,11 @@ protected:
 
 private:
     QTcpSocket *_tcpSocket;
+
+private slots:
+    void slotSocketDisconnected();
+
+    void slotSocketStateChanged(QAbstractSocket::SocketState socketState);
+    void slotError(QAbstractSocket::SocketError error);
 };
 

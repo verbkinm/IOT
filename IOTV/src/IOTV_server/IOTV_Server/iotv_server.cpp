@@ -2,6 +2,7 @@
 
 #include "event_action_parser.h"
 #include "connection_type/tcp_conn_type.h"
+#include "maker_iotv.h"
 
 #include <QNetworkDatagram>
 
@@ -85,72 +86,27 @@ void IOTV_Server::readServerSettings()
     _settingsServer.endGroup();
 }
 
-IOTV_Host *IOTV_Server::createHost(std::unordered_map<QString, QString> &setting, QTcpSocket *reverse_socket)
-{
-    auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&](const auto &pair){
-        return pair.first->settingsData().at(hostField::name) == setting[hostField::name];
-    });
-
-    if (it != _iot_hosts.end())
-    {
-        Log::write(QString(Q_FUNC_INFO) + ", Error: Double host name in config file - " + setting[hostField::name],
-                   Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG_FILENAME);
-    }
-
-    QThread *th = new QThread(this);
-    IOTV_Host *host = nullptr;
-
-    if (setting[hostField::connection_type] == connectionType::TCP_REVERSE)
-        host = new IOTV_Host(setting, reverse_socket, th);
-    else
-        host = new IOTV_Host(setting, th);
-
-    th->start();
-    _iot_hosts[host] = th;
-
-    if (!th->isRunning())
-    {
-        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Host in new thread",
-                   Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::DEFAULT_LOG_FILENAME);
-    }
-
-    return host;
-}
-
 void IOTV_Server::readHostSetting()
 {
     for (const auto &group : _settingsHosts.childGroups())
     {
-        // Лимит количества хостов
-        if (_iot_hosts.size() == _maxHostCount)
-        {
-            Log::write(QString(Q_FUNC_INFO) +
-                           ", Error: Hosts limit = " + QString::number(_maxHostCount),
-                       Log::Write_Flag::FILE_STDERR,
-                       ServerLog::DEFAULT_LOG_FILENAME);
-            break;
-        }
-
         _settingsHosts.beginGroup(group);
         std::unordered_map<QString, QString> setting;
 
-        setting[hostField::name] = group.toLatin1();
-        setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
+        setting[hostField::name] = group;
         setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, connectionType::TCP).toString();
         setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
         setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, setting[hostField::name] + ".log").toString();
 
-        if (ipConnectionType(setting[hostField::connection_type]))
+        if (Base_conn_type::isIpConnectionType(setting[hostField::connection_type]))
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
 
         //!!!
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        createHost(setting, nullptr);
+        Maker_iotv::host(_iot_hosts, _maxHostCount, setting, nullptr, this);
 
         _settingsHosts.endGroup();
     }
@@ -250,7 +206,7 @@ void IOTV_Server::startTCPServers()
 
 void IOTV_Server::startUDPServers()
 {
-    startUDP(_udpBroadcast, "255.255.255.255", _broadcasrListenerPort, "broadcast");
+    startUDP(_udpBroadcast, "255.255.255.255", _broadcasrListenerPort, "broadcast ");
 }
 
 void IOTV_Server::clientOnlineFile() const
@@ -279,6 +235,7 @@ void IOTV_Server::clientOnlineFile() const
     file.close();
 }
 
+//!!! не используется
 Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
 {
     auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&name](const auto &pair){
@@ -296,14 +253,6 @@ void IOTV_Server::clientHostsUpdate() const
     // Оповестить клиентов об обновлении устройств
     for (const auto &client : _iot_clients)
         emit client.first->signalUpdateHosts();
-}
-
-bool IOTV_Server::ipConnectionType(const QString &str) const
-{
-    if (str == connectionType::TCP || str == connectionType::UDP || str == connectionType::TCP_REVERSE)
-        return true;
-
-    return false;
 }
 
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
@@ -350,44 +299,10 @@ void IOTV_Server::slotNewClientConnection()
 {
     QTcpSocket* socket = _tcpClient->nextPendingConnection();
 
-    if (!socket)
-    {
-        Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ",
-                   Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG_FILENAME);
+    auto client = Maker_iotv::client(_iot_clients, _maxClientCount, _iot_hosts, socket, this);
+
+    if (client == nullptr)
         return;
-    }
-
-    Log::write("Client new connection: "
-                   + socket->peerAddress().toString()
-                   + ":"
-                   + QString::number(socket->peerPort()),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::TCP_LOG_FILENAME);
-
-    if (_iot_clients.size() >= _maxClientCount)
-    {
-        Log::write("Warnning: exceeded the maximum client limit. Client disconnected.",
-                   Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::TCP_LOG_FILENAME);
-        socket->disconnectFromHost();
-        socket->deleteLater();
-        return;
-    }
-
-    QThread *th = new QThread(this);
-    IOTV_Client *client = new IOTV_Client(socket, _iot_hosts, th);
-    th->start();
-
-    _iot_clients[client] = th;
-
-    if (!th->isRunning())
-    {
-        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
-                   Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG_FILENAME);
-        return;
-    }
 
     connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotClientDisconnected, Qt::QueuedConnection);
     connect(client, &IOTV_Client::signalFetchEventActionData, this, &IOTV_Server::slotFetchEventActionData, Qt::QueuedConnection);
@@ -415,47 +330,13 @@ void IOTV_Server::slotClientDisconnected()
 
 void IOTV_Server::slotNewHostConnection()
 {
-    QTcpSocket* socket = _tcpReverseHost->nextPendingConnection();
+    auto host = Maker_iotv::host_tcp_in(_iot_hosts, _maxHostCount, _tcpReverseHost->nextPendingConnection(), this);
 
-    if (!socket)
-    {
-        Log::write(QString(Q_FUNC_INFO) + " nextPendingConnection: ",
-                   Log::Write_Flag::FILE_STDERR,
-                   ServerLog::DEFAULT_LOG_FILENAME);
+    if (host == nullptr)
         return;
-    }
-
-    Log::write("Host new connection: "
-                   + socket->peerAddress().toString()
-                   + ":"
-                   + QString::number(socket->peerPort()),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::TCP_LOG_FILENAME);
-
-    if (_iot_hosts.size() >= _maxHostCount)
-    {
-        Log::write("Warnning: exceeded the maximum host limit. Host disconnected.",
-                   Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::TCP_LOG_FILENAME);
-        socket->disconnectFromHost();
-        socket->deleteLater();
-        return;
-    }
-
-    std::unordered_map<QString, QString> setting;
-    setting[hostField::connection_type] = connectionType::TCP_REVERSE;
-    setting[hostField::address] = socket->peerAddress().toString();
-    setting[hostField::port] = QString::number(socket->peerPort());
-    setting[hostField::interval] = "1000";
-    setting[hostField::logFile] = setting[hostField::address] + ":" + setting[hostField::port] + ".log";
-    setting[hostField::name] = socket->peerName() + ":" + setting[hostField::address] + ":" + setting[hostField::port];
-
-    auto host = createHost(setting, socket);
 
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
-
-    // Оповестить клиентов об обновлении устройств
     clientHostsUpdate();
 }
 
@@ -553,115 +434,13 @@ void IOTV_Server::slotQueryEventActionData()
 
 void IOTV_Server::slotPendingDatagrams()
 {
-    QByteArray data;
-    QNetworkDatagram dataGram;
+    auto host = Maker_iotv::host_broadcast(_udpBroadcast, _iot_hosts, _maxHostCount, this);
 
-    if (_udpBroadcast->hasPendingDatagrams())
-    {
-        dataGram = _udpBroadcast->receiveDatagram();
-        data = dataGram.data();
-    }
-
-    bool error;
-    uint64_t cutDataSize, expectedDataSize;
-
-    struct Header *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
-
-    if (error == true)
-    {
-        clearHeader(header);
-        qDebug() << "datagram error = ";
+    if (host == nullptr)
         return;
-    }
 
-    // Пакет не ещё полный
-    if (expectedDataSize > 0)
-    {
-        clearHeader(header);
-        qDebug() << "datagram expectedDataSize = " << expectedDataSize;
-        return;
-    }
-
-    if (header->assignment == HEADER_ASSIGNMENT_HOST_BROADCAST)
-    {
-        const struct Host_Broadcast *hb = static_cast<const struct Host_Broadcast *>(header->pkg);
-
-        // Лимит количества хостов
-        if (_iot_hosts.size() == _maxHostCount)
-        {
-            Log::write(QString(Q_FUNC_INFO) +
-                           ", Error: Hosts limit = " + QString::number(_maxHostCount),
-                       Log::Write_Flag::FILE_STDERR,
-                       ServerLog::DEFAULT_LOG_FILENAME);
-            return;
-        }
-
-        std::unordered_map<QString, QString> setting;
-
-        setting[hostField::name] = QString(QByteArray(hb->name, hb->nameSize)).toLatin1();
-        setting[hostField::name] = strlen(setting[hostField::name].toStdString().c_str()) > 30 ? QByteArray(setting[hostField::name].toStdString().c_str()).mid(0, 30) : setting[hostField::name];
-        setting[hostField::name] += " " + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss");
-
-        switch(hb->flags)
-        {
-        case Host_Broadcast_FLAGS_UDP_CONN:
-            setting[hostField::connection_type] = connectionType::UDP;
-            break;
-        case Host_Broadcast_FLAGS_TCP_CONN:
-        default:
-            setting[hostField::connection_type] = connectionType::TCP;
-        }
-
-        setting[hostField::address] = QHostAddress(hb->address).toString();
-        setting[hostField::interval] = "1000";
-        setting[hostField::logFile] = hostField::logFile + setting[hostField::name] + ".log";
-
-        if (ipConnectionType(setting[hostField::connection_type]))
-            setting[hostField::port] = QString::number(hb->port);
-
-        clearHeader(header);
-
-        auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&setting](const auto &pair){
-            return (pair.first->settingsData().at(hostField::address) == setting[hostField::address] &&
-                    pair.first->settingsData().at(hostField::port) == setting[hostField::port]);
-        });
-
-        if (it != _iot_hosts.end())
-        {
-            Log::write(QString(Q_FUNC_INFO) +
-                           ", Error: Double address and port from broadcast - " + setting[hostField::name],
-                       Log::Write_Flag::FILE_STDERR,
-                       ServerLog::DEFAULT_LOG_FILENAME);
-            return;
-        }
-
-        QThread *th = new QThread(this);
-        IOTV_Host *host = new IOTV_Host(setting, th);
-
-        th->start();
-        _iot_hosts[host] = th;
-
-        if (!th->isRunning())
-        {
-            Log::write(QString(Q_FUNC_INFO) +
-                           " Error: Can't run IOT_Host in new thread",
-                       Log::Write_Flag::FILE_STDOUT,
-                       ServerLog::DEFAULT_LOG_FILENAME);
-            //            exit(1);
-            return;
-        }
-
-        connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
-
-        // Оповестить клиентов об обновлении устройств
-        clientHostsUpdate();
-    }
-    else
-    {
-        Log::write("datagram назначение пакета не определено!",
-                   Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::DEFAULT_LOG_FILENAME);
-    }
+    connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
+    clientHostsUpdate();
 }
 
 void IOTV_Server::slotDevicePingTimeout()

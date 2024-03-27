@@ -14,6 +14,7 @@ class Udp_conn_type : public Base_conn_type
     Q_OBJECT
 public:
     Udp_conn_type(const QString& name, const QString& address, quint16 port, QObject *parent);
+    ~Udp_conn_type();
 
     virtual qint64 write(const QByteArray &data, qint64 size = -1) override;
     virtual void connectToHost() override;
@@ -23,7 +24,7 @@ protected:
     virtual QByteArray readAll() override;
 
 private:
-    QUdpSocket _udpSocket;
+    QUdpSocket *_udpSocket;
     quint16 _udpPort;
 
 private slots:

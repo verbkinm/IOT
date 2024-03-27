@@ -60,6 +60,14 @@ QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
     //    return "UNKNOW";
 }
 
+bool Base_conn_type::isIpConnectionType(const QString &conn_type)
+{
+    if (conn_type == connectionType::TCP || conn_type == connectionType::UDP || conn_type == connectionType::TCP_REVERSE)
+        return true;
+
+    return false;
+}
+
 QByteArray Base_conn_type::readAll()
 {
     return {0};
@@ -71,9 +79,9 @@ void Base_conn_type::slotReadData()
 
     QByteArray inData = readAll();
 
-    Log::write(_name + ": data response <- " + inData. toHex(':'),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write(_name + ": data response <- " + inData. toHex(':'),
+//               Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
 
     emit signalDataRiceved(inData);
 }

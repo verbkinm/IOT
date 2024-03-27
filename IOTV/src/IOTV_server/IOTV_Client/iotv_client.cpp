@@ -23,7 +23,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 
 IOTV_Client::~IOTV_Client()
 {
-    qDebug() << "client destruct";
+//    qDebug() << "client destruct";
     ///!!! закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {
@@ -225,10 +225,10 @@ void IOTV_Client::processQueryTech(const Header *header)
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const
 {
-    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
-                   + QString::number(_socket->peerPort())
-                   + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
+//                   + QString::number(_socket->peerPort())
+//                   + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
     _socket->write(data.data(), size);
 }
 
@@ -250,7 +250,6 @@ void IOTV_Client::slotDisconnected()
 
 void IOTV_Client::slotReadData()
 {
-    _silenceTimer.start();
     _recivedBuff += _socket->readAll();
 
     //!!! Определится с максимальным размером буфера
@@ -264,10 +263,10 @@ void IOTV_Client::slotReadData()
         return;
     }
 
-    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
-                   + QString::number(socket()->peerPort())
-                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
+//                   + QString::number(socket()->peerPort())
+//                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
     uint64_t cutDataSize = 0;
@@ -301,6 +300,8 @@ void IOTV_Client::slotReadData()
         }
         else if (header->type == HEADER_TYPE_REQUEST)
         {
+            _silenceTimer.start();
+
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
                 processQueryIdentification();
             else if (header->assignment == HEADER_ASSIGNMENT_READ)

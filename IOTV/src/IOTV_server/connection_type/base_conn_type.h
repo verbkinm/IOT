@@ -34,6 +34,7 @@ public:
     virtual void disconnectFromHost() = 0;
 
     static QString ConnTypeToString(Conn_type conn_type);
+    static bool isIpConnectionType(const QString &conn_type);
 
     uint64_t expectedDataSize;
 

@@ -32,7 +32,7 @@ private:
     void checkSettingsFileExist();
     void readServerSettings();
     void readHostSetting();
-    IOTV_Host *createHost(std::unordered_map<QString, QString> &setting, QTcpSocket *reverse_socket);
+
     void readEventActionJson();
     void writeEventActionJson(const QByteArray &data);
 
@@ -46,8 +46,6 @@ private:
     Base_Host *baseHostFromName(const QString &name) const;
 
     void clientHostsUpdate() const;
-
-    bool ipConnectionType(const QString &str) const;
 
     // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;

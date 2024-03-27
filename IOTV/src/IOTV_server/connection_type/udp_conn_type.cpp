@@ -1,47 +1,55 @@
 #include "udp_conn_type.h"
 
 Udp_conn_type::Udp_conn_type(const QString &name, const QString &address, quint16 port, QObject *parent)
-    : Base_conn_type(name, parent)
+    : Base_conn_type(name, parent),
+    _udpSocket(new QUdpSocket(this))
 {
     _address = address;
     _udpPort = port;
     _type = Conn_type::UDP;
 
 
-    connect(&_udpSocket, &QAbstractSocket::stateChanged, this, &Udp_conn_type::slotSocketStateChange, Qt::DirectConnection);
-    connect(&_udpSocket, &QAbstractSocket::errorOccurred, this, &Udp_conn_type::slotError);
-    connect(&_udpSocket, &QAbstractSocket::readyRead, this, &Udp_conn_type::slotReadData, Qt::DirectConnection);
+    connect(_udpSocket, &QAbstractSocket::stateChanged, this, &Udp_conn_type::slotSocketStateChange, Qt::DirectConnection);
+    connect(_udpSocket, &QAbstractSocket::errorOccurred, this, &Udp_conn_type::slotError);
+    connect(_udpSocket, &QAbstractSocket::readyRead, this, &Udp_conn_type::slotReadData, Qt::DirectConnection);
 
-    if (!_udpSocket.bind(QHostAddress::AnyIPv4))
+    if (!_udpSocket->bind(QHostAddress::AnyIPv4))
     {
         Log::write(_name + ": Error bind address",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
+        qDebug() << this;
     }
     else
     {
-        Log::write(_name + ": Bind address " + _udpSocket.localAddress().toString() + ":" + QString::number(_udpSocket.localPort()),
+        Log::write(_name + ": Bind address " + _udpSocket->localAddress().toString() + ":" + QString::number(_udpSocket->localPort()),
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
 
+Udp_conn_type::~Udp_conn_type()
+{
+    _udpSocket->abort();
+//    qDebug() << "udp conn type destruct";
+}
+
 qint64 Udp_conn_type::write(const QByteArray &data, qint64 size)
 {
-    Log::write(_name +
-               ": data transmit to " +
-               _address +
-               ":" +
-               QString::number(_udpPort) +
-               " -> " +
-               data.toHex(':'),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+    //    Log::write(_name +
+    //               ": data transmit to " +
+    //               _address +
+    //               ":" +
+    //               QString::number(_udpPort) +
+    //               " -> " +
+    //               data.toHex(':'),
+    //               Log::Write_Flag::FILE_STDOUT,
+    //               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (size == -1)
-        return _udpSocket.writeDatagram(data, QHostAddress(_address), _udpPort);
+        return _udpSocket->writeDatagram(data, QHostAddress(_address), _udpPort);
 
-    return _udpSocket.writeDatagram(data.data(), size, QHostAddress(_address), _udpPort);
+    return _udpSocket->writeDatagram(data.data(), size, QHostAddress(_address), _udpPort);
 }
 
 void Udp_conn_type::connectToHost()
@@ -58,7 +66,7 @@ QByteArray Udp_conn_type::readAll()
 {
     QByteArray data;
 
-    QNetworkDatagram datagram = _udpSocket.receiveDatagram();
+    QNetworkDatagram datagram = _udpSocket->receiveDatagram();
     data.append(datagram.data());
 
     if (datagram.isValid())
