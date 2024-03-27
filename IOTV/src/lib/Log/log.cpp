@@ -30,7 +30,7 @@ void Log::writeToFile(const QString &fileName, const QString &data)
     out << QDateTime::currentDateTime().toString(_FORMAT)
         << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE) : data)
         << '\n';
-    out.flush();
+//    out.flush();
 
     file.close();
 }

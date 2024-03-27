@@ -79,7 +79,7 @@ signals:
     // получение сырых данных для формирования пакетов
     void signalDataRiceved(QByteArray);
 
-    // сформированные данные
+    // сформированные данные для событий/действий
     void signalDataRX(uint8_t channleNumber, QByteArray data);
     void signalDataTX(uint8_t channleNumber, QByteArray data);
     void signalDataChanged(uint8_t channleNumber, QByteArray data);

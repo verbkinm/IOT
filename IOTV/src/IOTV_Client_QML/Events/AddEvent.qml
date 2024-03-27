@@ -27,28 +27,13 @@ Page {
             id: column
             width: parent.width
             anchors.top: parent.top
+            anchors.topMargin: 15
             spacing: 15
-
-            Item {
-                height: 50
-                width: parent.width
-
-                Text {
-                    id: eventTitle
-                    text: "Событие:"
-                    font.pixelSize: 14
-
-                    anchors {
-                        centerIn: parent
-                        top: parent.top
-                    }
-                }
-            }
 
             BaseItem.DataString {
                 id: name
                 width: parent.width
-                label: "Название: "
+                label: "Имя событие: "
                 text: title
             }
 
@@ -98,22 +83,6 @@ Page {
             }
 
             // Действие
-
-            Item {
-                height: 50
-                width: parent.width
-
-                Text {
-                    id: actionTitle
-                    text: "Действие:"
-                    font.pixelSize: 14
-
-                    anchors {
-                        centerIn: parent
-                        top: parent.top
-                    }
-                }
-            }
 
             BaseItem.ActionType {
                 id: actionTypeItem

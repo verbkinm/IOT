@@ -20,7 +20,6 @@ const QString serverField::broadCastListenerPort = "broadcastListener";
 const QString serverField::maxClient = "max_client";
 const QString serverField::maxHost = "max_host";
 
-QString ServerLog::TCP_LOG_FILENAME = "tcp_server.log";
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
 QString ServerLog::DEFAULT_LOG_FILENAME = "default.log";
 

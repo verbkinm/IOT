@@ -33,7 +33,6 @@ struct serverField
 
 struct ServerLog
 {
-    static QString TCP_LOG_FILENAME;
     static QString CLIENT_ONLINE_LOG_FILENAME;
     static QString DEFAULT_LOG_FILENAME;
 

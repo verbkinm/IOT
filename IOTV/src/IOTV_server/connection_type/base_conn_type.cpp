@@ -36,6 +36,9 @@ QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
     case Conn_type::TCP:
         return "TCP";
         break;
+    case Conn_type::TCP_REVERSE:
+        return "TCP_REVERSE";
+        break;
     case Conn_type::UDP:
         return "UDP";
         break;
@@ -46,18 +49,6 @@ QString Base_conn_type::ConnTypeToString(Base_conn_type::Conn_type conn_type)
         return "UNKNOW";
         break;
     }
-    //    if (conn_type == Conn_type::NONE)
-    //        return "NONE";
-    //    else if (conn_type == Conn_type::COM)
-    //        return "COM";
-    //    else if (conn_type == Conn_type::TCP)
-    //        return "TCP";
-    //    else if (conn_type == Conn_type::UDP)
-    //        return "UDP";
-    //    else if (conn_type == Conn_type::FILE)
-    //        return "FILE";
-
-    //    return "UNKNOW";
 }
 
 bool Base_conn_type::isIpConnectionType(const QString &conn_type)

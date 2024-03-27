@@ -26,13 +26,13 @@ IOTV_Host *Maker_iotv::host_tcp_in(std::unordered_map<IOTV_Host *, QThread *> &a
                    + ":"
                    + QString::number(reverse_socket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::TCP_LOG_FILENAME);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (add_to_iot_hosts.size() >= maxHostCount)
     {
         Log::write("Warnning: exceeded the maximum host limit. Host disconnected.",
                    Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::TCP_LOG_FILENAME);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         reverse_socket->disconnectFromHost();
         reverse_socket->deleteLater();
         return nullptr;
@@ -136,13 +136,13 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
                    + socket->peerAddress().toString()
                    + ":" + QString::number(socket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
-               ServerLog::TCP_LOG_FILENAME);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (add_to_iot_client.size() >= maxClientCount)
     {
         Log::write("Внимание: превышет лимит клиентов. Новый клиент отключен.",
                    Log::Write_Flag::FILE_STDOUT,
-                   ServerLog::TCP_LOG_FILENAME);
+                   ServerLog::DEFAULT_LOG_FILENAME);
         socket->disconnectFromHost();
         socket->deleteLater();
         return nullptr;

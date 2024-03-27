@@ -43,8 +43,6 @@ private:
     QTcpSocket _socket;
     QByteArray _recivedBuff;
 
-    uint64_t _expectedDataSize;
-
     QTimer _timerPing;
     // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается
     static constexpr int COUNTER_PING_COUNT = 5;

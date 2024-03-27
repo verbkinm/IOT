@@ -63,7 +63,7 @@ IOTV_Server::~IOTV_Server()
 
         QThread::usleep(10);
     }
-    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+    Log::write("Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 }
 
 QStringList IOTV_Server::getFileSettingNames() const
@@ -80,7 +80,6 @@ void IOTV_Server::readServerSettings()
     _broadcasrListenerPort = _settingsServer.value(serverField::broadCastListenerPort, 2022).toUInt();
     _maxClientCount = _settingsServer.value(serverField::maxClient, 5).toUInt();
     _maxHostCount = _settingsServer.value(serverField::maxHost, 10).toUInt();
-    ServerLog::TCP_LOG_FILENAME = _settingsServer.value(ServerLog::TCP_LOG, ServerLog::TCP_LOG_FILENAME).toString();
     ServerLog::CLIENT_ONLINE_LOG_FILENAME = _settingsServer.value(ServerLog::CLIENT_ONLINE_LOG, ServerLog::CLIENT_ONLINE_LOG_FILENAME).toString();
     ServerLog::DEFAULT_LOG_FILENAME = _settingsServer.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
     _settingsServer.endGroup();
@@ -170,12 +169,12 @@ void IOTV_Server::startTCP(QTcpServer *socket, quint16 port, const QString &lbl)
     if (socket->listen(QHostAddress(_address), port))
     {
         QString str = "Start TCP server for " + lbl + " " + _address + ":" + QString::number(port);
-        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     }
     else
     {
         QString str = "Error start TCP server for " + lbl + " " + _address + ":" + QString::number(port);
-        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
+        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
 
@@ -184,12 +183,12 @@ void IOTV_Server::startUDP(QUdpSocket *socket, const QString &addr, quint16 port
     if (socket->bind(QHostAddress(addr), port, QAbstractSocket::ReuseAddressHint))
     {
         QString str = "Start UDP server for " + lbl + addr + ":" + QString::number(port);
-        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+        Log::write(str, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     }
     else
     {
         QString str = "Error start UDP server for " + lbl + " " + addr + ":" + QString::number(port);;
-        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::TCP_LOG_FILENAME);
+        Log::write(str, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
 
@@ -276,7 +275,6 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsServer.setValue(serverField::broadCastListenerPort, 2022);
         _settingsServer.setValue(serverField::maxClient, _maxClientCount);
         _settingsServer.setValue(serverField::maxHost, _maxHostCount);
-        _settingsServer.setValue(ServerLog::TCP_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::TCP_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
         _settingsServer.endGroup();
@@ -318,7 +316,7 @@ void IOTV_Server::slotClientDisconnected()
         return;
 
     QString strOut = "Client disconnected";
-    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::TCP_LOG_FILENAME);
+    Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 
     _iot_clients[client]->exit();
     _iot_clients[client]->wait();
@@ -401,7 +399,7 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 
     Log::write(this->objectName() + ": " + strErr,
                Log::Write_Flag::FILE_STDERR,
-               ServerLog::TCP_LOG_FILENAME);
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();

@@ -60,21 +60,6 @@ Item {
             wrapMode: Text.Wrap
             elide: Text.ElideRight
         }
-
-        //        MouseArea {
-        //            anchors.fill: parent
-
-        //            onClicked: {
-        //                var component = Qt.createComponent("qrc:/Events/AddEvent.qml");
-        //                if (component.status === Component.Ready)
-        //                {
-        //                    var object = component.createObject(null, {_event: model.event, _action: model.action, title: model.name})
-        //                    //                for(var el in model.action)
-        //                    //                    console.log(el, " = ", model.action[el])
-        //                    glob_eventStackView.push(object)
-        //                }
-        //            }
-        //        }
     }
 
     MultiEffect {

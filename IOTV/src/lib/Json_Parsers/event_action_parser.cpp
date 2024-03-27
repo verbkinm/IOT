@@ -19,7 +19,8 @@ std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> Ev
     if (err.error != QJsonParseError::NoError)
     {
         qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
-        exit(-1);
+//        exit(-1);
+        return {};
     }
 
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> result;

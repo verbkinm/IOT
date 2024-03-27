@@ -15,7 +15,7 @@
 #include <QTemporaryFile>
 
 Client::Client(QObject *parent): QObject{parent},
-    _expectedDataSize(0), _counterPing(0)
+    _counterPing(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -216,7 +216,6 @@ void Client::slotConnected()
 void Client::slotDisconnected()
 {
     _devices.clear();
-    _expectedDataSize = 0;
     _recivedBuff.clear();
 
     emit countDeviceChanged();
@@ -545,30 +544,28 @@ void Client::responceTech(const Header *header)
 
 void Client::slotReciveData()
 {
-    while (_socket.bytesAvailable())
-        _recivedBuff += _socket.readAll();
+//    while (_socket.bytesAvailable())
+//        _recivedBuff += _socket.readAll();
 
-//    _recivedBuff = _socket.readAll();
+    _recivedBuff = _socket.readAll();
 
-    bool error = false;
-    uint64_t cutDataSize = 0;
+    bool error;
+    uint64_t cutDataSize, expectedDataSize;
 
     while (_recivedBuff.size() > 0)
     {
         struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(),
-                                           &error, &_expectedDataSize, &cutDataSize);
+                                           &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
             _recivedBuff.clear();
-            _expectedDataSize = 0;
-            cutDataSize = 0;
             clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
-        if (_expectedDataSize > 0)
+        if (expectedDataSize > 0)
         {
             clearHeader(header);
             break;
