@@ -1,6 +1,8 @@
 #include "maker_iotv.h"
 
 #include <QThread>
+#include <QFileInfo>
+#include <QDir>
 
 void Maker_iotv::deleteReverseSocket(QAbstractSocket *reverse_socket)
 {
@@ -43,8 +45,8 @@ IOTV_Host *Maker_iotv::host_tcp_in(std::unordered_map<IOTV_Host *, QThread *> &a
     setting[hostField::address] = reverse_socket->peerAddress().toString();
     setting[hostField::port] = QString::number(reverse_socket->peerPort());
     setting[hostField::interval] = "1000";
-    setting[hostField::logFile] = setting[hostField::address] + ":" + setting[hostField::port] + ".log";
     setting[hostField::name] = reverse_socket->peerName() + ":" + setting[hostField::address] + ":" + setting[hostField::port];
+    setting[hostField::logDir] = setting[hostField::address] + ":" + setting[hostField::port];
 
     return Maker_iotv::host(add_to_iot_hosts, maxHostCount, setting, reverse_socket, parent);
 }
@@ -239,7 +241,7 @@ IOTV_Host *Maker_iotv::host_broadcast(QUdpSocket *socket,
             setting[hostField::name] += ":" + setting[hostField::port];
         }
 
-        setting[hostField::logFile] = hostField::logFile + setting[hostField::name] + ".log";
+        setting[hostField::logDir] = setting[hostField::name];
 
         clearHeader(header);
 

@@ -96,7 +96,7 @@ void IOTV_Server::readHostSetting()
         setting[hostField::connection_type] = _settingsHosts.value(hostField::connection_type, connectionType::TCP).toString();
         setting[hostField::address] = _settingsHosts.value(hostField::address, "127.0.0.1").toString();
         setting[hostField::interval] = _settingsHosts.value(hostField::interval, "1000").toString();
-        setting[hostField::logFile] = _settingsHosts.value(hostField::logFile, setting[hostField::name] + ".log").toString();
+        setting[hostField::logDir] = _settingsHosts.value(hostField::logDir, setting[hostField::name]).toString();
 
         if (Base_conn_type::isIpConnectionType(setting[hostField::connection_type]))
             setting[hostField::port] = _settingsHosts.value(hostField::port, "0").toString();
@@ -278,16 +278,16 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
         _settingsServer.endGroup();
-        _settingsServer.sync();
+
     }
     if (!QFileInfo::exists(_settingsHosts.fileName()))
     {
-        _settingsHosts.beginGroup("Default");
+        _settingsHosts.beginGroup("Host");
         _settingsHosts.setValue(hostField::connection_type, connectionType::TCP);
         _settingsHosts.setValue(hostField::address, "127.0.0.1");
         _settingsHosts.setValue(hostField::port, 2021);
         _settingsHosts.setValue(hostField::interval, 0);
-        _settingsHosts.setValue(hostField::logFile, QFileInfo({QCoreApplication::applicationDirPath()}, "default.log").absoluteFilePath());
+        _settingsHosts.setValue(hostField::logDir,  QFileInfo({QCoreApplication::applicationDirPath()}, _settingsHosts.group()).absoluteFilePath());
         _settingsHosts.endGroup();
         _settingsHosts.sync();
     }

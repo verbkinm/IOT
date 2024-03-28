@@ -36,6 +36,8 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
             header->pkg = createTech(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
         else if (header->assignment == HEADER_ASSIGNMENT_HOST_BROADCAST)
             header->pkg = createHostBroadCast(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
+        else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+            header->pkg = createLogData(&data[HEADER_SIZE], size - *cutDataSize, error, expectedDataSize, cutDataSize);
 
         // Если cutDataSize > 0, то пакет body сформирован
         // Но если он НЕ равен тому, что ожидает header->dataSize, то это ошибка
@@ -443,6 +445,7 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
         case HEADER_ASSIGNMENT_WRITE :
         case HEADER_ASSIGNMENT_TECH :
         case HEADER_ASSIGNMENT_HOST_BROADCAST :
+        case HEADER_ASSIGNMENT_LOG_DATA :
             return true;
         }
     }
@@ -454,6 +457,7 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment)
         case HEADER_ASSIGNMENT_READ :
         case HEADER_ASSIGNMENT_WRITE :
         case HEADER_ASSIGNMENT_TECH :
+        case HEADER_ASSIGNMENT_LOG_DATA :
             return true;
         }
     }
@@ -528,4 +532,91 @@ Host_Broadcast *createHostBroadCast(uint8_t * const data, uint64_t size, bool *e
     *cutDataSize = hostBroadCastSize(hostBroadcastResult);
 
     return hostBroadcastResult;
+}
+
+Log_Data *createLogData(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+{
+    if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
+        return NULL;
+
+    *error = false;
+    *expectedDataSize = 0;
+    *cutDataSize = 0;
+
+    if (size < LOG_DATA_SIZE)
+    {
+        *expectedDataSize = LOG_DATA_SIZE;
+        return NULL;
+    }
+
+    uint8_t nameSize = data[0];
+
+    uint64_t startInterval =  0;
+    memcpy((void *)&startInterval, &data[1], 8); // 8 - документация
+
+    uint64_t endInterval =  0;
+    memcpy((void *)&endInterval, &data[9], 8); // 8 - документация
+
+    uint32_t interval =  0;
+    memcpy((void *)&interval, &data[17], 4); // 4 - документация
+
+    uint8_t flags = data[21];
+    uint8_t channelNumber = data[22];
+
+    uint32_t dataSize = 0;
+    memcpy(&dataSize, &data[23], 4); // 4 - размер данных пакета (документация)
+
+    if (size < (LOG_DATA_SIZE + nameSize + dataSize))
+    {
+        *expectedDataSize = LOG_DATA_SIZE + nameSize + dataSize;
+        return NULL;
+    }
+
+    uint64_t sum = nameSize + startInterval + endInterval + interval + flags + channelNumber + dataSize;
+    uint64_t chSum = 0;
+    memcpy(&chSum, &data[27], 8); // 8 - размер контрольной суммы пакета (документация)
+
+    if (sum != chSum)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    struct Log_Data *logDataReslut = (struct Log_Data *)malloc(sizeof(struct Log_Data));
+
+    if (logDataReslut == NULL)
+    {
+        *error = true;
+        return NULL;
+    }
+
+    logDataReslut->nameSize = nameSize;
+    logDataReslut->startInterval = startInterval;
+    logDataReslut->endInterval = endInterval;
+    logDataReslut->interval = interval;
+    logDataReslut->flags = flags;
+    logDataReslut->channelNumber = channelNumber;
+    logDataReslut->dataSize = dataSize;
+    logDataReslut->name = (nameSize > 0) ? (char *)malloc(nameSize) : NULL;
+    logDataReslut->data = NULL;
+
+    if (dataSize > 0 && (dataSize <= (size - LOG_DATA_SIZE + nameSize)))
+        logDataReslut->data = (char *)malloc(dataSize);
+
+    // Память не была выделена
+    if ( ((nameSize > 0) && (logDataReslut->name == NULL)) || ((dataSize > 0) && (logDataReslut->data == NULL)) )
+    {
+        *error = true;
+        clearLogData(logDataReslut);
+        return NULL;
+    }
+
+    if (nameSize > 0)
+        memcpy((void *)logDataReslut->name, &data[LOG_DATA_SIZE], nameSize);
+    if (dataSize > 0)
+        memcpy((void *)logDataReslut->data, &data[LOG_DATA_SIZE + nameSize], dataSize);
+
+    *cutDataSize = logDataSize(logDataReslut);
+
+    return logDataReslut;
 }

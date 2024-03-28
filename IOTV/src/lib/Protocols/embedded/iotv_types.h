@@ -7,6 +7,7 @@
 #define READ_WRITE_SIZE 15
 #define TECH_SIZE 15
 #define HOST_BROADCAST_SIZE 16
+#define LOG_DATA_SIZE 35
 
 typedef enum {
     HEADER_TYPE_NONE = 0,
@@ -23,7 +24,8 @@ typedef enum
     HEADER_ASSIGNMENT_WRITE,
     HEADER_ASSIGNMENT_PING_PONG,
     HEADER_ASSIGNMENT_TECH,
-    HEADER_ASSIGNMENT_HOST_BROADCAST
+    HEADER_ASSIGNMENT_HOST_BROADCAST,
+    HEADER_ASSIGNMENT_LOG_DATA
 } Header_ASSIGNMENT;
 
 typedef enum
@@ -79,5 +81,12 @@ typedef enum
     Host_Broadcast_FLAGS_UDP_CONN = 2,
     Host_Broadcast_FLAGS_ERROR = 0xFF
 } Host_Broadcast_FLAGS;
+
+typedef enum
+{
+    LOG_DATA_R = 0,
+    LOG_DATA_W,
+    LOG_DATA_RW
+} LOG_DATA_FLAGS;
 
 #endif // IOTV_TYPES_H

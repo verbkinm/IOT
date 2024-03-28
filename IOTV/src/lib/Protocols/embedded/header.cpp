@@ -6,6 +6,7 @@
 #include "read_write.h"
 #include "host_broadcast.h"
 #include "state.h"
+#include "log_data.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -96,6 +97,9 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
             break;
         case HEADER_ASSIGNMENT_HOST_BROADCAST:
             result += hostBroadCastToData((const struct Host_Broadcast *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            result += logDataToData((const struct Log_Data *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
             break;
         default:
             break;

@@ -4,7 +4,7 @@ const QString hostField::name = "name";
 const QString hostField::connection_type = "connection_type";
 const QString hostField::address = "address";
 const QString hostField::interval = "interval";
-const QString hostField::logFile = "log_file";
+const QString hostField::logDir = "logDir";
 const QString hostField::port = "port";
 
 const QString connectionType::TCP = "TCP";
@@ -23,10 +23,8 @@ const QString serverField::maxHost = "max_host";
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
 QString ServerLog::DEFAULT_LOG_FILENAME = "default.log";
 
-const QString ServerLog::TCP_LOG = "tcp_log";
 const QString ServerLog::CLIENT_ONLINE_LOG = "client_log";
 const QString ServerLog::DEFAULT_LOG = "default_log";
-
 
 //Json Event and Action
 const QString Json_Event_Action::EVENT_ACTION_FILE_NAME = "IOTV_Event_Action.json";

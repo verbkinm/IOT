@@ -3,6 +3,7 @@
 #include "read_write.h"
 #include "state.h"
 #include "tech.h"
+#include "log_data.h"
 #include "iotv_types.h"
 
 #include <string.h>
@@ -463,4 +464,35 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOT
 
     uint64_t sendDataSize = iot->readChannel[ptrReadWrite->channelNumber].dataSize;
     return pkgCount(sendDataSize, dataOutSize, HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize);
+}
+
+uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags)
+{
+    if (outData == NULL)
+        return 0;
+
+    struct Log_Data logData = {
+        .startInterval = startInterval,
+        .endInterval = endInterval,
+        .interval = interval,
+        .dataSize = 0,
+        .nameSize = (uint8_t)strlen(name),
+        .channelNumber = channelNumber,
+        .flags = flags,
+        .name = (char *)name,
+        .data = NULL
+    };
+
+    struct Header header = {
+        .version = 2,
+        .type = HEADER_TYPE_REQUEST,
+        .assignment = HEADER_ASSIGNMENT_LOG_DATA,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = logDataSize(&logData),
+        .pkg = &logData,
+    };
+
+    return headerToData(&header, outData, outDataSize);
 }

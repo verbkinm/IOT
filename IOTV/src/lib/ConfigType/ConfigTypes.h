@@ -8,7 +8,7 @@ struct hostField
     static const QString connection_type;
     static const QString address;
     static const QString interval;
-    static const QString logFile;
+    static const QString logDir;
     static const QString port;
 };
 
@@ -36,7 +36,6 @@ struct ServerLog
     static QString CLIENT_ONLINE_LOG_FILENAME;
     static QString DEFAULT_LOG_FILENAME;
 
-    static const QString TCP_LOG;
     static const QString CLIENT_ONLINE_LOG;
     static const QString DEFAULT_LOG;
 };

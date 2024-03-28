@@ -1,5 +1,11 @@
 #include "log.h"
 
+#include <QDebug>
+#include <QFileInfo>
+#include <QDir>
+#include <QDateTime>
+#include <QTextStream>
+
 const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss:zzz - ";
 std::mutex Log::_mutex;
 
@@ -19,6 +25,12 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 {
     std::lock_guard lg(_mutex);
     QFile file(fileName);
+
+    if (!file.exists())
+    {
+        QDir dir;
+        dir.mkdir(QFileInfo(file).absolutePath());
+    }
 
     if (!file.open(QFile::Append | QFile::Text))
     {
@@ -47,4 +59,9 @@ void Log::writeToStdErr(const QString &data)
     std::lock_guard lg(_mutex);
     qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
                << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
+}
+
+void Log::checkPath(const QString &fileName)
+{
+
 }

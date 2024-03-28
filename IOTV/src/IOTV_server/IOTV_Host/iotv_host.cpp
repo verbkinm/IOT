@@ -1,15 +1,25 @@
 #include "iotv_host.h"
 
+#include <QFileInfo>
+
+inline QString logDateName(const QDir &dir)
+{
+    return QFileInfo(dir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
+}
+
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData.at(hostField::logFile)), _settingsData(settingsData),
+    _logDir(settingsData.at(hostField::logDir)),
+    _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
+    //    QDir dir(settingsData.at(hostField::logDir));
+    //    _logFile = QFileInfo(dir, settingsData.at(hostField::name)).absoluteFilePath() + ".log";
     shareConstructor();
     makeConnType();
 }
 
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
-    _logFile(settingsData.at(hostField::logFile)), _settingsData(settingsData),
+    _logDir(settingsData.at(hostField::logDir)), _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
     shareConstructor();
@@ -42,7 +52,7 @@ void IOTV_Host::shareConstructor()
 
 IOTV_Host::~IOTV_Host()
 {
-//    qDebug() << "IOTV_Host destruct";
+    //    qDebug() << "IOTV_Host destruct";
 }
 
 void IOTV_Host::responceIdentification(const struct Header *header)
@@ -82,7 +92,7 @@ void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
 
 void IOTV_Host::responceRead(const struct Header *header)
 {
-//    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
+    //    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
@@ -99,8 +109,8 @@ void IOTV_Host::responceRead(const struct Header *header)
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
     this->setReadChannelData(channelNumber, data);
 
-    if (_logFile.isEmpty())
-        return;
+//    if (_logDir.isEmpty())
+//        return;
 
     // Не записываем в лог сырые данные
     if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
@@ -111,7 +121,7 @@ void IOTV_Host::responceRead(const struct Header *header)
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, _logFile);
+               Log::Write_Flag::FILE, logDateName(_logDir));
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -408,11 +418,18 @@ void IOTV_Host::slotPingTimeOut()
 
 void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
 {
-    //    !!! Нужно ли посылать данные на устройство, если они равны текущим данным?
-    //    if (getReadChannelData(channelNumber) != data)
-    //    {
     write(channelNumber, data);
-    //    }
+
+    // Не записываем в лог сырые данные
+    if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
+        return;
+
+    Raw raw(this->getReadChannelType(channelNumber), data);
+    Log::write("W:"
+                   + QString::number(channelNumber)
+                   + "="
+                   + raw.strData().first,
+               Log::Write_Flag::FILE, logDateName(_logDir));
 }
 
 void IOTV_Host::slotConnected()

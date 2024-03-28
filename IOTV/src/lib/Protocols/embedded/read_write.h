@@ -5,12 +5,12 @@
 
 struct Read_Write
 {
+    //!!! в документации 4 байта!
     uint64_t dataSize;
 
     uint8_t nameSize;
     uint8_t channelNumber;
     uint8_t flags;
-
 
     char *name;
     char *data;

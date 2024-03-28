@@ -3,6 +3,7 @@
 #include "iotv_event.h"
 
 #include <QTimer>
+#include <QTime>
 
 class IOTV_Event_Alarm : public IOTV_Event
 {
