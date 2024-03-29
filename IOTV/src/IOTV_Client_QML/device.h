@@ -62,6 +62,9 @@ signals:
     void signalQueryRead();
     void signalQueryState();
     void signalQueryWrite(int channelNumber, QByteArray data);
+    void signalQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    // Посылается из клиента
+    void signalResponceLogData(QByteArray data, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
 
     void signalStateChanged();
     void signalUpdate();

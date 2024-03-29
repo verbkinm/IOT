@@ -56,6 +56,7 @@ private:
     void queryIdentification();
     void queryState(const QString &name);
     void queryRead(const QString &name, uint8_t channelNumber);
+    void queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
     void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
     void queryPing();
     void queryTech(Tech_TYPE type, char *data, uint64_t dataSize);
@@ -67,6 +68,7 @@ private:
     void responceWrite(const struct Header *header) const;
     void responcePingPoing(const struct Header *header);
     void responceTech(const struct Header *header);
+    void responceLogData(const struct Header *header);
 
     qint64 write(const QByteArray &data);
 
@@ -99,6 +101,7 @@ private slots:
     void slotQueryRead();
     void slotQueryState();
     void slotQueryWrite(int channelNumber, const QByteArray &data);
+    void slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
 
     void slotError(QAbstractSocket::SocketError error);
 

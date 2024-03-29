@@ -18,7 +18,7 @@ SOURCES += \
         ../../../lib/Protocols/embedded/state.cpp \
         ../../../lib/Protocols/embedded/tech.cpp \
         ../../../lib/Protocols/embedded/host_broadcast.cpp  \
-        ../../../lib/Protocols/embedded/host_broadcast.h  \
+        ../../../lib/Protocols/embedded/log_data.cpp  \
         main.cpp
 
 # Default rules for deployment.
@@ -35,5 +35,8 @@ HEADERS += \
     ../../../lib/Protocols/embedded/read_write.h \
     ../../../lib/Protocols/embedded/state.h \
     ../../../lib/Protocols/embedded/tech.h \
+    ../../../lib/Protocols/embedded/host_broadcast.h  \
+    ../../../lib/Protocols/embedded/log_data.h
+
 
 INCLUDEPATH += ../../../lib/Protocols/embedded/

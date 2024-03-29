@@ -38,6 +38,11 @@ public:
 
     QString getAddress() const;
 
+    inline QString logName()
+    {
+        return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
+    }
+
 private:
     void shareConstructor();
     qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);

@@ -6,7 +6,9 @@
 #include "log_data.h"
 #include "iotv_types.h"
 
+#include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOTV_Server_embedded *iot, const struct Header *header);
 
@@ -425,6 +427,108 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, u
     };
 
     return headerToData(&header, outData, outDataSize);
+}
+
+uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
+{
+    if (fileName == NULL || outData == NULL || outDataSize == 0 || pkg == NULL)
+        return 0;
+
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL)
+        return  0;
+
+    int64_t lastTime = 0, logLine = 0;
+    uint64_t totalSendByte = 0;
+
+    while (!feof(file))
+    {
+        ++logLine;
+
+        char value[BUFSIZ] = {0};
+        char rw;
+        int64_t ms;
+        int ch, year, month, day, hour, minut, second;
+
+        char line [BUFSIZ] = {0};
+        if (fgets(line, sizeof(line), file) == NULL)
+            break;
+
+        if (strlen(line) < 31) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение
+        {
+            fprintf(stderr, "responseLogData, erro in %ld line\n", logLine);
+            continue;
+        }
+
+        sscanf(line, "%d%*c%d%*c%d%*c"
+                     "%d%*c%d%*c%d%*c%ld%*c%*c%*c"
+                     "%c%*c%d%*c%s",
+               &year, &month, &day,
+               &hour, &minut, &second,
+               &ms, &rw, &ch, value);
+
+        // Фильтр номера канала
+        if (pkg->channelNumber != ch)
+            continue;
+
+        // Фильтр напрвавления чтение/запись
+        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
+            continue;
+
+        tm tm{};
+        tm.tm_year = year - 1900;
+        tm.tm_mon = month - 1;
+        tm.tm_mday = day;
+        tm.tm_hour = hour;
+        tm.tm_min = minut;
+        tm.tm_sec = second;
+
+        uint64_t dt = mktime(&tm);
+
+        // Фильтр по интервалу даты/времени
+        if (dt < pkg->startInterval)
+            continue;
+        if (dt > pkg->endInterval)
+            break;
+
+        ms = dt * 1000 + ms;
+
+        // Фильтр по интервалу между записями в лог файле
+        if ((ms - lastTime) < pkg->interval)
+            continue;
+
+        lastTime = ms;
+
+        uint16_t valueSize = strlen(value);
+        uint32_t sendDataSize = 8 + 2 + valueSize;
+        char data[sendDataSize];
+
+        memcpy(data, &ms, sizeof(ms));
+        memcpy(&data[8], &valueSize, sizeof(valueSize));
+        memcpy(&data[10], value, valueSize);
+
+        struct Log_Data logData;
+        memcpy(&logData, pkg, sizeof(logData));
+        logData.dataSize = sendDataSize;
+        logData.data = data;
+
+        struct Header header = {
+            .version = 2,
+            .type = HEADER_TYPE_RESPONSE,
+            .assignment = HEADER_ASSIGNMENT_LOG_DATA,
+            .flags = HEADER_FLAGS_NONE,
+            .fragment = 1,
+            .fragments = 1,
+            .dataSize = logDataSize(&logData),
+            .pkg = &logData
+        };
+
+        uint64_t resultSize = headerToData(&header, outData, outDataSize);
+        totalSendByte += writeFunc(outData, resultSize, obj);
+    }
+
+    fclose(file);
+    return totalSendByte;
 }
 
 uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, uint8_t type)

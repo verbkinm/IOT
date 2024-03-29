@@ -2,10 +2,10 @@
 
 #include <QFileInfo>
 
-inline QString logDateName(const QDir &dir)
-{
-    return QFileInfo(dir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
-}
+//QString IOTV_Host::logName()
+//{
+//    return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
+//}
 
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)),
@@ -121,7 +121,7 @@ void IOTV_Host::responceRead(const struct Header *header)
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logDateName(_logDir));
+               Log::Write_Flag::FILE, logName());
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -429,7 +429,7 @@ void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
                    + QString::number(channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logDateName(_logDir));
+               Log::Write_Flag::FILE, logName());
 }
 
 void IOTV_Host::slotConnected()

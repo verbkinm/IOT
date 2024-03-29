@@ -27,6 +27,7 @@ SOURCES += \
         ../lib/Protocols/embedded/state.cpp \
         ../lib/Protocols/embedded/tech.cpp \
         ../lib/Protocols/embedded/host_broadcast.cpp  \
+        ../lib/Protocols/embedded/log_data.cpp  \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/tech.h \
     ../lib/Protocols/embedded/host_broadcast.h  \
+    ../lib/Protocols/embedded/log_data.h  \
     client.h \
     device.h \
     ../lib/Base_Host/base_host.h \

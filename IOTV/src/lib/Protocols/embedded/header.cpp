@@ -143,7 +143,7 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
 {
     uint64_t maxDatainFrame = buffSize - offsetSize;
 
-    if (maxDatainFrame == 0)
+    if (maxDatainFrame == 0 || buffSize < offsetSize)
         return 0;
 
     uint64_t result = sendDataSize / maxDatainFrame;

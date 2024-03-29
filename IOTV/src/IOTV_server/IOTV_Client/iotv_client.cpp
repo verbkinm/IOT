@@ -1,4 +1,5 @@
 #include "iotv_client.h"
+#include <fstream>
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
     _socket(socket),
@@ -23,7 +24,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 
 IOTV_Client::~IOTV_Client()
 {
-//    qDebug() << "client destruct";
+    //    qDebug() << "client destruct";
     ///!!! закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {
@@ -200,21 +201,10 @@ void IOTV_Client::processQueryTech(const Header *header)
 
     const struct Tech *pkg = static_cast<const struct Tech *>(header->pkg);
 
-    //    uint64_t size;
-    //    char outData[BUFSIZ];
-
     if (pkg->type == Tech_TYPE_EV_AC)
     {
         if (pkg->dataSize == 0)
-        {
             emit signalQueryEventActionData();
-            //            if (_eventManager != nullptr)
-            //            {
-            //                std::string str = Event_Action_Parser::toData(_eventManager->worker()).toStdString();
-            //                size = responseTech(outData, BUFSIZ, str.c_str(), str.size(), header);
-            //                write({outData, static_cast<int>(size)}, size);
-            //            }
-        }
         else
         {
             QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
@@ -223,12 +213,39 @@ void IOTV_Client::processQueryTech(const Header *header)
     }
 }
 
+void IOTV_Client::processQueryLogData(const Header *header)
+{
+    if (header == NULL || header->pkg == NULL)
+        return;
+
+    const struct Log_Data *pkg = static_cast<const struct Log_Data *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
+    auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host){
+        QString name = iotv_host.first->getName();
+        QString compareName(QByteArray{pkg->name, pkg->nameSize});
+
+        return name == compareName;
+    });
+
+    if (it == _hosts.end())
+        return;
+
+    auto host = it->first;
+
+    char outData[BUFSIZ];
+    uint64_t size = responseLogData(host->logName().toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
+
+    write({outData, static_cast<int>(size)}, size);
+}
+
 void IOTV_Client::write(const QByteArray &data, qint64 size) const
 {
-//    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
-//                   + QString::number(_socket->peerPort())
-//                   + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-//               ServerLog::DEFAULT_LOG_FILENAME);
+    //    Log::write("Server transmit to client " + _socket->peerAddress().toString() + ":"
+    //                   + QString::number(_socket->peerPort())
+    //                   + " -> " + data.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+    //               ServerLog::DEFAULT_LOG_FILENAME);
     _socket->write(data.data(), size);
 }
 
@@ -263,10 +280,10 @@ void IOTV_Client::slotReadData()
         return;
     }
 
-//    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
-//                   + QString::number(socket()->peerPort())
-//                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
-//               ServerLog::DEFAULT_LOG_FILENAME);
+    //    Log::write("Server recive from client " + _socket->peerAddress().toString() + ":"
+    //                   + QString::number(socket()->peerPort())
+    //                   + " <- " + _recivedBuff.toHex(':'), Log::Write_Flag::FILE_STDOUT,
+    //               ServerLog::DEFAULT_LOG_FILENAME);
 
     bool error = false;
     uint64_t cutDataSize = 0;
@@ -314,6 +331,8 @@ void IOTV_Client::slotReadData()
                 processQueryState(header);
             else if (header->assignment == HEADER_ASSIGNMENT_TECH)
                 processQueryTech(header);
+            else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+                processQueryLogData(header);
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);
@@ -344,7 +363,6 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
         .dataSize = techSize(&tech),
         .pkg = &tech
     };
-
 
     size = responseTech(outData, BUFSIZ, data.data(), data.size(), &header);
     write({outData, static_cast<int>(size)}, size);

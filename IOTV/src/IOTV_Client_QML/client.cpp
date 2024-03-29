@@ -360,6 +360,14 @@ void Client::queryRead(const QString &name, uint8_t channelNumber)
     write({outData, static_cast<int>(size)});
 }
 
+void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
+{
+    char outData[BUFSIZ];
+    auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, flags);
+
+    write({outData, static_cast<int>(size)});
+}
+
 void Client::queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data)
 {
     char outData[BUFSIZ];
@@ -397,7 +405,6 @@ void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
 void Client::responceIdentification(const Header *header)
 {
     Q_ASSERT(header != NULL);
-//    Q_ASSERT(header->pkg != NULL);
 
     //Пустой список устройств
     if (header->pkg == NULL)
@@ -408,13 +415,6 @@ void Client::responceIdentification(const Header *header)
 
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
     QString name(QByteArray{pkg->name, pkg->nameSize});
-
-//    // Устройство на удаление
-//    if (pkg->flags & Identification_FLAGS_DELETE)
-//    {
-//        _devices.erase(name);
-//        return;
-//    }
 
     struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
 
@@ -429,6 +429,8 @@ void Client::responceIdentification(const Header *header)
             connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead);
             connect(&device, &Device::signalQueryState, this, &Client::slotQueryState);
             connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite);
+            connect(&device, &Device::signalQuerLogData, this, &Client::slotQuerLogData);
+
             connect(&device, &Device::signalOpenReadStream, this, &Client::slotOpenReadStream);
             connect(&device, &Device::signalCloseReadStream, this, &Client::slotCloseReadStream);
         }
@@ -542,11 +544,25 @@ void Client::responceTech(const Header *header)
     }
 }
 
+void Client::responceLogData(const Header *header)
+{
+    Q_ASSERT(header != NULL);
+    Q_ASSERT(header->pkg != NULL);
+
+    const struct Log_Data *pkg = static_cast<const struct Log_Data *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
+    QString name(QByteArray{pkg->name, pkg->nameSize});
+
+    if (!_devices.contains(name))
+        return;
+
+    emit _devices[name].signalResponceLogData(QByteArray{pkg->data, pkg->dataSize}, pkg->interval, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
+}
+
 void Client::slotReciveData()
 {
-//    while (_socket.bytesAvailable())
-//        _recivedBuff += _socket.readAll();
-
     _recivedBuff = _socket.readAll();
 
     bool error;
@@ -554,9 +570,7 @@ void Client::slotReciveData()
 
     while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(),
-                                           &error, &expectedDataSize, &cutDataSize);
-
+        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &expectedDataSize, &cutDataSize);
         if (error == true)
         {
             _recivedBuff.clear();
@@ -590,6 +604,8 @@ void Client::slotReciveData()
                 responceState(header);
             else if (header->assignment == HEADER_ASSIGNMENT_TECH)
                 responceTech(header);
+            else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+                responceLogData(header);
         }
         else if (header->type == HEADER_TYPE_REQUEST)
         {
@@ -611,7 +627,6 @@ void Client::slotQueryRead()
 
     for (uint8_t i = 0; i < dev->getReadChannelLength(); ++i)
         queryRead(dev->getName(), i);
-
 }
 
 void Client::slotQueryState()
@@ -632,6 +647,16 @@ void Client::slotQueryWrite(int channelNumber, const QByteArray &data)
         return;
 
     queryWrite(dev->getName(), channelNumber, data);
+}
+
+void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
+{
+    Device *dev = qobject_cast<Device*>(sender());
+
+    if ( (dev == nullptr) || !dev->isOnline())
+        return;
+
+    queryLogDataHost(dev->getName(), startInterval, endInterval, interval, channelNumber, flags);
 }
 
 void Client::slotQueryIdentification()

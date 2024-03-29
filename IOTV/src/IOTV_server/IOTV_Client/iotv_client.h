@@ -44,6 +44,7 @@ private:
     void processQueryWrite(const struct Header* header);
     void processQueryPingPoing();
     void processQueryTech(const struct Header* header);
+    void processQueryLogData(const struct Header* header);
 
     void write(const QByteArray &data, qint64 size = -1) const;
 
