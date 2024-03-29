@@ -237,7 +237,7 @@ void IOTV_Client::processQueryLogData(const Header *header)
     char outData[BUFSIZ];
     uint64_t size = responseLogData(host->logName().toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 
-    write({outData, static_cast<int>(size)}, size);
+//    write({outData, static_cast<int>(size)}, size);
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const

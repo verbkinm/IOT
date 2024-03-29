@@ -50,10 +50,34 @@ Page {
                 channelPressure: 2
             }
 
+            Button {
+                id: queryLog
+                width: parent.width
+                height: 80
+
+                onClicked: {
+                    var startInterval = new Date(2024, 2, 29, 14, 57, 0, 0).getTime();
+                    var endInterval = new Date(2024, 2, 29, 17, 0, 0, 0).getTime()
+                    var interval = 1000
+                    var ch = 0
+                    var flags = 0
+                    device.signalQueryLogData(startInterval, endInterval, interval, 0, flags)
+                    device.signalQueryLogData(startInterval, endInterval, interval, 1, flags)
+                    device.signalQueryLogData(startInterval, endInterval, interval, 2, flags)
+                }
+            }
+
             onPositioningComplete: {
                 fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
 
             }
+        }
+    }
+
+    Connections {
+        target: device
+        function onSignalResponceLogData(data, timeMS, channelNumber, flags) {
+            console.log(timeMS, channelNumber, flags, data)
         }
     }
 

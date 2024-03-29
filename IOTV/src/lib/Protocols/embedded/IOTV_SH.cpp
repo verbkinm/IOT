@@ -447,7 +447,7 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
 
         char value[BUFSIZ] = {0};
         char rw;
-        int64_t ms;
+        uint64_t ms;
         int ch, year, month, day, hour, minut, second;
 
         char line [BUFSIZ] = {0};
@@ -467,14 +467,6 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
                &hour, &minut, &second,
                &ms, &rw, &ch, value);
 
-        // Фильтр номера канала
-        if (pkg->channelNumber != ch)
-            continue;
-
-        // Фильтр напрвавления чтение/запись
-        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
-            continue;
-
         tm tm{};
         tm.tm_year = year - 1900;
         tm.tm_mon = month - 1;
@@ -483,18 +475,24 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         tm.tm_min = minut;
         tm.tm_sec = second;
 
-        uint64_t dt = mktime(&tm);
+        ms = mktime(&tm) * 1000 + ms;
 
         // Фильтр по интервалу даты/времени
-        if (dt < pkg->startInterval)
+        if (ms < pkg->startInterval)
             continue;
-        if (dt > pkg->endInterval)
+        if (ms > pkg->endInterval)
             break;
-
-        ms = dt * 1000 + ms;
 
         // Фильтр по интервалу между записями в лог файле
         if ((ms - lastTime) < pkg->interval)
+            continue;
+
+        // Фильтр номера канала
+        if (pkg->channelNumber != ch)
+            continue;
+
+        // Фильтр напрвавления чтение/запись
+        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
             continue;
 
         lastTime = ms;

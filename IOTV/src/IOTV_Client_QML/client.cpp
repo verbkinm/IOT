@@ -429,7 +429,7 @@ void Client::responceIdentification(const Header *header)
             connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead);
             connect(&device, &Device::signalQueryState, this, &Client::slotQueryState);
             connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite);
-            connect(&device, &Device::signalQuerLogData, this, &Client::slotQuerLogData);
+            connect(&device, &Device::signalQueryLogData, this, &Client::slotQuerLogData);
 
             connect(&device, &Device::signalOpenReadStream, this, &Client::slotOpenReadStream);
             connect(&device, &Device::signalCloseReadStream, this, &Client::slotCloseReadStream);
@@ -558,7 +558,17 @@ void Client::responceLogData(const Header *header)
     if (!_devices.contains(name))
         return;
 
-    emit _devices[name].signalResponceLogData(QByteArray{pkg->data, pkg->dataSize}, pkg->interval, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
+    uint64_t timeMS;
+    memcpy(&timeMS, pkg->data, 8);
+
+    uint16_t dataSize;
+    memcpy(&dataSize, &pkg->data[8], 2);
+
+    QString data;
+    for (int i = 0; i < dataSize; ++i)
+        data.push_back(pkg->data[10 + i]);
+
+    emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 }
 
 void Client::slotReciveData()
