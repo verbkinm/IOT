@@ -210,7 +210,7 @@ void Client::slotConnected()
     emit signalConnected();
     emit stateConnectionChanged();
 
-    slotQueryIdentification();    
+    slotQueryIdentification();
 }
 
 void Client::slotDisconnected()
@@ -558,15 +558,19 @@ void Client::responceLogData(const Header *header)
     if (!_devices.contains(name))
         return;
 
-    uint64_t timeMS;
-    memcpy(&timeMS, pkg->data, 8);
-
-    uint16_t dataSize;
-    memcpy(&dataSize, &pkg->data[8], 2);
-
     QString data;
-    for (int i = 0; i < dataSize; ++i)
-        data.push_back(pkg->data[10 + i]);
+    uint64_t timeMS = 0;
+
+    if (pkg->dataSize > 0)
+    {
+        uint16_t dataSize;
+
+        memcpy(&timeMS, pkg->data, 8);
+        memcpy(&dataSize, &pkg->data[8], 2);
+
+        for (int i = 0; i < dataSize; ++i)
+            data.push_back(pkg->data[10 + i]);
+    }
 
     emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 }

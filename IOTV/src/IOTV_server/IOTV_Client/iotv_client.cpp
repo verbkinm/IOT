@@ -144,12 +144,12 @@ void IOTV_Client::processQueryRead(const Header *header)
 
     auto iot = it->first->convert();
 
-    uint64_t size;
+//    uint64_t size;
     char outData[BUFSIZ];
 
-    size = responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
+    /*size = */responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
 
-    write({outData, static_cast<int>(size)}, size);
+//    write({outData, static_cast<int>(size)}, size);
 
     clearIOTV_Server(iot);
 }
@@ -235,7 +235,7 @@ void IOTV_Client::processQueryLogData(const Header *header)
     auto host = it->first;
 
     char outData[BUFSIZ];
-    uint64_t size = responseLogData(host->logName().toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
+    /*uint64_t size = */responseLogData(host->logName().toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 
 //    write({outData, static_cast<int>(size)}, size);
 }

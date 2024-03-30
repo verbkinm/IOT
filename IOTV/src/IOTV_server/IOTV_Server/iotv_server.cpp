@@ -286,7 +286,7 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsHosts.setValue(hostField::connection_type, connectionType::TCP);
         _settingsHosts.setValue(hostField::address, "127.0.0.1");
         _settingsHosts.setValue(hostField::port, 2021);
-        _settingsHosts.setValue(hostField::interval, 0);
+        _settingsHosts.setValue(hostField::interval, 1000);
         _settingsHosts.setValue(hostField::logDir,  QFileInfo({QCoreApplication::applicationDirPath()}, _settingsHosts.group()).absoluteFilePath());
         _settingsHosts.endGroup();
         _settingsHosts.sync();

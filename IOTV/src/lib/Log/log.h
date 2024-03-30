@@ -24,8 +24,6 @@ private:
     static void writeToStdOut(const QString &data);
     static void writeToStdErr(const QString &data);
 
-    static void checkPath(const QString &fileName);
-
     static const QString _FORMAT;
     static std::mutex _mutex;
 };

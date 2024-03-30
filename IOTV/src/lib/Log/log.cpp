@@ -60,8 +60,3 @@ void Log::writeToStdErr(const QString &data)
     qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
                << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
 }
-
-void Log::checkPath(const QString &fileName)
-{
-
-}

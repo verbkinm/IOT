@@ -525,6 +525,26 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         totalSendByte += writeFunc(outData, resultSize, obj);
     }
 
+    // Пакет с нулевым фрагментом данных - завершающий пакет!
+    struct Log_Data logData;
+    memcpy(&logData, pkg, sizeof(logData));
+    logData.dataSize = 0;
+    logData.data = NULL;
+
+    struct Header header = {
+        .version = 2,
+        .type = HEADER_TYPE_RESPONSE,
+        .assignment = HEADER_ASSIGNMENT_LOG_DATA,
+        .flags = HEADER_FLAGS_NONE,
+        .fragment = 1,
+        .fragments = 1,
+        .dataSize = logDataSize(&logData),
+        .pkg = &logData
+    };
+
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    totalSendByte += writeFunc(outData, resultSize, obj);
+
     fclose(file);
     return totalSendByte;
 }
