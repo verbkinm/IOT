@@ -1,4 +1,4 @@
-QT += quick multimedia
+QT += quick multimedia charts
 
 CONFIG += c++2a
 

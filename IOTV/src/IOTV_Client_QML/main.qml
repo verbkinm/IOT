@@ -15,7 +15,7 @@ ApplicationWindow {
     title: qsTr("IOTV Client")
 
     minimumWidth: 400
-    minimumHeight: 640
+    minimumHeight: 400
 
     //! [orientation]
     readonly property bool inPortrait: global_window.width < global_window.height

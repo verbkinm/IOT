@@ -124,6 +124,8 @@
         <file>img/events/timer.png</file>
         <file>img/save_white.png</file>
         <file>img/delete_white.png</file>
+        <file>Devices/BaseItem/Log_Charts.qml</file>
+        <file>Devices/BaseItem/DatePicker.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

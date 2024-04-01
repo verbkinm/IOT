@@ -542,6 +542,10 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         .pkg = &logData
     };
 
+    printf("channel %d - stop fragment\n", logData.channelNumber);
+
+    fflush(stdout);
+
     uint64_t resultSize = headerToData(&header, outData, outDataSize);
     totalSendByte += writeFunc(outData, resultSize, obj);
 

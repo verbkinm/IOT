@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QIcon>
@@ -8,10 +8,10 @@
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setOrganizationName("VMS");
     app.setApplicationName("IOTV_Client");
-    app.setApplicationVersion("0.13");
+    app.setApplicationVersion("0.14");
     app.setWindowIcon(QIcon(":/img/logo.png"));
 
     QQmlApplicationEngine engine;

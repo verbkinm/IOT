@@ -15,6 +15,11 @@ Page {
     title: device.aliasName
     objectName: device.aliasName
 
+    Loader {
+        id: chartsLoader
+        property string title: "loaderTitle"
+    }
+
     header: Devices.DeviceHeader {
         id: headerPanel
     }
@@ -52,22 +57,20 @@ Page {
             }
 
             Button {
-                id: queryLog
-                width: parent.width
-                height: 80
+                id: btnCharts
+                width: 180
+                height: 60
+
+                highlighted: true
+                text: "График"
+
+                anchors.horizontalCenter: parent.horizontalCenter
 
                 onClicked: {
-                    var startInterval = new Date(2024, 2, 29, 14, 57, 0, 0).getTime();
-                    var endInterval = new Date(2025, 2, 29, 17, 0, 0, 0).getTime()
-                    var interval = 1000
-                    var ch = 0
-                    var flags = 0
-
-                    waitEndLogData = [true, true, true]
-
-                    device.signalQueryLogData(startInterval, endInterval, interval, 0, flags)
-                    device.signalQueryLogData(startInterval, endInterval, interval, 1, flags)
-                    device.signalQueryLogData(startInterval, endInterval, interval, 2, flags)
+                    chartsLoader.setSource("qrc:/Devices/BaseItem/Log_Charts.qml",
+                                           {"device": device, "waitList": waitEndLogData})
+                    chartsLoader.title = device.aliasName
+                    glob_deviceStackView.push(chartsLoader)
                 }
             }
 
@@ -75,27 +78,6 @@ Page {
                 fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
 
             }
-        }
-    }
-
-    Connections {
-        target: device
-        function onSignalResponceLogData(data, timeMS, channelNumber, flags) {
-            console.log(timeMS, channelNumber, flags, data)
-
-            if (data === "" && channelNumber < waitEndLogData.length)
-            {
-                waitEndLogData[channelNumber] = false
-            }
-
-            var allDone = false
-            for (var i = 0; i < waitEndLogData.length; i++)
-            {
-                if (waitEndLogData[i] === true)
-                    return
-            }
-
-            console.log("all done")
         }
     }
 
