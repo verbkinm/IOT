@@ -10,9 +10,7 @@
 #include "read_write.h"
 #include "tech.h"
 
-#include <iostream>
-#include <fstream>
-#include <QTemporaryFile>
+#include <QApplication>
 
 Client::Client(QObject *parent): QObject{parent},
     _counterPing(0)
@@ -572,6 +570,7 @@ void Client::responceLogData(const Header *header)
             data.push_back(pkg->data[10 + i]);
     }
 
+    // !!!
     emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 
     if (pkg->dataSize == 0)
@@ -582,7 +581,7 @@ void Client::responceLogData(const Header *header)
 
 void Client::slotReciveData()
 {
-    _recivedBuff = _socket.readAll();
+    _recivedBuff += _socket.readAll();
 
     bool error;
     uint64_t cutDataSize, expectedDataSize;

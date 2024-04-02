@@ -54,7 +54,7 @@ Page {
                            dateEnd.setMinutes(59)
                            dateEnd.setSeconds(59)
 
-                           requestLogData(dateStart.getTime(), dateEnd.getTime(), 60000)
+                           requestLogData(dateStart.getTime(), dateEnd.getTime(), 1000)
                        }
     }
 
@@ -70,7 +70,7 @@ Page {
         anchors.bottom: parent.bottom
         //        title: "XXX data read"
         antialiasing: true
-        animationOptions: ChartView.SeriesAnimations
+        animationOptions: ChartView.AllAnimations
         titleFont.bold: true
         titleFont.pointSize: 15
         //        legend.visible:false
@@ -182,21 +182,7 @@ Page {
 
         console.log(dateStart, dateEnd)
 
-        requestLogData(dateStart.getTime(), dateEnd.getTime(), 60000)
-
-//        var startInterval = new Date(2024, 2, 29, 14, 57, 0, 0).getTime();
-//        var endInterval = new Date(2025, 2, 29, 17, 0, 0, 0).getTime()
-//        var interval = 60 * 1000 // раз в миниуту
-//        var ch = 0
-//        var flags = 0
-
-//        waitList = [true, true, true]
-
-//        device.signalQueryLogData(startInterval, endInterval, interval, 0, flags)
-//        device.signalQueryLogData(startInterval, endInterval, interval, 1, flags)
-//        device.signalQueryLogData(startInterval, endInterval, interval, 2, flags)
-
-//        busyIndicator.visible = true
+        requestLogData(dateStart.getTime(), dateEnd.getTime(), 1000)
     }
 
     Component.onDestruction: {
@@ -244,28 +230,18 @@ Page {
 
             if (channelNumber === 0)
             {
-                //                if (yData < myAxisTemperature.tmpMin)
-                //                    myAxisTemperature.tmpMin = yData
-                //                if (yData > myAxisTemperature.tmpMax)
-                //                    myAxisTemperature.tmpMax = yData
-
-                //                yDataMin(myAxisTemperature, yData, 10)
-                //                yDataMax(myAxisTemperature, yData, 10)
                 lineSeriesTemperature.append(xVal, yData)
-                //                myAxisTemperature.tmpMin = yData
             }
             else if (channelNumber === 1)
             {
-                //                yDataMin(myAxisHumidity, yData, 20)
-                //                yDataMax(myAxisHumidity, yData, 20)
                 lineSeriesHumidity.append(xVal, yData)
             }
             else if (channelNumber === 2)
             {
-                //                yDataMin(myAxisPressure, yData, 50)
-                //                yDataMax(myAxisPressure, yData, 50)
                 lineSeriesPressure.append(xVal, yData)
             }
+            else
+                return
         }
     }
 
