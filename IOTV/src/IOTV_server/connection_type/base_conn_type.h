@@ -43,7 +43,6 @@ protected:
     QString _address;
     QString _logFile;
     Conn_type _type;
-//    QByteArray _host_buffer_data;
 
     std::mutex _hostBuffMutex;
 

@@ -1,5 +1,7 @@
 #include "tcp_conn_type.h"
 
+std::mutex writeMutex;
+
 TCP_conn_type::TCP_conn_type(const QString &name, const QString &address, quint16 port, QObject *parent) :
     Base_conn_type(name, parent),
     _tcpSocket(new QTcpSocket(this))
@@ -23,6 +25,8 @@ TCP_conn_type::~TCP_conn_type()
 
 qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 {
+    std::lock_guard lg(writeMutex);
+
     if (_tcpSocket->state() != QAbstractSocket::ConnectedState)
         return 0;
 

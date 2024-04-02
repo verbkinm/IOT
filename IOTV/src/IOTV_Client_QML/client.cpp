@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <QTemporaryFile>
 
 Client::Client(QObject *parent): QObject{parent},
     _counterPing(0)
@@ -28,7 +27,7 @@ Client::Client(QObject *parent): QObject{parent},
     connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData);
     connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged);
 
-    connect(&_timerPing, &QTimer::timeout, this, &Client::queryPing);
+//    connect(&_timerPing, &QTimer::timeout, this, &Client::queryPing);
 }
 
 Client::~Client()
@@ -558,31 +557,68 @@ void Client::responceLogData(const Header *header)
     if (!_devices.contains(name))
         return;
 
-    QString data;
-    uint64_t timeMS = 0;
+    if (header->fragment == 1)
+        _devices[name].clearLogData(pkg->channelNumber);
 
-    if (pkg->dataSize > 0)
+//    _devices[name].addLogData(QByteArray(pkg->data, pkg->dataSize), pkg->channelNumber);
+
+    if (header->fragment == header->fragments)
     {
-        uint16_t dataSize;
+//        QByteArray data = _devices[name].logData(pkg->channelNumber);
+        qDebug() << "Log data on channel" << pkg->channelNumber;// <<  ":" << data.size();
 
-        memcpy(&timeMS, pkg->data, 8);
-        memcpy(&dataSize, &pkg->data[8], 2);
-
-        for (int i = 0; i < dataSize; ++i)
-            data.push_back(pkg->data[10 + i]);
+//        QFile file("test.txt");
+//        file.open(QIODevice::WriteOnly);
+//        file.write(data);
     }
 
-    emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
+//    if (pkg->dataSize > 0)
+//    {
+//        char *ptr = pkg->data;
+//        char *endPtr = ptr + pkg->dataSize;
 
-    if (pkg->dataSize == 0)
-    {
-        qDebug() << "channel " << pkg->channelNumber << "stop fragment";
-    }
+//        while(ptr < endPtr)
+//        {
+//            QString data;
+//            uint64_t timeMS = 0;
+//            uint16_t dataSize;
+
+//            if (ptr + 8 + 2 > endPtr)
+//            {
+//                Log::write(QString (Q_FUNC_INFO) + " corrupt data", Log::Write_Flag::STDERR, 0);
+//                break;
+//            }
+
+//            memcpy(&timeMS, ptr, 8);
+//            ptr += 8;
+//            memcpy(&dataSize, ptr, 2);
+//            ptr += 2;
+
+//            if ((ptr + dataSize) > endPtr)
+//            {
+//                Log::write(QString (Q_FUNC_INFO) + " corrupt data", Log::Write_Flag::STDERR, 0);
+//                break;
+//            }
+
+//            data = QByteArray(ptr, dataSize);
+//            ptr += dataSize;
+
+//            _devices[name].addLogData(timeMS, pkg->channelNumber, pkg->flags, data);
+//        }
+//    }
+//    else
+//    {
+//        qDebug() << "channel " << pkg->channelNumber << "stop fragment";
+//        emit _devices[name].signalResponceLogData(pkg->channelNumber);
+//    }
 }
 
 void Client::slotReciveData()
 {
-    _recivedBuff = _socket.readAll();
+    _recivedBuff += _socket.readAll();
+    _recivedBuffSize = _recivedBuff.size();
+
+    qDebug() << _recivedBuff.size();
 
     bool error;
     uint64_t cutDataSize, expectedDataSize;
@@ -594,15 +630,20 @@ void Client::slotReciveData()
         {
             _recivedBuff.clear();
             clearHeader(header);
+            qDebug() << Q_FUNC_INFO << "error == true";
             break;
         }
 
         // Пакет не ещё полный
         if (expectedDataSize > 0)
         {
+            qDebug() << Q_FUNC_INFO << "Пакет не ещё полный";
             clearHeader(header);
             break;
         }
+
+        qDebug() << header->fragment << "/" << header->fragments << header->assignment;
+
 
         if (header->type == HEADER_TYPE_RESPONSE)
         {
@@ -674,6 +715,8 @@ void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint3
 
     if ( (dev == nullptr) || !dev->isOnline())
         return;
+
+    dev->clearLogData(channelNumber);
 
     queryLogDataHost(dev->getName(), startInterval, endInterval, interval, channelNumber, flags);
 }

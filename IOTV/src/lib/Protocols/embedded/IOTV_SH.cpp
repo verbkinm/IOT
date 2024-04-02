@@ -109,7 +109,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
     for (uint16_t i = 0; i < pkgsCount; ++i)
     {
         char *it = NULL;
-        uint64_t dataReadSize = dataPart(&it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
+        uint64_t dataReadSize = dataPartReadWrite(&it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
 
         struct Read_Write readWrite = {
             .dataSize = dataReadSize,
@@ -429,127 +429,50 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, u
     return headerToData(&header, outData, outDataSize);
 }
 
-uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
+uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
 {
-    if (fileName == NULL || outData == NULL || outDataSize == 0 || pkg == NULL)
+    if (rawData == NULL || outData == NULL || outDataSize == 0 || pkg == NULL)
         return 0;
 
-    FILE *file = fopen(fileName, "r");
-    if (file == NULL)
-        return  0;
-
-    int64_t lastTime = 0, logLine = 0;
+    uint64_t pkgsCount;
     uint64_t totalSendByte = 0;
 
-    while (!feof(file))
+    char *it = (char *)rawData;
+    char *end = (char *)rawData + rawDataSize;
+
+    pkgsCount = pkgCount(rawDataSize, outDataSize, HEADER_SIZE + LOG_DATA_SIZE + pkg->nameSize);
+    for (uint16_t i = 0; i < pkgsCount; ++i)
     {
-        ++logLine;
-
-        char value[BUFSIZ] = {0};
-        char rw;
-        uint64_t ms;
-        int ch, year, month, day, hour, minut, second;
-
-        char line [BUFSIZ] = {0};
-        if (fgets(line, sizeof(line), file) == NULL)
-            break;
-
-        if (strlen(line) < 31) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение
-        {
-            fprintf(stderr, "responseLogData, erro in %ld line\n", logLine);
-            continue;
-        }
-
-        sscanf(line, "%d%*c%d%*c%d%*c"
-                     "%d%*c%d%*c%d%*c%ld%*c%*c%*c"
-                     "%c%*c%d%*c%s",
-               &year, &month, &day,
-               &hour, &minut, &second,
-               &ms, &rw, &ch, value);
-
-        tm tm{};
-        tm.tm_year = year - 1900;
-        tm.tm_mon = month - 1;
-        tm.tm_mday = day;
-        tm.tm_hour = hour;
-        tm.tm_min = minut;
-        tm.tm_sec = second;
-
-        ms = mktime(&tm) * 1000 + ms;
-
-        // Фильтр по интервалу даты/времени
-        if (ms < pkg->startInterval)
-            continue;
-        if (ms > pkg->endInterval)
-            break;
-
-        // Фильтр по интервалу между записями в лог файле
-        if ((ms - lastTime) < pkg->interval)
-            continue;
-
-        // Фильтр номера канала
-        if (pkg->channelNumber != ch)
-            continue;
-
-        // Фильтр напрвавления чтение/запись
-        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
-            continue;
-
-        lastTime = ms;
-
-        uint16_t valueSize = strlen(value);
-        uint32_t sendDataSize = 8 + 2 + valueSize;
-        char data[sendDataSize];
-
-        memcpy(data, &ms, sizeof(ms));
-        memcpy(&data[8], &valueSize, sizeof(valueSize));
-        memcpy(&data[10], value, valueSize);
+        uint64_t rawDataPart = outDataSize - HEADER_SIZE - LOG_DATA_SIZE - pkg->nameSize;
+        uint64_t sizeLeft = end - it;
+        if (sizeLeft < rawDataPart)
+            rawDataPart = sizeLeft;
 
         struct Log_Data logData;
         memcpy(&logData, pkg, sizeof(logData));
-        logData.dataSize = sendDataSize;
-        logData.data = data;
+        logData.dataSize = rawDataPart;
+        logData.data = it;
 
         struct Header header = {
             .version = 2,
             .type = HEADER_TYPE_RESPONSE,
             .assignment = HEADER_ASSIGNMENT_LOG_DATA,
             .flags = HEADER_FLAGS_NONE,
-            .fragment = 1,
-            .fragments = 1,
+            .fragment = (uint16_t)(i + 1),
+            .fragments = (uint16_t)(pkgsCount),
             .dataSize = logDataSize(&logData),
             .pkg = &logData
         };
 
+        it += rawDataPart;
+
         uint64_t resultSize = headerToData(&header, outData, outDataSize);
         totalSendByte += writeFunc(outData, resultSize, obj);
+
+        printf("fragments = %d / %d totalSendByte = %lu\n", header.fragment, header.fragments, totalSendByte);
+        fflush(stdout);
     }
 
-    // Пакет с нулевым фрагментом данных - завершающий пакет!
-    struct Log_Data logData;
-    memcpy(&logData, pkg, sizeof(logData));
-    logData.dataSize = 0;
-    logData.data = NULL;
-
-    struct Header header = {
-        .version = 2,
-        .type = HEADER_TYPE_RESPONSE,
-        .assignment = HEADER_ASSIGNMENT_LOG_DATA,
-        .flags = HEADER_FLAGS_NONE,
-        .fragment = 1,
-        .fragments = 1,
-        .dataSize = logDataSize(&logData),
-        .pkg = &logData
-    };
-
-    printf("channel %d - stop fragment\n", logData.channelNumber);
-
-    fflush(stdout);
-
-    uint64_t resultSize = headerToData(&header, outData, outDataSize);
-    totalSendByte += writeFunc(outData, resultSize, obj);
-
-    fclose(file);
     return totalSendByte;
 }
 

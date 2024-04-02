@@ -1,12 +1,19 @@
 #pragma once
 
 #include <QTimer>
+#include <QLineSeries>
 
 #include "base_host.h"
 #include "IOTV_SH.h"
 #include "raw.h"
 #include "iotv_server_embedded.h"
 #include "wrap_qbytearray.h"
+
+//struct Log_Data_Buff {
+//    uint64_t timeMS;
+//    QString data;
+//    uint8_t flags;
+//};
 
 class Device : public Base_Host
 {
@@ -41,6 +48,8 @@ public:
     Q_INVOKABLE QString writeDataType(int channelNumber) const;
     Q_INVOKABLE void setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blue);
 
+    Q_INVOKABLE void seriesAddData(QLineSeries *series, uint8_t channelNumber, uint8_t flags);
+
     void setReadInterval(int interval);
 
     friend bool operator==(const Device &lhs, const Device &rhs);
@@ -48,6 +57,11 @@ public:
 
     const QString &aliasName() const;
     void setAliasName(const QString &newAliasName);
+
+    void addLogData(const QByteArray &data, uint8_t channelNumber);
+    void clearLogData(uint8_t channelNumber);
+
+    QByteArray logData(uint8_t channelNumber) const;
 
     Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
 
@@ -57,6 +71,8 @@ private:
 
     QTimer _timerRead, _timerState;
 
+    std::unordered_map<uint8_t, QByteArray> _log_data_buff;
+
 signals:
     void signalQueryIdentification();
     void signalQueryRead();
@@ -64,7 +80,8 @@ signals:
     void signalQueryWrite(int channelNumber, QByteArray data);
     void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
     // Посылается из клиента
-    void signalResponceLogData(QString data, int64_t timeMS, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void signalResponceLogData(uint8_t channelNumber);
+//    void signalResponceLogData(QString data, int64_t timeMS, uint8_t channelNumber, LOG_DATA_FLAGS flags);
 
     void signalStateChanged();
     void signalUpdate();

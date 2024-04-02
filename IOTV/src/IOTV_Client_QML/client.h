@@ -9,7 +9,6 @@
 #include <QFileInfo>
 #include <QEvent>
 
-
 #include "actions/iotv_action.h"
 #include "device.h"
 #include "events/iotv_event.h"
@@ -37,11 +36,13 @@ public:
     Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action, QString oldName);
     Q_INVOKABLE void removeEventAction(QString name);
 
+
     bool stateConnection() const;
 
 private:
     QTcpSocket _socket;
     QByteArray _recivedBuff;
+    uint64_t _recivedBuffSize;
 
     QTimer _timerPing;
     // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается

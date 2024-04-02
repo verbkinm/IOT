@@ -54,7 +54,7 @@ Page {
                            dateEnd.setMinutes(59)
                            dateEnd.setSeconds(59)
 
-                           requestLogData(dateStart.getTime(), dateEnd.getTime(), 60000)
+                           requestLogData(dateStart.getTime(), dateEnd.getTime(), 100)
                        }
     }
 
@@ -136,8 +136,8 @@ Page {
 
         LineSeries {
             onClicked: (point) =>{
-                console.log(point)
-            }
+                           console.log(point)
+                       }
 
             id:lineSeriesTemperature
             name: "Температура ℃"
@@ -166,7 +166,6 @@ Page {
         }
     }
 
-
     Component.onCompleted: {
         console.log("Log_Cahrts construct")
 
@@ -182,21 +181,7 @@ Page {
 
         console.log(dateStart, dateEnd)
 
-        requestLogData(dateStart.getTime(), dateEnd.getTime(), 60000)
-
-//        var startInterval = new Date(2024, 2, 29, 14, 57, 0, 0).getTime();
-//        var endInterval = new Date(2025, 2, 29, 17, 0, 0, 0).getTime()
-//        var interval = 60 * 1000 // раз в миниуту
-//        var ch = 0
-//        var flags = 0
-
-//        waitList = [true, true, true]
-
-//        device.signalQueryLogData(startInterval, endInterval, interval, 0, flags)
-//        device.signalQueryLogData(startInterval, endInterval, interval, 1, flags)
-//        device.signalQueryLogData(startInterval, endInterval, interval, 2, flags)
-
-//        busyIndicator.visible = true
+        requestLogData(dateStart.getTime(), dateEnd.getTime(), 100)
     }
 
     Component.onDestruction: {
@@ -205,67 +190,25 @@ Page {
 
     Connections {
         target: device
-        function onSignalResponceLogData(data, timeMS, channelNumber, flags) {
-            if (data === "" && channelNumber < waitList.length)
-            {
-                waitList[channelNumber] = false
-            }
+        function onSignalResponceLogData(channelNumber) {
 
-            var allDone = true
-            for (var i = 0; i < waitList.length; i++)
-            {
-                if (waitList[i] === true)
-                {
-                    allDone = false
-                    break
-                }
-            }
+//            waitList[channelNumber] = false
 
-            if (allDone)
-            {
-                busyIndicator.visible = false
-                return
-            }
 
-            var date = new Date(timeMS);
-            var hours = 0.0
-            var minutes = 0.0
-            var seconds = 0.0
+//            for (var i = 0; i < 3; i++)
+//            {
+//                if (waitList[i] === true)
+//                    return
+//            }
 
-            hours += date.getHours()
-            minutes += date.getMinutes() / 60
-            seconds += date.getSeconds() / 3600
+//            console.log("all resived")
 
-            var xVal = hours + minutes + seconds
-            var yData = parseFloat(data)
-
-            if (data === "")
-                return
-
-            if (channelNumber === 0)
-            {
-                //                if (yData < myAxisTemperature.tmpMin)
-                //                    myAxisTemperature.tmpMin = yData
-                //                if (yData > myAxisTemperature.tmpMax)
-                //                    myAxisTemperature.tmpMax = yData
-
-                //                yDataMin(myAxisTemperature, yData, 10)
-                //                yDataMax(myAxisTemperature, yData, 10)
-                lineSeriesTemperature.append(xVal, yData)
-                //                myAxisTemperature.tmpMin = yData
-            }
-            else if (channelNumber === 1)
-            {
-                //                yDataMin(myAxisHumidity, yData, 20)
-                //                yDataMax(myAxisHumidity, yData, 20)
-                lineSeriesHumidity.append(xVal, yData)
-            }
-            else if (channelNumber === 2)
-            {
-                //                yDataMin(myAxisPressure, yData, 50)
-                //                yDataMax(myAxisPressure, yData, 50)
-                lineSeriesPressure.append(xVal, yData)
-            }
+            //            if (channelNumber === 0)
+            //                device.seriesAddData(lineSeriesTemperature, channelNumber, 0)
+            //            else if (channelNumber === 1)
+            //                device.seriesAddData(lineSeriesHumidity, channelNumber, 0)
+            //            else if (channelNumber === 2)
+            //                device.seriesAddData(lineSeriesPressure, channelNumber, 0)
         }
     }
 
@@ -286,12 +229,6 @@ Page {
     }
 
     function requestLogData(dateStart, dateEnd, intervalMS) {
-        lineSeriesTemperature.clear()
-        lineSeriesHumidity.clear()
-        lineSeriesPressure.clear()
-
-        waitList = [true, true, true]
-
         device.signalQueryLogData(dateStart, dateEnd, intervalMS, 0, 0)
         device.signalQueryLogData(dateStart, dateEnd, intervalMS, 1, 0)
         device.signalQueryLogData(dateStart, dateEnd, intervalMS, 2, 0)
