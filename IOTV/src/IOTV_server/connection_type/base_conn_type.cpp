@@ -74,7 +74,7 @@ void Base_conn_type::slotReadData()
 //               Log::Write_Flag::FILE_STDOUT,
 //               ServerLog::DEFAULT_LOG_FILENAME);
 
-    emit signalDataRiceved(inData);
+    emit signalDataRiceved(std::move(inData));
 }
 
 QString Base_conn_type::getName() const

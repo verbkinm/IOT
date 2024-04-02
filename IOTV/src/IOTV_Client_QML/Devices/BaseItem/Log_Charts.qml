@@ -160,9 +160,10 @@ Page {
             id:lineSeriesPressure
             name: "Давление мм рт.ст."
             axisX: myAxisTime
-            axisY: myAxisPressure
+//            axisY: myAxisPressure
             color: "gray"
             width: 3
+            axisYRight: myAxisPressure
         }
     }
 

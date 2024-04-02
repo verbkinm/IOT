@@ -454,7 +454,7 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         if (fgets(line, sizeof(line), file) == NULL)
             break;
 
-        if (strlen(line) < 31) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение
+        if (strlen(line) < 31 || strlen(line) > 1024) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение.  1024 - ограничение от бесконечности
         {
             fprintf(stderr, "responseLogData, erro in %ld line\n", logLine);
             continue;

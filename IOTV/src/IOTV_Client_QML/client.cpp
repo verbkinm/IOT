@@ -334,6 +334,12 @@ void Client::removeEventAction(QString name)
     clearList(list);
 }
 
+void Client::initChartView(QObject *chartView, QList<QString> seriesData, QList<QList<int> > axisData)
+{
+    qDebug() << "QObject - " << chartView;
+    return;
+}
+
 void Client::queryIdentification()
 {
     char outData[BUFSIZ];
@@ -568,13 +574,18 @@ void Client::responceLogData(const Header *header)
 
         for (int i = 0; i < dataSize; ++i)
             data.push_back(pkg->data[10 + i]);
+
+//        _devices[name].addDataLog(pkg->channelNumber, timeMS, data, pkg->flags);
     }
 
-    //!!! копить данные. При получении нулевого пакета, кидать сигнал
+
+//    !!! копить данные. При получении нулевого пакета, кидать сигнал
     emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 
     if (pkg->dataSize == 0)
     {
+
+//        emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
         qDebug() << "channel " << pkg->channelNumber << "stop fragment";
     }
 }

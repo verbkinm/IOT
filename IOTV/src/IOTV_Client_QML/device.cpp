@@ -197,6 +197,20 @@ void Device::setAliasName(const QString &newAliasName)
     emit signalAliasNameChanged();
 }
 
+void Device::addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags)
+{
+//    Log_Data_Buff log_buf;
+//    log_buf.timeMS = timeMS;
+//    log_buf.data = data;
+//    log_buf.flags = flags;
+    _log_data_buf[channelNumber].emplace_back(timeMS, data, flags);
+}
+
+void Device::clearDataLog(uint8_t channelNumber)
+{
+    _log_data_buf[channelNumber].clear();
+}
+
 void Device::testFunc(Wrap_QByteArray *data)
 {
     qDebug() << "testFunc total data: " << data->data().size();
