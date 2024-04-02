@@ -570,7 +570,7 @@ void Client::responceLogData(const Header *header)
             data.push_back(pkg->data[10 + i]);
     }
 
-    // !!!
+    //!!! копить данные. При получении нулевого пакета, кидать сигнал
     emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 
     if (pkg->dataSize == 0)
