@@ -1,7 +1,7 @@
-import QtQuick 2.10
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Window
 
 import "Home" as HomePageModule
 import "Client" as ClientPageModule
@@ -32,7 +32,7 @@ ApplicationWindow {
 
 
     header: ToolBar {
-        height: 50
+        height: 40
         id: overlayHeader
 
         ToolButton {
@@ -209,10 +209,13 @@ ApplicationWindow {
         height: overlayHeader.height
         id: overlayFooter
 
-        RowLayout {
+        Row {
             anchors.fill: parent
 
             ToolButton {
+                opacity: indicator.currentIndex === 0 ? 1.0 : 0.4
+                height: overlayFooter.height
+                width: overlayFooter.width / 3
                 icon {
                     color: "transparent"
                     source: "qrc:/img/home.png"
@@ -220,10 +223,12 @@ ApplicationWindow {
                 onClicked: {
                     glob_swipeView.setCurrentIndex(0)
                 }
-                Layout.alignment: Qt.AlignCenter
             }
 
             ToolButton {
+                opacity: indicator.currentIndex === 1 ? 1.0 : 0.4
+                height: overlayFooter.height
+                width: overlayFooter.width / 3
                 icon {
                     color: "transparent"
                     source: "qrc:/img/calendar_white.png"
@@ -231,11 +236,12 @@ ApplicationWindow {
                 onClicked: {
                     glob_swipeView.setCurrentIndex(1)
                 }
-                //                }
-                Layout.alignment: Qt.AlignCenter
             }
 
             ToolButton {
+                opacity: indicator.currentIndex === 2 ? 1.0 : 0.4
+                height: overlayFooter.height
+                width: overlayFooter.width / 3
                 icon {
                     color: "transparent"
                     source: "qrc:/img/settings_white.png"
@@ -243,7 +249,6 @@ ApplicationWindow {
                 onClicked: {
                     glob_swipeView.setCurrentIndex(2)
                 }
-                Layout.alignment: Qt.AlignCenter
             }
         }
     }
@@ -286,6 +291,8 @@ ApplicationWindow {
                    {
                        glob_swipeView.setCurrentIndex(0)
                    }
+
+                   glob_swipeView.focus = true
                }
 
     Component.onCompleted: {

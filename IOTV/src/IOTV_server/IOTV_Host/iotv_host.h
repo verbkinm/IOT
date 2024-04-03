@@ -38,6 +38,11 @@ public:
 
     QString getAddress() const;
 
+    inline QString logName(const QDate &date)
+    {
+        return QFileInfo(_logDir, date.toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
+    }
+
     inline QString logName()
     {
         return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";

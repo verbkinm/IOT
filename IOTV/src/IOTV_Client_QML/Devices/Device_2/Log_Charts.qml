@@ -3,13 +3,60 @@ import QtQuick.Controls
 import QtCharts
 
 import "qrc:/Devices/" as Devices
+import "qrc:/Devices/BaseItem" as BaseItem
 
 Page {
     //Ссылка на Device
     required property var device
-    required property list<bool> waitList
+    property list<bool> waitList
 
     id: root
+
+    RoundButton {
+        id: previosDay
+
+        highlighted: true
+        width: height
+        height: txtDate.height + 5
+
+        icon {
+            color: "transparent"
+            source: "qrc:/img/back.png"
+        }
+
+        anchors {
+            left: parent.left
+            margins: 15
+            verticalCenter: txtDate.verticalCenter
+        }
+
+        onClicked: {
+            datePicker.selectedDate.setDate(datePicker.selectedDate.getDate() - 1)
+        }
+    }
+
+    RoundButton {
+        id: nextDay
+
+        highlighted: true
+        width: previosDay.width
+        height: previosDay.height
+
+        icon {
+            color: "transparent"
+            source: "qrc:/img/forward.png"
+        }
+
+        anchors {
+            right: parent.right
+            margins: previosDay.anchors.margins
+            verticalCenter: txtDate.verticalCenter
+        }
+
+        onClicked: {
+            datePicker.selectedDate.setDate(datePicker.selectedDate.getDate() + 1)
+        }
+    }
 
     TextField {
         id: txtDate
@@ -21,11 +68,11 @@ Page {
 
         visible: global_window.inPortrait
 
-        text: new Date().toLocaleDateString("d MM yyyy")
+        text: new Date().toLocaleDateString("dd MM yyyy")
         readOnly: true
         anchors {
-            left: parent.left
-            right: parent.right
+            left: previosDay.right
+            right: nextDay.left
             top: parent.top
             margins: 15
         }
@@ -36,26 +83,26 @@ Page {
         }
     }
 
-    DatePicker {
+    BaseItem.DatePicker {
         id: datePicker
         width: parent.width - parent.width * 0.1
         selectedDate: new Date()
 
-        onDateChanged: (date) =>{
-                           txtDate.text = date.toLocaleDateString("d MM yyyy")
+        onSelectedDateChanged: {
+            txtDate.text = selectedDate.toLocaleDateString("dd MM yyyy")
 
-                           var dateStart = new Date(date)
-                           dateStart.setHours(0)
-                           dateStart.setMinutes(0)
-                           dateStart.setSeconds(0)
+            var dateStart = new Date(selectedDate)
+            dateStart.setHours(0)
+            dateStart.setMinutes(0)
+            dateStart.setSeconds(0)
 
-                           var dateEnd = new Date(date)
-                           dateEnd.setHours(23)
-                           dateEnd.setMinutes(59)
-                           dateEnd.setSeconds(59)
+            var dateEnd = new Date(selectedDate)
+            dateEnd.setHours(23)
+            dateEnd.setMinutes(59)
+            dateEnd.setSeconds(59)
 
-                           requestLogData(dateStart.getTime(), dateEnd.getTime(), 1000)
-                       }
+            requestLogData(dateStart.getTime(), dateEnd.getTime())
+        }
     }
 
     ChartView {
@@ -136,8 +183,8 @@ Page {
 
         LineSeries {
             onClicked: (point) =>{
-                console.log(point)
-            }
+                           console.log(point)
+                       }
 
             id:lineSeriesTemperature
             name: "Температура ℃"
@@ -160,7 +207,7 @@ Page {
             id:lineSeriesPressure
             name: "Давление мм рт.ст."
             axisX: myAxisTime
-//            axisY: myAxisPressure
+            //            axisY: myAxisPressure
             color: "gray"
             width: 3
             axisYRight: myAxisPressure
@@ -170,20 +217,6 @@ Page {
 
     Component.onCompleted: {
         console.log("Log_Cahrts construct")
-
-        var dateStart = new Date
-        dateStart.setHours(0)
-        dateStart.setMinutes(0)
-        dateStart.setSeconds(0)
-
-        var dateEnd = new Date(dateStart)
-        dateEnd.setHours(23)
-        dateEnd.setMinutes(59)
-        dateEnd.setSeconds(59)
-
-        console.log(dateStart, dateEnd)
-
-        requestLogData(dateStart.getTime(), dateEnd.getTime(), 1000)
     }
 
     Component.onDestruction: {
@@ -192,57 +225,28 @@ Page {
 
     Connections {
         target: device
-        function onSignalResponceLogData(data, timeMS, channelNumber, flags) {
-            if (data === "" && channelNumber < waitList.length)
-            {
-                waitList[channelNumber] = false
-            }
+        function onSignalResponceLogData(points, channelNumber, flags) {
+            var obj;
+            if (channelNumber === 0)
+                obj = lineSeriesTemperature
+            else if (channelNumber === 1)
+                obj = lineSeriesHumidity
+            else if (channelNumber === 2)
+                obj = lineSeriesPressure
 
-            var allDone = true
-            for (var i = 0; i < waitList.length; i++)
+
+            for(var i = 0; i < points.length; i++)
+                obj.append(points[i].x, points[i].y)
+
+            waitList[channelNumber] = false
+
+            for (i = 0; i < waitList.length; i++)
             {
                 if (waitList[i] === true)
-                {
-                    allDone = false
-                    break
-                }
+                    return
             }
 
-            if (allDone)
-            {
-                busyIndicator.visible = false
-                return
-            }
-
-            var date = new Date(timeMS);
-            var hours = 0.0
-            var minutes = 0.0
-            var seconds = 0.0
-
-            hours += date.getHours()
-            minutes += date.getMinutes() / 60
-            seconds += date.getSeconds() / 3600
-
-            var xVal = hours + minutes + seconds
-            var yData = parseFloat(data)
-
-            if (data === "")
-                return
-
-            if (channelNumber === 0)
-            {
-                lineSeriesTemperature.append(xVal, yData)
-            }
-            else if (channelNumber === 1)
-            {
-                lineSeriesHumidity.append(xVal, yData)
-            }
-            else if (channelNumber === 2)
-            {
-                lineSeriesPressure.append(xVal, yData)
-            }
-            else
-                return
+            busyIndicator.visible = false
         }
     }
 
@@ -252,16 +256,6 @@ Page {
         visible: false
     }
 
-    function yDataMin(axis, data, offset)
-    {
-        axis.min = data < axis.min ? data - offset : axis.min
-    }
-
-    function yDataMax(axis, data, offset)
-    {
-        axis.max = data > axis.max ? data + offset : axis.max
-    }
-
     function requestLogData(dateStart, dateEnd, intervalMS) {
         lineSeriesTemperature.clear()
         lineSeriesHumidity.clear()
@@ -269,9 +263,9 @@ Page {
 
         waitList = [true, true, true]
 
-        device.signalQueryLogData(dateStart, dateEnd, intervalMS, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, intervalMS, 1, 0)
-        device.signalQueryLogData(dateStart, dateEnd, intervalMS, 2, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 1, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 2, 0)
 
         busyIndicator.visible = true
     }

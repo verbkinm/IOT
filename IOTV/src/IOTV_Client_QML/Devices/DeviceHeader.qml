@@ -109,6 +109,12 @@ Rectangle {
 
         id: loaderDebug
         objectName: "debug"
-        source: ""
+
+        onVisibleChanged: {
+            if (this.visible === false)
+            {
+                loaderDebug.setSource("")
+            }
+        }
     }
 }

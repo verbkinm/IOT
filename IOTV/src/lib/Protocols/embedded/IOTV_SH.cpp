@@ -434,12 +434,12 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
     if (fileName == NULL || outData == NULL || outDataSize == 0 || pkg == NULL)
         return 0;
 
-    FILE *file = fopen(fileName, "r");
-    if (file == NULL)
-        return  0;
-
     int64_t lastTime = 0, logLine = 0;
     uint64_t totalSendByte = 0;
+
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL)
+        goto NULL_DATA_FRAGMENT;
 
     while (!feof(file))
     {
@@ -525,6 +525,9 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         totalSendByte += writeFunc(outData, resultSize, obj);
     }
 
+    fclose(file);
+
+NULL_DATA_FRAGMENT:
     // Пакет с нулевым фрагментом данных - завершающий пакет!
     struct Log_Data logData;
     memcpy(&logData, pkg, sizeof(logData));
@@ -542,14 +545,12 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         .pkg = &logData
     };
 
-    printf("channel %d - stop fragment\n", logData.channelNumber);
-
-    fflush(stdout);
+//    printf("channel %d - stop fragment\n", logData.channelNumber);
+//    fflush(stdout);
 
     uint64_t resultSize = headerToData(&header, outData, outDataSize);
     totalSendByte += writeFunc(outData, resultSize, obj);
 
-    fclose(file);
     return totalSendByte;
 }
 

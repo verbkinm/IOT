@@ -1,5 +1,4 @@
 #include "iotv_client.h"
-#include <fstream>
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
     _socket(socket),
@@ -235,9 +234,12 @@ void IOTV_Client::processQueryLogData(const Header *header)
     auto host = it->first;
 
     char outData[BUFSIZ];
-    /*uint64_t size = */responseLogData(host->logName().toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 
-//    write({outData, static_cast<int>(size)}, size);
+    //!!! Доработать для интервалов pkg->startInterval - pkg->endInterval
+    std::time_t seconds = pkg->startInterval / 1000;
+    std::tm *tm = localtime(&seconds);
+
+    responseLogData(host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday}).toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const

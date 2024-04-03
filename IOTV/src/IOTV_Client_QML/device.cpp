@@ -1,5 +1,5 @@
 #include "device.h"
-#include <iostream>
+#include "qdatetime.h"
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent},
@@ -68,7 +68,7 @@ bool Device::setData(uint8_t channelNumber, const QByteArray &data)
         return false;
 
     this->setReadChannelData(channelNumber, data);
-    emit signalDataChanged(channelNumber);
+    emit signalDataChanged(channelNumber, data);
     return true;
 }
 
@@ -147,6 +147,45 @@ void Device::setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blu
 
 }
 
+float convert_range(float value, float From1, float From2, float To1, float To2)
+{
+    return (value-From1)/(From2-From1)*(To2-To1)+To1;
+}
+
+void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
+{
+    if (!_log_data_buf.contains(channelNumber))
+        return;
+
+    auto list = _log_data_buf[channelNumber];
+
+//    std::unordered_map<float, float> uniqPoint;
+    QList<QPointF> points;
+
+    for (const auto &el : list)
+    {
+        if (el.flags == flags)
+        {
+            uint64_t mDay = QDateTime::fromMSecsSinceEpoch(el.timeMS).time().msecsSinceStartOfDay();// / 1000;
+            float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+            float yVal = el.data.toFloat();
+            points.append({xVal, yVal});
+//            uniqPoint[xVal] = yVal;
+        }
+    }
+    _log_data_buf.erase(channelNumber);
+
+
+//    for (auto it : uniqPoint)
+//    {
+//        points.append({it.first, it.second});
+//    }
+
+    qDebug() << "Количество точек" << points.size();
+
+    emit signalResponceLogData(std::move(points), channelNumber, flags);
+}
+
 void Device::setReadInterval(int interval)
 {
     _timerRead.setInterval(interval);
@@ -199,11 +238,11 @@ void Device::setAliasName(const QString &newAliasName)
 
 void Device::addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags)
 {
-//    Log_Data_Buff log_buf;
-//    log_buf.timeMS = timeMS;
-//    log_buf.data = data;
-//    log_buf.flags = flags;
-    _log_data_buf[channelNumber].emplace_back(timeMS, data, flags);
+    Log_Data_Buff log_buf;
+    log_buf.timeMS = timeMS;
+    log_buf.data = data;
+    log_buf.flags = flags;
+    _log_data_buf[channelNumber].emplace_back(log_buf);
 }
 
 void Device::clearDataLog(uint8_t channelNumber)

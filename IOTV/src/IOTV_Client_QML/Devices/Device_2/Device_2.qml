@@ -9,8 +9,6 @@ Page {
     //Ссылка на Device
     required property var device
 
-    property list<bool> waitEndLogData: [false, false, false]
-
     id: root
     title: device.aliasName
     objectName: device.aliasName
@@ -18,6 +16,13 @@ Page {
     Loader {
         id: chartsLoader
         property string title: "loaderTitle"
+
+        onVisibleChanged: {
+            if (this.visible === false)
+            {
+                chartsLoader.setSource("")
+            }
+        }
     }
 
     header: Devices.DeviceHeader {
@@ -67,16 +72,14 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 onClicked: {
-                    chartsLoader.setSource("qrc:/Devices/BaseItem/Log_Charts.qml",
-                                           {"device": device, "waitList": waitEndLogData})
-                    chartsLoader.title = device.aliasName
+                    chartsLoader.setSource("Log_Charts.qml", {"device": device})
+                    chartsLoader.title = "График " + device.aliasName
                     glob_deviceStackView.push(chartsLoader)
                 }
             }
 
             onPositioningComplete: {
                 fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
-
             }
         }
     }
@@ -88,6 +91,7 @@ Page {
 
     Component.onDestruction: {
         console.log("Device 2 destruct: ", title)
+        chartsLoader.setSource("")
     }
 
     Devices.BusyRect {

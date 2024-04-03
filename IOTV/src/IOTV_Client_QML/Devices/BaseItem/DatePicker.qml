@@ -8,18 +8,20 @@ Dialog {
     standardButtons: Dialog.Save | Dialog.Cancel
 
     width: 400
-    height: 300
-
-    signal dateChanged(date date)
+    //    height: 500
 
     required property date selectedDate
 
     anchors.centerIn: parent
 
     onAccepted: {
-        dateChanged(selectedDate)
+        selectedDate = internal.selectedDateTmp
     }
 
+    QtObject {
+        id: internal
+        property date selectedDateTmp: selectedDate
+    }
 
     Dialog {
         id: dialogMonthYear
@@ -47,8 +49,8 @@ Dialog {
 
             yearThumbler.model = model
 
-            monthThumbler.currentIndex = selectedDate.getMonth()
-            yearThumbler.currentIndex = selectedDate.getFullYear() - 2000
+            monthThumbler.currentIndex = internal.selectedDateTmp.getMonth()
+            yearThumbler.currentIndex = internal.selectedDateTmp.getFullYear() - 2000
         }
 
         onAccepted: {
@@ -107,9 +109,9 @@ Dialog {
 
     }
 
-    GridLayout {
+    ColumnLayout {
         width: parent.width
-        columns: 2
+        //        columns: 2
 
         Label {
             id: calenarMonth
@@ -140,14 +142,14 @@ Dialog {
             font.pixelSize: 18
         }
 
-        WeekNumberColumn {
-            id: monthGrid
-            month: grid.month
-            year: grid.year
-            locale: grid.locale
+        //        WeekNumberColumn {
+        //            id: monthGrid
+        //            month: grid.month
+        //            year: grid.year
+        //            locale: grid.locale
 
-            Layout.fillHeight: true
-        }
+        //            Layout.fillHeight: true
+        //        }
 
         MonthGrid {
             id: grid
@@ -161,10 +163,12 @@ Dialog {
             delegate: Rectangle {
                 required property var model
 
-                //                color: model.date.toDateString() === selectedDate.toDateString() && model.month === grid.month ? Qt.color("blue") : Qt.rgba(0, 0, 0, 0)
-                border.color: "black"
-                border.width:  model.date.toDateString() === selectedDate.toDateString() && model.month === grid.month ? 1 : 0
-                radius: 15
+                height: width
+
+                color: model.date.toDateString() === internal.selectedDateTmp.toDateString() && model.month === grid.month ? Qt.rgba(0, 0, 255, 0.2) : Qt.rgba(0, 0, 0, 0)
+//                border.color: "black"
+//                border.width:  model.date.toDateString() === internal.selectedDateTmp.toDateString() && model.month === grid.month ? 1 : 0
+                radius: height
 
                 Text {
                     id: text
@@ -177,11 +181,11 @@ Dialog {
                 }
             }
             onClicked: (date) => {
-                           var lastSelectedDAte = selectedDate
-                           selectedDate = date
+                           var lastSelectedDAte = internal.selectedDateTmp
+                           internal.selectedDateTmp = date
 
-                           if (selectedDate.getMonth() !== grid.month)
-                           selectedDate = lastSelectedDAte
+                           if (internal.selectedDateTmp.getMonth() !== grid.month)
+                           internal.selectedDateTmp = lastSelectedDAte
                        }
         }
     }

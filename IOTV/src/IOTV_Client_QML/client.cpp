@@ -10,6 +10,8 @@
 #include "read_write.h"
 #include "tech.h"
 
+#include <QtConcurrent>
+
 #include <QApplication>
 
 Client::Client(QObject *parent): QObject{parent},
@@ -21,10 +23,10 @@ Client::Client(QObject *parent): QObject{parent},
     _timerPing.setParent(this);
     _timerPing.setInterval(Base_Host::TIMER_PING_INTERVAL);
 
-    connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected);
-    connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected);
-    connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData);
-    connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged);
+    connect(&_socket, &QTcpSocket::connected, this, &Client::slotConnected, Qt::QueuedConnection);
+    connect(&_socket, &QTcpSocket::disconnected, this, &Client::slotDisconnected, Qt::QueuedConnection);
+    connect(&_socket, &QTcpSocket::readyRead, this, &Client::slotReciveData, Qt::QueuedConnection);
+    connect(&_socket, &QTcpSocket::stateChanged, this, &Client::slotStateChanged, Qt::QueuedConnection);
 
     connect(&_timerPing, &QTimer::timeout, this, &Client::queryPing);
 }
@@ -223,7 +225,7 @@ void Client::slotDisconnected()
 
 void Client::slotStateChanged(QAbstractSocket::SocketState socketState)
 {
-    qDebug() << socketState;
+//    qDebug() << socketState;
 
     if (socketState == QAbstractSocket::UnconnectedState)
         emit signalDisconnected();
@@ -334,12 +336,6 @@ void Client::removeEventAction(QString name)
     clearList(list);
 }
 
-void Client::initChartView(QObject *chartView, QList<QString> seriesData, QList<QList<int> > axisData)
-{
-    qDebug() << "QObject - " << chartView;
-    return;
-}
-
 void Client::queryIdentification()
 {
     char outData[BUFSIZ];
@@ -429,14 +425,14 @@ void Client::responceIdentification(const Header *header)
         {
             Device &device = result.first->second;
             device.setParent(this);
-            connect(&device, &Device::signalQueryIdentification, this, &Client::slotQueryIdentification);
-            connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead);
-            connect(&device, &Device::signalQueryState, this, &Client::slotQueryState);
-            connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite);
-            connect(&device, &Device::signalQueryLogData, this, &Client::slotQuerLogData);
+            connect(&device, &Device::signalQueryIdentification, this, &Client::slotQueryIdentification, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryRead, this, &Client::slotQueryRead, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryState, this, &Client::slotQueryState, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryWrite, this, &Client::slotQueryWrite, Qt::QueuedConnection);
+            connect(&device, &Device::signalQueryLogData, this, &Client::slotQuerLogData, Qt::QueuedConnection);
 
-            connect(&device, &Device::signalOpenReadStream, this, &Client::slotOpenReadStream);
-            connect(&device, &Device::signalCloseReadStream, this, &Client::slotCloseReadStream);
+            connect(&device, &Device::signalOpenReadStream, this, &Client::slotOpenReadStream, Qt::QueuedConnection);
+            connect(&device, &Device::signalCloseReadStream, this, &Client::slotCloseReadStream, Qt::QueuedConnection);
         }
     }
     else
@@ -575,19 +571,22 @@ void Client::responceLogData(const Header *header)
         for (int i = 0; i < dataSize; ++i)
             data.push_back(pkg->data[10 + i]);
 
-//        _devices[name].addDataLog(pkg->channelNumber, timeMS, data, pkg->flags);
+        _devices[name].addDataLog(pkg->channelNumber, timeMS, data, pkg->flags);
     }
-
-
-//    !!! копить данные. При получении нулевого пакета, кидать сигнал
-    emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
 
     if (pkg->dataSize == 0)
     {
-
-//        emit _devices[name].signalResponceLogData(data, timeMS, pkg->channelNumber, static_cast<LOG_DATA_FLAGS>(pkg->flags));
+        _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
         qDebug() << "channel " << pkg->channelNumber << "stop fragment";
     }
+
+    static int counter = 0;
+    if (counter++ > 10)
+    {
+        QApplication::processEvents(QEventLoop::ExcludeSocketNotifiers);
+        counter = 0;
+    }
+    _counterPing = 0;
 }
 
 void Client::slotReciveData()
@@ -685,6 +684,7 @@ void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint3
     if ( (dev == nullptr) || !dev->isOnline())
         return;
 
+    dev->clearDataLog(channelNumber);
     queryLogDataHost(dev->getName(), startInterval, endInterval, interval, channelNumber, flags);
 }
 

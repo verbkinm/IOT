@@ -38,7 +38,6 @@ public:
     Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
     Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action, QString oldName);
     Q_INVOKABLE void removeEventAction(QString name);
-    Q_INVOKABLE void initChartView(QObject *chartView, QList<QString> seriesData,  QList<QList<int>> axisData);
 
     bool stateConnection() const;
 

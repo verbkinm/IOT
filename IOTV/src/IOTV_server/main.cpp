@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    a.setApplicationVersion("0.11.1");
+    a.setApplicationVersion("0.12");
 
     Log::write("Start program IOTV_Server " + QString(a.applicationVersion()),
                Log::Write_Flag::FILE_STDOUT,

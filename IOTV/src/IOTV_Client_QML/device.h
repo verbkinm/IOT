@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QTimer>
+#include <QLineSeries>
 
 #include "base_host.h"
 #include "IOTV_SH.h"
@@ -46,6 +47,7 @@ public:
     Q_INVOKABLE QString readDataType(int channelNumber) const;
     Q_INVOKABLE QString writeDataType(int channelNumber) const;
     Q_INVOKABLE void setLedColorManual(uint8_t ledNumder, bool red, bool green, bool blue);
+    Q_INVOKABLE void dataLogToPoints(uint8_t channelNumber, uint8_t flags);
 
     void setReadInterval(int interval);
 
@@ -72,16 +74,14 @@ signals:
     void signalQueryIdentification();
     void signalQueryRead();
     void signalQueryState();
-//    void signalQueryWrite(int channelNumber, QByteArray data);
     void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
     // Посылается из клиента
-    void signalResponceLogData(QString data, int64_t timeMS, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void signalResponceLogData(QList<QPointF> points, uint8_t channelNumber, uint8_t flags);
 
     void signalStateChanged();
     void signalUpdate();
     void signalAliasNameChanged();
 
-    void signalDataChanged(int channel);
     void signalDataAdded(int channel);
 
     void signalDataPkgComplete(int channel, const QByteArray &data);
