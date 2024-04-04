@@ -84,9 +84,9 @@ typedef enum
 
 typedef enum
 {
-    LOG_DATA_R = 0,
-    LOG_DATA_W,
-    LOG_DATA_RW
+    LOG_DATA_RW = 0,
+    LOG_DATA_R,
+    LOG_DATA_W
 } LOG_DATA_FLAGS;
 
 #endif // IOTV_TYPES_H

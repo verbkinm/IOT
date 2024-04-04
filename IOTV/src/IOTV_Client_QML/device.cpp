@@ -154,7 +154,7 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-    auto start = std::chrono::system_clock::now();
+//    auto start = std::chrono::system_clock::now();
 
     if (!_log_data_buf.contains(channelNumber))
         return;
@@ -170,7 +170,14 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
     for (auto &it : list)
     {
-        float yVal = it.data.toFloat();
+        float yVal = 0;
+
+        Raw raw = getReadChannelDataRaw(channelNumber);
+        if (raw.isInt() || raw.isReal())
+            yVal = it.data.toFloat();
+        else if (raw.isBool())
+            yVal = it.data == "true" ? 1 : 0;
+
         uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it.timeMS).time().msecsSinceStartOfDay();
         float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
         points.append({xVal, yVal});
@@ -208,7 +215,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
     _log_data_buf.erase(channelNumber);
 
-    qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
+//    qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
 
                               qDebug() << "Количество точек" << points.size();
 

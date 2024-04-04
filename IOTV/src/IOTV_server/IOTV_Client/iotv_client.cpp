@@ -239,6 +239,7 @@ void IOTV_Client::processQueryLogData(const Header *header)
     std::time_t seconds = pkg->startInterval / 1000;
     std::tm *tm = localtime(&seconds);
 
+    qDebug() << host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday});
     responseLogData(host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday}).toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 }
 

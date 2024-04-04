@@ -126,7 +126,6 @@ Page {
         margins.top: 10
         margins.bottom: 10
 
-
         // Время - x ось
         ValuesAxis {
             id: myAxisTime
@@ -234,7 +233,7 @@ Page {
             name: "Реле"
             axisX: myAxisTime
             axisYRight: myAxisRele
-            color: "yellow"
+            color: "green"
             width: 3
         }
 
@@ -261,7 +260,11 @@ Page {
         target: device
         function onSignalResponceLogData(points, channelNumber, flags) {
             var obj;
-            if (channelNumber === 12)
+            if (channelNumber === 0)
+                obj = lineSeriesRele
+            else if (channelNumber === 10)
+                obj = lineSeriesDistance
+            else if (channelNumber === 12)
                 obj = lineSeriesTemperature
             else if (channelNumber === 13)
                 obj = lineSeriesHumidity
@@ -274,8 +277,8 @@ Page {
 
             waitList[channelNumber] = false
 
-            if (/*waitList[0] === true ||
-                    waitList[10] === true ||*/
+            if (waitList[0] === true ||
+                    waitList[10] === true ||
                     waitList[12] === true ||
                     waitList[13] === true ||
                     waitList[14] === true)
@@ -295,6 +298,8 @@ Page {
         lineSeriesTemperature.clear()
         lineSeriesHumidity.clear()
         lineSeriesPressure.clear()
+        lineSeriesRele.clear()
+        lineSeriesDistance.clear()
 
         /*
         0 - реле
@@ -310,9 +315,11 @@ Page {
         waitList[13] = true
         waitList[14] = true
 
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 12, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 13, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 14, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 10, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 14, 0)
 
         busyIndicator.visible = true
     }

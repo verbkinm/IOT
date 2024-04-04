@@ -363,7 +363,7 @@ void Client::queryRead(const QString &name, uint8_t channelNumber)
 void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
 {
     char outData[BUFSIZ];
-    auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, flags);
+    auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, static_cast<uint8_t>(flags));
 
     write({outData, static_cast<int>(size)});
 }
@@ -386,12 +386,12 @@ void Client::queryPing()
 
     write({outData, static_cast<int>(size)});
 
-    if (_counterPing > COUNTER_PING_COUNT)
-    {
-        Log::write(" WARRNING: ping timeout",
-                   Log::Write_Flag::STDOUT, "");
-        disconnectFromHost();
-    }
+//    if (_counterPing > COUNTER_PING_COUNT)
+//    {
+//        Log::write(" WARRNING: ping timeout",
+//                   Log::Write_Flag::STDOUT, "");
+//        disconnectFromHost();
+//    }
 }
 
 void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
@@ -561,7 +561,7 @@ void Client::responceLogData(const Header *header)
     QString data;
     uint64_t timeMS = 0;
 
-    static auto start = std::chrono::system_clock::now();
+//    static auto start = std::chrono::system_clock::now();
 
     if (pkg->dataSize > 0)
     {
@@ -582,7 +582,7 @@ void Client::responceLogData(const Header *header)
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
         qDebug() << "channel " << pkg->channelNumber << "stop fragment";
 
-        qDebug() << "responceLogData - " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+//        qDebug() << "responceLogData - " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
     }
 
     // Что бы не вис графический интерфейс
