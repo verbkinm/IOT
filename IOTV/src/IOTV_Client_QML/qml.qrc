@@ -127,6 +127,7 @@
         <file>Devices/BaseItem/DatePicker.qml</file>
         <file>Devices/Device_2/Log_Charts.qml</file>
         <file>img/forward.png</file>
+        <file>Devices/Device_5/Log_Charts.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>
