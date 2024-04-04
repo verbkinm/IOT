@@ -561,6 +561,8 @@ void Client::responceLogData(const Header *header)
     QString data;
     uint64_t timeMS = 0;
 
+    static auto start = std::chrono::system_clock::now();
+
     if (pkg->dataSize > 0)
     {
         uint16_t dataSize;
@@ -571,6 +573,7 @@ void Client::responceLogData(const Header *header)
         for (int i = 0; i < dataSize; ++i)
             data.push_back(pkg->data[10 + i]);
 
+        QApplication::processEvents(QEventLoop::AllEvents);
         _devices[name].addDataLog(pkg->channelNumber, timeMS, data, pkg->flags);
     }
 
@@ -578,14 +581,20 @@ void Client::responceLogData(const Header *header)
     {
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
         qDebug() << "channel " << pkg->channelNumber << "stop fragment";
+
+        qDebug() << "responceLogData - " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
     }
 
-    static int counter = 0;
-    if (counter++ > 10)
-    {
-        QApplication::processEvents(QEventLoop::ExcludeSocketNotifiers);
-        counter = 0;
-    }
+    // Что бы не вис графический интерфейс
+//    static int counter = 0;
+//    if (counter++ > 10)
+//    {
+//        QApplication::processEvents(QEventLoop::EventLoopExec);
+//        counter = 0;
+//    }
+
+    // На стороне сервера поток Client занят отправкой данных и не отвечает на другие запросы от данного клиента
+    // в том числе не пинг, что бы данный клиент не прирвал связь по пинг таймеру, обнуляем счетчик.
     _counterPing = 0;
 }
 

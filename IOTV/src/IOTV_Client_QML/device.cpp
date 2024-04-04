@@ -154,19 +154,23 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-     auto start = std::chrono::system_clock::now();
+    auto start = std::chrono::system_clock::now();
 
     if (!_log_data_buf.contains(channelNumber))
         return;
 
     auto list = _log_data_buf[channelNumber];
+    if (list.size() == 0)
+    {
+        emit signalResponceLogData({}, channelNumber, flags);
+        return;
+    }
 
     QList<QPointF> points;
 
     auto it = list.begin();
     auto preIt = it;
     auto preEnd = --list.end();
-
 
     //Первая точка
     uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
@@ -187,7 +191,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
         }
     }
 
-    //Последняя точка
+    //Последняя точка. Не сравниваем с прошой, так как нужно минимум 2 точки для прямой на графике
     mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
     xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
     yVal = it->data.toFloat();
@@ -198,7 +202,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
     qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
 
-    qDebug() << "Количество точек" << points.size();
+                              qDebug() << "Количество точек" << points.size();
 
 
     emit signalResponceLogData(std::move(points), channelNumber, flags);

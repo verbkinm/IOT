@@ -240,7 +240,7 @@ Page {
 
         LineSeries {
             id:lineSeriesDistance
-            name: "Реле"
+            name: "VL6180"
             axisX: myAxisTime
             axisYRight: myAxisDistacnce
             color: "orange"
