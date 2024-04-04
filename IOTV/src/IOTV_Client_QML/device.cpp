@@ -168,34 +168,42 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
     QList<QPointF> points;
 
-    auto it = list.begin();
-    auto preIt = it;
-    auto preEnd = --list.end();
-
-    //Первая точка
-    uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-    float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-    float yVal = it->data.toFloat();
-    points.append({xVal, yVal});
-
-    ++it;
-    for (;it != preEnd; ++it, ++preIt)
+    for (auto &it : list)
     {
-        yVal = it->data.toFloat();
-        // Если значение прошлой точки совпадает с текущей, то пропускаем текущую точку
-        if (yVal != preIt->data.toFloat())
-        {
-            mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-            xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-            points.append({xVal, yVal});
-        }
+        float yVal = it.data.toFloat();
+        uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it.timeMS).time().msecsSinceStartOfDay();
+        float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+        points.append({xVal, yVal});
     }
 
-    //Последняя точка. Не сравниваем с прошой, так как нужно минимум 2 точки для прямой на графике
-    mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-    xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-    yVal = it->data.toFloat();
-    points.append({xVal, yVal});
+    //    auto it = list.begin();
+    //    auto preIt = it;
+    //    auto preEnd = --list.end();
+
+    //    //Первая точка
+    //    uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
+    //    float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+    //    float yVal = it->data.toFloat();
+    //    points.append({xVal, yVal});
+
+    //    ++it;
+    //    for (;it != preEnd; ++it, ++preIt)
+    //    {
+    //        yVal = it->data.toFloat();
+    //        // Если значение прошлой точки совпадает с текущей, то пропускаем текущую точку
+    //        if (yVal != preIt->data.toFloat())
+    //        {
+    //            mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
+    //            xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+    //            points.append({xVal, yVal});
+    //        }
+    //    }
+
+    //    //Последняя точка. Не сравниваем с прошой, так как нужно минимум 2 точки для прямой на графике
+    //    mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
+    //    xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+    //    yVal = it->data.toFloat();
+    //    points.append({xVal, yVal});
 
 
     _log_data_buf.erase(channelNumber);
