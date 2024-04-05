@@ -9,12 +9,6 @@
 #include "iotv_server_embedded.h"
 #include "wrap_qbytearray.h"
 
-struct Log_Data_Buff {
-    uint64_t timeMS;
-    QString data;
-    uint8_t flags;
-};
-
 class Device : public Base_Host
 {
     Q_OBJECT
@@ -57,7 +51,7 @@ public:
     const QString &aliasName() const;
     void setAliasName(const QString &newAliasName);
 
-    void addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags);
+    void addDataLog(uint8_t channelNumber, const QByteArray &data);
     void clearDataLog(uint8_t channelNumber);
 
     Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
@@ -68,7 +62,7 @@ private:
 
     QTimer _timerRead, _timerState;
 
-    std::unordered_map<uint8_t, std::list<Log_Data_Buff>> _log_data_buf;
+    std::unordered_map<uint8_t, QByteArray> _log_data_buf;
 
 signals:
     void signalQueryIdentification();

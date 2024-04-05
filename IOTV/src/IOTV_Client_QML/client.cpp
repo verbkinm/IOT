@@ -558,29 +558,19 @@ void Client::responceLogData(const Header *header)
     if (!_devices.contains(name))
         return;
 
-    QString data;
-    uint64_t timeMS = 0;
-
-//    static auto start = std::chrono::system_clock::now();
+    if (header->fragment == 1)
+        _devices[name].clearDataLog(pkg->channelNumber);
 
     if (pkg->dataSize > 0)
     {
-        uint16_t dataSize;
-
-        memcpy(&timeMS, pkg->data, 8);
-        memcpy(&dataSize, &pkg->data[8], 2);
-
-        for (int i = 0; i < dataSize; ++i)
-            data.push_back(pkg->data[10 + i]);
-
-        QApplication::processEvents(QEventLoop::AllEvents);
-        _devices[name].addDataLog(pkg->channelNumber, timeMS, data, pkg->flags);
+//        QApplication::processEvents(QEventLoop::AllEvents);
+        _devices[name].addDataLog(pkg->channelNumber, {pkg->data, pkg->dataSize});
     }
 
-    if (pkg->dataSize == 0)
+    if (header->fragment == header->fragments)
     {
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
-        qDebug() << "channel " << pkg->channelNumber << "stop fragment";
+        qDebug() << "channel " << pkg->channelNumber << "data size - " << "stop fragment";
 
 //        qDebug() << "responceLogData - " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
     }
@@ -594,7 +584,7 @@ void Client::responceLogData(const Header *header)
 //    }
 
     // На стороне сервера поток Client занят отправкой данных и не отвечает на другие запросы от данного клиента
-    // в том числе не пинг, что бы данный клиент не прирвал связь по пинг таймеру, обнуляем счетчик.
+    // в том числе на пинг, что бы данный клиент не прирвал связь по пинг таймеру, обнуляем счетчик.
     _counterPing = 0;
 }
 

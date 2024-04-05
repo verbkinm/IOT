@@ -429,86 +429,18 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, u
     return headerToData(&header, outData, outDataSize);
 }
 
-uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
+uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
 {
-    if (fileName == NULL || outData == NULL || outDataSize == 0 || pkg == NULL)
+    if (outData == NULL || outDataSize == 0 || pkg == NULL)
         return 0;
 
-    int64_t lastTime = 0, logLine = 0;
-    uint64_t totalSendByte = 0;
-
-    FILE *file = fopen(fileName, "r");
-    if (file == NULL)
-        goto NULL_DATA_FRAGMENT;
-
-    while (!feof(file))
+    // Пустые данные
+    if (rawData == nullptr || rawDataSize == 0)
     {
-        ++logLine;
-
-        char value[BUFSIZ] = {0};
-        char rw;
-        uint64_t ms;
-        int ch, year, month, day, hour, minut, second;
-
-        char line [BUFSIZ] = {0};
-        if (fgets(line, sizeof(line), file) == NULL)
-            break;
-
-        if (strlen(line) < 31 || strlen(line) > 1024) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение.  1024 - ограничение от бесконечности
-        {
-            fprintf(stderr, "responseLogData, erro in %ld line\n", logLine);
-            continue;
-        }
-
-        sscanf(line, "%d%*c%d%*c%d%*c"
-                     "%d%*c%d%*c%d%*c%ld%*c%*c%*c"
-                     "%c%*c%d%*c%s",
-               &year, &month, &day,
-               &hour, &minut, &second,
-               &ms, &rw, &ch, value);
-
-        tm tm{};
-        tm.tm_year = year - 1900;
-        tm.tm_mon = month - 1;
-        tm.tm_mday = day;
-        tm.tm_hour = hour;
-        tm.tm_min = minut;
-        tm.tm_sec = second;
-
-        ms = mktime(&tm) * 1000 + ms;
-
-        // Фильтр по интервалу даты/времени
-        if (ms < pkg->startInterval)
-            continue;
-        if (ms > pkg->endInterval)
-            break;
-
-        // Фильтр по интервалу между записями в лог файле
-        if ((ms - lastTime) < pkg->interval)
-            continue;
-
-        // Фильтр номера канала
-        if (pkg->channelNumber != ch)
-            continue;
-
-        // Фильтр напрвавления чтение/запись
-        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
-            continue;
-
-        lastTime = ms;
-
-        uint16_t valueSize = strlen(value);
-        uint32_t sendDataSize = 8 + 2 + valueSize;
-        char data[sendDataSize];
-
-        memcpy(data, &ms, sizeof(ms));
-        memcpy(&data[8], &valueSize, sizeof(valueSize));
-        memcpy(&data[10], value, valueSize);
-
         struct Log_Data logData;
         memcpy(&logData, pkg, sizeof(logData));
-        logData.dataSize = sendDataSize;
-        logData.data = data;
+        logData.dataSize = 0;
+        logData.data = NULL;
 
         struct Header header = {
             .version = 2,
@@ -522,34 +454,47 @@ uint64_t responseLogData(const char *fileName, char *outData, uint64_t outDataSi
         };
 
         uint64_t resultSize = headerToData(&header, outData, outDataSize);
-        totalSendByte += writeFunc(outData, resultSize, obj);
+        return  writeFunc(outData, resultSize, obj);
     }
 
-    fclose(file);
+    uint64_t pkgsCount;
+    uint64_t totalSendByte = 0;
 
-NULL_DATA_FRAGMENT:
-    // Пакет с нулевым фрагментом данных - завершающий пакет!
-    struct Log_Data logData;
-    memcpy(&logData, pkg, sizeof(logData));
-    logData.dataSize = 0;
-    logData.data = NULL;
+    char *it = (char *)rawData;
+    char *end = (char *)rawData + rawDataSize;
 
-    struct Header header = {
-        .version = 2,
-        .type = HEADER_TYPE_RESPONSE,
-        .assignment = HEADER_ASSIGNMENT_LOG_DATA,
-        .flags = HEADER_FLAGS_NONE,
-        .fragment = 1,
-        .fragments = 1,
-        .dataSize = logDataSize(&logData),
-        .pkg = &logData
-    };
+    pkgsCount = pkgCount(rawDataSize, outDataSize, HEADER_SIZE + LOG_DATA_SIZE + pkg->nameSize);
+    for (uint16_t i = 0; i < pkgsCount; ++i)
+    {
+        uint64_t rawDataPart = outDataSize - HEADER_SIZE - LOG_DATA_SIZE - pkg->nameSize;
+        uint64_t sizeLeft = end - it;
+        if (sizeLeft < rawDataPart)
+            rawDataPart = sizeLeft;
 
-//    printf("channel %d - stop fragment\n", logData.channelNumber);
-//    fflush(stdout);
+        struct Log_Data logData;
+        memcpy(&logData, pkg, sizeof(logData));
+        logData.dataSize = rawDataPart;
+        logData.data = it;
 
-    uint64_t resultSize = headerToData(&header, outData, outDataSize);
-    totalSendByte += writeFunc(outData, resultSize, obj);
+        struct Header header = {
+            .version = 2,
+            .type = HEADER_TYPE_RESPONSE,
+            .assignment = HEADER_ASSIGNMENT_LOG_DATA,
+            .flags = HEADER_FLAGS_NONE,
+            .fragment = (uint16_t)(i + 1),
+            .fragments = (uint16_t)(pkgsCount),
+            .dataSize = logDataSize(&logData),
+            .pkg = &logData
+        };
+
+        it += rawDataPart;
+
+        uint64_t resultSize = headerToData(&header, outData, outDataSize);
+        totalSendByte += writeFunc(outData, resultSize, obj);
+
+        printf("fragments = %d / %d totalSendByte = %lu\n", header.fragment, header.fragments, totalSendByte);
+        fflush(stdout);
+    }
 
     return totalSendByte;
 }
@@ -593,7 +538,7 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOT
     return pkgCount(sendDataSize, dataOutSize, HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize);
 }
 
-uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags)
+uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, int64_t startInterval, int64_t endInterval, int32_t interval, uint8_t channelNumber, uint8_t flags)
 {
     if (outData == NULL)
         return 0;

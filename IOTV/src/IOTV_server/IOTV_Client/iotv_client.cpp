@@ -221,10 +221,9 @@ void IOTV_Client::processQueryLogData(const Header *header)
     if (pkg == nullptr)
         return;
 
+    QString compareName(QByteArray{pkg->name, pkg->nameSize});
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host){
         QString name = iotv_host.first->getName();
-        QString compareName(QByteArray{pkg->name, pkg->nameSize});
-
         return name == compareName;
     });
 
@@ -235,12 +234,133 @@ void IOTV_Client::processQueryLogData(const Header *header)
 
     char outData[BUFSIZ];
 
-    //!!! Доработать для интервалов pkg->startInterval - pkg->endInterval
-    std::time_t seconds = pkg->startInterval / 1000;
-    std::tm *tm = localtime(&seconds);
+    time_t second = pkg->startInterval / 1000;
+    std::tm *tm = localtime(&second);
+    QDate startDate(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 
-    qDebug() << host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday});
-    responseLogData(host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday}).toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
+    QString fileName = host->logName(startDate);
+
+    int64_t lastTime = 0, logLine = 0;
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        Log::write(QString(Q_FUNC_INFO) + " не удалось открыть файл " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        responseLogData(0, 0, outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
+        return;
+    }
+
+    QByteArray byteArray;
+    while(!file.atEnd())
+    {
+        ++logLine;
+
+        QString value, line;
+        std::string valueStr;
+        char rw, tmp;
+        int64_t ms;
+        int ch, year, month, day, hour, minut, second;
+
+        line = file.readLine();
+
+        if (line.size() < 31) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение
+        {
+            Log::write(QString(Q_FUNC_INFO) + " ошибка данных лог файла " + fileName + " в строке " + QString::number(logLine), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            continue;
+        }
+
+        std::stringstream stream(line.toStdString());
+//        QTextStream stream(&line);
+        stream >> year >> tmp >> month >> tmp >> day >> tmp
+            >> hour >> tmp >> minut >> tmp >> second >> tmp >> ms >> tmp
+            >> rw >> tmp >> ch >> tmp >> valueStr;
+
+        value.append(valueStr);
+
+//        QDateTime dateTime({year, month, day}, {hour, minut, second, static_cast<int>(ms)});
+//        ms = dateTime.toMSecsSinceEpoch();
+
+        std::tm tm{};
+        tm.tm_year = year - 1900;
+        tm.tm_mon = month - 1;
+        tm.tm_mday = day;
+        tm.tm_hour = hour;
+        tm.tm_min = minut;
+        tm.tm_sec = second;
+
+        ms = mktime(&tm) * 1000 + ms;
+
+        // Фильтр по интервалу даты/времени
+        if (ms < pkg->startInterval)
+            continue;
+        if (ms > pkg->endInterval)
+            break;
+
+        // Фильтр по интервалу между записями в лог файле
+        if ((ms - lastTime) < pkg->interval)
+            continue;
+
+        // Фильтр номера канала
+        if (pkg->channelNumber != ch)
+            continue;
+
+        // Фильтр напрвавления чтение/запись
+        if ((pkg->flags == LOG_DATA_R && rw != 'R') || (pkg->flags == LOG_DATA_W && rw != 'W'))
+            continue;
+
+        lastTime = ms;
+
+        byteArray.append(QString::number(ms).toStdString());
+        byteArray.append(' ');
+        byteArray.append(value.toStdString().c_str());
+        byteArray.append('\n');
+    }
+
+    qDebug() << byteArray.size();
+
+    QFile fileTmp("test_" + QString::number(pkg->channelNumber) + ".txt");
+    fileTmp.open(QIODevice::WriteOnly);
+    fileTmp.write(byteArray.data(), byteArray.size());
+    fileTmp.close();
+
+    responseLogData(byteArray.data(), byteArray.size(), outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
+
+    /*
+
+    Интервал может может быть и не за одни сутки, тогда нужно парсить все лог файлы, попадающие под интервал
+    second = pkg->endInterval / 1000;
+    tm = localtime(&second);
+    QDate endDate(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+    ...
+    */
+
+//    if (header == NULL || header->pkg == NULL)
+//        return;
+
+//    const struct Log_Data *pkg = static_cast<const struct Log_Data *>(header->pkg);
+//    if (pkg == nullptr)
+//        return;
+
+//    auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host){
+//        QString name = iotv_host.first->getName();
+//        QString compareName(QByteArray{pkg->name, pkg->nameSize});
+
+//        return name == compareName;
+//    });
+
+//    if (it == _hosts.end())
+//        return;
+
+//    auto host = it->first;
+
+//    char outData[BUFSIZ];
+
+//    //!!! Доработать для интервалов pkg->startInterval - pkg->endInterval
+//    std::time_t seconds = pkg->startInterval / 1000;
+//    std::tm *tm = localtime(&seconds);
+
+//    qDebug() << host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday});
+//    responseLogData(host->logName({tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday}).toStdString().c_str(), outData, BUFSIZ, pkg, &IOTV_Client::writeFunc, _socket);
 }
 
 void IOTV_Client::write(const QByteArray &data, qint64 size) const

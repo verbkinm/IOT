@@ -1,5 +1,7 @@
 #include "device.h"
+#include "qbuffer.h"
 #include "qdatetime.h"
+#include <QFile>
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent},
@@ -154,72 +156,71 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-//    auto start = std::chrono::system_clock::now();
+    //    auto start = std::chrono::system_clock::now();
 
     if (!_log_data_buf.contains(channelNumber))
         return;
 
-    auto list = _log_data_buf[channelNumber];
-    if (list.size() == 0)
+    if (_log_data_buf[channelNumber].size() == 0)
     {
         emit signalResponceLogData({}, channelNumber, flags);
         return;
     }
 
+    QBuffer bufferFile(&_log_data_buf[channelNumber]);
+    bufferFile.open(QIODevice::ReadOnly);
+
+    QFile fileTmp("test_" + QString::number(channelNumber) + ".txt");
+    fileTmp.open(QIODevice::WriteOnly);
+    fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
+    fileTmp.close();
+
     QList<QPointF> points;
 
-    for (auto &it : list)
+    while (!bufferFile.atEnd())
     {
+        QString line = bufferFile.readLine();
+
+
+        std::stringstream stream(line.toStdString());
+
         float yVal = 0;
+        float xVal = 0;
+        uint64_t msDay = 0;
+        std::string dataStr;
+        QString data;
+
+        stream >> msDay >> dataStr;
+        data.append(dataStr);
+
+        if (stream.fail())
+        {
+            qDebug() << Q_FUNC_INFO << "ошибка данных";
+            continue;
+        }
+
+        msDay = QDateTime::fromMSecsSinceEpoch(msDay).time().msecsSinceStartOfDay();
+        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
 
         Raw raw = getReadChannelDataRaw(channelNumber);
         if (raw.isInt() || raw.isReal())
-            yVal = it.data.toFloat();
+            yVal = data.toFloat();
         else if (raw.isBool())
-            yVal = it.data == "true" ? 1 : 0;
+            yVal = data == "true" ? 1 : 0;
 
-        uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it.timeMS).time().msecsSinceStartOfDay();
-        float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
+        if (xVal < 9)
+        {
+            qDebug() << xVal;
+        }
+
         points.append({xVal, yVal});
     }
 
-    //    auto it = list.begin();
-    //    auto preIt = it;
-    //    auto preEnd = --list.end();
-
-    //    //Первая точка
-    //    uint64_t mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-    //    float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-    //    float yVal = it->data.toFloat();
-    //    points.append({xVal, yVal});
-
-    //    ++it;
-    //    for (;it != preEnd; ++it, ++preIt)
-    //    {
-    //        yVal = it->data.toFloat();
-    //        // Если значение прошлой точки совпадает с текущей, то пропускаем текущую точку
-    //        if (yVal != preIt->data.toFloat())
-    //        {
-    //            mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-    //            xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-    //            points.append({xVal, yVal});
-    //        }
-    //    }
-
-    //    //Последняя точка. Не сравниваем с прошой, так как нужно минимум 2 точки для прямой на графике
-    //    mDay = QDateTime::fromMSecsSinceEpoch(it->timeMS).time().msecsSinceStartOfDay();
-    //    xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-    //    yVal = it->data.toFloat();
-    //    points.append({xVal, yVal});
-
-
     _log_data_buf.erase(channelNumber);
 
-//    qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
+    //    qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
 
-                              qDebug() << "Количество точек" << points.size();
-
-
+    qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
 }
 
@@ -273,13 +274,9 @@ void Device::setAliasName(const QString &newAliasName)
     emit signalAliasNameChanged();
 }
 
-void Device::addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags)
+void Device::addDataLog(uint8_t channelNumber, const QByteArray &data)
 {
-    Log_Data_Buff log_buf;
-    log_buf.timeMS = timeMS;
-    log_buf.data = data;
-    log_buf.flags = flags;
-    _log_data_buf[channelNumber].emplace_back(log_buf);
+    _log_data_buf[channelNumber].append(data);
 }
 
 void Device::clearDataLog(uint8_t channelNumber)

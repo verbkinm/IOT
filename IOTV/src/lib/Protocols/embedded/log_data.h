@@ -5,11 +5,11 @@
 
 struct Log_Data
 {
-    uint64_t startInterval;
-    uint64_t endInterval;
+    int64_t startInterval;
+    int64_t endInterval;
 
-    uint32_t interval;
-    uint32_t dataSize;
+    int32_t interval;
+    int32_t dataSize;
 
     uint8_t nameSize;
     uint8_t channelNumber;
