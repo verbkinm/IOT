@@ -156,8 +156,6 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-    //    auto start = std::chrono::system_clock::now();
-
     if (!_log_data_buf.contains(channelNumber))
         return;
 
@@ -195,7 +193,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
         if (stream.fail())
         {
-            qDebug() << Q_FUNC_INFO << "ошибка данных";
+            qDebug() << Q_FUNC_INFO << "ошибка данных" << channelNumber;
             continue;
         }
 
@@ -217,9 +215,6 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     }
 
     _log_data_buf.erase(channelNumber);
-
-    //    qDebug() << "Время - " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
-
     qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
 }

@@ -386,12 +386,12 @@ void Client::queryPing()
 
     write({outData, static_cast<int>(size)});
 
-//    if (_counterPing > COUNTER_PING_COUNT)
-//    {
-//        Log::write(" WARRNING: ping timeout",
-//                   Log::Write_Flag::STDOUT, "");
-//        disconnectFromHost();
-//    }
+    if (_counterPing > COUNTER_PING_COUNT)
+    {
+        Log::write(" WARRNING: ping timeout",
+                   Log::Write_Flag::STDOUT, "");
+        disconnectFromHost();
+    }
 }
 
 void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
@@ -571,8 +571,6 @@ void Client::responceLogData(const Header *header)
     {
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
         qDebug() << "channel " << pkg->channelNumber << "data size - " << "stop fragment";
-
-//        qDebug() << "responceLogData - " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
     }
 
     // Что бы не вис графический интерфейс
