@@ -1,8 +1,10 @@
 #include "device.h"
-#include "qapplication.h"
-#include "qbuffer.h"
-#include "qdatetime.h"
+
+#include <QBuffer>
+#include <QDateTime>
 #include <QFile>
+
+#include <sstream>
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent},
@@ -157,10 +159,7 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-    if (!_log_data_buf.contains(channelNumber))
-        return;
-
-    if (_log_data_buf[channelNumber].size() == 0)
+    if (!_log_data_buf.contains(channelNumber) || _log_data_buf[channelNumber].size() == 0)
     {
         emit signalResponceLogData({}, channelNumber, flags);
         return;
@@ -174,7 +173,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
     fileTmp.close();
 
-    std::unordered_map<int, float> uniqPoints;
+    std::map<int, float> uniqPoints;
     const float roundOffset = 1000;
     while (!bufferFile.atEnd())
     {
@@ -213,9 +212,29 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     bufferFile.close();
     _log_data_buf.erase(channelNumber);
 
-    QList<QPointF> points;//(uniqPoints.begin(), uniqPoints.end());
-    for (auto [key, value] : uniqPoints)
-        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
+
+    QList<QPointF> points;
+    points.emplace_back(uniqPoints.begin()->first / roundOffset, uniqPoints.begin()->second);
+    for (auto it = ++uniqPoints.begin(); it != uniqPoints.end(); it++)
+    {
+        auto prev = std::prev(it);
+
+        if (it->second != prev->second)
+        {
+            points.emplace_back(prev->first / roundOffset, prev->second);
+
+            if (it->second == std::next(it)->second)
+                points.emplace_back(it->first / roundOffset, it->second);
+        }
+    }
+    points.emplace_back(uniqPoints.rbegin()->first / roundOffset, uniqPoints.rbegin()->second);
+
+//    qDebug() << "Количество точек list" << points.size();
+//    qDebug() << "Количество точек map" << uniqPoints.size();
+
+    uniqPoints.clear();
+//    for (auto [key, value] : uniqPoints)
+//        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
 
     qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
@@ -278,7 +297,7 @@ void Device::addDataLog(uint8_t channelNumber, const QByteArray &data)
 
 void Device::clearDataLog(uint8_t channelNumber)
 {
-    _log_data_buf[channelNumber].clear();
+    _log_data_buf.erase(channelNumber);
 }
 
 void Device::testFunc(Wrap_QByteArray *data)

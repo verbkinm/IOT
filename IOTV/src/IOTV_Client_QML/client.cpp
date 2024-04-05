@@ -386,12 +386,12 @@ void Client::queryPing()
 
     write({outData, static_cast<int>(size)});
 
-    if (_counterPing > COUNTER_PING_COUNT)
-    {
-        Log::write(" WARRNING: ping timeout",
-                   Log::Write_Flag::STDOUT, "");
-        disconnectFromHost();
-    }
+//    if (_counterPing > COUNTER_PING_COUNT)
+//    {
+//        Log::write(" WARRNING: ping timeout",
+//                   Log::Write_Flag::STDOUT, "");
+//        disconnectFromHost();
+//    }
 }
 
 void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
@@ -563,7 +563,7 @@ void Client::responceLogData(const Header *header)
 
     if (pkg->dataSize > 0)
     {
-        QApplication::processEvents(QEventLoop::AllEvents);
+//        QApplication::processEvents(QEventLoop::AllEvents);
         _devices[name].addDataLog(pkg->channelNumber, {pkg->data, pkg->dataSize});
     }
 

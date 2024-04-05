@@ -1,5 +1,7 @@
 #include "iotv_client.h"
 
+#include <sstream>
+
 IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
     _socket(socket),
     _hosts(hosts),

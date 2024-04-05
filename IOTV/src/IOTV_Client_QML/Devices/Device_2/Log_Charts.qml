@@ -117,7 +117,7 @@ Page {
         anchors.bottom: parent.bottom
         //        title: "XXX data read"
         antialiasing: true
-        animationOptions: ChartView.AllAnimations
+        animationOptions: ChartView.NoAnimation
         titleFont.bold: true
         titleFont.pointSize: 15
         //        legend.visible:false
@@ -263,8 +263,8 @@ Page {
 
         waitList = [true, true, true]
 
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 1, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 1, 0)
         device.signalQueryLogData(dateStart, dateEnd, 60000, 2, 0)
 
         busyIndicator.visible = true
