@@ -1,4 +1,5 @@
 #include "device.h"
+#include "qapplication.h"
 #include "qbuffer.h"
 #include "qdatetime.h"
 #include <QFile>
@@ -173,17 +174,15 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
     fileTmp.close();
 
-    QList<QPointF> points;
-
+    std::unordered_map<int, float> uniqPoints;
+    const float roundOffset = 1000;
     while (!bufferFile.atEnd())
     {
-        QString line = bufferFile.readLine();
-
-
-        std::stringstream stream(line.toStdString());
+        std::string line = bufferFile.readLine().toStdString();
+        std::stringstream stream(line);
 
         float yVal = 0;
-        float xVal = 0;
+//        float xVal = 0;
         uint64_t msDay = 0;
         std::string dataStr;
         QString data;
@@ -197,24 +196,27 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
             continue;
         }
 
-        msDay = QDateTime::fromMSecsSinceEpoch(msDay).time().msecsSinceStartOfDay();
-        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
-
         Raw raw = getReadChannelDataRaw(channelNumber);
         if (raw.isInt() || raw.isReal())
             yVal = data.toFloat();
         else if (raw.isBool())
             yVal = data == "true" ? 1 : 0;
 
-        if (xVal < 9)
-        {
-            qDebug() << xVal;
-        }
+        msDay = QDateTime::fromMSecsSinceEpoch(msDay).time().msecsSinceStartOfDay();
+//        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
 
-        points.append({xVal, yVal});
+        // умножить на 1000 и превратить в int, что бы уменьшить количество точек!
+        uniqPoints[convert_range(msDay, 0, 86'400'000, 0, 24) * roundOffset] = yVal;
+
+//        points.append({xVal, yVal});
     }
-
+    bufferFile.close();
     _log_data_buf.erase(channelNumber);
+
+    QList<QPointF> points;//(uniqPoints.begin(), uniqPoints.end());
+    for (auto [key, value] : uniqPoints)
+        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
+
     qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
 }

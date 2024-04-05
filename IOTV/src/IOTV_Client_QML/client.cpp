@@ -563,7 +563,7 @@ void Client::responceLogData(const Header *header)
 
     if (pkg->dataSize > 0)
     {
-//        QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
         _devices[name].addDataLog(pkg->channelNumber, {pkg->data, pkg->dataSize});
     }
 

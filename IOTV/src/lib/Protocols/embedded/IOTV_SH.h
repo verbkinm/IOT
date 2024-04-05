@@ -20,7 +20,7 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
 uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, uint8_t flags);
 uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name);
 uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, uint8_t type);
-uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, int64_t startInterval, int64_t endInterval, int32_t interval, uint8_t channelNumber, uint8_t flags);
+uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags);
 
 struct IOTV_Server_embedded *createIotFromHeaderIdentification(const struct Header *header);
 

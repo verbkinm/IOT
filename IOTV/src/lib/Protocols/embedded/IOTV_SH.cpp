@@ -538,7 +538,7 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOT
     return pkgCount(sendDataSize, dataOutSize, HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize);
 }
 
-uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, int64_t startInterval, int64_t endInterval, int32_t interval, uint8_t channelNumber, uint8_t flags)
+uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags)
 {
     if (outData == NULL)
         return 0;
