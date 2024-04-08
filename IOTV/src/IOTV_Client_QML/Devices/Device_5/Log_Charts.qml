@@ -315,8 +315,8 @@ Page {
         waitList[13] = true
         waitList[14] = true
 
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 10, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 10, 0)
         device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
         device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
         device.signalQueryLogData(dateStart, dateEnd, 60000, 14, 0)
