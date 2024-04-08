@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDir>
+#include <QDate>
 
 #include <memory>
 #include <mutex>

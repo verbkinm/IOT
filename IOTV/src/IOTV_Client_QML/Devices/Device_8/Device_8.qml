@@ -24,7 +24,7 @@ Page {
         height: root.height
         enabled: device.state
 
-        //        contentHeight: img.height
+        contentHeight: camRect.height + 130 + 15
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
@@ -34,8 +34,8 @@ Page {
         MyCamRect {
             id: camRect
             device: root.device
-            width: parent.width - 20
-            height: parent.height - (parent.height / 100 * 30)
+            width: root.width - 20
+            height: root.height - root.height * 0.3
             anchors.horizontalCenter: parent.horizontalCenter
 
             onPlay: {
@@ -56,10 +56,17 @@ Page {
             //                device.signalCloseReadStream(1)
             //            }
         }
+
+        onHeightChanged: {
+//            console.log(fl.height, fl.contentHeight)
+            glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
+        }
     }
 
     Component.onCompleted: {
         console.log("Device 8 construct: ", objectName)
+//        console.log(root.height)
+//        fl.contentHeight = camRect.height + 80 + 15
     }
 
     Component.onDestruction: {

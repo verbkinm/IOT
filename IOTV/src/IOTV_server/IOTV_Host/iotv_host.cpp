@@ -1,6 +1,7 @@
 #include "iotv_host.h"
 
 #include <QFileInfo>
+#include <QDate>
 
 //QString IOTV_Host::logName()
 //{

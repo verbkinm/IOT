@@ -9,7 +9,8 @@
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent},
     _name{QByteArray{dev->name, dev->nameSize}},
-    _aliasName(_name)
+    _aliasName(_name),
+    _logDataOverflow(false)
 {
     Q_ASSERT(dev != nullptr);
 
@@ -181,7 +182,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
         std::stringstream stream(line);
 
         float yVal = 0;
-//        float xVal = 0;
+        //        float xVal = 0;
         uint64_t msDay = 0;
         std::string dataStr;
         QString data;
@@ -192,7 +193,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
         if (stream.fail())
         {
             qDebug() << Q_FUNC_INFO << "ошибка данных" << channelNumber;
-            continue;
+                continue;
         }
 
         Raw raw = getReadChannelDataRaw(channelNumber);
@@ -202,12 +203,12 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
             yVal = data == "true" ? 1 : 0;
 
         msDay = QDateTime::fromMSecsSinceEpoch(msDay).time().msecsSinceStartOfDay();
-//        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
+        //        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
 
         // умножить на 1000 и превратить в int, что бы уменьшить количество точек!
         uniqPoints[convert_range(msDay, 0, 86'400'000, 0, 24) * roundOffset] = yVal;
 
-//        points.append({xVal, yVal});
+        //        points.append({xVal, yVal});
     }
     bufferFile.close();
     _log_data_buf.erase(channelNumber);
@@ -229,15 +230,15 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     }
     points.emplace_back(uniqPoints.rbegin()->first / roundOffset, uniqPoints.rbegin()->second);
 
-//    qDebug() << "Количество точек list" << points.size();
-//    qDebug() << "Количество точек map" << uniqPoints.size();
+    //    qDebug() << "Количество точек list" << points.size();
+    //    qDebug() << "Количество точек map" << uniqPoints.size();
 
     uniqPoints.clear();
-//    for (auto [key, value] : uniqPoints)
-//        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
+    //    for (auto [key, value] : uniqPoints)
+    //        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
 
     qDebug() << "Количество точек" << points.size();
-    emit signalResponceLogData(std::move(points), channelNumber, flags);
+        emit signalResponceLogData(std::move(points), channelNumber, flags);
 }
 
 void Device::setReadInterval(int interval)
@@ -292,7 +293,13 @@ void Device::setAliasName(const QString &newAliasName)
 
 void Device::addDataLog(uint8_t channelNumber, const QByteArray &data)
 {
-    _log_data_buf[channelNumber].append(data);
+    if ((_log_data_buf[channelNumber].size() + data.size()) <= LOG_DATA_MAX)
+    {
+        _log_data_buf[channelNumber].append(data);
+        _logDataOverflow = false;
+    }
+    else
+        _logDataOverflow = true;
 }
 
 void Device::clearDataLog(uint8_t channelNumber)
@@ -300,10 +307,20 @@ void Device::clearDataLog(uint8_t channelNumber)
     _log_data_buf.erase(channelNumber);
 }
 
+bool Device::logDataOverflow() const
+{
+    return _logDataOverflow;
+}
+
 void Device::testFunc(Wrap_QByteArray *data)
 {
     qDebug() << "testFunc total data: " << data->data().size();
     //    delete data;
+}
+
+int Device::getLOG_DATA_MAX()
+{
+    return LOG_DATA_MAX;
 }
 
 void Device::slotTimerReadTimeOut()

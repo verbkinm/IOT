@@ -106,6 +106,7 @@ Page {
     }
 
     ChartView {
+        id: chartView
         width: parent.width
 
         anchors.top: {
@@ -212,6 +213,21 @@ Page {
             width: 3
             axisYRight: myAxisPressure
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onWheel: (wheel)=> {
+                         var angle = wheel.angleDelta.y
+                         if (angle > 0)
+                            chartView.zoomIn()
+                         else
+                            chartView.zoomOut()
+                     }
+            onMouseXChanged: {
+//                console.log(mouseX)
+//                chartView.scrollLeft(mouseX)
+            }
+        }
     }
 
 
@@ -234,9 +250,15 @@ Page {
             else if (channelNumber === 2)
                 obj = lineSeriesPressure
 
+            var length = 0
 
-            for(var i = 0; i < points.length; i++)
-                obj.append(points[i].x, points[i].y)
+            if (device.logDataOverflow)
+                glob_notification.set_text("Превышен размер данных!")
+            else
+            {
+                for(var i = 0; i < points.length; i++)
+                    obj.append(points[i].x, points[i].y)
+            }
 
             waitList[channelNumber] = false
 
@@ -263,8 +285,8 @@ Page {
 
         waitList = [true, true, true]
 
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 1, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 1, 0)
         device.signalQueryLogData(dateStart, dateEnd, 60000, 2, 0)
 
         busyIndicator.visible = true

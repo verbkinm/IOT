@@ -1,5 +1,7 @@
 #include "tcp_reverse_conn_type.h"
 
+#include <QHostAddress>
+
 TCP_REVERSE_conn_type::TCP_REVERSE_conn_type(const QString &name, QTcpSocket *socket, QObject *parent)
     : Base_conn_type{name, parent}, _tcpSocket(socket)
 {

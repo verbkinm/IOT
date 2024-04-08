@@ -278,16 +278,6 @@ void IOTV_Client::processQueryLogData(const Header *header)
         QDateTime dateTime({year, month, day}, {hour, minut, second, static_cast<int>(ms)});
         ms = dateTime.toMSecsSinceEpoch();
 
-//        std::tm tm{};
-//        tm.tm_year = year - 1900;
-//        tm.tm_mon = month - 1;
-//        tm.tm_mday = day;
-//        tm.tm_hour = hour;
-//        tm.tm_min = minut;
-//        tm.tm_sec = second;
-
-//        ms = (uint64_t)mktime(&tm) * 1000 + ms;
-
         // Фильтр по интервалу даты/времени
         if (ms < pkg->startInterval)
             continue;
@@ -308,15 +298,17 @@ void IOTV_Client::processQueryLogData(const Header *header)
 
         lastTime = ms;
 
-        byteArray.append(QString::number(ms).toStdString() + " " + valueStr + "\n");
+        // qt5
+        std::string str = std::to_string(ms) + " " + valueStr + "\n";
+        byteArray.append(str.c_str());
     }
 
-    qDebug() << "Канал" << pkg->channelNumber << "строк" << logLine << byteArray.size();
+//    qDebug() << "Канал" << pkg->channelNumber << "строк" << logLine << byteArray.size();
 
-    QFile fileTmp("test_" + QString::number(pkg->channelNumber) + ".txt");
-    fileTmp.open(QIODevice::WriteOnly);
-    fileTmp.write(byteArray.data(), byteArray.size());
-    fileTmp.close();
+//    QFile fileTmp("test_" + QString::number(pkg->channelNumber) + ".txt");
+//    fileTmp.open(QIODevice::WriteOnly);
+//    fileTmp.write(byteArray.data(), byteArray.size());
+//    fileTmp.close();
 
     responseLogData(byteArray.data(), byteArray.size(), outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
 

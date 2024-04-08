@@ -22,6 +22,8 @@ class Device : public Base_Host
     Q_PROPERTY(int readChannelLength READ getReadChannelLength CONSTANT)
     Q_PROPERTY(int writeChannelLength READ getWriteChannelLength CONSTANT)
 
+    Q_PROPERTY(int logDataOverflow READ logDataOverflow CONSTANT)
+
 public:
     Device() = default;
     explicit Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
@@ -54,7 +56,11 @@ public:
     void addDataLog(uint8_t channelNumber, const QByteArray &data);
     void clearDataLog(uint8_t channelNumber);
 
+    bool logDataOverflow() const;
+
     Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
+
+    Q_INVOKABLE static int getLOG_DATA_MAX();
 
 private:
     const QString _name;
@@ -63,6 +69,9 @@ private:
     QTimer _timerRead, _timerState;
 
     std::unordered_map<uint8_t, QByteArray> _log_data_buf;
+
+    static constexpr int LOG_DATA_MAX = 1'000'000;
+    bool _logDataOverflow;
 
 signals:
     void signalQueryIdentification();
