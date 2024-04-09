@@ -254,13 +254,15 @@ Page {
                 glob_notification.set_text("Превышен размер данных!")
             else
             {
-                for(var i = 0; i < points.length; i++)
-                    obj.append(points[i].x, points[i].y)
+                // усконерние обавления точек!!!
+                device.fillSeries(obj, points)
+//                for(var i = 0; i < points.length; i++)
+//                    obj.append(points[i].x, points[i].y)
             }
 
             waitList[channelNumber] = false
 
-            for (i = 0; i < waitList.length; i++)
+            for (var i = 0; i < waitList.length; i++)
             {
                 if (waitList[i] === true)
                     return

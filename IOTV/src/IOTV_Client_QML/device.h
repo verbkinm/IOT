@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
 
     Q_INVOKABLE static int getLOG_DATA_MAX();
+    Q_INVOKABLE void fillSeries(QLineSeries *series, QList<QPointF> points);
 
 private:
     const QString _name;

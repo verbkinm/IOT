@@ -327,6 +327,12 @@ int Device::getLOG_DATA_MAX()
     return LOG_DATA_MAX;
 }
 
+void Device::fillSeries(QLineSeries *series, QList<QPointF> points)
+{
+    // намного быстрее добавляются точки, чем через qml series.append(x, y)
+    series->replace(points);
+}
+
 void Device::slotTimerReadTimeOut()
 {
     if (getId() == 0)

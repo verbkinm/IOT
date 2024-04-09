@@ -518,7 +518,6 @@ void Client::responceWrite(const struct Header *header) const
 
 void Client::responcePingPoing(const struct Header *header)
 {
-    qDebug() << "ping";
     Q_ASSERT(header != NULL);
     _counterPing = 0;
 }

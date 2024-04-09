@@ -273,8 +273,10 @@ Page {
             else if (channelNumber === 14)
                 obj = lineSeriesPressure
 
-            for(var i = 0; i < points.length; i++)
-                obj.append(points[i].x, points[i].y)
+            if (device.logDataOverflow)
+                glob_notification.set_text("Превышен размер данных!")
+            else
+                device.fillSeries(obj, points)
 
             waitList[channelNumber] = false
 
@@ -308,7 +310,8 @@ Page {
         12 - тепмпература
         13 - влажность
         14 - давление
-          */
+        */
+
         waitList = []
         waitList[0] = true
         waitList[10] = true
@@ -316,11 +319,11 @@ Page {
         waitList[13] = true
         waitList[14] = true
 
-        device.signalQueryLogData(dateStart, dateEnd, 100, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100, 10, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100, 12, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100, 13, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100 * 5, 14, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 1000, 10, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000 * 5, 14, 0)
 
         busyIndicator.visible = true
     }
