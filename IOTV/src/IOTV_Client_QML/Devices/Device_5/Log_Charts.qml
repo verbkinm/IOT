@@ -21,6 +21,8 @@ Page {
         width: height
         height: txtDate.height + 5
 
+        visible: global_window.inPortrait
+
         icon {
             color: "transparent"
             source: "qrc:/img/back.png"
@@ -43,6 +45,8 @@ Page {
         highlighted: true
         width: previosDay.width
         height: previosDay.height
+
+        visible: global_window.inPortrait
 
         icon {
             color: "transparent"
@@ -107,22 +111,29 @@ Page {
         }
     }
 
-    ChartView {
+    BaseItem.MyLegend {
+        id: myLegend
         width: parent.width
-
+        height: 30
         anchors.top: {
             if (txtDate.visible)
                 return txtDate.bottom
 
             return parent.top
         }
+    }
+
+    ChartView {
+        width: parent.width
+
+        anchors.top: myLegend. bottom
         anchors.bottom: parent.bottom
         //        title: "XXX data read"
         antialiasing: true
         animationOptions: ChartView.NoAnimation
         titleFont.bold: true
         titleFont.pointSize: 15
-        //        legend.visible:false
+//        legend.visible:false
         margins.left: 10
         margins.right: 10
         margins.top: 10
@@ -247,6 +258,14 @@ Page {
             color: "orange"
             width: 3
         }
+
+        Component.onCompleted: {
+            myLegend.addSeries(lineSeriesTemperature, lineSeriesTemperature.name, lineSeriesTemperature.color)
+            myLegend.addSeries(lineSeriesHumidity, lineSeriesHumidity.name, lineSeriesHumidity.color)
+            myLegend.addSeries(lineSeriesPressure, lineSeriesPressure.name, lineSeriesPressure.color)
+            myLegend.addSeries(lineSeriesRele, lineSeriesRele.name, lineSeriesRele.color)
+            myLegend.addSeries(lineSeriesDistance, lineSeriesDistance.name, lineSeriesDistance.color)
+        }
     }
 
 
@@ -256,6 +275,13 @@ Page {
 
     Component.onDestruction: {
         console.log("Log_Cahrts destruct")
+    }
+
+    Connections {
+        target: myLegend
+        function onSelected(series){
+            series.visible = !series.visible
+        }
     }
 
     Connections {

@@ -19,6 +19,8 @@ Page {
         width: height
         height: txtDate.height + 5
 
+        visible: global_window.inPortrait
+
         icon {
             color: "transparent"
             source: "qrc:/img/back.png"
@@ -41,6 +43,8 @@ Page {
         highlighted: true
         width: previosDay.width
         height: previosDay.height
+
+        visible: global_window.inPortrait
 
         icon {
             color: "transparent"
@@ -105,28 +109,32 @@ Page {
         }
     }
 
-    ChartView {
-        id: chartView
+    BaseItem.MyLegend {
+        id: myLegend
         width: parent.width
-
+        height: 30
         anchors.top: {
             if (txtDate.visible)
                 return txtDate.bottom
 
             return parent.top
         }
+    }
+
+    ChartView {
+        id: chartView
+        width: parent.width
+
+        anchors.top: myLegend. bottom
         anchors.bottom: parent.bottom
         //        title: "XXX data read"
         antialiasing: true
         animationOptions: ChartView.NoAnimation
-        titleFont.bold: true
-        titleFont.pointSize: 15
-        //        legend.visible:false
+        legend.visible: false
         margins.left: 10
         margins.right: 10
-        margins.top: 10
+        margins.top: 0
         margins.bottom: 10
-
 
         // Время - x ось
         ValuesAxis {
@@ -219,14 +227,20 @@ Page {
             onWheel: (wheel)=> {
                          var angle = wheel.angleDelta.y
                          if (angle > 0)
-                            chartView.zoomIn()
+                         chartView.zoomIn()
                          else
-                            chartView.zoomOut()
+                         chartView.zoomOut()
                      }
             onMouseXChanged: {
-//                console.log(mouseX)
-//                chartView.scrollLeft(mouseX)
+                //                console.log(mouseX)
+                //                chartView.scrollLeft(mouseX)
             }
+        }
+
+        Component.onCompleted: {
+            myLegend.addSeries(lineSeriesTemperature, lineSeriesTemperature.name, lineSeriesTemperature.color)
+            myLegend.addSeries(lineSeriesHumidity, lineSeriesHumidity.name, lineSeriesHumidity.color)
+            myLegend.addSeries(lineSeriesPressure, lineSeriesPressure.name, lineSeriesPressure.color)
         }
     }
 
@@ -237,6 +251,13 @@ Page {
 
     Component.onDestruction: {
         console.log("Log_Cahrts destruct")
+    }
+
+    Connections {
+        target: myLegend
+        function onSelected(series){
+            series.visible = !series.visible
+        }
     }
 
     Connections {
@@ -256,8 +277,8 @@ Page {
             {
                 // усконерние обавления точек!!!
                 device.fillSeries(obj, points)
-//                for(var i = 0; i < points.length; i++)
-//                    obj.append(points[i].x, points[i].y)
+                //                for(var i = 0; i < points.length; i++)
+                //                    obj.append(points[i].x, points[i].y)
             }
 
             waitList[channelNumber] = false

@@ -14,7 +14,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("IOTV Client")
 
-    minimumWidth: 400
+//    minimumWidth: 400
     minimumHeight: 400
 
     //! [orientation]
