@@ -160,6 +160,8 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
+//    auto start = std::chrono::system_clock::now();
+
     if (!_log_data_buf.contains(channelNumber) || _log_data_buf[channelNumber].size() == 0)
     {
         emit signalResponceLogData({}, channelNumber, flags);
@@ -169,10 +171,10 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     QBuffer bufferFile(&_log_data_buf[channelNumber]);
     bufferFile.open(QIODevice::ReadOnly);
 
-    QFile fileTmp("test_" + QString::number(channelNumber) + ".txt");
-    fileTmp.open(QIODevice::WriteOnly);
-    fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
-    fileTmp.close();
+    //    QFile fileTmp("test_" + QString::number(channelNumber) + ".txt");
+    //    fileTmp.open(QIODevice::WriteOnly);
+    //    fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
+    //    fileTmp.close();
 
     std::map<int, float> uniqPoints;
     const float roundOffset = 1000;
@@ -238,7 +240,9 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     //        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
 
     qDebug() << "Количество точек" << points.size();
-        emit signalResponceLogData(std::move(points), channelNumber, flags);
+    emit signalResponceLogData(std::move(points), channelNumber, flags);
+
+//    qDebug() << "dataLogToPoints, channel - " << channelNumber << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
 }
 
 void Device::setReadInterval(int interval)

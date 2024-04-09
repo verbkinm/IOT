@@ -12,6 +12,8 @@ Page {
 
     id: root
 
+    objectName: "Log Chart id 5"
+
     RoundButton {
         id: previosDay
 
@@ -117,7 +119,7 @@ Page {
         anchors.bottom: parent.bottom
         //        title: "XXX data read"
         antialiasing: true
-        animationOptions: ChartView.AllAnimations
+        animationOptions: ChartView.NoAnimation
         titleFont.bold: true
         titleFont.pointSize: 15
         //        legend.visible:false
@@ -271,7 +273,6 @@ Page {
             else if (channelNumber === 14)
                 obj = lineSeriesPressure
 
-
             for(var i = 0; i < points.length; i++)
                 obj.append(points[i].x, points[i].y)
 
@@ -317,9 +318,9 @@ Page {
 
         device.signalQueryLogData(dateStart, dateEnd, 100, 0, 0)
         device.signalQueryLogData(dateStart, dateEnd, 100, 10, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 14, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 12, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 13, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100 * 5, 14, 0)
 
         busyIndicator.visible = true
     }

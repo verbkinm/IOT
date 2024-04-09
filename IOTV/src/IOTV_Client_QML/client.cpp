@@ -386,12 +386,12 @@ void Client::queryPing()
 
     write({outData, static_cast<int>(size)});
 
-//    if (_counterPing > COUNTER_PING_COUNT)
-//    {
-//        Log::write(" WARRNING: ping timeout",
-//                   Log::Write_Flag::STDOUT, "");
-//        disconnectFromHost();
-//    }
+    if (_counterPing > COUNTER_PING_COUNT)
+    {
+        Log::write(" WARRNING: ping timeout",
+                   Log::Write_Flag::STDOUT, "");
+        disconnectFromHost();
+    }
 }
 
 void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
@@ -518,6 +518,7 @@ void Client::responceWrite(const struct Header *header) const
 
 void Client::responcePingPoing(const struct Header *header)
 {
+    qDebug() << "ping";
     Q_ASSERT(header != NULL);
     _counterPing = 0;
 }
@@ -569,6 +570,8 @@ void Client::responceLogData(const Header *header)
 
     if (header->fragment == header->fragments)
     {
+//        qDebug() << "responceLogData" << pkg->channelNumber << QTime::currentTime();
+
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
         qDebug() << "channel " << pkg->channelNumber << "data size - " << "stop fragment";
     }
@@ -583,11 +586,13 @@ void Client::responceLogData(const Header *header)
 
     // На стороне сервера поток Client занят отправкой данных и не отвечает на другие запросы от данного клиента
     // в том числе на пинг, что бы данный клиент не прирвал связь по пинг таймеру, обнуляем счетчик.
-    _counterPing = 0;
+//    _counterPing = 0;
 }
 
 void Client::slotReciveData()
 {
+//     qDebug() << Q_FUNC_INFO << QTime::currentTime();
+
     _recivedBuff += _socket.readAll();
 
     bool error;
@@ -596,8 +601,10 @@ void Client::slotReciveData()
     while (_recivedBuff.size() > 0)
     {
         struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &expectedDataSize, &cutDataSize);
+
         if (error == true)
         {
+            qDebug() << Q_FUNC_INFO << "error" << QTime::currentTime();
             _recivedBuff.clear();
             clearHeader(header);
             break;
@@ -606,9 +613,13 @@ void Client::slotReciveData()
         // Пакет не ещё полный
         if (expectedDataSize > 0)
         {
+            qDebug() << Q_FUNC_INFO << "expectedDataSize" << QTime::currentTime();
             clearHeader(header);
             break;
         }
+
+//        if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+//            qDebug() << "log data header" <<  QTime::currentTime();
 
         if (header->type == HEADER_TYPE_RESPONSE)
         {
@@ -630,7 +641,10 @@ void Client::slotReciveData()
             else if (header->assignment == HEADER_ASSIGNMENT_TECH)
                 responceTech(header);
             else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+            {
+//                qDebug() << "responceLogData" << QTime::currentTime();
                 responceLogData(header);
+            }
         }
         else if (header->type == HEADER_TYPE_REQUEST)
         {
@@ -676,12 +690,13 @@ void Client::slotQueryWrite(int channelNumber, const QByteArray &data)
 
 void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
 {
+//    qDebug() << "slotQuerLogData" << channelNumber << QTime::currentTime();
+
     Device *dev = qobject_cast<Device*>(sender());
 
     if ( (dev == nullptr) || !dev->isOnline())
         return;
 
-    dev->clearDataLog(channelNumber);
     queryLogDataHost(dev->getName(), startInterval, endInterval, interval, channelNumber, flags);
 }
 

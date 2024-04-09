@@ -250,8 +250,6 @@ Page {
             else if (channelNumber === 2)
                 obj = lineSeriesPressure
 
-            var length = 0
-
             if (device.logDataOverflow)
                 glob_notification.set_text("Превышен размер данных!")
             else
@@ -285,9 +283,9 @@ Page {
 
         waitList = [true, true, true]
 
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 1, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 2, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 1, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 100, 2, 0)
 
         busyIndicator.visible = true
     }
