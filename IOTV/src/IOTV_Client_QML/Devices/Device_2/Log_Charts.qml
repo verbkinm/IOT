@@ -90,7 +90,11 @@ Page {
     BaseItem.DatePicker {
         id: datePicker
         width: parent.width - parent.width * 0.1
-        selectedDate: new Date()
+        selectedDate: {
+            var result = new Date()
+            result.setHours(0, 0, 0)
+            return result
+        }
 
         onSelectedDateChanged: {
             txtDate.text = selectedDate.toLocaleDateString("dd MM yyyy")
@@ -135,22 +139,215 @@ Page {
         margins.top: 0
         margins.bottom: 10
 
+//                MouseArea {
+//        //            acceptedButtons: Qt.RightButton
+//                    anchors.fill: parent
+
+//                    property real xStart: 0
+//                    property real yStart: 0
+
+//                    onPressed: {
+//                        xStart = mouseX
+//                        yStart = mouseY
+//                    }
+
+//                    onPositionChanged: {
+//                        let dx = xStart - mouseX
+//                        let dy = yStart - mouseY
+
+//                        if (dx < 0)
+//                            chartView.scrollLeft(dx * -1)
+//                        else
+//                            chartView.scrollRight(dx)
+
+//                        if (dy < 0)
+//                            chartView.scrollUp(dy * -1)
+//                        else
+//                            chartView.scrollDown(dy)
+
+//                        xStart = mouseX
+//                        yStart = mouseY
+//                    }
+
+//                    onDoubleClicked: {
+//                        chartView.zoomReset()
+
+//                        myAxisTime.min = myAxisTime.defaultMin
+//                        myAxisTime.max = myAxisTime.defaultMax
+
+//                        myAxisTemperature.min = myAxisTemperature.defaultMin
+//                        myAxisTemperature.max = myAxisTemperature.defaultMax
+
+//                        myAxisHumidity.min = myAxisHumidity.defaultMin
+//                        myAxisHumidity.max = myAxisHumidity.defaultMax
+
+//                        myAxisPressure.min = myAxisPressure.defaultMin
+//                        myAxisPressure.max = myAxisPressure.defaultMax
+//                    }
+//                    onWheel: (wheel)=> {
+//                                 var angle = wheel.angleDelta.y
+//                                 if (angle > 0)
+//                                 chartView.zoom(1.1)
+//                                 else
+//                                 chartView.zoom(0.9)
+//                             }
+//                }
+
+        //???
+//        TapHandler {
+//            acceptedDevices: PointerDevice.TouchScreen | PointerDevice.TouchPad | PointerDevice.Mouse | PointerDevice.Stylus | PointerDevice.Airbrush | PointerDevice.Puck
+//            onLongPressed: {
+//                chartView.zoomReset()
+
+//                myAxisTime.min = myAxisTime.defaultMin
+//                myAxisTime.max = myAxisTime.defaultMax
+
+//                myAxisTemperature.min = myAxisTemperature.defaultMin
+//                myAxisTemperature.max = myAxisTemperature.defaultMax
+
+//                myAxisHumidity.min = myAxisHumidity.defaultMin
+//                myAxisHumidity.max = myAxisHumidity.defaultMax
+
+//                myAxisPressure.min = myAxisPressure.defaultMin
+//                myAxisPressure.max = myAxisPressure.defaultMax
+
+//                print("onLongPressed")
+//            }
+//        }
+
+        PinchArea{
+            id: pa
+            anchors.fill: parent
+            property real currentPinchScaleX: 1
+            property real currentPinchScaleY: 1
+            property real pinchStartX : 0
+            property real pinchStartY : 0
+
+            onPinchStarted: (pinch) =>{
+                                // Pinching has started. Record the initial center of the pinch
+                                // so relative motions can be reversed in the pinchUpdated signal
+                                // handler
+                                pinchStartX = pinch.center.x;
+                                pinchStartY = pinch.center.y;
+
+                                print("onPinchStarted")
+                            }
+
+            onPinchUpdated: (pinch) => {
+                                chartView.zoomReset();
+
+                                // Reverse pinch center motion direction
+                                var center_x = pinchStartX + (pinchStartX - pinch.center.x);
+                                var center_y = pinchStartY + (pinchStartY - pinch.center.y);
+
+                                // Compound pinch.scale with prior pinch scale level and apply
+                                // scale in the absolute direction of the pinch gesture
+                                var scaleX = currentPinchScaleX * (1 + (pinch.scale - 1) * Math.abs(Math.cos(pinch.angle * Math.PI / 180)));
+                                var scaleY = currentPinchScaleY * (1 + (pinch.scale - 1) * Math.abs(Math.sin(pinch.angle * Math.PI / 180)));
+
+                                // Apply scale to zoom levels according to pinch angle
+                                var width_zoom = height / scaleX;
+                                var height_zoom = width / scaleY;
+
+                                var r = Qt.rect(center_x - width_zoom / 2, center_y - height_zoom / 2, width_zoom, height_zoom);
+                                chartView.zoomIn(r);
+                            }
+
+            onPinchFinished: (pinch) => {
+                                 // Pinch finished. Record compounded pinch scale.
+                                 currentPinchScaleX = currentPinchScaleX * (1 + (pinch.scale - 1) * Math.abs(Math.cos(pinch.angle * Math.PI / 180)));
+                                 currentPinchScaleY = currentPinchScaleY * (1 + (pinch.scale - 1) * Math.abs(Math.sin(pinch.angle * Math.PI / 180)));
+                             }
+            MouseArea {
+                acceptedButtons: Qt.RightButton
+                anchors.fill: parent
+
+                property real xStart: 0
+                property real yStart: 0
+
+                onPressed: {
+                    xStart = mouseX
+                    yStart = mouseY
+                }
+
+                onPositionChanged: {
+                    let dx = xStart - mouseX
+                    let dy = yStart - mouseY
+
+                    if (dx < 0)
+                        chartView.scrollLeft(dx * -1)
+                    else
+                        chartView.scrollRight(dx)
+
+                    if (dy < 0)
+                        chartView.scrollUp(dy * -1)
+                    else
+                        chartView.scrollDown(dy)
+
+                    xStart = mouseX
+                    yStart = mouseY
+                }
+
+                onDoubleClicked: {
+                    chartView.zoomReset()
+
+                    myAxisTime.min = myAxisTime.defaultMin
+                    myAxisTime.max = myAxisTime.defaultMax
+
+                    myAxisTemperature.min = myAxisTemperature.defaultMin
+                    myAxisTemperature.max = myAxisTemperature.defaultMax
+
+                    myAxisHumidity.min = myAxisHumidity.defaultMin
+                    myAxisHumidity.max = myAxisHumidity.defaultMax
+
+                    myAxisPressure.min = myAxisPressure.defaultMin
+                    myAxisPressure.max = myAxisPressure.defaultMax
+                }
+                onWheel: (wheel)=> {
+                             var angle = wheel.angleDelta.y
+                             if (angle > 0)
+                             chartView.zoom(1.1)
+                             else
+                             chartView.zoom(0.9)
+                         }
+            }
+        }
+
         // Время - x ось
-        ValuesAxis {
+        DateTimeAxis {
+            property date defaultMin
+            property date defaultMax
+
             id: myAxisTime
-            min: 0
-            max: 24
-            tickCount: 11
+            min: defaultMin
+            max: defaultMax
+
+            tickCount: 5
             labelsFont.pointSize: 8
             labelsFont.bold: true
-            labelFormat: '%d'
+            format: global_window.inPortrait ? "hh:mm" :"hh:mm:ss"
+
+            defaultMin: {
+                var result = new Date(datePicker.selectedDate)
+                result.setHours(0, 0, 0)
+                return result
+            }
+            defaultMax: {
+                var result = new Date(datePicker.selectedDate)
+                result.setHours(0, 0, 0)
+                result.setDate(result.getDate() + 1)
+                return result
+            }
         }
 
         // Температура - y ось
         ValuesAxis{
+            readonly property int defaultMin: -40
+            readonly property int defaultMax: 80
+
             id: myAxisTemperature
-            min: -40
-            max: 80
+            min: defaultMin
+            max: defaultMax
             tickCount: {
                 if (global_window.inPortrait === true)
                     return 11
@@ -159,17 +356,17 @@ Page {
             labelsFont.pointSize: 8
             labelsFont.bold: true
             labelsColor: lineSeriesTemperature.color
-            labelFormat: '%d'
-
-            //            property real tmpMin: 1000
-            //            property real tmpMax: -1000
+            labelFormat: '%.1f'
         }
 
         // Влажность - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 100
+
             id: myAxisHumidity
-            min: 0
-            max: 100
+            min: defaultMin
+            max: defaultMax
             tickCount: myAxisTemperature.tickCount
             labelsFont.pointSize: 8
             labelsFont.bold: true
@@ -179,9 +376,12 @@ Page {
 
         // Давление - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 1100
+
             id: myAxisPressure
-            min: 0
-            max: 1100
+            min: defaultMin
+            max: defaultMax
             tickCount: myAxisHumidity.tickCount
             labelsFont.pointSize: 8
             labelsFont.bold: true
@@ -190,9 +390,9 @@ Page {
         }
 
         LineSeries {
-            onClicked: (point) =>{
-                           console.log(point)
-                       }
+            //            onClicked: (point) =>{
+            //                           console.log(point)
+            //                       }
 
             id:lineSeriesTemperature
             name: "Температура ℃"
@@ -219,21 +419,6 @@ Page {
             color: "gray"
             width: 3
             axisYRight: myAxisPressure
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onWheel: (wheel)=> {
-                         var angle = wheel.angleDelta.y
-                         if (angle > 0)
-                         chartView.zoomIn()
-                         else
-                         chartView.zoomOut()
-                     }
-            onMouseXChanged: {
-                //                console.log(mouseX)
-                //                chartView.scrollLeft(mouseX)
-            }
         }
 
         Component.onCompleted: {
@@ -274,8 +459,9 @@ Page {
                 glob_notification.set_text("Превышен размер данных!")
             else
             {
-                // усконерние обавления точек!!!
+                // усконерние обновления точек!!!
                 device.fillSeries(obj, points)
+                print(channelNumber, points.length)
                 //                for(var i = 0; i < points.length; i++)
                 //                    obj.append(points[i].x, points[i].y)
             }
@@ -305,9 +491,9 @@ Page {
 
         waitList = [true, true, true]
 
-        device.signalQueryLogData(dateStart, dateEnd, 100, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100, 1, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 100, 2, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 1, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000 * 5, 2, 0)
 
         busyIndicator.visible = true
     }

@@ -176,8 +176,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     //    fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
     //    fileTmp.close();
 
-    std::map<int, float> uniqPoints;
-    const float roundOffset = 1000;
+    std::map<uint64_t, float> uniqPoints;
     while (!bufferFile.atEnd())
     {
         std::string line = bufferFile.readLine().toStdString();
@@ -185,11 +184,11 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
         float yVal = 0;
         //        float xVal = 0;
-        uint64_t msDay = 0;
+        uint64_t ms = 0;
         std::string dataStr;
         QString data;
 
-        stream >> msDay >> dataStr;
+        stream >> ms >> dataStr;
         data.append(dataStr);
 
         if (stream.fail())
@@ -204,36 +203,29 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
         else if (raw.isBool())
             yVal = data == "true" ? 1 : 0;
 
-        msDay = QDateTime::fromMSecsSinceEpoch(msDay).time().msecsSinceStartOfDay();
-        //        xVal = convert_range(msDay, 0, 86'400'000, 0, 24);
-
-        // умножить на 1000 и превратить в int, что бы уменьшить количество точек!
-        uniqPoints[convert_range(msDay, 0, 86'400'000, 0, 24) * roundOffset] = yVal;
-
-        //        points.append({xVal, yVal});
+        uniqPoints[ms] = yVal;
     }
     bufferFile.close();
     _log_data_buf.erase(channelNumber);
 
-
     QList<QPointF> points;
-    points.emplace_back(uniqPoints.begin()->first / roundOffset, uniqPoints.begin()->second);
+    points.emplace_back(uniqPoints.begin()->first, uniqPoints.begin()->second);
     for (auto it = ++uniqPoints.begin(); it != uniqPoints.end(); it++)
     {
         auto prev = std::prev(it);
 
         if (it->second != prev->second)
         {
-            points.emplace_back(prev->first / roundOffset, prev->second);
+            points.emplace_back(prev->first, prev->second);
 
             if (it->second == std::next(it)->second)
-                points.emplace_back(it->first / roundOffset, it->second);
+                points.emplace_back(it->first, it->second);
         }
     }
-    points.emplace_back(uniqPoints.rbegin()->first / roundOffset, uniqPoints.rbegin()->second);
+    points.emplace_back(uniqPoints.rbegin()->first, uniqPoints.rbegin()->second);
 
-    //    qDebug() << "Количество точек list" << points.size();
-    //    qDebug() << "Количество точек map" << uniqPoints.size();
+        qDebug() << "Количество точек list" << points.size();
+        qDebug() << "Количество точек map" << uniqPoints.size();
 
     uniqPoints.clear();
     //    for (auto [key, value] : uniqPoints)

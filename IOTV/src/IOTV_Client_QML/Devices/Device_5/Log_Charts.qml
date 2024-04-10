@@ -123,6 +123,7 @@ Page {
     }
 
     ChartView {
+        id: chartView
         width: parent.width
 
         anchors.top: myLegend. bottom
@@ -138,22 +139,101 @@ Page {
         margins.top: 10
         margins.bottom: 10
 
+        MouseArea {
+            acceptedButtons: Qt.RightButton
+            anchors.fill: parent
+
+            property real xStart: 0
+            property real yStart: 0
+
+            onPressed: {
+                xStart = mouseX
+                yStart = mouseY
+            }
+
+            onPositionChanged: {
+                let dx = xStart - mouseX
+                let dy = yStart - mouseY
+
+                if (dx < 0)
+                    chartView.scrollLeft(dx * -1)
+                else
+                    chartView.scrollRight(dx)
+
+                if (dy < 0)
+                    chartView.scrollUp(dy * -1)
+                else
+                    chartView.scrollDown(dy)
+
+                xStart = mouseX
+                yStart = mouseY
+            }
+
+            onDoubleClicked: {
+                chartView.zoomReset()
+
+                myAxisTime.min = myAxisTime.defaultMin
+                myAxisTime.max = myAxisTime.defaultMax
+
+                myAxisTemperature.min = myAxisTemperature.defaultMin
+                myAxisTemperature.max = myAxisTemperature.defaultMax
+
+                myAxisHumidity.min = myAxisHumidity.defaultMin
+                myAxisHumidity.max = myAxisHumidity.defaultMax
+
+                myAxisPressure.min = myAxisPressure.defaultMin
+                myAxisPressure.max = myAxisPressure.defaultMax
+
+                myAxisRele.min = myAxisRele.defaultMin
+                myAxisRele.max = myAxisRele.defaultMax
+
+                myAxisDistacnce.min = myAxisDistacnce.defaultMin
+                myAxisDistacnce.max = myAxisDistacnce.defaultMax
+            }
+            onWheel: (wheel)=> {
+                         var angle = wheel.angleDelta.y
+                         if (angle > 0)
+                             chartView.zoom(1.1)
+                         else
+                             chartView.zoom(0.9)
+                     }
+        }
+
         // Время - x ось
-        ValuesAxis {
+        DateTimeAxis {
+            property date defaultMin
+            property date defaultMax
+
             id: myAxisTime
-            min: 0
-            max: 24
-            tickCount: 11
+            min: defaultMin
+            max: defaultMax
+
+            tickCount: 5
             labelsFont.pointSize: 8
             labelsFont.bold: true
-            labelFormat: '%d'
+            format: global_window.inPortrait ? "hh:mm" :"hh:mm:ss"
+
+            defaultMin: {
+                var result = new Date(datePicker.selectedDate)
+                result.setHours(0, 0, 0)
+                return result
+            }
+            defaultMax: {
+                var result = new Date(datePicker.selectedDate)
+                result.setHours(0, 0, 0)
+                result.setDate(result.getDate() + 1)
+                return result
+            }
         }
 
         // Температура - y ось
         ValuesAxis{
+            readonly property int defaultMin: -40
+            readonly property int defaultMax: 80
+
             id: myAxisTemperature
-            min: -40
-            max: 80
+            min: defaultMin
+            max: defaultMax
             tickCount: {
                 if (global_window.inPortrait === true)
                     return 11
@@ -167,9 +247,12 @@ Page {
 
         // Влажность - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 100
+
             id: myAxisHumidity
-            min: 0
-            max: 100
+            min: defaultMin
+            max: defaultMax
             tickCount: myAxisTemperature.tickCount
             labelsFont.pointSize: 8
             labelsFont.bold: true
@@ -179,9 +262,12 @@ Page {
 
         // Давление - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 1100
+
             id: myAxisPressure
-            min: 0
-            max: 1100
+            min: defaultMin
+            max: defaultMax
             tickCount: myAxisHumidity.tickCount
             labelsFont.pointSize: 8
             labelsFont.bold: true
@@ -191,9 +277,12 @@ Page {
 
         // Реле - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 1
+
             id: myAxisRele
-            min: 0
-            max: 1
+            min: defaultMin
+            max: defaultMax
             tickCount: 2
             labelsFont.pointSize: 8
             labelsFont.bold: true
@@ -203,9 +292,12 @@ Page {
 
         // Текущее расстояние - y ось
         ValuesAxis {
+            readonly property int defaultMin: 0
+            readonly property int defaultMax: 255
+
             id: myAxisDistacnce
-            min: 0
-            max: 255
+            min: defaultMin
+            max: defaultMax
             tickCount: myAxisHumidity.tickCount
             labelsFont.pointSize: 8
             labelsFont.bold: true
