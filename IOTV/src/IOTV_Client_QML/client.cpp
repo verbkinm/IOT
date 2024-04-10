@@ -503,7 +503,7 @@ void Client::responceReadStream(const Header *header)
     if (header->fragment == header->fragments)
     {
         QByteArray data = _devices[name].getReadChannelData(channel);
-        qDebug() << "PKG total: " << data.size();
+//        qDebug() << "PKG total: " << data.size();
         emit _devices[name].signalDataPkgComplete(channel, std::move(data));
     }
 }
@@ -603,7 +603,7 @@ void Client::slotReciveData()
 
         if (error == true)
         {
-            qDebug() << Q_FUNC_INFO << "error" << QTime::currentTime();
+//            qDebug() << Q_FUNC_INFO << "error" << QTime::currentTime();
             _recivedBuff.clear();
             clearHeader(header);
             break;
@@ -612,7 +612,7 @@ void Client::slotReciveData()
         // Пакет не ещё полный
         if (expectedDataSize > 0)
         {
-            qDebug() << Q_FUNC_INFO << "expectedDataSize" << QTime::currentTime();
+//            qDebug() << Q_FUNC_INFO << "expectedDataSize" << QTime::currentTime();
             clearHeader(header);
             break;
         }

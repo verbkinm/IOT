@@ -1,9 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 
 Rectangle {
     id: legend
     color: "#00000000"
+    height: legendRow.height
     anchors {
         topMargin: 10
         bottomMargin: 0
@@ -33,22 +35,23 @@ Rectangle {
 
     Component {
         id: legendDelegate
-        Rectangle {
+        Item {
             id: rect
             property var currentSeries: seriesNames[index]
             property var currentName: labelNames[index]
             property color markerColor: seriesColors[index]
 
-            border {
-                color: "black"
-                width: 1
-            }
+            //            border {
+            //                color: "black"
+            //                width: 1
+            //            }
 
 //            color: "#00000000"
-//            radius: 4
-//            width: {legend.width / seriesCount - legendRow.spacing * legendRow}
-            width: marker.width + label.width// legend.width / seriesCount - legendRow.spacing * seriesCount
+            //            radius: 4
+            //            width: {legend.width / seriesCount - legendRow.spacing * legendRow}
+            implicitWidth: marker.width + label.width// legend.width / seriesCount - legendRow.spacing * seriesCount
             implicitHeight: label.implicitHeight + marker.implicitHeight + 10
+
 
             Rectangle {
                 id: marker
@@ -61,10 +64,14 @@ Rectangle {
                     color: "black"
                     width: 1
                 }
+                anchors {
+                    leftMargin: 50
+                    rightMargin: 15
+                }
             }
             Text {
                 id: label
-//                width: parent.width - marker.width
+                width: implicitWidth
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: marker.right
@@ -72,17 +79,22 @@ Rectangle {
                 }
                 text: currentName
                 verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignLeft
                 font.pointSize: 8
+
                 elide: Text.ElideRight
-                 Layout.fillWidth: true
+
+                anchors {
+                    leftMargin: 15
+                    rightMargin: 15
+                }
             }
 
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
                 onClicked: {
-                    emit: legend.selected(currentSeries);
+                    legend.selected(currentSeries);
+                    label.font.strikeout = !label.font.strikeout
                 }
             }
         }
@@ -90,9 +102,10 @@ Rectangle {
 
     Flow {
         id: legendRow
-        spacing: 15
-        anchors.centerIn: parent
-//        anchors.fill: parent
+        spacing: 10
+        leftPadding: 15
+        rightPadding: 15
+        width: parent.width
 
         Repeater {
             id: legendRepeater
@@ -100,6 +113,16 @@ Rectangle {
             delegate: legendDelegate
         }
 
+        function mar(){
+            var rowCount = parent.width / (legendRow.children[0].width + legendRow.spacing);
+            if(rowCount> legendRow.children.length)
+                rowCount = legendRow.children.length
+
+            rowCount = parseInt(rowCount)
+            var rowWidth = rowCount * legendRow.children[0].width + (rowCount - 1) * legendRow.spacing
+//            print(legendRow.height)
+            return (parent.width - rowWidth) / 2
+        }
     }
 }
 

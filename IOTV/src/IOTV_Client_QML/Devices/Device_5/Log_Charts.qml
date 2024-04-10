@@ -114,7 +114,6 @@ Page {
     BaseItem.MyLegend {
         id: myLegend
         width: parent.width
-        height: 30
         anchors.top: {
             if (txtDate.visible)
                 return txtDate.bottom
@@ -133,7 +132,7 @@ Page {
         animationOptions: ChartView.NoAnimation
         titleFont.bold: true
         titleFont.pointSize: 15
-//        legend.visible:false
+        legend.visible:false
         margins.left: 10
         margins.right: 10
         margins.top: 10
@@ -234,7 +233,7 @@ Page {
 
         LineSeries {
             id:lineSeriesPressure
-            name: "Давление мм рт.ст."
+            name: "Давление мм..."
             axisX: myAxisTime
             axisY: myAxisPressure
             color: "gray"

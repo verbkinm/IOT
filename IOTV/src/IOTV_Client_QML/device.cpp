@@ -194,7 +194,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 
         if (stream.fail())
         {
-            qDebug() << Q_FUNC_INFO << "ошибка данных" << channelNumber;
+//            qDebug() << Q_FUNC_INFO << "ошибка данных" << channelNumber;
                 continue;
         }
 
@@ -239,7 +239,7 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     //    for (auto [key, value] : uniqPoints)
     //        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
 
-    qDebug() << "Количество точек" << points.size();
+//    qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
 
 //    qDebug() << "dataLogToPoints, channel - " << channelNumber << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();

@@ -3,18 +3,11 @@
 #include <QFileInfo>
 #include <QDate>
 
-//QString IOTV_Host::logName()
-//{
-//    return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
-//}
-
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)),
     _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
-    //    QDir dir(settingsData.at(hostField::logDir));
-    //    _logFile = QFileInfo(dir, settingsData.at(hostField::name)).absoluteFilePath() + ".log";
     shareConstructor();
     makeConnType();
 }
@@ -238,7 +231,6 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 responcePingPong(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }

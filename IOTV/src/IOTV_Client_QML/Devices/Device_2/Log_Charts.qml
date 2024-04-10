@@ -112,7 +112,6 @@ Page {
     BaseItem.MyLegend {
         id: myLegend
         width: parent.width
-        height: 30
         anchors.top: {
             if (txtDate.visible)
                 return txtDate.bottom
@@ -214,7 +213,7 @@ Page {
 
         LineSeries {
             id:lineSeriesPressure
-            name: "Давление мм рт.ст."
+            name: "Давление мм..."
             axisX: myAxisTime
             //            axisY: myAxisPressure
             color: "gray"

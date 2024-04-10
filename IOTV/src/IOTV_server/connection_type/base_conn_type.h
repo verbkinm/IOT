@@ -56,5 +56,6 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
+    // отлавливается в iotv_hosts
     void signalDataRiceved(QByteArray);
 };
