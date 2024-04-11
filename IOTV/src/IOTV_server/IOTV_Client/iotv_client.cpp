@@ -262,18 +262,23 @@ void IOTV_Client::processQueryLogData(const Header *header)
         return;
     }
 
+    std::ostringstream stream;
+    stream << file.rdbuf();
+
+    std::istringstream fileBuffer(stream.str());
+
     std::vector<char> byteArray;
-    while(!file.eof())
+    while(!fileBuffer.eof())
     {
         ++logLine;
 
-        if (file.eof() || file.fail())
+        if (fileBuffer.eof() || fileBuffer.fail())
         {
             Log::write(QString(Q_FUNC_INFO) + " ошибка данных лог файла " + fileName + " в строке " + QString::number(logLine), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
             break;
         }
 
-        file >> year >> tmp >> month >> tmp >> day
+        fileBuffer >> year >> tmp >> month >> tmp >> day
             >> hour >> tmp >> minut >> tmp >> second >> tmp >> ms >> tmp
             >> rw >> tmp >> ch >> tmp >> valueStr;
 

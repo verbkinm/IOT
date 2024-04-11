@@ -437,10 +437,10 @@ Page {
         waitList[14] = true
 
         device.signalQueryLogData(dateStart, dateEnd, 1000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 1000, 10, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000 * 5, 14, 0)
+//        device.signalQueryLogData(dateStart, dateEnd, 1000, 10, 0)
+//        device.signalQueryLogData(dateStart, dateEnd, 60000, 12, 0)
+//        device.signalQueryLogData(dateStart, dateEnd, 60000, 13, 0)
+//        device.signalQueryLogData(dateStart, dateEnd, 60000 * 5, 14, 0)
 
         busyIndicator.visible = true
     }
