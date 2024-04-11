@@ -386,12 +386,12 @@ void Client::queryPing()
 
     write({outData, static_cast<int>(size)});
 
-    if (_counterPing > COUNTER_PING_COUNT)
-    {
-        Log::write(" WARRNING: ping timeout",
-                   Log::Write_Flag::STDOUT, "");
-        disconnectFromHost();
-    }
+//    if (_counterPing > COUNTER_PING_COUNT)
+//    {
+//        Log::write(" WARRNING: ping timeout",
+//                   Log::Write_Flag::STDOUT, "");
+//        disconnectFromHost();
+//    }
 }
 
 void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)

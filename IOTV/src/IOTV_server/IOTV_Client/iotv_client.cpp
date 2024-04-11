@@ -1,11 +1,14 @@
 #include "iotv_client.h"
 
 #include <sstream>
+#include <fstream>
+#include <thread>
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent) : QObject(parent),
     _socket(socket),
     _hosts(hosts),
-    _expectedDataSize(0)
+    _expectedDataSize(0),
+    _logDataQueueTimer(nullptr)
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
@@ -19,7 +22,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     connect(this, &IOTV_Client::signalUpdateHosts, this, &IOTV_Client::processQueryIdentification, Qt::QueuedConnection);
     connect(this, &IOTV_Client::signalClearAndUpdateHosts, this, &IOTV_Client::processQueryIdentification_2, Qt::QueuedConnection);
 
-    _silenceTimer.setInterval(_silenceInterval);
+    _silenceTimer.setInterval(_SILENCEINTERVAL);
     _silenceTimer.start();
 }
 
@@ -234,49 +237,54 @@ void IOTV_Client::processQueryLogData(const Header *header)
 
     auto host = it->first;
 
-    char outData[BUFSIZ];
+//    char outData[BUFSIZ];
 
-    time_t second = pkg->startInterval / 1000;
-    std::tm *tm = localtime(&second);
-    QDate startDate(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+    time_t time = pkg->startInterval / 1000;
+    std::tm *tm_ptr = localtime(&time);
+    QDate startDate(tm_ptr->tm_year + 1900, tm_ptr->tm_mon + 1, tm_ptr->tm_mday);
 
     QString fileName = host->logName(startDate);
 
     int64_t lastTime = 0, logLine = 0;
-    QFile file(fileName);
+    std::string valueStr, line;
+    char rw, tmp;
+    uint64_t ms;
+    int ch, year, month, day, hour, minut, second;
+    std::tm tm{};
 
-    if (!file.open(QIODevice::ReadOnly))
+    std::ifstream file(fileName.toStdString());
+
+    if (!file.is_open())
     {
         Log::write(QString(Q_FUNC_INFO) + " не удалось открыть файл " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
-        responseLogData(0, 0, outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
+        std::lock_guard lg(_logDataQueueMutex);
+        _logDataQueue.emplace((Header *)header, std::vector<char>());
         return;
     }
 
-    QByteArray byteArray;
-    while(!file.atEnd())
+    std::vector<char> byteArray;
+    while(!file.eof())
     {
         ++logLine;
 
-        std::string valueStr, line;
-        char rw, tmp;
-        uint64_t ms;
-        int ch, year, month, day, hour, minut, second;
-
-        line = file.readLine().toStdString();
-
-        if (line.size() < 31) // 31 - yyyy.MM.dd hh:mm:ss:zzz - R:0=значение
+        if (file.eof() || file.fail())
         {
             Log::write(QString(Q_FUNC_INFO) + " ошибка данных лог файла " + fileName + " в строке " + QString::number(logLine), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
-            continue;
+            break;
         }
 
-        std::stringstream stream(line);
-        stream >> year >> tmp >> month >> tmp >> day
+        file >> year >> tmp >> month >> tmp >> day
             >> hour >> tmp >> minut >> tmp >> second >> tmp >> ms >> tmp
             >> rw >> tmp >> ch >> tmp >> valueStr;
 
-        QDateTime dateTime({year, month, day}, {hour, minut, second, static_cast<int>(ms)});
-        ms = dateTime.toMSecsSinceEpoch();
+        tm.tm_year = year - 1900;
+        tm.tm_mon = month - 1;
+        tm.tm_mday = day;
+        tm.tm_hour = hour;
+        tm.tm_min = minut;
+        tm.tm_sec = second;
+
+        ms = (uint64_t)mktime(&tm) * 1000 + ms;
 
         // Фильтр по интервалу даты/времени
         if (ms < pkg->startInterval)
@@ -298,10 +306,14 @@ void IOTV_Client::processQueryLogData(const Header *header)
 
         lastTime = ms;
 
-        // qt5
         std::string str = std::to_string(ms) + " " + valueStr + "\n";
-        byteArray.append(str.c_str());
+        size_t size = str.size();
+        for (size_t i = 0; i < size; i++)
+            byteArray.push_back(str[i]);
     }
+
+    std::lock_guard lg(_logDataQueueMutex);
+    _logDataQueue.emplace((Header *)header, std::move(byteArray));
 
 //    qDebug() << "Канал" << pkg->channelNumber << "строк" << logLine << byteArray.size();
 
@@ -310,7 +322,7 @@ void IOTV_Client::processQueryLogData(const Header *header)
 //    fileTmp.write(byteArray.data(), byteArray.size());
 //    fileTmp.close();
 
-    responseLogData(byteArray.data(), byteArray.size(), outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
+//    responseLogData(byteArray.data(), byteArray.size(), outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
 
     /*
 
@@ -414,11 +426,23 @@ void IOTV_Client::slotReadData()
             else if (header->assignment == HEADER_ASSIGNMENT_TECH)
                 processQueryTech(header);
             else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
-                processQueryLogData(header);
+            {
+                if (_logDataQueueTimer == nullptr)
+                {
+                    _logDataQueueTimer = new QTimer(this);
+                    connect(_logDataQueueTimer, &QTimer::timeout, this, &IOTV_Client::slotLogDataQueueTimerOut);
+                    _logDataQueueTimer->start(_LOGDATAQUEUETIMERINTERVAL);
+                }
+
+                std::thread th(&IOTV_Client::processQueryLogData, this, header);
+                th.detach();
+
+                _recivedBuff = _recivedBuff.mid(cutDataSize);
+                continue;
+            }
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);
-
         clearHeader(header);
     }
 }
@@ -504,6 +528,29 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
     iot->readChannel[channel].data = 0;
 
     clearIOTV_Server(iot);
+}
+
+void IOTV_Client::slotLogDataQueueTimerOut()
+{
+    std::lock_guard lg(_logDataQueueMutex);
+    if (_logDataQueue.empty())
+        return;
+
+    auto pair = _logDataQueue.front();
+    _logDataQueue.pop();
+
+    auto header = pair.first;
+    if (header == NULL || header->pkg == NULL)
+        return;
+
+    const struct Log_Data *pkg = static_cast<const struct Log_Data *>(header->pkg);
+    if (pkg == nullptr)
+        return;
+
+    char outData[BUFSIZ];
+    responseLogData(pair.second.data(), pair.second.size(), outData, sizeof(outData), pkg, &IOTV_Client::writeFunc, _socket);
+
+    clearHeader(header);
 }
 
 bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)

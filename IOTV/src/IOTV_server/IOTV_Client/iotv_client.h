@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QTimer>
 #include <QByteArray>
+#include <queue>
 
 #include "IOTV_Host/iotv_host.h"
 
@@ -22,18 +23,6 @@ public:
     friend bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs);
 
 private:
-    QTcpSocket *_socket;
-
-    const std::unordered_map<IOTV_Host *, QThread *> &_hosts;
-
-    QByteArray _recivedBuff;
-
-    QTimer _silenceTimer;
-
-    static constexpr uint _silenceInterval = 15000;
-
-    uint64_t _expectedDataSize;
-
     // Пришел запрос от клиента
     void processQueryIdentification();
     // Удаление всех устройств, а потом обновление всего списка!
@@ -50,6 +39,23 @@ private:
 
     static uint64_t writeFunc(char *data, uint64_t size, void *obj);
 
+    QTcpSocket *_socket;
+
+    const std::unordered_map<IOTV_Host *, QThread *> &_hosts;
+
+    QByteArray _recivedBuff;
+
+    QTimer _silenceTimer;
+    static constexpr uint _SILENCEINTERVAL = 15000;
+
+    uint64_t _expectedDataSize;
+
+    std::mutex _logDataQueueMutex;
+    std::queue<std::pair<Header *, std::vector<char>>> _logDataQueue;
+    QTimer *_logDataQueueTimer;
+    static constexpr uint _LOGDATAQUEUETIMERINTERVAL = 100;
+
+
 private slots:
     void slotDisconnected();
 
@@ -57,6 +63,8 @@ private slots:
     void slotFetchEventActionDataFromServer(QByteArray data);
 
     void slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
+
+    void slotLogDataQueueTimerOut();
 
 signals:
     void signalStopThread();
