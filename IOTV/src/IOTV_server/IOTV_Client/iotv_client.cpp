@@ -8,7 +8,8 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     _socket(socket),
     _hosts(hosts),
     _expectedDataSize(0),
-    _logDataQueueTimer(nullptr)
+    _logDataQueueTimer(nullptr),
+    _my_pool(4)
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
@@ -439,8 +440,16 @@ void IOTV_Client::slotReadData()
                     _logDataQueueTimer->start(_LOGDATAQUEUETIMERINTERVAL);
                 }
 
-                std::thread th(&IOTV_Client::processQueryLogData, this, header);
-                th.detach();
+                _my_pool.push({thread_pool::TaskType::Execute,
+                               [this, header](std::vector<thread_pool::Param> const&)
+                               {
+                                   this->processQueryLogData(header);
+                               },
+                               {}
+                });
+
+//                std::thread th(&IOTV_Client::processQueryLogData, this, header);
+//                th.detach();
 
                 _recivedBuff = _recivedBuff.mid(cutDataSize);
                 continue;

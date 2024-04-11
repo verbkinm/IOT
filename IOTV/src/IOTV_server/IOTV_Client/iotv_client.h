@@ -10,6 +10,7 @@
 #include <queue>
 
 #include "IOTV_Host/iotv_host.h"
+#include "thread_pool.h"
 
 class IOTV_Client : public QObject
 {
@@ -54,6 +55,8 @@ private:
     std::queue<std::pair<Header *, std::vector<char>>> _logDataQueue;
     QTimer *_logDataQueueTimer;
     static constexpr uint _LOGDATAQUEUETIMERINTERVAL = 100;
+
+    thread_pool::ThreadPool _my_pool;
 
 
 private slots:

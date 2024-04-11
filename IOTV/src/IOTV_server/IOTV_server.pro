@@ -35,6 +35,8 @@ SOURCES += \
     ../lib/Protocols/embedded/tech.cpp \
     ../lib/Protocols/embedded/host_broadcast.cpp  \
     ../lib/Protocols/embedded/log_data.cpp  \
+    ../lib/ThreadPool/thread_pool.cpp \
+    ../lib/ThreadPool/thread_safe_queue.cpp \
     IOTV_Server/iotv_server.cpp \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
@@ -79,6 +81,8 @@ HEADERS += \
     ../lib/Protocols/embedded/tech.h \
     ../lib/Protocols/embedded/host_broadcast.h \
     ../lib/Protocols/embedded/log_data.h  \
+    ../lib/ThreadPool/thread_pool.h \
+    ../lib/ThreadPool/thread_safe_queue.h \
     IOTV_Server/iotv_server.h \
     IOTV_Host/iotv_host.h \
     IOTV_Client/iotv_client.h \
@@ -102,7 +106,8 @@ INCLUDEPATH += ../lib/Base_Host \
                 ../lib/raw \
                 ../lib/ConfigType \
                 ../lib/Events \
-                ../lib/Json_Parsers
+                ../lib/Json_Parsers \
+                ../lib/ThreadPool
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
