@@ -13,6 +13,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
+    _logDataQueueTimer.setParent(this);
 
     connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
@@ -31,7 +32,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 
 IOTV_Client::~IOTV_Client()
 {
-    //    qDebug() << "client destruct";
+       // qDebug() << "client destruct";
     ///!!! закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {
@@ -368,7 +369,7 @@ uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
 
 void IOTV_Client::slotDisconnected()
 {
-    //    qDebug() << "client disconnect";
+       qDebug() << "client disconnect";
     emit signalDisconnected();
 }
 

@@ -40,22 +40,22 @@ IOTV_Server::~IOTV_Server()
 {
     for(auto &[client, thread] : _iot_clients)
     {
+        client->deleteLater();
+
         thread->exit();
         thread->wait();
         delete thread;
-        delete client;
     }
 
     _iot_clients.clear();
 
     for(auto &[host, thread] : _iot_hosts)
     {
+        host->deleteLater();
+
         thread->exit();
         thread->wait();
         delete thread;
-
-        host->moveToThread(this->thread());
-        delete host;
     }
 
     _iot_hosts.clear();
@@ -303,7 +303,7 @@ void IOTV_Server::slotNewClientConnection()
 
     auto client = Maker_iotv::client(_iot_clients, _maxClientCount, _iot_hosts, socket, this);
 
-    qDebug() << this->thread() << client->thread();
+    // qDebug() << this->thread() << client->thread();
 
     if (client == nullptr)
         return;
@@ -318,17 +318,19 @@ void IOTV_Server::slotNewClientConnection()
 void IOTV_Server::slotClientDisconnected()
 {
     IOTV_Client* client = qobject_cast<IOTV_Client*>(sender());
+
     if (client == nullptr)
         return;
 
     QString strOut = "Client disconnected";
     Log::write(strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 
+    client->deleteLater();
+
     _iot_clients[client]->exit();
     _iot_clients[client]->wait();
     delete _iot_clients[client];
-    delete client;
-//    _iot_clients[client]->deleteLater();
+
     _iot_clients.erase(client);
 
     clientOnlineFile();
@@ -342,7 +344,7 @@ void IOTV_Server::slotNewHostConnection()
         return;
 
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout);
-    connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
+    connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::DirectConnection);
     clientHostsUpdate();
 }
 
@@ -410,8 +412,8 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
                ServerLog::DEFAULT_LOG_FILENAME);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
-//    socket->abort();
-//    delete socket;
+    //    socket->abort();
+    //    delete socket;
     socket->deleteLater();
 }
 
@@ -458,18 +460,12 @@ void IOTV_Server::slotDevicePingTimeout()
     if (host == nullptr)
         return;
 
-//    host->setParent(this);
-//    qDebug() << this->thread() << host->thread() << host->parent();// << host->parent()->thread();
-
-    host->moveToThread(this->thread());
-//    host->deleteLater();
-//    delete host;
+    host->deleteLater();
 
     _iot_hosts[host]->exit();
     _iot_hosts[host]->wait();
     delete _iot_hosts[host];
 
-//    _iot_hosts[host]->deleteLater();
     _iot_hosts.erase(host);
 
     for (const auto &client : _iot_clients)
