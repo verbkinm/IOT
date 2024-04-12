@@ -9,7 +9,7 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     _hosts(hosts),
     _expectedDataSize(0),
     _logDataQueueTimer(nullptr),
-    _my_pool(4)
+    _my_pool(std::thread::hardware_concurrency())
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
@@ -18,13 +18,15 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
     connect(_socket, &QTcpSocket::disconnected, this, &IOTV_Client::slotDisconnected);
 
+    connect(&_logDataQueueTimer, &QTimer::timeout, this, &IOTV_Client::slotLogDataQueueTimerOut);
+    _logDataQueueTimer.start(_LOGDATAQUEUETIMERINTERVAL);
+
     connect(this, &IOTV_Client::signalFetchEventActionDataFromServer, this, &IOTV_Client::slotFetchEventActionDataFromServer, Qt::QueuedConnection);
 
     connect(this, &IOTV_Client::signalUpdateHosts, this, &IOTV_Client::processQueryIdentification, Qt::QueuedConnection);
     connect(this, &IOTV_Client::signalClearAndUpdateHosts, this, &IOTV_Client::processQueryIdentification_2, Qt::QueuedConnection);
 
-    _silenceTimer.setInterval(_SILENCEINTERVAL);
-    _silenceTimer.start();
+    _silenceTimer.start(_SILENCEINTERVAL);
 }
 
 IOTV_Client::~IOTV_Client()
@@ -182,6 +184,8 @@ void IOTV_Client::processQueryWrite(const Header *header)
         // Ответ клиенту о записи
         write({outData, static_cast<int>(size)}, size);
 
+//        qDebug() << this->thread() << it->first->thread() << this->parent();
+//        it->first->write(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
         // Послать данные на устройство напрямую нельзя - разные потоки
         emit it->first->signalQueryWrite(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
 
@@ -220,6 +224,8 @@ void IOTV_Client::processQueryTech(const Header *header)
 
 void IOTV_Client::processQueryLogData(const Header *header)
 {
+        auto start = std::chrono::system_clock::now();
+
     if (header == NULL || header->pkg == NULL)
         return;
 
@@ -259,7 +265,7 @@ void IOTV_Client::processQueryLogData(const Header *header)
     {
         Log::write(QString(Q_FUNC_INFO) + " не удалось открыть файл " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         std::lock_guard lg(_logDataQueueMutex);
-        _logDataQueue.emplace((Header *)header, std::vector<char>());
+        _logDataQueue.emplace(const_cast<Header *>(header), std::vector<char>());
         return;
     }
 
@@ -319,9 +325,10 @@ void IOTV_Client::processQueryLogData(const Header *header)
     }
 
     std::lock_guard lg(_logDataQueueMutex);
-    _logDataQueue.emplace((Header *)header, std::move(byteArray));
+    _logDataQueue.emplace(const_cast<Header *>(header), std::move(byteArray));
 
-//    qDebug() << "Канал" << pkg->channelNumber << "строк" << logLine << byteArray.size();
+    Log::write("_logDataQueue - " + QString::number(pkg->channelNumber) + QString::number(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count()),
+                Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 
 //    QFile fileTmp("test_" + QString::number(pkg->channelNumber) + ".txt");
 //    fileTmp.open(QIODevice::WriteOnly);
@@ -433,13 +440,6 @@ void IOTV_Client::slotReadData()
                 processQueryTech(header);
             else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
             {
-                if (_logDataQueueTimer == nullptr)
-                {
-                    _logDataQueueTimer = new QTimer(this);
-                    connect(_logDataQueueTimer, &QTimer::timeout, this, &IOTV_Client::slotLogDataQueueTimerOut);
-                    _logDataQueueTimer->start(_LOGDATAQUEUETIMERINTERVAL);
-                }
-
                 _my_pool.push({thread_pool::TaskType::Execute,
                                [this, header](std::vector<thread_pool::Param> const&)
                                {
@@ -447,10 +447,6 @@ void IOTV_Client::slotReadData()
                                },
                                {}
                 });
-
-//                std::thread th(&IOTV_Client::processQueryLogData, this, header);
-//                th.detach();
-
                 _recivedBuff = _recivedBuff.mid(cutDataSize);
                 continue;
             }

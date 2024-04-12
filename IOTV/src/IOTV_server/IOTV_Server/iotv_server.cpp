@@ -42,16 +42,20 @@ IOTV_Server::~IOTV_Server()
     {
         thread->exit();
         thread->wait();
-        thread->deleteLater();
+        delete thread;
+        delete client;
     }
 
     _iot_clients.clear();
 
-    for(auto &[hosts, thread] : _iot_hosts)
+    for(auto &[host, thread] : _iot_hosts)
     {
         thread->exit();
         thread->wait();
-        thread->deleteLater();
+        delete thread;
+
+        host->moveToThread(this->thread());
+        delete host;
     }
 
     _iot_hosts.clear();
@@ -299,6 +303,8 @@ void IOTV_Server::slotNewClientConnection()
 
     auto client = Maker_iotv::client(_iot_clients, _maxClientCount, _iot_hosts, socket, this);
 
+    qDebug() << this->thread() << client->thread();
+
     if (client == nullptr)
         return;
 
@@ -320,7 +326,9 @@ void IOTV_Server::slotClientDisconnected()
 
     _iot_clients[client]->exit();
     _iot_clients[client]->wait();
-    _iot_clients[client]->deleteLater();
+    delete _iot_clients[client];
+    delete client;
+//    _iot_clients[client]->deleteLater();
     _iot_clients.erase(client);
 
     clientOnlineFile();
@@ -333,7 +341,7 @@ void IOTV_Server::slotNewHostConnection()
     if (host == nullptr)
         return;
 
-    connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
+    connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout);
     connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
     clientHostsUpdate();
 }
@@ -402,6 +410,8 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
                ServerLog::DEFAULT_LOG_FILENAME);
 
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+//    socket->abort();
+//    delete socket;
     socket->deleteLater();
 }
 
@@ -448,9 +458,18 @@ void IOTV_Server::slotDevicePingTimeout()
     if (host == nullptr)
         return;
 
+//    host->setParent(this);
+//    qDebug() << this->thread() << host->thread() << host->parent();// << host->parent()->thread();
+
+    host->moveToThread(this->thread());
+//    host->deleteLater();
+//    delete host;
+
     _iot_hosts[host]->exit();
     _iot_hosts[host]->wait();
-    _iot_hosts[host]->deleteLater();
+    delete _iot_hosts[host];
+
+//    _iot_hosts[host]->deleteLater();
     _iot_hosts.erase(host);
 
     for (const auto &client : _iot_clients)

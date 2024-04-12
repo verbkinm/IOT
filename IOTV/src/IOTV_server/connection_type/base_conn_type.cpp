@@ -66,8 +66,6 @@ QByteArray Base_conn_type::readAll()
 
 void Base_conn_type::slotReadData()
 {
-    std::lock_guard lg(_hostBuffMutex);
-
     QByteArray inData = readAll();
 
 //    Log::write(_name + ": data response <- " + inData. toHex(':'),

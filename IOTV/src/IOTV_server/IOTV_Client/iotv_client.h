@@ -16,7 +16,7 @@ class IOTV_Client : public QObject
 {
     Q_OBJECT
 public:
-    IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent);
+    IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host* , QThread*> &hosts, QObject *parent = nullptr);
     ~IOTV_Client();
 
     const QTcpSocket *socket() const;
@@ -53,7 +53,7 @@ private:
 
     std::mutex _logDataQueueMutex;
     std::queue<std::pair<Header *, std::vector<char>>> _logDataQueue;
-    QTimer *_logDataQueueTimer;
+    QTimer _logDataQueueTimer;
     static constexpr uint _LOGDATAQUEUETIMERINTERVAL = 100;
 
     thread_pool::ThreadPool _my_pool;

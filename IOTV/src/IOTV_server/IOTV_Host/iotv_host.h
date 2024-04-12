@@ -26,7 +26,7 @@ public:
 
     QString getName() const override;
 
-    qint64 write(uint8_t channelNumber, const QByteArray &data);
+    qint64 write(uint8_t channelNumber, QByteArray data);
     QByteArray readData(uint8_t channelNumber) const;
 
     const std::unordered_map<QString, QString> &settingsData() const;
@@ -96,7 +96,7 @@ private slots:
     void slotPingTimeOut();
 
     // Используетеся для записи данных полученых от клиентов из других потоков
-    void slotQueryWrite(int channelNumber, const QByteArray &data);
+    void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotConnected();
 

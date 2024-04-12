@@ -99,10 +99,12 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
             return nullptr;
         }
 
-        host = new IOTV_Host(setting, socket, th);
+        host = new IOTV_Host(setting, socket);//, th);
     }
     else
-        host = new IOTV_Host(setting, th);
+        host = new IOTV_Host(setting);//, th);
+
+    host->moveToThread(th);
 
     th->start();
     add_to_iot_hosts[host] = th;
@@ -115,6 +117,7 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
 
         add_to_iot_hosts.erase(host);
         delete th;
+        delete host;
 
         return nullptr;
     }
@@ -151,7 +154,9 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
     }
 
     QThread *th = new QThread(parent);
-    IOTV_Client *client = new IOTV_Client(socket, iot_hosts, th);
+    IOTV_Client *client = new IOTV_Client(socket, iot_hosts);//, th);
+    client->moveToThread(th);
+
     th->start();
 
     add_to_iot_client[client] = th;
@@ -161,6 +166,12 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
         Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
+
+        delete th;
+        delete client;
+
+        add_to_iot_client.erase(client);
+
         return nullptr;
     }
 

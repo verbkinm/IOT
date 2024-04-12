@@ -71,7 +71,7 @@ private:
 
     std::unordered_map<uint8_t, QByteArray> _log_data_buf;
 
-    static constexpr int LOG_DATA_MAX = 1'000'000;
+    static constexpr int LOG_DATA_MAX = 10'000'000;
     bool _logDataOverflow;
 
 signals:

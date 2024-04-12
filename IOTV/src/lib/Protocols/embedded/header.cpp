@@ -131,6 +131,9 @@ void clearHeader(struct Header *header)
         case HEADER_ASSIGNMENT_TECH:
             clearTech((struct Tech *)header->pkg);
             break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            clearLogData((struct Log_Data *)header->pkg);
+            break;
         default:
             break;
         }

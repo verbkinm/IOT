@@ -5,6 +5,7 @@
 TCP_REVERSE_conn_type::TCP_REVERSE_conn_type(const QString &name, QTcpSocket *socket, QObject *parent)
     : Base_conn_type{name, parent}, _tcpSocket(socket)
 {
+    _tcpSocket->setParent(this);
     connect(socket, &QTcpSocket::readyRead, this, &TCP_REVERSE_conn_type::slotReadData);
     connect(socket, &QAbstractSocket::errorOccurred, this, &TCP_REVERSE_conn_type::slotError, Qt::QueuedConnection);
     connect(socket, &QAbstractSocket::stateChanged, this, &TCP_REVERSE_conn_type::slotSocketStateChanged, Qt::QueuedConnection);
