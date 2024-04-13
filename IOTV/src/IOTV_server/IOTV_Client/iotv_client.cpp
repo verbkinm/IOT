@@ -130,34 +130,31 @@ void IOTV_Client::processQueryRead(const Header *header)
     if (it == _hosts.end())
         return;
 
+    IOTV_Host *host = it->first;
+
     ///!!!
     if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
     {
-        if (it->first->addStreamRead(pkg->channelNumber, this))
-        {
-            disconnect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
-            connect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead, Qt::QueuedConnection);
-        }
+        emit host->signalAddStreamRead(pkg->channelNumber, this);
+        disconnect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
+        connect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead, Qt::QueuedConnection);
 
         return;
     }
     else if (pkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
     {
-        it->first->removeStreamRead(pkg->channelNumber, this);
-        disconnect(it->first, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
+        emit host->signalRemoveStreamRead(pkg->channelNumber, this);
+        // связать поток клиента и поток хоста через сигналы - слоты!
+        disconnect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
 
         return;
     }
     ///!!!
 
-    auto iot = it->first->convert();
+    auto iot = host->convert();
 
-//    uint64_t size;
     char outData[BUFSIZ];
-
-    /*size = */responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
-
-//    write({outData, static_cast<int>(size)}, size);
+    responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
 
     clearIOTV_Server(iot);
 }
@@ -441,6 +438,8 @@ void IOTV_Client::slotReadData()
                 processQueryTech(header);
             else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
             {
+//                std::thread th(&IOTV_Client::processQueryLogData, this, header);
+//                th.detach();
                 _my_pool.push({thread_pool::TaskType::Execute,
                                [this, header](std::vector<thread_pool::Param> const&)
                                {

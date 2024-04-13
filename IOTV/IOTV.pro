@@ -1,3 +1,4 @@
+TARGET = IOTV
 TEMPLATE = subdirs
 
 SUBDIRS += \

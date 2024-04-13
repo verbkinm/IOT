@@ -69,11 +69,6 @@ private:
 
     std::unordered_map<QString, QString>  _settingsData;
 
-    std::mutex _mutexParametersChange,
-        _mutexWrite, //writeToRemoteHost
-        _mutexStreamRead,
-        _mutexStreamWrite;
-
     // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
     static constexpr int COUNTER_STATE_COUNT = 3;
     int _counterState;
@@ -88,6 +83,10 @@ private:
 public slots:
     void slotDisconnected();
 
+    // дублирование функций addStreamRead  и removeStreamRead
+    void slotAddStreamRead(uint8_t channel, QObject *client);
+    void slotRemoveStreamRead(uint8_t channel, QObject *client);
+
 private slots:
     void slotDataResived(QByteArray data);
 
@@ -101,6 +100,9 @@ private slots:
     void slotConnected();
 
 signals:
+    void signalAddStreamRead(uint8_t channel, QObject *client);
+    void signalRemoveStreamRead(uint8_t channel, QObject *client);
+
     void signalDevicePingTimeOut();
     void signalStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
 };

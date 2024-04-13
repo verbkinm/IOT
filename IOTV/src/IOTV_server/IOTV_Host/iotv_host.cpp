@@ -42,6 +42,9 @@ void IOTV_Host::shareConstructor()
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
+
+    connect(this, &IOTV_Host::signalAddStreamRead, this, &IOTV_Host::slotAddStreamRead, Qt::QueuedConnection);
+    connect(this, &IOTV_Host::signalRemoveStreamRead, this, &IOTV_Host::slotRemoveStreamRead, Qt::QueuedConnection);
 }
 
 IOTV_Host::~IOTV_Host()
@@ -161,8 +164,6 @@ QByteArray IOTV_Host::readData(uint8_t channelNumber) const
 
 qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 {
-    std::lock_guard lg(_mutexWrite);
-
     // Перехват любой отправки данных, если id ещё не установлен
     if (getId() == 0)
     {
@@ -312,7 +313,6 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 
 bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 {
-    std::lock_guard lg(_mutexStreamRead);
     char outData[BUFSIZ];
     bool result = false;
 
@@ -338,7 +338,6 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 
 void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 {
-    std::lock_guard lg(_mutexStreamRead);
     char outData[BUFSIZ];
 
     if (_streamRead.count(channel) == 0)
@@ -352,7 +351,6 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
         auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
         writeToRemoteHost({outData, static_cast<int>(size)}, size);
     }
-
 }
 
 QString IOTV_Host::getAddress() const
@@ -440,4 +438,18 @@ void IOTV_Host::slotConnected()
 void IOTV_Host::slotDisconnected()
 {
     _conn_type->disconnectFromHost();
+}
+
+void IOTV_Host::slotAddStreamRead(uint8_t channel, QObject *client)
+{
+    if (addStreamRead(channel, client) == false)
+    {
+        QString msg = "Add read stream wrong. Channel #" + QString::number(channel);
+        Log::write(msg, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+    }
+}
+
+void IOTV_Host::slotRemoveStreamRead(uint8_t channel, QObject *client)
+{
+    removeStreamRead(channel, client);
 }
