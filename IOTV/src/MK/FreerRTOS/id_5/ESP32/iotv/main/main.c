@@ -4,7 +4,6 @@
 #include "service/service.h"
 #include "I2C/i2c.h"
 #include "iotv.h"
-#include "I2C/DS3231.h"
 
 //static const char *TAG = "main";
 
@@ -19,7 +18,6 @@ void app_main(void)
 	ESP_ERROR_CHECK(ret);
 
 	i2c_init();
-//	DS3231_set_system_time();
 
 	iotv_init();
 

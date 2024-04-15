@@ -159,8 +159,6 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
 
     th->start();
 
-    add_to_iot_client[client] = th;
-
     if (!th->isRunning())
     {
         Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
@@ -170,10 +168,10 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
         delete th;
         delete client;
 
-        add_to_iot_client.erase(client);
-
         return nullptr;
     }
+
+    add_to_iot_client[client] = th;
 
     return client;
 }

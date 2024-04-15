@@ -34,7 +34,7 @@ private:
     void processQueryWrite(const struct Header* header);
     void processQueryPingPoing();
     void processQueryTech(const struct Header* header);
-    void processQueryLogData(const struct Header* header);
+    void processQueryLogData(struct Header* header, std::atomic_int &run);
 
     void write(const QByteArray &data, qint64 size = -1) const;
 
@@ -56,7 +56,7 @@ private:
     QTimer _logDataQueueTimer;
     static constexpr uint _LOGDATAQUEUETIMERINTERVAL = 100;
 
-    thread_pool::ThreadPool _my_pool;
+    thread_pool::ThreadPool *_my_pool;
 
 
 private slots:

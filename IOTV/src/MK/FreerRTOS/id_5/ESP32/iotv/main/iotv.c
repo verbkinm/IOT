@@ -11,38 +11,22 @@ static char transmitBuffer[BUFSIZE];
 
 static int last_client_socket = 0;
 
-static uint8_t readType[15] = {
+static uint8_t readType[] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
-
-		DATA_TYPE_INT_8, 		// секунды
-		DATA_TYPE_INT_8,		// минуты
-		DATA_TYPE_INT_8,		// часы
-		DATA_TYPE_INT_8,		// день недели
-		DATA_TYPE_INT_8,		// день месяца
-		DATA_TYPE_INT_8,		// месяц
-		DATA_TYPE_INT_8,		// год
 
 		DATA_TYPE_INT_8,		// ориентация дисплея
 
 		DATA_TYPE_INT_16,		// текущее расстояние
-		DATA_TYPE_DOUBLE_64,	// освещённость
-		DATA_TYPE_DOUBLE_64,	// температура
-		DATA_TYPE_DOUBLE_64,	// влажность
-		DATA_TYPE_DOUBLE_64		// давление
+		DATA_TYPE_FLOAT_32,		// освещённость
+		DATA_TYPE_FLOAT_32,		// температура
+		DATA_TYPE_FLOAT_32,		// влажность
+		DATA_TYPE_FLOAT_32		// давление
 };
 
-static uint8_t writeType[10] = {
+static uint8_t writeType[] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
-
-		DATA_TYPE_INT_8, 		// секунды
-		DATA_TYPE_INT_8,		// минуты
-		DATA_TYPE_INT_8,		// часы
-		DATA_TYPE_INT_8,		// день недели
-		DATA_TYPE_INT_8,		// день месяца
-		DATA_TYPE_INT_8,		// месяц
-		DATA_TYPE_INT_8,		// год
 
 		DATA_TYPE_INT_8			// ориентация дисплея
 };
@@ -51,10 +35,10 @@ static struct IOTV_Server_embedded iot = {
 		.id = 5,
 		.name = "vl6180x+bme280+relay",
 		.description = "ESP-32 id-5",
-		.numberReadChannel = 15,
+		.numberReadChannel = 8,
 		.readChannel = NULL,
 		.readChannelType = readType,
-		.numberWriteChannel = 10,
+		.numberWriteChannel = 3,
 		.writeChannelType = writeType,
 		.state = 0,
 		.nameSize = 20,
@@ -187,25 +171,6 @@ void iotv_data_recived(const char *data, int size, int sock)
 						printf("Data in border: %d\n", *val16);
 						writeBorderDistanceToNVS(*val16);
 						break;
-					case CH_SEC:
-					case CH_MIN:
-						*val = inRange(*val, 0, 59);
-						break;
-					case CH_HOUR:
-						*val = inRange(*val, 0, 23);
-						break;
-					case CH_DAY:
-						*val = inRange(*val, 1, 7);
-						break;
-					case CH_DATE:
-						*val = inRange(*val, 1, 31);
-						break;
-					case CH_MONTH:
-						*val = inRange(*val, 1, 12);
-						break;
-					case CH_YEAR:
-						*val = inRange(*val, 0, 99);
-						break;
 					case CH_DISP_ORNT:
 						*val = inRange(*val, 0, 3);
 						writeDisplayOrientationToNVS(*val);
@@ -214,15 +179,6 @@ void iotv_data_recived(const char *data, int size, int sock)
 					default:
 						break;
 					}
-				}
-
-				if(((struct Read_Write *)header->pkg)->channelNumber >= CH_SEC && ((struct Read_Write *)header->pkg)->channelNumber <= CH_YEAR)
-				{
-					struct DateTime dt;
-					for (uint8_t i = DS3231_REG_SEC, j = CH_SEC; i <= DS3231_REG_YEAR; ++i, ++j)
-						((uint8_t *)&dt)[i] = *(uint8_t *)iot.readChannel[j].data;
-
-					DS3231_SetDataTime(&dt);
 				}
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
@@ -240,35 +196,3 @@ void iotv_data_recived(const char *data, int size, int sock)
 		clearHeader(header);
 	}
 }
-
-
-
-
-//void DS3231_Task(void *pvParameters)
-//{
-//	while(iot.state == 0)
-//		vTaskDelay(100 / portTICK_PERIOD_MS);
-//
-//	ESP_LOGW(TAG, "DS3231 task created");
-//
-//	struct DateTime dt;
-//
-//
-//	while(true)
-//	{
-//		dt = DS3231_DataTime();
-//
-//		if (dt.err)
-//		{
-//			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
-//				*(uint8_t *)iot.readChannel[i].data = 255;
-//		}
-//		else
-//		{
-//			for (uint8_t i = CH_SEC, j = 0; i <= CH_YEAR; ++i, ++j)
-//				*(uint8_t *)iot.readChannel[i].data = ((uint8_t *)&dt)[j];
-//		}
-//
-//		vTaskDelay(1000 / portTICK_PERIOD_MS);
-//	}
-//}

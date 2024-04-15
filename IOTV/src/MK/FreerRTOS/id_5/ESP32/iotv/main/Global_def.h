@@ -42,13 +42,6 @@
 
 #define CH_RELAY_STATE 						0
 #define CH_BORDER							1
-#define CH_SEC								2
-#define CH_MIN								3
-#define	CH_HOUR								4
-#define	CH_DAY								5
-#define CH_DATE								6
-#define CH_MONTH							7
-#define CH_YEAR								8
 #define CH_DISP_ORNT						9
 #define CH_RANGE							10
 #define CH_LUX								11

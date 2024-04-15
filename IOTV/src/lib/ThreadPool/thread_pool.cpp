@@ -22,7 +22,7 @@ namespace
     }
 } // namespace
 
-thread_pool::ThreadPool::ThreadPool(std::size_t n_threads)
+    thread_pool::ThreadPool::ThreadPool(std::size_t n_threads) : _run(RUN)
 {
     for (std::size_t i = 0; i < n_threads; ++i)
     {
@@ -32,11 +32,12 @@ thread_pool::ThreadPool::ThreadPool(std::size_t n_threads)
 
 thread_pool::ThreadPool::~ThreadPool()
 {
+    _run = TERMINATE;
+
+    //!!!
     Task const stop_task{TaskType::Stop, {}, {}};
     for (std::size_t i = 0; i < _threads.size(); ++i)
-    {
         push(stop_task);
-    }
 }
 
 bool thread_pool::ThreadPool::push(Task const& task)

@@ -38,6 +38,8 @@ IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
 
 IOTV_Server::~IOTV_Server()
 {
+    qDebug() << "IOTV_Server destruct";
+
     for(auto &[client, thread] : _iot_clients)
     {
         client->deleteLater();

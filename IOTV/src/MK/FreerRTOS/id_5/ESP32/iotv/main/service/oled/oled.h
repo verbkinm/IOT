@@ -30,7 +30,6 @@
 #include "esp_lvgl_port.h"
 
 #include "Global_def.h"
-#include "I2C/DS3231.h"
 #include "service/bme280/bme280.h"
 #include "iotv.h"
 

@@ -492,8 +492,11 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
         uint64_t resultSize = headerToData(&header, outData, outDataSize);
         totalSendByte += writeFunc(outData, resultSize, obj);
 
-        printf("fragments = %d / %d totalSendByte = %lu\n", header.fragment, header.fragments, totalSendByte);
-        fflush(stdout);
+        if (header.fragment == header.fragments)
+        {
+            printf("fragments = %d / %d totalSendByte = %lu\n", header.fragment, header.fragments, totalSendByte);
+            fflush(stdout);
+        }
     }
 
     return totalSendByte;
