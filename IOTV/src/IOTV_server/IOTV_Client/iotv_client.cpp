@@ -33,11 +33,11 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, const std::unordered_map<IOTV_Host*
 IOTV_Client::~IOTV_Client()
 {
        // qDebug() << "client destruct";
-    ///!!! закрыть все потоки, если такие имеются
+    // Закрыть все потоки, если такие имеются
     for (auto &el : _hosts)
     {
         for (int i = 0; i < el.first->getReadChannelLength(); ++i)
-            el.first->removeStreamRead(i, this);
+            emit el.first->signalRemoveStreamRead(i, this);
 
         //        for (int i = 0; i < el.first->getWriteChannelLength(); ++i)
         //            el.first->removeStreamWrite(i, this);
@@ -234,7 +234,12 @@ void IOTV_Client::processQueryLogData(Header *header, std::atomic_int &run)
 
     struct Log_Data *pkg = static_cast<struct Log_Data *>(header->pkg);
     if (pkg == nullptr)
+    {
+        std::lock_guard lg(_logDataQueueMutex);
+        _logDataQueue.emplace(header, std::vector<char>());
+        Log::write(QString(Q_FUNC_INFO) + " ошибка преобразования данных!", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         return;
+    }
 
     QString compareName(QByteArray{pkg->name, pkg->nameSize});
     auto it = std::find_if (_hosts.begin(), _hosts.end(), [&](const auto &iotv_host){
@@ -243,11 +248,14 @@ void IOTV_Client::processQueryLogData(Header *header, std::atomic_int &run)
     });
 
     if (it == _hosts.end())
+    {
+        std::lock_guard lg(_logDataQueueMutex);
+        _logDataQueue.emplace(header, std::vector<char>());
+        Log::write(QString(Q_FUNC_INFO) + " запрошенное устройство " + compareName + " не существует ", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         return;
+    }
 
     auto host = it->first;
-
-//    char outData[BUFSIZ];
 
     time_t time = pkg->startInterval / 1000;
     std::tm *tm_ptr = localtime(&time);
@@ -335,7 +343,6 @@ void IOTV_Client::processQueryLogData(Header *header, std::atomic_int &run)
 
     Log::write("_logDataQueue - " + QString::number(pkg->channelNumber) + QString::number(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count()),
                 Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
-
 
     /*
 
@@ -550,7 +557,10 @@ void IOTV_Client::slotLogDataQueueTimerOut()
 
         auto header = pair.first;
         if (header == NULL || header->pkg == NULL)
+        {
+            clearHeader(header);
             continue;
+        }
 
         const struct Log_Data *pkg = static_cast<const struct Log_Data *>(header->pkg);
         if (pkg == nullptr)
