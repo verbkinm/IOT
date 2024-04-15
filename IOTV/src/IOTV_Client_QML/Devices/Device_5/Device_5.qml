@@ -62,9 +62,9 @@ Page {
                 height: 300
 
                 device: root.device
-                channelTemperature: 12
-                channelHumidity: 13
-                channelPressure: 14
+                channelTemperature: 5
+                channelHumidity: 6
+                channelPressure: 7
             }
 
             Button {

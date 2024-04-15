@@ -42,12 +42,12 @@
 
 #define CH_RELAY_STATE 						0
 #define CH_BORDER							1
-#define CH_DISP_ORNT						9
-#define CH_RANGE							10
-#define CH_LUX								11
-#define CH_TEMP								12
-#define CH_HUM								13
-#define CH_PRES								14
+#define CH_DISP_ORNT						2
+#define CH_RANGE							3
+#define CH_LUX								4
+#define CH_TEMP								5
+#define CH_HUM								6
+#define CH_PRES								7
 
 // OLED
 #define OLED_PIN_NUM_RST           			-1

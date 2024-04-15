@@ -381,13 +381,13 @@ Page {
             var obj;
             if (channelNumber === 0)
                 obj = lineSeriesRele
-            else if (channelNumber === 10)
+            else if (channelNumber === 3)
                 obj = lineSeriesDistance
-            else if (channelNumber === 12)
+            else if (channelNumber === 5)
                 obj = lineSeriesTemperature
-            else if (channelNumber === 13)
+            else if (channelNumber === 6)
                 obj = lineSeriesHumidity
-            else if (channelNumber === 14)
+            else if (channelNumber === 7)
                 obj = lineSeriesPressure
 
             if (device.logDataOverflow)
@@ -398,10 +398,10 @@ Page {
             waitList[channelNumber] = false
 
             if (waitList[0] === true ||
-                    waitList[10] === true ||
-                    waitList[12] === true ||
-                    waitList[13] === true ||
-                    waitList[14] === true)
+                    waitList[3] === true ||
+                    waitList[5] === true ||
+                    waitList[6] === true ||
+                    waitList[7] === true)
                 return
 
             busyIndicator.visible = false
@@ -423,24 +423,24 @@ Page {
 
         /*
         0 - реле
-        10 - текущее расстояние
-        12 - тепмпература
-        13 - влажность
-        14 - давление
+        3 - текущее расстояние
+        5 - тепмпература
+        6 - влажность
+        7 - давление
         */
 
         waitList = []
         waitList[0] = true
-        waitList[10] = true
-        waitList[12] = true
-        waitList[13] = true
-        waitList[14] = true
+        waitList[3] = true
+        waitList[5] = true
+        waitList[6] = true
+        waitList[7] = true
 
         device.signalQueryLogData(dateStart, dateEnd, 60000, 0, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000, 10, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000 * 10, 12, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000 * 10, 13, 0)
-        device.signalQueryLogData(dateStart, dateEnd, 60000 * 30, 14, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000, 3, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000 * 10, 5, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000 * 10, 6, 0)
+        device.signalQueryLogData(dateStart, dateEnd, 60000 * 30, 7, 0)
 
         busyIndicator.visible = true
     }

@@ -14,9 +14,7 @@ static int last_client_socket = 0;
 static uint8_t readType[] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
-
 		DATA_TYPE_INT_8,		// ориентация дисплея
-
 		DATA_TYPE_INT_16,		// текущее расстояние
 		DATA_TYPE_FLOAT_32,		// освещённость
 		DATA_TYPE_FLOAT_32,		// температура
@@ -27,7 +25,6 @@ static uint8_t readType[] = {
 static uint8_t writeType[] = {
 		DATA_TYPE_BOOL,			// состояние реле
 		DATA_TYPE_INT_16, 		// порог срабатывания реле
-
 		DATA_TYPE_INT_8			// ориентация дисплея
 };
 
