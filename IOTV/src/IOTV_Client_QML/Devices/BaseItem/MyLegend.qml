@@ -41,14 +41,6 @@ Rectangle {
             property var currentName: labelNames[index]
             property color markerColor: seriesColors[index]
 
-            //            border {
-            //                color: "black"
-            //                width: 1
-            //            }
-
-//            color: "#00000000"
-            //            radius: 4
-            //            width: {legend.width / seriesCount - legendRow.spacing * legendRow}
             implicitWidth: marker.width + label.width// legend.width / seriesCount - legendRow.spacing * seriesCount
             implicitHeight: label.implicitHeight + marker.implicitHeight + 10
 
@@ -120,7 +112,6 @@ Rectangle {
 
             rowCount = parseInt(rowCount)
             var rowWidth = rowCount * legendRow.children[0].width + (rowCount - 1) * legendRow.spacing
-//            print(legendRow.height)
             return (parent.width - rowWidth) / 2
         }
     }

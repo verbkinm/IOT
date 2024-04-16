@@ -129,6 +129,8 @@
         <file>img/forward.png</file>
         <file>Devices/Device_5/Log_Charts.qml</file>
         <file>Devices/BaseItem/MyLegend.qml</file>
+        <file>img/zoom.png</file>
+        <file>img/zoom_white.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>
