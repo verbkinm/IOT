@@ -44,9 +44,19 @@ public:
         return QFileInfo(_logDir, date.toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
     }
 
+    inline QString logName(const QDate &date, uint8_t channelNumber)
+    {
+        return QFileInfo(_logDir, date.toString("yyyy-MM-dd")).absoluteFilePath() + "_" + QString::number(channelNumber) + ".log";
+    }
+
     inline QString logName()
     {
         return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
+    }
+
+    inline QString logName(uint8_t channelNumber)
+    {
+        return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() +  "_" + QString::number(channelNumber) + ".log";
     }
 
 private:

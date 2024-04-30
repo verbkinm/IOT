@@ -114,7 +114,7 @@ void IOTV_Host::responceRead(const struct Header *header)
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logName());
+               Log::Write_Flag::FILE, logName(pkg->channelNumber));
 }
 
 void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
@@ -417,7 +417,7 @@ void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
                    + QString::number(channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logName());
+               Log::Write_Flag::FILE, logName(channelNumber));
 }
 
 void IOTV_Host::slotConnected()

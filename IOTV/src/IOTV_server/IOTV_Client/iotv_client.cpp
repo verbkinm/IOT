@@ -261,7 +261,7 @@ void IOTV_Client::processQueryLogData(Header *header, std::atomic_int &run)
     std::tm *tm_ptr = localtime(&time);
     QDate startDate(tm_ptr->tm_year + 1900, tm_ptr->tm_mon + 1, tm_ptr->tm_mday);
 
-    QString fileName = host->logName(startDate);
+    QString fileName = host->logName(startDate, pkg->channelNumber);
 
     int64_t lastTime = 0, logLine = 0;
     std::string valueStr, line;
@@ -281,7 +281,7 @@ void IOTV_Client::processQueryLogData(Header *header, std::atomic_int &run)
     }
 
     std::vector<char> byteArray;
-    byteArray.reserve(BUFSIZ * 1000);
+    byteArray.reserve(BUFSIZ * 1000); //!!!
     while(!file.eof() && run == thread_pool::ThreadPool::Thread_State::RUN)
     {
         ++logLine;
