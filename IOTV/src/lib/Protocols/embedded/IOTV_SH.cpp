@@ -99,7 +99,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 
     if (rwPkg->flags != ReadWrite_FLAGS_OPEN_STREAM
         && (iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_RAW
-            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING
+            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING //!!!
             || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_NONE))
     {
         return 0;
@@ -147,7 +147,7 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, struct IOTV_Server_
 
     if (iot->readChannel == NULL
         || iot->numberWriteChannel <= ptrReadWrite->channelNumber
-        || iot->numberReadChannel <= ptrReadWrite->channelNumber
+        || iot->numberReadChannel <= ptrReadWrite->channelNumber //!!!
         || iot->readChannel[ptrReadWrite->channelNumber].data == NULL)
         return 0;
 
@@ -530,7 +530,7 @@ uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_
 
 static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const struct IOTV_Server_embedded *iot, const struct Header *header)
 {
-    if (header == NULL || header->pkg == NULL || iot->readChannel == NULL || iot == NULL)
+    if (header == NULL || header->pkg == NULL || iot == NULL || iot->readChannel == NULL)
         return 0;
 
     struct Read_Write *ptrReadWrite = ((struct Read_Write *)header->pkg);
