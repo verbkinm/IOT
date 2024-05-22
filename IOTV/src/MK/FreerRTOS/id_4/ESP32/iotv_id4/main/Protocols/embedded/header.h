@@ -2,22 +2,25 @@
 #define HEADER_H
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 
-#include "iotv_types.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 struct Header
 {
-    const Header_TYPE type;
-    const Header_ASSIGNMENT assignment;
-    const Header_FLAGS flags;
+    uint8_t version;
+    uint8_t type;
+    uint8_t assignment;
+    uint8_t flags;
 
-    const uint8_t version;
-    const uint64_t dataSize;
+    uint16_t fragment;
+    uint16_t fragments;
 
-    const void *pkg;
+    uint64_t dataSize;
+
+    void *pkg;
 };
 
 uint64_t headerSize(const struct Header *header);
@@ -25,5 +28,11 @@ uint64_t headerDataSize(const struct Header *header);
 uint64_t headerCheckSum(const struct Header *header);
 uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize);
 void clearHeader(struct Header *header);
+
+uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HEADER_H

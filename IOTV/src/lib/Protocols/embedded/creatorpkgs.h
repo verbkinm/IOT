@@ -1,6 +1,8 @@
 #ifndef CREATORPKGS_H
 #define CREATORPKGS_H
 
+#include <stdbool.h>
+
 #include "state.h"
 #include "read_write.h"
 #include "identification.h"
@@ -8,6 +10,11 @@
 #include "host_broadcast.h"
 #include "log_data.h"
 #include "header.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 // Формирование пакетов из сырых данных
 
@@ -25,5 +32,10 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment);
 
 bool isLittleEndian();
 void dataReverse(void *data, uint64_t size);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // CREATORPKGS_H

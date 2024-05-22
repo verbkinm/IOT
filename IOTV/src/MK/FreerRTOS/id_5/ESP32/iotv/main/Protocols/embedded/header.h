@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct Header
 {
     uint8_t version;
@@ -26,5 +31,8 @@ void clearHeader(struct Header *header);
 
 uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HEADER_H

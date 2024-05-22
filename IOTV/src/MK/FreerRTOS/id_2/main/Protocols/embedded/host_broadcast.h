@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct Host_Broadcast
 {
     uint32_t address;
@@ -16,5 +21,9 @@ uint64_t hostBroadCastCheckSum(const struct Host_Broadcast *body);
 uint64_t hostBroadCastSize(const struct Host_Broadcast *body);
 uint64_t hostBroadCastToData(const struct Host_Broadcast *body, char *outData, uint64_t outDataSize);
 void clearHostBroadCast(struct Host_Broadcast *host_broadcast);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HOST_BROADCAST_H

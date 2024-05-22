@@ -156,10 +156,15 @@ void IOTV_Client::processQueryRead(const Header *header)
     }
     ///!!!
 
+//    if (pkg->channelNumber == 40)
+//    {
+//            printf("it = NULL\n");
+//    }
+
     auto iot = host->convert();
 
     char outData[BUFSIZ];
-    responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket);
+    responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket, 0, 0);
 
     clearIOTV_Server(iot);
 }
@@ -183,7 +188,7 @@ void IOTV_Client::processQueryWrite(const Header *header)
         uint64_t size;
         char outData[BUFSIZ];
 
-        size = responseWriteData(outData, BUFSIZ, iot, header);
+        size = responseWriteData(outData, BUFSIZ, iot, header, 0, 0);
         // Ответ клиенту о записи
         write({outData, static_cast<int>(size)}, size);
 

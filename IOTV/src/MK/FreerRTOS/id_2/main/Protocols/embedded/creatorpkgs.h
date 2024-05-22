@@ -11,6 +11,11 @@
 #include "log_data.h"
 #include "header.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 // Формирование пакетов из сырых данных
 
 struct Header* createPkgs(uint8_t *data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize);
@@ -27,5 +32,10 @@ bool isBodyMustBe(uint8_t type, uint8_t assigment);
 
 bool isLittleEndian();
 void dataReverse(void *data, uint64_t size);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // CREATORPKGS_H

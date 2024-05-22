@@ -4,7 +4,9 @@
 #include "tech.h"
 #include "identification.h"
 #include "read_write.h"
+#include "host_broadcast.h"
 #include "state.h"
+#include "log_data.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -93,6 +95,12 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
         case HEADER_ASSIGNMENT_TECH:
             result += techToData((const struct Tech *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
             break;
+        case HEADER_ASSIGNMENT_HOST_BROADCAST:
+            result += hostBroadCastToData((const struct Host_Broadcast *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            result += logDataToData((const struct Log_Data *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
         default:
             break;
         }
@@ -123,6 +131,9 @@ void clearHeader(struct Header *header)
         case HEADER_ASSIGNMENT_TECH:
             clearTech((struct Tech *)header->pkg);
             break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            clearLogData((struct Log_Data *)header->pkg);
+            break;
         default:
             break;
         }
@@ -135,7 +146,7 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
 {
     uint64_t maxDatainFrame = buffSize - offsetSize;
 
-    if (maxDatainFrame == 0)
+    if (maxDatainFrame == 0 || buffSize < offsetSize)
         return 0;
 
     uint64_t result = sendDataSize / maxDatainFrame;

@@ -169,15 +169,27 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     //!!! сделать проверку на выделение памяти в  iot
 
-    if (nameSize > 0)
+    if (nameSize > 0 && iot->name != NULL)
         memcpy(const_cast<char *>(iot->name), getName().toStdString().c_str(), nameSize);
-    if (descriptionSize > 0)
+    if (descriptionSize > 0 && iot->description != NULL)
         memcpy(const_cast<char *>(iot->description), getDescription().toStdString().c_str(), descriptionSize);
 
     for (uint8_t i = 0; i < iot->numberReadChannel; ++i)
     {
+//        if (i == 40)
+//        {
+//            qDebug() << getReadChannelData(40).size();
+//        }
+
         auto t = getReadChannelType(i);
-        auto dataSize = dataSizeonDataType(static_cast<uint8_t>(t));
+        uint32_t dataSize = 0;
+
+
+        if (t == Raw::DATA_TYPE::STRING)
+            dataSize = _readChannel.getData(i).size();
+        else
+            dataSize = dataSizeonDataType(static_cast<uint8_t>(t));
+
         auto byteArr = getReadChannelData(i);
         if (numberReadChannel > 0 /*&& dataSize > 0*/)
         {
@@ -185,6 +197,9 @@ struct IOTV_Server_embedded *Base_Host::convert() const
                 iot->readChannel[i].data = static_cast<char *>(malloc(dataSize));
             else
                 iot->readChannel[i].data = nullptr;
+
+            if (iot->readChannel[i].data == NULL)
+                dataSize = 0;
 
             iot->readChannel[i].dataSize = dataSize;
 

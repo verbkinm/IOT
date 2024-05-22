@@ -14,7 +14,7 @@ TCP_REVERSE_conn_type::TCP_REVERSE_conn_type(const QString &name, QTcpSocket *so
 
 TCP_REVERSE_conn_type::~TCP_REVERSE_conn_type()
 {
-//    qDebug() << "destruct TCP_REVERSE_conn_type";
+    //    qDebug() << "destruct TCP_REVERSE_conn_type";
     _tcpSocket->abort();
 }
 
@@ -23,15 +23,15 @@ qint64 TCP_REVERSE_conn_type::write(const QByteArray &data, qint64 size)
     if (_tcpSocket->state() != QAbstractSocket::ConnectedState)
         return 0;
 
-    //    Log::write(_name +
-    //                   ": data transmit to " +
-    //                   _tcpSocket->peerAddress().toString() +
-    //                   ":" +
-    //                   QString::number(_tcpSocket->peerPort()) +
-    //                   " -> " +
-    //                   data.toHex(':'),
-    //               Log::Write_Flag::FILE_STDOUT,
-    //               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write(_name +
+//                   ": data transmit to " +
+//                   _tcpSocket->peerAddress().toString() +
+//                   ":" +
+//                   QString::number(_tcpSocket->peerPort()) +
+//                   " -> " +
+//                   data.toHex(':'),
+//               Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (size == -1)
     {

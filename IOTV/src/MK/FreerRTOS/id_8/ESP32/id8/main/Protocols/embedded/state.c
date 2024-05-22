@@ -32,9 +32,6 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     outData[1] = body->state;
     outData[2] = body->flags;
 
-//    if (outDataSize < stateSize(body))
-//        return 0;
-
     uint32_t dataSize =  body->dataSize;
     memcpy(&outData[3], &dataSize, 4); // 4 - документация
 

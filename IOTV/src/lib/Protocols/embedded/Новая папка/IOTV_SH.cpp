@@ -99,7 +99,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const struct IOTV_Se
 
     if (rwPkg->flags != ReadWrite_FLAGS_OPEN_STREAM
         && (iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_RAW
-            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING //!!!
+//            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING //!!!
             || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_NONE))
     {
         return 0;

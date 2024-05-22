@@ -100,6 +100,13 @@ void Device::setDataFromString(int channelNumber, QString data)
 
 QString Device::readData(int channelNumber) const
 {
+    QString str;
+    if (channelNumber == 15)
+    {
+        QByteArray data = getReadChannelData(channelNumber);
+        Raw::DATA_TYPE type = getReadChannelType(channelNumber);
+        str =  Raw::strData(data, type).first;
+    }
     QByteArray data = getReadChannelData(channelNumber);
     Raw::DATA_TYPE type = getReadChannelType(channelNumber);
     return Raw::strData(data, type).first;

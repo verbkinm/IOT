@@ -131,6 +131,7 @@
         <file>Devices/BaseItem/MyLegend.qml</file>
         <file>img/zoom.png</file>
         <file>img/zoom_white.png</file>
+        <file>img/id/9.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

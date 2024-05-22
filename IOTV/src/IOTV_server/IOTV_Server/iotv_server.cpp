@@ -465,8 +465,12 @@ void IOTV_Server::slotDevicePingTimeout()
     host->deleteLater();
 
     _iot_hosts[host]->exit();
-    _iot_hosts[host]->wait();
-    delete _iot_hosts[host];
+
+    connect(_iot_hosts[host], &QThread::finished, this, [this](){
+        qDebug() << "delete thread";
+        QThread *thread = dynamic_cast<QThread *>(sender());
+        delete thread;
+    });
 
     _iot_hosts.erase(host);
 

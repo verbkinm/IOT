@@ -54,6 +54,7 @@ IOTV_Host::~IOTV_Host()
 
 void IOTV_Host::responceIdentification(const struct Header *header)
 {
+//    qDebug() << __FUNCTION__;
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -96,6 +97,11 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     uint8_t channelNumber = pkg->channelNumber;
 
+//    if (channelNumber == 40)
+//    {
+////        printf("it = NULL\n");
+//    }
+
     if (_streamRead.count(channelNumber))
     {
         emit signalStreamRead(channelNumber, header->fragment, header->fragments, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
@@ -104,6 +110,11 @@ void IOTV_Host::responceRead(const struct Header *header)
 
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
     this->setReadChannelData(channelNumber, data);
+
+//    if (channelNumber == 40)
+//    {
+//        qDebug() << getReadChannelData(40).size() << getReadChannelData(40);
+//    }
 
     // Не записываем в лог сырые данные
     if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
@@ -386,7 +397,7 @@ void IOTV_Host::slotStateTimeOut()
 
 void IOTV_Host::slotPingTimeOut()
 {
-//    qDebug() << "ping";
+    //    qDebug() << "ping";
     ++_counterPing;
 
     char outData[BUFSIZ];
@@ -422,7 +433,7 @@ void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
 
 void IOTV_Host::slotConnected()
 {
-//    qDebug() << this->thread() << _timerPing.thread();
+    //    qDebug() << this->thread() << _timerPing.thread();
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();

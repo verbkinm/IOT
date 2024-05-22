@@ -480,7 +480,14 @@ void Client::responceRead(const struct Header *header)
     if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
         responceReadStream(header);
     else
+    {
+        if (pkg->channelNumber == 15)
+        {
+            auto res = QByteArray{pkg->data, static_cast<int>(pkg->dataSize)};
+            _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
+        }
         _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
+    }
 }
 
 void Client::responceReadStream(const Header *header)
