@@ -29,12 +29,12 @@ private:
     // Удаление всех устройств, а потом обновление всего списка!
     void processQueryIdentification_2();
 
-    void processQueryState(const struct Header* header);
-    void processQueryRead(const struct Header* header);
-    void processQueryWrite(const struct Header* header);
+    void processQueryState(const header_t* header);
+    void processQueryRead(const header_t* header);
+    void processQueryWrite(const header_t* header);
     void processQueryPingPoing();
-    void processQueryTech(const struct Header* header);
-    void processQueryLogData(struct Header* header, std::atomic_int &run);
+    void processQueryTech(const header_t* header);
+    void processQueryLogData(header_t* header, std::atomic_int &run);
 
     void write(const QByteArray &data, qint64 size = -1) const;
 

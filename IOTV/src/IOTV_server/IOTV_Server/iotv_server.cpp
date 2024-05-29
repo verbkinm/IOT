@@ -111,7 +111,9 @@ void IOTV_Server::readHostSetting()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        Maker_iotv::host(_iot_hosts, _maxHostCount, setting, nullptr, this);
+        auto host = Maker_iotv::host(_iot_hosts, _maxHostCount, setting, nullptr, this);
+        if (host != nullptr)
+            connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsClearAndUpdate, Qt::QueuedConnection);
 
         _settingsHosts.endGroup();
     }
@@ -260,6 +262,32 @@ void IOTV_Server::clientHostsUpdate() const
         emit client.first->signalUpdateHosts();
 }
 
+void IOTV_Server::clientHostsClearAndUpdate()
+{
+    IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
+
+    if (host == nullptr)
+        return;
+
+    // Если хост поменял имя и оно не уникально, добавляем к имени номер
+    {
+        QString name = host->getName();
+        int countName = 0;
+
+        for (const auto &el : _iot_hosts)
+        {
+            if (el.first->getName() == name)
+                ++countName;
+        }
+
+        if (countName > 1)
+            host->setName(name + "_" + QString::number(countName));
+    }
+
+    for (const auto &client : _iot_clients)
+        emit client.first->signalClearAndUpdateHosts();
+}
+
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
 {
     std::forward_list<const Base_Host *> result;
@@ -345,8 +373,10 @@ void IOTV_Server::slotNewHostConnection()
     if (host == nullptr)
         return;
 
+    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsClearAndUpdate, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout);
     connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::DirectConnection);
+
     clientHostsUpdate();
 }
 
@@ -451,7 +481,9 @@ void IOTV_Server::slotPendingDatagrams()
     if (host == nullptr)
         return;
 
+    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsClearAndUpdate, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
+
     clientHostsUpdate();
 }
 

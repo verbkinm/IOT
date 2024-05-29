@@ -360,7 +360,7 @@ void Client::queryRead(const QString &name, uint8_t channelNumber)
     write({outData, static_cast<int>(size)});
 }
 
-void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
+void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags)
 {
     char outData[BUFSIZ];
     auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, static_cast<uint8_t>(flags));
@@ -394,7 +394,7 @@ void Client::queryPing()
 //    }
 }
 
-void Client::queryTech(Tech_TYPE type, char *data, uint64_t dataSize)
+void Client::queryTech(tech_type_t type, char *data, uint64_t dataSize)
 {
     char outData[BUFSIZ];
     auto size = ::queryTech(outData, BUFSIZ, data, dataSize, type);
@@ -416,7 +416,7 @@ void Client::responceIdentification(const Header *header)
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
     QString name(QByteArray{pkg->name, pkg->nameSize});
 
-    struct IOTV_Server_embedded *iot = createIotFromHeaderIdentification(header);
+    iotv_obj_t *iot = createIotFromHeaderIdentification(header);
 
     if (!_devices.contains(name))
     {
@@ -437,11 +437,11 @@ void Client::responceIdentification(const Header *header)
     }
     else
         _devices[name].update(iot);
-
-    clearIOTV_Server(iot);
+    
+    clear_iotv_obj(iot);
 }
 
-void Client::responceState(const struct Header *header)
+void Client::responceState(const header_t *header)
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
@@ -460,7 +460,7 @@ void Client::responceState(const struct Header *header)
     }
 }
 
-void Client::responceRead(const struct Header *header)
+void Client::responceRead(const header_t *header)
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
@@ -515,7 +515,7 @@ void Client::responceReadStream(const Header *header)
     }
 }
 
-void Client::responceWrite(const struct Header *header) const
+void Client::responceWrite(const header_t *header) const
 {
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
@@ -523,7 +523,7 @@ void Client::responceWrite(const struct Header *header) const
     // Нет реакции на ответ о записи
 }
 
-void Client::responcePingPoing(const struct Header *header)
+void Client::responcePingPoing(const header_t *header)
 {
     Q_ASSERT(header != NULL);
     _counterPing = 0;
@@ -606,7 +606,7 @@ void Client::slotReciveData()
 
     while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &expectedDataSize, &cutDataSize);
+        header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -694,7 +694,7 @@ void Client::slotQueryWrite(int channelNumber, const QByteArray &data)
     queryWrite(dev->getName(), channelNumber, data);
 }
 
-void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags)
+void Client::slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags)
 {
 //    qDebug() << "slotQuerLogData" << channelNumber << QTime::currentTime();
 

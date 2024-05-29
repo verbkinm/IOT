@@ -56,11 +56,20 @@ void Device::update(const IOTV_Server_embedded *dev)
         }
         emit signalUpdate();
     }
+    else
+    {
+
+    }
 }
 
 QString Device::getName() const
 {
     return _name;
+}
+
+void Device::setName(const QString &name)
+{
+    _name = name;
 }
 
 bool Device::isOnline() const
@@ -254,9 +263,9 @@ void Device::setState(bool newState)
     Base_Host *host = this;
 
     //!!! Дублируются сигналы в Device и в Base_Host
-    if (state() != static_cast<State_STATE>(newState))
+    if (state() != static_cast<state_t>(newState))
     {
-        host->setState(static_cast<State_STATE>(newState));
+        host->setState(static_cast<state_t>(newState));
         emit signalStateChanged();
     }
 }

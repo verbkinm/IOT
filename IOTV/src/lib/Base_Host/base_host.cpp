@@ -3,7 +3,7 @@
 #include "iotv_server_embedded.h"
 
 Base_Host::Base_Host(uint16_t id, QObject *parent) : QObject(parent),
-    _id(id), _description("None"), _state(State_STATE::State_STATE_OFFLINE)
+    _id(id), _description("None"), _state(state_t::State_STATE_OFFLINE)
 {
 
 }
@@ -109,7 +109,7 @@ void Base_Host::setDescription(const QString &description)
     _description = description;
 }
 
-void Base_Host::setState(State_STATE newState)
+void Base_Host::setState(state_t newState)
 {
     if (newState != State_STATE_ONLINE && newState != State_STATE_OFFLINE)
     {
@@ -129,7 +129,7 @@ void Base_Host::setState(State_STATE newState)
     }
 }
 
-State_STATE Base_Host::state() const
+state_t Base_Host::state() const
 {
     return _state;
 }
@@ -144,14 +144,14 @@ QString Base_Host::getDescription() const
     return _description;
 }
 
-struct IOTV_Server_embedded *Base_Host::convert() const
+iotv_obj_t *Base_Host::convert() const
 {
     uint8_t nameSize = strlen(getName().toStdString().c_str());
     uint16_t descriptionSize = strlen(getDescription().toStdString().c_str());
     auto numberReadChannel = getReadChannelLength();
     auto numberWriteChannel = getWriteChannelLength();
 
-    struct IOTV_Server_embedded *iot = static_cast<struct IOTV_Server_embedded *>(malloc(sizeof(struct IOTV_Server_embedded)));
+    iotv_obj_t *iot = static_cast<iotv_obj_t *>(malloc(sizeof(iotv_obj_t)));
     if (iot == nullptr)
         return nullptr;
 

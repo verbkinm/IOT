@@ -52,7 +52,7 @@ IOTV_Host::~IOTV_Host()
     qDebug() << "IOTV_Host destruct";
 }
 
-void IOTV_Host::responceIdentification(const struct Header *header)
+void IOTV_Host::responceIdentification(const header_t *header)
 {
 //    qDebug() << __FUNCTION__;
     Q_ASSERT(header != NULL);
@@ -61,8 +61,7 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 
     this->setId(pkg->id);
-    // На данный момент имя константное и считывается с файла настроек
-    // this->setNname
+    this->setName(pkg->name);
     this->setDescription(QByteArray{pkg->description, pkg->descriptionSize});
     this->removeAllSubChannel();
 
@@ -81,14 +80,14 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     emit signalIdentRecived();
 }
 
-void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responceState(const iotv_obj_t *iot)
 {
     Q_ASSERT(iot != nullptr);
-    setState(static_cast<State_STATE>(iot->state));
+    setState(static_cast<state_t>(iot->state));
     _counterState = 0;
 }
 
-void IOTV_Host::responceRead(const struct Header *header)
+void IOTV_Host::responceRead(const header_t *header)
 {
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
@@ -128,19 +127,19 @@ void IOTV_Host::responceRead(const struct Header *header)
                Log::Write_Flag::FILE, logName(pkg->channelNumber));
 }
 
-void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
+void IOTV_Host::responceWrite(const iotv_obj_t *iot) const
 {
     Q_ASSERT(iot != nullptr);
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPong(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPong(const iotv_obj_t *iot)
 {
     Q_ASSERT(iot != nullptr);
     _counterPing = 0;
 }
 
-qint64 IOTV_Host::read(uint8_t channelNumber, ReadWrite_FLAGS flags)
+qint64 IOTV_Host::read(uint8_t channelNumber, readwrite_flag_t flags)
 {
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, flags);
@@ -209,7 +208,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
 
     while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
+        header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -245,7 +244,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
             //            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
             //                ;
 
-            clearIOTV_Server(iot);
+            clear_iotv_obj(iot);
         }
         else if (header->type == HEADER_TYPE_REQUEST)
         {
@@ -265,6 +264,11 @@ QString IOTV_Host::getName() const
         return _conn_type->getName();
 
     return {};
+}
+
+void IOTV_Host::setName(const QString &name)
+{
+    _conn_type->setName(name);
 }
 
 //!!!

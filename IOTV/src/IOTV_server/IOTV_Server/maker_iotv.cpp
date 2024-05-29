@@ -23,12 +23,12 @@ IOTV_Host *Maker_iotv::host_tcp_in(std::unordered_map<IOTV_Host *, QThread *> &a
         return nullptr;
     }
 
-    Log::write("Host new connection: "
-                   + reverse_socket->peerAddress().toString()
-                   + ":"
-                   + QString::number(reverse_socket->peerPort()),
-               Log::Write_Flag::FILE_STDOUT,
-               ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write("Host new connection: "
+//                   + reverse_socket->peerAddress().toString()
+//                   + ":"
+//                   + QString::number(reverse_socket->peerPort()),
+//               Log::Write_Flag::FILE_STDOUT,
+//               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (add_to_iot_hosts.size() >= maxHostCount)
     {
@@ -116,6 +116,7 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
                    ServerLog::DEFAULT_LOG_FILENAME);
 
         add_to_iot_hosts.erase(host);
+        //!!! deleteLater
         delete th;
         delete host;
 
@@ -161,7 +162,7 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
 
     if (!th->isRunning())
     {
-        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
+        Log::write(QString(Q_FUNC_INFO) + " Ошибка: невозможно запустить IOT_Client в новом потоке!",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
 
@@ -191,7 +192,7 @@ IOTV_Host *Maker_iotv::host_broadcast(QUdpSocket *socket,
     bool error;
     uint64_t cutDataSize, expectedDataSize;
 
-    struct Header *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
+    header_t *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
 
     if (error == true)
     {

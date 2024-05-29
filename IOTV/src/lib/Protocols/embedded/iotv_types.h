@@ -13,7 +13,7 @@ typedef enum {
     HEADER_TYPE_NONE = 0,
     HEADER_TYPE_REQUEST,
     HEADER_TYPE_RESPONSE
-} Header_TYPE;
+} header_type_t;
 
 typedef enum
 {
@@ -26,20 +26,20 @@ typedef enum
     HEADER_ASSIGNMENT_TECH,
     HEADER_ASSIGNMENT_HOST_BROADCAST,
     HEADER_ASSIGNMENT_LOG_DATA
-} Header_ASSIGNMENT;
+} header_assignment_t;
 
 typedef enum
 {
     HEADER_FLAGS_NONE = 0,
     HEADER_FLAGS_ERROR = 0xFF
-} Header_FLAGS;
+} header_flag_t;
 
 typedef enum
 {
     Identification_FLAGS_NONE = 0x00,
     Identification_FLAGS_DELETE = 0x01,
     Identification_FLAGS_ERROR = 0xFF
-} Identification_FLAGS;
+} identification_flag_t;
 
 typedef enum
 {
@@ -48,31 +48,31 @@ typedef enum
     ReadWrite_FLAGS_OPEN_STREAM = 0x02,
     ReadWrite_FLAGS_CLOSE_STREAM = 0x03,
     ReadWrite_FLAGS_ERROR = 0xFF
-} ReadWrite_FLAGS;
+} readwrite_flag_t;
 
 typedef enum
 {
     STATE_FLAGS_NONE = 0,
     STATE_FLAGS_ERROR = 0xFF
-} State_FLAGS;
+} state_flag_t;
 
 typedef enum
 {
     State_STATE_OFFLINE = 0,
     State_STATE_ONLINE
-} State_STATE;
+} state_t;
 
 typedef enum
 {
     Tech_TYPE_NONE = 0,
     Tech_TYPE_EV_AC
-} Tech_TYPE;
+} tech_type_t;
 
 typedef enum
 {
     Tech_FLAGS_NONE = 0,
     Tech_FLAGS_ERROR = 0xFF
-} Tech_FLAGS;
+} tech_flag_t;
 
 typedef enum
 {
@@ -80,13 +80,13 @@ typedef enum
     Host_Broadcast_FLAGS_TCP_CONN = 1,
     Host_Broadcast_FLAGS_UDP_CONN = 2,
     Host_Broadcast_FLAGS_ERROR = 0xFF
-} Host_Broadcast_FLAGS;
+} host_broadcast_flag_t;
 
 typedef enum
 {
     LOG_DATA_RW = 0,
     LOG_DATA_R,
     LOG_DATA_W
-} LOG_DATA_FLAGS;
+} log_data_flag_t;
 
 #endif // IOTV_TYPES_H

@@ -59,19 +59,19 @@ private:
     void queryIdentification();
     void queryState(const QString &name);
     void queryRead(const QString &name, uint8_t channelNumber);
-    void queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
     void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
     void queryPing();
-    void queryTech(Tech_TYPE type, char *data, uint64_t dataSize);
+    void queryTech(tech_type_t type, char *data, uint64_t dataSize);
 
-    void responceIdentification(const struct Header *header);
-    void responceState(const struct Header *header);
-    void responceRead(const struct Header* header);
-    void responceReadStream(const struct Header *header);
-    void responceWrite(const struct Header *header) const;
-    void responcePingPoing(const struct Header *header);
-    void responceTech(const struct Header *header);
-    void responceLogData(const struct Header *header);
+    void responceIdentification(const header_t *header);
+    void responceState(const header_t *header);
+    void responceRead(const header_t* header);
+    void responceReadStream(const header_t *header);
+    void responceWrite(const header_t *header) const;
+    void responcePingPoing(const header_t *header);
+    void responceTech(const header_t *header);
+    void responceLogData(const header_t *header);
 
     qint64 write(const QByteArray &data);
 
@@ -104,7 +104,7 @@ private slots:
     void slotQueryRead();
     void slotQueryState();
     void slotQueryWrite(int channelNumber, const QByteArray &data);
-    void slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
 
     void slotError(QAbstractSocket::SocketError error);
 

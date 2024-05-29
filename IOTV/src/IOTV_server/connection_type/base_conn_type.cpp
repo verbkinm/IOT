@@ -59,6 +59,11 @@ bool Base_conn_type::isIpConnectionType(const QString &conn_type)
     return false;
 }
 
+void Base_conn_type::setName(const QString &newName)
+{
+    _name = newName;
+}
+
 QByteArray Base_conn_type::readAll()
 {
     return {0};

@@ -61,19 +61,19 @@ void IOTV_Client::processQueryIdentification()
 
     if (_hosts.size() == 0)
     {
-        auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
-        write({outData, static_cast<int>(size)}, size);
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
+        write(QByteArray{outData, static_cast<int>(size)}, size);
         return;
     }
 
     for (const auto &host : _hosts)
     {
-        struct IOTV_Server_embedded *iot = host.first->convert();
+        iotv_obj_t *iot = host.first->convert();
 
-        auto size = responseIdentificationData(outData, BUFSIZ, iot, 0);
+        auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
 
         write({outData, static_cast<int>(size)}, size);
-        clearIOTV_Server(iot);
+        clear_iotv_obj(iot);
     }
 }
 
@@ -81,7 +81,7 @@ void IOTV_Client::processQueryIdentification_2()
 {
     // В начале удаляем все устройства
     char outData[BUFSIZ];
-    auto size = responseIdentificationData(outData, BUFSIZ, NULL, 0);
+    auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
     write({outData, static_cast<int>(size)}, size);
 
     // Потом обновляем весь список
@@ -110,7 +110,7 @@ void IOTV_Client::processQueryState(const Header *header)
     size = responseStateData(outData, BUFSIZ, iot);
 
     write({outData, static_cast<int>(size)}, size);
-    clearIOTV_Server(iot);
+    clear_iotv_obj(iot);
 }
 
 void IOTV_Client::processQueryRead(const Header *header)
@@ -164,9 +164,9 @@ void IOTV_Client::processQueryRead(const Header *header)
     auto iot = host->convert();
 
     char outData[BUFSIZ];
-    responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket, 0, 0);
+    responseReadData(outData, BUFSIZ, iot, header, &IOTV_Client::writeFunc, _socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 
-    clearIOTV_Server(iot);
+    clear_iotv_obj(iot);
 }
 
 void IOTV_Client::processQueryWrite(const Header *header)
@@ -188,7 +188,7 @@ void IOTV_Client::processQueryWrite(const Header *header)
         uint64_t size;
         char outData[BUFSIZ];
 
-        size = responseWriteData(outData, BUFSIZ, iot, header, 0, 0);
+        size = responseWriteData(outData, BUFSIZ, iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
         // Ответ клиенту о записи
         write({outData, static_cast<int>(size)}, size);
 
@@ -197,7 +197,7 @@ void IOTV_Client::processQueryWrite(const Header *header)
         // Послать данные на устройство напрямую нельзя - разные потоки
         emit it->first->signalQueryWrite(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
 
-        clearIOTV_Server(iot);
+        clear_iotv_obj(iot);
     }
 }
 
@@ -409,7 +409,7 @@ void IOTV_Client::slotReadData()
 
     while (_recivedBuff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
+        header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &_expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -481,7 +481,7 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
         .data = reinterpret_cast<uint8_t *>(data.data())
     };
 
-    struct Header header = {
+    header_t header = {
         .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_TECH,
@@ -508,7 +508,7 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
 
 
     struct Read_Write read = {
-        .dataSize = static_cast<uint64_t>(data.size()),
+        .dataSize = static_cast<uint32_t>(data.size()),
         .nameSize = iot->nameSize,
         .channelNumber = channel,
         .flags = ReadWrite_FLAGS_OPEN_STREAM,
@@ -516,7 +516,7 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
         .data = data.data()
     };
 
-    struct Header header = {
+    header_t header = {
         .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_READ,
@@ -549,7 +549,7 @@ void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fr
     iot->readChannel[channel].dataSize = 0;
     iot->readChannel[channel].data = 0;
 
-    clearIOTV_Server(iot);
+    clear_iotv_obj(iot);
 }
 
 void IOTV_Client::slotLogDataQueueTimerOut()

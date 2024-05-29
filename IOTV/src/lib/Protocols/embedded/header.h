@@ -22,12 +22,13 @@ struct Header
 
     void *pkg;
 };
+typedef struct Header header_t;
 
-uint64_t headerSize(const struct Header *header);
-uint64_t headerDataSize(const struct Header *header);
-uint64_t headerCheckSum(const struct Header *header);
-uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize);
-void clearHeader(struct Header *header);
+uint64_t headerSize(const header_t *header);
+uint64_t headerDataSize(const header_t *header);
+uint64_t headerCheckSum(const header_t *header);
+uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize);
+void clearHeader(header_t *header);
 
 uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize);
 

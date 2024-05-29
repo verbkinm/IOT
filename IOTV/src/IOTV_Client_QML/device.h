@@ -26,10 +26,11 @@ class Device : public Base_Host
 
 public:
     Device() = default;
-    explicit Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
-    void update(const struct IOTV_Server_embedded *dev);
+    explicit Device(const iotv_obj_t *dev, QObject *parent = nullptr);
+    void update(const iotv_obj_t *dev);
 
     virtual QString getName() const override;
+    virtual void setName(const QString &name) override;
 
     bool isOnline() const;
     void setState(bool newState);
@@ -64,7 +65,7 @@ public:
     Q_INVOKABLE void fillSeries(QLineSeries *series, QList<QPointF> points);
 
 private:
-    const QString _name;
+    QString _name;
     QString _aliasName;
 
     QTimer _timerRead, _timerState;
@@ -78,7 +79,7 @@ signals:
     void signalQueryIdentification();
     void signalQueryRead();
     void signalQueryState();
-    void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
     // Посылается из клиента
     void signalResponceLogData(QList<QPointF> points, uint8_t channelNumber, uint8_t flags);
 

@@ -5,8 +5,11 @@ QT += network serialport
 CONFIG += c++2a console warn_on depend_includepath testcase
 CONFIG -= app_bundle
 CONFIG += debug_and_release
+
 CONFIG(debug,debug|release) DESTDIR = debug
 CONFIG(release,debug|release) DESTDIR = release
+
+TARGET = iotv_server
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -34,7 +37,6 @@ SOURCES += \
     ../lib/Protocols/embedded/iotv_server_embedded.c \
     ../lib/Protocols/embedded/read_write.c \
     ../lib/Protocols/embedded/state.c \
-#    ../lib/Protocols/embedded/iotvp_print.c \
     ../lib/Protocols/embedded/tech.c \
     ../lib/Protocols/embedded/host_broadcast.c  \
     ../lib/Protocols/embedded/log_data.c  \
@@ -44,19 +46,18 @@ SOURCES += \
     IOTV_Host/iotv_host.cpp \
     IOTV_Client/iotv_client.cpp \
     IOTV_Server/maker_iotv.cpp \
-    \
-        connection_type/base_conn_type.cpp \
-        connection_type/com_conn_type.cpp \
-        connection_type/file_conn_type.cpp \
-        connection_type/tcp_conn_type.cpp \
-    connection_type/tcp_reverse_conn_type.cpp \
-        main.cpp \
-        connection_type/udp_conn_type.cpp \
-        wrapper.cpp \
-        ../lib/Base_Host/base_host.cpp \
-        ../lib/Base_Host/channel.cpp \
-        ../lib/Log/log.cpp \
-        ../lib/raw/raw.cpp \
+    connection_type/base_conn_type.cpp \
+    connection_type/com_conn_type.cpp \
+    connection_type/file_conn_type.cpp \
+    connection_type/tcp_conn_type.cpp \
+     connection_type/tcp_reverse_conn_type.cpp \
+    main.cpp \
+    connection_type/udp_conn_type.cpp \
+    wrapper.cpp \
+    ../lib/Base_Host/base_host.cpp \
+    ../lib/Base_Host/channel.cpp \
+    ../lib/Log/log.cpp \
+    ../lib/raw/raw.cpp \
 
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \

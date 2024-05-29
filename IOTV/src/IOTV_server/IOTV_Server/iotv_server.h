@@ -46,6 +46,7 @@ private:
     Base_Host *baseHostFromName(const QString &name) const;
 
     void clientHostsUpdate() const;
+    void clientHostsClearAndUpdate();
 
     // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
