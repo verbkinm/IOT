@@ -51,12 +51,13 @@ struct IOTV_Server_embedded
     char *name;
     char *description;
 };
+typedef struct IOTV_Server_embedded iotv_obj_t;
 
 int8_t dataSizeonDataType(uint8_t type);
 bool byteOrderReversebleData(uint8_t type);
-void clearIOTV_Server(struct IOTV_Server_embedded *iot);
+void clear_iotv_obj(iotv_obj_t *iot);
 
-uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const struct IOTV_Server_embedded *iot, uint8_t channelNumber);
+uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const iotv_obj_t *iot, uint8_t channelNumber);
 
 #ifdef __cplusplus
 }

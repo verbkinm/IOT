@@ -48,7 +48,7 @@ bool byteOrderReversebleData(uint8_t type)
     }
 }
 
-void clearIOTV_Server(struct IOTV_Server_embedded *iot)
+void clear_iotv_obj(iotv_obj_t *iot)
 {
     if (iot == NULL)
         return;
@@ -76,7 +76,7 @@ void clearIOTV_Server(struct IOTV_Server_embedded *iot)
 }
 
 
-uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const struct IOTV_Server_embedded *iot, uint8_t channelNumber)
+uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const iotv_obj_t *iot, uint8_t channelNumber)
 {
     if (iot == NULL || iot->readChannel == NULL || channelNumber >= iot->numberReadChannel)
     {

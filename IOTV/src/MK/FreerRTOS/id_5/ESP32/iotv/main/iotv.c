@@ -1,6 +1,6 @@
 #include "iotv.h"
 
-//extern QueueHandle_t xQueueInData, xQueueOutData;
+#include "esp_mac.h"
 
 static uint64_t realBufSize = 0;
 
@@ -30,7 +30,7 @@ static uint8_t writeType[] = {
 
 static struct IOTV_Server_embedded iot = {
 		.id = 5,
-		.name = "vl6180x+bme280+relay",
+		.name = NULL,
 		.description = "ESP-32 id-5",
 		.numberReadChannel = 8,
 		.readChannel = NULL,
@@ -38,7 +38,7 @@ static struct IOTV_Server_embedded iot = {
 		.numberWriteChannel = 3,
 		.writeChannelType = writeType,
 		.state = 0,
-		.nameSize = 20,
+		.nameSize = 0,
 		.descriptionSize = 11,
 };
 
@@ -65,10 +65,39 @@ struct IOTV_Server_embedded *iotv_get(void)
 	return &iot;
 }
 
-void iotv_init(void)
+esp_err_t iotv_init(void)
 {
 	// Выделения памяти для iot структуры
 	iot.readChannel = (struct RawEmbedded *)malloc(sizeof(struct RawEmbedded) * iot.numberReadChannel);
+
+	if (iot.readChannel == NULL)
+	{
+		ESP_LOGE(TAG, "iotv_init iot.readChannel - malloc error");
+		return ESP_FAIL;
+	}
+
+	uint8_t mac[6] = {0};
+	esp_efuse_mac_get_default(mac);
+
+	char mac_str[18] = {0};
+	sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+	char name[256] = {0}; // длина имени в протоколе IOTV определяется одним байтом. Максимальное значение получается 255
+	strcat(name, IOTV_DEVICE_NAME);
+	strcat(name, " (");
+	strcat(name, mac_str);
+	strcat(name, ")");
+
+	size_t nameSize = strlen(name);
+	iot.name = malloc(nameSize);
+	if (iot.name  == NULL)
+	{
+		ESP_LOGE(TAG, "iotv_init iot.name - malloc error");
+		return ESP_FAIL;
+	}
+	iot.nameSize = nameSize;
+
+	memcpy(iot.name, name, nameSize);
 
 	for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
 	{
@@ -80,6 +109,8 @@ void iotv_init(void)
 	*(int8_t *)iot.readChannel[CH_DISP_ORNT].data = readDisplayOrientationFromNVS();
 
 	iot.state = 1;
+
+	return ESP_OK;
 }
 
 void iotv_data_recived(const char *data, int size, int sock)
@@ -128,15 +159,15 @@ void iotv_data_recived(const char *data, int size, int sock)
 		if (header->type == HEADER_TYPE_REQUEST)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-				size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot);
+				size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot, Identification_FLAGS_NONE);
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
 			{
-				responseReadData(transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock);
+				responseReadData(transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 				size = 0;
 			}
 			else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
-				size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header);
+				size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 
 				if (size > 0)
 				{

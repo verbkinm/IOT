@@ -5,12 +5,12 @@
 #include <string.h>
 
 
-struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+header_t* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
     if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
         return NULL;
 
-    struct Header *header = createHeader(data, size, error, expectedDataSize, cutDataSize);
+    header_t *header = createHeader(data, size, error, expectedDataSize, cutDataSize);
 
     if (header == NULL)
         return NULL;
@@ -55,7 +55,7 @@ struct Header* createPkgs(uint8_t * const data, uint64_t size, bool *error, uint
     return header;
 }
 
-struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
+header_t* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t *expectedDataSize, uint64_t *cutDataSize)
 {
     if ((data == NULL ) || (error == NULL) || (expectedDataSize == NULL) || (cutDataSize == NULL) )
         return NULL;
@@ -102,7 +102,7 @@ struct Header* createHeader(uint8_t *data, uint64_t size, bool *error, uint64_t 
         return NULL;
     }
 
-    struct Header *headerResult = (struct Header *)malloc(sizeof(struct Header));
+    header_t *headerResult = (header_t *)malloc(sizeof(header_t));
 
     if (headerResult == NULL)
     {

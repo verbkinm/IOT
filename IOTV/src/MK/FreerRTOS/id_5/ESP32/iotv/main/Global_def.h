@@ -36,6 +36,8 @@
 #define DS3231_ADDR							0x68
 
 // IOTV
+#define IOTV_DEVICE_NAME					"ID_5"
+
 #define RELE_PIN 							GPIO_NUM_32
 #define BORDER_DISTANCE_DEFAULT 			150
 #define DISPLAY_ORIENTATION_DEFAULT			0

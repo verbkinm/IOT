@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint64_t headerCheckSum(const struct Header *header)
+uint64_t headerCheckSum(const header_t *header)
 {
     if (header == NULL)
         return 0;
@@ -20,7 +20,7 @@ uint64_t headerCheckSum(const struct Header *header)
     return  header->version + header->type + header->assignment + header->flags + header->fragment + header->fragments + header->dataSize;
 }
 
-uint64_t headerDataSize(const struct Header *header)
+uint64_t headerDataSize(const header_t *header)
 {
     if (header == NULL || header->pkg == NULL)
         return 0;
@@ -48,7 +48,7 @@ uint64_t headerDataSize(const struct Header *header)
     return 0;
 }
 
-uint64_t headerSize(const struct Header *header)
+uint64_t headerSize(const header_t *header)
 {
     if (header == NULL)
         return 0;
@@ -56,7 +56,7 @@ uint64_t headerSize(const struct Header *header)
     return HEADER_SIZE + headerDataSize(header);
 }
 
-uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize)
+uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize)
 {
     if ( header == NULL || outData == NULL)
         return 0;
@@ -109,7 +109,7 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
     return result;
 }
 
-void clearHeader(struct Header *header)
+void clearHeader(header_t *header)
 {
     if (header == NULL)
         return;
