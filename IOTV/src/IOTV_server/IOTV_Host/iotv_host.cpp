@@ -61,7 +61,11 @@ void IOTV_Host::responceIdentification(const header_t *header)
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 
     this->setId(pkg->id);
-    this->setName(pkg->name);
+
+    QString name = QByteArray(pkg->name, pkg->nameSize);
+    this->setName(name);
+    _logDir.setPath(name);
+
     this->setDescription(QByteArray{pkg->description, pkg->descriptionSize});
     this->removeAllSubChannel();
 

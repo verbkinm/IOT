@@ -23,12 +23,12 @@ IOTV_Host *Maker_iotv::host_tcp_in(std::unordered_map<IOTV_Host *, QThread *> &a
         return nullptr;
     }
 
-//    Log::write("Host new connection: "
-//                   + reverse_socket->peerAddress().toString()
-//                   + ":"
-//                   + QString::number(reverse_socket->peerPort()),
-//               Log::Write_Flag::FILE_STDOUT,
-//               ServerLog::DEFAULT_LOG_FILENAME);
+    Log::write("Host new connection: "
+                   + reverse_socket->peerAddress().toString()
+                   + ":"
+                   + QString::number(reverse_socket->peerPort()),
+               Log::Write_Flag::FILE_STDOUT,
+               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (add_to_iot_hosts.size() >= maxHostCount)
     {

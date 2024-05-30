@@ -74,7 +74,7 @@ signals:
     void signalDisconnected();
 
     void signalFetchEventActionData(QByteArray data);
-    void signalQueryEventActionData();
+    void signalQueryEventActionData(); // отлавливается в iotv_server
     void signalFetchEventActionDataFromServer(QByteArray data);
 
     // Высылается сервером, при добавлении новых устройств

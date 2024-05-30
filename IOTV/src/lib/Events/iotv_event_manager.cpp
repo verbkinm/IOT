@@ -58,7 +58,7 @@ bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Actio
     event->setParent(this);
     action->setParent(this);
 
-    connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec, Qt::UniqueConnection);
+    connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec);//, Qt::UniqueConnection);
 
     _worker.emplace_front(name, std::make_pair(event, action));
 

@@ -217,6 +217,8 @@ void IOTV_Client::processQueryTech(const Header *header)
     Q_ASSERT(header->pkg != NULL);
 
     const struct Tech *pkg = static_cast<const struct Tech *>(header->pkg);
+    if (pkg == nullptr)
+        return;
 
     if (pkg->type == Tech_TYPE_EV_AC)
     {

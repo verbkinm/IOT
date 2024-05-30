@@ -76,7 +76,7 @@ private:
     void responcePingPong(const iotv_obj_t *iot);
 
     std::unique_ptr<Base_conn_type> _conn_type;
-    const QDir _logDir;
+    QDir _logDir;
     QTimer _timerReRead, _timerState, _timerPing;
 
     std::unordered_map<QString, QString>  _settingsData;

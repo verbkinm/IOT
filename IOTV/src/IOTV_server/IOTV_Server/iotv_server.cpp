@@ -151,8 +151,12 @@ void IOTV_Server::readEventActionJson()
 
     _eventManager = new IOTV_Event_Manager(this);
 
+//    qDebug() << "Список событий:";
     for(const auto &pairs : list)
+    {
+//        qDebug() << pairs.first;
         _eventManager->bind(pairs.first, pairs.second.first, pairs.second.second);
+    }
 }
 
 void IOTV_Server::writeEventActionJson(const QByteArray &data)
@@ -333,8 +337,6 @@ void IOTV_Server::slotNewClientConnection()
 
     auto client = Maker_iotv::client(_iot_clients, _maxClientCount, _iot_hosts, socket, this);
 
-    // qDebug() << this->thread() << client->thread();
-
     if (client == nullptr)
         return;
 
@@ -374,8 +376,8 @@ void IOTV_Server::slotNewHostConnection()
         return;
 
     connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsClearAndUpdate, Qt::QueuedConnection);
-    connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout);
-    connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::DirectConnection);
+    connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
+    connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
 
     clientHostsUpdate();
 }
@@ -467,8 +469,10 @@ void IOTV_Server::slotQueryEventActionData()
 {
     IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
 
-    if (client == nullptr || _eventManager == nullptr)
+    if (client == nullptr)
         return;
+
+    readEventActionJson();
 
     QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
     emit client->signalFetchEventActionDataFromServer(data);
@@ -494,9 +498,8 @@ void IOTV_Server::slotDevicePingTimeout()
     if (host == nullptr)
         return;
 
-    host->deleteLater();
-
     _iot_hosts[host]->exit();
+    host->deleteLater();
 
     connect(_iot_hosts[host], &QThread::finished, this, [this](){
         qDebug() << "delete thread";
