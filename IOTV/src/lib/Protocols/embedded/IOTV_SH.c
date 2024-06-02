@@ -12,7 +12,7 @@
 
 static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t *iot, const header_t *header);
 
-uint64_t responseIdentificationData(char* outData, uint64_t dataSize, const iotv_obj_t *iot, identification_flag_t ident_flags)
+uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, identification_flag_t ident_flags)
 {
     if (outData == NULL)
         return 0;
@@ -105,30 +105,12 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *io
         return 0;
     }
 
-    //    if (rwPkg->channelNumber == 40)
-    //    {
-    //        printf("responseReadData ch 40, pkgsCount = %d\n", (int)pkgsCount);
-    //    }
-
     pkgsCount = responceReadWritePkgCount(dataSize, iot, head);
-
-    //    if (rwPkg->channelNumber == 40)
-    //    {
-    //        printf("responseReadData ch 40, pkgsCount = %d\n", (int)pkgsCount);
-    //    }
 
     for (uint16_t i = 0; i < pkgsCount; ++i)
     {
         char *it = NULL;
         uint64_t dataReadSize = dataPart(&it, i, dataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
-
-        //        if (rwPkg->channelNumber == 40)
-        //        {
-        //            printf("responseReadData ch 40, dataReadSize = %d\n", (int)dataReadSize);
-        //            if (it == NULL)
-        //                printf("it = NULL\n");
-        //        }
-
 
         struct Read_Write readWrite = {
             .dataSize = dataReadSize,
@@ -138,17 +120,6 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *io
             .name = iot->name,
             .data = it
         };
-
-        //		if (rwPkg->channelNumber == 15)
-        //		{
-        //			printf("responseReadData ch 15, dataSize = %d\n", (int)dataReadSize);
-        //			if (readWrite.data != NULL)
-        //			{
-        //				for (int i = 0; i < dataReadSize; ++i)
-        //					printf("%c", readWrite.data[i]);
-        //				printf("\n");
-        //			}
-        //		}
 
         header_t header = {
             .version = 2,

@@ -31,6 +31,7 @@ struct RawEmbedded {
     uint32_t dataSize;
     char *data;
 };
+typedef struct RawEmbedded raw_embedded_t;
 
 struct IOTV_Server_embedded
 {
@@ -44,7 +45,7 @@ struct IOTV_Server_embedded
     uint8_t nameSize;
     uint16_t descriptionSize;
 
-    struct RawEmbedded *readChannel;
+    raw_embedded_t *readChannel;
     uint8_t *readChannelType;
     uint8_t *writeChannelType;
 

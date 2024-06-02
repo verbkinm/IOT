@@ -151,10 +151,10 @@ void IOTV_Server::readEventActionJson()
 
     _eventManager = new IOTV_Event_Manager(this);
 
-//    qDebug() << "Список событий:";
+    //    qDebug() << "Список событий:";
     for(const auto &pairs : list)
     {
-//        qDebug() << pairs.first;
+        //        qDebug() << pairs.first;
         _eventManager->bind(pairs.first, pairs.second.first, pairs.second.second);
     }
 }
@@ -340,6 +340,10 @@ void IOTV_Server::slotNewClientConnection()
     if (client == nullptr)
         return;
 
+    connect(client, &IOTV_Client::signalClientToServerQueryIdentification, this, &IOTV_Server::slotClientToServerQueryIdentification, Qt::QueuedConnection);
+    connect(client, &IOTV_Client::signalClientToServerQueryRead, this, &IOTV_Server::slotClientToServerQueryRead, Qt::QueuedConnection);
+
+
     connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotClientDisconnected, Qt::QueuedConnection);
     connect(client, &IOTV_Client::signalFetchEventActionData, this, &IOTV_Server::slotFetchEventActionData, Qt::QueuedConnection);
     connect(client, &IOTV_Client::signalQueryEventActionData, this, &IOTV_Server::slotQueryEventActionData, Qt::QueuedConnection);
@@ -511,6 +515,125 @@ void IOTV_Server::slotDevicePingTimeout()
 
     for (const auto &client : _iot_clients)
         emit client.first->signalClearAndUpdateHosts();
+}
+
+void IOTV_Server::slotClientToServerQueryIdentification()
+{
+    IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
+    if (client == nullptr)
+        return;
+
+    char outData[BUFSIZ];
+    QByteArray result;
+
+    if (_iot_hosts.size() == 0)
+    {
+        auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
+        result = QByteArray(outData, static_cast<int>(size));
+    }
+
+    for (const auto &host : _iot_hosts)
+    {
+        iotv_obj_t *iot = host.first->convert();
+        auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
+
+        result += QByteArray{outData, static_cast<int>(size)};
+        clear_iotv_obj(iot);
+    }
+
+    emit client->signalServerToClientQueryIdentification(result);
+}
+
+void IOTV_Server::slotClientToServerQueryRead(RAII_Header raii_header)
+{
+    IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
+    if (client == nullptr)
+        return;
+
+    if (raii_header.header() == nullptr || raii_header.header()->pkg == nullptr)
+        return;
+
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(raii_header.header()->pkg);
+    if (pkg == nullptr)
+        return;
+
+    auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&](const auto &iotv_host)
+                           {
+                               QString name = iotv_host.first->getName();
+                               QString compareName(QByteArray{pkg->name, pkg->nameSize});
+
+                               return name == compareName;
+                               //                               const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+                               //                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                           });
+
+    if (it == _iot_hosts.end())
+        return;
+
+    IOTV_Host *host = it->first;
+
+    // ///!!!
+    // if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
+    // {
+    //     emit host->signalAddStreamRead(pkg->channelNumber, this);
+    //     disconnect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
+    //     connect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead, Qt::QueuedConnection);
+
+    //     return;
+    // }
+    // else if (pkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
+    // {
+    //     emit host->signalRemoveStreamRead(pkg->channelNumber, this);
+    //     // связать поток клиента и поток хоста через сигналы - слоты!
+    //     disconnect(host, &IOTV_Host::signalStreamRead, this, &IOTV_Client::slotStreamRead);
+
+    //     return;
+    // }
+    // ///!!!
+
+    auto iot = host->convert();
+    RAII_iot raii_iot(iot);
+    clear_iotv_obj(iot);
+
+    emit client->signalServerToClientQueryRead(raii_header, raii_iot);
+}
+
+void IOTV_Server::slotClientToServerQueryWrite(RAII_Header raii_header)
+{
+    IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
+    if (client == nullptr)
+        return;
+
+    if (raii_header.header() == nullptr || raii_header.header()->pkg == nullptr)
+        return;
+
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(raii_header.header()->pkg);
+    if (pkg == nullptr)
+        return;
+
+    auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&](const auto &iotv_host)
+                           {
+                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
+                           });
+
+    if (it != _hosts.end() && it->first->state() != State_STATE_OFFLINE)
+    {
+        auto iot = it->first->convert();
+
+        uint64_t size;
+        char outData[BUFSIZ];
+
+        size = responseWriteData(outData, BUFSIZ, iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
+        // Ответ клиенту о записи
+        write({outData, static_cast<int>(size)}, size);
+
+        //        qDebug() << this->thread() << it->first->thread() << this->parent();
+        //        it->first->write(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
+        // Послать данные на устройство напрямую нельзя - разные потоки
+        emit it->first->signalQueryWrite(pkg->channelNumber, {pkg->data, static_cast<int>(pkg->dataSize)});
+
+        clear_iotv_obj(iot);
+    }
 }
 
 void IOTV_Server::slotTest()

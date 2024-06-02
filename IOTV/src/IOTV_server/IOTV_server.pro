@@ -58,6 +58,8 @@ SOURCES += \
     ../lib/Base_Host/channel.cpp \
     ../lib/Log/log.cpp \
     ../lib/raw/raw.cpp \
+    ../lib/raii/raii_header.cpp \
+    ../lib/raii/raii_iot.cpp \
 
 HEADERS += \
     ../lib/ConfigType/ConfigTypes.h \
@@ -101,7 +103,9 @@ HEADERS += \
     ../lib/Base_Host/base_host.h \
     ../lib/Base_Host/channel.h \
     ../lib/Log/log.h \
-    ../lib/raw/raw.h
+    ../lib/raw/raw.h \
+    ../lib/raii/raii_header.h \
+    ../lib/raii/raii_iot.h \
 
 INCLUDEPATH += ../lib/Base_Host \
                 ../lib/Log \
@@ -111,7 +115,8 @@ INCLUDEPATH += ../lib/Base_Host \
                 ../lib/ConfigType \
                 ../lib/Events \
                 ../lib/Json_Parsers \
-                ../lib/ThreadPool
+                ../lib/ThreadPool \
+                ../lib/raii \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

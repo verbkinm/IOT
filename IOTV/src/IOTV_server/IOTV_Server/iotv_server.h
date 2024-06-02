@@ -88,5 +88,12 @@ private slots:
 
     void slotDevicePingTimeout();
 
+
+
+    void slotClientToServerQueryIdentification();
+    void slotClientToServerQueryRead(RAII_Header raii_header);
+    void slotClientToServerQueryWrite(RAII_Header raii_header);
+
+
     void slotTest();
 };
