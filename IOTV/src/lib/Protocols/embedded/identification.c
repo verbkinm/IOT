@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-uint64_t identificationCheckSum(const struct Identification *body)
+uint64_t identificationCheckSum(const identification_t *body)
 {
     if (body == NULL)
         return 0;
@@ -12,7 +12,7 @@ uint64_t identificationCheckSum(const struct Identification *body)
     return  body->id + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel + body->flags;
 }
 
-uint64_t identificationSize(const struct Identification *body)
+uint64_t identificationSize(const identification_t *body)
 {
     if (body == NULL)
         return 0;
@@ -20,7 +20,7 @@ uint64_t identificationSize(const struct Identification *body)
     return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
 }
 
-uint64_t identificationToData(const struct Identification *body, char *outData, uint64_t outDataSize)
+uint64_t identificationToData(const identification_t *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -50,7 +50,7 @@ uint64_t identificationToData(const struct Identification *body, char *outData, 
     return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
 }
 
-void clearIdentification(struct Identification *ident)
+void clearIdentification(identification_t *ident)
 {
     if (ident == NULL)
         return;
@@ -77,4 +77,61 @@ void clearIdentification(struct Identification *ident)
     }
 
     free(ident);
+}
+
+identification_t *identificationCopy(const identification_t *ident)
+{
+    identification_t *copy = NULL;
+
+    if (ident == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(identification_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, ident, sizeof(identification_t));
+
+    copy->name = NULL;
+    copy->description = NULL;
+    copy->writeChannelType = NULL;
+    copy->readChannelType = NULL;
+
+    if (ident->name != NULL && ident->nameSize > 0)
+    {
+        copy->name = malloc(ident->nameSize);
+        if (copy->name != NULL)
+            memcpy(copy->name, ident->name, ident->nameSize);
+        else
+            copy->nameSize = 0;
+    }
+
+    if (ident->description != NULL && ident->descriptionSize > 0)
+    {
+        copy->description = malloc(ident->descriptionSize);
+        if (copy->description != NULL)
+            memcpy(copy->description, ident->description, ident->descriptionSize);
+        else
+            copy->descriptionSize = 0;
+    }
+
+    if (ident->writeChannelType != NULL && ident->numberWriteChannel > 0)
+    {
+        copy->writeChannelType = malloc(ident->numberWriteChannel);
+        if (copy->writeChannelType != NULL)
+            memcpy(copy->writeChannelType, ident->writeChannelType, ident->numberWriteChannel);
+        else
+            copy->numberWriteChannel = 0;
+    }
+
+    if (ident->readChannelType != NULL && ident->numberReadChannel > 0)
+    {
+        copy->readChannelType = malloc(ident->numberReadChannel);
+        if (copy->readChannelType != NULL)
+            memcpy(copy->readChannelType, ident->readChannelType, ident->numberReadChannel);
+        else
+            copy->numberReadChannel = 0;
+    }
+
+    return copy;
 }

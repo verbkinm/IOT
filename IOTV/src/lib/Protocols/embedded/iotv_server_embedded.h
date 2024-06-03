@@ -58,6 +58,8 @@ int8_t dataSizeonDataType(uint8_t type);
 bool byteOrderReversebleData(uint8_t type);
 void clear_iotv_obj(iotv_obj_t *iot);
 
+iotv_obj_t *iotCopy(const iotv_obj_t *iot);
+
 uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const iotv_obj_t *iot, uint8_t channelNumber);
 
 #ifdef __cplusplus

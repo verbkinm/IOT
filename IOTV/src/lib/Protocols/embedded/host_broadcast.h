@@ -16,11 +16,14 @@ struct Host_Broadcast
     uint8_t flags;
     char *name;
 };
+typedef struct Host_Broadcast host_broadcast_t;
 
-uint64_t hostBroadCastCheckSum(const struct Host_Broadcast *body);
-uint64_t hostBroadCastSize(const struct Host_Broadcast *body);
-uint64_t hostBroadCastToData(const struct Host_Broadcast *body, char *outData, uint64_t outDataSize);
-void clearHostBroadCast(struct Host_Broadcast *host_broadcast);
+uint64_t hostBroadCastCheckSum(const host_broadcast_t *body);
+uint64_t hostBroadCastSize(const host_broadcast_t *body);
+uint64_t hostBroadCastToData(const host_broadcast_t *body, char *outData, uint64_t outDataSize);
+void clearHostBroadCast(host_broadcast_t *host_broadcast);
+
+host_broadcast_t *hostBroadCastCopy(host_broadcast_t *hostBroadCast);
 
 #ifdef __cplusplus
 }

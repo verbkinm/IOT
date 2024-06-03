@@ -81,6 +81,9 @@ uint64_t responsePingData(char *outData, uint64_t dataSize)
 
 uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, const header_t *head, uint64_t (*writeFunc)(char *, uint64_t, void *obj), void *obj, readwrite_flag_t rw_flags, header_flag_t header_flags)
 {
+    if (outData == NULL || iot == NULL || head == NULL || writeFunc == NULL)
+        return 0;
+
     struct Read_Write *rwPkg = ((struct Read_Write *)head->pkg);
     uint64_t pkgsCount;
     uint64_t totalSendByte = 0;

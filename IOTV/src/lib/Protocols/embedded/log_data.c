@@ -3,7 +3,7 @@
 #include "string.h"
 #include "stdlib.h"
 
-uint64_t logDataCheckSum(const struct Log_Data *body)
+uint64_t logDataCheckSum(const log_data_t *body)
 {
     if (body == NULL)
         return 0;
@@ -11,7 +11,7 @@ uint64_t logDataCheckSum(const struct Log_Data *body)
     return  body->nameSize + body->startInterval + body->endInterval + body->interval + body->flags + body->channelNumber + body->dataSize;
 }
 
-uint64_t logDataSize(const struct Log_Data *body)
+uint64_t logDataSize(const log_data_t *body)
 {
     if (body == NULL)
         return 0;
@@ -19,7 +19,7 @@ uint64_t logDataSize(const struct Log_Data *body)
     return LOG_DATA_SIZE + body->nameSize + body->dataSize;
 }
 
-uint64_t logDataToData(const struct Log_Data *body, char *outData, uint64_t outDataSize)
+uint64_t logDataToData(const log_data_t *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -66,4 +66,41 @@ void clearLogData(struct Log_Data *body)
         free((void *)body->data);
 
     free(body);
+}
+
+log_data_t *logDataCopy(const log_data_t *logData)
+{
+    log_data_t *copy = NULL;
+
+    if (logData == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(log_data_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, logData, sizeof(log_data_t));
+
+    copy->name = NULL;
+    copy->data = NULL;
+
+    if (logData->name != NULL && logData->nameSize > 0)
+    {
+        copy->name = malloc(logData->nameSize);
+        if (copy->name != NULL)
+            memcpy(copy->name, logData->name, logData->nameSize);
+        else
+            copy->nameSize = 0;
+    }
+
+    if (logData->data != NULL && logData->dataSize > 0)
+    {
+        copy->data = malloc(logData->dataSize);
+        if (copy->data != NULL)
+            memcpy(copy->data, logData->data, logData->dataSize);
+        else
+            copy->dataSize = 0;
+    }
+
+    return copy;
 }

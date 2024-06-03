@@ -156,3 +156,38 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
 
     return result;
 }
+
+header_t *headerCopy(header_t *header)
+{
+    header_t *copy = NULL;
+
+    if (header == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(header_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, header, sizeof(header_t));
+
+    copy->pkg = NULL;
+
+
+    if (copy->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+        copy->pkg = identificationCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_STATE)
+        copy->pkg = stateCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
+        copy->pkg = readWriteCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+        copy->pkg = techCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_HOST_BROADCAST)
+        copy->pkg = hostBroadCastCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+        copy->pkg = logDataCopy(header->pkg);
+    else
+        copy->pkg = NULL;
+
+
+    return copy;
+}

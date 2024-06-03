@@ -23,11 +23,14 @@ struct Log_Data
     char *name;
     char *data;
 };
+typedef struct Log_Data log_data_t;
 
-uint64_t logDataCheckSum(const struct Log_Data *body);
-uint64_t logDataSize(const struct Log_Data *body);
-uint64_t logDataToData(const struct Log_Data *body, char *outData, uint64_t outDataSize);
-void clearLogData(struct Log_Data *body);
+uint64_t logDataCheckSum(const log_data_t *body);
+uint64_t logDataSize(const log_data_t *body);
+uint64_t logDataToData(const log_data_t *body, char *outData, uint64_t outDataSize);
+void clearLogData(log_data_t *body);
+
+log_data_t *logDataCopy(const log_data_t *logData);
 
 #ifdef __cplusplus
 }

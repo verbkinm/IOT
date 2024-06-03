@@ -127,7 +127,6 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
 }
 
 IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &add_to_iot_client, uint maxClientCount,
-                                const std::unordered_map<IOTV_Host *, QThread *> &iot_hosts,
                                 QTcpSocket *socket, QObject *parent)
 {
     if (!socket)
@@ -155,7 +154,7 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
     }
 
     QThread *th = new QThread(parent);
-    IOTV_Client *client = new IOTV_Client(socket, iot_hosts);//, th);
+    IOTV_Client *client = new IOTV_Client(socket);//, th);
     client->moveToThread(th);
 
     th->start();

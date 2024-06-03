@@ -176,14 +176,13 @@ iotv_obj_t *Base_Host::convert() const
 
     for (uint8_t i = 0; i < iot->numberReadChannel; ++i)
     {
-//        if (i == 40)
+//        if (i == 14)
 //        {
-//            qDebug() << getReadChannelData(40).size();
+//            qDebug() << getReadChannelData(14).size();
 //        }
 
         auto t = getReadChannelType(i);
         uint32_t dataSize = 0;
-
 
         if (t == Raw::DATA_TYPE::STRING)
             dataSize = _readChannel.getData(i).size();
@@ -198,7 +197,7 @@ iotv_obj_t *Base_Host::convert() const
             else
                 iot->readChannel[i].data = nullptr;
 
-            if (iot->readChannel[i].data == NULL)
+            if (iot->readChannel[i].data == nullptr)
                 dataSize = 0;
 
             iot->readChannel[i].dataSize = dataSize;

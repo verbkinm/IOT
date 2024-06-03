@@ -4,7 +4,7 @@
 #include "string.h"
 #include "stdlib.h"
 
-uint64_t hostBroadCastCheckSum(const struct Host_Broadcast *body)
+uint64_t hostBroadCastCheckSum(const host_broadcast_t *body)
 {
     if (body == NULL)
         return 0;
@@ -12,7 +12,7 @@ uint64_t hostBroadCastCheckSum(const struct Host_Broadcast *body)
     return  body->nameSize + body->address + body->flags + body->port;
 }
 
-uint64_t hostBroadCastSize(const struct Host_Broadcast *body)
+uint64_t hostBroadCastSize(const host_broadcast_t *body)
 {
     if (body == NULL)
         return 0;
@@ -20,7 +20,7 @@ uint64_t hostBroadCastSize(const struct Host_Broadcast *body)
     return HOST_BROADCAST_SIZE + body->nameSize;
 }
 
-uint64_t hostBroadCastToData(const struct Host_Broadcast *body, char *outData, uint64_t outDataSize)
+uint64_t hostBroadCastToData(const host_broadcast_t *body, char *outData, uint64_t outDataSize)
 {
     if ( (body == NULL) || (outData == NULL) )
         return 0;
@@ -47,7 +47,7 @@ uint64_t hostBroadCastToData(const struct Host_Broadcast *body, char *outData, u
     return HOST_BROADCAST_SIZE + body->nameSize;
 }
 
-void clearHostBroadCast(struct Host_Broadcast *host_broadcast)
+void clearHostBroadCast(host_broadcast_t *host_broadcast)
 {
     if (host_broadcast == NULL)
         return;
@@ -56,4 +56,29 @@ void clearHostBroadCast(struct Host_Broadcast *host_broadcast)
         free((void *)host_broadcast->name);
 
     free(host_broadcast);
+}
+
+host_broadcast_t *hostBroadCastCopy(host_broadcast_t *hostBroadCast)
+{
+    host_broadcast_t *copy = NULL;
+
+    if (hostBroadCast == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(host_broadcast_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, hostBroadCast, sizeof(host_broadcast_t));
+
+    copy->name = NULL;
+
+    if (hostBroadCast->name != NULL && hostBroadCast->nameSize > 0)
+    {
+        copy->name = malloc(copy->nameSize);
+        if (copy->name != NULL)
+            memcpy(copy->name, hostBroadCast->name, copy->nameSize);
+    }
+
+    return copy;
 }

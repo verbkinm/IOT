@@ -24,11 +24,14 @@ struct Identification
     uint8_t *writeChannelType;
     uint8_t *readChannelType;
 };
+typedef struct Identification identification_t;
 
-uint64_t identificationCheckSum(const struct Identification *body);
-uint64_t identificationSize(const struct Identification *body);
-uint64_t identificationToData(const struct Identification *body, char *outData, uint64_t outDataSize);
-void clearIdentification(struct Identification *ident);
+uint64_t identificationCheckSum(const identification_t *body);
+uint64_t identificationSize(const identification_t *body);
+uint64_t identificationToData(const identification_t *body, char *outData, uint64_t outDataSize);
+void clearIdentification(identification_t *ident);
+
+identification_t *identificationCopy(const identification_t *ident);
 
 #ifdef __cplusplus
 }

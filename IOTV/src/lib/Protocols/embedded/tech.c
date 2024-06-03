@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-uint64_t techCheckSum(const struct Tech *body)
+uint64_t techCheckSum(const tech_t *body)
 {
     if (body == NULL)
         return 0;
@@ -12,7 +12,7 @@ uint64_t techCheckSum(const struct Tech *body)
     return  (uint8_t)body->type + body->flags + body->dataSize;
 }
 
-uint64_t techSize(const struct Tech *body)
+uint64_t techSize(const tech_t *body)
 {
     if (body == NULL)
         return 0;
@@ -20,7 +20,7 @@ uint64_t techSize(const struct Tech *body)
     return TECH_SIZE + body->dataSize;
 }
 
-uint64_t techToData(const struct Tech *body, char *outData, uint64_t outDataSize)
+uint64_t techToData(const tech_t *body, char *outData, uint64_t outDataSize)
 {
     if ( body == NULL || outData == NULL || (outDataSize < techSize(body)))
         return 0;
@@ -40,7 +40,7 @@ uint64_t techToData(const struct Tech *body, char *outData, uint64_t outDataSize
     return TECH_SIZE + body->dataSize;
 }
 
-void clearTech(struct Tech *tech)
+void clearTech(tech_t *tech)
 {
     if (tech == NULL)
         return;
@@ -51,3 +51,28 @@ void clearTech(struct Tech *tech)
     free(tech);
 }
 
+
+tech_t *techCopy(tech_t *tech)
+{
+    tech_t *copy = NULL;
+
+    if (tech == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(tech_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, tech, sizeof(tech_t));
+
+    copy->data = NULL;
+
+    if (tech->data != NULL && tech->dataSize > 0)
+    {
+        copy->data = malloc(copy->dataSize);
+        if (copy->data != NULL)
+            memcpy(copy->data, tech->data, copy->dataSize);
+    }
+
+    return copy;
+}
