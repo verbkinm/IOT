@@ -23,7 +23,7 @@ class IOTV_Host : public Base_Host
 public:
     IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
     IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent = nullptr);
-    ~IOTV_Host();
+    virtual ~IOTV_Host();
 
     virtual QString getName() const override;
     virtual void setName(const QString &name) override;

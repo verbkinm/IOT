@@ -9,10 +9,9 @@
 IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
-    _maxClientCount(1), _maxHostCount(10),
-    _eventManager(nullptr)
+    _maxClientCount(1), _maxHostCount(10)
 {
-//    qDebug() << QThread::currentThread();
+    //    qDebug() << QThread::currentThread();
 
     checkSettingsFileExist();
     readServerSettings();
@@ -121,7 +120,7 @@ void IOTV_Server::readHostSetting()
     }
 }
 
-void IOTV_Server::readEventActionJson()
+QByteArray IOTV_Server::readEventActionJson()
 {
     QString fileName = QDir(QFileInfo(_settingsHosts.fileName()).path()).filePath(Json_Event_Action::EVENT_ACTION_FILE_NAME);
     QFile file(fileName);
@@ -132,9 +131,9 @@ void IOTV_Server::readEventActionJson()
         if (!file.isOpen())
         {
             Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
-            exit(1);
+            return {};
         }
-        file.write("{\n}");
+        file.write("{\"Остальное\" : {}\n}");
         file.close();
         file.open(QIODevice::ReadOnly);
 
@@ -142,23 +141,23 @@ void IOTV_Server::readEventActionJson()
         if (!file.isOpen())
         {
             Log::write("Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
-            exit(1);
+            return {};
         }
     }
 
-    auto list = Event_Action_Parser::parseJson(file.readAll(), baseHostList());
+    QByteArray result = file.readAll();
 
-    if (_eventManager != nullptr)
-        delete _eventManager;
+    auto pairs = Event_Action_Parser::parseJson(result, baseHostList());
+    auto event_vec = pairs.first.first;
+    auto action_vec = pairs.first.second;
+    auto event_groups = pairs.second.first;
+    auto action_groups = pairs.second.second;
 
-    _eventManager = new IOTV_Event_Manager(this);
+    _eventManager.reset();
+    _eventManager = std::make_unique<IOTV_Event_Manager>(event_vec, action_vec, event_groups, action_groups);
+    _eventManager->bind();
 
-    //    qDebug() << "Список событий:";
-    for(const auto &pairs : list)
-    {
-        //        qDebug() << pairs.first;
-        _eventManager->bind(pairs.first, pairs.second.first, pairs.second.second);
-    }
+    return result;
 }
 
 void IOTV_Server::writeEventActionJson(const QByteArray &data)
@@ -261,14 +260,7 @@ Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
     return nullptr;
 }
 
-//void IOTV_Server::clientHostsUpdate() const
-//{
-//    // Оповестить клиентов об обновлении устройств
-//    for (const auto &client : _iot_clients)
-//        emit client.first->signalUpdateHosts();
-//}
-
-void IOTV_Server::clientHostsUpdate() const
+void IOTV_Server::clientHostsUpdate()
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
 
@@ -296,15 +288,19 @@ void IOTV_Server::clientHostsUpdate() const
         auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
         result = QByteArray(outData, static_cast<int>(size));
     }
-
-    for (const auto &host : _iot_hosts)
+    else
     {
-        iotv_obj_t *iot = host.first->convert();
-        auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
+        for (const auto &host : _iot_hosts)
+        {
+            iotv_obj_t *iot = host.first->convert();
+            auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
 
-        result += QByteArray{outData, static_cast<int>(size)};
-        clear_iotv_obj(iot);
+            result += QByteArray{outData, static_cast<int>(size)};
+            clear_iotv_obj(iot);
+        }
     }
+
+    readEventActionJson();
 
     for (const auto &client : _iot_clients)
         emit client.first->signalUpdateHosts(result);
@@ -388,6 +384,8 @@ void IOTV_Server::slotClientDisconnected()
     delete _iot_clients[client];
 
     _iot_clients.erase(client);
+
+//    readEventActionJson();
 
     clientOnlineFile();
 }
@@ -475,33 +473,6 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
     socket->deleteLater();
 }
 
-//void IOTV_Server::slotFetchEventActionData(QByteArray data)
-//{
-//    QJsonParseError err;
-//    QJsonDocument::fromJson(data, &err);
-//    if (err.error != QJsonParseError::NoError)
-//    {
-//        qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
-//        return;
-//    }
-
-//    writeEventActionJson(data);
-//    readEventActionJson();
-//}
-
-//void IOTV_Server::slotQueryEventActionData()
-//{
-//    IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
-
-//    if (client == nullptr)
-//        return;
-
-//    readEventActionJson();
-
-//    QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
-//    emit client->signalFetchEventActionDataFromServer(data);
-//}
-
 void IOTV_Server::slotPendingDatagrams()
 {
     auto host = Maker_iotv::host_broadcast(_udpBroadcast, _iot_hosts, _maxHostCount, this);
@@ -518,13 +489,10 @@ void IOTV_Server::slotPendingDatagrams()
 void IOTV_Server::slotDevicePingTimeout()
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
-
     if (host == nullptr)
         return;
 
     _iot_hosts[host]->exit();
-    host->deleteLater();
-
     connect(_iot_hosts[host], &QThread::finished, this, [this](){
         qDebug() << "delete thread";
         QThread *thread = dynamic_cast<QThread *>(sender());
@@ -532,6 +500,7 @@ void IOTV_Server::slotDevicePingTimeout()
     });
 
     _iot_hosts.erase(host);
+    host->deleteLater();
 
     clientHostsUpdate();
 }
@@ -582,8 +551,6 @@ void IOTV_Server::slotClientToServerQueryRead(RAII_Header raii_header)
                                QString compareName(QByteArray{pkg->name, pkg->nameSize});
 
                                return name == compareName;
-                               //                               const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
-                               //                               return iotv_host.first->getName() == QByteArray{pkg->name, pkg->nameSize};
                            });
 
     if (it == _iot_hosts.end())
@@ -672,8 +639,6 @@ void IOTV_Server::slotClientToServerQueryState(RAII_Header raii_header)
 
 void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
 {
-//    qDebug() << QThread::currentThread();
-
     IOTV_Client *client = dynamic_cast<IOTV_Client *>(sender());
     if (client == nullptr)
         return;
@@ -689,10 +654,9 @@ void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
     {
         if (pkg->dataSize == 0)
         {
-            readEventActionJson();
-
-            QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
-            emit client->signalFetchEventActionDataFromServer(data);
+//            readEventActionJson();
+//            QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
+            emit client->signalFetchEventActionDataFromServer(readEventActionJson());
         }
         else
         {

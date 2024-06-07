@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
+    required property var event
     property string eventType: eventTypeComboBox.currentText
     property alias model: eventTypeComboBox.model
     property alias comboBox: eventTypeComboBox
@@ -27,8 +28,9 @@ Item {
         id: eventTypeComboBox
         width: 200
 
-        model: ["connection", "disconnection", "state", "data", "alarm", "timer"]
-        currentIndex: startIndex(model, startType)
+        // iotv_event.h
+        model: ["NONE", "CONNECTING", "DISCONNECTING", "STATE", "DATA", "ALARM", "TIMER"]
+        currentIndex: startIndex(model, event.type)
 
         anchors {
             verticalCenter: parent.verticalCenter

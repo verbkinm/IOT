@@ -15,6 +15,7 @@
 #include "actions/iotv_action.h"
 #include "device.h"
 #include "events/iotv_event.h"
+#include "iotv_event_manager.h"
 
 class Client : public QObject
 {
@@ -23,6 +24,7 @@ class Client : public QObject
     Q_PROPERTY(quint16 totalDevice READ countDevices NOTIFY countDeviceChanged)
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
     Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
+
 public:
     explicit Client(QObject *parent = nullptr);
     ~Client();
@@ -35,9 +37,25 @@ public:
     Q_INVOKABLE QList<QObject*> devList();
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
-    Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
-    Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action, QString oldName);
-    Q_INVOKABLE void removeEventAction(QString name);
+
+
+    Q_INVOKABLE void saveEvent(IOTV_Event *event);
+    Q_INVOKABLE void removeEvent(IOTV_Event *event);
+
+    Q_INVOKABLE bool isExistsEventGroup(const QString &groupName);
+    Q_INVOKABLE void saveEventGroup(const QString &groupName);
+
+    Q_INVOKABLE QList<QString> eventsGroupList() const;
+    Q_INVOKABLE QList<QString> actionsGroupList() const;
+
+    Q_INVOKABLE QList<QString> eventsListInGroup(const QString &groupName) const;
+    Q_INVOKABLE QList<QString> actionsListInGroup(const QString &groupName) const;
+
+    Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Event *createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const;
+
+    Q_INVOKABLE void deleteObject(QObject *obj) const;
+
 
     bool stateConnection() const;
 
@@ -55,6 +73,8 @@ private:
     std::map<QString, Device> _devices;
 
     QList<QList<QVariantMap>> _evAcList;
+
+    std::unique_ptr<IOTV_Event_Manager> _eventManager;
 
     void queryIdentification();
     void queryState(const QString &name);

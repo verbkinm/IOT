@@ -23,7 +23,21 @@ public:
     virtual void exec() = 0;
     virtual bool isValid() const = 0;
 
+    QString name() const;
+    void setName(const QString &newName);
+
+    bool isEnable() const;
+    void setEnable(bool newEnable);
+
+//    friend bool operator<(const IOTV_Action &lhs, const IOTV_Action &rhs);
+
+    QString group() const;
+    void setGroup(const QString &newGroup);
+
 private:
     ACTION_TYPE _type;
+    QString _name;
+    QString _group;
+    bool _enable;
 };
 

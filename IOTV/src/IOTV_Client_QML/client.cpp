@@ -1,5 +1,11 @@
 #include "client.h"
 
+#include "events/iotv_event_alarm.h"
+#include "events/iotv_event_connect.h"
+#include "events/iotv_event_data.h"
+#include "events/iotv_event_disconnect.h"
+#include "events/iotv_event_state.h"
+#include "events/iotv_event_timer.h"
 #include "iotv_event_manager.h"
 #include "event_action_parser.h"
 #include "log.h"
@@ -11,6 +17,7 @@
 #include "tech.h"
 
 #include <QtConcurrent>
+#include<QTime>
 
 #include <QApplication>
 
@@ -154,14 +161,14 @@ QString Client::findAliasName(const QString &realName) const
 
 void Client::removeEventAction(QList<QList<QVariantMap> > &list, const QString &name)
 {
-    for (auto i = 0; i < list.size(); ++i)
-    {
-        if (list[i].size() < 2)
-            continue;
+//    for (auto i = 0; i < list.size(); ++i)
+//    {
+//        if (list[i].size() < 2)
+//            continue;
 
-        if (list[i][0][Json_Event_Action::EVENT_ACTION_NAME] == name)
-            list.removeAt(i);
-    }
+//        if (list[i][0][Json_Event_Action::EVENT_ACTION_NAME] == name)
+//            list.removeAt(i);
+//    }
 }
 
 std::forward_list<const Base_Host *> Client::host_list() const
@@ -176,16 +183,16 @@ std::forward_list<const Base_Host *> Client::host_list() const
 std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > Client::convert(const QList<QList<QVariantMap> > &list) const
 {
     std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> result;
-    auto hosts = host_list();
+//    auto hosts = host_list();
 
-    for (auto &el : list)
-    {
-        QString el_name = el.at(0)[Json_Event_Action::EVENT_ACTION_NAME].toString();
-        IOTV_Event *el_event = IOTV_Event_Manager::createEvent(el.at(0), hosts);
-        IOTV_Action *el_action = IOTV_Event_Manager::createAction(el.at(1), hosts);
+//    for (auto &el : list)
+//    {
+//        QString el_name = el.at(0)[Json_Event_Action::EVENT_ACTION_NAME].toString();
+//        IOTV_Event *el_event = IOTV_Event_Manager::createEvent(el.at(0), hosts);
+//        IOTV_Action *el_action = IOTV_Event_Manager::createAction(el.at(1), hosts);
 
-        result.emplace_front(el_name, std::make_pair(el_event, el_action));
-    }
+//        result.emplace_front(el_name, std::make_pair(el_event, el_action));
+//    }
 
     return result;
 }
@@ -211,6 +218,7 @@ void Client::slotConnected()
     emit stateConnectionChanged();
 
     slotQueryIdentification();
+    queryEventAction();
 }
 
 void Client::slotDisconnected()
@@ -288,52 +296,144 @@ bool Client::stateConnection() const
     return _socket.state() == QAbstractSocket::ConnectedState;
 }
 
-QList<QList<QVariantMap>> Client::evAcList() const
+void Client::saveEvent(IOTV_Event *event)
 {
-    return _evAcList;
+    if (event == nullptr)
+        return;
+
+    QString eventName(event->name());
+    QString eventGroup(event->group());
+
+    auto findEvent = _eventManager->findEvent(eventGroup, eventName);
+    if (findEvent != nullptr)
+        _eventManager->deleteEvent(eventGroup, eventName);
+
+    std::shared_ptr<IOTV_Event> ptr(event);
+    _eventManager->addEvent(ptr);
+
+    QByteArray data = Event_Action_Parser::toData(_eventManager->events(), _eventManager->actions());
+    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
 }
 
-void Client::saveEventAction(QVariantMap event, QVariantMap action,  QString oldName)
+void Client::removeEvent(IOTV_Event *event)
 {
-    auto host = host_list();
+    if (event == nullptr)
+        return;
 
+    QString eventName = event->name();
+    QString eventGroup = event->group();
+
+    _eventManager->deleteEvent(eventGroup, eventName);
+}
+
+bool Client::isExistsEventGroup(const QString &groupName)
+{
+    return _eventManager->eventGroups().contains(groupName);
+}
+
+void Client::saveEventGroup(const QString &groupName)
+{
+    _eventManager->addEventGroup(groupName);
+}
+
+QList<QString> Client::eventsGroupList() const
+{
+    if (_eventManager.get() == nullptr)
+        return {};
+
+    const auto &event_groups = _eventManager->eventGroups();
+    return {event_groups.begin(), event_groups.end()};
+}
+
+QList<QString> Client::actionsGroupList() const
+{
+    if (_eventManager.get() == nullptr)
+        return {};
+
+    const auto &action_groups = _eventManager->actionGroups();
+    return {action_groups.begin(), action_groups.end()};
+}
+
+QList<QString> Client::eventsListInGroup(const QString &groupName) const
+{
+    if (_eventManager.get() == nullptr)
+        return {};
+
+    const std::vector<std::shared_ptr<IOTV_Event>> &vec = _eventManager->events();
+
+    QList<QString> result;
+    for (const auto &el : vec)
     {
-        QList<QVariantMap> list;
-        list << event << action;
-        auto l = replaceAliasToRealName({list});
-        event = l[0][0];
-        action = l[0][1];
+        if (el->group() == groupName)
+            result.push_back(el->name());
     }
 
-    QString name = event[Json_Event_Action::EVENT_ACTION_NAME].toString();
-    IOTV_Event *_event = IOTV_Event_Manager::createEvent(event, host);
-    IOTV_Action *_action = IOTV_Event_Manager::createAction(action, host);
-
-    auto evAcListWithRealName = replaceAliasToRealName(_evAcList);
-
-    removeEventAction(evAcListWithRealName, name);
-    removeEventAction(evAcListWithRealName, oldName);
-
-    auto list = convert(evAcListWithRealName);
-    list.emplace_front(name, std::make_pair(_event, _action));
-
-    QByteArray data = Event_Action_Parser::toData(list);
-    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
-
-    clearList(list);
+    return result;
 }
 
-void Client::removeEventAction(QString name)
+QList<QString> Client::actionsListInGroup(const QString &groupName) const
 {
-    auto evAcListWithRealName = replaceAliasToRealName(_evAcList);
-    removeEventAction(evAcListWithRealName, name);
+    if (_eventManager.get() == nullptr)
+        return {};
 
-    auto list = convert(evAcListWithRealName);
+    const std::vector<std::shared_ptr<IOTV_Action>> &vec = _eventManager->actions();
 
-    QByteArray data = Event_Action_Parser::toData(list);
-    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
+    QList<QString> result;
+    for (const auto &el : vec)
+    {
+        if (el->group() == groupName)
+            result.push_back(el->name());
+    }
 
-    clearList(list);
+    return result;
+}
+
+IOTV_Event *Client::copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const
+{
+    auto event = _eventManager->findEvent(groupName, eventName);
+
+    if (event == nullptr)
+        return nullptr;
+
+    return IOTV_Event_Manager::copyEvent(event.get());
+}
+
+IOTV_Event *Client::createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const
+{
+    IOTV_Event *result = nullptr;
+
+    if (eventType == "NONE")
+        result = new IOTV_Event(IOTV_Event::EVENT_TYPE::NONE, nullptr);
+    else if (eventType == "CONNECTING") // NONE не надо возвращать nullptr!
+        result = new IOTV_Event_Connect(nullptr);
+    else if (eventType == "DISCONNECTING")
+        result = new IOTV_Event_Disconnect(nullptr);
+    else if (eventType == "STATE")
+        result = new IOTV_Event_State(IOTV_Event_State::STATE_TYPE::NONE, nullptr);
+    else if (eventType == "DATA")
+        result = new IOTV_Event_Data(IOTV_Event_Data::DATA_DIRECTION::NONE, Json_Event_Action::COMPARE_ALWAYS_FALSE, nullptr, 0, "0");
+    else if (eventType == "ALARM")
+    {
+        std::array<bool, 7> days;
+        std::memset(days.data(), false, days.size());
+
+        result = new IOTV_Event_Alarm({0, 0}, days);
+    }
+    else if (eventType == "TIMER")
+        result = new IOTV_Event_Timer(0);
+
+    if (result != nullptr)
+    {
+        result->setName(eventName);
+        result->setGroup(groupName);
+    }
+
+    return result;
+}
+
+void Client::deleteObject(QObject *obj) const
+{
+    obj->deleteLater();
 }
 
 void Client::queryIdentification()
@@ -483,7 +583,7 @@ void Client::responceRead(const header_t *header)
     {
         if (pkg->channelNumber == 15)
         {
-            auto res = QByteArray{pkg->data, static_cast<int>(pkg->dataSize)};
+//            auto res = QByteArray{pkg->data, static_cast<int>(pkg->dataSize)};
             _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
         }
         _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
@@ -535,6 +635,8 @@ void Client::responceTech(const Header *header)
     Q_ASSERT(header->pkg != NULL);
 
     const struct Tech *pkg = static_cast<const struct Tech*>(header->pkg);
+    if (pkg == nullptr)
+        return;
 
     if (pkg->type == Tech_TYPE_EV_AC)
     {
@@ -544,9 +646,18 @@ void Client::responceTech(const Header *header)
         for(const auto &pair : _devices)
             hosts.push_front(&pair.second);
 
-        _evAcList = Event_Action_Parser::parseJsonToVariantMap(data, hosts);
-        _evAcList = replaceRealNameToAlias(_evAcList);
+        auto pairs = Event_Action_Parser::parseJson(data, hosts);
+        auto event_vec = pairs.first.first;
+        auto action_vec = pairs.first.second;
+        auto event_groups = pairs.second.first;
+        auto action_groups = pairs.second.second;
 
+        _eventManager.reset();
+        _eventManager = std::make_unique<IOTV_Event_Manager>(event_vec, action_vec, event_groups, action_groups);
+
+//        for (const auto &el : event_groups) {
+//            qDebug() << el;
+//        }
         emit signalEventAction();
     }
 }
@@ -610,7 +721,6 @@ void Client::slotReciveData()
 
         if (error == true)
         {
-//            qDebug() << Q_FUNC_INFO << "error" << QTime::currentTime();
             _recivedBuff.clear();
             clearHeader(header);
             break;
@@ -619,7 +729,6 @@ void Client::slotReciveData()
         // Пакет не ещё полный
         if (expectedDataSize > 0)
         {
-//            qDebug() << Q_FUNC_INFO << "expectedDataSize" << QTime::currentTime();
             clearHeader(header);
             break;
         }

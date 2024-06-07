@@ -29,9 +29,17 @@ const QString ServerLog::DEFAULT_LOG = "default_log";
 //Json Event and Action
 const QString Json_Event_Action::EVENT_ACTION_FILE_NAME = "IOTV_Event_Action.json";
 
-const QString Json_Event_Action::EVENT_ACTION_NAME = "name";
-const QString Json_Event_Action::EVENT = "event";
-const QString Json_Event_Action::ACTION = "action";
+const QString Json_Event_Action::EVENTS = "events";
+const QString Json_Event_Action::EVENT_GROUP = "group";
+const QString Json_Event_Action::EVENT_GROUPS = "event_groups";
+const QString Json_Event_Action::EVENT_NAME = "name";
+const QString Json_Event_Action::EVENT_ENABLE = "enable"
+    ;
+const QString Json_Event_Action::ACTIONS = "actions";
+const QString Json_Event_Action::ACTION_GROUP = "group";
+const QString Json_Event_Action::ACTION_GROUPS = "action_groups";
+const QString Json_Event_Action::ACTION_NAME = "name";
+const QString Json_Event_Action::ACTION_ENABLE = "enable";
 
 const QString Json_Event_Action::HOST_NAME = "host_name";
 const QString Json_Event_Action::HOST_DST = "dst_host";

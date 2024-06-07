@@ -12,70 +12,39 @@
 #include "actions/iotv_action_data_tx_ref.h"
 //#include "actions/iotv_action_msg.h"
 
-IOTV_Event_Manager::IOTV_Event_Manager(QObject *parent)
-    : QObject{parent}
+IOTV_Event_Manager::IOTV_Event_Manager(const std::vector<std::shared_ptr<IOTV_Event> > &events, const std::vector<std::shared_ptr<IOTV_Action> > &actions,
+                                       const std::set<QString> &event_groups, const std::set<QString> &action_groups)
+    : _events(events), _actions(actions), _event_groups(event_groups), _action_groups(action_groups)
 {
+    // Если в списке событий (_events)  есть название группы, которое отсутствует в списке групп событий (_event_groups),
+    // добавляем эту группу в список групп событий (_event_groups)
+    for (auto &event : _events)
+        _event_groups.insert(event->group());
 
+    // Тоже самое для действий и групп действий
+    for (auto &action : _actions)
+        _action_groups.insert(action->group());
 }
 
 IOTV_Event_Manager::~IOTV_Event_Manager()
 {
-    for (auto const &el : _worker)
-    {
-        auto event = el.second.first;
-        auto action = el.second.second;
-        if (event != nullptr)
-            delete event;
-        if (action != nullptr)
-            delete action;
-    }
+
 }
 
-bool IOTV_Event_Manager::bind(const QString &name, IOTV_Event *event, IOTV_Action *action)
+void IOTV_Event_Manager::bind()
 {
-    if (event == nullptr && action == nullptr)
-        return false;
-    if (event == nullptr && action != nullptr)
+    for (auto &event : _events)
     {
-        delete action;
-        return false;
+        event->clearActions();
+        auto &actionMustBeenBinding = event->actionMustBeenBinding;
+        for (size_t i = 0; i < actionMustBeenBinding.size(); i++)
+        {
+            QString groupName = actionMustBeenBinding[i].first;
+            QString actionName = actionMustBeenBinding[i].second;
+
+            event->addAction(findAction(groupName, actionName));
+        }
     }
-    if (event != nullptr && action == nullptr)
-    {
-        delete event;
-        return false;
-    }
-
-    if (!event->isValid() || !action->isValid())
-    {
-        delete event;
-        delete action;
-        return false;
-    }
-
-    std::lock_guard lg(_workerMutex);
-
-    event->setParent(this);
-    action->setParent(this);
-
-    connect(event, &IOTV_Event::signalEvent, action, &IOTV_Action::exec);//, Qt::UniqueConnection);
-
-    _worker.emplace_front(name, std::make_pair(event, action));
-
-    return true;
-}
-
-const std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &IOTV_Event_Manager::worker() const
-{
-    //!!!
-//    std::lock_guard lg(_workerMutex);
-    return _worker;
-}
-
-size_t IOTV_Event_Manager::size() const
-{
-    std::lock_guard lg(_workerMutex);
-    return std::distance(_worker.begin(), _worker.end());
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString &type)
@@ -150,91 +119,94 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, int seconds)
     return new IOTV_Event_Timer(seconds);
 }
 
-IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
-{
-    IOTV_Event *result = nullptr;
+//IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
+//{
+//    IOTV_Event *result = nullptr;
 
-    const Base_Host *host = Event_Action_Parser::hostByName(hosts, event[Json_Event_Action::HOST_NAME].toString());
+//    const Base_Host *host = Event_Action_Parser::hostByName(hosts, event[Json_Event_Action::HOST_NAME].toString());
 
-    if (event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_CONN || event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DISCONN)
-    {
-        QString type = event[Json_Event_Action::TYPE].toString();
-        result = createEvent(host, type);
-    }
-    else if (event[Json_Event_Action::TYPE] == Json_Event_Action::STATE)
-    {
-        QString state = event[Json_Event_Action::STATE].toString();
-        QString type = event[Json_Event_Action::TYPE].toString();
+//    if (event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_CONN || event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DISCONN)
+//    {
+//        QString type = event[Json_Event_Action::TYPE].toString();
+//        result = createEvent(host, type);
+//    }
+//    else if (event[Json_Event_Action::TYPE] == Json_Event_Action::STATE)
+//    {
+//        QString state = event[Json_Event_Action::STATE].toString();
+//        QString type = event[Json_Event_Action::TYPE].toString();
 
-        result = IOTV_Event_Manager::createEvent(host, type, state);
-    }
-    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DATA)
-    {
-        QString direction = event[Json_Event_Action::DIRECTION].toString();
-        QString compare = event[Json_Event_Action::COMPARE].toString();
-        uint8_t ch_num = event[Json_Event_Action::CH_NUM].toString().toInt();
-        QString data = event[Json_Event_Action::DATA].toString();
-        QString type = event[Json_Event_Action::TYPE].toString();
+//        result = IOTV_Event_Manager::createEvent(host, type, state);
+//    }
+//    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_DATA)
+//    {
+//        QString direction = event[Json_Event_Action::DIRECTION].toString();
+//        QString compare = event[Json_Event_Action::COMPARE].toString();
+//        uint8_t ch_num = event[Json_Event_Action::CH_NUM].toString().toInt();
+//        QString data = event[Json_Event_Action::DATA].toString();
+//        QString type = event[Json_Event_Action::TYPE].toString();
 
-        result = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
-    }
-    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_ALARM)
-    {
-        QString timeStr = event[Json_Event_Action::ALARM_TIME].toString();
-        QString daysStr = event[Json_Event_Action::ALARM_DAYS].toString();
-        QString type = event[Json_Event_Action::TYPE].toString();
+//        result = IOTV_Event_Manager::createEvent(host, type, direction, data, compare, ch_num);
+//    }
+//    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_ALARM)
+//    {
+//        QString timeStr = event[Json_Event_Action::ALARM_TIME].toString();
+//        QString daysStr = event[Json_Event_Action::ALARM_DAYS].toString();
+//        QString type = event[Json_Event_Action::TYPE].toString();
 
-        QTime time;
-        std::array<bool, 7> days;
+//        QTime time;
+//        std::array<bool, 7> days;
 
-        QStringList HM = timeStr.split(':');
-        if ( HM.size() != 2 )
-            return nullptr;
+//        QStringList HM = timeStr.split(':');
+//        if ( HM.size() != 2 )
+//            return nullptr;
 
-        bool ok_h, ok_m;
-        int h = HM.at(0).toInt(&ok_h);
-        int m = HM.at(1).toInt(&ok_m);
+//        bool ok_h, ok_m;
+//        int h = HM.at(0).toInt(&ok_h);
+//        int m = HM.at(1).toInt(&ok_m);
 
-        if (ok_h == false || ok_m == false)
-            return nullptr;
+//        if (ok_h == false || ok_m == false)
+//            return nullptr;
 
-        time.setHMS(h, m, 0);
+//        time.setHMS(h, m, 0);
 
-        if ( daysStr.size() != 7 )
-            return nullptr;
+//        if ( daysStr.size() != 7 )
+//            return nullptr;
 
-        for (uint i = 0; i < days.size(); ++i)
-        {
-            auto ch = daysStr.at(i);
-            if ( ch != '0' && ch != '1' )
-                return nullptr;
+//        for (uint i = 0; i < days.size(); ++i)
+//        {
+//            auto ch = daysStr.at(i);
+//            if ( ch != '0' && ch != '1' )
+//                return nullptr;
 
-            days[i] = QString(ch).toInt();
-        }
-        result = IOTV_Event_Manager::createEvent(type, time, days);
-    }
-    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_TIMER)
-    {
-        QString seconds = event[Json_Event_Action::TIMER_SECONDS].toString();
-        QString type = event[Json_Event_Action::TYPE].toString();
+//            days[i] = QString(ch).toInt();
+//        }
+//        result = IOTV_Event_Manager::createEvent(type, time, days);
+//    }
+//    else if(event[Json_Event_Action::TYPE] == Json_Event_Action::TYPE_TIMER)
+//    {
+//        QString seconds = event[Json_Event_Action::TIMER_SECONDS].toString();
+//        QString type = event[Json_Event_Action::TYPE].toString();
 
-        bool ok;
-        int sec = seconds.toInt(&ok);
+//        bool ok;
+//        int sec = seconds.toInt(&ok);
 
-        if (ok)
-            result = IOTV_Event_Manager::createEvent(type, sec);
-        else
-            result = nullptr;
-    }
+//        if (ok)
+//            result = IOTV_Event_Manager::createEvent(type, sec);
+//        else
+//            result = nullptr;
+//    }
 
-    return result;
-}
+//    return result;
+//}
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
                                               const QString &data)
 {
-    if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
-        return nullptr;
+    //    if (host == nullptr)
+    //        return nullptr;
+
+    //    if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
+    //        return nullptr;
 
     if (type == Json_Event_Action::TYPE_DATA_TX)
         return new IOTV_Action_Data_TX(host, ch_num, data);
@@ -276,6 +248,165 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QVariantMap &action, const s
         uint8_t srcChNum = action[Json_Event_Action::CH_NUM_SRC].toString().toInt();
 
         result = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(dstHost), const_cast<Base_Host *>(srcHost), dstChNum, srcChNum);
+    }
+
+    return result;
+}
+
+const std::vector<std::shared_ptr<IOTV_Event> > &IOTV_Event_Manager::events() const
+{
+    return _events;
+}
+
+const std::vector<std::shared_ptr<IOTV_Action> > &IOTV_Event_Manager::actions() const
+{
+    return _actions;
+}
+
+void IOTV_Event_Manager::addEvent(std::shared_ptr<IOTV_Event> event)
+{
+    if (event != nullptr)
+        _events.push_back(event);
+}
+
+void IOTV_Event_Manager::addAction(std::shared_ptr<IOTV_Action> action)
+{
+    if (action != nullptr)
+        _actions.push_back(action);
+}
+
+std::shared_ptr<IOTV_Event> IOTV_Event_Manager::findEvent(const QString &groupName, const QString &eventName) const
+{
+    for (auto &event : _events)
+    {
+        if (event != nullptr)
+        {
+            if ( event->group() == groupName && event->name() == eventName)
+                return event;
+        }
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<IOTV_Action> IOTV_Event_Manager::findAction(const QString &groupName, const QString &eventName) const
+{
+    for (auto &action : _actions)
+    {
+        if (action != nullptr)
+        {
+            if ( action->group() == groupName && action->name() == eventName)
+                return action;
+        }
+    }
+
+    return nullptr;
+}
+
+void IOTV_Event_Manager::deleteEvent(const QString &groupName, const QString &eventName)
+{
+    for (size_t i = 0; i < _events.size(); i++)
+    {
+        if (_events[i] != nullptr)
+        {
+            if (_events[i]->group() == groupName && _events[i]->name() == eventName)
+                _events.erase(_events.begin() + i);
+        }
+    }
+}
+
+void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &eventName)
+{
+    for (size_t i = 0; i < _actions.size(); i++)
+    {
+        if (_actions[i] != nullptr)
+        {
+            if (_actions[i]->group() == groupName && _actions[i]->name() == eventName)
+                _actions.erase(_actions.begin() + i);
+        }
+    }
+}
+
+const std::set<QString> &IOTV_Event_Manager::eventGroups() const
+{
+    return _event_groups;
+}
+
+const std::set<QString> &IOTV_Event_Manager::actionGroups() const
+{
+    return _action_groups;
+}
+
+void IOTV_Event_Manager::addEventGroup(const QString &groupName)
+{
+    _event_groups.insert(groupName);
+}
+
+void IOTV_Event_Manager::addActionGroup(const QString &groupName)
+{
+    _action_groups.insert(groupName);
+}
+
+void IOTV_Event_Manager::removeEventGroup(const QString &groupName)
+{
+    _event_groups.erase(groupName);
+}
+
+void IOTV_Event_Manager::removeActionGroup(const QString &groupName)
+{
+    _action_groups.erase(groupName);
+}
+
+IOTV_Event *IOTV_Event_Manager::copyEvent(const IOTV_Event *event)
+{
+    if (event == nullptr)
+        return nullptr;
+
+    IOTV_Event *result = nullptr;
+    IOTV_Event::EVENT_TYPE type = event->type();
+
+    if (type == IOTV_Event::EVENT_TYPE::NONE)
+        result = new IOTV_Event(IOTV_Event::EVENT_TYPE::NONE, nullptr);
+    else if (type == IOTV_Event::EVENT_TYPE::CONNECTING)
+        result = new IOTV_Event_Connect(event->host());
+    else if (type == IOTV_Event::EVENT_TYPE::DISCONNECTING)
+        result = new IOTV_Event_Disconnect(event->host());
+    else if (type == IOTV_Event::EVENT_TYPE::STATE)
+    {
+        auto state = static_cast<const IOTV_Event_State *>(event)->state();
+        result = new IOTV_Event_State(state, event->host());
+    }
+    else if (type == IOTV_Event::EVENT_TYPE::DATA)
+    {
+        const IOTV_Event_Data *event_data = static_cast<const IOTV_Event_Data *>(event);
+        if (event_data != nullptr)
+        {
+            auto direction = event_data->direction();
+            auto compare = event_data->compareStr();
+            uint8_t chNum = event_data->channelNumber();
+            QString data = event_data->data();
+
+            result = new IOTV_Event_Data(direction, compare, event->host(), chNum, data);
+        }
+    }
+    else if (type == IOTV_Event::EVENT_TYPE::ALARM)
+    {
+        const IOTV_Event_Alarm *event_alarm = static_cast<const IOTV_Event_Alarm *>(event);
+        if (event_alarm != nullptr)
+            result = new IOTV_Event_Alarm(event_alarm->time(), event_alarm->days());
+    }
+    else if (type == IOTV_Event::EVENT_TYPE::TIMER)
+    {
+        const IOTV_Event_Timer *event_timer = static_cast<const IOTV_Event_Timer *>(event);
+        if (event_timer != nullptr)
+            result = new IOTV_Event_Timer(event_timer->totalSeconds());
+    }
+
+    if (result != nullptr)
+    {
+        result->setName(event->name());
+        result->setGroup(event->group());
+        result->setEnable(event->isEnable());
     }
 
     return result;

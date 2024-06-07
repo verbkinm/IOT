@@ -2,13 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
-    property alias directectionComboBox: directionTypeComboBox
-    property alias compareTypeComboBox: compareTypeComboBox
-    property alias dataString: _data.text
-    property alias channelNumber: chNum.value
-
-    property string startDirection: ""
-    property string startCompare: ""
+    required property var event
 
     id: root
     width: 400
@@ -32,8 +26,9 @@ Column {
             id: directionTypeComboBox
             width: 200
 
-            model: ["tx", "rx", "any", "change"]
-            currentIndex: startIndex(model, startDirection)
+            //iotv_event_data.h
+            model: ["NONE", "RX", "TX", "ANY", "CHANGE"]
+            currentIndex: startIndex(model, event.directionStr)
 
             anchors {
                 verticalCenter: parent.verticalCenter
@@ -61,8 +56,9 @@ Column {
             id: compareTypeComboBox
             width: 200
 
+            // ConfigTypes.h struct Json_Event_Action
             model: ["==", "!=", ">", "<", ">=", "<=", "always true", "always false"]
-            currentIndex: startIndex(model, startCompare)
+            currentIndex: startIndex(model, event.compare)
 
             anchors {
                 verticalCenter: parent.verticalCenter
@@ -82,6 +78,7 @@ Column {
         id: chNum
         label: "№ канала"
         width: parent.width
+        value: event.chNum
     }
 
     function startIndex(model, textItem)
@@ -93,13 +90,5 @@ Column {
         var index = model.findIndex(found)
 
         return index === -1 ? 0 : index
-    }
-
-    function compare() {
-        return compareTypeComboBox.currentText
-    }
-
-    function direction() {
-        return directionTypeComboBox.currentText
     }
 }

@@ -4,7 +4,14 @@
 #include "raw.h"
 
 class IOTV_Event_Data : public IOTV_Event
-{   
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString directionStr READ getDirection WRITE setDirection NOTIFY signalDirectionChanged)
+    Q_PROPERTY(QString compare READ compareStr WRITE setCompareStr NOTIFY signalCompareChanged)
+    Q_PROPERTY(QString dataStr READ data WRITE setDataStr NOTIFY signalDataChanged)
+    Q_PROPERTY(int chNum READ channelNumber WRITE setChannelNumber NOTIFY signalChannelNumberChanged)
+
 public:
     enum class DATA_DIRECTION : uint8_t
     {
@@ -12,7 +19,17 @@ public:
         RX,
         TX,
         ANY,
-        CHANGE
+        CHANGE,
+
+        DATA_DIRECTION_NUMBER
+    };
+
+    const QString directionType[5] = {
+        "NONE",
+        "RX",
+        "TX",
+        "ANY",
+        "CHANGE"
     };
 
     IOTV_Event_Data(const DATA_DIRECTION &direction, const QString &compare,
@@ -21,13 +38,20 @@ public:
                     QObject *parent = nullptr);
 
     DATA_DIRECTION direction() const;
-    const QString &compareStr() const;
-
+    QString getDirection() const;
+    QString compareStr() const;
     uint8_t channelNumber() const;
+    QString data() const;
 
-    const QString data() const;
+    void setDirection(const QString &newDirection);
+    void setCompareStr(const QString &newCompare);
+    void setDataStr(const QString &newDataStr);
+    void setChannelNumber(uint8_t newChNum);
 
 private:
+    virtual void runActions() override;
+    virtual bool isValid() const override;
+
     DATA_DIRECTION _type;
     uint8_t _channelNumber;
     QString _data;
@@ -39,5 +63,11 @@ private:
 
 private slots:
     void slotCheckData(uint8_t channleNumber, QByteArray rhs);
+
+signals:
+    void signalDirectionChanged(QString);
+    void signalCompareChanged(QString);
+    void signalDataChanged(QString);
+    void signalChannelNumberChanged(int);
 };
 

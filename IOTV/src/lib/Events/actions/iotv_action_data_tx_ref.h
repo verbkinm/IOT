@@ -20,8 +20,15 @@ public:
     uint8_t dstChannelNumber() const;
     uint8_t srcChannelNumber() const;
 
+    QString srcHostName() const;
+    void setSrcHostName(const QString &newSrcHostName);
+
+    QString dstHostName() const;
+    void setDstHostName(const QString &newDstHostName);
+
 private:
     Base_Host *_dstHost, *_srcHost;
+    QString _dstHostName, _srcHostName;
     uint8_t _dstChannelNumber, _srcChannelNumber;
 };
 

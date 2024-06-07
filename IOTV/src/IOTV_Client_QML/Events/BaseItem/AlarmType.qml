@@ -2,17 +2,16 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
+    required property var event
+
     id: itemAlarmType
     height: 50
     width: 400
 
     // days устанавливается из данных полученных с сервера. При сохранении на сервер так же считываются данные с days
-    property string days: "0000000"
+    property string days: event.days
     // days_complete необходим для промежуточного хранения при открытии диалогового окна.
     property string days_complete: "0000000"
-
-    property alias h: hours.currentIndex
-    property alias m: minutes.currentIndex
 
     RoundButton {
         width: 64
@@ -91,6 +90,8 @@ Item {
                     model: 24
                     font.pixelSize: 18
 
+                    currentIndex: event.hour
+
                     Label {
                         font.pixelSize: 18
                         text: ":"
@@ -108,6 +109,8 @@ Item {
                     visibleItemCount: 3
                     model: 60
                     font.pixelSize: 18
+
+                    currentIndex: event.minute
                 }
             }
             Rectangle {

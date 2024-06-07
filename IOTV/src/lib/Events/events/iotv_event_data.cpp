@@ -15,16 +15,16 @@ IOTV_Event_Data::IOTV_Event_Data(const DATA_DIRECTION &direction, const QString 
         return;
 
     if (direction == DATA_DIRECTION::RX)
-        connect(host, &Base_Host::signalDataRX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalDataRX, this, &IOTV_Event_Data::slotCheckData, Qt::QueuedConnection);
     else if (direction == DATA_DIRECTION::TX)
-        connect(host, &Base_Host::signalDataTX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalDataTX, this, &IOTV_Event_Data::slotCheckData, Qt::QueuedConnection);
     else if (direction == DATA_DIRECTION::ANY)
     {
-        connect(host, &Base_Host::signalDataRX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
-        connect(host, &Base_Host::signalDataTX, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalDataRX, this, &IOTV_Event_Data::slotCheckData, Qt::QueuedConnection);
+        connect(host, &Base_Host::signalDataTX, this, &IOTV_Event_Data::slotCheckData, Qt::QueuedConnection);
     }
     else if (direction == DATA_DIRECTION::CHANGE)
-        connect(host, &Base_Host::signalDataChanged, this, &IOTV_Event_Data::slotCheckData, Qt::UniqueConnection);
+        connect(host, &Base_Host::signalDataChanged, this, &IOTV_Event_Data::slotCheckData, Qt::QueuedConnection);
 }
 
 IOTV_Event_Data::DATA_DIRECTION IOTV_Event_Data::direction() const
@@ -66,9 +66,38 @@ std::function<bool(Raw, Raw)> IOTV_Event_Data::createCompare(const QString &comp
     };
 }
 
-const QString &IOTV_Event_Data::compareStr() const
+QString IOTV_Event_Data::compareStr() const
 {
     return _compareStr;
+}
+
+void IOTV_Event_Data::setCompareStr(const QString &newCompare)
+{
+    if (_compareStr == newCompare)
+        return;
+
+    _compareStr = newCompare;
+    _compare = createCompare(newCompare);
+
+    emit signalCompareChanged(newCompare);
+}
+
+void IOTV_Event_Data::setDataStr(const QString &newDataStr)
+{
+    if (_data == newDataStr)
+        return;
+
+    _data = newDataStr;
+    emit signalDataChanged(newDataStr);
+}
+
+void IOTV_Event_Data::setChannelNumber(uint8_t newChNum)
+{
+    if (_channelNumber == newChNum)
+        return;
+
+    _channelNumber = newChNum;
+    emit signalChannelNumberChanged(newChNum);
 }
 
 uint8_t IOTV_Event_Data::channelNumber() const
@@ -76,20 +105,57 @@ uint8_t IOTV_Event_Data::channelNumber() const
     return _channelNumber;
 }
 
-const QString IOTV_Event_Data::data() const
+QString IOTV_Event_Data::data() const
 {
     return _data;
 }
 
+QString IOTV_Event_Data::getDirection() const
+{
+    return typeName[static_cast<int>(direction())];
+}
+
+void IOTV_Event_Data::setDirection(const QString &newDirection)
+{
+    DATA_DIRECTION old_state = _type;
+
+    if (newDirection == directionType[1])
+        _type = DATA_DIRECTION::RX;
+    else if (newDirection == directionType[2])
+        _type = DATA_DIRECTION::TX;
+    else if (newDirection == directionType[3])
+        _type = DATA_DIRECTION::ANY;
+    else if (newDirection == directionType[4])
+        _type = DATA_DIRECTION::CHANGE;
+    else
+        _type = DATA_DIRECTION::NONE;
+
+    if (_type != old_state)
+        emit signalDirectionChanged(newDirection);
+}
+
+void IOTV_Event_Data::runActions()
+{
+    execActions();
+}
+
+bool IOTV_Event_Data::isValid() const
+{
+    if (host() == nullptr || host()->getId() == 0 || type() != EVENT_TYPE::DATA)
+        return false;
+
+    return true;
+}
+
 void IOTV_Event_Data::slotCheckData(uint8_t channleNumber, QByteArray rhs)
 {
-    if (_host->getId() == 0)
+    if (!isValid())
         return;
-
 
     Raw rawHost(_host->getReadChannelType(channleNumber), rhs);
     QString str = rawHost.strData().first;
     bool res = _compare(Raw(_data), Raw(str));
+
     if (_channelNumber == channleNumber && res)
-        emit signalEvent();
+        runActions();
 }

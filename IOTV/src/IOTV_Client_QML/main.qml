@@ -164,7 +164,7 @@ ApplicationWindow {
                     glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
                 }
 
-                EventsPageModule.Events {
+                EventsPageModule.EventsAndActions {
                     //                    anchors.fill: parent
                     id: eventsPage
                     objectName: "Events"

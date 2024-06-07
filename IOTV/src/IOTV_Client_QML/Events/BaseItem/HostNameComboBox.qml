@@ -2,9 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property alias comboBox: hostComboBox
-    property string startHostName: ""
-    property alias label: hostNameText.text
+    required property var event
 
     id: root
     height: 50
@@ -26,12 +24,16 @@ Item {
         width: 200
 
         model: listName()
-        currentIndex: startIndex(model, startHostName)
+        currentIndex: startIndex(model, event.hostName)
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 20
+        }
+
+        onCurrentIndexChanged: {
+            event.hostName = currentText
         }
     }
 
@@ -52,9 +54,5 @@ Item {
         var index = model.findIndex(found)
 
         return index === -1 ? 0 : index
-    }
-
-    function hostName() {
-        return hostComboBox.currentText
     }
 }

@@ -33,7 +33,7 @@ private:
     void readServerSettings();
     void readHostSetting();
 
-    void readEventActionJson();
+    QByteArray readEventActionJson();
     void writeEventActionJson(const QByteArray &data);
 
     void startTCPServers();
@@ -46,7 +46,7 @@ private:
     Base_Host *baseHostFromName(const QString &name) const;
 
 //    void clientHostsUpdate() const;
-    void clientHostsUpdate() const;
+    void clientHostsUpdate();
 
     // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
@@ -65,7 +65,7 @@ private:
     uint _maxClientCount;
     uint _maxHostCount;
 
-    IOTV_Event_Manager *_eventManager;
+    std::shared_ptr<IOTV_Event_Manager> _eventManager;
 
     QTcpServer *_tcpClient;
     QTcpServer *_tcpReverseHost; // Hosts TCP_REVERSE conn type

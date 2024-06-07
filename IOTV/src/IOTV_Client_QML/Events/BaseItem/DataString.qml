@@ -4,6 +4,8 @@ import QtQuick.Controls 2.5
 Item {
     property alias text: dataTextField.text
     property alias label: dataText.text
+    property alias labelVisible: dataText.visible
+    property alias placeholderText: dataTextField.placeholderText
 
     height: 50
     width: 400//parent.width
@@ -36,10 +38,4 @@ Item {
             rightMargin: 20
         }
     }
-
-
-//    Component.onCompleted: {
-//        forceActiveFocus()
-//    }
-
 }

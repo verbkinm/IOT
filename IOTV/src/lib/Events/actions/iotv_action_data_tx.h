@@ -18,8 +18,12 @@ public:
     virtual void exec() override;
     virtual bool isValid() const override;
 
+    QString hostName() const;
+    void setHostName(const QString &newHostName);
+
 private:
     Base_Host *_host;
+    QString _hostName;
     uint8_t _channelNumber;
     QString _data;
 };
