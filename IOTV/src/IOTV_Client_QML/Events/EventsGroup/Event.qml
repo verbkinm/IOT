@@ -8,8 +8,13 @@ Page {
 
     property alias btnDeleteVisible: deleteEvent.visible
 
+    QtObject {
+        id:privateields
+        property string oldEventName: ""
+    }
+
     id: root
-    title: _event.name
+    //    title: _event.name
 
     Flickable {
         width: parent.width
@@ -29,20 +34,28 @@ Page {
             anchors.topMargin: 15
             spacing: 15
 
-            BaseItem.DataString {
-                id: group
-                width: parent.width
-                label: "Группа: "
-                text: (_event === null) ? "По умолчанию" : _event.groupName
-                placeholderText: "Название группы"
-            }
+            //            BaseItem.DataString {
+            //                id: group
+            //                width: parent.width
+            //                label: "Группа: "
+            //                text: (_event === null) ? "По умолчанию" : _event.groupName
+            //                placeholderText: "Название группы"
+
+            //                onSignalTextEdited: {
+            //                    _event.groupName = text
+            //                }
+            //            }
 
             BaseItem.DataString {
                 id: name
                 width: parent.width
                 label: "Имя событие: "
-                text: title
+                text: _event.name
                 placeholderText: "Название события"
+
+                onSignalTextEdited: {
+                    _event.name = text
+                }
             }
 
             BaseItem.HostNameComboBox {
@@ -85,11 +98,6 @@ Page {
                 width: parent.width
             }
 
-            BaseItem.HorizontLine {
-                height: 20
-                width: parent.width
-            }
-
             Item {
                 width: parent.width
                 height: 70
@@ -114,8 +122,8 @@ Page {
                     }
 
                     onClicked: {
-                        client.removeEventAction(title)
-                        glob_eventStackView.pop(eventsPage)
+                        client.removeEvent(_event)
+                        glob_eventStackView.pop()
                     }
                 }
 
@@ -139,7 +147,7 @@ Page {
                     }
 
                     onClicked: {
-                        if (name.text === "")
+                        if (_event.name === "")
                         {
                             glob_dialogShared.defaultAcceptedMessage()
                             glob_dialogShared.title = "Внимание"
@@ -148,10 +156,26 @@ Page {
                             return
                         }
 
+                        // Если добавляется новое событие
+                        if (!btnDeleteVisible)
+                        {
+                            if (client.isExistsEventNameInGroup(_event.groupName, _event.name))
+                            {
+                                glob_dialogShared.defaultAcceptedMessage()
+                                glob_dialogShared.title = "Внимание"
+                                glob_dialogShared.text = "Cобытие с таким именем в группе \"" + _event.groupName + "\" уже существует!"
+                                glob_dialogShared.open()
+                                return
+                            }
+                        }
+                        // Если изменяется существующее событие
+                        else if (btnDeleteVisible)
+                        {
+                            !!!
+                            client.removeEvent(_event.groupName, privateields.oldEventName)
+                        }
                         client.saveEvent(_event)
-                        client.queryEventAction()
-
-                        glob_eventStackView.pop(eventsPage)
+                        glob_eventStackView.pop()
                     }
                 }
             }
@@ -160,7 +184,7 @@ Page {
 
     Component.onCompleted: {
         console.log("Add Events page construct: ")
-//        focusChanged(true)
+        privateields.oldEventName = _event.name
     }
 
     Component.onDestruction: {
@@ -168,10 +192,10 @@ Page {
     }
 
     onFocusChanged: {
-//        eventTypeItem.signalActivated()
-////        actionTypeItem.signalActivated()
+        //        eventTypeItem.signalActivated()
+        ////        actionTypeItem.signalActivated()
 
-//        focus = true
+        //        focus = true
     }
 
     function eventTypeCreate(eventType, model)

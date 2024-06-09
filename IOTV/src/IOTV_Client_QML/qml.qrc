@@ -140,6 +140,9 @@
         <file>BaseItem/GridList.qml</file>
         <file>Events/EventsGroup/AddGroup.qml</file>
         <file>Events/EventsGroup/EventGroupHeader.qml</file>
+        <file>img/events/state.png</file>
+        <file>img/folder_actions.png</file>
+        <file>img/folder_events.png</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

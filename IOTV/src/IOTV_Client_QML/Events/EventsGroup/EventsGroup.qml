@@ -5,16 +5,14 @@ import "qrc:/BaseItem/" as BaseItem
 
 Page {
     id: root
-    //    title: "!!!"
 
     onVisibleChanged: {
         updateListModel()
     }
 
-
     RoundButton {
         id: addNewEventGroup
-        z:1
+        z: 1
         width: 64
         height: 64
         highlighted: true
@@ -30,26 +28,16 @@ Page {
         }
 
         onClicked: {
-            listView.loader.setSource("qrc:/Events/EventsGroup/AddGroup.qml")
+            listView.loader.setSource("qrc:/Events/EventsGroup/AddGroup.qml",
+                                      {btnDeleteVisible: false})
             listView.loader.title =  "Добавить новую группу событий"
             listView.loader.objectName =  listView.loader.title
             glob_eventStackView.push(listView.loader)
         }
     }
 
-
-    EventGroupHeader {
-        id:eventGroupHeader
-
-        onSignalClicked: {
-            print("header settings click")
-        }
-    }
-
     BaseItem.GridList {
         id: listView
-
-        anchors.topMargin: eventGroupHeader.height + 20
 
         model: ListModel {id: listModel}
 

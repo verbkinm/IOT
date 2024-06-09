@@ -20,9 +20,11 @@ public:
         std::pair<std::vector<std::shared_ptr<IOTV_Event>>, std::vector<std::shared_ptr<IOTV_Action>>>,
         std::pair<std::set<QString>, std::set<QString>>
         >
-        parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
+    parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
 
-    static QByteArray toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions);
+    static QByteArray toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions,
+                             const std::set<QString> &event_groups, const std::set<QString> &action_groups);
+
 
     static const Base_Host *hostByName(const std::forward_list<const Base_Host *> &hosts, const QString &name);
 

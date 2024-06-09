@@ -218,7 +218,8 @@ void Client::slotConnected()
     emit stateConnectionChanged();
 
     slotQueryIdentification();
-    queryEventAction();
+    queryTech(Tech_TYPE_EV_AC, nullptr, 0);
+    //    queryEventAction();
 }
 
 void Client::slotDisconnected()
@@ -296,6 +297,13 @@ bool Client::stateConnection() const
     return _socket.state() == QAbstractSocket::ConnectedState;
 }
 
+void Client::saveEventAction()
+{
+    QByteArray data = Event_Action_Parser::toData(_eventManager->events(), _eventManager->actions(), _eventManager->eventGroups(), _eventManager->actionGroups());
+    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
+    queryTech(Tech_TYPE_EV_AC, nullptr, 0);
+}
+
 void Client::saveEvent(IOTV_Event *event)
 {
     if (event == nullptr)
@@ -311,8 +319,7 @@ void Client::saveEvent(IOTV_Event *event)
     std::shared_ptr<IOTV_Event> ptr(event);
     _eventManager->addEvent(ptr);
 
-    QByteArray data = Event_Action_Parser::toData(_eventManager->events(), _eventManager->actions());
-    queryTech(Tech_TYPE_EV_AC, data.data(), data.size());
+    saveEventAction();
 }
 
 void Client::removeEvent(IOTV_Event *event)
@@ -324,6 +331,30 @@ void Client::removeEvent(IOTV_Event *event)
     QString eventGroup = event->group();
 
     _eventManager->deleteEvent(eventGroup, eventName);
+    saveEventAction();
+}
+
+void Client::removeEvent(const QString &groupName, const QString &eventName)
+{
+    _eventManager->deleteEvent(groupName, eventName);
+    saveEventAction();
+}
+
+void Client::renameEventGroup(const QString &oldGroupName, const QString &newGroupName)
+{
+    _eventManager->renameEventGroup(oldGroupName, newGroupName);
+    saveEventAction();
+}
+
+void Client::removeEventGroup(const QString &groupName)
+{
+    _eventManager->removeEventGroup(groupName);
+    saveEventAction();
+}
+
+bool Client::isEmptyEventGroup(const QString &groupName)
+{
+    return _eventManager->eventsInGroup(groupName).size() == 0;
 }
 
 bool Client::isExistsEventGroup(const QString &groupName)
@@ -331,9 +362,16 @@ bool Client::isExistsEventGroup(const QString &groupName)
     return _eventManager->eventGroups().contains(groupName);
 }
 
+bool Client::isExistsEventNameInGroup(const QString &groupName, const QString &eventName)
+{
+    return _eventManager->findEvent(groupName, eventName) != nullptr;
+}
+
 void Client::saveEventGroup(const QString &groupName)
 {
     _eventManager->addEventGroup(groupName);
+
+    saveEventAction();
 }
 
 QList<QString> Client::eventsGroupList() const
@@ -359,14 +397,11 @@ QList<QString> Client::eventsListInGroup(const QString &groupName) const
     if (_eventManager.get() == nullptr)
         return {};
 
-    const std::vector<std::shared_ptr<IOTV_Event>> &vec = _eventManager->events();
+    std::vector<std::shared_ptr<IOTV_Event>> vec = _eventManager->eventsInGroup(groupName);
 
     QList<QString> result;
     for (const auto &el : vec)
-    {
-        if (el->group() == groupName)
-            result.push_back(el->name());
-    }
+        result.push_back(el->name());
 
     return result;
 }
@@ -537,7 +572,7 @@ void Client::responceIdentification(const Header *header)
     }
     else
         _devices[name].update(iot);
-    
+
     clear_iotv_obj(iot);
 }
 

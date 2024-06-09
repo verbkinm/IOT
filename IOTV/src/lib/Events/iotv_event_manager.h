@@ -52,6 +52,8 @@ public:
     const std::vector<std::shared_ptr<IOTV_Event>> &events() const;
     const std::vector<std::shared_ptr<IOTV_Action>> &actions() const;
 
+    std::vector<std::shared_ptr<IOTV_Event>> eventsInGroup(const QString &groupName) const;
+
     void addEvent(std::shared_ptr<IOTV_Event> event);
     void addAction(std::shared_ptr<IOTV_Action> action);
 
@@ -70,6 +72,9 @@ public:
 
     void removeEventGroup(const QString &groupName);
     void removeActionGroup(const QString &groupName);
+
+    void renameEventGroup(const QString &oldGroupName, const QString &newGroupName);
+    void renameActionGroup(const QString &oldGroupName, const QString &newGroupName);
 
 private:
     std::vector<std::shared_ptr<IOTV_Event>> _events;

@@ -40,15 +40,23 @@ public:
 
 
     Q_INVOKABLE void saveEvent(IOTV_Event *event);
-    Q_INVOKABLE void removeEvent(IOTV_Event *event);
-
-    Q_INVOKABLE bool isExistsEventGroup(const QString &groupName);
     Q_INVOKABLE void saveEventGroup(const QString &groupName);
 
-    Q_INVOKABLE QList<QString> eventsGroupList() const;
-    Q_INVOKABLE QList<QString> actionsGroupList() const;
 
+    Q_INVOKABLE void removeEvent(IOTV_Event *event);
+    Q_INVOKABLE void removeEvent(const QString &groupName, const QString &eventName);
+    Q_INVOKABLE void removeEventGroup(const QString &groupName);
+
+    Q_INVOKABLE void renameEventGroup(const QString &oldGroupName, const QString &newGroupName);
+
+    Q_INVOKABLE bool isEmptyEventGroup(const QString &groupName); // пуста ли группа
+    Q_INVOKABLE bool isExistsEventGroup(const QString &groupName); // есть ли группа событий с таким именем
+    Q_INVOKABLE bool isExistsEventNameInGroup(const QString &groupName, const QString &eventName);
+
+    Q_INVOKABLE QList<QString> eventsGroupList() const;
     Q_INVOKABLE QList<QString> eventsListInGroup(const QString &groupName) const;
+
+    Q_INVOKABLE QList<QString> actionsGroupList() const;
     Q_INVOKABLE QList<QString> actionsListInGroup(const QString &groupName) const;
 
     Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
@@ -75,6 +83,7 @@ private:
     QList<QList<QVariantMap>> _evAcList;
 
     std::unique_ptr<IOTV_Event_Manager> _eventManager;
+    void saveEventAction();
 
     void queryIdentification();
     void queryState(const QString &name);

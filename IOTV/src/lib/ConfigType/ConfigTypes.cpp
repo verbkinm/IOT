@@ -46,6 +46,7 @@ const QString Json_Event_Action::HOST_DST = "dst_host";
 const QString Json_Event_Action::HOST_SRC = "src_host";
 
 const QString Json_Event_Action::TYPE = "type";
+const QString Json_Event_Action::TYPE_NONE = "none";
 const QString Json_Event_Action::TYPE_CONN = "connection";
 const QString Json_Event_Action::TYPE_DISCONN = "disconnection";
 const QString Json_Event_Action::TYPE_STATE = "state";
@@ -60,11 +61,13 @@ const QString Json_Event_Action::TYPE_CMD_CLIENT = "cmd_client";
 const QString Json_Event_Action::TYPE_MESSAGE = "message";
 
 const QString Json_Event_Action::STATE = "state";
+const QString Json_Event_Action::STATE_NONE = "none";
 const QString Json_Event_Action::STATE_ONLINE = "online";
 const QString Json_Event_Action::STATE_OFFNLINE = "offline";
 const QString Json_Event_Action::STATE_SWITCH = "switch";
 
 const QString Json_Event_Action::DIRECTION = "direction";
+const QString Json_Event_Action::DIRECTION_NONE = "none";
 const QString Json_Event_Action::DIRECTION_TX = "tx";
 const QString Json_Event_Action::DIRECTION_RX = "rx";
 const QString Json_Event_Action::DIRECTION_ANY = "any";

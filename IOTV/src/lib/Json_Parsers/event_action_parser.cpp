@@ -91,13 +91,16 @@ Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<c
     return {{events, actions}, {event_groups, action_groups}};
 }
 
-QByteArray Event_Action_Parser::toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions)
+QByteArray Event_Action_Parser::toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions,
+                                       const std::set<QString> &event_groups, const std::set<QString> &action_groups)
 {
     QJsonDocument jdoc;
 
     QJsonObject jobj_root;
     QJsonObject jactions;
     QJsonObject jevents;
+    QJsonArray jevent_group;
+    QJsonArray jaction_group;
 
     int counter_actions = 0;
     for (const auto &action : actions)
@@ -107,8 +110,16 @@ QByteArray Event_Action_Parser::toData(const std::vector<std::shared_ptr<IOTV_Ev
     for (const auto &event : events)
         jevents.insert(Json_Event_Action::EVENTS + "_" + QString::number(counter_events++), parseEvent(event));
 
+    for (const auto &action_group : action_groups)
+        jaction_group.append(action_group);
+
+    for (const auto &event_group : event_groups)
+        jevent_group.append(event_group);
+
     jobj_root.insert(Json_Event_Action::ACTIONS, jactions);
     jobj_root.insert(Json_Event_Action::EVENTS, jevents);
+    jobj_root.insert(Json_Event_Action::ACTION_GROUPS, jaction_group);
+    jobj_root.insert(Json_Event_Action::EVENT_GROUPS, jevent_group);
 
     jdoc.setObject(jobj_root);
 
@@ -123,7 +134,7 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
 
     IOTV_Event *event = nullptr;
 
-    if (type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
+    if (type == Json_Event_Action::TYPE_NONE || type == Json_Event_Action::TYPE_CONN || type == Json_Event_Action::TYPE_DISCONN)
     {
         event = IOTV_Event_Manager::createEvent(host, type);
     }
@@ -307,7 +318,7 @@ QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
         if (state == nullptr)
             return {};
 
-        QString stateStr;
+        QString stateStr = Json_Event_Action::STATE_NONE;
         if (state->state() == IOTV_Event_State::STATE_TYPE::ONLINE)
             stateStr = Json_Event_Action::STATE_ONLINE;
         else if (state->state() == IOTV_Event_State::STATE_TYPE::OFFLINE)

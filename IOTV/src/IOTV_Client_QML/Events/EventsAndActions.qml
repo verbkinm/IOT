@@ -18,7 +18,7 @@ Page {
             ListElement {
                 text: "События"
                 title: "Группы событий"
-                icon: "qrc:/img/folder.png"
+                icon: "qrc:/img/folder_events.png"
                 loaderSource: "qrc:/Events/EventsGroup/EventsGroup.qml"
 //                attributes: [
 //                   ListElement {}
@@ -28,7 +28,7 @@ Page {
             ListElement {
                 text: "Действия"
                 title: "Группы действий"
-                icon: "qrc:/img/folder.png"
+                icon: "qrc:/img/folder_actions.png"
                 loaderSource: "qrc:/Events/ActionsGroup/ActionsGroup.qml"
 //                attributes: [
 //                    ListElement {title: "title 2"; arg: "255"}

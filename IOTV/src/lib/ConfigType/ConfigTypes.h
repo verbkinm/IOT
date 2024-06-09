@@ -61,6 +61,7 @@ struct Json_Event_Action
     static const QString HOST_SRC;
 
     static const QString TYPE;
+    static const QString TYPE_NONE;
     static const QString TYPE_CONN;
     static const QString TYPE_DISCONN;
     static const QString TYPE_STATE;
@@ -75,11 +76,13 @@ struct Json_Event_Action
     static const QString TYPE_MESSAGE;
 
     static const QString STATE;
+    static const QString STATE_NONE;
     static const QString STATE_ONLINE;
     static const QString STATE_OFFNLINE;
     static const QString STATE_SWITCH;
 
     static const QString DIRECTION;
+    static const QString DIRECTION_NONE;
     static const QString DIRECTION_TX;
     static const QString DIRECTION_RX;
     static const QString DIRECTION_ANY;

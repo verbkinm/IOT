@@ -1,8 +1,10 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import "qrc:/Devices/BaseItem" as BaseItem
 
 Rectangle {
+    property alias text: lbl.text
+    property alias icon: imgId.source
+
     height: 64
     width: parent.width
 
@@ -11,6 +13,30 @@ Rectangle {
     border.color: Qt.rgba(0, 0, 0, 0.1)
 
     signal signalClicked()
+
+    Image {
+        id: imgId
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: 10
+        }
+        source: "qrc:/img/folder.png"
+        height: 52
+        width: 52
+        fillMode: Image.PreserveAspectFit // ensure it fits
+    }
+
+    Label {
+        id: lbl
+        text: "text"
+
+        anchors {
+            left: imgId.right
+            verticalCenter: parent.verticalCenter
+            leftMargin: 10
+        }
+    }
 
     RoundButton {
         id: settings
@@ -34,11 +60,6 @@ Rectangle {
 
         onClicked: {
             signalClicked()
-//            loaderDebug.objectName = device.aliasName + "_setting"
-//            loaderDebug.setSource("/Devices/Setting/Setting.qml", {
-//                                      "device": device
-//                                  })
-//            glob_deviceStackView.push(loaderDebug)
         }
     }
 }

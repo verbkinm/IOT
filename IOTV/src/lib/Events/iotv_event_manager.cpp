@@ -49,7 +49,9 @@ void IOTV_Event_Manager::bind()
 
 IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString &type)
 {
-    if (type == Json_Event_Action::TYPE_CONN)
+    if (type == Json_Event_Action::TYPE_NONE)
+        return new IOTV_Event(IOTV_Event::EVENT_TYPE::NONE, host);
+    else if (type == Json_Event_Action::TYPE_CONN)
         return new IOTV_Event_Connect(host);
     else if (type == Json_Event_Action::TYPE_DISCONN)
         return new IOTV_Event_Disconnect(host);
@@ -69,8 +71,6 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString
         newState = IOTV_Event_State::STATE_TYPE::OFFLINE;
     else if (state == Json_Event_Action::STATE_SWITCH)
         newState = IOTV_Event_State::STATE_TYPE::SWITCH;
-    else
-        return nullptr;
 
     return new IOTV_Event_State(newState, host);
 }
@@ -82,6 +82,8 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString
     if (type != Json_Event_Action::TYPE_DATA)
         return nullptr;
 
+    QString cmp = compare;
+
     IOTV_Event_Data::DATA_DIRECTION newDirection = IOTV_Event_Data::DATA_DIRECTION::NONE;
     if (direction == Json_Event_Action::DIRECTION_RX)
         newDirection = IOTV_Event_Data::DATA_DIRECTION::RX;
@@ -91,16 +93,16 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const Base_Host *host, const QString
         newDirection = IOTV_Event_Data::DATA_DIRECTION::ANY;
     else if (direction == Json_Event_Action::DIRECTION_CHANGE)
         newDirection = IOTV_Event_Data::DATA_DIRECTION::CHANGE;
-    else
-        return nullptr;
 
-    if (compare != Json_Event_Action::COMPARE_EQ && compare != Json_Event_Action::COMPARE_NE
-        && compare != Json_Event_Action::COMPARE_GR && compare != Json_Event_Action::COMPARE_LS
-        && compare != Json_Event_Action::COMPARE_GE && compare != Json_Event_Action::COMPARE_LE
-        && compare != Json_Event_Action::COMPARE_ALWAYS_TRUE && compare != Json_Event_Action::COMPARE_ALWAYS_FALSE)
-        return nullptr;
+    if (cmp != Json_Event_Action::COMPARE_EQ && cmp != Json_Event_Action::COMPARE_NE
+        && cmp != Json_Event_Action::COMPARE_GR && cmp != Json_Event_Action::COMPARE_LS
+        && cmp != Json_Event_Action::COMPARE_GE && cmp != Json_Event_Action::COMPARE_LE
+        && cmp != Json_Event_Action::COMPARE_ALWAYS_TRUE && cmp != Json_Event_Action::COMPARE_ALWAYS_FALSE)
+    {
+        cmp = Json_Event_Action::COMPARE_ALWAYS_FALSE;
+    }
 
-    return new IOTV_Event_Data(newDirection, compare, host, channelNumber, data);
+    return new IOTV_Event_Data(newDirection, cmp, host, channelNumber, data);
 }
 
 IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, const QTime &time, const std::array<bool, 7> &days)
@@ -263,6 +265,20 @@ const std::vector<std::shared_ptr<IOTV_Action> > &IOTV_Event_Manager::actions() 
     return _actions;
 }
 
+std::vector<std::shared_ptr<IOTV_Event> > IOTV_Event_Manager::eventsInGroup(const QString &groupName) const
+{
+    std::vector<std::shared_ptr<IOTV_Event>> vec;
+    for (auto &event : _events)
+    {
+        if (event == nullptr)
+            continue;
+        if (event->group() == groupName)
+            vec.emplace_back(event);
+    }
+
+    return vec;
+}
+
 void IOTV_Event_Manager::addEvent(std::shared_ptr<IOTV_Event> event)
 {
     if (event != nullptr)
@@ -310,7 +326,10 @@ void IOTV_Event_Manager::deleteEvent(const QString &groupName, const QString &ev
         if (_events[i] != nullptr)
         {
             if (_events[i]->group() == groupName && _events[i]->name() == eventName)
+            {
                 _events.erase(_events.begin() + i);
+                --i;
+            }
         }
     }
 }
@@ -355,6 +374,29 @@ void IOTV_Event_Manager::removeEventGroup(const QString &groupName)
 void IOTV_Event_Manager::removeActionGroup(const QString &groupName)
 {
     _action_groups.erase(groupName);
+}
+
+void IOTV_Event_Manager::renameEventGroup(const QString &oldGroupName, const QString &newGroupName)
+{
+    std::set<QString>::iterator it = _event_groups.find(oldGroupName);
+    if (it != _event_groups.end())
+    {
+        _event_groups.erase(it);
+        _event_groups.insert(newGroupName);
+    }
+
+    for (std::shared_ptr<IOTV_Event> &event : _events)
+    {
+        if (event == nullptr)
+            continue;
+        if (event.get()->group() == oldGroupName)
+            event.get()->setGroup(newGroupName);
+    }
+}
+
+void IOTV_Event_Manager::renameActionGroup(const QString &oldGroupName, const QString &newGroupName)
+{
+
 }
 
 IOTV_Event *IOTV_Event_Manager::copyEvent(const IOTV_Event *event)

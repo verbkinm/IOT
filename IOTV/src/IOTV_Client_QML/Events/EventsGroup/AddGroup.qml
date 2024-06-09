@@ -5,6 +5,9 @@ import "qrc:/Events/BaseItem" as BaseItem
 Page {
     id: root
 
+    property string oldGroupName: "" // при изменении имени существующей группы
+    property alias btnDeleteVisible: deleteEvent.visible
+
     Flickable {
         width: parent.width
         height: parent.height
@@ -31,7 +34,7 @@ Page {
                 verticalAlignment: Text.AlignVCenter
                 antialiasing: true
                 font.pixelSize: 14
-                text: "Новая группа событий"
+                text: oldGroupName === "" ? "Новая группа событий" : oldGroupName
                 placeholderText: "Введите название группы..."
                 placeholderTextColor: "#ccc"
 
@@ -45,6 +48,42 @@ Page {
             Item {
                 width: parent.width
                 height: 70
+
+                RoundButton {
+                    id: deleteEvent
+                    width: 64
+                    height: 64
+                    highlighted: true
+
+                    anchors {
+                        right: save.left
+                        rightMargin: 20
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/delete_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        if (!client.isEmptyEventGroup(groupName.text))
+                        {
+                            glob_dialogShared.defaultAcceptedMessage()
+                            glob_dialogShared.title = "Внимание"
+                            glob_dialogShared.text = "Нельзя удалить группу, которая содержить события!"
+                            glob_dialogShared.open()
+
+                            return
+                        }
+
+                        client.removeEventGroup(groupName.text)
+                        glob_eventStackView.pop()
+                        glob_eventStackView.pop()
+                    }
+                }
 
                 RoundButton {
                     id: save
@@ -72,27 +111,34 @@ Page {
                             glob_dialogShared.title = "Внимание"
                             glob_dialogShared.text = "Имя группы не может быть пустым!"
                             glob_dialogShared.open()
-
                             return
                         }
 
-                        if (client.isExistsEventGroup(groupName.text))
+                        // Если добавляем новую группу
+                        if (oldGroupName === "" && client.isExistsEventGroup(groupName.text))
                         {
-                            glob_dialogShared.defaultAcceptedMessage()
-                            glob_dialogShared.title = "Внимание"
-                            glob_dialogShared.text = "Такое имя группы событий уже существует!"
-                            glob_dialogShared.open()
+                            groupIsExist()
+                            return
+                        }
 
+                        // Если изменяем имя существующей группы
+                        if (oldGroupName !== "")
+                        {
+                            if (client.isExistsEventGroup(groupName.text))
+                            {
+                                groupIsExist()
+                            }
+                            else
+                            {
+                                client.renameEventGroup(oldGroupName, groupName.text)
+                                glob_eventStackView.pop()
+                                glob_eventStackView.pop()
+                            }
                             return
                         }
 
                         client.saveEventGroup(groupName.text)
                         glob_eventStackView.pop()
-
-//                        client.saveEvent(_event)
-//                        client.queryEventAction()
-
-//                        glob_eventStackView.pop(eventsPage)
                     }
                 }
             }
@@ -105,5 +151,13 @@ Page {
 
     Component.onDestruction: {
         console.log("Add Event group page destruct: ", objectName)
+    }
+
+    function groupIsExist()
+    {
+        glob_dialogShared.defaultAcceptedMessage()
+        glob_dialogShared.title = "Внимание"
+        glob_dialogShared.text = "Такое имя группы событий уже существует!"
+        glob_dialogShared.open()
     }
 }

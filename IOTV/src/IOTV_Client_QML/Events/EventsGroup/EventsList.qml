@@ -9,6 +9,10 @@ Page {
 
     property string groupName: ""
 
+    onVisibleChanged: {
+        updateListModel()
+    }
+
     RoundButton {
         id: addNewEvent
         z:1
@@ -37,6 +41,16 @@ Page {
 
     EventGroupHeader {
         id:eventGroupHeader
+        text: groupName
+        icon: "qrc:/img/folder.png"
+
+        onSignalClicked: {
+            listView.loader.setSource("qrc:/Events/EventsGroup/AddGroup.qml",
+                                      {btnDeleteVisible: true, oldGroupName: groupName})
+            listView.loader.title = groupName
+            listView.loader.objectName = listView.loader.title
+            glob_eventStackView.push(listView.loader)
+        }
     }
 
     BaseItem.GridList  {
@@ -53,6 +67,7 @@ Page {
 
     Component.onCompleted: {
         console.log("Events list page construct: ", objectName)
+        print("groupName = ", groupName)
     }
 
     Component.onDestruction: {
@@ -64,7 +79,7 @@ Page {
         listModel.clear()
         var list = client.eventsListInGroup(root.groupName)
 
-        console.log("list size = ", list.length)
+        console.log("events in group list size = ", list.length)
         for (var i = 0; i < list.length; i++)
         {
             var objectAtributes = {
@@ -94,7 +109,7 @@ Page {
         case "DISCONNECTING":
             return "qrc:/img/events/disconnected.png"
         case "STATE":
-            return "qrc:/img/id/0.png"
+            return "qrc:/img/events/state.png"
         case "DATA":
             return "qrc:/img/events/data.png"
         case "ALARM":

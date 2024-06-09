@@ -7,6 +7,8 @@ Item {
     property alias labelVisible: dataText.visible
     property alias placeholderText: dataTextField.placeholderText
 
+    signal signalTextEdited();
+
     height: 50
     width: 400//parent.width
 
@@ -36,6 +38,10 @@ Item {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 20
+        }
+
+        onTextEdited: {
+            signalTextEdited()
         }
     }
 }

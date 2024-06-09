@@ -32,7 +32,7 @@ Item {
         }
 
         onCurrentIndexChanged: {
-            event.state = currentText
+            event.state = model[currentIndex]
         }
     }
 
