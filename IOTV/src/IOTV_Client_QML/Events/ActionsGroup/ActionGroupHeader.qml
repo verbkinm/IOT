@@ -4,8 +4,10 @@ import QtQuick.Controls 2.5
 Rectangle {
     property alias text: lbl.text
     property alias icon: imgId.source
+    property bool readOnly: false
 
     z: 1
+
     height: 64
     width: parent.width
 
@@ -45,6 +47,8 @@ Rectangle {
         width: 52
         height: 52
         highlighted: true
+
+        visible: !readOnly
 
         anchors {
             right: parent.right

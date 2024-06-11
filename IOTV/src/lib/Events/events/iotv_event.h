@@ -7,11 +7,13 @@ class IOTV_Event : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool enable READ isEnable WRITE setEnable NOTIFY signalEnableChanged)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY signalNameChanged)
     Q_PROPERTY(QString hostName READ hostName WRITE setHostName NOTIFY signalHostNameChanged)
     Q_PROPERTY(QString groupName READ group WRITE setGroup NOTIFY signalGroupNameChanged)
 
     Q_PROPERTY(QString type READ getType CONSTANT)
+    Q_PROPERTY(QStringList actionGroups READ actionGroups CONSTANT)
 
 public:
     enum class EVENT_TYPE : uint8_t
@@ -38,15 +40,15 @@ public:
     };
 
     IOTV_Event(EVENT_TYPE type, const Base_Host *host, QObject *parent = nullptr);
-    virtual ~IOTV_Event(){};
+    virtual ~IOTV_Event() = default;
 
     const Base_Host *host() const;
 
     EVENT_TYPE type() const;
     QString getType() const;
 
-    friend bool operator==(const IOTV_Event &lhs, const IOTV_Event &rhs);
-    friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
+    //    friend bool operator==(const IOTV_Event &lhs, const IOTV_Event &rhs);
+    //    friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
 
     QString name() const;
     void setName(const QString &newName);
@@ -55,7 +57,10 @@ public:
     void setEnable(bool newEnable);
 
     void addAction(std::shared_ptr<IOTV_Action> action);
+    void removeAction(const QString &groupName, const QString &actionName);
     void clearActions();
+
+    QStringList actionGroups() const;
 
     QString group() const;
     void setGroup(const QString &newGroup);
@@ -86,7 +91,14 @@ private:
     bool _enable;
 
 signals:
+    void signalEnableChanged(bool);
     void signalNameChanged(QString newName);
     void signalGroupNameChanged(QString newName);
     void signalHostNameChanged(QString newName);
+
+public slots:
+    // Вызывается в CurrentConnectionList.qml
+    QList<QString> slotActionInGroup(const QString &groupName);
+    // удаляет из actionMustBeenBinding. Вызывается в CurrentConnectionList.qml
+    void slotRemoveAction(const QString &groupName, const QString &actionName);
 };

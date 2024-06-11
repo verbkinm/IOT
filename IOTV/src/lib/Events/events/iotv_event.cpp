@@ -37,6 +37,27 @@ void IOTV_Event::execActions()
     }
 }
 
+QList<QString> IOTV_Event::slotActionInGroup(const QString &groupName)
+{
+    QList<QString> result;
+
+    for (const auto &pair : actionMustBeenBinding)
+    {
+        if (pair.first == groupName)
+            result << pair.second;
+    }
+
+    return result;
+}
+
+void IOTV_Event::slotRemoveAction(const QString &groupName, const QString &actionName)
+{
+    actionMustBeenBinding.erase(actionMustBeenBinding.begin(),
+                                std::remove_if(actionMustBeenBinding.begin(), actionMustBeenBinding.end(), [&](auto &pair){
+                                    return pair.first == groupName && pair.second == actionName;
+                                }));
+}
+
 const std::vector<std::shared_ptr<IOTV_Action> > &IOTV_Event::actions() const
 {
     return _actions;
@@ -100,22 +121,38 @@ void IOTV_Event::addAction(std::shared_ptr<IOTV_Action> action)
         return;
 
     _actions.push_back(action);
-//    actionMustBeenBinding.emplace_back(action->group(), action->name());
+    //    actionMustBeenBinding.emplace_back(action->group(), action->name());
+}
+
+void IOTV_Event::removeAction(const QString &groupName, const QString &actionName)
+{
+    _actions.erase(_actions.begin(), std::remove_if(_actions.begin(), _actions.end(), [&](auto &action){
+                       return action.get()->group() == groupName && action.get()->name() == actionName;
+               }));
 }
 
 void IOTV_Event::clearActions()
 {
     _actions.clear();
-//    actionMustBeenBinding.clear();
+    //    actionMustBeenBinding.clear();
 }
 
-bool operator==(const IOTV_Event &lhs, const IOTV_Event &rhs)
+QStringList IOTV_Event::actionGroups() const
 {
-    return (lhs._type == rhs._type &&
-            lhs._host == rhs._host);
+    QStringList result;
+    for (const auto &pair : actionMustBeenBinding)
+        result << pair.first;
+
+    return result;
 }
 
-bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs)
-{
-    return (lhs._host < rhs._host);
-}
+//bool operator==(const IOTV_Event &lhs, const IOTV_Event &rhs)
+//{
+//    return (lhs._type == rhs._type &&
+//            lhs._host == rhs._host);
+//}
+
+//bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs)
+//{
+//    return (lhs._host < rhs._host);
+//}

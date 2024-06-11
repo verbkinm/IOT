@@ -155,7 +155,7 @@ QByteArray IOTV_Server::readEventActionJson()
 
     _eventManager.reset();
     _eventManager = std::make_unique<IOTV_Event_Manager>(event_vec, action_vec, event_groups, action_groups);
-    _eventManager->bind();
+//    _eventManager->bind();
 
     return result;
 }

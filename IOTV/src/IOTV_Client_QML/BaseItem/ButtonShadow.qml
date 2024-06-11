@@ -5,11 +5,17 @@ import QtQuick.Effects
 Item {
     readonly property string statePressed: "pressed"
     readonly property string stateRealesed: "released"
+    readonly property string stateChecked: "stateChecked"
+    readonly property string stateUnChecked: "stateUnChecked"
+
+    property bool checkable: false
+    property bool checked: false
 
     property alias label: lbl
     property alias icon: img
 
     signal signalClicked()
+    signal signalToggled()
 
     id: root
 
@@ -19,7 +25,16 @@ Item {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        onClicked: signalClicked()
+        onClicked:
+        {
+            if (checkable)
+            {
+                checked = !checked
+                signalToggled()
+            }
+            else
+                signalClicked()
+        }
     }
 
     Rectangle {
@@ -34,7 +49,7 @@ Item {
 
         Image {
             id: img
-//            source: model.source
+            //            source: model.source
             anchors {
                 top: parent.top
                 horizontalCenter: parent.horizontalCenter
@@ -76,18 +91,34 @@ Item {
     states: [
         State {
             name: statePressed
-            when: mouseArea.pressed
-            PropertyChanges {
-                target: componentRect
-                scale: 0.95
-            }
+            when: mouseArea.pressed && !checkable
         },
         State {
             name: stateRealesed
-            when: !mouseArea.pressed
+            when: !mouseArea.pressed && !checkable
+        },
+        State {
+            name: stateChecked
+            when: checked && checkable
             PropertyChanges {
                 target: componentRect
-                scale: 1.0
+                color: "#3f51b5"
+            }
+            PropertyChanges {
+                target: lbl
+                color: "white"
+            }
+        },
+        State {
+            name: stateUnChecked
+            when: !checked && checkable
+            PropertyChanges {
+                target: componentRect
+                color: Qt.rgba(255, 255, 255, 1)
+            }
+            PropertyChanges {
+                target: lbl
+                color: "black"
             }
         }
     ]
@@ -121,6 +152,52 @@ Item {
                     from: 0.95
                     to: 1.0
                     duration: 100
+                }
+                PropertyAnimation {
+                    target: shadowEff
+                    property: "scale"
+                    from: 0.95
+                    to: 1.0
+                    duration: 100
+                }
+            }
+        },
+        Transition {
+            to: stateChecked
+            ParallelAnimation {
+                PropertyAnimation {
+                    target: componentRect
+                    property: "scale"
+                    from: 1.0
+                    to: 0.95
+                    duration: 50
+                }
+                ColorAnimation {
+                    target: componentRect
+                    duration: 200
+                }
+                PropertyAnimation {
+                    target: shadowEff
+                    property: "scale"
+                    from: 1.0
+                    to: 0.95
+                    duration: 50
+                }
+            }
+        },
+        Transition {
+            to: stateUnChecked
+            ParallelAnimation {
+                PropertyAnimation {
+                    target: componentRect
+                    property: "scale"
+                    from: 0.95
+                    to: 1.0
+                    duration: 100
+                }
+                ColorAnimation {
+                    target: componentRect
+                    duration: 200
                 }
                 PropertyAnimation {
                     target: shadowEff

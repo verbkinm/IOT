@@ -13,6 +13,11 @@ IOTV_Action::ACTION_TYPE IOTV_Action::type() const
     return _type;
 }
 
+QString IOTV_Action::getType() const
+{
+    return typeName[static_cast<int>(type())];
+}
+
 QString IOTV_Action::name() const
 {
     return _name;
@@ -30,8 +35,7 @@ bool IOTV_Action::isEnable() const
 
 void IOTV_Action::setEnable(bool newEnable)
 {
-    if (isValid())
-        _enable = newEnable;
+    _enable = newEnable;
 }
 
 QString IOTV_Action::group() const

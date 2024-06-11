@@ -5,7 +5,7 @@ import "qrc:/BaseItem/" as BaseItem
 
 Page {
     id: root
-    title: "Список событий в группе"
+//    title: "Список событий в группе"
 
     property string groupName: ""
 
@@ -14,7 +14,6 @@ Page {
     }
 
     RoundButton {
-        id: addNewEvent
         z:1
         width: 64
         height: 64
@@ -67,7 +66,6 @@ Page {
 
     Component.onCompleted: {
         console.log("Events list page construct: ", objectName)
-        print("groupName = ", groupName)
     }
 
     Component.onDestruction: {
@@ -86,11 +84,10 @@ Page {
                 _event: client.copyEventByNameAndGroup(list[i], root.groupName),
                 btnDeleteVisible: true
             }
-
             var object = {
                 text: list[i],
                 title: list[i],
-                icon: actionImageByEventType(objectAtributes._event.type),
+                icon: imageByEventType(objectAtributes._event.type),
                 loaderSource: "qrc:/Events/EventsGroup/Event.qml",
                 attributes: [objectAtributes]
             }
@@ -99,7 +96,7 @@ Page {
         listView.height = list.length * 100
     }
 
-    function actionImageByEventType(eventType) {
+    function imageByEventType(eventType) {
 
         // iotv_event.h
         switch (eventType)

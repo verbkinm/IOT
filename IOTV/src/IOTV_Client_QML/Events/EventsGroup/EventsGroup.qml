@@ -78,7 +78,6 @@ Page {
         listModel.clear()
         var list = client.eventsGroupList()
 
-        console.log("eventsGroupList size = ", list.length)
         for (var i = 0; i < list.length; i++)
         {
             var objectAtributes = {

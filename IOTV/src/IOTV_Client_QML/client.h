@@ -34,14 +34,14 @@ public:
 
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
-    Q_INVOKABLE QList<QObject*> devList();
+    Q_INVOKABLE QList<QObject *> devList();
+    Q_INVOKABLE QList<QString> allHostAliasName() const;  // список имён хостов, который включает в себя так же и имена хостов из файла IOTV_Event_Action.json
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
 
-
+    // Events
     Q_INVOKABLE void saveEvent(IOTV_Event *event);
     Q_INVOKABLE void saveEventGroup(const QString &groupName);
-
 
     Q_INVOKABLE void removeEvent(IOTV_Event *event);
     Q_INVOKABLE void removeEvent(const QString &groupName, const QString &eventName);
@@ -56,11 +56,29 @@ public:
     Q_INVOKABLE QList<QString> eventsGroupList() const;
     Q_INVOKABLE QList<QString> eventsListInGroup(const QString &groupName) const;
 
+    Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Event *createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const;
+
+    // Actions
+    Q_INVOKABLE void saveAction(IOTV_Action *action);
+    Q_INVOKABLE void saveActionGroup(const QString &groupName);
+
+    Q_INVOKABLE void removeAction(const QString &groupName, const QString &eventName);
+    Q_INVOKABLE void removeActionGroup(const QString &groupName);
+
+    Q_INVOKABLE void renameActionGroup(const QString &oldGroupName, const QString &newGroupName);
+
+    Q_INVOKABLE bool isEmptyActionGroup(const QString &groupName); // пуста ли группа
+    Q_INVOKABLE bool isExistsActionGroup(const QString &groupName); // есть ли группа событий с таким именем
+    Q_INVOKABLE bool isExistsActionNameInGroup(const QString &groupName, const QString &eventName);
+
     Q_INVOKABLE QList<QString> actionsGroupList() const;
     Q_INVOKABLE QList<QString> actionsListInGroup(const QString &groupName) const;
 
-    Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
-    Q_INVOKABLE IOTV_Event *createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Action *copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Action *createEmptyAction(const QString &actionType, const QString &actionName, const QString &groupName) const;
+
+
 
     Q_INVOKABLE void deleteObject(QObject *obj) const;
 
@@ -79,8 +97,6 @@ private:
 
     //!!! unorder_map
     std::map<QString, Device> _devices;
-
-    QList<QList<QVariantMap>> _evAcList;
 
     std::unique_ptr<IOTV_Event_Manager> _eventManager;
     void saveEventAction();

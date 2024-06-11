@@ -23,8 +23,8 @@ Column {
         }
 
         ComboBox {
-            id: directionTypeComboBox
-            width: 200
+            id: direction
+            width: parent.width / 2
 
             //iotv_event_data.h
             model: ["NONE", "RX", "TX", "ANY", "CHANGE"]
@@ -35,6 +35,10 @@ Column {
                 right: parent.right
                 rightMargin: 20
             }
+
+            onCurrentIndexChanged: {
+                event.directionStr = direction.model[currentIndex]
+            }
         }
     }
 
@@ -43,7 +47,6 @@ Column {
         width: parent.width
 
         Text {
-            id: conditionText
             text: "Условие:"
             anchors {
                 verticalCenter: parent.verticalCenter
@@ -53,8 +56,8 @@ Column {
         }
 
         ComboBox {
-            id: compareTypeComboBox
-            width: 200
+            id: compareType
+            width: parent.width / 2
 
             // ConfigTypes.h struct Json_Event_Action
             model: ["==", "!=", ">", "<", ">=", "<=", "always true", "always false"]
@@ -65,13 +68,22 @@ Column {
                 right: parent.right
                 rightMargin: 20
             }
+
+            onCurrentIndexChanged: {
+                event.compare = compareType.model[currentIndex]
+            }
         }
     }
 
     DataString {
         id: _data
-        visible: !((compareTypeComboBox.currentText === compareTypeComboBox.model[6]) || (compareTypeComboBox.currentText === compareTypeComboBox.model[7]))
+        visible: !((compareType.currentText === compareType.model[6]) || (compareType.currentText === compareType.model[7]))
         width: parent.width
+        text: event.dataStr
+
+        onSignalTextEdited: {
+            event.dataStr = text
+        }
     }
 
     ChannelNumber {
@@ -79,6 +91,13 @@ Column {
         label: "№ канала"
         width: parent.width
         value: event.chNum
+
+        onSignalNumberChanged: {
+            event.chNum = value
+        }
+    }
+
+    Component.onCompleted: {
     }
 
     function startIndex(model, textItem)

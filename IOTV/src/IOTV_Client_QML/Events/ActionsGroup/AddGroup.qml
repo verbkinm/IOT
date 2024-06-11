@@ -34,7 +34,7 @@ Page {
                 verticalAlignment: Text.AlignVCenter
                 antialiasing: true
                 font.pixelSize: 14
-                text: oldGroupName === "" ? "Новая группа событий" : oldGroupName
+                text: oldGroupName === "" ? "Новая группа действий" : oldGroupName
                 placeholderText: "Введите название группы..."
                 placeholderTextColor: "#ccc"
 
@@ -69,7 +69,7 @@ Page {
                     }
 
                     onClicked: {
-                        if (!client.isEmptyEventGroup(oldGroupName))
+                        if (!client.isEmptyActionGroup(oldGroupName))
                         {
                             glob_dialogShared.defaultAcceptedMessage()
                             glob_dialogShared.title = "Внимание"
@@ -79,7 +79,7 @@ Page {
                             return
                         }
 
-                        client.removeEventGroup(oldGroupName)
+                        client.removeActionGroup(oldGroupName)
                         glob_eventStackView.pop()
                         glob_eventStackView.pop()
                     }
@@ -115,7 +115,7 @@ Page {
                         }
 
                         // Если добавляем новую группу
-                        if (oldGroupName === "" && client.isExistsEventGroup(groupName.text))
+                        if (oldGroupName === "" && client.isExistsActionGroup(groupName.text))
                         {
                             groupIsExist()
                             return
@@ -124,20 +124,20 @@ Page {
                         // Если изменяем имя существующей группы
                         if (oldGroupName !== "")
                         {
-                            if (client.isExistsEventGroup(groupName.text))
+                            if (client.isExistsActionGroup(groupName.text))
                             {
                                 groupIsExist()
                             }
                             else
                             {
-                                client.renameEventGroup(oldGroupName, groupName.text)
+                                client.renameActionGroup(oldGroupName, groupName.text)
                                 glob_eventStackView.pop()
                                 glob_eventStackView.pop()
                             }
                             return
                         }
 
-                        client.saveEventGroup(groupName.text)
+                        client.saveActionGroup(groupName.text)
                         glob_eventStackView.pop()
                     }
                 }
@@ -146,18 +146,18 @@ Page {
     }
 
     Component.onCompleted: {
-        console.log("Add Event group page construct: ")
+        console.log("Add Action group page construct: ")
     }
 
     Component.onDestruction: {
-        console.log("Add Event group page destruct: ", objectName)
+        console.log("Add Action group page destruct: ", objectName)
     }
 
     function groupIsExist()
     {
         glob_dialogShared.defaultAcceptedMessage()
         glob_dialogShared.title = "Внимание"
-        glob_dialogShared.text = "Такое имя группы событий уже существует!"
+        glob_dialogShared.text = "Такое имя группы действий уже существует!"
         glob_dialogShared.open()
     }
 }

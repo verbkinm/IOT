@@ -58,7 +58,11 @@ QString IOTV_Action_Data_TX_Ref::srcHostName() const
 
 void IOTV_Action_Data_TX_Ref::setSrcHostName(const QString &newSrcHostName)
 {
+    if (_srcHostName == newSrcHostName)
+        return;
+
     _srcHostName = newSrcHostName;
+    emit signalSrcHostChanged(newSrcHostName);
 }
 
 QString IOTV_Action_Data_TX_Ref::dstHostName() const
@@ -66,7 +70,29 @@ QString IOTV_Action_Data_TX_Ref::dstHostName() const
     return _dstHostName;
 }
 
+void IOTV_Action_Data_TX_Ref::setSrcChNum(uint8_t ch)
+{
+    if (_srcChannelNumber == ch)
+        return;
+
+    _srcChannelNumber = ch;
+    emit signalSrcChNumChanged(ch);
+}
+
+void IOTV_Action_Data_TX_Ref::setDstChNum(uint8_t ch)
+{
+    if (_dstChannelNumber == ch)
+        return;
+
+    _dstChannelNumber = ch;
+    emit signalDstChNumChanged(ch);
+}
+
 void IOTV_Action_Data_TX_Ref::setDstHostName(const QString &newDstHostName)
 {
+    if (_dstHostName == newDstHostName)
+        return;
+
     _dstHostName = newDstHostName;
+    emit signalDstHostChanged(newDstHostName);
 }

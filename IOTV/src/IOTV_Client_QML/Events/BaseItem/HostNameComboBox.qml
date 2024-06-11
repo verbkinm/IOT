@@ -2,15 +2,19 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    required property var event
+    property string startText: ""
+    property alias text: hostNameText.text
 
     id: root
     height: 50
-    width: 400//parent.width
+    width: 400
+
+    signal signalCurrentTextChanged(var modelIndexText)
 
     Text {
         id: hostNameText
         text: "Имя устройства:"
+        width: parent.width / 2
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -21,10 +25,10 @@ Item {
 
     ComboBox {
         id: hostComboBox
-        width: 200
+        width: parent.width / 2
 
-        model: listName()
-        currentIndex: startIndex(model, event.hostName)
+        model: client.allHostAliasName()
+        currentIndex: startIndex(model, startText)
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -33,16 +37,8 @@ Item {
         }
 
         onCurrentIndexChanged: {
-            event.hostName = currentText
+            signalCurrentTextChanged(hostComboBox.model[currentIndex])
         }
-    }
-
-    function listName() {
-        var arr = []
-        for( var i = 0; i < client.devList().length; i++)
-            arr.push(client.devList()[i].aliasName)
-
-        return arr
     }
 
     function startIndex(model, textItem)

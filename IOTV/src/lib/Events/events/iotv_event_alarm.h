@@ -9,9 +9,12 @@ class IOTV_Event_Alarm : public IOTV_Event
 {
     Q_OBJECT
 
+    Q_PROPERTY(int totalSeconds READ totalSeconds WRITE setTotalSeconds NOTIFY signalTotalSecondsChanged)
     Q_PROPERTY(QString days READ dayString WRITE setDaysFromString NOTIFY signalDaysChanged)
-    Q_PROPERTY(int hour READ getHour CONSTANT)
-    Q_PROPERTY(int minute READ getMinute CONSTANT)
+    Q_PROPERTY(int hour READ hours WRITE setHours NOTIFY signalHoursChanged)
+    Q_PROPERTY(int minute READ minutes WRITE setMinutes NOTIFY signalMinutesChanged)
+    Q_PROPERTY(int second READ seconds WRITE setSeconds NOTIFY signalSecondsChanged)
+
 
 public:
     IOTV_Event_Alarm(const QTime &time, const std::array<bool, 7> &days, QObject *parent = nullptr);
@@ -22,8 +25,16 @@ public:
     QString dayString() const;
     void setDaysFromString(const QString &daysString);
 
-    int getHour() const;
-    int getMinute() const;
+    int hours() const;
+    int minutes() const;
+    int seconds() const;
+
+    void setHours(int h);
+    void setMinutes(int m);
+    void setSeconds(int s);
+
+    int totalSeconds() const;
+    void setTotalSeconds(int sec);
 
     const std::array<bool, 7> &days() const;
 
@@ -37,5 +48,10 @@ private:
 
 signals:
     void signalDaysChanged(QString newDays);
+
+    void signalHoursChanged(int);
+    void signalMinutesChanged(int);
+    void signalSecondsChanged(int);
+    void signalTotalSecondsChanged(int);
 };
 

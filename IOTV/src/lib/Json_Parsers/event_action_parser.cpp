@@ -159,18 +159,19 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
         QTime time;
         std::array<bool, 7> days;
 
-        QStringList HM = timeStr.split(':');
-        if ( HM.size() != 2 )
+        QStringList HMS = timeStr.split(':');
+        if ( HMS.size() != 3 )
             return nullptr;
 
-        bool ok_h, ok_m;
-        int h = HM.at(0).toInt(&ok_h);
-        int m = HM.at(1).toInt(&ok_m);
+        bool ok_h, ok_m, ok_s;
+        int h = HMS.at(0).toInt(&ok_h);
+        int m = HMS.at(1).toInt(&ok_m);
+        int s = HMS.at(2).toInt(&ok_s);
 
-        if (ok_h == false || ok_m == false)
+        if (ok_h == false || ok_m == false || ok_s == false)
             return nullptr;
 
-        time.setHMS(h, m, 0);
+        time.setHMS(h, m, s);
 
         if ( daysStr.size() != 7 )
             return nullptr;
@@ -202,9 +203,9 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
 
     if (event != nullptr)
     {
-        QString group(jobj.value(Json_Event_Action::ACTION_GROUP).toString());
-        QString name(jobj.value(Json_Event_Action::ACTION_NAME).toString());
-        QString enable = jobj.value(Json_Event_Action::ACTION_ENABLE).toString();
+        QString group(jobj.value(Json_Event_Action::EVENT_GROUP).toString());
+        QString name(jobj.value(Json_Event_Action::EVENT_NAME).toString());
+        QString enable = jobj.value(Json_Event_Action::EVENT_ENABLE).toString();
 
         event->setGroup(group);
         event->setName(name);
@@ -268,6 +269,8 @@ IOTV_Action *Event_Action_Parser::parseAction(const QJsonObject &jobj, const std
         tx_ref_action->setDstHostName(dstHostName);
         tx_ref_action->setSrcHostName(srcHostName);
     }
+    else
+        action = IOTV_Event_Manager::createAction();
 
     if (action != nullptr)
     {
@@ -336,7 +339,7 @@ QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
         if (dataEv == nullptr)
             return {};
 
-        QString direction;
+        QString direction = Json_Event_Action::DIRECTION_NONE;
         if (dataEv->direction() == IOTV_Event_Data::DATA_DIRECTION::RX)
             direction = Json_Event_Action::DIRECTION_RX;
         else if (dataEv->direction() == IOTV_Event_Data::DATA_DIRECTION::TX)
@@ -363,7 +366,7 @@ QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
         if (alarmEvent == nullptr)
             return {};
 
-        id.insert(Json_Event_Action::ALARM_TIME, alarmEvent->time().toString("h:m"));
+        id.insert(Json_Event_Action::ALARM_TIME, alarmEvent->time().toString("h:m:s"));
         id.insert(Json_Event_Action::ALARM_DAYS, alarmEvent->dayString());
     }
     else if (event->type() == IOTV_Event::EVENT_TYPE::TIMER)
@@ -412,7 +415,12 @@ QJsonObject Event_Action_Parser::parseAction(std::shared_ptr<IOTV_Action> action
         return {};
 
     QJsonObject id;
-    if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX)
+
+    if (action->type() == IOTV_Action::ACTION_TYPE::NONE)
+    {
+        id.insert(Json_Event_Action::TYPE, Json_Event_Action::DATA_TYPE_NONE);
+    }
+    else if (action->type() == IOTV_Action::ACTION_TYPE::DATA_TX)
     {
         id.insert(Json_Event_Action::TYPE, Json_Event_Action::TYPE_DATA_TX);
 

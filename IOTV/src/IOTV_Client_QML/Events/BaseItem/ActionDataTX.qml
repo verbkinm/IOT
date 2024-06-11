@@ -2,33 +2,41 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
-    property alias comboBox: hostNameAction
-    property alias dataString: _data.text
-    property alias channelNumber: chNum.value
+    required property var action
 
-    property alias hostName: hostNameAction.startHostName
-
-    width: 400//parent.width
+    width: 400
     spacing: 15
 
     HostNameComboBox {
         id: hostNameAction
         height: 50
         width: parent.width
+
+        startText: action.hostName
+
+        onSignalCurrentTextChanged: (modelIndexText) =>{
+           action.hostName = modelIndexText
+        }
     }
 
     DataString {
         id: _data
         width: parent.width
+        text: action.dataStr
+
+        onSignalTextEdited: {
+            action.dataStr = text
+        }
     }
 
     ChannelNumber {
         id: chNum
         label: "№ канала"
         width: parent.width
-    }
+        value: action.chNum
 
-    function currentHostName() {
-        return hostNameAction.comboBox.currentText
+        onSignalNumberChanged: {
+            action.chNum = value
+        }
     }
 }

@@ -1,5 +1,7 @@
 #include "client.h"
 
+#include "actions/iotv_action_data_tx.h"
+#include "actions/iotv_action_data_tx_ref.h"
 #include "events/iotv_event_alarm.h"
 #include "events/iotv_event_connect.h"
 #include "events/iotv_event_data.h"
@@ -76,6 +78,16 @@ QByteArray Client::readData(const QString &deviceName, uint8_t channelNumber) co
         return {};
 
     return _devices.at(deviceName).getReadChannelData(channelNumber);
+}
+
+QList<QObject *> Client::devList()
+{
+    QList<QObject *> result;
+
+    for(auto &[key, val] : _devices)
+        result << &val;
+
+    return result;
 }
 
 qint64 Client::write(const QByteArray &data)
@@ -268,14 +280,24 @@ void Client::slotCloseReadStream(int channel)
     write({outData, static_cast<int>(size)});
 }
 
-QList<QObject *> Client::devList()
+QList<QString> Client::allHostAliasName() const
 {
-    QList<QObject *> list;
+    // имена всех исвестных хостов из IOTV_Event_Action.json
+    std::set<QString> set = _eventManager->allHostsName();
 
-    for(auto &[key, val] : _devices)
-        list << &val;
+    // удалить реальные имена существующих устройств
+    std::erase_if(set, [&](auto &el){
+        return _devices.contains(el);
+    });
 
-    return list;
+    // добавить алиасы существующих устройств
+    for(const auto &[key, val] : _devices)
+        set.insert(val.aliasName());
+
+    // Пустое имя
+    set.insert("");
+
+    return {set.begin(), set.end()};
 }
 
 QObject *Client::deviceByName(const QString &name)
@@ -316,7 +338,10 @@ void Client::saveEvent(IOTV_Event *event)
     if (findEvent != nullptr)
         _eventManager->deleteEvent(eventGroup, eventName);
 
-    std::shared_ptr<IOTV_Event> ptr(event);
+    // в Event.qml передаётся копия event, которая удаляется при уничтожении Event.qml
+    // по этому делается копия
+    IOTV_Event *copyEv = IOTV_Event_Manager::copyEvent(event);
+    std::shared_ptr<IOTV_Event> ptr(copyEv);
     _eventManager->addEvent(ptr);
 
     saveEventAction();
@@ -370,7 +395,6 @@ bool Client::isExistsEventNameInGroup(const QString &groupName, const QString &e
 void Client::saveEventGroup(const QString &groupName)
 {
     _eventManager->addEventGroup(groupName);
-
     saveEventAction();
 }
 
@@ -404,6 +428,66 @@ QList<QString> Client::eventsListInGroup(const QString &groupName) const
         result.push_back(el->name());
 
     return result;
+}
+
+void Client::saveAction(IOTV_Action *action)
+{
+    if (action == nullptr)
+        return;
+
+    QString actionName(action->name());
+    QString actionGroup(action->group());
+
+    auto findEvent = _eventManager->findAction(actionGroup, actionName);
+    if (findEvent != nullptr)
+        _eventManager->deleteAction(actionGroup, actionName);
+
+    // в Action.qml передаётся копия action, которая удаляется при уничтожении Action.qml
+    // по этому делается копия
+    IOTV_Action *copyAc = IOTV_Event_Manager::copyAction(action);
+    std::shared_ptr<IOTV_Action> ptr(copyAc);
+    _eventManager->addAction(ptr);
+
+    saveEventAction();
+}
+
+void Client::saveActionGroup(const QString &groupName)
+{
+    _eventManager->addActionGroup(groupName);
+    saveEventAction();
+}
+
+void Client::removeAction(const QString &groupName, const QString &eventName)
+{
+    _eventManager->deleteAction(groupName, eventName);
+    saveEventAction();
+}
+
+void Client::removeActionGroup(const QString &groupName)
+{
+    _eventManager->removeActionGroup(groupName);
+    saveEventAction();
+}
+
+void Client::renameActionGroup(const QString &oldGroupName, const QString &newGroupName)
+{
+    _eventManager->renameActionGroup(oldGroupName, newGroupName);
+    saveEventAction();
+}
+
+bool Client::isEmptyActionGroup(const QString &groupName)
+{
+    return _eventManager->actionsInGroup(groupName).size() == 0;
+}
+
+bool Client::isExistsActionGroup(const QString &groupName)
+{
+    return _eventManager->actionGroups().contains(groupName);
+}
+
+bool Client::isExistsActionNameInGroup(const QString &groupName, const QString &eventName)
+{
+    return _eventManager->findAction(groupName, eventName) != nullptr;
 }
 
 QList<QString> Client::actionsListInGroup(const QString &groupName) const
@@ -460,6 +544,36 @@ IOTV_Event *Client::createEmptyEvent(const QString &eventType, const QString &ev
     if (result != nullptr)
     {
         result->setName(eventName);
+        result->setGroup(groupName);
+    }
+
+    return result;
+}
+
+IOTV_Action *Client::copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const
+{
+    auto action = _eventManager->findAction(groupName, actionName);
+
+    if (action == nullptr)
+        return nullptr;
+
+    return IOTV_Event_Manager::copyAction(action.get());
+}
+
+IOTV_Action *Client::createEmptyAction(const QString &actionType, const QString &actionName, const QString &groupName) const
+{
+    IOTV_Action *result = nullptr;
+
+    if (actionType == "NONE")
+        result = new IOTV_Action(IOTV_Action::ACTION_TYPE::NONE, nullptr);
+    else if (actionType == "DATA_TX")
+        result = new IOTV_Action_Data_TX(nullptr, 0, "");
+    else if (actionType == "DATA_TX_REF")
+        result = new IOTV_Action_Data_TX_Ref(nullptr, 0, nullptr, 0);
+
+    if (result != nullptr)
+    {
+        result->setName(actionName);
         result->setGroup(groupName);
     }
 

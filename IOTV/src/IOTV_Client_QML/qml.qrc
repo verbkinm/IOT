@@ -52,7 +52,7 @@
         <file>Events/BaseItem/ChannelNumber.qml</file>
         <file>Events/BaseItem/DataString.qml</file>
         <file>Events/BaseItem/DataType.qml</file>
-        <file>Events/BaseItem/EventType.qml</file>
+        <file>Events/BaseItem/ObjType.qml</file>
         <file>Events/BaseItem/HorizontLine.qml</file>
         <file>Events/BaseItem/HostNameComboBox.qml</file>
         <file>Events/BaseItem/StateType.qml</file>
@@ -143,6 +143,14 @@
         <file>img/events/state.png</file>
         <file>img/folder_actions.png</file>
         <file>img/folder_events.png</file>
+        <file>Events/BaseItem/OnOff.qml</file>
+        <file>Events/ActionsGroup/ActionGroupHeader.qml</file>
+        <file>img/actions/data_tx.png</file>
+        <file>img/actions/data_tx_ref.png</file>
+        <file>Events/ActionsGroup/AddGroup.qml</file>
+        <file>Events/ActionsGroup/Action.qml</file>
+        <file>Events/EventsGroup/CurrentConnectionGroupList.qml</file>
+        <file>Events/EventsGroup/CurrentConnectionList.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

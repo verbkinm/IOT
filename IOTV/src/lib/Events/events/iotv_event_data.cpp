@@ -112,7 +112,8 @@ QString IOTV_Event_Data::data() const
 
 QString IOTV_Event_Data::getDirection() const
 {
-    return typeName[static_cast<int>(direction())];
+    int dir = static_cast<int>(direction());
+    return directionType[dir];
 }
 
 void IOTV_Event_Data::setDirection(const QString &newDirection)

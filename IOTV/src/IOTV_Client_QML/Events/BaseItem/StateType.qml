@@ -10,6 +10,7 @@ Item {
 
     Text {
         text: "Тип состояния:"
+        width: parent.width / 2
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -19,7 +20,7 @@ Item {
 
     ComboBox {
         id: stateTypeComboBox
-        width: 200
+        width: parent.width / 2
 
         // iotv_event_state.h
         model: ["NONE", "ONLINE", "OFFLINE", "SWITCH"]

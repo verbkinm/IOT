@@ -5,7 +5,7 @@
 
 #include "client.h"
 #include "producer.h"
-#include "qthread.h"
+//#include "qthread.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,12 +18,11 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");
 
-    QThread *th = new QThread;
-    Client *client = new Client(th);
+//    QThread *th = new QThread;
+    Client *client = new Client;//(th);
 
-    th->start();
+//    th->start();
 
-//    Client client;
     engine.rootContext()->setContextProperty("client", client);
 
     qmlRegisterType<Producer>("Producer", 1, 0, "Producer");

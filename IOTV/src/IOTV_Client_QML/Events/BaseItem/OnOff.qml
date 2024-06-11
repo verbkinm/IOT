@@ -2,18 +2,16 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property alias label: chNumberText.text
-    property alias value: chNumberSpinBox.value
+    required property var obj
 
-    signal signalNumberChanged();
-
+    id: root
     height: 50
     width: 400
 
     Text {
-        id: chNumberText
-        text: "№ канала:"
-        width: parent.width / 2
+        id: hostNameText
+        text: "Вкл./Выкл"
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -21,11 +19,12 @@ Item {
         }
     }
 
-    SpinBox {
-        id: chNumberSpinBox
+    ComboBox {
+        id: hostComboBox
         width: parent.width / 2
-        from: 0
-        to: 255
+
+        model: ["Выключено", "Включено"]
+        currentIndex: obj.enable ? 1 : 0
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -33,8 +32,8 @@ Item {
             rightMargin: 20
         }
 
-        onValueChanged: {
-            signalNumberChanged()
+        onCurrentIndexChanged: {
+            obj.enable = currentIndex == 0 ? false : true
         }
     }
 }

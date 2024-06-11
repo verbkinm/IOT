@@ -2,21 +2,21 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    required property var event
-    property string eventType: eventTypeComboBox.currentText
-    property alias model: eventTypeComboBox.model
-    property alias comboBox: eventTypeComboBox
+    required property var obj
+    property string objType: objTypeComboBox.currentText
+    property alias model: objTypeComboBox.model
+    property alias comboBox: objTypeComboBox
     property string startType: ""
 
     signal signalActivated();
 
     id: eventTypeItem
     height: 50
-    width: 400//parent.width
+    width: 400
 
     Text {
-        id: eventTypeNameText
-        text: "Тип события:"
+        text: "Тип:"
+        width: parent.width / 2
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -25,12 +25,10 @@ Item {
     }
 
     ComboBox {
-        id: eventTypeComboBox
-        width: 200
+        id: objTypeComboBox
+        width: parent.width / 2
 
-        // iotv_event.h
-        model: ["NONE", "CONNECTING", "DISCONNECTING", "STATE", "DATA", "ALARM", "TIMER"]
-        currentIndex: startIndex(model, event.type)
+        currentIndex: startIndex(model, obj.type)
 
         anchors {
             verticalCenter: parent.verticalCenter

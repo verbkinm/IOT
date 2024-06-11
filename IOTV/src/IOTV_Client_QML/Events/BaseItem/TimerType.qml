@@ -3,7 +3,6 @@ import QtQuick.Controls 2.5
 
 Item {
     required property var event
-    readonly property int oldSecond: event.totalSeconds
 
     id: itemTimerType
     height: 50
@@ -36,7 +35,7 @@ Item {
     Dialog {
         id: timerSetting
         modal: true
-        standardButtons: Dialog.Save | Dialog.Cancel
+        standardButtons: Dialog.Ok
 
         leftMargin: 15
         rightMargin: 15
@@ -52,10 +51,7 @@ Item {
         }
 
         onAccepted: {
-        }
-
-        onRejected: {
-            event.totalSeconds = oldSecond
+            event.totalSeconds = hoursTumbler.currentIndex * 3600 + minutesTumbler.currentIndex * 60 + secondsTumbler.currentIndex
         }
 
         Item {
@@ -121,6 +117,7 @@ Item {
                     currentIndex: event.second
                 }
             }
+
             Rectangle {
                 id: tumblerRect
                 width: parent.width * 0.9

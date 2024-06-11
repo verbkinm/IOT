@@ -10,11 +10,13 @@ Item {
     signal signalTextEdited();
 
     height: 50
-    width: 400//parent.width
+    width: 400
 
     Text {
         id: dataText
+        width: parent.width / 2
         text: "Данные:"
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -25,7 +27,7 @@ Item {
     TextField {
         id: dataTextField
         focus: true
-        width: 200
+        width: parent.width / 2
         height: 52
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

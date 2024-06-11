@@ -51,20 +51,20 @@ Page {
                 startType: (_event === undefined) ? "" : _event["type"]
 
                 onSignalActivated: {
-                    if (eventType === model[4] || eventType === model[5])
+                    if (objType === model[4] || objType === model[5])
                         hostNameItem.visible = false
                     else
                         hostNameItem.visible = true
 
-                    if (eventType === model[0] || eventType === model[1])
+                    if (objType === model[0] || objType === model[1])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/EmptyItem.qml")
-                    else if(eventType === model[2])
+                    else if(objType === model[2])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/StateType.qml", {width: parent.width})
-                    else if(eventType === model[3])
+                    else if(objType === model[3])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/DataType.qml", {width: parent.width})
-                    else if(eventType === model[4])
+                    else if(objType === model[4])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/AlarmType.qml", {width: parent.width})
-                    else if(eventType === model[5])
+                    else if(objType === model[5])
                         eventTypeLoader.setSource("qrc:/Events/BaseItem/TimerType.qml", {width: parent.width})
                 }
             }
@@ -187,7 +187,7 @@ Page {
                         var event = new Map
                         event["name"] = name.text
                         event["host_name"] = hostNameItem.hostName()
-                        event["type"] = eventTypeItem.eventType
+                        event["type"] = eventTypeItem.objType
 
                         if(event["type"] === eventTypeItem.model[2])
                             event["state"] = eventTypeLoader.item.stateType()

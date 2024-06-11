@@ -15,6 +15,7 @@ public:
 
     void bind();
 
+    // Создание EVENT
     //! IOTV_Event_Connect и IOTV_Event_Disconnect
     static IOTV_Event *createEvent(const Base_Host *host, const QString &type);
 
@@ -32,27 +33,32 @@ public:
     //! IOTV_Event_Timer
     static IOTV_Event *createEvent(const QString &type, int seconds);
 
-//    static IOTV_Event *createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts);
 
-    //! IOTV_Action_Data_TX и IOTV_Action_Data_RX
+    // Создание ACTION
+    //! IOTV_Action EMPTY
+    static IOTV_Action *createAction();
+
+    //! IOTV_Action_Data_TX
     static IOTV_Action *createAction(const QString &type, Base_Host *host, uint8_t ch_num, const QString &data);
 
-    //! IOTV_Action_Data_TX_Ref и IOTV_Action_Data_RX_Ref
+    //! IOTV_Action_Data_TX_Ref
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
                                      uint8_t dstCh_num, uint8_t srcCh_Num);
-
-    static IOTV_Action *createAction(const QVariantMap &action, const std::forward_list<const Base_Host *> &hosts);
 
 
     //
     static IOTV_Event *copyEvent(const IOTV_Event *event);
+    static IOTV_Action *copyAction(const IOTV_Action *action);
 
 
     // объекты
+    std::set<QString> allHostsName() const;
+
     const std::vector<std::shared_ptr<IOTV_Event>> &events() const;
     const std::vector<std::shared_ptr<IOTV_Action>> &actions() const;
 
     std::vector<std::shared_ptr<IOTV_Event>> eventsInGroup(const QString &groupName) const;
+    std::vector<std::shared_ptr<IOTV_Action>> actionsInGroup(const QString &groupName) const;
 
     void addEvent(std::shared_ptr<IOTV_Event> event);
     void addAction(std::shared_ptr<IOTV_Action> action);
@@ -61,7 +67,7 @@ public:
     std::shared_ptr<IOTV_Action> findAction(const QString &groupName, const QString &eventName) const;
 
     void deleteEvent(const QString &groupName, const QString &eventName);
-    void deleteAction(const QString &groupName, const QString &eventName);
+    void deleteAction(const QString &groupName, const QString &actionName);
 
     // группы
     const std::set<QString> &eventGroups() const;

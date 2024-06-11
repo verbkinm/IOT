@@ -34,7 +34,11 @@ QString IOTV_Action_Data_TX::hostName() const
 
 void IOTV_Action_Data_TX::setHostName(const QString &newHostName)
 {
+    if (_hostName == newHostName)
+        return;
+
     _hostName = newHostName;
+    emit signalHostNameChanged(newHostName);
 }
 
 const Base_Host *IOTV_Action_Data_TX::host() const
@@ -47,7 +51,25 @@ uint8_t IOTV_Action_Data_TX::channelNumber() const
     return _channelNumber;
 }
 
-const QString &IOTV_Action_Data_TX::data() const
+QString IOTV_Action_Data_TX::data() const
 {
     return _data;
+}
+
+void IOTV_Action_Data_TX::setDataStr(const QString &newDataStr)
+{
+    if (_data == newDataStr)
+        return;
+
+    _data = newDataStr;
+    emit signalDataChanged(newDataStr);
+}
+
+void IOTV_Action_Data_TX::setChannelNumber(uint8_t newChNum)
+{
+    if (_channelNumber == newChNum)
+        return;
+
+    _channelNumber = newChNum;
+    emit signalChannelNumberChanged(newChNum);
 }

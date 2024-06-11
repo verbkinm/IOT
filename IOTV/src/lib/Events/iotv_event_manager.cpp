@@ -121,6 +121,11 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, int seconds)
     return new IOTV_Event_Timer(seconds);
 }
 
+IOTV_Action *IOTV_Event_Manager::createAction()
+{
+    return new IOTV_Action(IOTV_Action::ACTION_TYPE::NONE);
+}
+
 //IOTV_Event *IOTV_Event_Manager::createEvent(const QVariantMap &event, const std::forward_list<const Base_Host *> &hosts)
 //{
 //    IOTV_Event *result = nullptr;
@@ -204,12 +209,6 @@ IOTV_Event *IOTV_Event_Manager::createEvent(const QString &type, int seconds)
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *host, uint8_t ch_num,
                                               const QString &data)
 {
-    //    if (host == nullptr)
-    //        return nullptr;
-
-    //    if (type != Json_Event_Action::TYPE_DATA_TX/* && type != Json_Event_Action::TYPE_DATA_RX*/)
-    //        return nullptr;
-
     if (type == Json_Event_Action::TYPE_DATA_TX)
         return new IOTV_Action_Data_TX(host, ch_num, data);
 
@@ -218,41 +217,10 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *ho
 
 IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost, uint8_t dstCh_num, uint8_t srcCh_Num)
 {
-    if (type != Json_Event_Action::TYPE_DATA_TX_REF/* && type != Json_Event_Action::TYPE_DATA_RX_REF*/)
+    if (type != Json_Event_Action::TYPE_DATA_TX_REF)
         return nullptr;
 
-    if (type == Json_Event_Action::TYPE_DATA_TX_REF)
-        return new IOTV_Action_Data_TX_Ref(dstHost, dstCh_num, srcHost, srcCh_Num);
-
-    return nullptr;
-}
-
-IOTV_Action *IOTV_Event_Manager::createAction(const QVariantMap &action, const std::forward_list<const Base_Host *> &hosts)
-{
-    QString type = action[Json_Event_Action::TYPE].toString();
-    IOTV_Action *result = nullptr;
-
-    if (type == Json_Event_Action::TYPE_DATA_TX)
-    {
-        const Base_Host *host = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_NAME].toString());
-        QString data = action[Json_Event_Action::DATA].toString();
-        uint8_t ch_num = action[Json_Event_Action::CH_NUM].toString().toInt();
-
-        result = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(host), ch_num, data);
-
-    }
-    else if (type == Json_Event_Action::TYPE_DATA_TX_REF)
-    {
-        const Base_Host *dstHost = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_DST].toString());
-        const Base_Host *srcHost = Event_Action_Parser::hostByName(hosts, action[Json_Event_Action::HOST_SRC].toString());
-
-        uint8_t dstChNum = action[Json_Event_Action::CH_NUM_DST].toString().toInt();
-        uint8_t srcChNum = action[Json_Event_Action::CH_NUM_SRC].toString().toInt();
-
-        result = IOTV_Event_Manager::createAction(type, const_cast<Base_Host *>(dstHost), const_cast<Base_Host *>(srcHost), dstChNum, srcChNum);
-    }
-
-    return result;
+    return new IOTV_Action_Data_TX_Ref(dstHost, dstCh_num, srcHost, srcCh_Num);
 }
 
 const std::vector<std::shared_ptr<IOTV_Event> > &IOTV_Event_Manager::events() const
@@ -274,6 +242,20 @@ std::vector<std::shared_ptr<IOTV_Event> > IOTV_Event_Manager::eventsInGroup(cons
             continue;
         if (event->group() == groupName)
             vec.emplace_back(event);
+    }
+
+    return vec;
+}
+
+std::vector<std::shared_ptr<IOTV_Action> > IOTV_Event_Manager::actionsInGroup(const QString &groupName) const
+{
+    std::vector<std::shared_ptr<IOTV_Action>> vec;
+    for (auto &action : _actions)
+    {
+        if (action == nullptr)
+            continue;
+        if (action->group() == groupName)
+            vec.emplace_back(action);
     }
 
     return vec;
@@ -334,15 +316,30 @@ void IOTV_Event_Manager::deleteEvent(const QString &groupName, const QString &ev
     }
 }
 
-void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &eventName)
+void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &actionName)
 {
     for (size_t i = 0; i < _actions.size(); i++)
     {
         if (_actions[i] != nullptr)
         {
-            if (_actions[i]->group() == groupName && _actions[i]->name() == eventName)
+            if (_actions[i]->group() == groupName && _actions[i]->name() == actionName)
+            {
                 _actions.erase(_actions.begin() + i);
+                --i;
+            }
         }
+    }
+
+    for (auto &event : _events)
+    {
+        if (event == nullptr)
+            continue;
+
+        event->removeAction(groupName, actionName);
+        std::pair<QString, QString> pair(groupName, actionName);
+        event->actionMustBeenBinding.erase(event->actionMustBeenBinding.begin(), std::remove_if(event->actionMustBeenBinding.begin(), event->actionMustBeenBinding.end(), [&](auto &pair){
+                                               return pair.first == groupName && pair.second == actionName;
+                                           }));
     }
 }
 
@@ -396,7 +393,29 @@ void IOTV_Event_Manager::renameEventGroup(const QString &oldGroupName, const QSt
 
 void IOTV_Event_Manager::renameActionGroup(const QString &oldGroupName, const QString &newGroupName)
 {
+    std::set<QString>::iterator it = _action_groups.find(oldGroupName);
+    if (it != _action_groups.end())
+    {
+        _action_groups.erase(it);
+        _action_groups.insert(newGroupName);
+    }
 
+    for (std::shared_ptr<IOTV_Action> &action : _actions)
+    {
+        if (action == nullptr)
+            continue;
+        if (action.get()->group() == oldGroupName)
+            action.get()->setGroup(newGroupName);
+    }
+
+    for (auto &event : _events)
+    {
+        for (auto &pair : event->actionMustBeenBinding)
+        {
+            if (pair.first == oldGroupName)
+                pair.first = newGroupName;
+        }
+    }
 }
 
 IOTV_Event *IOTV_Event_Manager::copyEvent(const IOTV_Event *event)
@@ -449,6 +468,92 @@ IOTV_Event *IOTV_Event_Manager::copyEvent(const IOTV_Event *event)
         result->setName(event->name());
         result->setGroup(event->group());
         result->setEnable(event->isEnable());
+        result->setHostName(event->hostName());
+        result->actionMustBeenBinding = event->actionMustBeenBinding;
+    }
+
+    return result;
+}
+
+IOTV_Action *IOTV_Event_Manager::copyAction(const IOTV_Action *action)
+{
+    if (action == nullptr)
+        return nullptr;
+
+    IOTV_Action *result = nullptr;
+    IOTV_Action::ACTION_TYPE type = action->type();
+
+    if (type == IOTV_Action::ACTION_TYPE::NONE)
+        result = new IOTV_Action(IOTV_Action::ACTION_TYPE::NONE, nullptr);
+    else if (type == IOTV_Action::ACTION_TYPE::DATA_TX)
+    {
+        const IOTV_Action_Data_TX *tx = dynamic_cast<const IOTV_Action_Data_TX *>(action);
+        if (tx == nullptr)
+            return nullptr;
+
+        Base_Host *host = const_cast<Base_Host *>(tx->host());
+        IOTV_Action_Data_TX *result_data_tx = new IOTV_Action_Data_TX(host, tx->channelNumber(), tx->data());
+        result_data_tx->setHostName(tx->hostName());
+        result = result_data_tx;
+    }
+    else if (type == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
+    {
+        const IOTV_Action_Data_TX_Ref *tx_ref = dynamic_cast<const IOTV_Action_Data_TX_Ref *>(action);
+        if (tx_ref == nullptr)
+            return nullptr;
+
+        Base_Host *dstHost = const_cast<Base_Host *>(tx_ref->dstHost());
+        Base_Host *srcHost = const_cast<Base_Host *>(tx_ref->srcHost());
+
+        IOTV_Action_Data_TX_Ref *result_data_tx_ref = new IOTV_Action_Data_TX_Ref(dstHost, tx_ref->dstChannelNumber(),
+                                                                                  srcHost, tx_ref->srcChannelNumber());
+
+        result_data_tx_ref->setSrcHostName(tx_ref->srcHostName());
+        result_data_tx_ref->setDstHostName(tx_ref->dstHostName());
+
+        result = result_data_tx_ref;
+    }
+
+    if (result != nullptr)
+    {
+        result->setName(action->name());
+        result->setGroup(action->group());
+        result->setEnable(action->isEnable());
+    }
+
+    return result;
+}
+
+std::set<QString> IOTV_Event_Manager::allHostsName() const
+{
+    std::set<QString> result;
+
+    for (const auto &el : _events)
+    {
+        if (el != nullptr)
+            result.insert(el->hostName());
+    }
+
+    for (const auto &el : _actions)
+    {
+        if (el == nullptr)
+            continue;
+
+        if (el->type() == IOTV_Action::ACTION_TYPE::DATA_TX)
+        {
+            const IOTV_Action_Data_TX *action = dynamic_cast<const IOTV_Action_Data_TX *>(el.get());
+            if (action != nullptr)
+                result.insert(action->hostName());
+        }
+        else if (el->type() == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
+        {
+            const IOTV_Action_Data_TX_Ref *action = dynamic_cast<const IOTV_Action_Data_TX_Ref *>(el.get());
+            if (action != nullptr)
+            {
+                result.insert(action->srcHostName());
+                result.insert(action->dstHostName());
+            }
+        }
     }
 
     return result;

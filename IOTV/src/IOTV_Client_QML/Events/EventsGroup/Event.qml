@@ -20,7 +20,7 @@ Page {
         width: parent.width
         height: parent.height
 
-        contentHeight: column.height
+        contentHeight: column.height + 20
 
         ScrollBar.vertical: ScrollBar {
             id: scroll
@@ -34,18 +34,6 @@ Page {
             anchors.topMargin: 15
             spacing: 15
 
-            //            BaseItem.DataString {
-            //                id: group
-            //                width: parent.width
-            //                label: "Группа: "
-            //                text: (_event === null) ? "По умолчанию" : _event.groupName
-            //                placeholderText: "Название группы"
-
-            //                onSignalTextEdited: {
-            //                    _event.groupName = text
-            //                }
-            //            }
-
             BaseItem.DataString {
                 id: name
                 width: parent.width
@@ -58,39 +46,95 @@ Page {
                 }
             }
 
-            BaseItem.HostNameComboBox {
-                id: hostNameItem
-                height: 50
+            BaseItem.OnOff {
+                id: onOff
                 width: parent.width
-                event: _event
+                obj: _event
             }
 
-            BaseItem.EventType {
-                id: eventTypeItem
-                height: 50
+            BaseItem.HostNameComboBox {
+                id: hostNameItem
                 width: parent.width
-                event: _event
+                startText: _event.hostName
+
+                onSignalCurrentTextChanged: (modelIndexText) =>{
+                   _event.hostName = modelIndexText
+                }
+            }
+
+            BaseItem.ObjType {
+                id: eventTypeItem
+                width: parent.width
+                // iotv_event.h
+                model: ["NONE", "CONNECTING", "DISCONNECTING", "STATE", "DATA", "ALARM", "TIMER"]
+                obj: _event
 
                 onSignalActivated: {
                     client.deleteObject(_event);
                     _event = client.createEmptyEvent(comboBox.model[comboBox.currentIndex], _event.name, _event.groupName)
-                    print(_event.type)
-
-                    eventTypeCreate(eventType, model)
+                    eventTypeCreate(objType)
                 }
 
                 Component.onCompleted: {
                     print("BaseItem.EventType complete")
-                    eventTypeCreate(eventType, model)
+                    eventTypeCreate(objType)
                 }
             }
-
-            // Событие
 
             Loader {
                 id: eventTypeLoader
                 source: ""
                 width: parent.width
+            }
+
+            BaseItem.HorizontLine {
+                height: 20
+                width: parent.width
+            }
+
+            Item {
+                Loader {
+                    property string title
+                    id: addConnection
+                    objectName: title
+                }
+
+                id: connectionAction
+                height: 50
+                width: parent.width
+
+                Text {
+                    text: "Соединения:"
+                    width: parent.width / 2
+
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        leftMargin: 20
+                    }
+                }
+
+                Button {
+                    id: hostComboBox
+                    width: parent.width / 2
+                    text: "Список"
+                    highlighted: true
+
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        rightMargin: 20
+                    }
+
+                    onClicked: {
+//                        addConnection.setSource("")
+                        addConnection.setSource("qrc:/Events/EventsGroup/CurrentConnectionGroupList.qml",
+                                                {event: _event})
+                        addConnection.title = "Соединения"
+                        addConnection.objectName = "objectName"
+                        glob_eventStackView.push(addConnection)
+                    }
+                }
             }
 
             BaseItem.HorizontLine {
@@ -122,7 +166,7 @@ Page {
                     }
 
                     onClicked: {
-                        client.removeEvent(_event)
+                        client.removeEvent(_event.groupName, privateields.oldEventName)
                         glob_eventStackView.pop()
                     }
                 }
@@ -161,17 +205,19 @@ Page {
                         {
                             if (client.isExistsEventNameInGroup(_event.groupName, _event.name))
                             {
-                                glob_dialogShared.defaultAcceptedMessage()
-                                glob_dialogShared.title = "Внимание"
-                                glob_dialogShared.text = "Cобытие с таким именем в группе \"" + _event.groupName + "\" уже существует!"
-                                glob_dialogShared.open()
+                                eventExist()
                                 return
                             }
                         }
                         // Если изменяется существующее событие
                         else if (btnDeleteVisible)
                         {
-                            !!!
+                            if (_event.name !==  privateields.oldEventName && client.isExistsEventNameInGroup(_event.groupName, _event.name))
+                            {
+                                eventExist()
+                                return
+                            }
+
                             client.removeEvent(_event.groupName, privateields.oldEventName)
                         }
                         client.saveEvent(_event)
@@ -185,10 +231,12 @@ Page {
     Component.onCompleted: {
         console.log("Add Events page construct: ")
         privateields.oldEventName = _event.name
+        //        print(_event.getDirection)
     }
 
     Component.onDestruction: {
         console.log("Add Events page destruct: ", objectName)
+        client.deleteObject(_event);
     }
 
     onFocusChanged: {
@@ -198,8 +246,18 @@ Page {
         //        focus = true
     }
 
-    function eventTypeCreate(eventType, model)
+    function eventExist()
     {
+        glob_dialogShared.defaultAcceptedMessage()
+        glob_dialogShared.title = "Внимание"
+        glob_dialogShared.text = "Cобытие с таким именем в группе \"" + _event.groupName + "\" уже существует!"
+        glob_dialogShared.open()
+    }
+
+    function eventTypeCreate(eventType)
+    {
+        var model = eventTypeItem.model
+
         if (eventType === model[0] || eventType === model[5] || eventType === model[6])
             hostNameItem.visible = false
         else
