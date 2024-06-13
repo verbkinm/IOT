@@ -48,7 +48,7 @@ void IOTV_Action::setGroup(const QString &newGroup)
     _group = newGroup;
 }
 
-//bool operator<(const IOTV_Action &lhs, const IOTV_Action &rhs)
-//{
-//    return (std::make_tuple(lhs.group(), lhs.name()) < std::make_tuple(rhs.group(), rhs.name()));
-//}
+bool operator<(const IOTV_Action &lhs, const IOTV_Action &rhs)
+{
+    return std::make_tuple(lhs.group(), lhs.name()) < std::make_tuple(rhs.group(), rhs.name());
+}

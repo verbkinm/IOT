@@ -3,8 +3,8 @@
 IOTV_Event_Timer::IOTV_Event_Timer(int seconds, QObject *parent)
     : IOTV_Event{EVENT_TYPE::TIMER, nullptr, parent}
 {
-    if (seconds < 10)
-        seconds = 10;
+    if (seconds < 1)
+        seconds = 1;
 
     connect(&_timer, &QTimer::timeout, this, &IOTV_Event_Timer::runActions, Qt::QueuedConnection);
     _timer.start(seconds * 1000);

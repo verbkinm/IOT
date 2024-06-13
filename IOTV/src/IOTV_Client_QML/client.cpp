@@ -421,10 +421,10 @@ QList<QString> Client::eventsListInGroup(const QString &groupName) const
     if (_eventManager.get() == nullptr)
         return {};
 
-    std::vector<std::shared_ptr<IOTV_Event>> vec = _eventManager->eventsInGroup(groupName);
+    auto list = _eventManager->eventsInGroup(groupName);
 
     QList<QString> result;
-    for (const auto &el : vec)
+    for (const auto &el : list)
         result.push_back(el->name());
 
     return result;
@@ -495,10 +495,10 @@ QList<QString> Client::actionsListInGroup(const QString &groupName) const
     if (_eventManager.get() == nullptr)
         return {};
 
-    const std::vector<std::shared_ptr<IOTV_Action>> &vec = _eventManager->actions();
+    const auto &list = _eventManager->actions();
 
     QList<QString> result;
-    for (const auto &el : vec)
+    for (const auto &el : list)
     {
         if (el->group() == groupName)
             result.push_back(el->name());

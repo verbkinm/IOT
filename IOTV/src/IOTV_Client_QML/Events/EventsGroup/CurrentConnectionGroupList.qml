@@ -6,13 +6,13 @@ import "qrc:/Events/ActionsGroup/" as ActionsGroup
 
 Page {
     id: root
-//    title: "Список действий в группе"
+    //    title: "Список действий в группе"
 
     required property var event
 
-//    onVisibleChanged: {
-//        updateListModel()
-//    }
+    onVisibleChanged: {
+        updateListModel()
+    }
 
     RoundButton {
         z:1
@@ -31,11 +31,11 @@ Page {
         }
 
         onClicked: {
-//            listView.loader.setSource("qrc:/Events/ActionsGroup/Action.qml",
-//                                 { _action: client.createEmptyAction("NONE", "Новое действие", groupName), btnDeleteVisible: false})
-//            listView.loader.title =  "Новое действие"
-//            listView.loader.objectName =  listView.loader.title
-//            glob_eventStackView.push(listView.loader)
+            listView.loader.setSource("qrc:/Events/EventsGroup/AddCurrentConnection_GroupList.qml",
+                                      { event: root.event})
+            listView.loader.title =  "Группы событий"
+            listView.loader.objectName =  listView.loader.title
+            glob_eventStackView.push(listView.loader)
         }
     }
 

@@ -17,6 +17,8 @@ void IOTV_Action_Data_TX::exec()
     if (!isEnable() || !isValid())
         return;
 
+    qDebug() << "Action" << typeName[(int)type()];
+
     Raw raw(_host->getReadChannelType(_channelNumber), _data);
     if (raw.isValid())
         emit _host->signalQueryWrite(_channelNumber, raw.data());

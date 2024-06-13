@@ -14,7 +14,7 @@
 
 //<Имя группы, <Имя события-действия, <Событие, Действие>>>
 std::pair<
-    std::pair<std::vector<std::shared_ptr<IOTV_Event>>, std::vector<std::shared_ptr<IOTV_Action>>>,
+    std::pair<Event_List, Action_List>,
     std::pair<std::set<QString>, std::set<QString>>
     >
 Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts)
@@ -33,11 +33,11 @@ Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<c
     auto jroot = jdoc.object();
 
     if (jroot.size() != 4)
-       return {};
+        return {};
 
     // объекты для возврата из функции
-    std::vector<std::shared_ptr<IOTV_Action>> actions;
-    std::vector<std::shared_ptr<IOTV_Event>> events;
+    Action_List actions;
+    Event_List events;
     std::set<QString> action_groups;
     std::set<QString> event_groups;
 
@@ -72,14 +72,14 @@ Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<c
     {
         IOTV_Action *action = parseAction(jaction.toObject(), hosts);
         if (action != nullptr)
-            actions.emplace_back(action);
+            actions.emplace(action);
     }
 
     for (const auto &jevent : jevents)
     {
         IOTV_Event *event = parseEvent(jevent.toObject(), hosts);
         if (event != nullptr)
-            events.emplace_back(event);
+            events.emplace(event);
     }
 
     for (const auto &jaction_group : jaction_groups)
@@ -91,7 +91,7 @@ Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<c
     return {{events, actions}, {event_groups, action_groups}};
 }
 
-QByteArray Event_Action_Parser::toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions,
+QByteArray Event_Action_Parser::toData(const Event_List &events, const Action_List &actions,
                                        const std::set<QString> &event_groups, const std::set<QString> &action_groups)
 {
     QJsonDocument jdoc;
@@ -215,21 +215,20 @@ IOTV_Event *Event_Action_Parser::parseEvent(const QJsonObject &jobj, const std::
 
         auto jactions = jobj.value(Json_Event_Action::ACTIONS);
 
-        if (jactions.isArray())
+        // json: "actions": [ [ "", [""] ], [ "", [""] ] ]
+        auto arr_1_level = jactions.toArray(); // - [ [ "группа 1", ["действие 1", "действие 2"] ], [ "группа 2", ["действие 1", "действие 2"] ] ]
+        for (auto groupAndActions : arr_1_level)
         {
-            auto arr_1_level = jactions.toArray();
-            for (auto action : arr_1_level)
+            auto arr_2_level = groupAndActions.toArray(); // - [ "группа 1", ["действие 1", "действие 2"] ]
+            if (arr_2_level.size() == 2)
             {
-                if (action.isArray())
-                {
-                    auto arr_2_level = action.toArray();
-                    if (arr_2_level.size() == 2)
-                    {
-                        QString group(arr_2_level.at(0).toString());
-                        QString name(arr_2_level.at(1).toString());
-                        event->actionMustBeenBinding.push_back(std::make_pair(group, name));
-                    }
-                }
+                QString groupName(arr_2_level.at(0).toString());
+                std::set<QString> actionName;
+                auto arr_3_level = arr_2_level.at(1).toArray(); // - ["действие 1", "действие 2"]
+                for (auto action : arr_3_level)
+                    actionName.insert(action.toString());
+
+                event->actionMustBeenBinding[groupName] = actionName;
             }
         }
     }
@@ -392,19 +391,24 @@ QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
     id.insert(Json_Event_Action::EVENT_ENABLE, event->isEnable() == true ? "true" : "false");
 
 
-    QJsonArray jactions;
-    QJsonArray jaction;
+    QJsonArray jaction_lvl_1; // - [ [ "группа 1", ["действие 1", "действие 2"] ], [ "группа 2", ["действие 1", "действие 2"] ], ... ]
+    QJsonArray jaction_lvl_2; // - [ "группа 1", ["действие 1", "действие 2"] ]
+    QJsonArray jaction_lvl_3; // - ["действие 1", "действие 2"]
 
     for (const auto &pair : event->actionMustBeenBinding)
     {
-        QStringList list;
-        list << pair.first << pair.second;
-        jaction = QJsonArray::fromStringList(list);
+        QString groupName = pair.first;
+        QStringList actionList(pair.second.begin(), pair.second.end());
 
-        jactions.append(jaction);
+        jaction_lvl_3 = QJsonArray::fromStringList(actionList);
+        QJsonValue jGroupName(groupName);
+        jaction_lvl_2.append(jGroupName);
+        jaction_lvl_2.append(jaction_lvl_3);
+
+        jaction_lvl_1.append(jaction_lvl_2);
     }
 
-    id.insert(Json_Event_Action::ACTIONS, jactions);
+    id.insert(Json_Event_Action::ACTIONS, jaction_lvl_1);
 
     return id;
 }

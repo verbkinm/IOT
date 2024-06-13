@@ -151,6 +151,8 @@
         <file>Events/ActionsGroup/Action.qml</file>
         <file>Events/EventsGroup/CurrentConnectionGroupList.qml</file>
         <file>Events/EventsGroup/CurrentConnectionList.qml</file>
+        <file>Events/EventsGroup/AddCurrentConnection_GroupList.qml</file>
+        <file>Events/EventsGroup/AddCurrentConnection_ActionList.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

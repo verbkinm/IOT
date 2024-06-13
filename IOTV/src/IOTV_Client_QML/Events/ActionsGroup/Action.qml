@@ -70,7 +70,6 @@ Page {
                 }
             }
 
-            // Событие
             Loader {
                 id: actionTypeLoader
                 source: ""

@@ -16,13 +16,9 @@ public:
     Event_Action_Parser() = delete;
     ~Event_Action_Parser() = delete;
 
-    static std::pair<
-        std::pair<std::vector<std::shared_ptr<IOTV_Event>>, std::vector<std::shared_ptr<IOTV_Action>>>,
-        std::pair<std::set<QString>, std::set<QString>>
-        >
-    parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
+    static std::pair<std::pair<Event_List, Action_List>, std::pair<std::set<QString>, std::set<QString> > > parseJson(const QByteArray &data, const std::forward_list<const Base_Host *> &hosts);
 
-    static QByteArray toData(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions,
+    static QByteArray toData(const Event_List &events, const Action_List &actions,
                              const std::set<QString> &event_groups, const std::set<QString> &action_groups);
 
 

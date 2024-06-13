@@ -10,7 +10,7 @@ Item {
 
     Text {
         id: hostNameText
-        text: "Вкл./Выкл"
+        text: "Вкл./Выкл."
 
         anchors {
             verticalCenter: parent.verticalCenter

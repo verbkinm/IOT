@@ -9,7 +9,7 @@
 class IOTV_Event_Manager
 {
 public:
-    explicit IOTV_Event_Manager(const std::vector<std::shared_ptr<IOTV_Event>> &events, const std::vector<std::shared_ptr<IOTV_Action>> &actions,
+    explicit IOTV_Event_Manager(const Event_List &events, const Action_List &actions,
                                 const std::set<QString> &event_groups, const std::set<QString> &action_groups);
     ~IOTV_Event_Manager();
 
@@ -54,11 +54,11 @@ public:
     // объекты
     std::set<QString> allHostsName() const;
 
-    const std::vector<std::shared_ptr<IOTV_Event>> &events() const;
-    const std::vector<std::shared_ptr<IOTV_Action>> &actions() const;
+    const Event_List &events() const;
+    const Action_List &actions() const;
 
-    std::vector<std::shared_ptr<IOTV_Event>> eventsInGroup(const QString &groupName) const;
-    std::vector<std::shared_ptr<IOTV_Action>> actionsInGroup(const QString &groupName) const;
+    Event_List eventsInGroup(const QString &groupName) const;
+    Action_List actionsInGroup(const QString &groupName) const;
 
     void addEvent(std::shared_ptr<IOTV_Event> event);
     void addAction(std::shared_ptr<IOTV_Action> action);
@@ -83,8 +83,8 @@ public:
     void renameActionGroup(const QString &oldGroupName, const QString &newGroupName);
 
 private:
-    std::vector<std::shared_ptr<IOTV_Event>> _events;
-    std::vector<std::shared_ptr<IOTV_Action>> _actions;
+    Event_List _events;
+    Action_List _actions;
 
     std::set<QString> _event_groups;
     std::set<QString> _action_groups;

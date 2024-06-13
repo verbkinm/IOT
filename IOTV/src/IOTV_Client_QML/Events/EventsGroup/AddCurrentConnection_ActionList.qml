@@ -11,7 +11,7 @@ Page {
     required property string groupName
 
     RoundButton {
-        id: delActions
+        id: saveActions
         z:1
         width: 64
         height: 64
@@ -19,7 +19,13 @@ Page {
         enabled: false
 
 
-        font.pixelSize: 36
+        Image {
+            anchors.centerIn: parent
+            source: "qrc:/img/save_white.png"
+            height: 22
+            width: 22
+            fillMode: Image.PreserveAspectFit
+        }
 
         anchors {
             right: parent.right
@@ -28,23 +34,11 @@ Page {
             bottomMargin: 10
         }
 
-        Image {
-            anchors.centerIn: parent
-            source: "qrc:/img/delete_white.png"
-            height: 24
-            width: 24
-            fillMode: Image.PreserveAspectFit
-        }
-
         onClicked: {
-            print("delete action: ")
             for (var i = 0; i < listModel.count; i++)
             {
                 if (listModel.get(i).checked)
-                {
-                    var actionName = listModel.get(i).text
-                    event.slotRemoveAction(groupName, actionName)
-                }
+                    event.slotAddAction(groupName, listModel.get(i).text)
             }
             client.saveEvent(_event)
             glob_eventStackView.pop()
@@ -72,7 +66,7 @@ Page {
 
             onSignalToggled: {
                 model.checked = this.checked
-                deleteActionButtonEnable()
+                saveActionButtonEnable()
             }
         }
 
@@ -81,46 +75,34 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        console.log("CurrentConnectionList page construct: ", objectName)
-    }
-
-    Component.onDestruction: {
-        console.log("CurrentConnectionList page destruct: ", objectName)
-    }
-
-    function deleteActionButtonEnable()
+    function saveActionButtonEnable()
     {
         for (var i = 0; i < listModel.count; i++)
         {
             if (listModel.get(i).checked)
             {
-                delActions.enabled = true
+                saveActions.enabled = true
                 return
             }
         }
 
-        delActions.enabled = false
+        saveActions.enabled = false
     }
 
     function updateListModel()
     {
         listModel.clear()
-        var list = event.slotActionInGroup(root.groupName)
+        var list = client.actionsListInGroup(root.groupName)
         for (var i = 0; i < list.length; i++)
         {
-            var objectAtributes = {
-                _action: client.copyActionByNameAndGroup(list[i], root.groupName),
-//                btnDeleteVisible: true
-            }
+            var action = client.copyActionByNameAndGroup(list[i], root.groupName)
+
             var object = {
-                text: list[i],
-                title: list[i],
                 checked: false,
-                icon: actionImageByEventType(objectAtributes._action.type),
-//                loaderSource: "qrc:/Events/ActionsGroup/Action.qml",
-                attributes: [objectAtributes]
+                text: list[i],
+                icon: actionImageByEventType(action.type),
             }
+
             listModel.append(object)
         }
         listView.height = list.length * 100

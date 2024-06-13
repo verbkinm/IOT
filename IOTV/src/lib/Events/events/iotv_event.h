@@ -1,7 +1,12 @@
 #pragma once
 
+#include <map>
+#include <set>
+
 #include "base_host.h"
 #include "actions/iotv_action.h"
+
+
 
 class IOTV_Event : public QObject
 {
@@ -47,9 +52,6 @@ public:
     EVENT_TYPE type() const;
     QString getType() const;
 
-    //    friend bool operator==(const IOTV_Event &lhs, const IOTV_Event &rhs);
-    //    friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
-
     QString name() const;
     void setName(const QString &newName);
 
@@ -65,13 +67,16 @@ public:
     QString group() const;
     void setGroup(const QString &newGroup);
 
-    // 1 - имя группу действия, 2 - имя действия. Имена действий, которые должны находится в _actions.
-    std::vector<std::pair<QString, QString>> actionMustBeenBinding;
+    // Необходим для синхронизации json данных.
+    // ключ - группа, значение - список действий группы
+    std::map<QString, std::set<QString>> actionMustBeenBinding;
 
     QString hostName() const;
     void setHostName(const QString &newHostName);
 
-    const std::vector<std::shared_ptr<IOTV_Action>> &actions() const;
+    const Action_List &actions() const;
+
+    friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
 
 protected:
     void execActions();
@@ -84,7 +89,7 @@ protected:
 
 private:
     EVENT_TYPE _type;
-    std::vector<std::shared_ptr<IOTV_Action>> _actions;
+    Action_List _actions;
     QString _name;
     QString _group;
 
@@ -99,6 +104,19 @@ signals:
 public slots:
     // Вызывается в CurrentConnectionList.qml
     QList<QString> slotActionInGroup(const QString &groupName);
+
     // удаляет из actionMustBeenBinding. Вызывается в CurrentConnectionList.qml
     void slotRemoveAction(const QString &groupName, const QString &actionName);
+
+    // сохраняетв actionMustBeenBinding. Вызывается в AddCurrentConnection_ActionList.qml
+    void slotAddAction(const QString &groupName, const QString &actionName);
 };
+
+struct Compare_Event {
+    bool operator()(const std::shared_ptr<IOTV_Event> &lhs, const std::shared_ptr<IOTV_Event> &rhs) const
+    {
+        return *lhs < *rhs;
+    }
+};
+
+typedef std::set<std::shared_ptr<IOTV_Event>, Compare_Event> Event_List;

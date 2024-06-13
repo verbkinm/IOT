@@ -155,9 +155,9 @@ QByteArray IOTV_Server::readEventActionJson()
 
     _eventManager.reset();
     _eventManager = std::make_unique<IOTV_Event_Manager>(event_vec, action_vec, event_groups, action_groups);
-//    _eventManager->bind();
+    _eventManager->bind();
 
-    return result;
+    return result;//Event_Action_Parser::toData(_eventManager->events(), _eventManager->actions(), _eventManager->eventGroups(), _eventManager->actionGroups());
 }
 
 void IOTV_Server::writeEventActionJson(const QByteArray &data)
@@ -666,7 +666,7 @@ void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
             QJsonDocument::fromJson(data, &err);
             if (err.error != QJsonParseError::NoError)
             {
-                qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
+                qDebug() << "Error parse json from client" << err.errorString() << ' ' << err.offset;
                 return;
             }
 

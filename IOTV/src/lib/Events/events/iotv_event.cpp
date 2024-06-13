@@ -30,6 +30,8 @@ void IOTV_Event::execActions()
     if (!_enable)
         return;
 
+    qDebug() << "Event" << typeName[(int)_type];
+
     for (auto &action : _actions)
     {
         if (action != nullptr)
@@ -44,7 +46,10 @@ QList<QString> IOTV_Event::slotActionInGroup(const QString &groupName)
     for (const auto &pair : actionMustBeenBinding)
     {
         if (pair.first == groupName)
-            result << pair.second;
+        {
+            for (const auto &action : pair.second)
+                result << action;
+        }
     }
 
     return result;
@@ -52,13 +57,20 @@ QList<QString> IOTV_Event::slotActionInGroup(const QString &groupName)
 
 void IOTV_Event::slotRemoveAction(const QString &groupName, const QString &actionName)
 {
-    actionMustBeenBinding.erase(actionMustBeenBinding.begin(),
-                                std::remove_if(actionMustBeenBinding.begin(), actionMustBeenBinding.end(), [&](auto &pair){
-                                    return pair.first == groupName && pair.second == actionName;
-                                }));
+    if (!actionMustBeenBinding.contains(groupName))
+        return;
+
+    actionMustBeenBinding[groupName].erase(actionName);
+    if (actionMustBeenBinding[groupName].size() == 0)
+        actionMustBeenBinding.erase(groupName);
 }
 
-const std::vector<std::shared_ptr<IOTV_Action> > &IOTV_Event::actions() const
+void IOTV_Event::slotAddAction(const QString &groupName, const QString &actionName)
+{
+    actionMustBeenBinding[groupName].insert(actionName);
+}
+
+const Action_List &IOTV_Event::actions() const
 {
     return _actions;
 }
@@ -112,7 +124,11 @@ bool IOTV_Event::isEnable() const
 
 void IOTV_Event::setEnable(bool newEnable)
 {
+    if (_enable == newEnable)
+        return;
+
     _enable = newEnable;
+    emit signalEnableChanged(newEnable);
 }
 
 void IOTV_Event::addAction(std::shared_ptr<IOTV_Action> action)
@@ -120,15 +136,23 @@ void IOTV_Event::addAction(std::shared_ptr<IOTV_Action> action)
     if (action == nullptr)
         return;
 
-    _actions.push_back(action);
+    _actions.insert(action);
     //    actionMustBeenBinding.emplace_back(action->group(), action->name());
 }
 
 void IOTV_Event::removeAction(const QString &groupName, const QString &actionName)
 {
-    _actions.erase(_actions.begin(), std::remove_if(_actions.begin(), _actions.end(), [&](auto &action){
-                       return action.get()->group() == groupName && action.get()->name() == actionName;
-               }));
+    for (auto &action : _actions)
+    {
+        if (action->group() == groupName && action->name() == actionName)
+        {
+            _actions.erase(action);
+            break;
+        }
+    }
+//    _actions.erase(_actions.begin(), std::remove_if(_actions.begin(), _actions.end(), [&](auto &action){
+//                       return action.get()->group() == groupName && action.get()->name() == actionName;
+//                   }));
 }
 
 void IOTV_Event::clearActions()
@@ -152,7 +176,7 @@ QStringList IOTV_Event::actionGroups() const
 //            lhs._host == rhs._host);
 //}
 
-//bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs)
-//{
-//    return (lhs._host < rhs._host);
-//}
+bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs)
+{
+    return std::make_tuple(lhs.group(), lhs.name()) < std::make_tuple(rhs.group(), rhs.name());
+}

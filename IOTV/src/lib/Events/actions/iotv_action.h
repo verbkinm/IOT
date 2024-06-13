@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <set>
 
 class IOTV_Action : public QObject
 {
@@ -48,6 +49,8 @@ public:
     QString group() const;
     void setGroup(const QString &newGroup);
 
+    friend bool operator<(const IOTV_Action &lhs, const IOTV_Action &rhs);
+
 private:
     ACTION_TYPE _type;
     QString _name;
@@ -60,3 +63,11 @@ signals:
     void signalGroupNameChanged(QString newName);
 };
 
+struct Compare_Action {
+    bool operator()(const std::shared_ptr<IOTV_Action> &lhs, const std::shared_ptr<IOTV_Action> &rhs) const
+    {
+        return *lhs < *rhs;
+    }
+};
+
+typedef std::set<std::shared_ptr<IOTV_Action>, Compare_Action> Action_List;

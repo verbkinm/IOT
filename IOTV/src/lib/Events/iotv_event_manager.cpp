@@ -12,7 +12,7 @@
 #include "actions/iotv_action_data_tx_ref.h"
 //#include "actions/iotv_action_msg.h"
 
-IOTV_Event_Manager::IOTV_Event_Manager(const std::vector<std::shared_ptr<IOTV_Event> > &events, const std::vector<std::shared_ptr<IOTV_Action> > &actions,
+IOTV_Event_Manager::IOTV_Event_Manager(const Event_List &events, const Action_List &actions,
                                        const std::set<QString> &event_groups, const std::set<QString> &action_groups)
     : _events(events), _actions(actions), _event_groups(event_groups), _action_groups(action_groups)
 {
@@ -24,6 +24,27 @@ IOTV_Event_Manager::IOTV_Event_Manager(const std::vector<std::shared_ptr<IOTV_Ev
     // Тоже самое для действий и групп действий
     for (auto &action : _actions)
         _action_groups.insert(action->group());
+
+
+    for (auto &event : _events)
+    {
+        for (auto &pair : event->actionMustBeenBinding)
+        {
+            QString actionGroupName = pair.first;
+            _action_groups.insert(actionGroupName);
+
+            for (auto &actionName : pair.second)
+            {
+                if (findAction(actionGroupName, actionName) == nullptr)
+                {
+                    std::shared_ptr<IOTV_Action> ptr(createAction());
+                    ptr->setName(actionName);
+                    ptr->setGroup(actionGroupName);
+                    _actions.insert(ptr);
+                }
+            }
+        }
+    }
 }
 
 IOTV_Event_Manager::~IOTV_Event_Manager()
@@ -37,12 +58,11 @@ void IOTV_Event_Manager::bind()
     {
         event->clearActions();
         auto &actionMustBeenBinding = event->actionMustBeenBinding;
-        for (size_t i = 0; i < actionMustBeenBinding.size(); i++)
+        for (auto &pair : actionMustBeenBinding)
         {
-            QString groupName = actionMustBeenBinding[i].first;
-            QString actionName = actionMustBeenBinding[i].second;
-
-            event->addAction(findAction(groupName, actionName));
+            QString groupName = pair.first;
+            for (auto &actionName : pair.second)
+                event->addAction(findAction(groupName, actionName));
         }
     }
 }
@@ -223,54 +243,56 @@ IOTV_Action *IOTV_Event_Manager::createAction(const QString &type, Base_Host *ds
     return new IOTV_Action_Data_TX_Ref(dstHost, dstCh_num, srcHost, srcCh_Num);
 }
 
-const std::vector<std::shared_ptr<IOTV_Event> > &IOTV_Event_Manager::events() const
+const Event_List &IOTV_Event_Manager::events() const
 {
     return _events;
 }
 
-const std::vector<std::shared_ptr<IOTV_Action> > &IOTV_Event_Manager::actions() const
+const Action_List &IOTV_Event_Manager::actions() const
 {
     return _actions;
 }
 
-std::vector<std::shared_ptr<IOTV_Event> > IOTV_Event_Manager::eventsInGroup(const QString &groupName) const
+Event_List IOTV_Event_Manager::eventsInGroup(const QString &groupName) const
 {
-    std::vector<std::shared_ptr<IOTV_Event>> vec;
+    Event_List list;
     for (auto &event : _events)
     {
         if (event == nullptr)
             continue;
+
         if (event->group() == groupName)
-            vec.emplace_back(event);
+            list.insert(event);
     }
 
-    return vec;
+    return list;
 }
 
-std::vector<std::shared_ptr<IOTV_Action> > IOTV_Event_Manager::actionsInGroup(const QString &groupName) const
+Action_List IOTV_Event_Manager::actionsInGroup(const QString &groupName) const
 {
-    std::vector<std::shared_ptr<IOTV_Action>> vec;
+    Action_List list;
     for (auto &action : _actions)
     {
         if (action == nullptr)
             continue;
+
         if (action->group() == groupName)
-            vec.emplace_back(action);
+            list.insert(action);
     }
 
-    return vec;
+    return list;
 }
 
 void IOTV_Event_Manager::addEvent(std::shared_ptr<IOTV_Event> event)
 {
     if (event != nullptr)
-        _events.push_back(event);
+        _events.insert(event);
 }
 
 void IOTV_Event_Manager::addAction(std::shared_ptr<IOTV_Action> action)
 {
     if (action != nullptr)
-        _actions.push_back(action);
+        _actions.insert(action);
 }
 
 std::shared_ptr<IOTV_Event> IOTV_Event_Manager::findEvent(const QString &groupName, const QString &eventName) const
@@ -303,44 +325,67 @@ std::shared_ptr<IOTV_Action> IOTV_Event_Manager::findAction(const QString &group
 
 void IOTV_Event_Manager::deleteEvent(const QString &groupName, const QString &eventName)
 {
-    for (size_t i = 0; i < _events.size(); i++)
-    {
-        if (_events[i] != nullptr)
-        {
-            if (_events[i]->group() == groupName && _events[i]->name() == eventName)
-            {
-                _events.erase(_events.begin() + i);
-                --i;
-            }
-        }
-    }
-}
-
-void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &actionName)
-{
-    for (size_t i = 0; i < _actions.size(); i++)
-    {
-        if (_actions[i] != nullptr)
-        {
-            if (_actions[i]->group() == groupName && _actions[i]->name() == actionName)
-            {
-                _actions.erase(_actions.begin() + i);
-                --i;
-            }
-        }
-    }
-
     for (auto &event : _events)
     {
         if (event == nullptr)
             continue;
 
-        event->removeAction(groupName, actionName);
-        std::pair<QString, QString> pair(groupName, actionName);
-        event->actionMustBeenBinding.erase(event->actionMustBeenBinding.begin(), std::remove_if(event->actionMustBeenBinding.begin(), event->actionMustBeenBinding.end(), [&](auto &pair){
-                                               return pair.first == groupName && pair.second == actionName;
-                                           }));
+        if (event->group() == groupName && event->name() == eventName)
+        {
+            _events.erase(event);
+            break;
+        }
     }
+
+//    for (size_t i = 0; i < _events.size(); i++)
+//    {
+//        if (_events[i] != nullptr)
+//        {
+//            if (_events[i]->group() == groupName && _events[i]->name() == eventName)
+//            {
+//                _events.erase(_events.begin() + i);
+//                --i;
+//            }
+//        }
+//    }
+}
+
+void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &actionName)
+{
+    for (auto &action : _actions)
+    {
+        if (action == nullptr)
+            continue;
+
+        if (action->group() == groupName && action->name() == actionName)
+        {
+            _actions.erase(action);
+            break;
+        }
+    }
+
+//    for (size_t i = 0; i < _actions.size(); i++)
+//    {
+//        if (_actions[i] != nullptr)
+//        {
+//            if (_actions[i]->group() == groupName && _actions[i]->name() == actionName)
+//            {
+//                _actions.erase(_actions.begin() + i);
+//                --i;
+//            }
+//        }
+//    }
+
+//    for (auto &event : _events)
+//    {
+//        if (event == nullptr)
+//            continue;
+
+//        event->removeAction(groupName, actionName);
+//        event->actionMustBeenBinding[groupName].erase(actionName);
+//        if (event->actionMustBeenBinding[groupName].size() == 0)
+//            event->actionMustBeenBinding.erase(groupName);
+//    }
 }
 
 const std::set<QString> &IOTV_Event_Manager::eventGroups() const
@@ -382,10 +427,11 @@ void IOTV_Event_Manager::renameEventGroup(const QString &oldGroupName, const QSt
         _event_groups.insert(newGroupName);
     }
 
-    for (std::shared_ptr<IOTV_Event> &event : _events)
+    for (auto &event : _events)
     {
         if (event == nullptr)
             continue;
+
         if (event.get()->group() == oldGroupName)
             event.get()->setGroup(newGroupName);
     }
@@ -400,7 +446,7 @@ void IOTV_Event_Manager::renameActionGroup(const QString &oldGroupName, const QS
         _action_groups.insert(newGroupName);
     }
 
-    for (std::shared_ptr<IOTV_Action> &action : _actions)
+    for (auto &action : _actions)
     {
         if (action == nullptr)
             continue;
@@ -410,11 +456,11 @@ void IOTV_Event_Manager::renameActionGroup(const QString &oldGroupName, const QS
 
     for (auto &event : _events)
     {
-        for (auto &pair : event->actionMustBeenBinding)
-        {
-            if (pair.first == oldGroupName)
-                pair.first = newGroupName;
-        }
+        event->actionMustBeenBinding[newGroupName] = event->actionMustBeenBinding[oldGroupName];
+        event->actionMustBeenBinding.erase(oldGroupName);
+
+        if (event->actionMustBeenBinding[newGroupName].size() == 0)
+            event->actionMustBeenBinding.erase(newGroupName);
     }
 }
 
