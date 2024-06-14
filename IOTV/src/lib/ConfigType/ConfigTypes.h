@@ -34,9 +34,11 @@ struct serverField
 struct ServerLog
 {
     static QString CLIENT_ONLINE_LOG_FILENAME;
+    static QString EVENT_ACTION_LOG_FILENAME;
     static QString DEFAULT_LOG_FILENAME;
 
     static const QString CLIENT_ONLINE_LOG;
+    static const QString EVENT_ACTION_LOG;
     static const QString DEFAULT_LOG;
 };
 
@@ -44,15 +46,24 @@ struct Json_Event_Action
 {
     static const QString EVENT_ACTION_FILE_NAME;
 
-    static const QString EVENT_ACTION_NAME;
-    static const QString EVENT;
-    static const QString ACTION;
+    static const QString EVENTS;
+    static const QString EVENT_GROUP;
+    static const QString EVENT_GROUPS;
+    static const QString EVENT_NAME;
+    static const QString EVENT_ENABLE;
+
+    static const QString ACTIONS;
+    static const QString ACTION_GROUP;
+    static const QString ACTION_GROUPS;
+    static const QString ACTION_NAME;
+    static const QString ACTION_ENABLE;
 
     static const QString HOST_NAME;
     static const QString HOST_DST;
     static const QString HOST_SRC;
 
     static const QString TYPE;
+    static const QString TYPE_NONE;
     static const QString TYPE_CONN;
     static const QString TYPE_DISCONN;
     static const QString TYPE_STATE;
@@ -67,11 +78,13 @@ struct Json_Event_Action
     static const QString TYPE_MESSAGE;
 
     static const QString STATE;
+    static const QString STATE_NONE;
     static const QString STATE_ONLINE;
     static const QString STATE_OFFNLINE;
     static const QString STATE_SWITCH;
 
     static const QString DIRECTION;
+    static const QString DIRECTION_NONE;
     static const QString DIRECTION_TX;
     static const QString DIRECTION_RX;
     static const QString DIRECTION_ANY;

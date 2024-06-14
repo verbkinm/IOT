@@ -16,6 +16,7 @@ Page {
     Loader {
         id: chartsLoader
         property string title: "loaderTitle"
+        objectName: "loader chart id2"
 
         onVisibleChanged: {
             if (this.visible === false)

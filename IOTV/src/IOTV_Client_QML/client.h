@@ -15,6 +15,7 @@
 #include "actions/iotv_action.h"
 #include "device.h"
 #include "events/iotv_event.h"
+#include "iotv_event_manager.h"
 
 class Client : public QObject
 {
@@ -23,6 +24,7 @@ class Client : public QObject
     Q_PROPERTY(quint16 totalDevice READ countDevices NOTIFY countDeviceChanged)
     Q_PROPERTY(quint16 onlineDevice READ countDeviceOnline NOTIFY onlineDeviceChanged)
     Q_PROPERTY(bool state READ stateConnection NOTIFY stateConnectionChanged)
+
 public:
     explicit Client(QObject *parent = nullptr);
     ~Client();
@@ -32,12 +34,57 @@ public:
 
     QByteArray readData(const QString &deviceName, uint8_t channelNumber) const;
 
-    Q_INVOKABLE QList<QObject*> devList();
+    Q_INVOKABLE QList<QObject *> devList();
+    Q_INVOKABLE QList<QString> allHostAliasName() const;  // список имён хостов, который включает в себя так же и имена хостов из файла IOTV_Event_Action.json
     Q_INVOKABLE QObject *deviceByName(const QString &name);
     Q_INVOKABLE void queryEventAction();
-    Q_INVOKABLE QList<QList<QVariantMap>> evAcList() const;
-    Q_INVOKABLE void saveEventAction(QVariantMap event, QVariantMap action, QString oldName);
-    Q_INVOKABLE void removeEventAction(QString name);
+
+    // Events
+    Q_INVOKABLE void saveEvent(IOTV_Event *event);
+    Q_INVOKABLE void saveEventGroup(const QString &groupName);
+
+    Q_INVOKABLE void removeEvent(IOTV_Event *event);
+    Q_INVOKABLE void removeEvent(const QString &groupName, const QString &eventName);
+    Q_INVOKABLE void removeEventGroup(const QString &groupName);
+
+    Q_INVOKABLE void renameEventGroup(const QString &oldGroupName, const QString &newGroupName);
+
+    Q_INVOKABLE bool isEmptyEventGroup(const QString &groupName); // пуста ли группа
+    Q_INVOKABLE bool isExistsEventGroup(const QString &groupName); // есть ли группа событий с таким именем
+    Q_INVOKABLE bool isExistsEventNameInGroup(const QString &groupName, const QString &eventName);
+
+    Q_INVOKABLE QList<QString> eventsGroupList() const;
+    Q_INVOKABLE QList<QString> eventsListInGroup(const QString &groupName) const;
+
+    Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Event *createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const;
+
+    // Actions
+    Q_INVOKABLE void saveAction(IOTV_Action *action);
+    Q_INVOKABLE void saveActionGroup(const QString &groupName);
+
+    Q_INVOKABLE void removeAction(const QString &groupName, const QString &eventName);
+    Q_INVOKABLE void removeActionGroup(const QString &groupName);
+
+    Q_INVOKABLE void renameActionGroup(const QString &oldGroupName, const QString &newGroupName);
+
+    Q_INVOKABLE bool isEmptyActionGroup(const QString &groupName); // пуста ли группа
+    Q_INVOKABLE bool isExistsActionGroup(const QString &groupName); // есть ли группа событий с таким именем
+    Q_INVOKABLE bool isExistsActionNameInGroup(const QString &groupName, const QString &eventName);
+
+    Q_INVOKABLE QList<QString> actionsGroupList() const;
+    Q_INVOKABLE QList<QString> actionsListInGroup(const QString &groupName) const;
+
+    Q_INVOKABLE IOTV_Action *copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const;
+    Q_INVOKABLE IOTV_Action *createEmptyAction(const QString &actionType, const QString &actionName, const QString &groupName) const;
+
+    // используется в qml для удаления временной копии события или действия
+    Q_INVOKABLE void deleteObject(QObject *obj) const;
+
+    //
+//    Q_INVOKABLE QString realName(const QString &devName) const;
+//    Q_INVOKABLE QString aliasName(const QString &devName) const;
+
 
     bool stateConnection() const;
 
@@ -47,43 +94,34 @@ private:
 
     QTimer _timerPing;
     // Что бы не плодить таймеры. Если отправляется пакет пинг уже N-ый раз, значит ответов не было и соединение разрывается
-    static constexpr int COUNTER_PING_COUNT = 5;
+    static constexpr int COUNTER_PING_COUNT = 60;
+    // Если будет превышено кол-во попыток получения от сервера ответа на пинг запрос, клиент (данное приложение) отключается от сервера
     int _counterPing;
 
     //!!! unorder_map
     std::map<QString, Device> _devices;
 
-    QList<QList<QVariantMap>> _evAcList;
+    std::unique_ptr<IOTV_Event_Manager> _eventManager;
+    void saveEventAction();
 
     void queryIdentification();
     void queryState(const QString &name);
     void queryRead(const QString &name, uint8_t channelNumber);
-    void queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
     void queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data);
     void queryPing();
-    void queryTech(Tech_TYPE type, char *data, uint64_t dataSize);
+    void queryTech(tech_type_t type, char *data, uint64_t dataSize);
 
-    void responceIdentification(const struct Header *header);
-    void responceState(const struct Header *header);
-    void responceRead(const struct Header* header);
-    void responceReadStream(const struct Header *header);
-    void responceWrite(const struct Header *header) const;
-    void responcePingPoing(const struct Header *header);
-    void responceTech(const struct Header *header);
-    void responceLogData(const struct Header *header);
+    void responceIdentification(const header_t *header);
+    void responceState(const header_t *header);
+    void responceRead(const header_t* header);
+    void responceReadStream(const header_t *header);
+    void responceWrite(const header_t *header) const;
+    void responcePingPoing(const header_t *header);
+    void responceTech(const header_t *header);
+    void responceLogData(const header_t *header);
 
     qint64 write(const QByteArray &data);
-
-    QList<QList<QVariantMap>> replaceRealNameToAlias(const QList<QList<QVariantMap>> &evActList) const;
-    QList<QList<QVariantMap>> replaceAliasToRealName(const QList<QList<QVariantMap>> &evActList) const;
-    QString findRealName(const QString &alias) const;
-    QString findAliasName(const QString &realName) const;
-
-    void removeEventAction(QList<QList<QVariantMap> > &list, const QString &name);
-
-    std::forward_list<const Base_Host *> host_list() const;
-    std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *>>> convert(const QList<QList<QVariantMap>> &list) const;
-    void clearList(std::forward_list<std::pair<QString, std::pair<IOTV_Event *, IOTV_Action *> > > &list) const;
 
 public slots:
     void connectToHost(const QString &address, qint64 port);
@@ -103,7 +141,7 @@ private slots:
     void slotQueryRead();
     void slotQueryState();
     void slotQueryWrite(int channelNumber, const QByteArray &data);
-    void slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void slotQuerLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
 
     void slotError(QAbstractSocket::SocketError error);
 

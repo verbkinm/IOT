@@ -2,57 +2,54 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
-    property alias srcHostName: srcHost.startHostName
-    property alias dstHostName: dstHost.startHostName
-    property alias srcChannelNumber: srcChNum.value
-    property alias dstChannelNumber: dstChNum.value
+    required property var action
 
-    width: 400//parent.width
+    width: 400
     spacing: 15
 
     HostNameComboBox {
         id: srcHost
         height: 50
         width: parent.width
-        label: "Источник"
+        text: "Имя источника:"
+        startText: action.srcHost//client.aliasName(action.srcHost)
+
+        onSignalCurrentTextChanged: (modelIndexText) =>{
+           action.srcHost = modelIndexText
+        }
     }
 
     ChannelNumber {
         id: srcChNum
         label: "Канал источника"
         width: parent.width
+        value: action.srcChNum
+
+        onSignalNumberChanged: {
+            action.srcChNum = value
+        }
     }
 
     HostNameComboBox {
         id: dstHost
         height: 50
         width: parent.width
-        label: "Приёмник"
+        text: "Имя приёмника:"
+        startText: action.dstHost//client.aliasName(action.dstHost)
+
+        onSignalCurrentTextChanged: (modelIndexText) =>{
+           action.dstHost = modelIndexText
+        }
     }
 
     ChannelNumber {
         id: dstChNum
         label: "Канал приёмника"
         width: parent.width
-    }
+        value: action.dstChNum
 
-    function listName() {
-        var arr = []
-        for( var i = 0; i < client.devList().length; i++)
-            arr.push(client.devList()[i].aliasName)
-
-        return arr
+        onSignalNumberChanged: {
+            action.dstChNum = value
+        }
     }
-
-    function srcHostNameText() {
-        return srcHost.comboBox.currentText
-    }
-    function dstHostNameText() {
-        return dstHost.comboBox.currentText
-    }
-
-//    Component.onCompleted: {
-//        console.log(srcHostName)
-//        console.log(dstHostName)
-//    }
 }

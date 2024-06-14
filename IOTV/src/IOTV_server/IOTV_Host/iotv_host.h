@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDir>
+#include <QDate>
 
 #include <memory>
 #include <mutex>
@@ -12,6 +13,7 @@
 #include "connection_type/udp_conn_type.h"
 #include "connection_type/com_conn_type.h"
 #include "connection_type/file_conn_type.h"
+
 #include "base_host.h"
 #include "IOTV_SH.h"
 
@@ -21,11 +23,12 @@ class IOTV_Host : public Base_Host
 public:
     IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent = nullptr);
     IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent = nullptr);
-    ~IOTV_Host();
+    virtual ~IOTV_Host();
 
-    QString getName() const override;
+    virtual QString getName() const override;
+    virtual void setName(const QString &name) override;
 
-    qint64 write(uint8_t channelNumber, const QByteArray &data);
+    qint64 write(uint8_t channelNumber, QByteArray data);
     QByteArray readData(uint8_t channelNumber) const;
 
     const std::unordered_map<QString, QString> &settingsData() const;
@@ -43,35 +46,40 @@ public:
         return QFileInfo(_logDir, date.toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
     }
 
+    inline QString logName(const QDate &date, uint8_t channelNumber)
+    {
+        return QFileInfo(_logDir, date.toString("yyyy-MM-dd")).absoluteFilePath() + "_" + QString::number(channelNumber) + ".log";
+    }
+
     inline QString logName()
     {
         return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
     }
 
+    inline QString logName(uint8_t channelNumber)
+    {
+        return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() +  "_" + QString::number(channelNumber) + ".log";
+    }
+
 private:
     void shareConstructor();
-    qint64 read(uint8_t channelNumber, ReadWrite_FLAGS flags = ReadWrite_FLAGS_NONE);
+    qint64 read(uint8_t channelNumber, readwrite_flag_t flags = ReadWrite_FLAGS_NONE);
     qint64 readAll();
     qint64 writeToRemoteHost(const QByteArray &data, qint64 size = -1);
 
     void makeConnType();
 
-    void responceIdentification(const struct Header *header);
-    void responceState(const struct IOTV_Server_embedded *iot);
-    void responceRead(const struct Header* header);
-    void responceWrite(const struct IOTV_Server_embedded *iot) const;
-    void responcePingPong(const struct IOTV_Server_embedded *iot);
+    void responceIdentification(const header_t *header);
+    void responceState(const iotv_obj_t *iot);
+    void responceRead(const header_t* header);
+    void responceWrite(const iotv_obj_t *iot) const;
+    void responcePingPong(const iotv_obj_t *iot);
 
     std::unique_ptr<Base_conn_type> _conn_type;
-    const QDir _logDir;
+    QDir _logDir;
     QTimer _timerReRead, _timerState, _timerPing;
 
     std::unordered_map<QString, QString>  _settingsData;
-
-    std::mutex _mutexParametersChange,
-        _mutexWrite, //writeToRemoteHost
-        _mutexStreamRead,
-        _mutexStreamWrite;
 
     // Что бы не плодить таймеры. Если отправляется пакет статуса уже N-ый раз, значит ответов не было и статус офлайн
     static constexpr int COUNTER_STATE_COUNT = 3;
@@ -87,6 +95,10 @@ private:
 public slots:
     void slotDisconnected();
 
+    // дублирование функций addStreamRead  и removeStreamRead
+    void slotAddStreamRead(uint8_t channel, QObject *client);
+    void slotRemoveStreamRead(uint8_t channel, QObject *client);
+
 private slots:
     void slotDataResived(QByteArray data);
 
@@ -95,11 +107,16 @@ private slots:
     void slotPingTimeOut();
 
     // Используетеся для записи данных полученых от клиентов из других потоков
-    void slotQueryWrite(int channelNumber, const QByteArray &data);
+    void slotQueryWrite(int channelNumber, QByteArray data);
 
     void slotConnected();
 
 signals:
+    // Высылается из iotv_client
+    void signalAddStreamRead(uint8_t channel, QObject *client);
+    // Высылается из iotv_client
+    void signalRemoveStreamRead(uint8_t channel, QObject *client);
+
     void signalDevicePingTimeOut();
     void signalStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
 };

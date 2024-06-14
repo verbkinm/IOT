@@ -9,9 +9,6 @@
 
 const char *TAG = "SNTP";
 
-//const char *sntp_utc_default = "UTC-3";
-//const char *sntp_server_url_default = "pool.ntp.org";
-
 const char *sntp_utc = "UTC-5";
 const char *sntp_server_url = "pool.ntp.org";
 
@@ -31,8 +28,6 @@ void time_sync_notification_cb(struct timeval *tv)
 	localtime_r(&now, &timeinfo);
 	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
 	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
-
-//	DS3231_SetDataTime_tm(&timeinfo);
 }
 
 void sntp_obtain_time(void)
@@ -55,8 +50,6 @@ void sntp_service_task(void *pvParameters)
 	time_t now;
 	struct tm timeinfo;
 
-	glob_set_status_reg(STATUS_SNTP_ON);
-
 	while(true)
 	{
 		if (glob_get_status_err())
@@ -65,7 +58,7 @@ void sntp_service_task(void *pvParameters)
 		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
-		if ( !(glob_get_status_reg() & STATUS_SNTP_ON) || !(glob_get_status_reg() & STATUS_IP_GOT) )
+		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
 			goto for_end;
 
 		time(&now);
@@ -90,7 +83,7 @@ void sntp_service_task(void *pvParameters)
 		vTaskDelay(1000 * (1 * 60) / portTICK_PERIOD_MS); // раз в 1 минуту
 
 		for_end:
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+			vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 
 	vTaskDelete(NULL);

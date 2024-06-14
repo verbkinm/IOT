@@ -43,7 +43,7 @@ uint8_t writeType[5] = {DATA_TYPE_NONE, DATA_TYPE_NONE, DATA_TYPE_INT_16, DATA_T
 
 QByteArray buffer;
 
-struct IOTV_Server_embedded iot = {
+iotv_obj_t iot = {
     .id = 8,
     .numberReadChannel = 5,
     .numberWriteChannel = 5,
@@ -86,7 +86,7 @@ void slotDataRecived()
     {
         memcpy(recivedBuffer, buffer.data(), buffer.size()); //!!!
 
-        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
+        header_t* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -109,7 +109,7 @@ void slotDataRecived()
 
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, Identification_FLAGS_NONE);
                 udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
@@ -120,11 +120,11 @@ void slotDataRecived()
                 else if ((rwPkg->channelNumber == 0 || rwPkg->channelNumber == 1) && rwPkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
                     camera->stop();
 
-                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
                 udp_socket->writeDatagram(transmitBuffer, size, serverAddr, serverPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
@@ -170,7 +170,7 @@ void slotImageCaptured(QImage img)
         .data = iot.readChannel[0].data
     };
 
-    struct Header header = {
+    header_t header = {
         .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_READ,
@@ -183,7 +183,7 @@ void slotImageCaptured(QImage img)
 
     QNetworkDatagram dataGram;
     dataGram.setSender(serverAddr, serverPort);
-    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)&dataGram);
+    responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)&dataGram, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 //для ПК
@@ -201,7 +201,7 @@ void slotAudio(QByteArray data)
         .data = iot.readChannel[1].data
     };
 
-    struct Header header = {
+    header_t header = {
         .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_READ,
@@ -265,7 +265,7 @@ void slotTimeOut()
         .name = iot.name
     };
 
-    struct Header header = {
+    header_t header = {
         .version = 2,
         .type = HEADER_TYPE_RESPONSE,
         .assignment = HEADER_ASSIGNMENT_HOST_BROADCAST,

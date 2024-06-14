@@ -3,10 +3,14 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct Read_Write
 {
-    //!!! в документации 4 байта!
-    uint64_t dataSize;
+    uint32_t dataSize;
 
     uint8_t nameSize;
     uint8_t channelNumber;
@@ -15,10 +19,17 @@ struct Read_Write
     char *name;
     char *data;
 };
+typedef struct Read_Write read_write_t;
 
-uint64_t readWriteCheckSum(const struct Read_Write *body);
-uint64_t readWriteSize(const struct Read_Write *body);
-uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t outDataSize);
-void clearReadWrite(struct Read_Write *readWrite);
+uint64_t readWriteCheckSum(const read_write_t *body);
+uint64_t readWriteSize(const read_write_t *body);
+uint64_t readWriteToData(const read_write_t *body, char *outData, uint64_t outDataSize);
+void clearReadWrite(read_write_t *readWrite);
+
+read_write_t *readWriteCopy(const read_write_t *readWrite_pkg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // READ_WRITE_H

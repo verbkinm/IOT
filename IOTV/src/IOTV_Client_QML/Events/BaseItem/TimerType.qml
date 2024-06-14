@@ -2,14 +2,12 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
+    required property var event
+
     id: itemTimerType
     height: 50
     width: 400
 
-    property int totalSeconds: 0
-    property int h: 0
-    property int m: 0
-    property int s: 0
 
     RoundButton {
         width: 64
@@ -37,7 +35,7 @@ Item {
     Dialog {
         id: timerSetting
         modal: true
-        standardButtons: Dialog.Save | Dialog.Cancel
+        standardButtons: Dialog.Ok
 
         leftMargin: 15
         rightMargin: 15
@@ -53,12 +51,7 @@ Item {
         }
 
         onAccepted: {
-        }
-
-        onRejected: {
-            hoursTumbler.currentIndex = h
-            minutesTumbler.currentIndex = m
-            secondsTumbler.currentIndex = s
+            event.totalSeconds = hoursTumbler.currentIndex * 3600 + minutesTumbler.currentIndex * 60 + secondsTumbler.currentIndex
         }
 
         Item {
@@ -81,6 +74,8 @@ Item {
                     model: 24
                     font.pixelSize: 18
 
+                    currentIndex: event.hour
+
                     Label {
                         font.pixelSize: 18
                         text: ":"
@@ -99,6 +94,8 @@ Item {
                     model: 60
                     font.pixelSize: 18
 
+                    currentIndex: event.minute
+
                     Label {
                         font.pixelSize: 18
                         text: ":"
@@ -116,8 +113,11 @@ Item {
                     visibleItemCount: 3
                     model: 60
                     font.pixelSize: 18
+
+                    currentIndex: event.second
                 }
             }
+
             Rectangle {
                 id: tumblerRect
                 width: parent.width * 0.9
@@ -131,22 +131,12 @@ Item {
     }
 
     Component.onCompleted: {
-        if (totalSeconds >= 60 * 60 * 24)
+        if (event.totalSeconds >= 60 * 60 * 24)
         {
-            h = 23
-            m = 59
-            s = 59
+            event.hour = 23
+            event.minute = 59
+            event.second = 59
         }
-        else
-        {
-            h = totalSeconds / 3600;
-            m = totalSeconds / 60 - h * 60;
-            s = totalSeconds - m * 60 - h * 3600;
-        }
-
-        hoursTumbler.currentIndex = h
-        minutesTumbler.currentIndex = m
-        secondsTumbler.currentIndex = s
     }
 
     Connections {
@@ -157,9 +147,5 @@ Item {
         function onWidthChanged() {
             timerSetting.y = mapFromItem(glob_eventStackView, 0, 0).y + glob_eventStackView.height / 2 - timerSetting.height / 2
         }
-    }
-
-    function getTotalSeconds() {
-        return hoursTumbler.currentIndex * 3600 + minutesTumbler.currentIndex * 60 + secondsTumbler.currentIndex
     }
 }

@@ -36,25 +36,20 @@
 #define DS3231_ADDR							0x68
 
 // IOTV
+#define IOTV_DEVICE_NAME					"ID_5"
+
 #define RELE_PIN 							GPIO_NUM_32
 #define BORDER_DISTANCE_DEFAULT 			150
 #define DISPLAY_ORIENTATION_DEFAULT			0
 
 #define CH_RELAY_STATE 						0
 #define CH_BORDER							1
-#define CH_SEC								2
-#define CH_MIN								3
-#define	CH_HOUR								4
-#define	CH_DAY								5
-#define CH_DATE								6
-#define CH_MONTH							7
-#define CH_YEAR								8
-#define CH_DISP_ORNT						9
-#define CH_RANGE							10
-#define CH_LUX								11
-#define CH_TEMP								12
-#define CH_HUM								13
-#define CH_PRES								14
+#define CH_DISP_ORNT						2
+#define CH_RANGE							3
+#define CH_LUX								4
+#define CH_TEMP								5
+#define CH_HUM								6
+#define CH_PRES								7
 
 // OLED
 #define OLED_PIN_NUM_RST           			-1

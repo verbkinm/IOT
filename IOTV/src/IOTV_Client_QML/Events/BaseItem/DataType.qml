@@ -2,13 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Column {
-    property alias directectionComboBox: directionTypeComboBox
-    property alias compareTypeComboBox: compareTypeComboBox
-    property alias dataString: _data.text
-    property alias channelNumber: chNum.value
-
-    property string startDirection: ""
-    property string startCompare: ""
+    required property var event
 
     id: root
     width: 400
@@ -29,16 +23,21 @@ Column {
         }
 
         ComboBox {
-            id: directionTypeComboBox
-            width: 200
+            id: direction
+            width: parent.width / 2
 
-            model: ["tx", "rx", "any", "change"]
-            currentIndex: startIndex(model, startDirection)
+            //iotv_event_data.h
+            model: ["NONE", "RX", "TX", "ANY", "CHANGE"]
+            currentIndex: startIndex(model, event.directionStr)
 
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: 20
+            }
+
+            onCurrentIndexChanged: {
+                event.directionStr = direction.model[currentIndex]
             }
         }
     }
@@ -48,7 +47,6 @@ Column {
         width: parent.width
 
         Text {
-            id: conditionText
             text: "Условие:"
             anchors {
                 verticalCenter: parent.verticalCenter
@@ -58,30 +56,48 @@ Column {
         }
 
         ComboBox {
-            id: compareTypeComboBox
-            width: 200
+            id: compareType
+            width: parent.width / 2
 
+            // ConfigTypes.h struct Json_Event_Action
             model: ["==", "!=", ">", "<", ">=", "<=", "always true", "always false"]
-            currentIndex: startIndex(model, startCompare)
+            currentIndex: startIndex(model, event.compare)
 
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: 20
             }
+
+            onCurrentIndexChanged: {
+                event.compare = compareType.model[currentIndex]
+            }
         }
     }
 
     DataString {
         id: _data
-        visible: !((compareTypeComboBox.currentText === compareTypeComboBox.model[6]) || (compareTypeComboBox.currentText === compareTypeComboBox.model[7]))
+        visible: !((compareType.currentText === compareType.model[6]) || (compareType.currentText === compareType.model[7]))
         width: parent.width
+        text: event.dataStr
+
+        onSignalTextEdited: {
+            event.dataStr = text
+        }
     }
 
     ChannelNumber {
         id: chNum
         label: "№ канала"
         width: parent.width
+        value: event.chNum
+
+        onSignalNumberChanged: {
+            event.chNum = value
+        }
+    }
+
+    Component.onCompleted: {
     }
 
     function startIndex(model, textItem)
@@ -93,13 +109,5 @@ Column {
         var index = model.findIndex(found)
 
         return index === -1 ? 0 : index
-    }
-
-    function compare() {
-        return compareTypeComboBox.currentText
-    }
-
-    function direction() {
-        return directionTypeComboBox.currentText
     }
 }

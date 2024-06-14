@@ -9,7 +9,7 @@
 const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss:zzz - ";
 std::mutex Log::_mutex;
 
-const int MAX_STRING_SIZE = 200;
+const int MAX_STRING_SIZE = 2000000;
 
 void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
 {

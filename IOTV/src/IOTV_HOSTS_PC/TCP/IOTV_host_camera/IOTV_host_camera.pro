@@ -10,16 +10,16 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        ../../../lib/Protocols/embedded/IOTV_SH.cpp \
-        ../../../lib/Protocols/embedded/creatorpkgs.cpp \
-        ../../../lib/Protocols/embedded/header.cpp \
-        ../../../lib/Protocols/embedded/identification.cpp \
-        ../../../lib/Protocols/embedded/iotv_server_embedded.cpp \
-        ../../../lib/Protocols/embedded/read_write.cpp \
-        ../../../lib/Protocols/embedded/state.cpp \
-        ../../../lib/Protocols/embedded/tech.cpp \
-        ../../../lib/Protocols/embedded/host_broadcast.cpp  \
-        ../../../lib/Protocols/embedded/log_data.cpp  \
+        ../../../lib/Protocols/embedded/IOTV_SH.c \
+        ../../../lib/Protocols/embedded/creatorpkgs.c \
+        ../../../lib/Protocols/embedded/header.c \
+        ../../../lib/Protocols/embedded/identification.c \
+        ../../../lib/Protocols/embedded/iotv_server_embedded.c \
+        ../../../lib/Protocols/embedded/read_write.c \
+        ../../../lib/Protocols/embedded/state.c \
+        ../../../lib/Protocols/embedded/tech.c \
+        ../../../lib/Protocols/embedded/host_broadcast.c  \
+        ../../../lib/Protocols/embedded/log_data.c  \
         main.cpp \
         widget.cpp
 

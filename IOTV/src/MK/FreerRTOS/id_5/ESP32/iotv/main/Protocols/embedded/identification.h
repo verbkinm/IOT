@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct Identification
 {
     uint16_t id;
@@ -20,10 +25,14 @@ struct Identification
     uint8_t *readChannelType;
 };
 
-uint64_t identificationCheckSum(const struct Identification *);
-uint64_t identificationSize(const struct Identification *);
+uint64_t identificationCheckSum(const struct Identification *body);
+uint64_t identificationSize(const struct Identification *body);
 uint64_t identificationToData(const struct Identification *body, char *outData, uint64_t outDataSize);
 void clearIdentification(struct Identification *ident);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // IDENTIFICATION_H
 

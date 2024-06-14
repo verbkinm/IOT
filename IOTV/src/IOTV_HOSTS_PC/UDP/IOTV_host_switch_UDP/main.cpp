@@ -25,7 +25,7 @@ uint8_t writeType[3] = {DATA_TYPE_BOOL, DATA_TYPE_BOOL, DATA_TYPE_BOOL};
 
 QByteArray buffer;
 
-struct IOTV_Server_embedded iot = {
+iotv_obj_t iot = {
     .id = 1,
     .numberReadChannel = 3,
     .numberWriteChannel = 3,
@@ -69,7 +69,7 @@ void slotDataRecived()
     {
         memcpy(recivedBuffer, buffer.data(), buffer.size());
 
-        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
+        header_t* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -90,16 +90,16 @@ void slotDataRecived()
 
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, Identification_FLAGS_NONE);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
                 socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)

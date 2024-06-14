@@ -9,6 +9,9 @@ IOTV_Action_MSG::IOTV_Action_MSG(const QString &msg, QObject *parent) :
 
 void IOTV_Action_MSG::exec()
 {
+    if (!isEnable()  || !isValid())
+        return;
+
     Log::write(_msg, Log::Write_Flag::STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 }
 

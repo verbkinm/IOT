@@ -5,12 +5,15 @@ Item {
     property alias label: chNumberText.text
     property alias value: chNumberSpinBox.value
 
+    signal signalNumberChanged();
+
     height: 50
-    width: 400//parent.width
+    width: 400
 
     Text {
         id: chNumberText
         text: "№ канала:"
+        width: parent.width / 2
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -20,7 +23,7 @@ Item {
 
     SpinBox {
         id: chNumberSpinBox
-        width: 200
+        width: parent.width / 2
         from: 0
         to: 255
 
@@ -28,6 +31,10 @@ Item {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 20
+        }
+
+        onValueChanged: {
+            signalNumberChanged()
         }
     }
 }

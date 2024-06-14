@@ -9,7 +9,7 @@
 #include "Global_def.h"
 
 struct THP {
-	double temperature,
+	float temperature,
 		   humidity,
 		   pressure;
 	bool err;

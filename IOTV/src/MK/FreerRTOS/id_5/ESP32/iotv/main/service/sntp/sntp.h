@@ -12,9 +12,10 @@
 #include "freertos/task.h"
 #include "esp_sntp.h"
 #include "esp_netif_sntp.h"
+#include "esp_log.h"
 
 #include "Global_def.h"
-#include "I2C/DS3231.h"
+#include "Local_Lib/local_lib.h"
 
 void sntp_service_task(void *pvParameters);
 void sntp_obtain_time(void);

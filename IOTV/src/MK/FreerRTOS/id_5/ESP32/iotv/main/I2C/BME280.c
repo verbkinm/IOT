@@ -73,9 +73,9 @@ static bool BME280_state = false;
 static void BME280_writeReg(uint8_t reg, uint8_t value);
 static uint8_t BME280_readReg(uint8_t reg);
 
-static double BME280_temperature(void);
-static double BME280_pressure(void);
-static double BME280_humidity(void);
+static float BME280_temperature(void);
+static float BME280_pressure(void);
+static float BME280_humidity(void);
 
 void BME280_init(void)
 {
@@ -99,8 +99,6 @@ void BME280_init(void)
 	BME280_writeReg(CTRL_HUM, 0b101);
 	BME280_writeReg(CTRL_MEAS, 0b10110111); // 101 101 11
 	BME280_writeReg(CONFIG, 0b11110000); // 111 100 00
-
-	return;
 }
 
 void BME280_deinit(void)
@@ -170,7 +168,7 @@ struct THP BME280_readValues(void)
 	return thp;
 }
 
-static double BME280_temperature(void)
+static float BME280_temperature(void)
 {
 	uint8_t counter = 0;
 	while ((BME280_readReg(_STATUS) & 0b1001) != 0)
@@ -210,7 +208,7 @@ static double BME280_temperature(void)
 	return temperature;
 }
 
-static double BME280_pressure(void)
+static float BME280_pressure(void)
 {
 	uint8_t msb = BME280_readReg(PRESS_MSB);
 	uint8_t lsb = BME280_readReg(PRESS_LSB_);
@@ -255,7 +253,7 @@ static double BME280_pressure(void)
 	return pressure;
 }
 
-static double BME280_humidity(void)
+static float BME280_humidity(void)
 {
 	uint8_t msb = BME280_readReg(HUM_MSB);
 	uint8_t lsb = BME280_readReg(HUM_LSB);

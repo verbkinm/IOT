@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 enum DATA_TYPE
 {
     DATA_TYPE_INT_8 = 0,
@@ -23,7 +28,7 @@ enum DATA_TYPE
 };
 
 struct RawEmbedded {
-    uint64_t dataSize;
+    uint32_t dataSize;
     char *data;
 };
 
@@ -46,11 +51,16 @@ struct IOTV_Server_embedded
     char *name;
     char *description;
 };
+typedef struct IOTV_Server_embedded iotv_obj_t;
 
 int8_t dataSizeonDataType(uint8_t type);
 bool byteOrderReversebleData(uint8_t type);
-void clearIOTV_Server(struct IOTV_Server_embedded *iot);
+void clear_iotv_obj(iotv_obj_t *iot);
 
-uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const struct IOTV_Server_embedded *iot, uint8_t channelNumber);
+uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const iotv_obj_t *iot, uint8_t channelNumber);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // IOTV_SERVER_EMBEDDED_H

@@ -65,15 +65,15 @@ void MainWindow::printIdentificationData(const Identification *body)
     result += "\tКаналы записи:\n";
     for (int i = 0; i < body->numberWriteChannel; ++i)
     {
-        Raw raw(static_cast<Raw::DATA_TYPE>(body->writeChannelType[i]));
-        result += "\t\tКанал " + QString::number(i) + ":\t" + raw.strData().second + "\n";
+//        Raw raw(static_cast<Raw::DATA_TYPE>(body->writeChannelType[i]));
+        result += "\t\tКанал " + QString::number(i) + ":\t" + Raw::strType(static_cast<Raw::DATA_TYPE>(body->writeChannelType[i])) + "\n";
     }
 
     result += "\tКаналы чтения:\n";
     for (int i = 0; i < body->numberReadChannel; ++i)
     {
-        Raw raw(static_cast<Raw::DATA_TYPE>(body->readChannelType[i]));
-        result += "\t\tКанал " + QString::number(i) + ":\t" + raw.strData().second + "\n";
+//        Raw raw(static_cast<Raw::DATA_TYPE>(body->readChannelType[i]));
+        result += "\t\tКанал " + QString::number(i) + ":\t" + Raw::strType(static_cast<Raw::DATA_TYPE>(body->writeChannelType[i])) + "\n";
     }
 
     ui->convertText->appendPlainText(result);

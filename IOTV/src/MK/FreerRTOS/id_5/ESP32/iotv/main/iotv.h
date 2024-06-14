@@ -17,11 +17,9 @@
 
 #include "I2C/BME280.h"
 #include "I2C/VL6180X_Simple.h"
-#include "I2C/DS3231.h"
 #include "nvs/local_nvs.h"
 
-
-void iotv_init(void);
+esp_err_t iotv_init(void);
 void iotv_data_recived(const char *data, int size, int sock);
 
 void iotv_clear_buf_data(void);

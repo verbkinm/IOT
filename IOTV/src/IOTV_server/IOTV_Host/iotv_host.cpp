@@ -1,19 +1,13 @@
 #include "iotv_host.h"
 
 #include <QFileInfo>
-
-//QString IOTV_Host::logName()
-//{
-//    return QFileInfo(_logDir, QDate::currentDate().toString("yyyy-MM-dd")).absoluteFilePath() + ".log";
-//}
+#include <QDate>
 
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)),
     _settingsData(settingsData),
     _counterState(0), _counterPing(0)
 {
-    //    QDir dir(settingsData.at(hostField::logDir));
-    //    _logFile = QFileInfo(dir, settingsData.at(hostField::name)).absoluteFilePath() + ".log";
     shareConstructor();
     makeConnType();
 }
@@ -29,8 +23,8 @@ IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, Q
 
 void IOTV_Host::shareConstructor()
 {
-    _timerState.setParent(this);
     _timerReRead.setParent(this);
+    _timerState.setParent(this);
     _timerPing.setParent(this);
 
     auto interval = _settingsData[hostField::interval].toUInt();
@@ -48,23 +42,30 @@ void IOTV_Host::shareConstructor()
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
+
+    connect(this, &IOTV_Host::signalAddStreamRead, this, &IOTV_Host::slotAddStreamRead, Qt::QueuedConnection);
+    connect(this, &IOTV_Host::signalRemoveStreamRead, this, &IOTV_Host::slotRemoveStreamRead, Qt::QueuedConnection);
 }
 
 IOTV_Host::~IOTV_Host()
 {
-    //    qDebug() << "IOTV_Host destruct";
+    qDebug() << "IOTV_Host destruct";
 }
 
-void IOTV_Host::responceIdentification(const struct Header *header)
+void IOTV_Host::responceIdentification(const header_t *header)
 {
+//    qDebug() << __FUNCTION__;
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
     const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
 
     this->setId(pkg->id);
-    // На данный момент имя константное и считывается с файла настроек
-    // this->setNname
+
+    QString name = QByteArray(pkg->name, pkg->nameSize);
+    this->setName(name);
+    _logDir.setPath(name);
+
     this->setDescription(QByteArray{pkg->description, pkg->descriptionSize});
     this->removeAllSubChannel();
 
@@ -83,22 +84,26 @@ void IOTV_Host::responceIdentification(const struct Header *header)
     emit signalIdentRecived();
 }
 
-void IOTV_Host::responceState(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responceState(const iotv_obj_t *iot)
 {
     Q_ASSERT(iot != nullptr);
-    setState(static_cast<State_STATE>(iot->state));
+    setState(static_cast<state_t>(iot->state));
     _counterState = 0;
 }
 
-void IOTV_Host::responceRead(const struct Header *header)
+void IOTV_Host::responceRead(const header_t *header)
 {
-    //    qDebug() << "PKG " << header->fragment << "/" << header->fragments;
     Q_ASSERT(header != nullptr);
     Q_ASSERT(header->pkg != nullptr);
 
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
 
     uint8_t channelNumber = pkg->channelNumber;
+
+//    if (channelNumber == 40)
+//    {
+////        printf("it = NULL\n");
+//    }
 
     if (_streamRead.count(channelNumber))
     {
@@ -109,8 +114,10 @@ void IOTV_Host::responceRead(const struct Header *header)
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
     this->setReadChannelData(channelNumber, data);
 
-//    if (_logDir.isEmpty())
-//        return;
+//    if (channelNumber == 40)
+//    {
+//        qDebug() << getReadChannelData(40).size() << getReadChannelData(40);
+//    }
 
     // Не записываем в лог сырые данные
     if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
@@ -121,22 +128,22 @@ void IOTV_Host::responceRead(const struct Header *header)
                    + QString::number(pkg->channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logName());
+               Log::Write_Flag::FILE, logName(pkg->channelNumber));
 }
 
-void IOTV_Host::responceWrite(const struct IOTV_Server_embedded *iot) const
+void IOTV_Host::responceWrite(const iotv_obj_t *iot) const
 {
     Q_ASSERT(iot != nullptr);
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPong(const struct IOTV_Server_embedded *iot)
+void IOTV_Host::responcePingPong(const iotv_obj_t *iot)
 {
     Q_ASSERT(iot != nullptr);
     _counterPing = 0;
 }
 
-qint64 IOTV_Host::read(uint8_t channelNumber, ReadWrite_FLAGS flags)
+qint64 IOTV_Host::read(uint8_t channelNumber, readwrite_flag_t flags)
 {
     char outData[BUFSIZ];
     auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, flags);
@@ -149,7 +156,7 @@ qint64 IOTV_Host::readAll()
     return read(0, ReadWrite_FLAGS_IGNORE_CH);
 }
 
-qint64 IOTV_Host::write(uint8_t channelNumber, const QByteArray &data)
+qint64 IOTV_Host::write(uint8_t channelNumber, QByteArray data)
 {
     if ((channelNumber >= this->getWriteChannelLength()))
         return -1;
@@ -171,8 +178,6 @@ QByteArray IOTV_Host::readData(uint8_t channelNumber) const
 
 qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
 {
-    std::lock_guard lg(_mutexWrite);
-
     // Перехват любой отправки данных, если id ещё не установлен
     if (getId() == 0)
     {
@@ -207,7 +212,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
 
     while (_buff.size() > 0)
     {
-        struct Header* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
+        header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -237,14 +242,13 @@ void IOTV_Host::slotDataResived(QByteArray data)
                 responcePingPong(iot);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
             {
-
                 iot->state = static_cast<const struct State *>(header->pkg)->state;
                 responceState(iot);
             }
             //            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
             //                ;
 
-            clearIOTV_Server(iot);
+            clear_iotv_obj(iot);
         }
         else if (header->type == HEADER_TYPE_REQUEST)
         {
@@ -264,6 +268,11 @@ QString IOTV_Host::getName() const
         return _conn_type->getName();
 
     return {};
+}
+
+void IOTV_Host::setName(const QString &name)
+{
+    _conn_type->setName(name);
 }
 
 //!!!
@@ -308,11 +317,10 @@ void IOTV_Host::makeConnType()
     else
         Q_ASSERT(false);
 
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &Base_Host::signalConnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &Base_Host::signalDisconnected, Qt::QueuedConnection);
-    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived, Qt::QueuedConnection);
-    connect(this, &IOTV_Host::signalDevicePingTimeOut, _conn_type.get(), &Base_conn_type::connectToHost, Qt::QueuedConnection);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &IOTV_Host::slotConnected);
+    connect(_conn_type.get(), &Base_conn_type::signalConnected, this, &Base_Host::signalConnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDisconnected, this, &Base_Host::signalDisconnected);
+    connect(_conn_type.get(), &Base_conn_type::signalDataRiceved, this, &IOTV_Host::slotDataResived);
 
     _conn_type->connectToHost();
 }
@@ -324,7 +332,6 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
 
 bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 {
-    std::lock_guard lg(_mutexStreamRead);
     char outData[BUFSIZ];
     bool result = false;
 
@@ -350,7 +357,6 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 
 void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
 {
-    std::lock_guard lg(_mutexStreamRead);
     char outData[BUFSIZ];
 
     if (_streamRead.count(channel) == 0)
@@ -364,7 +370,6 @@ void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
         auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
         writeToRemoteHost({outData, static_cast<int>(size)}, size);
     }
-
 }
 
 QString IOTV_Host::getAddress() const
@@ -400,6 +405,7 @@ void IOTV_Host::slotStateTimeOut()
 
 void IOTV_Host::slotPingTimeOut()
 {
+    //    qDebug() << "ping";
     ++_counterPing;
 
     char outData[BUFSIZ];
@@ -411,14 +417,15 @@ void IOTV_Host::slotPingTimeOut()
         Log::write(_conn_type->getName() + " WARRNING: ping timeout",
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
+        _conn_type->connectToHost();
         emit signalDevicePingTimeOut();
         _counterPing = 0;
     }
 }
 
-void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
+void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
 {
-    write(channelNumber, data);
+    write(channelNumber, std::move(data));
 
     // Не записываем в лог сырые данные
     if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
@@ -429,11 +436,12 @@ void IOTV_Host::slotQueryWrite(int channelNumber, const QByteArray &data)
                    + QString::number(channelNumber)
                    + "="
                    + raw.strData().first,
-               Log::Write_Flag::FILE, logName());
+               Log::Write_Flag::FILE, logName(channelNumber));
 }
 
 void IOTV_Host::slotConnected()
 {
+    //    qDebug() << this->thread() << _timerPing.thread();
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
@@ -449,4 +457,18 @@ void IOTV_Host::slotConnected()
 void IOTV_Host::slotDisconnected()
 {
     _conn_type->disconnectFromHost();
+}
+
+void IOTV_Host::slotAddStreamRead(uint8_t channel, QObject *client)
+{
+    if (addStreamRead(channel, client) == false)
+    {
+        QString msg = "Add read stream wrong. Channel #" + QString::number(channel);
+        Log::write(msg, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+    }
+}
+
+void IOTV_Host::slotRemoveStreamRead(uint8_t channel, QObject *client)
+{
+    removeStreamRead(channel, client);
 }

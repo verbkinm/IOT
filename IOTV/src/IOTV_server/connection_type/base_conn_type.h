@@ -24,6 +24,8 @@ public:
     static constexpr int BUFFER_MAX_SIZE = BUFSIZ;
 
     QString getName() const;
+    void setName(const QString &newName);
+
     QString getAddress() const;
     Conn_type getConnectionType() const;
 
@@ -38,14 +40,12 @@ public:
 
     uint64_t expectedDataSize;
 
+
 protected:
-    const QString _name;
+    QString _name;
     QString _address;
     QString _logFile;
     Conn_type _type;
-//    QByteArray _host_buffer_data;
-
-    std::mutex _hostBuffMutex;
 
     virtual QByteArray readAll();
 
@@ -56,5 +56,6 @@ signals:
     void signalConnected();
     void signalDisconnected();
 
+    // отлавливается в iotv_hosts
     void signalDataRiceved(QByteArray);
 };

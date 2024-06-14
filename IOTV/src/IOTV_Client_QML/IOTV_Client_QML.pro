@@ -17,17 +17,16 @@ SOURCES += \
         ../lib/Events/events/iotv_event_timer.cpp \
         ../lib/Events/iotv_event_manager.cpp \
         ../lib/Json_Parsers/event_action_parser.cpp \
-        ../lib/Protocols/embedded/IOTV_SH.cpp \
-        ../lib/Protocols/embedded/creatorpkgs.cpp \
-        ../lib/Protocols/embedded/header.cpp \
-        ../lib/Protocols/embedded/identification.cpp \
-        ../lib/Protocols/embedded/iotv_server_embedded.cpp \
-        ../lib/Protocols/embedded/iotvp_print.cpp \
-        ../lib/Protocols/embedded/read_write.cpp \
-        ../lib/Protocols/embedded/state.cpp \
-        ../lib/Protocols/embedded/tech.cpp \
-        ../lib/Protocols/embedded/host_broadcast.cpp  \
-        ../lib/Protocols/embedded/log_data.cpp  \
+        ../lib/Protocols/embedded/IOTV_SH.c \
+        ../lib/Protocols/embedded/creatorpkgs.c \
+        ../lib/Protocols/embedded/header.c \
+        ../lib/Protocols/embedded/identification.c \
+        ../lib/Protocols/embedded/iotv_server_embedded.c \
+        ../lib/Protocols/embedded/read_write.c \
+        ../lib/Protocols/embedded/state.c \
+        ../lib/Protocols/embedded/tech.c \
+        ../lib/Protocols/embedded/host_broadcast.c  \
+        ../lib/Protocols/embedded/log_data.c  \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
@@ -59,7 +58,6 @@ HEADERS += \
     ../lib/Protocols/embedded/header.h \
     ../lib/Protocols/embedded/identification.h \
     ../lib/Protocols/embedded/iotv_server_embedded.h \
-    ../lib/Protocols/embedded/iotvp_print.h \
     ../lib/Protocols/embedded/read_write.h \
     ../lib/Protocols/embedded/state.h \
     ../lib/Protocols/embedded/tech.h \

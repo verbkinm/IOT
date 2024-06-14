@@ -3,7 +3,7 @@
 #include "iotv_server_embedded.h"
 
 Base_Host::Base_Host(uint16_t id, QObject *parent) : QObject(parent),
-    _id(id), _description("None"), _state(State_STATE::State_STATE_OFFLINE)
+    _id(id), _description("None"), _state(state_t::State_STATE_OFFLINE)
 {
 
 }
@@ -109,7 +109,7 @@ void Base_Host::setDescription(const QString &description)
     _description = description;
 }
 
-void Base_Host::setState(State_STATE newState)
+void Base_Host::setState(state_t newState)
 {
     if (newState != State_STATE_ONLINE && newState != State_STATE_OFFLINE)
     {
@@ -129,7 +129,7 @@ void Base_Host::setState(State_STATE newState)
     }
 }
 
-State_STATE Base_Host::state() const
+state_t Base_Host::state() const
 {
     return _state;
 }
@@ -144,14 +144,14 @@ QString Base_Host::getDescription() const
     return _description;
 }
 
-struct IOTV_Server_embedded *Base_Host::convert() const
+iotv_obj_t *Base_Host::convert() const
 {
     uint8_t nameSize = strlen(getName().toStdString().c_str());
     uint16_t descriptionSize = strlen(getDescription().toStdString().c_str());
     auto numberReadChannel = getReadChannelLength();
     auto numberWriteChannel = getWriteChannelLength();
 
-    struct IOTV_Server_embedded *iot = static_cast<struct IOTV_Server_embedded *>(malloc(sizeof(struct IOTV_Server_embedded)));
+    iotv_obj_t *iot = static_cast<iotv_obj_t *>(malloc(sizeof(iotv_obj_t)));
     if (iot == nullptr)
         return nullptr;
 
@@ -169,15 +169,26 @@ struct IOTV_Server_embedded *Base_Host::convert() const
 
     //!!! сделать проверку на выделение памяти в  iot
 
-    if (nameSize > 0)
+    if (nameSize > 0 && iot->name != NULL)
         memcpy(const_cast<char *>(iot->name), getName().toStdString().c_str(), nameSize);
-    if (descriptionSize > 0)
+    if (descriptionSize > 0 && iot->description != NULL)
         memcpy(const_cast<char *>(iot->description), getDescription().toStdString().c_str(), descriptionSize);
 
     for (uint8_t i = 0; i < iot->numberReadChannel; ++i)
     {
+//        if (i == 14)
+//        {
+//            qDebug() << getReadChannelData(14).size();
+//        }
+
         auto t = getReadChannelType(i);
-        auto dataSize = dataSizeonDataType(static_cast<uint8_t>(t));
+        uint32_t dataSize = 0;
+
+        if (t == Raw::DATA_TYPE::STRING)
+            dataSize = _readChannel.getData(i).size();
+        else
+            dataSize = dataSizeonDataType(static_cast<uint8_t>(t));
+
         auto byteArr = getReadChannelData(i);
         if (numberReadChannel > 0 /*&& dataSize > 0*/)
         {
@@ -185,6 +196,9 @@ struct IOTV_Server_embedded *Base_Host::convert() const
                 iot->readChannel[i].data = static_cast<char *>(malloc(dataSize));
             else
                 iot->readChannel[i].data = nullptr;
+
+            if (iot->readChannel[i].data == nullptr)
+                dataSize = 0;
 
             iot->readChannel[i].dataSize = dataSize;
 

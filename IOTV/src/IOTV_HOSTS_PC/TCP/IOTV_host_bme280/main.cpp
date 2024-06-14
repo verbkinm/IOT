@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QTimer>
 
 #include <iostream>
 
@@ -11,6 +12,8 @@
 
 QTcpServer *server = nullptr;
 QTcpSocket *socket = nullptr;
+
+QTimer *timer = nullptr;
 
 char recivedBuffer[BUFSIZ], transmitBuffer[BUFSIZ];
 uint64_t realBufSize = 0;
@@ -25,7 +28,7 @@ uint8_t readType[3] = {DATA_TYPE_FLOAT_32, DATA_TYPE_FLOAT_32, DATA_TYPE_FLOAT_3
 
 QByteArray buffer;
 
-struct IOTV_Server_embedded iot = {
+iotv_obj_t iot = {
     .id = 2,
     .numberReadChannel = 3,
     .numberWriteChannel = 0,
@@ -66,7 +69,7 @@ void slotDataRecived()
     {
         memcpy(recivedBuffer, buffer.data(), buffer.size());
 
-        struct Header* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
+        header_t* header = createPkgs((uint8_t*)recivedBuffer, buffer.size(), &error, &expextedDataSize, &cutDataSize);
 
         if (error == true)
         {
@@ -84,16 +87,16 @@ void slotDataRecived()
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, 0);
+                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, Identification_FLAGS_NONE);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
-                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket);
+                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header);
+                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
                 socket->write(transmitBuffer, size);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
@@ -136,8 +139,24 @@ void slotNewConnection()
     QObject::connect(socket, &QTcpSocket::disconnected, &QObject::deleteLater);
 }
 
+void slotTimerOut()
+{
+    float t = (rand() % (2500 - (1800) + 1) + (1800)) / 100.0;
+    memcpy(iot.readChannel[0].data, &t, iot.readChannel[0].dataSize);
+
+    float h = (rand() % (10000 - 7000 + 1) + 7000) / 100.0;
+    memcpy(iot.readChannel[1].data, &h, iot.readChannel[1].dataSize);
+
+    float p = (rand() % (76000 - (73000) + 1) + (73000)) / 100.0;
+    memcpy(iot.readChannel[2].data, &p, iot.readChannel[2].dataSize);
+
+//    qDebug() << t << h << p;
+}
+
 int main(int argc, char *argv[])
 {
+    srand(time(0));
+
     QCoreApplication a(argc, argv);
 
     iot.readChannel = (struct RawEmbedded*)malloc(sizeof(struct RawEmbedded) * 3);
@@ -166,6 +185,12 @@ int main(int argc, char *argv[])
 
     server->listen(QHostAddress("127.0.0.1"), 2025);
     std::cout << "Start service on 127.0.0.1:2025" << std::endl;
+
+    timer = new QTimer;
+
+    QObject::connect(timer, &QTimer::timeout, slotTimerOut);
+
+    timer->start(500);
 
     return a.exec();
 }

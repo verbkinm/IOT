@@ -99,10 +99,12 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
             return nullptr;
         }
 
-        host = new IOTV_Host(setting, socket, th);
+        host = new IOTV_Host(setting, socket);//, th);
     }
     else
-        host = new IOTV_Host(setting, th);
+        host = new IOTV_Host(setting);//, th);
+
+    host->moveToThread(th);
 
     th->start();
     add_to_iot_hosts[host] = th;
@@ -114,7 +116,9 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
                    ServerLog::DEFAULT_LOG_FILENAME);
 
         add_to_iot_hosts.erase(host);
+        //!!! deleteLater
         delete th;
+        delete host;
 
         return nullptr;
     }
@@ -123,7 +127,6 @@ IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_i
 }
 
 IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &add_to_iot_client, uint maxClientCount,
-                                const std::unordered_map<IOTV_Host *, QThread *> &iot_hosts,
                                 QTcpSocket *socket, QObject *parent)
 {
     if (!socket)
@@ -151,18 +154,24 @@ IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &ad
     }
 
     QThread *th = new QThread(parent);
-    IOTV_Client *client = new IOTV_Client(socket, iot_hosts, th);
-    th->start();
+    IOTV_Client *client = new IOTV_Client(socket);//, th);
+    client->moveToThread(th);
 
-    add_to_iot_client[client] = th;
+    th->start();
 
     if (!th->isRunning())
     {
-        Log::write(QString(Q_FUNC_INFO) + " Error: Can't run IOT_Client in new thread ",
+        Log::write(QString(Q_FUNC_INFO) + " Ошибка: невозможно запустить IOT_Client в новом потоке!",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
+
+        delete th;
+        delete client;
+
         return nullptr;
     }
+
+    add_to_iot_client[client] = th;
 
     return client;
 }
@@ -182,7 +191,7 @@ IOTV_Host *Maker_iotv::host_broadcast(QUdpSocket *socket,
     bool error;
     uint64_t cutDataSize, expectedDataSize;
 
-    struct Header *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
+    header_t *header = createPkgs(reinterpret_cast<uint8_t *>(data.data()), data.size(), &error, &expectedDataSize, &cutDataSize);
 
     if (error == true)
     {

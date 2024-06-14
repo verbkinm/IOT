@@ -2,8 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Item {
-    property alias comboBox: stateTypeComboBox
-    property string startState: ""
+    required property var event
 
     id: itemStateType
     height: 50
@@ -11,6 +10,7 @@ Item {
 
     Text {
         text: "Тип состояния:"
+        width: parent.width / 2
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -20,15 +20,20 @@ Item {
 
     ComboBox {
         id: stateTypeComboBox
-        width: 200
+        width: parent.width / 2
 
-        model: ["online", "offline", "switch"]
-        currentIndex: startIndex(model, startState)
+        // iotv_event_state.h
+        model: ["NONE", "ONLINE", "OFFLINE", "SWITCH"]
+        currentIndex: startIndex(model, event.state)
 
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
             rightMargin: 20
+        }
+
+        onCurrentIndexChanged: {
+            event.state = model[currentIndex]
         }
     }
 

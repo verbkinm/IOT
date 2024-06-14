@@ -19,6 +19,7 @@ Rectangle {
         font.pixelSize: 14
         horizontalAlignment: Text.AlignHCenter
         placeholderText: "Имя устройства"
+        readOnly: true
 
         anchors {
             left: parent.left

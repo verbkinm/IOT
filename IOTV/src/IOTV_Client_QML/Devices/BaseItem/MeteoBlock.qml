@@ -92,8 +92,6 @@ Item {
         temperature.text = temperatureValue()
         humidity.text = humidityValue()
         pressure.text = pressureValue()
-
-//        console.log(column.height)
     }
     Component.onDestruction: {
         console.log("Destruct MeteoBlock")

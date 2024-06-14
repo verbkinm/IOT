@@ -14,7 +14,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("IOTV Client")
 
-    minimumWidth: 400
+    minimumWidth: 200
     minimumHeight: 400
 
     //! [orientation]
@@ -164,7 +164,7 @@ ApplicationWindow {
                     glob_swipeView.focus = true // для glob_swipeView Keys.onEscapePressed:
                 }
 
-                EventsPageModule.Events {
+                EventsPageModule.EventsAndActions {
                     //                    anchors.fill: parent
                     id: eventsPage
                     objectName: "Events"

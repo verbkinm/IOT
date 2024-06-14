@@ -3,6 +3,7 @@
 #include <QObject>
 
 #include "channel.h"
+#include "iotv_server_embedded.h"
 #include "iotv_types.h"
 
 class Base_Host : public QObject
@@ -16,6 +17,7 @@ public:
     QString getDescription() const;
 
     virtual QString getName() const = 0;
+    virtual void setName(const QString &name) = 0;
 
     uint8_t getReadChannelLength() const;
     uint8_t getWriteChannelLength() const;
@@ -25,11 +27,11 @@ public:
 
     const QByteArray &getReadChannelData(uint8_t channelNumber) const;
     const Raw &getReadChannelDataRaw(uint8_t channelNumber) const;
+    
+    void setState(state_t newState);
+    state_t state() const;
 
-    void setState(State_STATE newState);
-    State_STATE state() const;
-
-    struct IOTV_Server_embedded *convert() const;
+    iotv_obj_t *convert() const;
 
     static constexpr uint16_t TIMER_READ_INTERVAL = 1000;
     static constexpr uint16_t TIMER_STATE_INTERVAL = 1000;
@@ -62,8 +64,8 @@ private:
 
     Channel _readChannel;
     Channel _writeChannel;
-
-    State_STATE _state;
+    
+    state_t _state;
 
 signals:
     void signalConnected();
@@ -73,8 +75,8 @@ signals:
 
     void signalStateOnline();
     void signalStateOffline();
-    void signalStateChanged(State_STATE);
-    void signalStateUnknow(State_STATE);
+    void signalStateChanged(state_t);
+    void signalStateUnknow(state_t);
 
     // получение сырых данных для формирования пакетов
     void signalDataRiceved(QByteArray);

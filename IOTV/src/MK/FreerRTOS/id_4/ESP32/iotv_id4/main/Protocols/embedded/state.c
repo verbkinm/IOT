@@ -1,5 +1,8 @@
 #include "state.h"
-#include <stdint.h>
+#include "iotv_types.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 uint64_t stateCheckSum(const struct State *body)
 {
@@ -28,9 +31,6 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     outData[0] = body->nameSize;
     outData[1] = body->state;
     outData[2] = body->flags;
-
-//    if (outDataSize < stateSize(body))
-//        return 0;
 
     uint32_t dataSize =  body->dataSize;
     memcpy(&outData[3], &dataSize, 4); // 4 - документация

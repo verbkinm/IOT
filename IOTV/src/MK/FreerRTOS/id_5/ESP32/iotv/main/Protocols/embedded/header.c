@@ -4,13 +4,15 @@
 #include "tech.h"
 #include "identification.h"
 #include "read_write.h"
+#include "host_broadcast.h"
 #include "state.h"
+#include "log_data.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
-uint64_t headerCheckSum(const struct Header *header)
+uint64_t headerCheckSum(const header_t *header)
 {
     if (header == NULL)
         return 0;
@@ -18,7 +20,7 @@ uint64_t headerCheckSum(const struct Header *header)
     return  header->version + header->type + header->assignment + header->flags + header->fragment + header->fragments + header->dataSize;
 }
 
-uint64_t headerDataSize(const struct Header *header)
+uint64_t headerDataSize(const header_t *header)
 {
     if (header == NULL || header->pkg == NULL)
         return 0;
@@ -46,7 +48,7 @@ uint64_t headerDataSize(const struct Header *header)
     return 0;
 }
 
-uint64_t headerSize(const struct Header *header)
+uint64_t headerSize(const header_t *header)
 {
     if (header == NULL)
         return 0;
@@ -54,7 +56,7 @@ uint64_t headerSize(const struct Header *header)
     return HEADER_SIZE + headerDataSize(header);
 }
 
-uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDataSize)
+uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize)
 {
     if ( header == NULL || outData == NULL)
         return 0;
@@ -93,6 +95,12 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
         case HEADER_ASSIGNMENT_TECH:
             result += techToData((const struct Tech *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
             break;
+        case HEADER_ASSIGNMENT_HOST_BROADCAST:
+            result += hostBroadCastToData((const struct Host_Broadcast *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            result += logDataToData((const struct Log_Data *)header->pkg, &outData[HEADER_SIZE], outDataSize - HEADER_SIZE);
+            break;
         default:
             break;
         }
@@ -101,7 +109,7 @@ uint64_t headerToData(const struct Header *header, char *outData, uint64_t outDa
     return result;
 }
 
-void clearHeader(struct Header *header)
+void clearHeader(header_t *header)
 {
     if (header == NULL)
         return;
@@ -123,6 +131,9 @@ void clearHeader(struct Header *header)
         case HEADER_ASSIGNMENT_TECH:
             clearTech((struct Tech *)header->pkg);
             break;
+        case HEADER_ASSIGNMENT_LOG_DATA:
+            clearLogData((struct Log_Data *)header->pkg);
+            break;
         default:
             break;
         }
@@ -135,7 +146,7 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
 {
     uint64_t maxDatainFrame = buffSize - offsetSize;
 
-    if (maxDatainFrame == 0)
+    if (maxDatainFrame == 0 || buffSize < offsetSize)
         return 0;
 
     uint64_t result = sendDataSize / maxDatainFrame;

@@ -17,7 +17,6 @@ public:
 
     static IOTV_Client *client(std::unordered_map<IOTV_Client*, QThread*> &add_to_iot_client,
                                         uint maxClientCount,
-                                        const std::unordered_map<IOTV_Host*, QThread*> &iot_hosts,
                                         QTcpSocket *socket, QObject *parent);
 
     static IOTV_Host *host_broadcast(QUdpSocket *socket,

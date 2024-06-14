@@ -16,6 +16,16 @@ Page {
     title: device.aliasName
     objectName: device.aliasName
 
+    Loader {
+        id: chartsLoader
+        property string title: "loaderTitle"
+
+        onVisibleChanged: {
+            if (this.visible === false)
+                chartsLoader.setSource("")
+        }
+    }
+
     header: Devices.DeviceHeader {
         id: headerPanel
     }
@@ -52,15 +62,37 @@ Page {
                 height: 300
 
                 device: root.device
-                channelTemperature: 12
-                channelHumidity: 13
-                channelPressure: 14
+                channelTemperature: 5
+                channelHumidity: 6
+                channelPressure: 7
+            }
+
+            Button {
+                id: btnCharts
+                width: 180
+                height: 60
+
+                highlighted: true
+                text: "График"
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: {
+                    chartsLoader.setSource("Log_Charts.qml", {"device": device})
+                    chartsLoader.title = "График " + device.aliasName
+                    glob_deviceStackView.push(chartsLoader)
+                }
+            }
+
+            onPositioningComplete: {
+                fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height + 15
             }
         }
     }
 
     Component.onCompleted: {
         console.log("Device 5 construct: ", objectName)
+        fl.contentHeight = column.height + column.topPadding + column.spacing + overlayHeader.height
     }
 
     Component.onDestruction: {

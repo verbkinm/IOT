@@ -43,8 +43,7 @@
         <file>Devices/Setting/Device/Device_5.qml</file>
         <file>Devices/BaseItem/MeteoBlock.qml</file>
         <file>Devices/BaseItem/MeteoBlock_Item.qml</file>
-        <file>Events/Events.qml</file>
-        <file>Events/AddEvent.qml</file>
+        <file>Events/EventsAndActions.qml</file>
         <file>img/settings_white.png</file>
         <file>img/calendar_white.png</file>
         <file>Events/BaseItem/ActionDataTX.qml</file>
@@ -53,15 +52,13 @@
         <file>Events/BaseItem/ChannelNumber.qml</file>
         <file>Events/BaseItem/DataString.qml</file>
         <file>Events/BaseItem/DataType.qml</file>
-        <file>Events/BaseItem/EventType.qml</file>
+        <file>Events/BaseItem/ObjType.qml</file>
         <file>Events/BaseItem/HorizontLine.qml</file>
         <file>Events/BaseItem/HostNameComboBox.qml</file>
         <file>Events/BaseItem/StateType.qml</file>
         <file>Events/BaseItem/EmptyItem.qml</file>
         <file>Events/EvActComponent.qml</file>
-        <file>Events/EvActList.qml</file>
         <file>Events/BaseItem/AlarmType.qml</file>
-        <file>Events/BaseItem/Round_Button.qml</file>
         <file>Devices/BaseItem/Led_state.qml</file>
         <file>img/id/5.png</file>
         <file>img/debug_white.png</file>
@@ -127,6 +124,35 @@
         <file>Devices/BaseItem/DatePicker.qml</file>
         <file>Devices/Device_2/Log_Charts.qml</file>
         <file>img/forward.png</file>
+        <file>Devices/Device_5/Log_Charts.qml</file>
+        <file>Devices/BaseItem/MyLegend.qml</file>
+        <file>img/zoom.png</file>
+        <file>img/zoom_white.png</file>
+        <file>img/id/9.png</file>
+        <file>BaseItem/ButtonShadow.qml</file>
+        <file>Events/EventsGroup/EventsGroup.qml</file>
+        <file>Events/ActionsGroup/ActionsGroup.qml</file>
+        <file>Events/EventsGroup/EventsList.qml</file>
+        <file>Events/ActionsGroup/ActionsList.qml</file>
+        <file>Events/EventsGroup/Event.qml</file>
+        <file>img/folder.png</file>
+        <file>img/calendar_color.png</file>
+        <file>BaseItem/GridList.qml</file>
+        <file>Events/EventsGroup/AddGroup.qml</file>
+        <file>Events/EventsGroup/EventGroupHeader.qml</file>
+        <file>img/events/state.png</file>
+        <file>img/folder_actions.png</file>
+        <file>img/folder_events.png</file>
+        <file>Events/BaseItem/OnOff.qml</file>
+        <file>Events/ActionsGroup/ActionGroupHeader.qml</file>
+        <file>img/actions/data_tx.png</file>
+        <file>img/actions/data_tx_ref.png</file>
+        <file>Events/ActionsGroup/AddGroup.qml</file>
+        <file>Events/ActionsGroup/Action.qml</file>
+        <file>Events/EventsGroup/CurrentConnectionGroupList.qml</file>
+        <file>Events/EventsGroup/CurrentConnectionList.qml</file>
+        <file>Events/EventsGroup/AddCurrentConnection_GroupList.qml</file>
+        <file>Events/EventsGroup/AddCurrentConnection_ActionList.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
 </RCC>

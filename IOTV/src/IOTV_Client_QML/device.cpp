@@ -1,10 +1,16 @@
 #include "device.h"
-#include "qdatetime.h"
+
+#include <QBuffer>
+#include <QDateTime>
+#include <QFile>
+
+#include <sstream>
 
 Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
     : Base_Host{static_cast<uint8_t>(dev->id), parent},
     _name{QByteArray{dev->name, dev->nameSize}},
-    _aliasName(_name)
+    _aliasName(_name),
+    _logDataOverflow(false)
 {
     Q_ASSERT(dev != nullptr);
 
@@ -50,11 +56,20 @@ void Device::update(const IOTV_Server_embedded *dev)
         }
         emit signalUpdate();
     }
+    else
+    {
+
+    }
 }
 
 QString Device::getName() const
 {
     return _name;
+}
+
+void Device::setName(const QString &name)
+{
+    _name = name;
 }
 
 bool Device::isOnline() const
@@ -94,6 +109,13 @@ void Device::setDataFromString(int channelNumber, QString data)
 
 QString Device::readData(int channelNumber) const
 {
+    QString str;
+    if (channelNumber == 15)
+    {
+        QByteArray data = getReadChannelData(channelNumber);
+        Raw::DATA_TYPE type = getReadChannelType(channelNumber);
+        str =  Raw::strData(data, type).first;
+    }
     QByteArray data = getReadChannelData(channelNumber);
     Raw::DATA_TYPE type = getReadChannelType(channelNumber);
     return Raw::strData(data, type).first;
@@ -154,36 +176,81 @@ float convert_range(float value, float From1, float From2, float To1, float To2)
 
 void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
 {
-    if (!_log_data_buf.contains(channelNumber))
-        return;
+//    auto start = std::chrono::system_clock::now();
 
-    auto list = _log_data_buf[channelNumber];
-
-//    std::unordered_map<float, float> uniqPoint;
-    QList<QPointF> points;
-
-    for (const auto &el : list)
+    if (!_log_data_buf.contains(channelNumber) || _log_data_buf[channelNumber].size() == 0)
     {
-        if (el.flags == flags)
-        {
-            uint64_t mDay = QDateTime::fromMSecsSinceEpoch(el.timeMS).time().msecsSinceStartOfDay();// / 1000;
-            float xVal = convert_range(mDay, 0, 86'400'000, 0, 24);
-            float yVal = el.data.toFloat();
-            points.append({xVal, yVal});
-//            uniqPoint[xVal] = yVal;
-        }
+        emit signalResponceLogData({}, channelNumber, flags);
+        return;
     }
+
+    QBuffer bufferFile(&_log_data_buf[channelNumber]);
+    bufferFile.open(QIODevice::ReadOnly);
+
+    //    QFile fileTmp("test_" + QString::number(channelNumber) + ".txt");
+    //    fileTmp.open(QIODevice::WriteOnly);
+    //    fileTmp.write(_log_data_buf[channelNumber].data(), _log_data_buf[channelNumber].size());
+    //    fileTmp.close();
+
+    std::map<uint64_t, float> uniqPoints;
+    while (!bufferFile.atEnd())
+    {
+        std::string line = bufferFile.readLine().toStdString();
+        std::stringstream stream(line);
+
+        float yVal = 0;
+        //        float xVal = 0;
+        uint64_t ms = 0;
+        std::string dataStr;
+        QString data;
+
+        stream >> ms >> dataStr;
+        data.append(dataStr);
+
+        if (stream.fail())
+        {
+//            qDebug() << Q_FUNC_INFO << "ошибка данных" << channelNumber;
+                continue;
+        }
+
+        Raw raw = getReadChannelDataRaw(channelNumber);
+        if (raw.isInt() || raw.isReal())
+            yVal = data.toFloat();
+        else if (raw.isBool())
+            yVal = data == "true" ? 1 : 0;
+
+        uniqPoints[ms] = yVal;
+    }
+    bufferFile.close();
     _log_data_buf.erase(channelNumber);
 
+    QList<QPointF> points;
+    points.emplace_back(uniqPoints.begin()->first, uniqPoints.begin()->second);
+    for (auto it = ++uniqPoints.begin(); it != uniqPoints.end(); it++)
+    {
+        auto prev = std::prev(it);
 
-//    for (auto it : uniqPoint)
-//    {
-//        points.append({it.first, it.second});
-//    }
+        if (it->second != prev->second)
+        {
+            points.emplace_back(prev->first, prev->second);
 
-    qDebug() << "Количество точек" << points.size();
+            if (it->second == std::next(it)->second)
+                points.emplace_back(it->first, it->second);
+        }
+    }
+    points.emplace_back(uniqPoints.rbegin()->first, uniqPoints.rbegin()->second);
 
+        qDebug() << "Количество точек list" << points.size();
+        qDebug() << "Количество точек map" << uniqPoints.size();
+
+    uniqPoints.clear();
+    //    for (auto [key, value] : uniqPoints)
+    //        points.append({key / roundOffset, value}); // не забываем вернуть запятую на место!
+
+//    qDebug() << "Количество точек" << points.size();
     emit signalResponceLogData(std::move(points), channelNumber, flags);
+
+//    qDebug() << "dataLogToPoints, channel - " << channelNumber << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
 }
 
 void Device::setReadInterval(int interval)
@@ -196,9 +263,9 @@ void Device::setState(bool newState)
     Base_Host *host = this;
 
     //!!! Дублируются сигналы в Device и в Base_Host
-    if (state() != static_cast<State_STATE>(newState))
+    if (state() != static_cast<state_t>(newState))
     {
-        host->setState(static_cast<State_STATE>(newState));
+        host->setState(static_cast<state_t>(newState));
         emit signalStateChanged();
     }
 }
@@ -236,24 +303,42 @@ void Device::setAliasName(const QString &newAliasName)
     emit signalAliasNameChanged();
 }
 
-void Device::addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags)
+void Device::addDataLog(uint8_t channelNumber, const QByteArray &data)
 {
-    Log_Data_Buff log_buf;
-    log_buf.timeMS = timeMS;
-    log_buf.data = data;
-    log_buf.flags = flags;
-    _log_data_buf[channelNumber].emplace_back(log_buf);
+    if ((_log_data_buf[channelNumber].size() + data.size()) <= LOG_DATA_MAX)
+    {
+        _log_data_buf[channelNumber].append(data);
+        _logDataOverflow = false;
+    }
+    else
+        _logDataOverflow = true;
 }
 
 void Device::clearDataLog(uint8_t channelNumber)
 {
-    _log_data_buf[channelNumber].clear();
+    _log_data_buf.erase(channelNumber);
+}
+
+bool Device::logDataOverflow() const
+{
+    return _logDataOverflow;
 }
 
 void Device::testFunc(Wrap_QByteArray *data)
 {
     qDebug() << "testFunc total data: " << data->data().size();
     //    delete data;
+}
+
+int Device::getLOG_DATA_MAX()
+{
+    return LOG_DATA_MAX;
+}
+
+void Device::fillSeries(QLineSeries *series, QList<QPointF> points)
+{
+    // намного быстрее добавляются точки, чем через qml series.append(x, y)
+    series->replace(points);
 }
 
 void Device::slotTimerReadTimeOut()

@@ -33,7 +33,7 @@ private:
     void readServerSettings();
     void readHostSetting();
 
-    void readEventActionJson();
+    QByteArray readEventActionJson();
     void writeEventActionJson(const QByteArray &data);
 
     void startTCPServers();
@@ -45,13 +45,14 @@ private:
 
     Base_Host *baseHostFromName(const QString &name) const;
 
-    void clientHostsUpdate() const;
+//    void clientHostsUpdate() const;
+    void clientHostsUpdate();
 
     // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
 
-    std::unordered_map<IOTV_Host* , QThread*> _iot_hosts;
-    std::unordered_map<IOTV_Client*, QThread*> _iot_clients;
+    std::unordered_map<IOTV_Host *, QThread *> _iot_hosts;
+    std::unordered_map<IOTV_Client *, QThread *> _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
 
@@ -64,7 +65,7 @@ private:
     uint _maxClientCount;
     uint _maxHostCount;
 
-    IOTV_Event_Manager *_eventManager;
+    std::shared_ptr<IOTV_Event_Manager> _eventManager;
 
     QTcpServer *_tcpClient;
     QTcpServer *_tcpReverseHost; // Hosts TCP_REVERSE conn type
@@ -80,12 +81,22 @@ private slots:
 
     void slotError(QAbstractSocket::SocketError error);
 
-    void slotFetchEventActionData(QByteArray data);
-    void slotQueryEventActionData();
+//    void slotFetchEventActionData(QByteArray data);
+//    void slotQueryEventActionData();
 
     void slotPendingDatagrams();
 
     void slotDevicePingTimeout();
+
+    void slotClientToServerQueryIdentification();
+    void slotClientToServerQueryRead(RAII_Header raii_header);
+    void slotClientToServerQueryWrite(RAII_Header raii_header);
+    void slotClientToServerQueryState(RAII_Header raii_header);
+    void slotClientToServerQueryTech(RAII_Header raii_header);
+    void slotClientToServerQueryLogData(RAII_Header raii_header);
+
+    void slotEvent(QString group, QString name, QString type);
+    void slotAction(QString group, QString name, QString type);
 
     void slotTest();
 };

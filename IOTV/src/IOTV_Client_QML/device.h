@@ -9,12 +9,6 @@
 #include "iotv_server_embedded.h"
 #include "wrap_qbytearray.h"
 
-struct Log_Data_Buff {
-    uint64_t timeMS;
-    QString data;
-    uint8_t flags;
-};
-
 class Device : public Base_Host
 {
     Q_OBJECT
@@ -28,12 +22,15 @@ class Device : public Base_Host
     Q_PROPERTY(int readChannelLength READ getReadChannelLength CONSTANT)
     Q_PROPERTY(int writeChannelLength READ getWriteChannelLength CONSTANT)
 
+    Q_PROPERTY(int logDataOverflow READ logDataOverflow CONSTANT)
+
 public:
     Device() = default;
-    explicit Device(const struct IOTV_Server_embedded *dev, QObject *parent = nullptr);
-    void update(const struct IOTV_Server_embedded *dev);
+    explicit Device(const iotv_obj_t *dev, QObject *parent = nullptr);
+    void update(const iotv_obj_t *dev);
 
     virtual QString getName() const override;
+    virtual void setName(const QString &name) override;
 
     bool isOnline() const;
     void setState(bool newState);
@@ -57,24 +54,32 @@ public:
     const QString &aliasName() const;
     void setAliasName(const QString &newAliasName);
 
-    void addDataLog(uint8_t channelNumber, uint64_t timeMS, const QString &data, uint8_t flags);
+    void addDataLog(uint8_t channelNumber, const QByteArray &data);
     void clearDataLog(uint8_t channelNumber);
+
+    bool logDataOverflow() const;
 
     Q_INVOKABLE void testFunc(Wrap_QByteArray *data);
 
+    Q_INVOKABLE static int getLOG_DATA_MAX();
+    Q_INVOKABLE void fillSeries(QLineSeries *series, QList<QPointF> points);
+
 private:
-    const QString _name;
+    QString _name;
     QString _aliasName;
 
     QTimer _timerRead, _timerState;
 
-    std::unordered_map<uint8_t, std::list<Log_Data_Buff>> _log_data_buf;
+    std::unordered_map<uint8_t, QByteArray> _log_data_buf;
+
+    static constexpr int LOG_DATA_MAX = 10'000'000;
+    bool _logDataOverflow;
 
 signals:
     void signalQueryIdentification();
     void signalQueryRead();
     void signalQueryState();
-    void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, LOG_DATA_FLAGS flags);
+    void signalQueryLogData(uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags);
     // Посылается из клиента
     void signalResponceLogData(QList<QPointF> points, uint8_t channelNumber, uint8_t flags);
 

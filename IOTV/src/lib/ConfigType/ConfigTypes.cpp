@@ -21,23 +21,34 @@ const QString serverField::maxClient = "max_client";
 const QString serverField::maxHost = "max_host";
 
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
+QString ServerLog::EVENT_ACTION_LOG_FILENAME = "event_action.log";
 QString ServerLog::DEFAULT_LOG_FILENAME = "default.log";
 
 const QString ServerLog::CLIENT_ONLINE_LOG = "client_log";
+const QString ServerLog::EVENT_ACTION_LOG = "event_action_log";
 const QString ServerLog::DEFAULT_LOG = "default_log";
 
 //Json Event and Action
 const QString Json_Event_Action::EVENT_ACTION_FILE_NAME = "IOTV_Event_Action.json";
 
-const QString Json_Event_Action::EVENT_ACTION_NAME = "name";
-const QString Json_Event_Action::EVENT = "event";
-const QString Json_Event_Action::ACTION = "action";
+const QString Json_Event_Action::EVENTS = "events";
+const QString Json_Event_Action::EVENT_GROUP = "group";
+const QString Json_Event_Action::EVENT_GROUPS = "event_groups";
+const QString Json_Event_Action::EVENT_NAME = "name";
+const QString Json_Event_Action::EVENT_ENABLE = "enable"
+    ;
+const QString Json_Event_Action::ACTIONS = "actions";
+const QString Json_Event_Action::ACTION_GROUP = "group";
+const QString Json_Event_Action::ACTION_GROUPS = "action_groups";
+const QString Json_Event_Action::ACTION_NAME = "name";
+const QString Json_Event_Action::ACTION_ENABLE = "enable";
 
 const QString Json_Event_Action::HOST_NAME = "host_name";
 const QString Json_Event_Action::HOST_DST = "dst_host";
 const QString Json_Event_Action::HOST_SRC = "src_host";
 
 const QString Json_Event_Action::TYPE = "type";
+const QString Json_Event_Action::TYPE_NONE = "none";
 const QString Json_Event_Action::TYPE_CONN = "connection";
 const QString Json_Event_Action::TYPE_DISCONN = "disconnection";
 const QString Json_Event_Action::TYPE_STATE = "state";
@@ -52,11 +63,13 @@ const QString Json_Event_Action::TYPE_CMD_CLIENT = "cmd_client";
 const QString Json_Event_Action::TYPE_MESSAGE = "message";
 
 const QString Json_Event_Action::STATE = "state";
+const QString Json_Event_Action::STATE_NONE = "none";
 const QString Json_Event_Action::STATE_ONLINE = "online";
 const QString Json_Event_Action::STATE_OFFNLINE = "offline";
 const QString Json_Event_Action::STATE_SWITCH = "switch";
 
 const QString Json_Event_Action::DIRECTION = "direction";
+const QString Json_Event_Action::DIRECTION_NONE = "none";
 const QString Json_Event_Action::DIRECTION_TX = "tx";
 const QString Json_Event_Action::DIRECTION_RX = "rx";
 const QString Json_Event_Action::DIRECTION_ANY = "any";
