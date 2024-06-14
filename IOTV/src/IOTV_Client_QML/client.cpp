@@ -98,6 +98,33 @@ qint64 Client::write(const QByteArray &data)
     return _socket.write(data);
 }
 
+//QString Client::realName(const QString &devName) const
+//{
+//    if (_devices.contains(devName))
+//        return devName;
+
+//    for (const auto &pair : _devices)
+//    {
+//        const auto &dev = pair.second;
+//        if (dev.aliasName() == devName)
+//            return dev.getName();
+//    }
+
+//    return devName;
+//}
+
+//QString Client::aliasName(const QString &devName) const
+//{
+//    for (const auto &pair : _devices)
+//    {
+//        const auto &dev = pair.second;
+//        if (dev.getName() == devName)
+//            return dev.aliasName();
+//    }
+
+//    return devName;
+//}
+
 void Client::slotConnected()
 {
     emit signalConnected();
@@ -216,6 +243,7 @@ void Client::saveEvent(IOTV_Event *event)
     // по этому делается копия
     IOTV_Event *copyEv = IOTV_Event_Manager::copyEvent(event);
     std::shared_ptr<IOTV_Event> ptr(copyEv);
+//    ptr->setHostName(realName(ptr->hostName())); // замена алиаса на настоящее имя
     _eventManager->addEvent(ptr);
 
     saveEventAction();
@@ -320,6 +348,26 @@ void Client::saveAction(IOTV_Action *action)
     // по этому делается копия
     IOTV_Action *copyAc = IOTV_Event_Manager::copyAction(action);
     std::shared_ptr<IOTV_Action> ptr(copyAc);
+
+//    IOTV_Action::ACTION_TYPE type = ptr->type();
+
+//    if (type == IOTV_Action::ACTION_TYPE::DATA_TX)
+//    {
+//        IOTV_Action_Data_TX *tx = dynamic_cast<IOTV_Action_Data_TX *>(ptr.get());
+//        if (tx == nullptr)
+//            return;
+//        tx->setHostName(realName(tx->hostName()));
+//    }
+//    else if (type == IOTV_Action::ACTION_TYPE::DATA_TX_REF)
+//    {
+//        IOTV_Action_Data_TX_Ref *tx_ref = dynamic_cast<IOTV_Action_Data_TX_Ref *>(ptr.get());
+//        if (tx_ref == nullptr)
+//            return;
+
+//        tx_ref->setSrcHostName(realName(tx_ref->srcHostName()));
+//        tx_ref->setDstHostName(realName(tx_ref->dstHostName()));
+//    }
+
     _eventManager->addAction(ptr);
 
     saveEventAction();

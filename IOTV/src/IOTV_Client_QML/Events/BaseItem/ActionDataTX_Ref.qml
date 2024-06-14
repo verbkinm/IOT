@@ -12,7 +12,7 @@ Column {
         height: 50
         width: parent.width
         text: "Имя источника:"
-        startText: action.srcHost
+        startText: action.srcHost//client.aliasName(action.srcHost)
 
         onSignalCurrentTextChanged: (modelIndexText) =>{
            action.srcHost = modelIndexText
@@ -35,7 +35,7 @@ Column {
         height: 50
         width: parent.width
         text: "Имя приёмника:"
-        startText: action.dstHost
+        startText: action.dstHost//client.aliasName(action.dstHost)
 
         onSignalCurrentTextChanged: (modelIndexText) =>{
            action.dstHost = modelIndexText

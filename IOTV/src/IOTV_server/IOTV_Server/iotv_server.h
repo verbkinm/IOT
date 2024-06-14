@@ -88,8 +88,6 @@ private slots:
 
     void slotDevicePingTimeout();
 
-
-
     void slotClientToServerQueryIdentification();
     void slotClientToServerQueryRead(RAII_Header raii_header);
     void slotClientToServerQueryWrite(RAII_Header raii_header);
@@ -97,6 +95,8 @@ private slots:
     void slotClientToServerQueryTech(RAII_Header raii_header);
     void slotClientToServerQueryLogData(RAII_Header raii_header);
 
+    void slotEvent(QString group, QString name, QString type);
+    void slotAction(QString group, QString name, QString type);
 
     void slotTest();
 };

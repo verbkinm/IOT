@@ -18,22 +18,22 @@ IOTV_Event_Manager::IOTV_Event_Manager(const Event_List &events, const Action_Li
 {
     // Если в списке событий (_events)  есть название группы, которое отсутствует в списке групп событий (_event_groups),
     // добавляем эту группу в список групп событий (_event_groups)
-    for (auto &event : _events)
+    for (const auto &event : _events)
         _event_groups.insert(event->group());
 
     // Тоже самое для действий и групп действий
-    for (auto &action : _actions)
+    for (const auto &action : _actions)
         _action_groups.insert(action->group());
 
 
-    for (auto &event : _events)
+    for (const auto &event : _events)
     {
         for (auto &pair : event->actionMustBeenBinding)
         {
             QString actionGroupName = pair.first;
             _action_groups.insert(actionGroupName);
 
-            for (auto &actionName : pair.second)
+            for (const auto &actionName : pair.second)
             {
                 if (findAction(actionGroupName, actionName) == nullptr)
                 {

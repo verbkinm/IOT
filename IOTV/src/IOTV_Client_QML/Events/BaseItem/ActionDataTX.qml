@@ -12,7 +12,7 @@ Column {
         height: 50
         width: parent.width
 
-        startText: action.hostName
+        startText: action.hostName//client.aliasName(action.hostName)
 
         onSignalCurrentTextChanged: (modelIndexText) =>{
            action.hostName = modelIndexText

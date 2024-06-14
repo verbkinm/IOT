@@ -88,6 +88,7 @@ void IOTV_Server::readServerSettings()
     _maxClientCount = _settingsServer.value(serverField::maxClient, 5).toUInt();
     _maxHostCount = _settingsServer.value(serverField::maxHost, 10).toUInt();
     ServerLog::CLIENT_ONLINE_LOG_FILENAME = _settingsServer.value(ServerLog::CLIENT_ONLINE_LOG, ServerLog::CLIENT_ONLINE_LOG_FILENAME).toString();
+    ServerLog::EVENT_ACTION_LOG_FILENAME = _settingsServer.value(ServerLog::EVENT_ACTION_LOG, ServerLog::EVENT_ACTION_LOG_FILENAME).toString();
     ServerLog::DEFAULT_LOG_FILENAME = _settingsServer.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
     _settingsServer.endGroup();
 }
@@ -157,7 +158,14 @@ QByteArray IOTV_Server::readEventActionJson()
     _eventManager = std::make_unique<IOTV_Event_Manager>(event_vec, action_vec, event_groups, action_groups);
     _eventManager->bind();
 
-    return result;//Event_Action_Parser::toData(_eventManager->events(), _eventManager->actions(), _eventManager->eventGroups(), _eventManager->actionGroups());
+
+    for (const auto &event : _eventManager->events())
+        connect(event.get(), &IOTV_Event::signalEvent, this, &IOTV_Server::slotEvent);
+
+    for (const auto &action : _eventManager->actions())
+        connect(action.get(), &IOTV_Action::signalAction, this, &IOTV_Server::slotAction);
+
+    return result;
 }
 
 void IOTV_Server::writeEventActionJson(const QByteArray &data)
@@ -328,6 +336,7 @@ void IOTV_Server::checkSettingsFileExist()
         _settingsServer.setValue(serverField::maxClient, _maxClientCount);
         _settingsServer.setValue(serverField::maxHost, _maxHostCount);
         _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
+        _settingsServer.setValue(ServerLog::EVENT_ACTION_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::EVENT_ACTION_LOG_FILENAME).absoluteFilePath());
         _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
         _settingsServer.endGroup();
 
@@ -385,7 +394,7 @@ void IOTV_Server::slotClientDisconnected()
 
     _iot_clients.erase(client);
 
-//    readEventActionJson();
+    //    readEventActionJson();
 
     clientOnlineFile();
 }
@@ -654,8 +663,8 @@ void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
     {
         if (pkg->dataSize == 0)
         {
-//            readEventActionJson();
-//            QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
+            //            readEventActionJson();
+            //            QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
             emit client->signalFetchEventActionDataFromServer(readEventActionJson());
         }
         else
@@ -712,6 +721,19 @@ void IOTV_Server::slotClientToServerQueryLogData(RAII_Header raii_header)
     QString fileName = host->logName(startDate, pkg->channelNumber);
 
     emit client->signalServerToClientQueryLogData(raii_header, fileName, false);
+}
+
+void IOTV_Server::slotEvent(QString group, QString name, QString type)
+{
+    QString msg = "Event"
+                  ": \"" + group + "\" \"" + name + "\" " + type;
+    Log::write(msg , Log::Write_Flag::FILE_STDOUT, ServerLog::EVENT_ACTION_LOG_FILENAME);
+}
+
+void IOTV_Server::slotAction(QString group, QString name, QString type)
+{
+    QString msg = "Action: \"" + group + "\" \"" + name + "\" " + type;
+    Log::write(msg , Log::Write_Flag::FILE_STDOUT, ServerLog::EVENT_ACTION_LOG_FILENAME);
 }
 
 void IOTV_Server::slotTest()

@@ -101,6 +101,8 @@ signals:
     void signalGroupNameChanged(QString newName);
     void signalHostNameChanged(QString newName);
 
+    void signalEvent(QString group, QString name, QString type);
+
 public slots:
     // Вызывается в CurrentConnectionList.qml
     QList<QString> slotActionInGroup(const QString &groupName);

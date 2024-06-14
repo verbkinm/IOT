@@ -34,9 +34,11 @@ struct serverField
 struct ServerLog
 {
     static QString CLIENT_ONLINE_LOG_FILENAME;
+    static QString EVENT_ACTION_LOG_FILENAME;
     static QString DEFAULT_LOG_FILENAME;
 
     static const QString CLIENT_ONLINE_LOG;
+    static const QString EVENT_ACTION_LOG;
     static const QString DEFAULT_LOG;
 };
 

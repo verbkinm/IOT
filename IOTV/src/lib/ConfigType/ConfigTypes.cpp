@@ -21,9 +21,11 @@ const QString serverField::maxClient = "max_client";
 const QString serverField::maxHost = "max_host";
 
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
+QString ServerLog::EVENT_ACTION_LOG_FILENAME = "event_action.log";
 QString ServerLog::DEFAULT_LOG_FILENAME = "default.log";
 
 const QString ServerLog::CLIENT_ONLINE_LOG = "client_log";
+const QString ServerLog::EVENT_ACTION_LOG = "event_action_log";
 const QString ServerLog::DEFAULT_LOG = "default_log";
 
 //Json Event and Action

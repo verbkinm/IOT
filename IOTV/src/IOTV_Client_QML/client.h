@@ -78,9 +78,12 @@ public:
     Q_INVOKABLE IOTV_Action *copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const;
     Q_INVOKABLE IOTV_Action *createEmptyAction(const QString &actionType, const QString &actionName, const QString &groupName) const;
 
-
-
+    // используется в qml для удаления временной копии события или действия
     Q_INVOKABLE void deleteObject(QObject *obj) const;
+
+    //
+//    Q_INVOKABLE QString realName(const QString &devName) const;
+//    Q_INVOKABLE QString aliasName(const QString &devName) const;
 
 
     bool stateConnection() const;

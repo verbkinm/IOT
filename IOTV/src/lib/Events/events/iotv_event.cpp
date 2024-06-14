@@ -30,8 +30,7 @@ void IOTV_Event::execActions()
     if (!_enable)
         return;
 
-    qDebug() << "Event" << typeName[(int)_type];
-
+    emit signalEvent(_group, _name, getType());
     for (auto &action : _actions)
     {
         if (action != nullptr)

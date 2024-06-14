@@ -55,7 +55,7 @@ Page {
             BaseItem.HostNameComboBox {
                 id: hostNameItem
                 width: parent.width
-                startText: _event.hostName
+                startText: _event.hostName//client.aliasName(_event.hostName)
 
                 onSignalCurrentTextChanged: (modelIndexText) =>{
                    _event.hostName = modelIndexText

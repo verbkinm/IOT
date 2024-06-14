@@ -61,6 +61,8 @@ signals:
     void signalEnableChanged(bool);
     void signalNameChanged(QString newName);
     void signalGroupNameChanged(QString newName);
+
+    void signalAction(QString group, QString name, QString type);
 };
 
 struct Compare_Action {
