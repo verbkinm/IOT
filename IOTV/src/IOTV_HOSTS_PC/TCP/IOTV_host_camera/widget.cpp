@@ -40,19 +40,35 @@ Widget::Widget(QObject *parent)
     captureSession.setCamera(camera);
     captureSession.setImageCapture(&imageCapture);
 
+    audioIn = new QAudioInput(QMediaDevices::defaultAudioInput());
+//    captureSession.setAudioInput(audioIn);
+
+    _audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
+//    captureSession.setAudioOutput(_audioOut);
+
     QAudioFormat format;
     format.setSampleRate(44100);
     format.setChannelCount(1);
     format.setSampleFormat(QAudioFormat::Int32);
 
-    audioIn = new QAudioInput(QMediaDevices::defaultAudioInput());
+//    audioIn = new QAudioInput(QMediaDevices::defaultAudioInput());
     source = new QAudioSource(audioIn->device(), format);
     source->setVolume(1);
     devIn = source->start();
 
-    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+//    _audioOut = new QAudioOutput(QMediaDevices::defaultAudioOutput(), this);
+//    _audioSink = new QAudioSink(_audioOut->device(), format, this);
+
+//    devOut = _audioSink->start();
+//    _audioOut->setVolume(1.0);
+
+
+//    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 
     imageCapture.capture();
+
+//    connect(&_timerAudio, &QTimer::timeout, this, &Widget::slotAudio, Qt::QueuedConnection);
+//    _timerAudio.start(50);
 }
 
 Widget::~Widget()
@@ -79,30 +95,37 @@ size_t Widget::getImageSavedSize() const
 
 void Widget::start()
 {
+//    camera->start();
+    qDebug() << "camera start";
     timer->start(INTERVAL);
-//    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 void Widget::stop()
 {
+//    camera->stop();
+    qDebug() << "camera stop";
     timer->stop();
-//    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 
 void Widget::processCapturedImage(int requestId, const QImage &img)
 {
+    if (!timer->isActive())
+        return;
+
     Q_UNUSED(requestId);
 
     timer->stop();
 
     _image = img;
-    _image.save("Image.jpg", "JPG", 100);
+//    _image.save("Image.jpg", "JPG", 100);
 
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    _image.save(&buffer, "JPG", 100);
+//    _image.save(&buffer, "JPG", 100);
 
     emit signalImageCaptured();
     timer->start(INTERVAL);
@@ -151,6 +174,26 @@ void Widget::displayErrorMessage()
 
 void Widget::slotReadyRead()
 {
-    emit signalAudio(devIn->readAll());
+//    if (!timer->isActive())
+//        return;
+
+    QByteArray data = devIn->readAll();
+    emit signalAudio(data);
+
+//    devOut->write(data);
+}
+
+void Widget::slotAudio()
+{
+//    if (!timerActive)
+//        return;
+
+//    QByteArray data = devIn->readAll();
+//    devOut->write(data);
+
+//    emit signalAudio(data);
+
+
+//    devOut->write(devIn->readAll());
 }
 

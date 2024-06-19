@@ -40,14 +40,14 @@ uint64_t readWriteToData(const read_write_t *body, char *outData, uint64_t outDa
 
     if ( (body->nameSize > 0)
         && (body->name != NULL)
-        && (body->nameSize < (outDataSize - READ_WRITE_SIZE)) )
+        && (body->nameSize <= (outDataSize - READ_WRITE_SIZE)) )
     {
         memcpy(&outData[READ_WRITE_SIZE], body->name, body->nameSize);
     }
 
     if ((body->dataSize > 0)
         && (body->data != NULL)
-        && (body->dataSize < (outDataSize - READ_WRITE_SIZE - body->nameSize)))
+        && (body->dataSize <= (outDataSize - READ_WRITE_SIZE - body->nameSize)))
     {
         memcpy(&outData[READ_WRITE_SIZE + body->nameSize], body->data, body->dataSize);
     }

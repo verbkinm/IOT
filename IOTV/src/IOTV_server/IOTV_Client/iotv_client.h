@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QTimer>
 #include <QByteArray>
+#include <QEvent>
 #include <queue>
 
 #include "IOTV_Host/iotv_host.h"
@@ -22,8 +23,11 @@ public:
     ~IOTV_Client();
 
     const QTcpSocket *socket() const;
+    QString stringRepresentation() const;
 
-    friend bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs);
+//    friend bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs);
+
+    virtual bool event(QEvent *event) override;
 
 private:
     void processQueryLogData(RAII_Header header, QString fileName, bool hostError, std::atomic_int &run);
@@ -48,8 +52,10 @@ private:
 
     thread_pool::ThreadPool *_my_pool;
 
+    QString _stringRepresentation;
+
 public slots:
-     void slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
+     void slotStreamRead(RAII_Header raii_header);
 
 private slots:
     void slotDisconnected();
@@ -57,12 +63,9 @@ private slots:
     void slotReadData();
     void slotFetchEventActionDataFromServer(QByteArray data);
 
-
-
     void slotLogDataQueueTimerOut();
 
     void slotUpdateHosts(QByteArray data);
-
 
     void slotServerToClientQueryIdentification(QByteArray data);
     void slotServerToClientQueryRead(RAII_Header raii_header, RAII_iot raii_iot);
@@ -70,8 +73,12 @@ private slots:
     void slotServerToClientQueryState(RAII_iot raii_iot);
     void slotServerToClientQueryLogData(RAII_Header raii_header, QString logName, bool hostError);
 
+    void slotMoveToThread(QThread *newThread);
+
 signals:
-    void signalStopThread();
+    void signalMoveToThread(QThread *newThread);
+    void signalMovedToThread(QThread *oldThread);
+
     void signalDisconnected();
 
     void signalFetchEventActionDataFromServer(QByteArray data);
@@ -95,3 +102,12 @@ signals:
     void signalServerToClientQueryState(RAII_iot raii_iot);
     void signalServerToClientQueryLogData(RAII_Header raii_header, QString logName, bool hostError);
 };
+
+struct Compare_IOTV_Client {
+    bool operator()(const std::shared_ptr<IOTV_Client> &lhs, const std::shared_ptr<IOTV_Client> &rhs) const
+    {
+        return lhs.get()->stringRepresentation() < rhs->stringRepresentation();
+    }
+};
+
+typedef std::set<std::shared_ptr<IOTV_Client>, Compare_IOTV_Client> IOTV_Client_List;

@@ -8,6 +8,9 @@
 #include <map>
 #include <set>
 
+#include "raii_header.h"
+#include "raii_iot.h"
+
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/tcp_reverse_conn_type.h"
 #include "connection_type/udp_conn_type.h"
@@ -33,10 +36,10 @@ public:
 
     const std::unordered_map<QString, QString> &settingsData() const;
 
-    bool addStreamRead(uint8_t channel, QObject *client);
+    bool addStreamRead(uint8_t channel, const QString &client);
     void addStreamWrite(uint8_t channel);
 
-    void removeStreamRead(uint8_t channel, QObject *client);
+    void removeStreamRead(uint8_t channel, const QString &client);
     void removeStreamWrite(uint8_t channel);
 
     QString getAddress() const;
@@ -69,11 +72,11 @@ private:
 
     void makeConnType();
 
-    void responceIdentification(const header_t *header);
-    void responceState(const iotv_obj_t *iot);
-    void responceRead(const header_t* header);
-    void responceWrite(const iotv_obj_t *iot) const;
-    void responcePingPong(const iotv_obj_t *iot);
+    void responceIdentification(RAII_Header raii_header);
+    void responceState(RAII_iot raii_iot);
+    void responceRead(RAII_Header raii_header);
+    void responceWrite(RAII_iot raii_iot) const;
+    void responcePingPong(RAII_iot raii_iot);
 
     std::unique_ptr<Base_conn_type> _conn_type;
     QDir _logDir;
@@ -88,7 +91,7 @@ private:
     static constexpr int COUNTER_PING_COUNT = 3;
     int _counterPing;
 
-    std::map<uint8_t, std::set<QObject *>> _streamRead, _streamWrite;
+    std::map<uint8_t, std::set<QString>> _streamRead, _streamWrite;
 
     QByteArray _buff;
 
@@ -96,8 +99,8 @@ public slots:
     void slotDisconnected();
 
     // дублирование функций addStreamRead  и removeStreamRead
-    void slotAddStreamRead(uint8_t channel, QObject *client);
-    void slotRemoveStreamRead(uint8_t channel, QObject *client);
+    void slotAddStreamRead(uint8_t channel, QString client);
+    void slotRemoveStreamRead(uint8_t channel, QString client);
 
 private slots:
     void slotDataResived(QByteArray data);
@@ -111,12 +114,27 @@ private slots:
 
     void slotConnected();
 
+    void slotMoveToThread(QThread *newThread);
+
 signals:
+    void signalMoveToThread(QThread *newThread);
+    void signalMovedToThread(QThread *oldThread);
+
     // Высылается из iotv_client
-    void signalAddStreamRead(uint8_t channel, QObject *client);
+    void signalAddStreamRead(uint8_t channel, QString client);
     // Высылается из iotv_client
-    void signalRemoveStreamRead(uint8_t channel, QObject *client);
+    void signalRemoveStreamRead(uint8_t channel, QString client);
 
     void signalDevicePingTimeOut();
-    void signalStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data);
+    // Принимается в iotv_server
+    void signalStreamRead(RAII_Header raii_header);
 };
+
+struct Compare_IOTV_Host {
+    bool operator()(const std::shared_ptr<IOTV_Host> &lhs, const std::shared_ptr<IOTV_Host> &rhs) const
+    {
+        return lhs.get()->getName() < rhs->getName();
+    }
+};
+
+typedef std::set<std::shared_ptr<IOTV_Host>, Compare_IOTV_Host> IOTV_Host_List;

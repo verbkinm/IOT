@@ -33,7 +33,9 @@ class Producer : public QObject
     Q_OBJECT
 //    QML_ELEMENT
     Q_PROPERTY(QVideoSink* videoSink READ videoSink WRITE setVideoSink NOTIFY videoSinkChanged)
-    Q_PROPERTY(Device* video_device READ getDevice WRITE setDevice)
+    Q_PROPERTY(Device* video_device READ getDevice WRITE setDevice NOTIFY videoDeviceChanged)
+//    Q_PROPERTY(QAudioSink* audioSink READ getAudioDevice WRITE setAudioDevice NOTIFY audioDeviceChanged)
+
 
 public:
     explicit Producer(QObject *parent = nullptr);
@@ -45,10 +47,15 @@ public:
     Device *getDevice();
     void setDevice(Device *dev);
 
+//    QAudioSink *getAudioDevice();
+//    void setAudioDevice(QAudioSink *dev);
+
 private:
     QPointer<QVideoSink> m_videoSink;
     QImageCapture *imageCapture;
     QIODevice *devOut;
+    QAudioOutput *_audioOut;
+    QAudioSink *_audioSink;
 
     QMediaCaptureSession *session;
     QMediaRecorder *recorder;
@@ -61,9 +68,11 @@ private:
 
 signals:
     void videoSinkChanged();
+    void videoDeviceChanged();
+    void audioDeviceChanged();
 
 public slots:
-    void slotDataPkgComplete(int channel, const QByteArray &data);
+    void slotDataPkgComplete(int channel, QByteArray data);
     void slotDataVideoFrame(int w, int h, const QByteArray &data);
     void slotDataAudioFrame(Wrap_QByteArray *data);
 

@@ -2,6 +2,22 @@
 
 #include <QString>
 
+struct CATEGORY
+{
+    static const QString NONE;
+    static const QString NET;
+    static const QString SERVER;
+    static const QString TGBOT;
+    static const QString DATA;
+    static const QString EVENT;
+    static const QString ACTION;
+
+    static const QString INFO;
+    static const QString DEBUG;
+    static const QString WARNING;
+    static const QString ERROR;
+};
+
 struct hostField
 {
     static const QString name;
@@ -23,12 +39,27 @@ struct connectionType
 
 struct serverField
 {
+    static const QString SERVER_GROUP;
     static const QString address;
     static const QString portClients;
     static const QString portHosts;
     static const QString broadCastListenerPort;
     static const QString maxClient;
     static const QString maxHost;
+};
+
+struct tgBotField
+{
+    static const QString TG_BOT_GROUP;
+    static const QString TGBOTTOKEN;
+    static const QString TGBOTLOG;
+    static const QString TGBOTTRUSTCLIENTS;
+};
+
+struct tgBotFileName
+{
+    static QString TGBOT_LOG_FILENAME;
+    static QString TGBOT_TRUST_CLIENTS_FILENAME;
 };
 
 struct ServerLog

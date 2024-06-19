@@ -13,12 +13,12 @@ void COM_conn_type::connectToHost()
 {
     if (!_serialPort.open(QIODevice::ReadWrite))
     {
-        Log::write(_name + " Error open port", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, _name + " Error open port", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
 //        _reconnectTimer.start(DEFAULT_INTERVAL);
         return;
     }
 //    _reconnectTimer.stop();
-    Log::write(_name + ": connected to " + _address, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
+    Log::write(CATEGORY::NET, _name + " connected to " + _address, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     emit signalConnected();
 }
 
@@ -128,7 +128,7 @@ void COM_conn_type::setSettingsPort(const SetingsPort &settingsPort)
 void COM_conn_type::slotHandleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError || error == QSerialPort::ReadError)
-        Log::write(_name + " Error port", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, _name + " Error port", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
 
     disconnectFromHost();
 }
@@ -136,7 +136,7 @@ void COM_conn_type::slotHandleError(QSerialPort::SerialPortError error)
 
 qint64 COM_conn_type::write(const QByteArray &data, qint64 size)
 {
-    Log::write(_name + ": data transmit to " + _address + " -> " + data.toHex(':'),
+    Log::write(CATEGORY::DATA, _name + ": data transmit to " + _address + " -> " + data.toHex(':'),
                Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     return _serialPort.write(data.data(), size);
 }

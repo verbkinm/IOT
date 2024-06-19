@@ -1,4 +1,7 @@
 #include "iotv_host.h"
+#include "qthread.h"
+#include "raii_iot.h"
+
 
 #include <QFileInfo>
 #include <QDate>
@@ -45,6 +48,8 @@ void IOTV_Host::shareConstructor()
 
     connect(this, &IOTV_Host::signalAddStreamRead, this, &IOTV_Host::slotAddStreamRead, Qt::QueuedConnection);
     connect(this, &IOTV_Host::signalRemoveStreamRead, this, &IOTV_Host::slotRemoveStreamRead, Qt::QueuedConnection);
+
+    connect(this, &IOTV_Host::signalMoveToThread, this, &IOTV_Host::slotMoveToThread, Qt::QueuedConnection);
 }
 
 IOTV_Host::~IOTV_Host()
@@ -52,13 +57,14 @@ IOTV_Host::~IOTV_Host()
     qDebug() << "IOTV_Host destruct";
 }
 
-void IOTV_Host::responceIdentification(const header_t *header)
+void IOTV_Host::responceIdentification(RAII_Header raii_header)
 {
-//    qDebug() << __FUNCTION__;
-    Q_ASSERT(header != NULL);
-    Q_ASSERT(header->pkg != NULL);
+    if (raii_header.header() == nullptr || raii_header.header()->pkg == NULL)
+        return;
 
-    const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
+    const struct Identification *pkg = static_cast<const struct Identification *>(raii_header.header()->pkg);
+    if (pkg == nullptr)
+        return;
 
     this->setId(pkg->id);
 
@@ -84,62 +90,59 @@ void IOTV_Host::responceIdentification(const header_t *header)
     emit signalIdentRecived();
 }
 
-void IOTV_Host::responceState(const iotv_obj_t *iot)
+void IOTV_Host::responceState(RAII_iot raii_iot)
 {
-    Q_ASSERT(iot != nullptr);
-    setState(static_cast<state_t>(iot->state));
+    if (raii_iot.iot() == nullptr)
+        return;
+
+    setState(static_cast<state_t>(raii_iot.iot()->state));
     _counterState = 0;
 }
 
-void IOTV_Host::responceRead(const header_t *header)
+void IOTV_Host::responceRead(RAII_Header raii_header)
 {
-    Q_ASSERT(header != nullptr);
-    Q_ASSERT(header->pkg != nullptr);
+    if (raii_header.header() == nullptr || raii_header.header()->pkg == NULL)
+        return;
 
-    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(raii_header.header()->pkg);
+    if (pkg == nullptr)
+        return;
 
     uint8_t channelNumber = pkg->channelNumber;
 
-//    if (channelNumber == 40)
-//    {
-////        printf("it = NULL\n");
-//    }
-
     if (_streamRead.count(channelNumber))
     {
-        emit signalStreamRead(channelNumber, header->fragment, header->fragments, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
+        emit signalStreamRead(raii_header);
         return;
     }
 
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
     this->setReadChannelData(channelNumber, data);
 
-//    if (channelNumber == 40)
-//    {
-//        qDebug() << getReadChannelData(40).size() << getReadChannelData(40);
-//    }
-
     // Не записываем в лог сырые данные
     if (this->getReadChannelType(channelNumber) ==  Raw::DATA_TYPE::RAW)
         return;
 
     Raw raw(this->getReadChannelType(pkg->channelNumber), data);
-    Log::write("R:"
-                   + QString::number(pkg->channelNumber)
-                   + "="
-                   + raw.strData().first,
+    Log::write(CATEGORY::NONE, "R:"
+                                   + QString::number(pkg->channelNumber)
+                                   + "="
+                                   + raw.strData().first,
                Log::Write_Flag::FILE, logName(pkg->channelNumber));
 }
 
-void IOTV_Host::responceWrite(const iotv_obj_t *iot) const
+void IOTV_Host::responceWrite(RAII_iot raii_iot) const
 {
-    Q_ASSERT(iot != nullptr);
+    if (raii_iot.iot() == nullptr)
+        return;
     //Нет никакой реакции на ответ о записи
 }
 
-void IOTV_Host::responcePingPong(const iotv_obj_t *iot)
+void IOTV_Host::responcePingPong(RAII_iot raii_iot)
 {
-    Q_ASSERT(iot != nullptr);
+    if (raii_iot.iot() == nullptr)
+        return;
+
     _counterPing = 0;
 }
 
@@ -202,7 +205,7 @@ void IOTV_Host::slotDataResived(QByteArray data)
     //!!! Определится с максимальным размером буфера
     if (_buff.size() >= BUFSIZ * 1000)
     {
-        Log::write("slotDataResived HOST переполнение буфера!",
+        Log::write(CATEGORY::ERROR, "slotDataResived HOST переполнение буфера!",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
         _buff.clear();
@@ -213,52 +216,49 @@ void IOTV_Host::slotDataResived(QByteArray data)
     while (_buff.size() > 0)
     {
         header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_buff.data()), _buff.size(), &error, &expectedDataSize, &cutDataSize);
+        RAII_Header raii_header(header);
+        clearHeader(header);
 
         if (error == true)
         {
             _buff.clear();
-            clearHeader(header);
             break;
         }
 
         // Пакет не ещё полный
         if (expectedDataSize > 0)
-        {
-            clearHeader(header);
             break;
-        }
 
-        if (header->type == HEADER_TYPE_RESPONSE)
+        if (raii_header.header()->type == HEADER_TYPE_RESPONSE)
         {
             auto *iot = convert();
+            RAII_iot raii_iot(iot);
+            clear_iotv_obj(iot);
 
-            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-                responceIdentification(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_READ)
-                responceRead(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
-                responceWrite(iot);
-            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                responcePingPong(iot);
-            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
+            if (raii_header.header()->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+                responceIdentification(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_READ)
+                responceRead(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_WRITE)
+                responceWrite(raii_iot);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_PING_PONG)
+                responcePingPong(raii_iot);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_STATE)
             {
-                iot->state = static_cast<const struct State *>(header->pkg)->state;
-                responceState(iot);
+                raii_iot.iot()->state = static_cast<const struct State *>(raii_header.header()->pkg)->state;
+                responceState(raii_iot);
             }
             //            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
             //                ;
-
-            clear_iotv_obj(iot);
         }
-        else if (header->type == HEADER_TYPE_REQUEST)
+        else if (raii_header.header()->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент устройства нe посылают запросы!!!
-            Log::write("Запрос от устройств не предусмотрен!",
+            Log::write(CATEGORY::WARNING, "Запрос от устройств не предусмотрен!",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
         _buff = _buff.mid(cutDataSize);
-        clearHeader(header);
     }
 }
 
@@ -330,7 +330,7 @@ const std::unordered_map<QString, QString> &IOTV_Host::settingsData() const
     return _settingsData;
 }
 
-bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
+bool IOTV_Host::addStreamRead(uint8_t channel, const QString &client)
 {
     char outData[BUFSIZ];
     bool result = false;
@@ -355,7 +355,7 @@ bool IOTV_Host::addStreamRead(uint8_t channel, QObject *client)
 //    _streamWrite.insert(channel);
 //}
 
-void IOTV_Host::removeStreamRead(uint8_t channel, QObject *client)
+void IOTV_Host::removeStreamRead(uint8_t channel, const QString &client)
 {
     char outData[BUFSIZ];
 
@@ -414,7 +414,7 @@ void IOTV_Host::slotPingTimeOut()
 
     if (_counterPing > COUNTER_PING_COUNT)
     {
-        Log::write(_conn_type->getName() + " WARRNING: ping timeout",
+        Log::write(CATEGORY::WARNING, _conn_type->getName() + "ping timeout",
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
         _conn_type->connectToHost();
@@ -432,16 +432,15 @@ void IOTV_Host::slotQueryWrite(int channelNumber, QByteArray data)
         return;
 
     Raw raw(this->getReadChannelType(channelNumber), data);
-    Log::write("W:"
-                   + QString::number(channelNumber)
-                   + "="
-                   + raw.strData().first,
+    Log::write(CATEGORY::NONE, "W:"
+                                   + QString::number(channelNumber)
+                                   + "="
+                                   + raw.strData().first,
                Log::Write_Flag::FILE, logName(channelNumber));
 }
 
 void IOTV_Host::slotConnected()
 {
-    //    qDebug() << this->thread() << _timerPing.thread();
     _timerReRead.start();
     _timerState.start();
     _timerPing.start();
@@ -454,21 +453,29 @@ void IOTV_Host::slotConnected()
     _streamWrite.clear();
 }
 
+void IOTV_Host::slotMoveToThread(QThread *newThread)
+{
+    QThread *curThread = QThread::currentThread();
+    this->moveToThread(newThread);
+    qDebug() << "host moved to thread";
+    emit signalMovedToThread(curThread);
+}
+
 void IOTV_Host::slotDisconnected()
 {
     _conn_type->disconnectFromHost();
 }
 
-void IOTV_Host::slotAddStreamRead(uint8_t channel, QObject *client)
+void IOTV_Host::slotAddStreamRead(uint8_t channel, QString client)
 {
     if (addStreamRead(channel, client) == false)
     {
         QString msg = "Add read stream wrong. Channel #" + QString::number(channel);
-        Log::write(msg, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, msg, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
 
-void IOTV_Host::slotRemoveStreamRead(uint8_t channel, QObject *client)
+void IOTV_Host::slotRemoveStreamRead(uint8_t channel, QString client)
 {
     removeStreamRead(channel, client);
 }

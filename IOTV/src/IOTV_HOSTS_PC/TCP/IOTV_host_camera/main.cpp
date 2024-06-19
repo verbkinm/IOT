@@ -66,7 +66,7 @@ uint64_t writeFunc(char *data, uint64_t size, void *obj)
         return 0;
 
     auto s = socket->write(data, size);
-    socket->flush();
+    //    socket->flush();
     return s;
 }
 
@@ -74,7 +74,7 @@ void slotDataRecived()
 {
     buffer += socket->readAll();
 
-    qDebug() << buffer.toHex(':') << '\n';
+    //    qDebug() << buffer.toHex(':') << '\n';
 
     if ((uint64_t)buffer.size() < expextedDataSize)
         return;
@@ -111,8 +111,8 @@ void slotDataRecived()
                     camera->start();
                 else if ((rwPkg->channelNumber == 0 || rwPkg->channelNumber == 1) && rwPkg->flags == ReadWrite_FLAGS_CLOSE_STREAM)
                     camera->stop();
-
-                responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
+                else
+                    responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
             {
@@ -184,7 +184,7 @@ void slotImageCaptured()
     QBuffer buffer(&byteArra);
     buffer.open(QIODevice::WriteOnly);
     QImage img = camera->getImage();
-    //    img = img.convertToFormat(QImage::Format_RGBA8888);
+    img = img.convertToFormat(QImage::Format_RGBA8888);
     //    qDebug() << img.format();
 
     int width = *(int16_t *)iot.readChannel[2].data;
@@ -192,6 +192,10 @@ void slotImageCaptured()
 
     img = img.scaled(width, height, Qt::KeepAspectRatio);
     img.save(&buffer, "JPG", *(int8_t *)iot.readChannel[4].data);
+
+    //    std::ofstream file("image.jpg", std::ios::binary);
+    //    file.write(byteArra.data(), byteArra.size());
+    //    img.save("image.jpg", "JPG", *(int8_t *)iot.readChannel[4].data);
 
     iot.readChannel[0].dataSize = byteArra.size();
     iot.readChannel[0].data = byteArra.data();
@@ -216,6 +220,7 @@ void slotImageCaptured()
         .pkg = &readWrite
     };
 
+    qDebug() << 0 << width << height << *(int8_t *)iot.readChannel[4].data << iot.readChannel[0].dataSize;
     responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
@@ -245,6 +250,7 @@ void slotAudio(QByteArray data)
         .pkg = &readWrite
     };
 
+    qDebug() << 1 << iot.readChannel[1].dataSize;
     responseReadData(transmitBuffer, BUFSIZ, &iot, &header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
@@ -278,7 +284,7 @@ void slotInitApp()
 
     QObject::connect(server, &QTcpServer::newConnection, slotNewConnection);
     QObject::connect(camera, &Widget::signalImageCaptured, slotImageCaptured);
-    //    QObject::connect(camera, &Widget::signalAudio, slotAudio);
+    QObject::connect(camera, &Widget::signalAudio, slotAudio);
 
     server->listen(QHostAddress("127.0.0.1"), 2028);
     std::cout << "Start service on 127.0.0.1:2028" << std::endl;
@@ -290,7 +296,7 @@ void slotTimeOut()
         .address = QHostAddress("127.0.0.1").toIPv4Address(),
         .port = 2028,
         .nameSize = iot.nameSize,
-        .flags = 0,
+        .flags = Host_Broadcast_FLAGS_TCP_CONN,
         .name = iot.name
     };
 

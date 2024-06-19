@@ -77,7 +77,7 @@ void slotDataRecived()
     QNetworkDatagram datagram = udp_socket->receiveDatagram();
     buffer.append(datagram.data());
 
-    qDebug() << buffer.toHex(':') << '\n';
+//    qDebug() << buffer.toHex(':') << '\n';
 
     if ((uint64_t)buffer.size() < expextedDataSize)
         return;

@@ -16,6 +16,7 @@
 
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
+#include "IOTV_Bot/iotv_bot.h"
 
 #include "iotv_event_manager.h"
 
@@ -37,22 +38,16 @@ private:
     void writeEventActionJson(const QByteArray &data);
 
     void startTCPServers();
-    void startTCP(QTcpServer *socket, quint16 port, const QString &lbl);
+    void startTCP(std::shared_ptr<QTcpServer> socket, quint16 port, const QString &lbl);
     void startUDPServers();
-    void startUDP(QUdpSocket *socket, const QString &addr, quint16 port, const QString &lbl);
+    void startUDP(std::shared_ptr<QUdpSocket> socket, const QString &addr, quint16 port, const QString &lbl);
 
     void clientOnlineFile() const;
 
-    Base_Host *baseHostFromName(const QString &name) const;
-
-//    void clientHostsUpdate() const;
     void clientHostsUpdate();
 
-    // Возвращает список Base_Host* из _iot_hosts
-    std::forward_list<const Base_Host *> baseHostList() const;
-
-    std::unordered_map<IOTV_Host *, QThread *> _iot_hosts;
-    std::unordered_map<IOTV_Client *, QThread *> _iot_clients;
+    IOTV_Host_List _iot_hosts;
+    IOTV_Client_List _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
 
@@ -67,11 +62,14 @@ private:
 
     std::shared_ptr<IOTV_Event_Manager> _eventManager;
 
-    QTcpServer *_tcpClient;
-    QTcpServer *_tcpReverseHost; // Hosts TCP_REVERSE conn type
+    std::shared_ptr<QTcpServer> _tcpClient;
+    std::shared_ptr<QTcpServer> _tcpReverseHost; // Hosts TCP_REVERSE conn type
 
     // широковещательный слушатель!
-    QUdpSocket *_udpBroadcast;
+    std::shared_ptr<QUdpSocket> _udpBroadcast;
+
+    std::shared_ptr<IOTV_Bot> _tg_bot;
+    std::shared_ptr<QThread> _tgbot_thread;
 
 private slots:
     void slotNewClientConnection();
@@ -80,9 +78,6 @@ private slots:
     void slotNewHostConnection();
 
     void slotError(QAbstractSocket::SocketError error);
-
-//    void slotFetchEventActionData(QByteArray data);
-//    void slotQueryEventActionData();
 
     void slotPendingDatagrams();
 
@@ -98,5 +93,14 @@ private slots:
     void slotEvent(QString group, QString name, QString type);
     void slotAction(QString group, QString name, QString type);
 
-    void slotTest();
+    void slotBotRequest(int64_t id, QString request);
+
+    void slotClearClientObj(QThread *thread);
+    void slotClearHostObj(QThread *thread);
+
+    void slotDestroy();
+
+signals:
+    void signalReadyToDestroy();
+    void signalDestroy();
 };

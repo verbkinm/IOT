@@ -1,5 +1,7 @@
 #include "iotv_client.h"
+#include "qthread.h"
 
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <thread>
@@ -7,12 +9,14 @@
 IOTV_Client::IOTV_Client(QTcpSocket *socket, QObject *parent) : QObject(parent),
     _socket(socket),
     _expectedDataSize(0),
-    _logDataQueueTimer(nullptr),
-    _my_pool(nullptr)//new thread_pool::ThreadPool(std::thread::hardware_concurrency()))
+    _my_pool(nullptr)
 {
     _socket->setParent(this);
     _silenceTimer.setParent(this);
     _logDataQueueTimer.setParent(this);
+
+    // что бы знать какой был ip и порт после отключения сокета
+    _stringRepresentation = _socket->peerAddress().toString() + ":" + QString::number(_socket->peerPort());
 
     connect(&_silenceTimer, &QTimer::timeout, _socket, &QTcpSocket::disconnectFromHost);
     connect(_socket, &QTcpSocket::readyRead, this, &IOTV_Client::slotReadData);
@@ -31,26 +35,14 @@ IOTV_Client::IOTV_Client(QTcpSocket *socket, QObject *parent) : QObject(parent),
     connect(this, &IOTV_Client::signalServerToClientQueryState, this, &IOTV_Client::slotServerToClientQueryState, Qt::QueuedConnection);
     connect(this, &IOTV_Client::signalServerToClientQueryLogData, this, &IOTV_Client::slotServerToClientQueryLogData, Qt::QueuedConnection);
 
+    connect(this, &IOTV_Client::signalMoveToThread, this, &IOTV_Client::slotMoveToThread, Qt::QueuedConnection);
+
     _silenceTimer.start(_SILENCEINTERVAL);
 }
 
 IOTV_Client::~IOTV_Client()
 {
-    // qDebug() << "client destruct";
-    // Закрыть все потоки, если такие имеются
-//    for (auto &el : _hosts)
-//    {
-//        for (int i = 0; i < el.first->getReadChannelLength(); ++i)
-//            emit el.first->signalRemoveStreamRead(i, this);
-
-//        //        for (int i = 0; i < el.first->getWriteChannelLength(); ++i)
-//        //            el.first->removeStreamWrite(i, this);
-
-//    }
-
-    _logDataQueueTimer.stop();
-//    delete _my_pool;
-
+    qDebug() << "IOTV_Client destruct";
     slotLogDataQueueTimerOut();
 }
 
@@ -59,9 +51,25 @@ const QTcpSocket *IOTV_Client::socket() const
     return _socket;
 }
 
+QString IOTV_Client::stringRepresentation() const
+{
+    return _stringRepresentation;
+}
+
+bool IOTV_Client::event(QEvent *event)
+{
+    if (event->type() == QEvent::ThreadChange)
+    {
+//        qDebug() << QThread::currentThread();
+//        _silenceTimer.stop();
+//        _logDataQueueTimer.stop();
+    }
+    return QObject::event(event);
+}
+
 void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName, bool hostError, std::atomic_int &run)
 {
-    auto start = std::chrono::system_clock::now();
+//    auto start = std::chrono::system_clock::now();
 
     if (raii_header.header() == NULL)
         return;
@@ -71,7 +79,7 @@ void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName,
     {
         std::lock_guard lg(_logDataQueueMutex);
         _logDataQueue.emplace(raii_header, std::vector<char>());
-        Log::write(QString(Q_FUNC_INFO) + " ошибка преобразования данных!", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " ошибка преобразования данных!", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         return;
     }
 
@@ -80,7 +88,7 @@ void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName,
     {
         std::lock_guard lg(_logDataQueueMutex);
         _logDataQueue.emplace(raii_header, std::vector<char>());
-        Log::write(QString(Q_FUNC_INFO) + " запрошенное устройство " + compareName + " не существует ", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " запрошенное устройство " + compareName + " не существует ", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         return;
     }
 
@@ -95,7 +103,7 @@ void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName,
 
     if (!file.is_open())
     {
-        Log::write(QString(Q_FUNC_INFO) + " не удалось открыть файл " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " не удалось открыть файл " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         std::lock_guard lg(_logDataQueueMutex);
         _logDataQueue.emplace(raii_header, std::vector<char>());
         return;
@@ -109,7 +117,7 @@ void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName,
 
         if (file.eof() || file.fail())
         {
-            Log::write(QString(Q_FUNC_INFO) + " ошибка данных лог файла " + fileName + " в строке " + QString::number(logLine), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " ошибка данных лог файла " + fileName + " в строке " + QString::number(logLine), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
             break;
         }
 
@@ -161,9 +169,6 @@ void IOTV_Client::processQueryLogData(RAII_Header raii_header, QString fileName,
     std::lock_guard lg(_logDataQueueMutex);
     _logDataQueue.emplace(raii_header, std::move(byteArray));
 
-    Log::write("_logDataQueue - " + QString::number(pkg->channelNumber) + QString::number(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count()),
-               Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
-
     /*
 
     Интервал может может быть и не за одни сутки, тогда нужно парсить все лог файлы, попадающие под интервал
@@ -195,7 +200,7 @@ uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
 
 void IOTV_Client::slotDisconnected()
 {
-    qDebug() << "client disconnect";
+//    qDebug() << "client disconnect";
     emit signalDisconnected();
 }
 
@@ -206,7 +211,7 @@ void IOTV_Client::slotReadData()
     //!!! Определится с максимальным размером буфера
     if (_recivedBuff.size() >= BUFSIZ * 10)
     {
-        Log::write("slotDataResived CLIENT переполнение буфера!",
+        Log::write(CATEGORY::ERROR, "slotDataResived CLIENT переполнение буфера!",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
         _recivedBuff.clear();
@@ -243,7 +248,7 @@ void IOTV_Client::slotReadData()
         if (raii_header.header()->type == HEADER_TYPE_RESPONSE)
         {
             // На данный момент от клиента не должно приходить ответов
-            Log::write("Ответ от клиента не предусмотрен!",
+            Log::write(CATEGORY::WARNING, "Ответ от клиента не предусмотрен!",
                        Log::Write_Flag::FILE_STDOUT,
                        ServerLog::DEFAULT_LOG_FILENAME);
         }
@@ -316,60 +321,14 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
     write({outData, static_cast<int>(size)}, size);
 }
 
-void IOTV_Client::slotStreamRead(uint8_t channel, uint16_t fragment, uint16_t fragments, QByteArray data)
+void IOTV_Client::slotStreamRead(RAII_Header raii_header)
 {
-    IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
-    if (host == nullptr)
+    if (raii_header.header() == nullptr || raii_header.header()->pkg == nullptr)
         return;
 
-    auto iot = host->convert();
-    iot->readChannel[channel].dataSize = data.size();
-    iot->readChannel[channel].data = data.data();
-
-
-    struct Read_Write read = {
-        .dataSize = static_cast<uint32_t>(data.size()),
-        .nameSize = iot->nameSize,
-        .channelNumber = channel,
-        .flags = ReadWrite_FLAGS_OPEN_STREAM,
-        .name = iot->name,
-        .data = data.data()
-    };
-
-    header_t header = {
-        .version = 2,
-        .type = HEADER_TYPE_RESPONSE,
-        .assignment = HEADER_ASSIGNMENT_READ,
-        .flags = HEADER_FLAGS_NONE,
-        .fragment = fragment,
-        .fragments = fragments,
-        .dataSize = readWriteSize(&read),
-        .pkg = &read
-    };
-
-    auto outDataSize = headerSize(&header);
-    if (outDataSize > BUFSIZ)
-    {
-        char *outData = (char *)malloc(outDataSize);
-        if (outData == nullptr)
-            return;
-
-        auto size = headerToData(&header, outData, outDataSize);
-        _socket->write(outData, size);
-
-        free(outData);
-    }
-    else
-    {
-        char outData[headerSize(&header)];
-        auto size = headerToData(&header, outData, BUFSIZ);
-        _socket->write(outData, size);
-    }
-
-    iot->readChannel[channel].dataSize = 0;
-    iot->readChannel[channel].data = 0;
-
-    clear_iotv_obj(iot);
+    QByteArray sendData;
+    size_t size = raii_header.toData(sendData);
+    _socket->write(sendData.data(), size);
 }
 
 void IOTV_Client::slotLogDataQueueTimerOut()
@@ -445,10 +404,13 @@ void IOTV_Client::slotServerToClientQueryLogData(RAII_Header raii_header, QStrin
 //                                     this->processQueryLogData(raii_header, logName, hostError, std::ref(_my_pool->_run));
 //                                },
 //                                {}
-//                 });
+    //                 });
 }
 
-bool operator==(const IOTV_Client &lhs, const IOTV_Client &rhs)
+void IOTV_Client::slotMoveToThread(QThread *newThread)
 {
-    return lhs._socket == rhs._socket;
+    QThread *curThread = QThread::currentThread();
+    this->moveToThread(newThread);
+    qDebug() << "client moved to thread";
+    emit signalMovedToThread(curThread);
 }

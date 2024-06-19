@@ -27,3 +27,10 @@ header_t *RAII_Header::header() const
 {
     return _header;
 }
+
+size_t RAII_Header::toData(QByteArray &data) const
+{
+    data.resize(headerSize(_header));
+
+    return headerToData(_header, data.data(), data.size());
+}

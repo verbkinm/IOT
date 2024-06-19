@@ -1,5 +1,18 @@
 #include "ConfigTypes.h"
 
+const QString CATEGORY::NONE = "";
+const QString CATEGORY::NET = "NET";
+const QString CATEGORY::SERVER = "SERVER";
+const QString CATEGORY::TGBOT = "TGBOT";
+const QString CATEGORY::DATA = "DATA";
+const QString CATEGORY::EVENT = "EVENT";
+const QString CATEGORY::ACTION = "ACTION";
+
+const QString CATEGORY::INFO = "INFO";
+const QString CATEGORY::DEBUG = "DEBUG";
+const QString CATEGORY::WARNING = "WARNING";
+const QString CATEGORY::ERROR = "ERROR";
+
 const QString hostField::name = "name";
 const QString hostField::connection_type = "connection_type";
 const QString hostField::address = "address";
@@ -13,12 +26,21 @@ const QString connectionType::FILE = "FILE";
 const QString connectionType::COM = "COM";
 const QString connectionType::UDP = "UDP";
 
+const QString serverField::SERVER_GROUP = "SERVER";
 const QString serverField::address = "address";
 const QString serverField::portClients = "portClients";
 const QString serverField::portHosts = "portHosts";
 const QString serverField::broadCastListenerPort = "broadcastListener";
 const QString serverField::maxClient = "max_client";
 const QString serverField::maxHost = "max_host";
+
+const QString tgBotField::TG_BOT_GROUP = "TG_BOT";
+const QString tgBotField::TGBOTTOKEN = "tgbot_token";
+const QString tgBotField::TGBOTLOG = "tgbot_log";
+const QString tgBotField::TGBOTTRUSTCLIENTS = "tgbot_trust_clients";
+
+QString tgBotFileName::TGBOT_LOG_FILENAME = "tgbot.log";
+QString tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME = "tgbot_trust_clients.txt";
 
 QString ServerLog::CLIENT_ONLINE_LOG_FILENAME = "client_online.log";
 QString ServerLog::EVENT_ACTION_LOG_FILENAME = "event_action.log";

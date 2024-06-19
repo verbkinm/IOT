@@ -18,6 +18,8 @@
 #include "read_write.h"
 #include "tech.h"
 
+#include <fstream>
+
 #include <QtConcurrent>
 #include<QTime>
 
@@ -652,11 +654,11 @@ void Client::responceRead(const header_t *header)
         responceReadStream(header);
     else
     {
-        if (pkg->channelNumber == 15)
-        {
-//            auto res = QByteArray{pkg->data, static_cast<int>(pkg->dataSize)};
-            _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
-        }
+//        if (pkg->channelNumber == 15)
+//        {
+////            auto res = QByteArray{pkg->data, static_cast<int>(pkg->dataSize)};
+//            _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
+//        }
         _devices[name].setData(channel, {pkg->data, static_cast<int>(pkg->dataSize)});
     }
 }
@@ -682,8 +684,18 @@ void Client::responceReadStream(const Header *header)
     {
         QByteArray data = _devices[name].getReadChannelData(channel);
 //        qDebug() << "PKG total: " << data.size();
-        emit _devices[name].signalDataPkgComplete(channel, std::move(data));
+        emit _devices[name].signalDataPkgComplete(channel, data);
     }
+
+//    if (header->fragment == 1)
+//    {
+//        std::ofstream file("image.jpg", std::ios::trunc);
+//        file.write(pkg->data, pkg->dataSize);
+//        return;
+//    }
+
+//    std::ofstream file("image.jpg", std::ios::app);
+//    file.write(pkg->data, pkg->dataSize);
 }
 
 void Client::responceWrite(const header_t *header) const
@@ -761,7 +773,7 @@ void Client::responceLogData(const Header *header)
 //        qDebug() << "responceLogData" << pkg->channelNumber << QTime::currentTime();
 
         _devices[name].dataLogToPoints(pkg->channelNumber, pkg->flags);
-        qDebug() << "channel " << pkg->channelNumber << "data size - " << "stop fragment";
+//        qDebug() << "channel " << pkg->channelNumber << "data size - " << "stop fragment";
     }
 
     // Что бы не вис графический интерфейс
@@ -835,7 +847,7 @@ void Client::slotReciveData()
         else if (header->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент от сервера не должно приходить запросов
-            Log::write("Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");
+            Log::write(CATEGORY::WARNING, "Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);

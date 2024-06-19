@@ -137,6 +137,9 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *io
 
         uint64_t resultSize = headerToData(&header, outData, dataSize);
         totalSendByte += writeFunc(outData, resultSize, obj);
+        //!!!
+//        printf("responseReadData %d / %d = %lu\n", i + 1, (int)pkgsCount, totalSendByte);
+//        fflush(stdout);
     }
 
     return totalSendByte;

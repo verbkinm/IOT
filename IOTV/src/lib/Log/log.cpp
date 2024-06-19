@@ -9,19 +9,25 @@
 const QString Log::_FORMAT = "yyyy.MM.dd hh:mm:ss:zzz - ";
 std::mutex Log::_mutex;
 
-const int MAX_STRING_SIZE = 2000000;
+const int MAX_STRING_SIZE = 256;
 
-void Log::write(const QString& data, Write_Flags writeFlags, const QString &fileName)
+void Log::write(const QString &category, const QString& data, Write_Flags writeFlags, const QString &fileName)
 {
+    QString categ;
+    if (category != "")
+        categ = "(" + category + "): ";
+    else
+        categ = category;
+
     if (writeFlags.testFlag(Write_Flag::FILE))
-        writeToFile(fileName, data);
+        writeToFile(fileName, categ, data);
     if (writeFlags.testFlag(Write_Flag::STDOUT))
-        writeToStdOut(data);
+        writeToStdOut(categ, data);
     if (writeFlags.testFlag(Write_Flag::STDERR))
-        writeToStdErr(data);
+        writeToStdErr(categ, data);
 }
 
-void Log::writeToFile(const QString &fileName, const QString &data)
+void Log::writeToFile(const QString &fileName, const QString &category, const QString &data)
 {
     std::lock_guard lg(_mutex);
     QFile file(fileName);
@@ -40,23 +46,29 @@ void Log::writeToFile(const QString &fileName, const QString &data)
 
     QTextStream out(&file);
     out << QDateTime::currentDateTime().toString(_FORMAT)
+        << category
         << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE) : data)
         << '\n';
-//    out.flush();
 
     file.close();
 }
 
-void Log::writeToStdOut(const QString &data)
+void Log::writeToStdOut(const QString &category, const QString &data)
 {
     std::lock_guard lg(_mutex);
-    qDebug() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
-             << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
+    QTextStream out(stdout);
+    out << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
+        << category
+        << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str())
+        << '\n';
 }
 
-void Log::writeToStdErr(const QString &data)
+void Log::writeToStdErr(const QString &category, const QString &data)
 {
     std::lock_guard lg(_mutex);
-    qWarning() << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
-               << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str());
+    QTextStream out(stderr);
+    out << QDateTime::currentDateTime().toString(_FORMAT).toStdString().c_str()
+        << category
+        << ((data.size() > MAX_STRING_SIZE) ? data.mid(0, MAX_STRING_SIZE).toStdString().c_str() : data.toStdString().c_str())
+        << '\n';
 }

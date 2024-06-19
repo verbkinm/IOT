@@ -14,7 +14,7 @@ TCP_REVERSE_conn_type::TCP_REVERSE_conn_type(const QString &name, QTcpSocket *so
 
 TCP_REVERSE_conn_type::~TCP_REVERSE_conn_type()
 {
-    //    qDebug() << "destruct TCP_REVERSE_conn_type";
+    qDebug() << "destruct TCP_REVERSE_conn_type";
     _tcpSocket->abort();
 }
 
@@ -23,15 +23,15 @@ qint64 TCP_REVERSE_conn_type::write(const QByteArray &data, qint64 size)
     if (_tcpSocket->state() != QAbstractSocket::ConnectedState)
         return 0;
 
-//    Log::write(_name +
-//                   ": data transmit to " +
-//                   _tcpSocket->peerAddress().toString() +
-//                   ":" +
-//                   QString::number(_tcpSocket->peerPort()) +
-//                   " -> " +
-//                   data.toHex(':'),
-//               Log::Write_Flag::FILE_STDOUT,
-//               ServerLog::DEFAULT_LOG_FILENAME);
+    //    Log::write(_name +
+    //                   ": data transmit to " +
+    //                   _tcpSocket->peerAddress().toString() +
+    //                   ":" +
+    //                   QString::number(_tcpSocket->peerPort()) +
+    //                   " -> " +
+    //                   data.toHex(':'),
+    //               Log::Write_Flag::FILE_STDOUT,
+    //               ServerLog::DEFAULT_LOG_FILENAME);
 
     if (size == -1)
     {
@@ -62,8 +62,8 @@ QByteArray TCP_REVERSE_conn_type::readAll()
 
 void TCP_REVERSE_conn_type::slotSocketDisconnected()
 {
-    Log::write(_name + ": disconnected from " + _tcpSocket->peerAddress().toString()
-                   + ":" + QString::number(_tcpSocket->peerPort()),
+    Log::write(CATEGORY::NET, _name + ": disconnected from " + _tcpSocket->peerAddress().toString()
+                                  + ":" + QString::number(_tcpSocket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 
@@ -98,7 +98,7 @@ void TCP_REVERSE_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState 
         break;
     }
 
-    Log::write(_name + ": " + strErr,
+    Log::write(CATEGORY::WARNING, _name + ": " + strErr,
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 }
@@ -168,7 +168,7 @@ void TCP_REVERSE_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(_name + ": " + strErr,
-               Log::Write_Flag::FILE_STDOUT,
+    Log::write(CATEGORY::ERROR,_name + ": " + strErr,
+               Log::Write_Flag::FILE_STDERR,
                ServerLog::DEFAULT_LOG_FILENAME);
 }

@@ -12,7 +12,7 @@ void IOTV_Action_MSG::exec()
     if (!isEnable()  || !isValid())
         return;
 
-    Log::write(_msg, Log::Write_Flag::STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
+//    Log::write(CATEGORY::ACTION, _msg, Log::Write_Flag::STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 }
 
 bool IOTV_Action_MSG::isValid() const

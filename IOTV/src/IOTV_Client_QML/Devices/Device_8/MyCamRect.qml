@@ -49,7 +49,14 @@ Item {
             id: producer
             videoSink: videoOutput.videoSink
             video_device: root.device
+//            audioSink: audioOutput.device
         }
+
+//        AudioOutput {
+//            id: audioOutput
+//            volume: 1
+//        }
+
         VideoOutput {
             id: videoOutput
             anchors.centerIn: parent

@@ -89,7 +89,8 @@ signals:
 
     void signalDataAdded(int channel);
 
-    void signalDataPkgComplete(int channel, const QByteArray &data);
+    // Отлавливается в producer.cpp
+    void signalDataPkgComplete(int channel, QByteArray data);
 
     void signalTest(Wrap_QByteArray *data);
 

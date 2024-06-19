@@ -35,7 +35,7 @@ private:
     QCamera *camera;
     QMediaCaptureSession captureSession;
     QImageCapture imageCapture;
-    QTimer *timer;
+    QTimer *timer, _timerAudio;
     QImage _image;
 
 
@@ -44,10 +44,15 @@ private:
 
     QAudioInput *audioIn;
     QAudioSource *source;
-    QAudioSink *audioSink;
     QIODevice *devIn;
 
+    QIODevice *devOut;
+    QAudioOutput *_audioOut;
+    QAudioSink *_audioSink;
+
     static constexpr int INTERVAL = 25;
+
+    bool timerActive;
 
 public slots:
     void processCapturedImage(int requestId, const QImage &img);
@@ -60,6 +65,7 @@ public slots:
     void displayErrorMessage();
 
     void slotReadyRead();
+    void slotAudio();
 
 signals:
     void signalFirstCapture();

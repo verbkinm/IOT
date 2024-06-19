@@ -50,7 +50,7 @@ Widget::Widget(QObject *parent)
     source->setVolume(1);
     devIn = source->start();
 
-    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+//    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 
     imageCapture.capture();
 }
@@ -79,14 +79,19 @@ size_t Widget::getImageSavedSize() const
 
 void Widget::start()
 {
+    qDebug() << "camera start";
     timer->start(INTERVAL);
+
+    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+
 //    connect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 void Widget::stop()
 {
+    qDebug() << "camera stop";
     timer->stop();
-//    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
+    disconnect(devIn, &QIODevice::readyRead, this, &Widget::slotReadyRead);
 }
 
 
@@ -151,6 +156,7 @@ void Widget::displayErrorMessage()
 
 void Widget::slotReadyRead()
 {
+    qDebug() << "slotReadyRead";
     emit signalAudio(devIn->readAll());
 }
 

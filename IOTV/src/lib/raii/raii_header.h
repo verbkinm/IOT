@@ -15,6 +15,8 @@ public:
 
     header_t *header() const;
 
+    size_t toData(QByteArray &data) const;
+
 private:
     header_t *_header;
 };

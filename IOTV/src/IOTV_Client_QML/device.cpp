@@ -240,8 +240,8 @@ void Device::dataLogToPoints(uint8_t channelNumber, uint8_t flags)
     }
     points.emplace_back(uniqPoints.rbegin()->first, uniqPoints.rbegin()->second);
 
-        qDebug() << "Количество точек list" << points.size();
-        qDebug() << "Количество точек map" << uniqPoints.size();
+//        qDebug() << "Количество точек list" << points.size();
+//        qDebug() << "Количество точек map" << uniqPoints.size();
 
     uniqPoints.clear();
     //    for (auto [key, value] : uniqPoints)

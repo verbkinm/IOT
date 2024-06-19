@@ -15,14 +15,14 @@ Udp_conn_type::Udp_conn_type(const QString &name, const QString &address, quint1
 
     if (!_udpSocket->bind(QHostAddress::AnyIPv4))
     {
-        Log::write(_name + ": Error bind address",
+        Log::write(CATEGORY::ERROR, _name + ": Error bind address",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
         qDebug() << this;
     }
     else
     {
-        Log::write(_name + ": Bind address " + _udpSocket->localAddress().toString() + ":" + QString::number(_udpSocket->localPort()),
+        Log::write(CATEGORY::NET, _name + ": Bind address " + _udpSocket->localAddress().toString() + ":" + QString::number(_udpSocket->localPort()),
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
@@ -140,8 +140,8 @@ void Udp_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(_name + ": " + strErr,
-               Log::Write_Flag::FILE_STDOUT,
+    Log::write(CATEGORY::ERROR, _name + ": " + strErr,
+               Log::Write_Flag::FILE_STDERR,
                ServerLog::DEFAULT_LOG_FILENAME);
 }
 
@@ -173,7 +173,7 @@ void Udp_conn_type::slotSocketStateChange(QAbstractSocket::SocketState socketSta
         break;
     }
 
-    Log::write(_name + ": " + strErr,
+    Log::write(CATEGORY::WARNING, _name + ": " + strErr,
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 }

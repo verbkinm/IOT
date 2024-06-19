@@ -51,7 +51,7 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 void TCP_conn_type::connectToHost()
 {
     disconnectFromHost();
-    Log::write(_name + ": try to connect...", Log::Write_Flag::FILE_STDOUT,
+    Log::write(CATEGORY::NET, _name + "try to connect...", Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
     _tcpSocket->connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }
@@ -68,7 +68,7 @@ QByteArray TCP_conn_type::readAll()
 
 void TCP_conn_type::slotNewConnection()
 {
-    Log::write(_name + ": connected to " + _tcpSocket->peerAddress().toString()
+    Log::write(CATEGORY::NET, _name + " connected to " + _tcpSocket->peerAddress().toString()
                    + ":" + QString::number(_tcpSocket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
@@ -83,7 +83,7 @@ void TCP_conn_type::slotSocketDisconnected()
 {
     expectedDataSize = 0;
 
-    Log::write(_name + ": disconnected from " + _tcpSocket->peerAddress().toString()
+    Log::write(CATEGORY::NET, _name + "disconnected from " + _tcpSocket->peerAddress().toString()
                    + ":" + QString::number(_tcpSocket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
@@ -122,7 +122,7 @@ void TCP_conn_type::slotSocketStateChanged(QAbstractSocket::SocketState socketSt
         break;
     }
 
-    Log::write(_name + ": " + strErr,
+    Log::write(CATEGORY::WARNING, _name + ": " + strErr,
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
 }
@@ -192,7 +192,7 @@ void TCP_conn_type::slotError(QAbstractSocket::SocketError error)
         break;
     }
 
-    Log::write(_name + ": " + strErr,
-               Log::Write_Flag::FILE_STDOUT,
+    Log::write(CATEGORY::ERROR, _name + ": " + strErr,
+               Log::Write_Flag::FILE_STDERR,
                ServerLog::DEFAULT_LOG_FILENAME);
 }

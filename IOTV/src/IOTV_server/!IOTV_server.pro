@@ -6,8 +6,8 @@ CONFIG += c++2a console warn_on depend_includepath testcase
 CONFIG -= app_bundle
 CONFIG += debug_and_release
 
-CONFIG(debug,debug|release) DESTDIR = debug
-CONFIG(release,debug|release) DESTDIR = release
+#CONFIG(debug,debug|release) DESTDIR = debug
+#CONFIG(release,debug|release) DESTDIR = release
 
 TARGET = iotv_server
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <set>
 
 #include "channel.h"
 #include "iotv_server_embedded.h"
@@ -90,3 +91,11 @@ signals:
     void signalQueryWrite(int channelNumber, QByteArray data);
 };
 
+struct Compare_Base_Host {
+    bool operator()(const std::shared_ptr<Base_Host> &lhs, const std::shared_ptr<Base_Host> &rhs) const
+    {
+        return lhs.get()->getName() < rhs->getName();
+    }
+};
+
+typedef std::set<std::shared_ptr<Base_Host>, Compare_Base_Host> Base_Host_List;
