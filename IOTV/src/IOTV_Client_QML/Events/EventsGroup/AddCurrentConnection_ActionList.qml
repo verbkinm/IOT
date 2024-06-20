@@ -101,6 +101,7 @@ Page {
                 checked: false,
                 text: list[i],
                 icon: actionImageByEventType(action.type),
+                stackView: glob_eventStackView,
             }
 
             listModel.append(object)

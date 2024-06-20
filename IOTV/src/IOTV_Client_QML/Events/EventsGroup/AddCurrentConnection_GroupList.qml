@@ -38,6 +38,7 @@ Page {
                 title: list[i],
                 icon: "qrc:/img/folder.png",
                 loaderSource: "qrc:/Events/EventsGroup/AddCurrentConnection_ActionList.qml",
+                stackView: glob_eventStackView,
                 attributes: [objectAtributes]
             }
             listModel.append(object)
