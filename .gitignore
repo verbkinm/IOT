@@ -57,3 +57,5 @@ IOTV/src/MK/FreerRTOS/id_2/dependencies.lock
 *cmake_install.cmake
 
 IOTV/pcb/*backups/*.zip
+
+IOTV/src/IOTV_server/iotv_server_autogen/*

@@ -4,6 +4,9 @@ project(iotv_server VERSION 0.20 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/build/release)
@@ -28,9 +31,9 @@ endif()
 
 configure_file(config.h.in config.h)
 
-qt_standard_project_setup()
+#qt_standard_project_setup()
 
-qt_add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME}
     ../lib/Base_Host/base_host.cpp                      ../lib/Base_Host/base_host.h
     ../lib/Base_Host/channel.cpp                        ../lib/Base_Host/channel.h
     ../lib/ConfigType/ConfigTypes.cpp                   ../lib/ConfigType/ConfigTypes.h

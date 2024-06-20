@@ -83,6 +83,7 @@ Page {
                 title: "Соединения",
                 icon: "qrc:/img/folder.png",
                 loaderSource: "qrc:/Events/EventsGroup/CurrentConnectionList.qml",
+                stackView: glob_eventStackView,
                 attributes: [objectAtributes]
             }
             listModel.append(object)
