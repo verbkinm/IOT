@@ -18,6 +18,7 @@
 #include "IOTV_Client/iotv_client.h"
 #include "IOTV_Bot/iotv_bot.h"
 
+#include "config_server.h"
 #include "iotv_event_manager.h"
 
 class IOTV_Server : public QObject
@@ -30,7 +31,6 @@ public:
     QStringList getFileSettingNames() const;
 
 private:
-    void checkSettingsFileExist();
     void readServerSettings();
     void readHostSetting();
 
@@ -46,7 +46,6 @@ private:
 
     Base_Host *baseHostFromName(const QString &name) const;
 
-//    void clientHostsUpdate() const;
     void clientHostsUpdate();
 
     // Возвращает список Base_Host* из _iot_hosts
@@ -56,15 +55,9 @@ private:
     std::unordered_map<IOTV_Client *, QThread *> _iot_clients;
 
     QSettings _settingsServer, _settingsHosts;
-
-    QString _address;
-    quint16 _portForClients, _portTcpHosts;
-    quint16 _broadcasrListenerPort, _portUdpHosts;
+    Config_Server _config;
 
     QTimer _reconnectTimer;
-
-    uint _maxClientCount;
-    uint _maxHostCount;
 
     std::shared_ptr<IOTV_Event_Manager> _eventManager;
 
@@ -85,9 +78,6 @@ private slots:
 
     void slotError(QAbstractSocket::SocketError error);
 
-//    void slotFetchEventActionData(QByteArray data);
-//    void slotQueryEventActionData();
-
     void slotPendingDatagrams();
 
     void slotDevicePingTimeout();
@@ -103,6 +93,4 @@ private slots:
     void slotAction(QString group, QString name, QString type);
 
     void slotBotRequest(int64_t id, QString request);
-
-    void slotTest();
 };

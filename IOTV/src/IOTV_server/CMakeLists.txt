@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(iotv_server VERSION 0.19 LANGUAGES C CXX)
+project(iotv_server VERSION 0.20 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,7 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/build/rel
 find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network SerialPort)
 
-#tgbot-cpp
+#-> tgbot-cpp
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
@@ -24,7 +24,7 @@ if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
     add_definitions(-DHAVE_CURL)
 endif()
-#tgbot-cpp
+#<- tgbot-cpp
 
 configure_file(config.h.in config.h)
 
@@ -74,9 +74,12 @@ qt_add_executable(${PROJECT_NAME}
     connection_type/tcp_reverse_conn_type.cpp           connection_type/tcp_reverse_conn_type.h
     connection_type/udp_conn_type.cpp                   connection_type/udp_conn_type.h
     main.cpp
-    wrapper.cpp wrapper.h
-    IOTV_Bot/iotv_bot.h                                 IOTV_Bot/iotv_bot.cpp
+    wrapper.cpp                                         wrapper.h
+    IOTV_Bot/iotv_bot.cpp                               IOTV_Bot/iotv_bot.h
+    IOTV_Server/eraser_iotv.cpp                         IOTV_Server/eraser_iotv.h
+    IOTV_Server/config_server.cpp                       IOTV_Server/config_server.h
 )
+
 target_include_directories(${PROJECT_NAME} PRIVATE
     ../lib/Base_Host
     ../lib/ConfigType

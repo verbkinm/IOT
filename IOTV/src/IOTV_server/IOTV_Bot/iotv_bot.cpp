@@ -96,6 +96,13 @@ void IOTV_Bot::startBot()
         emit signalBotRequest(message->chat->id, "clients");
     });
 
+    _bot.getEvents().onCommand("hosts", [&](TgBot::Message::Ptr message){
+        if (!trustClient(message))
+            return;
+
+        emit signalBotRequest(message->chat->id, "hosts");
+    });
+
     _bot.getEvents().onCommand("help", [&](TgBot::Message::Ptr message){
         if (!trustClient(message))
             return;

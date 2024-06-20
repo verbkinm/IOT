@@ -3,18 +3,16 @@
 #include "event_action_parser.h"
 #include "connection_type/tcp_conn_type.h"
 #include "maker_iotv.h"
+#include "eraser_iotv.h"
 
 #include <QNetworkDatagram>
 
 IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
     _settingsServer(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Server"),
     _settingsHosts(QSettings::IniFormat, QSettings::UserScope, "VMS", "IOTV_Hosts"),
-    _maxClientCount(1), _maxHostCount(10),
     _tgbot_thread(nullptr), _tg_bot(nullptr)
 {
-    //    qDebug() << QThread::currentThread();
-
-    checkSettingsFileExist();
+    _config.checkSettingsFileExist(_settingsServer, _settingsHosts);
     readServerSettings();
 
     _tcpClient = new QTcpServer(this);
@@ -42,28 +40,8 @@ IOTV_Server::~IOTV_Server()
 {
     qDebug() << "IOTV_Server destruct";
 
-    for(auto &[client, thread] : _iot_clients)
-    {
-        client->deleteLater();
-
-        thread->exit();
-        thread->wait();
-        delete thread;
-    }
-
-    _iot_clients.clear();
-
-    for(auto &[host, thread] : _iot_hosts)
-    {
-        host->deleteLater();
-
-        thread->exit();
-        thread->wait();
-        delete thread;
-    }
-
-    _iot_hosts.clear();
-
+    Eraser_iotv::clients(_iot_clients);
+    Eraser_iotv::hosts(_iot_hosts);
 
     while (_tcpClient->isListening())
     {
@@ -73,13 +51,7 @@ IOTV_Server::~IOTV_Server()
     }
     Log::write(CATEGORY::NET, "Stop TCP server.", Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
 
-    _tgbot_thread->exit();
-    _tgbot_thread->wait();
-    delete _tgbot_thread;
-    _tgbot_thread = nullptr;
-
-    delete _tg_bot;
-    _tg_bot = nullptr;
+    Eraser_iotv::bot(&_tg_bot, &_tgbot_thread);
 }
 
 QStringList IOTV_Server::getFileSettingNames() const
@@ -88,72 +60,23 @@ QStringList IOTV_Server::getFileSettingNames() const
 }
 
 void IOTV_Server::readServerSettings()
-{       
-    _settingsServer.beginGroup(serverField::SERVER_GROUP);
-    _address = _settingsServer.value(serverField::address, "127.0.0.1").toString();
-    _portForClients = _settingsServer.value(serverField::portClients, 2022).toUInt();
-    _portTcpHosts = _settingsServer.value(serverField::portHosts, 2023).toUInt();
-    _broadcasrListenerPort = _settingsServer.value(serverField::broadCastListenerPort, 2022).toUInt();
-    _maxClientCount = _settingsServer.value(serverField::maxClient, 5).toUInt();
-    _maxHostCount = _settingsServer.value(serverField::maxHost, 10).toUInt();
-    ServerLog::CLIENT_ONLINE_LOG_FILENAME = _settingsServer.value(ServerLog::CLIENT_ONLINE_LOG, ServerLog::CLIENT_ONLINE_LOG_FILENAME).toString();
-    ServerLog::EVENT_ACTION_LOG_FILENAME = _settingsServer.value(ServerLog::EVENT_ACTION_LOG, ServerLog::EVENT_ACTION_LOG_FILENAME).toString();
-    ServerLog::DEFAULT_LOG_FILENAME = _settingsServer.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
-    _settingsServer.endGroup();
+{
+    _config.readServerSettings(_settingsServer);
 
-    _settingsServer.beginGroup(tgBotField::TG_BOT_GROUP);
-    tgBotFileName::TGBOT_LOG_FILENAME = _settingsServer.value(tgBotFileName::TGBOT_LOG_FILENAME, tgBotFileName::TGBOT_LOG_FILENAME).toString();
-    tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME = _settingsServer.value(tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME, tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME).toString();
-
-    QString token = _settingsServer.value(tgBotField::TGBOTTOKEN, "").toString();
+    QString token;
     std::set<int64_t> clients;
+    _config.readBotSettings(_settingsServer, token, clients);
 
-    std::ifstream file(tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME.toStdString());
-    if (!file.is_open())
-        Log::write(CATEGORY::ERROR, QString("Не удалось открыть файл %1").arg(tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME), Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
-   else
-   {
-       while(!file.eof())
-       {
-           int64_t chatId;
-           file >> chatId;
-           clients.insert(chatId);
-       }
-   }
-
-   if (token != "")
-   {
-       if (_tgbot_thread != nullptr)
-       {
-           _tgbot_thread->exit();
-           _tgbot_thread->wait();
-           delete _tgbot_thread;
-       }
-       _tgbot_thread = new QThread();
+    if (token != "")
+    {
+       Maker_iotv::bot(&_tg_bot, &_tgbot_thread, token, clients);
 
        if (_tg_bot != nullptr)
-           delete _tg_bot;
-
-       _tg_bot = new IOTV_Bot(token, clients);
-       _tg_bot->moveToThread(_tgbot_thread);
-
-       _tgbot_thread->start();
-
-       if (!_tgbot_thread->isRunning())
-       {
-           Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "невозможно запустить IOTV_Bot в новом потоке!",
-                      Log::Write_Flag::FILE_STDERR,
-                      ServerLog::DEFAULT_LOG_FILENAME);
-           delete _tg_bot;
-           _tg_bot = nullptr;
-       }
-       else
        {
            connect(_tg_bot, &IOTV_Bot::signalBotRequest, this, &IOTV_Server::slotBotRequest, Qt::QueuedConnection);
            emit _tg_bot->signalStart();
        }
-   }
-   _settingsServer.endGroup();
+    }
 }
 
 void IOTV_Server::readHostSetting()
@@ -176,7 +99,7 @@ void IOTV_Server::readHostSetting()
         //if (setting[hostField::connection_type] == connectionType::COM)
         //  ;
 
-        auto host = Maker_iotv::host(_iot_hosts, _maxHostCount, setting, nullptr, this);
+        auto host = Maker_iotv::host(_iot_hosts, _config.maxHostCount, setting, nullptr, this);
         if (host != nullptr)
             connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsUpdate, Qt::QueuedConnection);
 
@@ -194,17 +117,17 @@ QByteArray IOTV_Server::readEventActionJson()
         file.open(QIODevice::WriteOnly);
         if (!file.isOpen())
         {
-            Log::write(CATEGORY::ERROR, "Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            Log::write(CATEGORY::ERROR, "Невозможно создать/записать файл: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
             return {};
         }
-        file.write("{\"Остальное\" : {}\n}");
+        file.write("{{}\n}");
         file.close();
         file.open(QIODevice::ReadOnly);
 
         // Если запись разрешена, а чтение всё же не доступно
         if (!file.isOpen())
         {
-            Log::write(CATEGORY::ERROR, "Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+            Log::write(CATEGORY::ERROR, "Невозможно прочитать файл: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
             return {};
         }
     }
@@ -238,7 +161,7 @@ void IOTV_Server::writeEventActionJson(const QByteArray &data)
     file.open(QIODevice::WriteOnly);
     if (!file.isOpen())
     {
-        Log::write(CATEGORY::ERROR, "Can't create/open file: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        Log::write(CATEGORY::ERROR, "Невозможно создать/записать файл: " + fileName, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         exit(1);
     }
 
@@ -250,14 +173,14 @@ void IOTV_Server::startTCP(QTcpServer *socket, quint16 port, const QString &lbl)
     if (socket->isListening())
         return;
 
-    if (socket->listen(QHostAddress(_address), port))
+    if (socket->listen(QHostAddress(_config.address), port))
     {
-        QString str = "Start TCP server for " + lbl + " " + _address + ":" + QString::number(port);
+        QString str = "Запуск TCP сервера для " + lbl + " " + _config.address + ":" + QString::number(port);
         Log::write(CATEGORY::NET, str, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     }
     else
     {
-        QString str = "Error start TCP server for " + lbl + " " + _address + ":" + QString::number(port);
+        QString str = "Запуск TCP сервера для " + lbl + " " + _config.address + ":" + QString::number(port);
         Log::write(CATEGORY::ERROR, str, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
@@ -266,20 +189,20 @@ void IOTV_Server::startUDP(QUdpSocket *socket, const QString &addr, quint16 port
 {
     if (socket->bind(QHostAddress(addr), port, QAbstractSocket::ReuseAddressHint))
     {
-        QString str = "Start UDP server for " + lbl + addr + ":" + QString::number(port);
+        QString str = "Запуск UDP сервера для " + lbl + addr + ":" + QString::number(port);
         Log::write(CATEGORY::NET, str, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
     }
     else
     {
-        QString str = "Error start UDP server for " + lbl + " " + addr + ":" + QString::number(port);;
+        QString str = "Запуск UDP сервера для " + lbl + " " + addr + ":" + QString::number(port);;
         Log::write(CATEGORY::ERROR, str, Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
     }
 }
 
 void IOTV_Server::startTCPServers()
 {
-    startTCP(_tcpClient, _portForClients, "clients");
-    startTCP(_tcpReverseHost, _portTcpHosts, "hosts");
+    startTCP(_tcpClient, _config.portForClients, "clients");
+    startTCP(_tcpReverseHost, _config.portTcpHosts, "hosts");
 
     if (_tcpClient->isListening() && _tcpReverseHost->isListening())
         _reconnectTimer.stop();
@@ -289,7 +212,7 @@ void IOTV_Server::startTCPServers()
 
 void IOTV_Server::startUDPServers()
 {
-    startUDP(_udpBroadcast, "255.255.255.255", _broadcasrListenerPort, "broadcast ");
+    startUDP(_udpBroadcast, "255.255.255.255", _config.broadcasrListenerPort, "broadcast ");
 }
 
 void IOTV_Server::clientOnlineFile() const
@@ -387,52 +310,17 @@ std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
     return result;
 }
 
-void IOTV_Server::checkSettingsFileExist()
-{
-    if (!QFileInfo::exists(_settingsServer.fileName()))
-    {
-        _settingsServer.beginGroup(serverField::SERVER_GROUP);
-        _settingsServer.setValue(serverField::address, "127.0.0.1");
-        _settingsServer.setValue(serverField::portClients, 2022);
-        _settingsServer.setValue(serverField::portHosts, 2023);
-        _settingsServer.setValue(serverField::broadCastListenerPort, 2022);
-        _settingsServer.setValue(serverField::maxClient, _maxClientCount);
-        _settingsServer.setValue(serverField::maxHost, _maxHostCount);
-        _settingsServer.setValue(ServerLog::CLIENT_ONLINE_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::CLIENT_ONLINE_LOG_FILENAME).absoluteFilePath());
-        _settingsServer.setValue(ServerLog::EVENT_ACTION_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::EVENT_ACTION_LOG_FILENAME).absoluteFilePath());
-        _settingsServer.setValue(ServerLog::DEFAULT_LOG, QFileInfo({QCoreApplication::applicationDirPath()}, ServerLog::DEFAULT_LOG_FILENAME).absoluteFilePath());
-        _settingsServer.endGroup();
-
-        _settingsServer.beginGroup(tgBotField::TG_BOT_GROUP);
-        _settingsServer.setValue(tgBotField::TGBOTTOKEN, "");
-        _settingsServer.setValue(tgBotField::TGBOTLOG, QFileInfo({QCoreApplication::applicationDirPath()}, tgBotFileName::TGBOT_LOG_FILENAME).absoluteFilePath());
-        _settingsServer.setValue(tgBotField::TGBOTTRUSTCLIENTS, QFileInfo({QCoreApplication::applicationDirPath()}, tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME).absoluteFilePath());
-        _settingsServer.endGroup();
-
-    }
-    if (!QFileInfo::exists(_settingsHosts.fileName()))
-    {
-        _settingsHosts.beginGroup("Host");
-        _settingsHosts.setValue(hostField::connection_type, connectionType::TCP);
-        _settingsHosts.setValue(hostField::address, "127.0.0.1");
-        _settingsHosts.setValue(hostField::port, 2021);
-        _settingsHosts.setValue(hostField::interval, 1000);
-        _settingsHosts.setValue(hostField::logDir,  QFileInfo({QCoreApplication::applicationDirPath()}, _settingsHosts.group()).absoluteFilePath());
-        _settingsHosts.endGroup();
-        _settingsHosts.sync();
-    }
-}
-
 void IOTV_Server::slotNewClientConnection()
 {
     QTcpSocket* socket = _tcpClient->nextPendingConnection();
 
-    auto client = Maker_iotv::client(_iot_clients, _maxClientCount, socket, this);
+    auto client = Maker_iotv::client(_iot_clients, _config.maxClientCount, socket, this);
 
     if (client == nullptr)
         return;
 
-    emit _tg_bot->signalSendMsgForAll("Подключён клиент: " + client->stringRepresentation());
+    if (_tg_bot != nullptr)
+        emit _tg_bot->signalSendMsgForAll("Подключён клиент: " + client->stringRepresentation());
 
     connect(client, &IOTV_Client::signalClientToServerQueryIdentification, this, &IOTV_Server::slotClientToServerQueryIdentification, Qt::QueuedConnection);
     connect(client, &IOTV_Client::signalClientToServerQueryRead, this, &IOTV_Server::slotClientToServerQueryRead, Qt::QueuedConnection);
@@ -456,24 +344,17 @@ void IOTV_Server::slotClientDisconnected()
 
     QString strOut = "Client disconnected";
     Log::write(CATEGORY::NET, strOut, Log::Write_Flag::FILE_STDOUT, ServerLog::DEFAULT_LOG_FILENAME);
-    emit _tg_bot->signalSendMsgForAll("Отключен клиент: " + client->stringRepresentation());
+    if (_tg_bot != nullptr)
+        emit _tg_bot->signalSendMsgForAll("Отключен клиент: " + client->stringRepresentation());
 
-    client->deleteLater();
-
-    _iot_clients[client]->exit();
-    _iot_clients[client]->wait();
-    delete _iot_clients[client];
-
-    _iot_clients.erase(client);
-
-    //    readEventActionJson();
+    Eraser_iotv::client(_iot_clients, client);
 
     clientOnlineFile();
 }
 
 void IOTV_Server::slotNewHostConnection()
 {
-    auto host = Maker_iotv::host_tcp_in(_iot_hosts, _maxHostCount, _tcpReverseHost->nextPendingConnection(), this);
+    auto host = Maker_iotv::host_tcp_in(_iot_hosts, _config.maxHostCount, _tcpReverseHost->nextPendingConnection(), this);
 
     if (host == nullptr)
         return;
@@ -556,7 +437,7 @@ void IOTV_Server::slotError(QAbstractSocket::SocketError error)
 
 void IOTV_Server::slotPendingDatagrams()
 {
-    auto host = Maker_iotv::host_broadcast(_udpBroadcast, _iot_hosts, _maxHostCount, this);
+    auto host = Maker_iotv::host_broadcast(_udpBroadcast, _iot_hosts, _config.maxHostCount, this);
 
     if (host == nullptr)
         return;
@@ -570,18 +451,8 @@ void IOTV_Server::slotPendingDatagrams()
 void IOTV_Server::slotDevicePingTimeout()
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
-    if (host == nullptr)
-        return;
 
-    _iot_hosts[host]->exit();
-    connect(_iot_hosts[host], &QThread::finished, this, [this](){
-        qDebug() << "delete thread";
-        QThread *thread = dynamic_cast<QThread *>(sender());
-        delete thread;
-    });
-
-    _iot_hosts.erase(host);
-    host->deleteLater();
+    Eraser_iotv::host(_iot_hosts, host);
 
     clientHostsUpdate();
 }
@@ -734,17 +605,14 @@ void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
     if (pkg->type == Tech_TYPE_EV_AC)
     {
         if (pkg->dataSize == 0)
-        {
-            //            readEventActionJson();
-            //            QByteArray data = Event_Action_Parser::toData(_eventManager->worker());
             emit client->signalFetchEventActionDataFromServer(readEventActionJson());
-        }
         else
         {
             QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
 
             QJsonParseError err;
             QJsonDocument::fromJson(data, &err);
+
             if (err.error != QJsonParseError::NoError)
             {
                 qDebug() << "Error parse json from client" << err.errorString() << ' ' << err.offset;
@@ -801,7 +669,8 @@ void IOTV_Server::slotEvent(QString group, QString name, QString type)
                   ": \"" + group + "\" \"" + name + "\" " + type;
     Log::write(CATEGORY::EVENT, msg , Log::Write_Flag::FILE_STDOUT, ServerLog::EVENT_ACTION_LOG_FILENAME);
 
-    emit _tg_bot->signalSendMsgForAll("Событие: " + msg);
+    if (_tg_bot != nullptr)
+        emit _tg_bot->signalSendMsgForAll("Событие: " + msg);
 }
 
 void IOTV_Server::slotAction(QString group, QString name, QString type)
@@ -809,25 +678,39 @@ void IOTV_Server::slotAction(QString group, QString name, QString type)
     QString msg = "Action: \"" + group + "\" \"" + name + "\" " + type;
     Log::write(CATEGORY::ACTION, msg , Log::Write_Flag::FILE_STDOUT, ServerLog::EVENT_ACTION_LOG_FILENAME);
 
-    emit _tg_bot->signalSendMsgForAll("Действие: " + msg);
+    if (_tg_bot != nullptr)
+        emit _tg_bot->signalSendMsgForAll("Действие: " + msg);
 }
 
 void IOTV_Server::slotBotRequest(int64_t id, QString request)
 {
+    if (_tg_bot == nullptr)
+        return;
+
     if (request == "clients")
     {
         QFile file(ServerLog::CLIENT_ONLINE_LOG_FILENAME);
         file.open(QIODevice::ReadOnly);
 
-        QString text = file.readAll();
-        if (text.size() == 0)
-            text = "Нет подключенных клиентов";
+        QString txt = "Список клиентов:\n";
+        QString dataFile = file.readAll();
 
-        emit _tg_bot->signalSendMsg(id, text);
+        if (dataFile.size() == 0)
+            txt += "Нет подключенных клиентов";
+        else
+            txt += dataFile;
+
+        emit _tg_bot->signalSendMsg(id, txt);
     }
-}
+    else if (request == "hosts")
+    {
+        QString txt = "Список хостов:\n";
+        for (const auto &[host, _] : _iot_hosts)
+            txt += host->getName() + " (" + host->getAddress() + ") - " + (host->state() == State_STATE_ONLINE ? "онлайн" : "офлайн") + "\n";
 
-void IOTV_Server::slotTest()
-{
-    // TESTING
+        if (_iot_hosts.size() == 0)
+            txt += "Нет подключенных хостов";
+
+        emit _tg_bot->signalSendMsg(id, txt);
+    }
 }

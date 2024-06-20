@@ -265,3 +265,24 @@ IOTV_Host *Maker_iotv::host_broadcast(QUdpSocket *socket,
 
     return host;
 }
+
+void Maker_iotv::bot(IOTV_Bot **tg_bot, QThread **tgbot_thread, const QString &token, const std::set<int64_t> &clients)
+{
+    *tgbot_thread = new QThread();
+    *tg_bot = new IOTV_Bot(token, clients);
+    (*tg_bot)->moveToThread(*tgbot_thread);
+
+    (*tgbot_thread)->start();
+
+    if (!(*tgbot_thread)->isRunning())
+    {
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "невозможно запустить IOTV_Bot в новом потоке!",
+                   Log::Write_Flag::FILE_STDERR,
+                   ServerLog::DEFAULT_LOG_FILENAME);
+
+        delete *tg_bot;
+        *tg_bot = nullptr;
+        delete *tgbot_thread;
+        *tgbot_thread = nullptr;
+    }
+}

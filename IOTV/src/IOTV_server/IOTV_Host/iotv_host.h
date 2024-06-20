@@ -129,12 +129,3 @@ signals:
     // Принимается в iotv_server
     void signalStreamRead(RAII_Header raii_header);
 };
-
-struct Compare_IOTV_Host {
-    bool operator()(const std::shared_ptr<IOTV_Host> &lhs, const std::shared_ptr<IOTV_Host> &rhs) const
-    {
-        return lhs.get()->getName() < rhs->getName();
-    }
-};
-
-typedef std::set<std::shared_ptr<IOTV_Host>, Compare_IOTV_Host> IOTV_Host_List;
