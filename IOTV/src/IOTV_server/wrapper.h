@@ -16,5 +16,4 @@ private:
 
 private slots:
     void slotFileChanged(const QString &fileName);
-    void slotServerDestroy();
 };

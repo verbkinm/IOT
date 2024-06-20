@@ -13,11 +13,11 @@ void Maker_iotv::deleteReverseSocket(QAbstractSocket *reverse_socket)
     }
 }
 
-std::shared_ptr<IOTV_Host> Maker_iotv::host_tcp_in(IOTV_Host_List &add_to_iot_hosts, uint maxHostCount, QTcpSocket *reverse_socket, QObject *parent)
+IOTV_Host *Maker_iotv::host_tcp_in(std::unordered_map<IOTV_Host *, QThread *> &add_to_iot_hosts, uint maxHostCount, QTcpSocket *reverse_socket, QObject *parent)
 {
     if (!reverse_socket)
     {
-        Log::write(CATEGORY::WARNING, QString(Q_FUNC_INFO) + " nextPendingConnection: ",
+        Log::write(CATEGORY::NET, QString(Q_FUNC_INFO) + " nextPendingConnection: ",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
         return nullptr;
@@ -51,15 +51,15 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host_tcp_in(IOTV_Host_List &add_to_iot_ho
     return Maker_iotv::host(add_to_iot_hosts, maxHostCount, setting, reverse_socket, parent);
 }
 
-std::shared_ptr<IOTV_Host> Maker_iotv::host(IOTV_Host_List &add_to_iot_hosts,
+IOTV_Host *Maker_iotv::host(std::unordered_map<IOTV_Host *, QThread *> &add_to_iot_hosts,
                             uint maxHostCount,
                             const std::unordered_map<QString, QString> &setting,
                             QAbstractSocket *reverse_socket, QObject *parent)
 {
     if (add_to_iot_hosts.size() == maxHostCount)
     {
-        Log::write(CATEGORY::WARNING, QString(Q_FUNC_INFO) +
-                       "Hosts limit = " + QString::number(maxHostCount),
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) +
+                       ", Error: Hosts limit = " + QString::number(maxHostCount),
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
 
@@ -68,13 +68,13 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host(IOTV_Host_List &add_to_iot_hosts,
         return nullptr;
     }
 
-    auto it = std::find_if (add_to_iot_hosts.begin(), add_to_iot_hosts.end(), [&](const auto &host){
-        return host->settingsData().at(hostField::name) == setting.at(hostField::name);
+    auto it = std::find_if (add_to_iot_hosts.begin(), add_to_iot_hosts.end(), [&](const auto &pair){
+        return pair.first->settingsData().at(hostField::name) == setting.at(hostField::name);
     });
 
     if (it != add_to_iot_hosts.end())
     {
-        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "Double host name in config file - " + setting.at(hostField::name),
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + ", Error: Double host name in config file - " + setting.at(hostField::name),
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
 
@@ -83,15 +83,15 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host(IOTV_Host_List &add_to_iot_hosts,
         return nullptr;
     }
 
-    QThread *th = new QThread;
-    std::shared_ptr<IOTV_Host> host;
+    QThread *th = new QThread(parent);
+    IOTV_Host *host = nullptr;
 
     if (setting.at(hostField::connection_type) == connectionType::TCP_REVERSE)
     {
         auto socket = dynamic_cast<QTcpSocket *>(reverse_socket);
         if (socket == nullptr)
         {
-            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "Error dynamic_cast!",
+            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " Error dynamic_cast!",
                        Log::Write_Flag::FILE_STDERR,
                        ServerLog::DEFAULT_LOG_FILENAME);
 
@@ -99,36 +99,39 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host(IOTV_Host_List &add_to_iot_hosts,
             return nullptr;
         }
 
-        host = std::make_shared<IOTV_Host>(setting, socket);
+        host = new IOTV_Host(setting, socket);//, th);
     }
     else
-        host = std::make_shared<IOTV_Host>(setting);
+        host = new IOTV_Host(setting);//, th);
 
     host->moveToThread(th);
 
     th->start();
+    add_to_iot_hosts[host] = th;
 
     if (!th->isRunning())
     {
-        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "Can't run IOT_Host in new thread",
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + " Error: Can't run IOT_Host in new thread",
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
+
+        add_to_iot_hosts.erase(host);
+        //!!! deleteLater
         delete th;
+        delete host;
 
         return nullptr;
     }
-    add_to_iot_hosts.insert(host);
-
 
     return host;
 }
 
-std::shared_ptr<IOTV_Client> Maker_iotv::client(IOTV_Client_List &add_to_iot_client, uint maxClientCount,
+IOTV_Client *Maker_iotv::client(std::unordered_map<IOTV_Client *, QThread *> &add_to_iot_client, uint maxClientCount,
                                 QTcpSocket *socket, QObject *parent)
 {
     if (!socket)
     {
-        Log::write(CATEGORY::WARNING, QString(Q_FUNC_INFO) + " nextPendingConnection: ",
+        Log::write(CATEGORY::NET, QString(Q_FUNC_INFO) + " nextPendingConnection: ",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
         return nullptr;
@@ -150,43 +153,38 @@ std::shared_ptr<IOTV_Client> Maker_iotv::client(IOTV_Client_List &add_to_iot_cli
         return nullptr;
     }
 
-    QThread *th = new QThread;
+    QThread *th = new QThread(parent);
+    IOTV_Client *client = new IOTV_Client(socket);//, th);
+    client->moveToThread(th);
+
     th->start();
 
     if (!th->isRunning())
     {
-        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "невозможно запустить IOTV_Client в новом потоке!",
+        Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "невозможно запустить IOT_Client в новом потоке!",
                    Log::Write_Flag::FILE_STDERR,
                    ServerLog::DEFAULT_LOG_FILENAME);
 
         delete th;
+        delete client;
 
         return nullptr;
     }
 
-    std::shared_ptr<IOTV_Client> client = std::make_shared<IOTV_Client>(socket);
-    client.get()->moveToThread(th);
-
-//    qDebug() << client->thread();
-//    th->exit();
-//    th->wait();
-//    delete th;
-//    qDebug() << client->thread();
-
-    add_to_iot_client.insert(client);
+    add_to_iot_client[client] = th;
 
     return client;
 }
 
-std::shared_ptr<IOTV_Host> Maker_iotv::host_broadcast(std::shared_ptr<QUdpSocket> socket,
-                                      IOTV_Host_List &add_to_iot_hosts,
+IOTV_Host *Maker_iotv::host_broadcast(QUdpSocket *socket,
+                                      std::unordered_map<IOTV_Host *, QThread *> &add_to_iot_hosts,
                                       uint maxHostCount,
                                       QObject *parent)
 {
     if (!socket->hasPendingDatagrams())
         return nullptr;
 
-    std::shared_ptr<IOTV_Host> host;
+    IOTV_Host *host = nullptr;
     QNetworkDatagram dataGram = socket->receiveDatagram();
     QByteArray data = dataGram.data();
 
@@ -217,8 +215,8 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host_broadcast(std::shared_ptr<QUdpSocket
         // Лимит количества хостов
         if (add_to_iot_hosts.size() == maxHostCount)
         {
-            Log::write(CATEGORY::WARNING, QString(Q_FUNC_INFO) +
-                           "Hosts limit = " + QString::number(maxHostCount),
+            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) +
+                           ", Error: Hosts limit = " + QString::number(maxHostCount),
                        Log::Write_Flag::FILE_STDERR,
                        ServerLog::DEFAULT_LOG_FILENAME);
             return nullptr;
@@ -236,7 +234,7 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host_broadcast(std::shared_ptr<QUdpSocket
             break;
         case Host_Broadcast_FLAGS_ERROR:
         default:
-            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + "Error flag!",
+            Log::write(CATEGORY::ERROR, QString(Q_FUNC_INFO) + ", Error flag!",
                        Log::Write_Flag::FILE_STDERR,
                        ServerLog::DEFAULT_LOG_FILENAME);
             return nullptr;
@@ -260,7 +258,7 @@ std::shared_ptr<IOTV_Host> Maker_iotv::host_broadcast(std::shared_ptr<QUdpSocket
     }
     else
     {
-        Log::write(CATEGORY::WARNING, "datagram назначение пакета не определено!",
+        Log::write(CATEGORY::ERROR, "datagram назначение пакета не определено!",
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
     }
