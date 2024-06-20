@@ -7,7 +7,7 @@
 
 std::shared_ptr<std::vector<std::string>> allowUpdates = std::make_shared<std::vector<std::string>>();
 //allowUpdates->push_back("[\"message\"]");
-    ;
+;
 IOTV_Bot::IOTV_Bot(const QString &token, const std::set<int64_t> &clients, QObject *parent)
     : QObject{parent}, _bot(token.toStdString()),/* _longPoll(_bot, 1, 1),*/ _clients(clients)
 {
@@ -41,7 +41,9 @@ void IOTV_Bot::sendMessage(int64_t id, const QString &message)
 {
     try
     {
-        _bot.getApi().sendMessage(id, message.toStdString());
+        _bot.getApi().sendMessage(id, message.toStdString(),
+                                  nullptr, nullptr, nullptr,
+                                  "html");
         auto get = _bot.getApi().getChat(id);
 
         QString msg = "id: "
@@ -65,7 +67,7 @@ void IOTV_Bot::startBot()
 {
     allowUpdates->push_back("[\"message\"]");
     _longPoll = std::make_shared<TgBot::TgLongPoll>(_bot, 1, 1, allowUpdates);
-    slotSendMessageForAll("Питание включено.");
+    slotSendMessageForAll("<b>Питание включено.</b>");
 
     _timer.reset();
     _timer = std::make_shared<QTimer>();
@@ -89,28 +91,46 @@ void IOTV_Bot::startBot()
         Log::write(CATEGORY::TGBOT, msg, Log::Write_Flag::FILE_STDOUT, tgBotFileName::TGBOT_LOG_FILENAME);
     });
 
-    _bot.getEvents().onCommand("clients", [&](TgBot::Message::Ptr message){
+    _bot.getEvents().onCommand(TG_BOT::CMD_CLIENTS.toStdString(), [&](TgBot::Message::Ptr message){
         if (!trustClient(message))
             return;
 
-        emit signalBotRequest(message->chat->id, "clients");
+        emit signalBotRequest(message->chat->id, TG_BOT::CMD_CLIENTS);
     });
 
-    _bot.getEvents().onCommand("hosts", [&](TgBot::Message::Ptr message){
+    _bot.getEvents().onCommand(TG_BOT::CMD_HOSTS.toStdString(), [&](TgBot::Message::Ptr message){
         if (!trustClient(message))
             return;
 
-        emit signalBotRequest(message->chat->id, "hosts");
+        emit signalBotRequest(message->chat->id, TG_BOT::CMD_HOSTS);
     });
 
-    _bot.getEvents().onCommand("help", [&](TgBot::Message::Ptr message){
+    _bot.getEvents().onCommand(TG_BOT::CMD_CONFIG_SERVER.toStdString(), [&](TgBot::Message::Ptr message){
         if (!trustClient(message))
             return;
 
-        sendMessage(message->chat->id, "Список команд:\n"
-                                                       "/clients - список подключенных клиентов\n"
-                                                       "/hosts - список подключенных хостов\n"
-                                                       "/help - вывод справки");
+        emit signalBotRequest(message->chat->id, TG_BOT::CMD_CONFIG_SERVER);
+    });
+
+
+    _bot.getEvents().onCommand(TG_BOT::CMD_CONFIG_HOSTS.toStdString(), [&](TgBot::Message::Ptr message){
+        if (!trustClient(message))
+            return;
+
+        emit signalBotRequest(message->chat->id, TG_BOT::CMD_CONFIG_HOSTS);
+    });
+
+
+    _bot.getEvents().onCommand(TG_BOT::CMD_HELP.toStdString(), [&](TgBot::Message::Ptr message){
+        if (!trustClient(message))
+            return;
+
+        sendMessage(message->chat->id, "<b>Список команд:</b>\n\n"
+                                       "/" + TG_BOT::CMD_CLIENTS + " - список подключенных клиентов\n"
+                                       "/" + TG_BOT::CMD_HOSTS + " - список подключенных хостов\n"
+                                       "/" + TG_BOT::CMD_CONFIG_SERVER + " - конфигурационный файл сервера\n"
+                                       "/" + TG_BOT::CMD_CONFIG_HOSTS + " - конфигурационный файл хостов\n"
+                                       "/" + TG_BOT::CMD_HELP + " - вывод справки");
     });
 }
 

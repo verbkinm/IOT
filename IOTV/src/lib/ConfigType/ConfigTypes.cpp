@@ -128,3 +128,9 @@ const QString Json_Event_Action::ALARM_TIME = "time";
 const QString Json_Event_Action::ALARM_DAYS = "days";
 
 const QString Json_Event_Action::TIMER_SECONDS = "seconds";
+
+const QString TG_BOT::CMD_CLIENTS = "clients";
+const QString TG_BOT::CMD_HOSTS = "hosts";
+const QString TG_BOT::CMD_CONFIG_SERVER = "config_server";
+const QString TG_BOT::CMD_CONFIG_HOSTS = "config_hosts";
+const QString TG_BOT::CMD_HELP = "help";

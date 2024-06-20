@@ -673,12 +673,13 @@ void IOTV_Server::slotBotRequest(int64_t id, QString request)
     if (_tg_bot == nullptr)
         return;
 
-    if (request == "clients")
+    if (request == TG_BOT::CMD_CLIENTS)
     {
+        updateClientOnlineFile();
         QFile file(ServerLog::CLIENT_ONLINE_LOG_FILENAME);
         file.open(QIODevice::ReadOnly);
 
-        QString txt = "Список клиентов:\n";
+        QString txt = "<b>Список клиентов:</b>\n\n";
         QString dataFile = file.readAll();
 
         if (dataFile.size() == 0)
@@ -688,14 +689,32 @@ void IOTV_Server::slotBotRequest(int64_t id, QString request)
 
         emit _tg_bot->signalSendMsg(id, txt);
     }
-    else if (request == "hosts")
+    else if (request == TG_BOT::CMD_HOSTS)
     {
-        QString txt = "Список хостов:\n";
+        QString txt = "<b>Список хостов:</b>\n\n";
         for (const auto &[host, _] : _iot_hosts)
             txt += host->getName() + " (" + host->getAddress() + ") - " + (host->state() == State_STATE_ONLINE ? "онлайн" : "офлайн") + "\n";
 
         if (_iot_hosts.size() == 0)
             txt += "Нет подключенных хостов";
+
+        emit _tg_bot->signalSendMsg(id, txt);
+    }
+    else if (request == TG_BOT::CMD_CONFIG_SERVER)
+    {
+        QFile file(_settingsServer.fileName());
+        file.open(QIODevice::ReadOnly);
+
+        QString txt = "<b>Конфигурационный файл сервера:</b>\n\n" + file.readAll();
+
+        emit _tg_bot->signalSendMsg(id, txt);
+    }
+    else if (request == TG_BOT::CMD_CONFIG_HOSTS)
+    {
+        QFile file(_settingsHosts.fileName());
+        file.open(QIODevice::ReadOnly);
+
+        QString txt = "<b>Конфигурационный файл хостов:</b>\n\n" + file.readAll();
 
         emit _tg_bot->signalSendMsg(id, txt);
     }

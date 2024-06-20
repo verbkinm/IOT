@@ -153,3 +153,11 @@ struct Json_Event_Action
 
     static const QString TIMER_SECONDS;
 };
+
+struct TG_BOT {
+    static const QString CMD_CLIENTS;
+    static const QString CMD_HOSTS;
+    static const QString CMD_CONFIG_SERVER;
+    static const QString CMD_CONFIG_HOSTS;
+    static const QString CMD_HELP;
+};

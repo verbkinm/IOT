@@ -13,6 +13,7 @@ public:
     IOTV_Bot(const QString &token, const std::set<int64_t> &clients, QObject *parent = nullptr);
     ~IOTV_Bot();
 
+
 private:
     void startBot();
     bool trustClient(const TgBot::Message::Ptr &message);
