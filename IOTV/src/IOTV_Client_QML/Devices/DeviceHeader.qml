@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.5
-import "qrc:/Devices/BaseItem" as BaseItem
+import "qrc:/BaseItem" as BaseItem
 
 Rectangle {
     height: 64
@@ -9,8 +9,8 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(0, 0, 0, 0.1)
 
-    BaseItem.Led_state {
-        deviceName: device.name
+    BaseItem.Led_Indicator {
+        ledEnable: device.state
         anchors {
             left: parent.left
             leftMargin: parent.height / 2

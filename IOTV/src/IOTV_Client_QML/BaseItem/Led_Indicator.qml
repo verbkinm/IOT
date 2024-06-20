@@ -1,10 +1,10 @@
 import QtQuick 2.9
 
 Rectangle {
-    required property var deviceName
-
     readonly property string stateOnline: "online"
     readonly property string stateOffline: "offline"
+
+    property bool ledEnable: false
 
     state: stateOffline
 
@@ -21,7 +21,7 @@ Rectangle {
     states: [
         State {
             name: stateOnline
-            when: client.deviceByName(deviceName).state
+            when: ledEnable
             PropertyChanges {
                 target: statusConnection
                 color: Qt.rgba(0, 100, 0, 1)
@@ -29,7 +29,7 @@ Rectangle {
         },
         State {
             name: stateOffline
-            when: !client.deviceByName(deviceName).state
+            when: !ledEnable
             PropertyChanges {
                 target: statusConnection
                 color: Qt.rgba(255, 0, 0, 1)

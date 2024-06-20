@@ -2,10 +2,11 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 
 Rectangle {
-    id: controlConnect
+    property alias text: txtConnection
+
+    id: root
     anchors.fill: parent
     opacity: 1
-    visible: true
 
     color: Qt.rgba(0, 0, 0, 0)
 
@@ -15,13 +16,13 @@ Rectangle {
     states: [
         State {
             name: stateHide
-            when: (client != null) ? client.state : ""
-            PropertyChanges { target: controlConnect; opacity: 0; visible: false }
+            when: !root.visible
+            PropertyChanges { target: root; opacity: 0; visible: false }
         },
         State {
             name: stateShow
-            when:  (client != null) ? !client.state : ""
-            PropertyChanges { target: controlConnect; opacity: 1; visible: true }
+            when: root.visible
+            PropertyChanges { target: root; opacity: 1; visible: true }
         }
     ]
 
@@ -29,39 +30,30 @@ Rectangle {
         Transition {
             to: stateHide
             ParallelAnimation{
-                PropertyAnimation { target: controlConnect; property: "visible"; from: true; to: false; duration: 500 }
-                PropertyAnimation { target: controlConnect; property: "opacity"; from: 1; to: 0; duration: 500 }
+                PropertyAnimation { target: root; property: "visible"; from: true; to: false; duration: 500 }
+                PropertyAnimation { target: root; property: "opacity"; from: 1; to: 0; duration: 500 }
             }
         },
         Transition {
             to: stateShow
-            PropertyAnimation { target: controlConnect; property: "opacity"; from: 0; to: 1; duration: 500 }
+            PropertyAnimation { target: root; property: "opacity"; from: 0; to: 1; duration: 500 }
         }
     ]
 
     Text {
         id: txtConnection
-        text: qsTr("Соединение не установлено")
         anchors.centerIn: parent
         font.pixelSize: 18
         wrapMode: Text.Wrap
     }
 
-    // Дублирует clientPage.btn
-    Button {
-        height: clientPage.btn.height
-        width: clientPage.btn.width
-        font.pixelSize: clientPage.btn.font.pixelSize
-        text: clientPage.btn.text
-        highlighted: clientPage.btn.highlighted
+    function show()
+    {
+        root.state = stateShow
+    }
 
-
-        anchors.top: txtConnection.bottom
-        anchors.margins: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        onClicked: {
-            clientPage.btn.clicked()
-        }
+    function hide()
+    {
+        root.state = stateHide
     }
 }

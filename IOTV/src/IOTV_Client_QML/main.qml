@@ -30,6 +30,7 @@ ApplicationWindow {
     property alias glob_dialogShared: dialogShared
     property alias glob_notification: notification
 
+    property alias glob_ClientPage: clientPage
 
     header: ToolBar {
         height: 40

@@ -11,6 +11,9 @@ Item {
     property bool checkable: false
     property bool checked: false
 
+    property alias ledVisible: led.visible
+    property alias ledEnable: led.ledEnable
+
     property alias label: lbl
     property alias icon: img
 
@@ -77,6 +80,17 @@ Item {
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.Wrap
             elide: Text.ElideRight
+        }
+
+        Led_Indicator {
+            id: led
+            visible: false
+            anchors {
+                right: parent.right
+                top: parent.top
+                rightMargin: 10
+                topMargin: 10
+            }
         }
     }
 

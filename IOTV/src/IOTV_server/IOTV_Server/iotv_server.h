@@ -42,11 +42,7 @@ private:
     void startUDPServers();
     void startUDP(QUdpSocket *socket, const QString &addr, quint16 port, const QString &lbl);
 
-    void clientOnlineFile() const;
-
-    Base_Host *baseHostFromName(const QString &name) const;
-
-    void clientHostsUpdate();
+    void updateClientOnlineFile() const;
 
     // Возвращает список Base_Host* из _iot_hosts
     std::forward_list<const Base_Host *> baseHostList() const;
@@ -71,6 +67,8 @@ private:
     QThread *_tgbot_thread;
 
 private slots:
+    void slotHostsUpdate();
+
     void slotNewClientConnection();
     void slotClientDisconnected();
 

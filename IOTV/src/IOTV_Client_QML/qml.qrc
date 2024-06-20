@@ -30,12 +30,10 @@
         <file>img/logo.png</file>
         <file>DialogShared.qml</file>
         <file>Notification.qml</file>
-        <file>Home/DeviceComponent.qml</file>
         <file>Home/Home.qml</file>
         <file>Home/Home_Connector.qml</file>
         <file>Client/Client.qml</file>
         <file>MainMenu.qml</file>
-        <file>Home/DeviceListView.qml</file>
         <file>Devices/Device_2/Device_2.qml</file>
         <file>Devices/Device_1/Device_1.qml</file>
         <file>Devices/Device_1/Device_1_switch.qml</file>
@@ -57,9 +55,7 @@
         <file>Events/BaseItem/HostNameComboBox.qml</file>
         <file>Events/BaseItem/StateType.qml</file>
         <file>Events/BaseItem/EmptyItem.qml</file>
-        <file>Events/EvActComponent.qml</file>
         <file>Events/BaseItem/AlarmType.qml</file>
-        <file>Devices/BaseItem/Led_state.qml</file>
         <file>img/id/5.png</file>
         <file>img/debug_white.png</file>
         <file>img/question_mark_white.png</file>
@@ -153,6 +149,8 @@
         <file>Events/EventsGroup/CurrentConnectionList.qml</file>
         <file>Events/EventsGroup/AddCurrentConnection_GroupList.qml</file>
         <file>Events/EventsGroup/AddCurrentConnection_ActionList.qml</file>
+        <file>BaseItem/Led_Indicator.qml</file>
     </qresource>
     <qresource prefix="/audio"/>
+    <qresource prefix="/q"/>
 </RCC>

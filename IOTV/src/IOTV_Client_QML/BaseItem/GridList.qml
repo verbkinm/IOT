@@ -40,11 +40,14 @@ GridView {
 
     delegate : BaseItem.ButtonShadow {
         label {
-            text: model.text
+            text: model.text === undefined ? "" : model.text
         }
         icon {
-            source: model.icon
+            source: model.icon === undefined ? "" : model.icon
         }
+        ledVisible: model.ledVisible === undefined ? false : model.ledVisible
+        ledEnable: model.ledEnable === undefined ? false : model.ledEnable
+
         onSignalClicked: {
             if (model.attributes === undefined)
                 listLoader.setSource(model.loaderSource)
@@ -52,7 +55,7 @@ GridView {
                 listLoader.setSource(model.loaderSource, model.attributes.get(0))
 
             listLoader.title = model.title
-            glob_eventStackView.push(listLoader)
+            model.stackView.push(listLoader)
         }
 
         Component.onCompleted: {

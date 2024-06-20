@@ -101,7 +101,7 @@ void IOTV_Server::readHostSetting()
 
         auto host = Maker_iotv::host(_iot_hosts, _config.maxHostCount, setting, nullptr, this);
         if (host != nullptr)
-            connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsUpdate, Qt::QueuedConnection);
+            connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::slotHostsUpdate, Qt::QueuedConnection);
 
         _settingsHosts.endGroup();
     }
@@ -215,7 +215,7 @@ void IOTV_Server::startUDPServers()
     startUDP(_udpBroadcast, "255.255.255.255", _config.broadcasrListenerPort, "broadcast ");
 }
 
-void IOTV_Server::clientOnlineFile() const
+void IOTV_Server::updateClientOnlineFile() const
 {
     std::ofstream file(ServerLog::CLIENT_ONLINE_LOG_FILENAME.toStdString().c_str(), std::ios::trunc);
 
@@ -241,20 +241,7 @@ void IOTV_Server::clientOnlineFile() const
     file.close();
 }
 
-//!!! не используется
-Base_Host *IOTV_Server::baseHostFromName(const QString &name) const
-{
-    auto it = std::find_if (_iot_hosts.begin(), _iot_hosts.end(), [&name](const auto &pair){
-        return pair.first->getName() == name;
-    });
-
-    if (it != _iot_hosts.end())
-        return it->first;
-
-    return nullptr;
-}
-
-void IOTV_Server::clientHostsUpdate()
+void IOTV_Server::slotHostsUpdate()
 {
     IOTV_Host *host = dynamic_cast<IOTV_Host *>(sender());
 
@@ -329,10 +316,9 @@ void IOTV_Server::slotNewClientConnection()
     connect(client, &IOTV_Client::signalClientToServerQueryTech, this, &IOTV_Server::slotClientToServerQueryTech, Qt::QueuedConnection);
     connect(client, &IOTV_Client::signalClientToServerLogData, this, &IOTV_Server::slotClientToServerQueryLogData, Qt::QueuedConnection);
 
-
     connect(client, &IOTV_Client::signalDisconnected, this, &IOTV_Server::slotClientDisconnected, Qt::QueuedConnection);
 
-    clientOnlineFile();
+    updateClientOnlineFile();
 }
 
 void IOTV_Server::slotClientDisconnected()
@@ -349,7 +335,7 @@ void IOTV_Server::slotClientDisconnected()
 
     Eraser_iotv::client(_iot_clients, client);
 
-    clientOnlineFile();
+    updateClientOnlineFile();
 }
 
 void IOTV_Server::slotNewHostConnection()
@@ -359,11 +345,11 @@ void IOTV_Server::slotNewHostConnection()
     if (host == nullptr)
         return;
 
-    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsUpdate, Qt::QueuedConnection);
+    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::slotHostsUpdate, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDisconnected, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
 
-    clientHostsUpdate();
+    slotHostsUpdate();
 }
 
 
@@ -442,10 +428,10 @@ void IOTV_Server::slotPendingDatagrams()
     if (host == nullptr)
         return;
 
-    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::clientHostsUpdate, Qt::QueuedConnection);
+    connect(host, &IOTV_Host::signalIdentRecived, this, &IOTV_Server::slotHostsUpdate, Qt::QueuedConnection);
     connect(host, &IOTV_Host::signalDevicePingTimeOut, this, &IOTV_Server::slotDevicePingTimeout, Qt::QueuedConnection);
 
-    clientHostsUpdate();
+    slotHostsUpdate();
 }
 
 void IOTV_Server::slotDevicePingTimeout()
@@ -454,7 +440,7 @@ void IOTV_Server::slotDevicePingTimeout()
 
     Eraser_iotv::host(_iot_hosts, host);
 
-    clientHostsUpdate();
+    slotHostsUpdate();
 }
 
 void IOTV_Server::slotClientToServerQueryIdentification()

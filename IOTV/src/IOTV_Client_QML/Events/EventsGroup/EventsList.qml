@@ -89,6 +89,9 @@ Page {
                 title: list[i],
                 icon: imageByEventType(objectAtributes._event.type),
                 loaderSource: "qrc:/Events/EventsGroup/Event.qml",
+                ledVisible: true,
+                ledEnable: objectAtributes._event.enable,
+                stackView: glob_eventStackView,
                 attributes: [objectAtributes]
             }
             listModel.append(object)
