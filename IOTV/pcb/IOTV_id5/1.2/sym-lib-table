@@ -1,6 +1,0 @@
-(sym_lib_table
-  (version 7)
-  (lib (name "esp32_devkit_v1_doit")(type "Legacy")(uri "/home/user/.local/share/kicad/kicad/symbols/esp32_devkit_v1_doit.lib")(options "")(descr ""))
-  (lib (name "Espressif")(type "KiCad")(uri "/home/user/myProg/IOT/IOTV/pcb/lib/kicad/kicad-libraries-main/symbols/Espressif.kicad_sym")(options "")(descr ""))
-  (lib (name "HLK-5M05")(type "KiCad")(uri "/home/user/myProg/IOT/IOTV/pcb/lib/hlk-pm01/HLK-5M05/HLK-5M05.kicad_sym")(options "")(descr ""))
-)
