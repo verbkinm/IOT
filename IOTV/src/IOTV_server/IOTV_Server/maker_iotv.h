@@ -14,7 +14,7 @@ public:
 
     static IOTV_Host *host(std::unordered_map<IOTV_Host* , QThread*> &add_to_iot_hosts, uint maxHostCount,
                                     const std::unordered_map<QString, QString> &setting,
-                                    QAbstractSocket *reverse_socket, QObject *parent);
+                                    QTcpSocket *reverse_socket, QObject *parent);
 
     static IOTV_Client *client(std::unordered_map<IOTV_Client *, QThread *> &add_to_iot_client,
                                         uint maxClientCount,
