@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(iotv_server VERSION 0.20 LANGUAGES C CXX)
+project(iotv_server VERSION 0.21 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -81,6 +81,7 @@ add_executable(${PROJECT_NAME}
     IOTV_Bot/iotv_bot.cpp                               IOTV_Bot/iotv_bot.h
     IOTV_Server/eraser_iotv.cpp                         IOTV_Server/eraser_iotv.h
     IOTV_Server/config_server.cpp                       IOTV_Server/config_server.h
+    IOTV_Server/tg_bot_handler.cpp                      IOTV_Server/tg_bot_handler.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

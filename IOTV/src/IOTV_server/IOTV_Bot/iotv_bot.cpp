@@ -6,10 +6,9 @@
 #include <QDebug>
 
 std::shared_ptr<std::vector<std::string>> allowUpdates = std::make_shared<std::vector<std::string>>();
-//allowUpdates->push_back("[\"message\"]");
-;
+
 IOTV_Bot::IOTV_Bot(const QString &token, const std::set<int64_t> &clients, QObject *parent)
-    : QObject{parent}, _bot(token.toStdString()),/* _longPoll(_bot, 1, 1),*/ _clients(clients)
+    : QObject{parent}, _bot(token.toStdString()), _clients(clients)
 {
     connect(this, &IOTV_Bot::signalStart, this, &IOTV_Bot::startBot, Qt::QueuedConnection);
     connect(this, &IOTV_Bot::signalSendMsg, this, &IOTV_Bot::sendMessage, Qt::QueuedConnection);
@@ -68,6 +67,7 @@ void IOTV_Bot::startBot()
     allowUpdates->push_back("[\"message\"]");
     _longPoll = std::make_shared<TgBot::TgLongPoll>(_bot, 1, 1, allowUpdates);
     slotSendMessageForAll("<b>Питание включено.</b>");
+    slotSendMessageForAll("/help");
 
     _timer.reset();
     _timer = std::make_shared<QTimer>();
@@ -143,13 +143,14 @@ void IOTV_Bot::slotSendMessageForAll(QString message)
 void IOTV_Bot::slotTimer()
 {
     _timer->stop();
+
     try
     {
         _longPoll->start();
     }
     catch (TgBot::TgException& e)
     {
-        printf("error: %s\n", e.what());
+        Log::write(CATEGORY::ERROR, QString(e.what()), Log::Write_Flag::FILE_STDERR, tgBotFileName::TGBOT_LOG_FILENAME);
     }
     catch (...)
     {

@@ -51,7 +51,7 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 void TCP_conn_type::connectToHost()
 {
     disconnectFromHost();
-    Log::write(CATEGORY::NET, _name + "try to connect...", Log::Write_Flag::FILE_STDOUT,
+    Log::write(CATEGORY::NET, _name + " try to connect...", Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);
     _tcpSocket->connectToHost(_address, _tcpPort, QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 }

@@ -38,12 +38,17 @@ void Config_Server::readServerSettings(QSettings &settingObj)
     ServerLog::DEFAULT_LOG_FILENAME = settingObj.value(ServerLog::DEFAULT_LOG, ServerLog::DEFAULT_LOG_FILENAME).toString();
 
     settingObj.endGroup();
+
+    settingObj.sync();
 }
 
 void Config_Server::readBotSettings(QSettings &settingObj, QString &token, std::set<int64_t> &clients)
 {
     settingObj.beginGroup(tgBotField::TG_BOT_GROUP);
     token = settingObj.value(tgBotField::TGBOTTOKEN, "").toString();
+
+    tgBotFileName::TGBOT_LOG_FILENAME = settingObj.value(tgBotField::TGBOTLOG, tgBotFileName::TGBOT_LOG_FILENAME).toString();
+    tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME = settingObj.value(tgBotField::TGBOTTRUSTCLIENTS, tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME).toString();
 
     std::ifstream file(tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME.toStdString());
     if (!file.is_open())
@@ -58,6 +63,7 @@ void Config_Server::readBotSettings(QSettings &settingObj, QString &token, std::
         }
     }
     settingObj.endGroup();
+    settingObj.sync();
 }
 
 void Config_Server::checkSettingsFileExist(QSettings &server, QSettings &hosts)
@@ -81,7 +87,7 @@ void Config_Server::checkSettingsFileExist(QSettings &server, QSettings &hosts)
         server.setValue(tgBotField::TGBOTLOG, QFileInfo({QCoreApplication::applicationDirPath()}, tgBotFileName::TGBOT_LOG_FILENAME).absoluteFilePath());
         server.setValue(tgBotField::TGBOTTRUSTCLIENTS, QFileInfo({QCoreApplication::applicationDirPath()}, tgBotFileName::TGBOT_TRUST_CLIENTS_FILENAME).absoluteFilePath());
         server.endGroup();
-
+        server.sync();
     }
 
     if (!QFileInfo::exists(hosts.fileName()))
