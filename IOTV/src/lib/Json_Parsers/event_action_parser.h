@@ -21,8 +21,11 @@ public:
     static QByteArray toData(const Event_List &events, const Action_List &actions,
                              const std::set<QString> &event_groups, const std::set<QString> &action_groups);
 
+    static void toDataRunAction(const QString &groupName, const QString &actionName);
 
     static const Base_Host *hostByName(const std::forward_list<const Base_Host *> &hosts, const QString &name);
+
+
 
 private:
     static IOTV_Event *parseEvent(const QJsonObject &jobj, const std::forward_list<const Base_Host *> &hosts);

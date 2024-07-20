@@ -59,6 +59,8 @@ public:
     Q_INVOKABLE IOTV_Event *copyEventByNameAndGroup(const QString &eventName, const QString &groupName) const;
     Q_INVOKABLE IOTV_Event *createEmptyEvent(const QString &eventType, const QString &eventName, const QString &groupName) const;
 
+    Q_INVOKABLE void runEvent(const QString &groupName, const QString &eventName);
+
     // Actions
     Q_INVOKABLE void saveAction(IOTV_Action *action);
     Q_INVOKABLE void saveActionGroup(const QString &groupName);
@@ -77,6 +79,9 @@ public:
 
     Q_INVOKABLE IOTV_Action *copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const;
     Q_INVOKABLE IOTV_Action *createEmptyAction(const QString &actionType, const QString &actionName, const QString &groupName) const;
+
+    Q_INVOKABLE void runAction(const QString &groupName, const QString &actiontName);
+
 
     // используется в qml для удаления временной копии события или действия
     Q_INVOKABLE void deleteObject(QObject *obj) const;

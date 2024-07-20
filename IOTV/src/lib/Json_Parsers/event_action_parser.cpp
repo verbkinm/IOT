@@ -297,6 +297,21 @@ const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const B
     return nullptr;
 }
 
+void Event_Action_Parser::toDataRunAction(const QString &groupName, const QString &actionName)
+{
+    QJsonDocument jdoc;
+
+    QJsonObject jobj_root;
+//    QJsonObject jgroup, jactions;
+
+    jobj_root.insert(Json_Event_Action::ACTION_GROUP, groupName);
+    jobj_root.insert(Json_Event_Action::ACTION_NAME, actionName);
+
+    jdoc.setObject(jobj_root);
+
+    qDebug() << jobj_root;
+}
+
 QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
 {
     QJsonObject id;

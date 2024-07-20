@@ -86,6 +86,31 @@ Page {
                 height: 70
 
                 RoundButton {
+                    id: runAction
+                    width: 64
+                    height: 64
+                    highlighted: true
+
+                    anchors {
+                        right: deleteAction.left
+                        rightMargin: 20
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+//                        source: "qrc:/img/delete_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        client.runAction(_action.groupName, privateields.oldActionName)
+//                        glob_eventStackView.pop()
+                    }
+                }
+
+                RoundButton {
                     id: deleteAction
                     width: 64
                     height: 64

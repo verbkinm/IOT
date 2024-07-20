@@ -65,7 +65,10 @@ typedef enum
 typedef enum
 {
     Tech_TYPE_NONE = 0,
-    Tech_TYPE_EV_AC
+    Tech_TYPE_EV_AC = 0x01,
+    Tech_TYPE_UPDATE = 0x02,
+    Tech_TYPE_RUN_EVENT = 0x03,
+    Tech_TYPE_RUN_ACTION = 0x04,
 } tech_type_t;
 
 typedef enum
