@@ -45,11 +45,9 @@ public:
     static IOTV_Action *createAction(const QString &type, Base_Host *dstHost, Base_Host *srcHost,
                                      uint8_t dstCh_num, uint8_t srcCh_Num);
 
-
     //
     static IOTV_Event *copyEvent(const IOTV_Event *event);
     static IOTV_Action *copyAction(const IOTV_Action *action);
-
 
     // объекты
     std::set<QString> allHostsName() const;
@@ -68,6 +66,9 @@ public:
 
     void deleteEvent(const QString &groupName, const QString &eventName);
     void deleteAction(const QString &groupName, const QString &actionName);
+
+    void runEvent(const QString &groupName, const QString &eventName);
+    void runAction(const QString &groupName, const QString &actionName);
 
     // группы
     const std::set<QString> &eventGroups() const;

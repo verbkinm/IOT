@@ -589,26 +589,37 @@ void IOTV_Server::slotClientToServerQueryTech(RAII_Header raii_header)
     if (pkg == nullptr)
         return;
 
+    QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
+
     if (pkg->type == Tech_TYPE_EV_AC)
     {
         if (pkg->dataSize == 0)
             emit client->signalFetchEventActionDataFromServer(readEventActionJson());
         else
         {
-            QByteArray data(reinterpret_cast<const char *>(pkg->data), pkg->dataSize);
-
             QJsonParseError err;
             QJsonDocument::fromJson(data, &err);
 
             if (err.error != QJsonParseError::NoError)
             {
-                qDebug() << "Error parse json from client" << err.errorString() << ' ' << err.offset;
+                Log::write(CATEGORY::ERROR, "Error parse json from client: " + err.errorString() + " " + QString::number(err.offset),
+                           Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
                 return;
             }
 
             writeEventActionJson(data);
             readEventActionJson();
         }
+    }
+    else if(pkg->type == Tech_TYPE_RUN_EVENT)
+    {
+        std::pair<QString, QString> groupName_eventName = Event_Action_Parser::parseRunEventAction(data);
+        _eventManager->runEvent(groupName_eventName.first, groupName_eventName.second);
+    }
+    else if(pkg->type == Tech_TYPE_RUN_ACTION)
+    {
+        std::pair<QString, QString> groupName_actioName = Event_Action_Parser::parseRunEventAction(data);
+        _eventManager->runAction(groupName_actioName.first, groupName_actioName.second);
     }
 }
 

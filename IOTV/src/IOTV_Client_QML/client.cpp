@@ -476,7 +476,8 @@ IOTV_Event *Client::createEmptyEvent(const QString &eventType, const QString &ev
 
 void Client::runEvent(const QString &groupName, const QString &eventName)
 {
-
+    QByteArray data = Event_Action_Parser::toDataRunEvent(groupName, eventName);
+    queryTech(Tech_TYPE_RUN_EVENT, data.data(), data.size());
 }
 
 IOTV_Action *Client::copyActionByNameAndGroup(const QString &actionName, const QString &groupName) const
@@ -511,7 +512,8 @@ IOTV_Action *Client::createEmptyAction(const QString &actionType, const QString 
 
 void Client::runAction(const QString &groupName, const QString &actiontName)
 {
-    Event_Action_Parser::toDataRunAction(groupName, actiontName);
+    QByteArray data = Event_Action_Parser::toDataRunAction(groupName, actiontName);
+    queryTech(Tech_TYPE_RUN_ACTION, data.data(), data.size());
 }
 
 void Client::deleteObject(QObject *obj) const

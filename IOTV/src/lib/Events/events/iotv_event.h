@@ -6,8 +6,6 @@
 #include "base_host.h"
 #include "actions/iotv_action.h"
 
-
-
 class IOTV_Event : public QObject
 {
     Q_OBJECT
@@ -75,13 +73,14 @@ public:
     void setHostName(const QString &newHostName);
 
     const Action_List &actions() const;
+    virtual void runActions(){}
 
     friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
 
 protected:
     void execActions();
 
-    virtual void runActions(){}
+
     virtual bool isValid() const {return false;}
 
     const Base_Host *_host;
@@ -110,7 +109,7 @@ public slots:
     // удаляет из actionMustBeenBinding. Вызывается в CurrentConnectionList.qml
     void slotRemoveAction(const QString &groupName, const QString &actionName);
 
-    // сохраняетв actionMustBeenBinding. Вызывается в AddCurrentConnection_ActionList.qml
+    // сохраняет в actionMustBeenBinding. Вызывается в AddCurrentConnection_ActionList.qml
     void slotAddAction(const QString &groupName, const QString &actionName);
 };
 

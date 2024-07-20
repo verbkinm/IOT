@@ -385,7 +385,23 @@ void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &a
 //        event->actionMustBeenBinding[groupName].erase(actionName);
 //        if (event->actionMustBeenBinding[groupName].size() == 0)
 //            event->actionMustBeenBinding.erase(groupName);
-//    }
+    //    }
+}
+
+void IOTV_Event_Manager::runEvent(const QString &groupName, const QString &eventName)
+{
+    auto event = findEvent(groupName, eventName);
+
+    if (event != nullptr)
+        event->runActions();
+}
+
+void IOTV_Event_Manager::runAction(const QString &groupName, const QString &actionName)
+{
+    auto action = findAction(groupName, actionName);
+
+    if (action != nullptr)
+        action->exec();
 }
 
 const std::set<QString> &IOTV_Event_Manager::eventGroups() const

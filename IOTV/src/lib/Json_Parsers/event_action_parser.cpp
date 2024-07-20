@@ -23,7 +23,8 @@ Event_Action_Parser::parseJson(const QByteArray &data, const std::forward_list<c
     QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError)
     {
-        qDebug() << "Error parse json " << err.errorString() << ' ' << err.offset;
+        Log::write(CATEGORY::ERROR, "Error parse json" + err.errorString() + " " + QString::number(err.offset),
+                   Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
         return {};
     }
 
@@ -297,19 +298,60 @@ const Base_Host *Event_Action_Parser::hostByName(const std::forward_list<const B
     return nullptr;
 }
 
-void Event_Action_Parser::toDataRunAction(const QString &groupName, const QString &actionName)
+QByteArray Event_Action_Parser::toDataRunAction(const QString &groupName, const QString &actionName)
 {
     QJsonDocument jdoc;
 
     QJsonObject jobj_root;
-//    QJsonObject jgroup, jactions;
 
     jobj_root.insert(Json_Event_Action::ACTION_GROUP, groupName);
     jobj_root.insert(Json_Event_Action::ACTION_NAME, actionName);
 
     jdoc.setObject(jobj_root);
 
-    qDebug() << jobj_root;
+    return jdoc.toJson();
+}
+
+QByteArray Event_Action_Parser::toDataRunEvent(const QString &groupName, const QString &eventName)
+{
+    QJsonDocument jdoc;
+
+    QJsonObject jobj_root;
+
+    jobj_root.insert(Json_Event_Action::EVENT_GROUP, groupName);
+    jobj_root.insert(Json_Event_Action::EVENT_NAME, eventName);
+
+    jdoc.setObject(jobj_root);
+
+    return jdoc.toJson();
+}
+
+std::pair<QString, QString> Event_Action_Parser::parseRunEventAction(const QByteArray &data)
+{
+    QJsonParseError err;
+    QJsonDocument jdoc = QJsonDocument::fromJson(data, &err);
+
+    if (err.error != QJsonParseError::NoError)
+    {
+        Log::write(CATEGORY::ERROR, "Error parse json" + err.errorString() + " " + QString::number(err.offset),
+                   Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+        return {};
+    }
+
+    if (!jdoc.isObject())
+        return {};
+
+    auto jroot = jdoc.object();
+
+    if (jroot.size() != 2)
+        return {};
+
+    QString group_name, run_object_name;
+
+    group_name = jroot.value(Json_Event_Action::EVENT_GROUP).toString();
+    run_object_name = jroot.value(Json_Event_Action::EVENT_NAME).toString();
+
+    return {group_name, run_object_name};
 }
 
 QJsonObject Event_Action_Parser::parseEvent(std::shared_ptr<IOTV_Event> event)
