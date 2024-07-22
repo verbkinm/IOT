@@ -1,0 +1,1 @@
+переделать IOTV_SH, что бы все respone и query разбивали пакеты больших размеров на части, как это сделано в функциях responseReadData и responseLogData
