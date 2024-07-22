@@ -1,6 +1,8 @@
 #ifndef IOTV_TYPES_H
 #define IOTV_TYPES_H
 
+#define ZERO_RETURN_WARNING fprintf(stderr, "%s %s %d: return ZERO!\n", __FILE__, __func__, __LINE__); fflush(stderr);
+
 #define HEADER_SIZE 24
 #define IDENTIFICATION_SIZE  16
 #define STATE_SIZE  15

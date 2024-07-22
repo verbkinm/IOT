@@ -9,13 +9,17 @@
 #include "log_data.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 uint64_t headerCheckSum(const header_t *header)
 {
     if (header == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     return  header->version + header->type + header->assignment + header->flags + header->fragment + header->fragments + header->dataSize;
 }
@@ -23,7 +27,10 @@ uint64_t headerCheckSum(const header_t *header)
 uint64_t headerDataSize(const header_t *header)
 {
     if (header == NULL || header->pkg == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     // Должно быть что-то одно.
     switch (header->assignment)
@@ -51,18 +58,26 @@ uint64_t headerDataSize(const header_t *header)
 uint64_t headerSize(const header_t *header)
 {
     if (header == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
-
+    }
     return HEADER_SIZE + headerDataSize(header);
 }
 
 uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize)
 {
-    if ( header == NULL || outData == NULL)
+    if ( header == NULL || outData == NULL || (outDataSize < headerSize(header)))
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
-    if (outDataSize < headerSize(header))
-        return 0;
+//    if (outDataSize < headerSize(header))
+//    {
+//        ZERO_RETURN_WARNING;
+//        return 0;
+//    }
 
     uint64_t result = HEADER_SIZE;
 
@@ -147,7 +162,10 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
     uint64_t maxDatainFrame = buffSize - offsetSize;
 
     if (maxDatainFrame == 0 || buffSize < offsetSize)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     uint64_t result = sendDataSize / maxDatainFrame;
 

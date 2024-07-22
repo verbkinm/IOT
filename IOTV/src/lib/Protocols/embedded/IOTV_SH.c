@@ -15,7 +15,10 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t
 uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, identification_flag_t ident_flags)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     if (iot == NULL)
     {
@@ -63,7 +66,10 @@ uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const iotv
 uint64_t responsePingData(char *outData, uint64_t dataSize)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     header_t header = {
         .version = 2,
@@ -82,7 +88,10 @@ uint64_t responsePingData(char *outData, uint64_t dataSize)
 uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, const header_t *head, uint64_t (*writeFunc)(char *, uint64_t, void *obj), void *obj, readwrite_flag_t rw_flags, header_flag_t header_flags)
 {
     if (outData == NULL || iot == NULL || head == NULL || writeFunc == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Read_Write *rwPkg = ((struct Read_Write *)head->pkg);
     uint64_t pkgsCount;
@@ -105,6 +114,7 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *io
             //					|| iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING
             || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_NONE))
     {
+        ZERO_RETURN_WARNING;
         return 0;
     }
 
@@ -148,14 +158,20 @@ uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *io
 uint64_t responseWriteData(char *outData, uint64_t dataSize, iotv_obj_t *iot, const header_t *head, readwrite_flag_t rw_flags, header_flag_t header_flags)
 {
     if (head == NULL || outData == NULL || iot == NULL || head->pkg == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Read_Write *ptrReadWrite = ((struct Read_Write *)head->pkg);
 
     if (iot->readChannel == NULL
         || iot->numberWriteChannel <= ptrReadWrite->channelNumber
         || iot->numberReadChannel <= ptrReadWrite->channelNumber)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
 
     if (ptrReadWrite->dataSize > 0)
@@ -191,7 +207,10 @@ uint64_t responseWriteData(char *outData, uint64_t dataSize, iotv_obj_t *iot, co
 uint64_t responseStateData(char *outData, uint64_t dataSize, const iotv_obj_t *iot)
 {
     if (outData == NULL || iot == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct State state = {
         .nameSize = iot->nameSize,
@@ -219,7 +238,10 @@ uint64_t responseStateData(char *outData, uint64_t dataSize, const iotv_obj_t *i
 uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     header_t header = {
         .version = 2,
@@ -238,7 +260,10 @@ uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
 uint64_t queryPingData(char *outData, uint64_t dataSize)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     header_t header = {
         .version = 2,
@@ -257,7 +282,10 @@ uint64_t queryPingData(char *outData, uint64_t dataSize)
 uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize)
 {
     if (outData == NULL || dataToWrite == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Read_Write readWrite = {
         .dataSize = dataWriteSize,
@@ -285,7 +313,10 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
 uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, uint8_t flags)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Read_Write readWrite = {
         .dataSize = 0,
@@ -313,7 +344,10 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
 uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct State state = {
         .nameSize = (uint8_t)strlen(name),
@@ -410,7 +444,10 @@ iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
 uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, uint64_t inDataSize, const header_t *head)
 {
     if (outData == NULL || inData == NULL || head == NULL || head->pkg == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     const struct Tech *pkg = (const struct Tech *)(head->pkg);
 
@@ -438,7 +475,10 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, u
 uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
 {
     if (outData == NULL || outDataSize == 0 || pkg == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     // Пустые данные
     if (rawData == NULL || rawDataSize == 0)
@@ -505,7 +545,10 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
 uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, uint8_t type)
 {
     if (outData == NULL || (inData == NULL && inDataSize > 0))
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Tech tech = {
         .flags = Tech_FLAGS_NONE,
@@ -531,7 +574,10 @@ uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_
 static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t *iot, const header_t *header)
 {
     if (header == NULL || header->pkg == NULL || iot->readChannel == NULL || iot == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Read_Write *ptrReadWrite = ((struct Read_Write *)header->pkg);
     if (iot->numberReadChannel <= ptrReadWrite->channelNumber)
@@ -544,7 +590,10 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t
 uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags)
 {
     if (outData == NULL)
+    {
+        ZERO_RETURN_WARNING;
         return 0;
+    }
 
     struct Log_Data logData = {
         .startInterval = startInterval,

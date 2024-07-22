@@ -20,10 +20,17 @@
 
 #include <fstream>
 
-#include <QtConcurrent>
-#include<QTime>
+//#include <QtConcurrent>
+#include <QTime>
 
 #include <QApplication>
+
+#ifdef BUFSIZ
+#undef BUFSIZ
+#endif
+
+// На arm BUFSIZ = 1024
+#define BUFSIZ 8192
 
 Client::Client(QObject *parent): QObject{parent},
     _counterPing(0)
