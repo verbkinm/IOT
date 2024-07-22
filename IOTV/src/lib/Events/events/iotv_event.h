@@ -72,15 +72,14 @@ public:
     QString hostName() const;
     void setHostName(const QString &newHostName);
 
+    virtual void forceExec();
     const Action_List &actions() const;
-    virtual void runActions(){}
 
     friend bool operator<(const IOTV_Event &lhs, const IOTV_Event &rhs);
 
 protected:
+    virtual void runActions(){};
     void execActions();
-
-
     virtual bool isValid() const {return false;}
 
     const Base_Host *_host;

@@ -56,6 +56,9 @@ void Client::connectToHost(const QString &address, qint64 port)
 
 void Client::disconnectFromHost()
 {
+    if (_eventManager != nullptr)
+        _eventManager->clear();
+
     _socket.abort();
     _timerPing.stop();
     _counterPing = 0;

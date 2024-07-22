@@ -25,6 +25,7 @@ public:
     void setDataStr(const QString &newDataStr);
     void setChannelNumber(uint8_t newChNum);
 
+    virtual void forceExec() override;
     virtual void exec() override;
     virtual bool isValid() const override;
 

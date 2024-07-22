@@ -150,6 +150,8 @@
         <file>Events/EventsGroup/AddCurrentConnection_GroupList.qml</file>
         <file>Events/EventsGroup/AddCurrentConnection_ActionList.qml</file>
         <file>BaseItem/Led_Indicator.qml</file>
+        <file>img/edit_white.png</file>
+        <file>img/edit.png</file>
     </qresource>
     <qresource prefix="/audio"/>
     <qresource prefix="/q"/>

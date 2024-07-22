@@ -106,7 +106,11 @@ Page {
                     if (!client.state)
                         client.connectToHost(addr.text, port.text)
                     else
+                    {
+                        glob_deviceStackView.pop(homePage)
+                        eventsPage.destroyEv()
                         client.disconnectFromHost()
+                    }
                 }
             }
         }

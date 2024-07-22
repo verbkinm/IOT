@@ -31,7 +31,7 @@ Page {
 
         onClicked: {
             listView.loader.setSource("qrc:/Events/ActionsGroup/Action.qml",
-                                 { _action: client.createEmptyAction("NONE", "Новое действие", groupName), btnDeleteVisible: false})
+                                 { _action: client.createEmptyAction("NONE", "Новое действие", groupName), newAction: true})
             listView.loader.title =  "Новое действие"
             listView.loader.objectName =  listView.loader.title
             glob_eventStackView.push(listView.loader)
@@ -45,7 +45,7 @@ Page {
 
         onSignalClicked: {
             listView.loader.setSource("qrc:/Events/ActionsGroup/AddGroup.qml",
-                                      {btnDeleteVisible: true, oldGroupName: groupName})
+                                      {newAction: true, oldGroupName: groupName})
             listView.loader.title = groupName
             listView.loader.objectName = listView.loader.title
             glob_eventStackView.push(listView.loader)
@@ -80,7 +80,7 @@ Page {
         {
             var objectAtributes = {
                 _action: client.copyActionByNameAndGroup(list[i], root.groupName),
-                btnDeleteVisible: true
+                newAction: false
             }
             var object = {
                 text: list[i],

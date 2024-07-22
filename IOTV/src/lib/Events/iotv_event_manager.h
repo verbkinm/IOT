@@ -83,6 +83,8 @@ public:
     void renameEventGroup(const QString &oldGroupName, const QString &newGroupName);
     void renameActionGroup(const QString &oldGroupName, const QString &newGroupName);
 
+    void clear();
+
 private:
     Event_List _events;
     Action_List _actions;

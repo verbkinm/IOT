@@ -393,7 +393,7 @@ void IOTV_Event_Manager::runEvent(const QString &groupName, const QString &event
     auto event = findEvent(groupName, eventName);
 
     if (event != nullptr)
-        event->runActions();
+        event->forceExec();
 }
 
 void IOTV_Event_Manager::runAction(const QString &groupName, const QString &actionName)
@@ -401,7 +401,7 @@ void IOTV_Event_Manager::runAction(const QString &groupName, const QString &acti
     auto action = findAction(groupName, actionName);
 
     if (action != nullptr)
-        action->exec();
+        action->forceExec();
 }
 
 const std::set<QString> &IOTV_Event_Manager::eventGroups() const
@@ -478,6 +478,15 @@ void IOTV_Event_Manager::renameActionGroup(const QString &oldGroupName, const QS
         if (event->actionMustBeenBinding[newGroupName].size() == 0)
             event->actionMustBeenBinding.erase(newGroupName);
     }
+}
+
+void IOTV_Event_Manager::clear()
+{
+    _events.clear();
+    _actions.clear();
+
+    _event_groups.clear();
+    _action_groups.clear();
 }
 
 IOTV_Event *IOTV_Event_Manager::copyEvent(const IOTV_Event *event)

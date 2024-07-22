@@ -76,3 +76,16 @@ void IOTV_Action_Data_TX::setChannelNumber(uint8_t newChNum)
     _channelNumber = newChNum;
     emit signalChannelNumberChanged(newChNum);
 }
+
+void IOTV_Action_Data_TX::forceExec()
+{
+    if (!isValid())
+        return;
+
+    Raw raw(_host->getReadChannelType(_channelNumber), _data);
+    if (raw.isValid())
+    {
+        emit _host->signalQueryWrite(_channelNumber, raw.data());
+        emit signalAction(group(), name(), getType());
+    }
+}

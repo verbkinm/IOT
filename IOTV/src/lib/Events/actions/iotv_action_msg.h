@@ -11,6 +11,7 @@ public:
     explicit IOTV_Action_MSG(const QString &msg, QObject *parent = nullptr);
     virtual ~IOTV_Action_MSG() = default;
 
+    virtual void forceExec() override;
     virtual void exec() override;
     virtual bool isValid() const override;
 

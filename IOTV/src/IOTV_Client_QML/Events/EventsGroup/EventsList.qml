@@ -31,7 +31,7 @@ Page {
 
         onClicked: {
             listView.loader.setSource("qrc:/Events/EventsGroup/Event.qml",
-                                 { _event: client.createEmptyEvent("NONE", "Новое событие", groupName), btnDeleteVisible: false})
+                                 { _event: client.createEmptyEvent("NONE", "Новое событие", groupName), newEvent: true})
             listView.loader.title =  "Новое событие"
             listView.loader.objectName =  listView.loader.title
             glob_eventStackView.push(listView.loader)
@@ -45,7 +45,7 @@ Page {
 
         onSignalClicked: {
             listView.loader.setSource("qrc:/Events/EventsGroup/AddGroup.qml",
-                                      {btnDeleteVisible: true, oldGroupName: groupName})
+                                      {newEvent: false, oldGroupName: groupName})
             listView.loader.title = groupName
             listView.loader.objectName = listView.loader.title
             glob_eventStackView.push(listView.loader)
@@ -82,7 +82,7 @@ Page {
         {
             var objectAtributes = {
                 _event: client.copyEventByNameAndGroup(list[i], root.groupName),
-                btnDeleteVisible: true
+                newEvent: false
             }
             var object = {
                 text: list[i],

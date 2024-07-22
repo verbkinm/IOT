@@ -99,3 +99,16 @@ void IOTV_Action_Data_TX_Ref::setDstHostName(const QString &newDstHostName)
     _dstHostName = newDstHostName;
     emit signalDstHostChanged(newDstHostName);
 }
+
+void IOTV_Action_Data_TX_Ref::forceExec()
+{
+    if (!isValid())
+        return;
+
+    Raw raw = _srcHost->getReadChannelDataRaw(_srcChannelNumber);
+    if (raw.isValid())
+    {
+        emit _dstHost->signalQueryWrite(_dstChannelNumber, raw.data());
+        emit signalAction(group(), name(), getType());
+    }
+}

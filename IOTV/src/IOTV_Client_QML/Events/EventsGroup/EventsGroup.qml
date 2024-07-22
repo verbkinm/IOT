@@ -29,7 +29,7 @@ Page {
 
         onClicked: {
             listView.loader.setSource("qrc:/Events/EventsGroup/AddGroup.qml",
-                                      {btnDeleteVisible: false})
+                                      {newEvent: true})
             listView.loader.title =  "Добавить новую группу событий"
             listView.loader.objectName =  listView.loader.title
             glob_eventStackView.push(listView.loader)

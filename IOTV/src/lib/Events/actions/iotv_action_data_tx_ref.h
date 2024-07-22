@@ -35,6 +35,7 @@ public:
     void setSrcHostName(const QString &newSrcHostName);
     void setDstHostName(const QString &newDstHostName);
 
+    virtual void forceExec() override;
     virtual void exec() override;
     virtual bool isValid() const override;
 

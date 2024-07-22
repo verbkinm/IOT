@@ -8,6 +8,8 @@ Item {
     height: 50
     width: 400
 
+    signal signalActivated();
+
     Text {
         id: hostNameText
         text: "Вкл./Выкл."
@@ -33,7 +35,11 @@ Item {
         }
 
         onCurrentIndexChanged: {
-            obj.enable = currentIndex == 0 ? false : true
+            obj.enable = currentIndex === 0 ? false : true
+        }
+
+        onActivated: {
+            signalActivated();
         }
     }
 }

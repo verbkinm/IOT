@@ -6,7 +6,7 @@ import "qrc:/Events/BaseItem" as BaseItem
 Page {
     required property var _event
 
-    property alias btnDeleteVisible: deleteEvent.visible
+    required property bool newEvent
 
     QtObject {
         id:privateields
@@ -58,8 +58,8 @@ Page {
                 startText: _event.hostName//client.aliasName(_event.hostName)
 
                 onSignalCurrentTextChanged: (modelIndexText) =>{
-                   _event.hostName = modelIndexText
-                }
+                                                _event.hostName = modelIndexText
+                                            }
             }
 
             BaseItem.ObjType {
@@ -115,7 +115,7 @@ Page {
                 }
 
                 Button {
-                    id: hostComboBox
+                    id: listAction
                     width: parent.width / 2
                     text: "Список"
                     highlighted: true
@@ -127,7 +127,7 @@ Page {
                     }
 
                     onClicked: {
-//                        addConnection.setSource("")
+                        //                        addConnection.setSource("")
                         addConnection.setSource("qrc:/Events/EventsGroup/CurrentConnectionGroupList.qml",
                                                 {event: _event})
                         addConnection.title = "Соединения"
@@ -145,6 +145,56 @@ Page {
             Item {
                 width: parent.width
                 height: 70
+
+                RoundButton {
+                    id: editEvent
+                    width: 64
+                    height: 64
+                    highlighted: true
+
+                    anchors {
+                        left: parent.left
+                        leftMargin: 20
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/edit_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        objectEnable(true)
+                        runEvent.enabled = false
+                        enabled = false
+                    }
+                }
+
+                RoundButton {
+                    id: runEvent
+                    width: 64
+                    height: 64
+                    highlighted: true
+
+                    anchors {
+                        right: deleteEvent.left
+                        rightMargin: 20
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/id_4/play_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        client.runEvent(_event.groupName, _event.name)
+                    }
+                }
 
                 RoundButton {
                     id: deleteEvent
@@ -201,7 +251,7 @@ Page {
                         }
 
                         // Если добавляется новое событие
-                        if (!btnDeleteVisible)
+                        if (newEvent)
                         {
                             if (client.isExistsEventNameInGroup(_event.groupName, _event.name))
                             {
@@ -210,7 +260,7 @@ Page {
                             }
                         }
                         // Если изменяется существующее событие
-                        else if (btnDeleteVisible)
+                        else if (!newEvent)
                         {
                             if (_event.name !==  privateields.oldEventName && client.isExistsEventNameInGroup(_event.groupName, _event.name))
                             {
@@ -232,6 +282,15 @@ Page {
         console.log("Add Events page construct: ")
         privateields.oldEventName = _event.name
         //        print(_event.getDirection)
+
+        if (newEvent)
+        {
+            editEvent.visible = false
+            runEvent.visible = false
+            deleteEvent.visible = false
+        }
+        else
+            objectEnable(false)
     }
 
     Component.onDestruction: {
@@ -244,6 +303,17 @@ Page {
         ////        actionTypeItem.signalActivated()
 
         //        focus = true
+    }
+
+    function objectEnable(state)
+    {
+        name.enabled = state
+        onOff.enabled = state
+        hostNameItem.enabled = state
+        eventTypeItem.enabled = state
+        eventTypeLoader.enabled = state
+        listAction.enabled = state
+        save.enabled = state
     }
 
     function eventExist()

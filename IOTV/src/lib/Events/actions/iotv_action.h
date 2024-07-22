@@ -37,6 +37,7 @@ public:
     ACTION_TYPE type() const;
     QString getType() const;
 
+    virtual void forceExec() {};
     virtual void exec() {};
     virtual bool isValid() const {return false;};
 

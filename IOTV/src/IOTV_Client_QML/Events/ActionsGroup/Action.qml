@@ -6,7 +6,7 @@ import "qrc:/Events/BaseItem" as BaseItem
 Page {
     required property var _action
 
-    property alias btnDeleteVisible: deleteAction.visible
+    required property bool newAction
 
     QtObject {
         id:privateields
@@ -43,6 +43,7 @@ Page {
 
                 onSignalTextEdited: {
                     _action.name = text
+//                    runAction.enabled = false
                 }
             }
 
@@ -50,6 +51,10 @@ Page {
                 id: onOff
                 width: parent.width
                 obj: _action
+
+                onSignalActivated: {
+//                    runAction.enabled = false
+                }
             }
 
             BaseItem.ObjType {
@@ -63,6 +68,8 @@ Page {
                     client.deleteObject(_action);
                     _action = client.createEmptyAction(comboBox.model[comboBox.currentIndex], _action.name, _action.groupName)
                     actionTypeCreate(objType)
+
+//                    runAction.enabled = false
                 }
 
                 Component.onCompleted: {
@@ -86,6 +93,32 @@ Page {
                 height: 70
 
                 RoundButton {
+                    id: editAction
+                    width: 64
+                    height: 64
+                    highlighted: true
+
+                    anchors {
+                        left: parent.left
+                        leftMargin: 20
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/img/edit_white.png"
+                        height: 24
+                        width: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        objectEnable(true)
+                        runAction.enabled = false
+                        enabled = false
+                    }
+                }
+
+                RoundButton {
                     id: runAction
                     width: 64
                     height: 64
@@ -98,15 +131,14 @@ Page {
 
                     Image {
                         anchors.centerIn: parent
-//                        source: "qrc:/img/delete_white.png"
+                        source: "qrc:/img/id_4/play_white.png"
                         height: 24
                         width: 24
                         fillMode: Image.PreserveAspectFit
                     }
 
                     onClicked: {
-                        client.runAction(_action.groupName, privateields.oldActionName)
-//                        glob_eventStackView.pop()
+                        client.runAction(_action.groupName, _action.name)
                     }
                 }
 
@@ -117,7 +149,7 @@ Page {
                     highlighted: true
 
                     anchors {
-                        right: save.left
+                        right: saveAction.left
                         rightMargin: 20
                     }
 
@@ -136,7 +168,7 @@ Page {
                 }
 
                 RoundButton {
-                    id: save
+                    id: saveAction
                     width: 64
                     height: 64
                     highlighted: true
@@ -165,7 +197,7 @@ Page {
                         }
 
                         // Если добавляется новое действие
-                        if (!btnDeleteVisible)
+                        if (newAction)
                         {
                             if (client.isExistsActionNameInGroup(_action.groupName, _action.name))
                             {
@@ -174,7 +206,7 @@ Page {
                             }
                         }
                         // Если изменяется существующее действие
-                        else if (btnDeleteVisible)
+                        else if (!newAction)
                         {
                             if (_action.name !==  privateields.oldActionName && client.isExistsActionNameInGroup(_action.groupName, _action.name))
                             {
@@ -195,6 +227,15 @@ Page {
     Component.onCompleted: {
         console.log("Add Action page construct: ")
         privateields.oldActionName = _action.name
+
+        if (newAction)
+        {
+            editAction.visible = false
+            runAction.visible = false
+            deleteAction.visible = false
+        }
+        else
+            objectEnable(false)
     }
 
     Component.onDestruction: {
@@ -207,6 +248,15 @@ Page {
         ////        actionTypeItem.signalActivated()
 
         //        focus = true
+    }
+
+    function objectEnable(state)
+    {
+        name.enabled = state
+        onOff.enabled = state
+        actionTypeItem.enabled = state
+        actionTypeLoader.enabled = state
+        saveAction.enabled = state
     }
 
     function actionExist()

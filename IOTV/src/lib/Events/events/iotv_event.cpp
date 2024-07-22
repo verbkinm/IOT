@@ -88,6 +88,19 @@ void IOTV_Event::setHostName(const QString &newHostName)
     }
 }
 
+void IOTV_Event::forceExec()
+{
+    if (!isValid())
+        return;
+
+    emit signalEvent(_group, _name, getType());
+    for (auto &action : _actions)
+    {
+        if (action != nullptr)
+            action->exec();
+    }
+}
+
 QString IOTV_Event::group() const
 {
     return _group;
@@ -149,9 +162,6 @@ void IOTV_Event::removeAction(const QString &groupName, const QString &actionNam
             break;
         }
     }
-//    _actions.erase(_actions.begin(), std::remove_if(_actions.begin(), _actions.end(), [&](auto &action){
-//                       return action.get()->group() == groupName && action.get()->name() == actionName;
-//                   }));
 }
 
 void IOTV_Event::clearActions()
