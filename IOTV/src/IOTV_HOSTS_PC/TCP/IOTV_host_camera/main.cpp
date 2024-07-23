@@ -100,10 +100,7 @@ void slotDataRecived()
         if (header->type == HEADER_TYPE_REQUEST)
         {
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-            {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, Identification_FLAGS_NONE);
-                socket->write(transmitBuffer, size);
-            }
+                responseIdentificationData(transmitBuffer, BUFSIZ, &iot, writeFunc, (void *)socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
                 struct Read_Write *rwPkg = ((struct Read_Write *)header->pkg);
@@ -115,20 +112,11 @@ void slotDataRecived()
                     responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
-            {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
-                socket->write(transmitBuffer, size);
-            }
+                responseWriteData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-            {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
-                socket->write(transmitBuffer, size);
-            }
+                responsePingData(transmitBuffer, BUFSIZ,  writeFunc, (void *)socket, HEADER_FLAGS_NONE);
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-            {
-                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
-                socket->write(transmitBuffer, size);
-            }
+                responseStateData(transmitBuffer, BUFSIZ, &iot, writeFunc, (void *)socket, STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
         }
 
         buffer = buffer.mid(cutDataSize);

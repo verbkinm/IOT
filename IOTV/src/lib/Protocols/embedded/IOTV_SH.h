@@ -12,13 +12,26 @@ extern "C"
 #endif
 
 // Ответы на запросы. Ответы сразу в сырые данные.
-uint64_t responseIdentificationData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, identification_flag_t ident_flags);
-uint64_t responsePingData(char *outData, uint64_t dataSize);
-uint64_t responseReadData(char *outData, uint64_t dataSize, const iotv_obj_t *iot, const header_t *head, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, readwrite_flag_t rw_flags, header_flag_t header_flags);
-uint64_t responseWriteData(char *outData, uint64_t dataSize, iotv_obj_t *iot, const header_t *head, readwrite_flag_t rw_flags, header_flag_t header_flags);
-uint64_t responseStateData(char *outData, uint64_t dataSize, const iotv_obj_t *iot);
-uint64_t responseTech(char *outData, uint64_t outDataSize, const char *inData, uint64_t inDataSize, const header_t *head);
-uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj);
+uint64_t responseIdentificationData(char *outData, uint64_t outDataSize, const iotv_obj_t *iot,
+                                    uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, identification_flag_t ident_flags, header_flag_t header_flags);
+
+uint64_t responsePingData(char *outData, uint64_t outDataSize,
+                          uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, header_flag_t header_flags);
+
+uint64_t responseReadData(char *outData, uint64_t outDataSize, const iotv_obj_t *iot, const header_t *head,
+                          uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, readwrite_flag_t rw_flags, header_flag_t header_flags);
+
+uint64_t responseWriteData(char *outData, uint64_t outDataSize, iotv_obj_t *iot, const header_t *head,
+                           uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, readwrite_flag_t rw_flags, header_flag_t header_flags);
+
+uint64_t responseStateData(char *outData, uint64_t outDataSize, const iotv_obj_t *iot,
+                           uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, state_flag_t rw_flags, header_flag_t header_flags);
+
+uint64_t responseTech(char *outData, uint64_t outDataSize, const char *rawData, uint64_t rawDataSize, const header_t *head,
+                      uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, tech_flag_t flags, header_flag_t header_flags);
+
+uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg,
+                         uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj);
 
 // Формируем запросы сразу в сыром виде в outData
 uint64_t queryIdentificationData(char *outData, uint64_t dataSize);

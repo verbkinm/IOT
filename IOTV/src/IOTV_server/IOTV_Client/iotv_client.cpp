@@ -192,7 +192,7 @@ uint64_t IOTV_Client::writeFunc(char *data, uint64_t size, void *obj)
 {
     QTcpSocket *socket = static_cast<QTcpSocket *>(obj);
 
-    if (socket == NULL)
+    if (socket == nullptr || data == nullptr)
         return 0;
 
     return socket->write(data, size);
@@ -264,12 +264,8 @@ void IOTV_Client::slotReadData()
                 emit signalClientToServerQueryWrite(raii_header);
             else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
-                uint64_t size;
                 char outData[BUFSIZ];
-
-                size = responsePingData(outData, BUFSIZ);
-
-                write({outData, static_cast<int>(size)}, size);
+                responsePingData(outData, BUFSIZ, &IOTV_Client::writeFunc, _socket, HEADER_FLAGS_NONE);
             }
             else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_STATE)
                 emit signalClientToServerQueryState(raii_header);
@@ -317,8 +313,7 @@ void IOTV_Client::slotFetchEventActionDataFromServer(QByteArray data)
         .pkg = &tech
     };
 
-    size = responseTech(outData, BUFSIZ, data.data(), data.size(), &header);
-    write({outData, static_cast<int>(size)}, size);
+    responseTech(outData, BUFSIZ, data.data(), data.size(), &header, &IOTV_Client::writeFunc, _socket, Tech_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void IOTV_Client::slotStreamRead(RAII_Header raii_header)
@@ -352,20 +347,29 @@ void IOTV_Client::slotLogDataQueueTimerOut()
     }
 }
 
-void IOTV_Client::slotUpdateHosts(QByteArray data)
+void IOTV_Client::slotUpdateHosts(std::vector<RAII_iot> vec_iot)
 {
     // В начале удаляем все устройства
     char outData[BUFSIZ];
-    auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
-    write({outData, static_cast<int>(size)}, size);
+    responseIdentificationData(outData, BUFSIZ, NULL, &IOTV_Client::writeFunc, _socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
 
     // Потом обновляем весь список
-    write(data, data.size());
+    for (const auto &el : vec_iot)
+        responseIdentificationData(outData, BUFSIZ, el.iot(), &IOTV_Client::writeFunc, _socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
-void IOTV_Client::slotServerToClientQueryIdentification(QByteArray data)
+void IOTV_Client::slotServerToClientQueryIdentification(std::vector<RAII_iot> vec_iot)
 {
-    write(data, data.size());
+    char outData[BUFSIZ];
+
+    if (vec_iot.size() == 0)
+    {
+        responseIdentificationData(outData, BUFSIZ, NULL, &IOTV_Client::writeFunc, _socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
+        return;
+    }
+
+    for (const auto &el : vec_iot)
+        responseIdentificationData(outData, BUFSIZ, el.iot(), &IOTV_Client::writeFunc, _socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void IOTV_Client::slotServerToClientQueryRead(RAII_Header raii_header, RAII_iot raii_iot)
@@ -379,19 +383,15 @@ void IOTV_Client::slotServerToClientQueryWrite(RAII_Header raii_header, RAII_iot
     uint64_t size;
     char outData[BUFSIZ];
 
-    size = responseWriteData(outData, BUFSIZ, raii_iot.iot(), raii_header.header(), ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
+    size = responseWriteData(outData, BUFSIZ, raii_iot.iot(), raii_header.header(), &IOTV_Client::writeFunc, _socket, ReadWrite_FLAGS_WRITE_OK, HEADER_FLAGS_NONE);
     // Ответ клиенту о записи
     write({outData, static_cast<int>(size)}, size);
 }
 
 void IOTV_Client::slotServerToClientQueryState(RAII_iot raii_iot)
 {
-    uint64_t size;
     char outData[BUFSIZ];
-
-    size = responseStateData(outData, BUFSIZ, raii_iot.iot());
-
-    write({outData, static_cast<int>(size)}, size);
+    responseStateData(outData, BUFSIZ, raii_iot.iot(), &IOTV_Client::writeFunc, _socket, STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void IOTV_Client::slotServerToClientQueryLogData(RAII_Header raii_header, QString logName, bool hostError)

@@ -414,7 +414,7 @@ void IOTV_Host::slotPingTimeOut()
 
     if (_counterPing > COUNTER_PING_COUNT)
     {
-        Log::write(CATEGORY::WARNING, _conn_type->getName() + "ping timeout",
+        Log::write(CATEGORY::WARNING, _conn_type->getName() + " ping timeout",
                    Log::Write_Flag::FILE_STDOUT,
                    ServerLog::DEFAULT_LOG_FILENAME);
         _conn_type->connectToHost();

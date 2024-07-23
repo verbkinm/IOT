@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setOrganizationName("VMS");
     app.setApplicationName("IOTV_Client");
-    app.setApplicationVersion("0.25");
+    app.setApplicationVersion("0.26");
     app.setWindowIcon(QIcon(":/img/logo.png"));
 
     QQmlApplicationEngine engine;

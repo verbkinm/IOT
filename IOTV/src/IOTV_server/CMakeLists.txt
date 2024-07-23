@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(iotv_server VERSION 0.22 LANGUAGES C CXX)
+project(iotv_server VERSION 0.23 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -262,30 +262,19 @@ void IOTV_Server::slotHostsUpdate()
             host->setName(name + "_" + QString::number(countName));
     }
 
-    char outData[BUFSIZ];
-    QByteArray result;
+    std::vector<RAII_iot> vec_iot;
 
-    if (_iot_hosts.size() == 0)
+    for (const auto &host : _iot_hosts)
     {
-        auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
-        result = QByteArray(outData, static_cast<int>(size));
-    }
-    else
-    {
-        for (const auto &host : _iot_hosts)
-        {
-            iotv_obj_t *iot = host.first->convert();
-            auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
-
-            result += QByteArray{outData, static_cast<int>(size)};
-            clear_iotv_obj(iot);
-        }
+        iotv_obj_t *iot = host.first->convert();
+        vec_iot.emplace_back(iot);
+        clear_iotv_obj(iot);
     }
 
     readEventActionJson();
 
     for (const auto &client : _iot_clients)
-        emit client.first->signalUpdateHosts(result);
+        emit client.first->signalUpdateHosts(vec_iot);
 }
 
 std::forward_list<const Base_Host *> IOTV_Server::baseHostList() const
@@ -450,25 +439,15 @@ void IOTV_Server::slotClientToServerQueryIdentification()
     if (client == nullptr)
         return;
 
-    char outData[BUFSIZ];
-    QByteArray result;
-
-    if (_iot_hosts.size() == 0)
-    {
-        auto size = responseIdentificationData(outData, BUFSIZ, NULL, Identification_FLAGS_NONE);
-        result = QByteArray(outData, static_cast<int>(size));
-    }
-
+    std::vector<RAII_iot> vec_iot;
     for (const auto &host : _iot_hosts)
     {
         iotv_obj_t *iot = host.first->convert();
-        auto size = responseIdentificationData(outData, BUFSIZ, iot, Identification_FLAGS_NONE);
-
-        result += QByteArray{outData, static_cast<int>(size)};
+        vec_iot.emplace_back(iot);
         clear_iotv_obj(iot);
     }
 
-    emit client->signalServerToClientQueryIdentification(result);
+    emit client->signalServerToClientQueryIdentification(vec_iot);
 }
 
 void IOTV_Server::slotClientToServerQueryRead(RAII_Header raii_header)

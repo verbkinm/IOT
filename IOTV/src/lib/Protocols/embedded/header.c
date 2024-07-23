@@ -17,7 +17,7 @@ uint64_t headerCheckSum(const header_t *header)
 {
     if (header == NULL)
     {
-        ZERO_RETURN_WARNING;
+        RETURN_WARNING;
         return 0;
     }
 
@@ -26,30 +26,33 @@ uint64_t headerCheckSum(const header_t *header)
 
 uint64_t headerDataSize(const header_t *header)
 {
-    if (header == NULL || header->pkg == NULL)
+    if (header == NULL)
     {
-        ZERO_RETURN_WARNING;
+        RETURN_WARNING;
         return 0;
     }
 
-    // Должно быть что-то одно.
-    switch (header->assignment)
+    if (header->pkg != NULL)
     {
-    case HEADER_ASSIGNMENT_IDENTIFICATION:
-        return identificationSize((const struct Identification *)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_STATE:
-        return stateSize((const struct State*)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_READ:
-    case HEADER_ASSIGNMENT_WRITE:
-        return readWriteSize((const struct Read_Write *)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_TECH:
-        return techSize((const struct Tech *)header->pkg);
-        break;
-    default:
-        break;
+        // Должно быть что-то одно.
+        switch (header->assignment)
+        {
+        case HEADER_ASSIGNMENT_IDENTIFICATION:
+            return identificationSize((const struct Identification *)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_STATE:
+            return stateSize((const struct State*)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_READ:
+        case HEADER_ASSIGNMENT_WRITE:
+            return readWriteSize((const struct Read_Write *)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_TECH:
+            return techSize((const struct Tech *)header->pkg);
+            break;
+        default:
+            break;
+        }
     }
 
     return 0;
@@ -59,7 +62,7 @@ uint64_t headerSize(const header_t *header)
 {
     if (header == NULL)
     {
-        ZERO_RETURN_WARNING;
+        RETURN_WARNING;
         return 0;
     }
     return HEADER_SIZE + headerDataSize(header);
@@ -67,17 +70,17 @@ uint64_t headerSize(const header_t *header)
 
 uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize)
 {
-    if ( header == NULL || outData == NULL || (outDataSize < headerSize(header)))
+    if (header == NULL || outData == NULL || (outDataSize < headerSize(header)))
     {
-        ZERO_RETURN_WARNING;
+        RETURN_WARNING;
         return 0;
     }
 
-//    if (outDataSize < headerSize(header))
-//    {
-//        ZERO_RETURN_WARNING;
-//        return 0;
-//    }
+    //    if (outDataSize < headerSize(header))
+    //    {
+    //        ZERO_RETURN_WARNING;
+    //        return 0;
+    //    }
 
     uint64_t result = HEADER_SIZE;
 
@@ -163,7 +166,7 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
 
     if (maxDatainFrame == 0 || buffSize < offsetSize)
     {
-        ZERO_RETURN_WARNING;
+        RETURN_WARNING;
         return 0;
     }
 

@@ -163,9 +163,10 @@ struct Identification *createIdentification(uint8_t * const data, uint64_t size,
 
     uint16_t id = (uint16_t)(data[0] << 8) | data[1];
     uint8_t nameSize = data[2];
-    uint16_t descriptionSize = (uint16_t)(data[3] << 8) | data[4];
-    uint8_t numberWriteChannel = data[5];
-    uint8_t numberReadChannel = data[6];
+    uint8_t numberWriteChannel = data[3];
+    uint8_t numberReadChannel = data[4];
+    uint16_t descriptionSize = (uint16_t)(data[5] << 8) | data[6];
+
     uint8_t flags = data[7];
 
     uint64_t sum = id + nameSize + descriptionSize + numberWriteChannel + numberReadChannel + flags;

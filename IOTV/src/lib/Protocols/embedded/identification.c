@@ -1,6 +1,7 @@
 #include "identification.h"
 #include "iotv_types.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -31,10 +32,10 @@ uint64_t identificationToData(const identification_t *body, char *outData, uint6
     outData[0] = body->id >> 8;
     outData[1] = body->id;
     outData[2] = body->nameSize;
-    outData[3] = body->descriptionSize >> 8;
-    outData[4] = body->descriptionSize;
-    outData[5] = body->numberWriteChannel;
-    outData[6] = body->numberReadChannel;
+    outData[3] = body->numberWriteChannel;
+    outData[4] = body->numberReadChannel;
+    outData[5] = body->descriptionSize >> 8;
+    outData[6] = body->descriptionSize;
     outData[7] = body->flags;
 
     uint64_t chSum =  body->id + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel + body->flags;
@@ -56,25 +57,13 @@ void clearIdentification(identification_t *ident)
         return;
 
     if (ident->name != NULL)
-    {
         free((void *)ident->name);
-        ident->name = NULL;
-    }
     if (ident->description != NULL)
-    {
         free((void *)ident->description);
-        ident->description = NULL;
-    }
     if (ident->writeChannelType != NULL)
-    {
         free((void *)ident->writeChannelType);
-        ident->writeChannelType = NULL;
-    }
     if (ident->readChannelType != NULL)
-    {
         free((void *)ident->readChannelType);
-        ident->readChannelType = NULL;
-    }
 
     free(ident);
 }
@@ -88,7 +77,10 @@ identification_t *identificationCopy(const identification_t *ident)
 
     copy = calloc(1, sizeof(identification_t));
     if (copy == NULL)
+    {
+        RETURN_WARNING;
         return copy;
+    }
 
     memcpy(copy, ident, sizeof(identification_t));
 

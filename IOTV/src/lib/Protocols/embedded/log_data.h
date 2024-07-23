@@ -14,7 +14,7 @@ struct Log_Data
     uint64_t endInterval;
 
     uint32_t interval;
-    int32_t dataSize;
+    uint32_t dataSize;
 
     uint8_t nameSize;
     uint8_t channelNumber;

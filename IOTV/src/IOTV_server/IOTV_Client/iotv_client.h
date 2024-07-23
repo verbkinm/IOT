@@ -65,9 +65,9 @@ private slots:
 
     void slotLogDataQueueTimerOut();
 
-    void slotUpdateHosts(QByteArray data);
+    void slotUpdateHosts(std::vector<RAII_iot> vec_iot);
 
-    void slotServerToClientQueryIdentification(QByteArray data);
+    void slotServerToClientQueryIdentification(std::vector<RAII_iot> vec_iot);
     void slotServerToClientQueryRead(RAII_Header raii_header, RAII_iot raii_iot);
     void slotServerToClientQueryWrite(RAII_Header raii_header, RAII_iot raii_iot);
     void slotServerToClientQueryState(RAII_iot raii_iot);
@@ -84,7 +84,7 @@ signals:
     void signalFetchEventActionDataFromServer(QByteArray data);
 
     // Высылается сервером, при добавлении новых устройств или удалении
-    void signalUpdateHosts(QByteArray data);
+    void signalUpdateHosts(std::vector<RAII_iot> vec_iot);
 
     // Все сигналы отлавливает IOTV_Server. IOTV_Server очищает полученные header_t * !!!
     void signalClientToServerQueryIdentification();
@@ -96,7 +96,7 @@ signals:
     void signalClientToServerLogData(RAII_Header raii_header);
 
     // Ответ IOTV_Server на сигналы ClientToServer
-    void signalServerToClientQueryIdentification(QByteArray data);
+    void signalServerToClientQueryIdentification(std::vector<RAII_iot> vec_iot);
     void signalServerToClientQueryRead(RAII_Header raii_header, RAII_iot raii_iot);
     void signalServerToClientQueryWrite(RAII_Header raii_header, RAII_iot raii_iot);
     void signalServerToClientQueryState(RAII_iot raii_iot);

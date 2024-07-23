@@ -89,33 +89,22 @@ void slotDataRecived()
             quint16 peerPort = datagram.senderPort();
 
             if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-            {
-                uint64_t size = responseIdentificationData(transmitBuffer, BUFSIZ, &iot, Identification_FLAGS_NONE);
-                socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
-            }
+                responseIdentificationData(transmitBuffer, BUFSIZ, &iot, writeFunc, (void *)socket, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
             else if (header->assignment == HEADER_ASSIGNMENT_READ)
             {
                 responseReadData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)&datagram, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             }
             else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
-            {
-                uint64_t size = responseWriteData(transmitBuffer, BUFSIZ, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
-                socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
-            }
+                responseWriteData(transmitBuffer, BUFSIZ, &iot, header, writeFunc, (void *)socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
             else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
             {
-                uint64_t size = responsePingData(transmitBuffer, BUFSIZ);
-                socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
-
+                uint64_t size = responsePingData(transmitBuffer, BUFSIZ,  writeFunc, (void *)socket, HEADER_FLAGS_NONE);
                 QByteArray data;
                 data.append(transmitBuffer, size);
                 std::cout << peerHost.toString().toStdString().c_str() << ":" << peerPort << " -> " << data.toHex(':').data() << '\n';
             }
             else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-            {
-                uint64_t size = responseStateData(transmitBuffer, BUFSIZ, &iot);
-                socket->writeDatagram(transmitBuffer, size, peerHost, peerPort);
-            }
+                responseStateData(transmitBuffer, BUFSIZ, &iot, writeFunc, (void *)socket, STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
         }
 
         buffer = buffer.mid(cutDataSize);

@@ -1,7 +1,7 @@
 #ifndef IOTV_TYPES_H
 #define IOTV_TYPES_H
 
-#define ZERO_RETURN_WARNING fprintf(stderr, "%s %s %d: return ZERO!\n", __FILE__, __func__, __LINE__); fflush(stderr);
+#define RETURN_WARNING fprintf(stderr, "%s %s %d: return warning!\n", __FILE__, __func__, __LINE__); fflush(stderr);
 
 #define HEADER_SIZE 24
 #define IDENTIFICATION_SIZE  16
@@ -40,6 +40,7 @@ typedef enum
 {
     Identification_FLAGS_NONE = 0x00,
     Identification_FLAGS_DELETE = 0x01,
+    Identification_FLAGS_AUTONOMIC_DEVICE = 0x02,
     Identification_FLAGS_ERROR = 0xFF
 } identification_flag_t;
 
@@ -49,6 +50,8 @@ typedef enum
     ReadWrite_FLAGS_IGNORE_CH = 0x01,
     ReadWrite_FLAGS_OPEN_STREAM = 0x02,
     ReadWrite_FLAGS_CLOSE_STREAM = 0x03,
+    ReadWrite_FLAGS_WRITE_OK = 0x04,
+    ReadWrite_FLAGS_WRITE_ERR = 0x05,
     ReadWrite_FLAGS_ERROR = 0xFF
 } readwrite_flag_t;
 
