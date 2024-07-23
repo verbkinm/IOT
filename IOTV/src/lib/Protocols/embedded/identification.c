@@ -8,7 +8,10 @@
 uint64_t identificationCheckSum(const identification_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return  body->id + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel + body->flags;
 }
@@ -16,18 +19,21 @@ uint64_t identificationCheckSum(const identification_t *body)
 uint64_t identificationSize(const identification_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return IDENTIFICATION_SIZE + body->nameSize + body->descriptionSize + body->numberWriteChannel + body->numberReadChannel;
 }
 
 uint64_t identificationToData(const identification_t *body, char *outData, uint64_t outDataSize)
 {
-    if ( (body == NULL) || (outData == NULL) )
+    if ( (body == NULL) || (outData == NULL) || (outDataSize < identificationSize(body)))
+    {
+        RETURN_WARNING;
         return 0;
-
-    if (outDataSize < identificationSize(body))
-        return 0;
+    }
 
     outData[0] = body->id >> 8;
     outData[1] = body->id;

@@ -1,13 +1,17 @@
 #include "state.h"
 #include "iotv_types.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
 
 uint64_t stateCheckSum(const state_pkg_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return  body->nameSize + body->state + body->flags + body->dataSize;
 }
@@ -15,18 +19,21 @@ uint64_t stateCheckSum(const state_pkg_t *body)
 uint64_t stateSize(const state_pkg_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return STATE_SIZE + body->nameSize + body->dataSize;
 }
 
 uint64_t stateToData(const state_pkg_t *body, char *outData, uint64_t outDataSize)
 {
-    if ( (body == NULL) || (outData == NULL) )
+    if ( (body == NULL) || (outData == NULL) || (outDataSize < stateSize(body)))
+    {
+        RETURN_WARNING;
         return 0;
-
-    if (outDataSize < stateSize(body))
-        return 0;
+    }
 
     outData[0] = body->nameSize;
     outData[1] = body->state;
@@ -55,7 +62,6 @@ void clearState(state_pkg_t *state)
         free((void *)state->data);
 
     free(state);
-//    state = NULL;
 }
 
 state_pkg_t *stateCopy(const state_pkg_t *state_pkg)

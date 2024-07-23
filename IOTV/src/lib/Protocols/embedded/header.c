@@ -76,12 +76,6 @@ uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSiz
         return 0;
     }
 
-    //    if (outDataSize < headerSize(header))
-    //    {
-    //        ZERO_RETURN_WARNING;
-    //        return 0;
-    //    }
-
     uint64_t result = HEADER_SIZE;
 
     outData[0] = header->version;

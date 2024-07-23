@@ -3,11 +3,15 @@
 #include "iotv_types.h"
 #include "string.h"
 #include "stdlib.h"
+#include "stdio.h"
 
 uint64_t hostBroadCastCheckSum(const host_broadcast_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return  body->nameSize + body->address + body->flags + body->port;
 }
@@ -15,18 +19,21 @@ uint64_t hostBroadCastCheckSum(const host_broadcast_t *body)
 uint64_t hostBroadCastSize(const host_broadcast_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return HOST_BROADCAST_SIZE + body->nameSize;
 }
 
 uint64_t hostBroadCastToData(const host_broadcast_t *body, char *outData, uint64_t outDataSize)
 {
-    if ( (body == NULL) || (outData == NULL) )
+    if ( (body == NULL) || (outData == NULL) || (outDataSize < hostBroadCastSize(body)))
+    {
+        RETURN_WARNING;
         return 0;
-
-    if (outDataSize < hostBroadCastSize(body))
-        return 0;
+    }
 
     outData[0] = body->nameSize;
 

@@ -673,7 +673,8 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t
     return pkgCount(sendDataSize, dataOutSize, HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize);
 }
 
-uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, uint8_t flags)
+uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name,
+                      uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags)
 {
     if (outData == NULL)
     {
