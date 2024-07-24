@@ -6,23 +6,24 @@
 
 #include <sstream>
 
-Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
-    : Base_Host{static_cast<uint8_t>(dev->id), parent},
-    _name{QByteArray{dev->name, dev->nameSize}},
+Device::Device(const RAII_iot &dev, QObject *parent)
+    : Base_Host{static_cast<uint8_t>(dev.iot()->id), parent},
+    _name{QByteArray{dev.iot()->name, dev.iot()->nameSize}},
     _aliasName(_name),
     _logDataOverflow(false)
 {
-    Q_ASSERT(dev != nullptr);
+    iotv_obj_t *iot = dev.iot();
+
+    this->setDescription(QByteArray{iot->description, iot->descriptionSize});
+
+    for (int i = 0; i < iot->numberReadChannel; ++i)
+        this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(iot->readChannelType[i])});
+
+    for (int i = 0; i < iot->numberWriteChannel; ++i)
+        this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(iot->writeChannelType[i])});
 
     _timerRead.setParent(this);
     _timerState.setParent(this);
-    this->setDescription(QByteArray{dev->description, dev->descriptionSize});
-
-    for (int i = 0; i < dev->numberReadChannel; ++i)
-        this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->readChannelType[i])});
-
-    for (int i = 0; i < dev->numberWriteChannel; ++i)
-        this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i])});
 
     connect(&_timerRead, &QTimer::timeout, this, &Device::slotTimerReadTimeOut);
     connect(&_timerState, &QTimer::timeout, this, &Device::slotTimerStateTimeOut);
@@ -35,24 +36,25 @@ Device::Device(const IOTV_Server_embedded *dev, QObject *parent)
 }
 
 //!!!
-void Device::update(const IOTV_Server_embedded *dev)
+void Device::update(const RAII_iot &dev)
 {
-    Q_ASSERT(dev != nullptr);
+    iotv_obj_t *iot = dev.iot();
+    Q_ASSERT(iot != nullptr);
 
     if (this->getId() == 0)
     {
-        this->setId(dev->id);
-        this->setDescription(QByteArray{dev->description, dev->descriptionSize});
+        this->setId(iot->id);
+        this->setDescription(QByteArray{iot->description, iot->descriptionSize});
 
-        if (this->getReadChannelLength() != dev->numberReadChannel)
+        if (this->getReadChannelLength() != iot->numberReadChannel)
         {
             this->removeAllSubChannel();
 
-            for (int i = 0; i < dev->numberReadChannel; ++i)
-                this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->readChannelType[i])});
+            for (int i = 0; i < iot->numberReadChannel; ++i)
+                this->addReadSubChannel(Raw{static_cast<Raw::DATA_TYPE>(iot->readChannelType[i])});
 
-            for (int i = 0; i < dev->numberWriteChannel; ++i)
-                this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(dev->writeChannelType[i])});
+            for (int i = 0; i < iot->numberWriteChannel; ++i)
+                this->addWriteSubChannel(Raw{static_cast<Raw::DATA_TYPE>(iot->writeChannelType[i])});
         }
         emit signalUpdate();
     }

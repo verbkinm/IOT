@@ -452,9 +452,9 @@ iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
     };
 
     if (nameSize > 0)
-        memcpy((void *)iot.name, ptrIdentification->name, nameSize);
+        memcpy(iot.name, ptrIdentification->name, nameSize);
     if (descriptionSize > 0)
-        memcpy((void *)iot.description, ptrIdentification->description, descriptionSize);
+        memcpy(iot.description, ptrIdentification->description, descriptionSize);
 
     bool mallocFlag = false;
     for (int i = 0; i < numberReadChannel; ++i)
@@ -473,7 +473,7 @@ iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
     for (int i = 0; i < numberWriteChannel; ++i)
         iot.writeChannelType[i] = ptrIdentification->writeChannelType[i];
 
-    memcpy((void *)ptrIot, &iot, sizeof(iotv_obj_t));
+    memcpy(ptrIot, &iot, sizeof(iotv_obj_t));
 
     // Проверка malloc!
     if (mallocFlag
@@ -482,7 +482,9 @@ iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
         || (numberReadChannel > 0 && (ptrIot->readChannel == NULL || ptrIot->readChannelType == NULL))
         || (numberWriteChannel > 0 && ptrIot->writeChannelType == NULL))
     {
+        RETURN_WARNING;
         clear_iotv_obj(ptrIot);
+        return NULL;
     }
 
     return ptrIot;

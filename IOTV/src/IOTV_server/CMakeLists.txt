@@ -66,6 +66,7 @@ add_executable(${PROJECT_NAME}
     ../lib/raii/raii_header.cpp                         ../lib/raii/raii_header.h
     ../lib/raii/raii_iot.cpp                            ../lib/raii/raii_iot.h
     ../lib/raw/raw.cpp                                  ../lib/raw/raw.h
+    ../lib/fragmentData/fragmentmanager_identification.cpp ../lib/fragmentData/fragmentmanager_identification.h
     IOTV_Client/iotv_client.cpp                         IOTV_Client/iotv_client.h
     IOTV_Host/iotv_host.cpp                             IOTV_Host/iotv_host.h
     IOTV_Server/iotv_server.cpp                         IOTV_Server/iotv_server.h
@@ -95,6 +96,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ../lib/ThreadPool
     ../lib/raii
     ../lib/raw
+    ../lib/fragmentData
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR})

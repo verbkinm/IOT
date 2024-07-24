@@ -27,6 +27,9 @@ SOURCES += \
         ../lib/Protocols/embedded/tech.c \
         ../lib/Protocols/embedded/host_broadcast.c  \
         ../lib/Protocols/embedded/log_data.c  \
+        ../lib/fragmentData/fragmentmanager_identification.cpp \
+        ../lib/raii/raii_header.cpp \
+        ../lib/raii/raii_iot.cpp \
         client.cpp \
         device.cpp \
         ../lib/Base_Host/base_host.cpp \
@@ -63,6 +66,9 @@ HEADERS += \
     ../lib/Protocols/embedded/tech.h \
     ../lib/Protocols/embedded/host_broadcast.h  \
     ../lib/Protocols/embedded/log_data.h  \
+    ../lib/fragmentData/fragmentmanager_identification.h \
+    ../lib/raii/raii_header.h \
+    ../lib/raii/raii_iot.h \
     client.h \
     device.h \
     ../lib/Base_Host/base_host.h \
@@ -80,11 +86,13 @@ RESOURCES += \
 INCLUDEPATH += ../lib/Base_Host \
             ../lib/Log \
             ../lib/Protocols/embedded \
-            ../lib/Protocols/ \
+            ../lib/Protocols \
             ../lib/raw \
             ../lib/ConfigType \
             ../lib/Events \
-            ../lib/Json_Parsers
+            ../lib/Json_Parsers \
+            ../lib/fragmentData \
+            ../lib/raii
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

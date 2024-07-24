@@ -10,6 +10,7 @@
 
 #include "raii_header.h"
 #include "raii_iot.h"
+#include "fragmentmanager_identification.h"
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/tcp_reverse_conn_type.h"
@@ -94,6 +95,7 @@ private:
     std::map<uint8_t, std::set<QString>> _streamRead, _streamWrite;
 
     QByteArray _buff;
+    FragmentManager_Identification _fragIdent;
 
 public slots:
     void slotDisconnected();

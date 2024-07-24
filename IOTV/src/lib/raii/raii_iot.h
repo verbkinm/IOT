@@ -8,7 +8,7 @@ class RAII_iot
 {
 public:
     RAII_iot();
-    RAII_iot(iotv_obj_t *iot);
+    explicit RAII_iot(iotv_obj_t *iot);
     RAII_iot(const RAII_iot &raii_iot);
     ~RAII_iot();
 

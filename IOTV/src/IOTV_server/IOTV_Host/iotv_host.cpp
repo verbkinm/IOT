@@ -9,7 +9,8 @@
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)),
     _settingsData(settingsData),
-    _counterState(0), _counterPing(0)
+    _counterState(0), _counterPing(0),
+    _fragIdent(BUFSIZ * 10)
 {
     shareConstructor();
     makeConnType();
@@ -17,7 +18,8 @@ IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, Q
 
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)), _settingsData(settingsData),
-    _counterState(0), _counterPing(0)
+    _counterState(0), _counterPing(0),
+    _fragIdent(BUFSIZ * 10)
 {
     shareConstructor();
     _conn_type = std::make_unique<TCP_REVERSE_conn_type>(_settingsData[hostField::name], reverse_socket, this);
@@ -62,9 +64,23 @@ void IOTV_Host::responceIdentification(RAII_Header raii_header)
     if (raii_header.header() == nullptr || raii_header.header()->pkg == NULL)
         return;
 
-    const struct Identification *pkg = static_cast<const struct Identification *>(raii_header.header()->pkg);
+    const Identification *pkg = static_cast<const Identification *>(raii_header.header()->pkg);
     if (pkg == nullptr)
         return;
+
+    if (raii_header.header()->fragments > 1)
+    {
+        _fragIdent.addPkg(raii_header);
+        if (_fragIdent.isComplete())
+        {
+            raii_header = _fragIdent.pkg();
+            pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+            if (pkg == nullptr)
+                return;
+        }
+        else
+            return;
+    }
 
     this->setId(pkg->id);
 

@@ -16,6 +16,8 @@
 #include "device.h"
 #include "events/iotv_event.h"
 #include "iotv_event_manager.h"
+#include "fragmentmanager_identification.h"
+#include "raii_header.h"
 
 class Client : public QObject
 {
@@ -107,6 +109,9 @@ private:
     std::map<QString, Device> _devices;
 
     std::unique_ptr<IOTV_Event_Manager> _eventManager;
+
+    FragmentManager_Identification _fragIdent;
+
     void saveEventAction();
 
     void queryIdentification();
@@ -117,14 +122,14 @@ private:
     void queryPing();
     void queryTech(tech_type_t type, char *data, uint64_t dataSize);
 
-    void responceIdentification(const header_t *header);
-    void responceState(const header_t *header);
-    void responceRead(const header_t* header);
-    void responceReadStream(const header_t *header);
-    void responceWrite(const header_t *header) const;
-    void responcePingPoing(const header_t *header);
-    void responceTech(const header_t *header);
-    void responceLogData(const header_t *header);
+    void responceIdentification(const RAII_Header &raii_header);
+    void responceState(const RAII_Header &raii_header);
+    void responceRead(const RAII_Header &raii_header);
+    void responceReadStream(const RAII_Header &raii_header);
+    void responceWrite(const RAII_Header &raii_header) const;
+    void responcePingPoing(const RAII_Header &raii_header);
+    void responceTech(const RAII_Header &raii_header);
+    void responceLogData(const RAII_Header &raii_header);
 
     qint64 write(const QByteArray &data);
 

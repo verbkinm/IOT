@@ -33,7 +33,7 @@
 #define BUFSIZ 8192
 
 Client::Client(QObject *parent): QObject{parent},
-    _counterPing(0)
+    _counterPing(0), _fragIdent(BUFSIZ * 10)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -558,7 +558,7 @@ void Client::queryRead(const QString &name, uint8_t channelNumber)
 void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags)
 {
     char outData[BUFSIZ];
-    auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, static_cast<uint8_t>(flags));
+    auto size = queryLogData(outData, BUFSIZ, name.toStdString().c_str(), startInterval, endInterval, interval, channelNumber, flags);
 
     write({outData, static_cast<int>(size)});
 }
@@ -597,25 +597,44 @@ void Client::queryTech(tech_type_t type, char *data, uint64_t dataSize)
     write({outData, static_cast<int>(size)});
 }
 
-void Client::responceIdentification(const Header *header)
+void Client::responceIdentification(const RAII_Header &raii_header)
 {
-    Q_ASSERT(header != NULL);
+    if (raii_header.header()== NULL)
+        return;
 
     //Пустой список устройств
-    if (header->pkg == NULL)
+    if (raii_header.header()->pkg == NULL)
     {
         _devices.clear();
         return;
     }
 
-    const struct Identification *pkg = static_cast<const struct Identification *>(header->pkg);
+    const Identification *pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+
+    RAII_Header raii_header_to_frag(raii_header);
+    if (raii_header.header()->fragments > 1)
+    {
+        _fragIdent.addPkg(raii_header);
+        if (_fragIdent.isComplete())
+        {
+            raii_header_to_frag = _fragIdent.pkg();
+            pkg = static_cast<const Identification *>(raii_header_to_frag.header()->pkg);
+            if (pkg == nullptr)
+                return;
+        }
+        else
+            return;
+    }
+
     QString name(QByteArray{pkg->name, pkg->nameSize});
 
-    iotv_obj_t *iot = createIotFromHeaderIdentification(header);
+    iotv_obj_t *iot = createIotFromHeaderIdentification(raii_header_to_frag.header());
+    RAII_iot raii_iot(iot);
+    clear_iotv_obj(iot);
 
     if (!_devices.contains(name))
     {
-        auto result = _devices.emplace(name, iot);
+        auto result = _devices.emplace(name, raii_iot);
         if (result.second)
         {
             Device &device = result.first->second;
@@ -631,13 +650,14 @@ void Client::responceIdentification(const Header *header)
         }
     }
     else
-        _devices[name].update(iot);
+        _devices[name].update(raii_iot);
 
-    clear_iotv_obj(iot);
 }
 
-void Client::responceState(const header_t *header)
+void Client::responceState(const RAII_Header &raii_header)
 {
+    header_t *header = raii_header.header();
+
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -655,8 +675,10 @@ void Client::responceState(const header_t *header)
     }
 }
 
-void Client::responceRead(const header_t *header)
+void Client::responceRead(const RAII_Header &raii_header)
 {
+    header_t *header = raii_header.header();
+
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -673,7 +695,7 @@ void Client::responceRead(const header_t *header)
         return;
 
     if (pkg->flags == ReadWrite_FLAGS_OPEN_STREAM)
-        responceReadStream(header);
+        responceReadStream(raii_header);
     else
     {
 //        if (pkg->channelNumber == 15)
@@ -685,8 +707,10 @@ void Client::responceRead(const header_t *header)
     }
 }
 
-void Client::responceReadStream(const Header *header)
+void Client::responceReadStream(const RAII_Header &raii_header)
 {
+    header_t *header = raii_header.header();
+
     const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
     if (pkg == nullptr)
         return;
@@ -720,22 +744,24 @@ void Client::responceReadStream(const Header *header)
 //    file.write(pkg->data, pkg->dataSize);
 }
 
-void Client::responceWrite(const header_t *header) const
+void Client::responceWrite(const RAII_Header &raii_header) const
 {
-    Q_ASSERT(header != NULL);
-    Q_ASSERT(header->pkg != NULL);
+//    Q_ASSERT(raii_header != NULL);
+//    Q_ASSERT(raii_header->pkg != NULL);
 
     // Нет реакции на ответ о записи
 }
 
-void Client::responcePingPoing(const header_t *header)
+void Client::responcePingPoing(const RAII_Header &raii_header)
 {
-    Q_ASSERT(header != NULL);
+//    Q_ASSERT(raii_header != NULL);
     _counterPing = 0;
 }
 
-void Client::responceTech(const Header *header)
-{
+void Client::responceTech(const RAII_Header &raii_header)
+{  
+    header_t *header = raii_header.header();
+
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -767,8 +793,10 @@ void Client::responceTech(const Header *header)
     }
 }
 
-void Client::responceLogData(const Header *header)
+void Client::responceLogData(const RAII_Header &raii_header)
 {
+    header_t *header = raii_header.header();
+
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
@@ -823,6 +851,8 @@ void Client::slotReciveData()
     while (_recivedBuff.size() > 0)
     {
         header_t* header = createPkgs(reinterpret_cast<uint8_t*>(_recivedBuff.data()), _recivedBuff.size(), &error, &expectedDataSize, &cutDataSize);
+        RAII_Header raii_header(header);
+        clearHeader(header);
 
         if (error == true)
         {
@@ -833,47 +863,43 @@ void Client::slotReciveData()
 
         // Пакет не ещё полный
         if (expectedDataSize > 0)
-        {
-            clearHeader(header);
             break;
-        }
 
 //        if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
 //            qDebug() << "log data header" <<  QTime::currentTime();
 
-        if (header->type == HEADER_TYPE_RESPONSE)
+        if (raii_header.header()->type == HEADER_TYPE_RESPONSE)
         {
-            if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+            if (raii_header.header()->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
             {
                 size_t count = _devices.size();
-                responceIdentification(header);
+                responceIdentification(raii_header);
                 if (count != _devices.size())
                     emit countDeviceChanged();
             }
-            else if (header->assignment == HEADER_ASSIGNMENT_READ)
-                responceRead(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
-                responceWrite(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-                responcePingPoing(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_STATE)
-                responceState(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_TECH)
-                responceTech(header);
-            else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_READ)
+                responceRead(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_WRITE)
+                responceWrite(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_PING_PONG)
+                responcePingPoing(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_STATE)
+                responceState(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_TECH)
+                responceTech(raii_header);
+            else if (raii_header.header()->assignment == HEADER_ASSIGNMENT_LOG_DATA)
             {
 //                qDebug() << "responceLogData" << QTime::currentTime();
-                responceLogData(header);
+                responceLogData(raii_header);
             }
         }
-        else if (header->type == HEADER_TYPE_REQUEST)
+        else if (raii_header.header()->type == HEADER_TYPE_REQUEST)
         {
             // На данный момент от сервера не должно приходить запросов
             Log::write(CATEGORY::WARNING, "Запрос от сервера не предусмотрен!", Log::Write_Flag::STDOUT, "");
         }
 
         _recivedBuff = _recivedBuff.mid(cutDataSize);
-        clearHeader(header);
     }
 }
 

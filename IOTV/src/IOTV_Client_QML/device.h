@@ -4,9 +4,7 @@
 #include <QLineSeries>
 
 #include "base_host.h"
-#include "IOTV_SH.h"
-#include "raw.h"
-#include "iotv_server_embedded.h"
+#include "raii_iot.h"
 #include "wrap_qbytearray.h"
 
 class Device : public Base_Host
@@ -26,8 +24,8 @@ class Device : public Base_Host
 
 public:
     Device() = default;
-    explicit Device(const iotv_obj_t *dev, QObject *parent = nullptr);
-    void update(const iotv_obj_t *dev);
+    explicit Device(const RAII_iot &dev, QObject *parent = nullptr);
+    void update(const RAII_iot &dev);
 
     virtual QString getName() const override;
     virtual void setName(const QString &name) override;

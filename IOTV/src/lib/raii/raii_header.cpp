@@ -23,6 +23,17 @@ RAII_Header::~RAII_Header()
     clearHeader(_header);
 }
 
+RAII_Header &RAII_Header::operator=(const RAII_Header &raii_header)
+{
+    if (&raii_header == this)
+        return *this;
+
+    clearHeader(_header);
+    _header = headerCopy(raii_header.header());
+
+    return *this;
+}
+
 header_t *RAII_Header::header() const
 {
     return _header;
