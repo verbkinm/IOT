@@ -20,7 +20,6 @@
 
 #include <fstream>
 
-//#include <QtConcurrent>
 #include <QTime>
 
 #include <QApplication>
@@ -31,9 +30,10 @@
 
 // На arm BUFSIZ = 1024
 #define BUFSIZ 8192
+#define FRAGMENTS_IDENTIFICATION_MAX_SIZE (BUFSIZ * 10)
 
 Client::Client(QObject *parent): QObject{parent},
-    _counterPing(0), _fragIdent(BUFSIZ * 10)
+    _counterPing(0)
 {
     _socket.setParent(this);
     _socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -597,7 +597,7 @@ void Client::queryTech(tech_type_t type, char *data, uint64_t dataSize)
     write({outData, static_cast<int>(size)});
 }
 
-void Client::responceIdentification(const RAII_Header &raii_header)
+void Client::responceIdentification(RAII_Header raii_header)
 {
     if (raii_header.header()== NULL)
         return;
@@ -610,15 +610,38 @@ void Client::responceIdentification(const RAII_Header &raii_header)
     }
 
     const Identification *pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+    if (pkg == nullptr)
+        return;
 
-    RAII_Header raii_header_to_frag(raii_header);
+    QString name(QByteArray{pkg->name, pkg->nameSize});
+
     if (raii_header.header()->fragments > 1)
     {
-        _fragIdent.addPkg(raii_header);
-        if (_fragIdent.isComplete())
+        if (!_fragIdent.contains(name))
+            _fragIdent.emplace(name, FRAGMENTS_IDENTIFICATION_MAX_SIZE);
+
+        auto fmi = _fragIdent.find(name);
+        if (fmi == _fragIdent.end())
+            return;
+
+        fmi->second.addPkg(raii_header);
+
+        if (fmi->second.overflow())
         {
-            raii_header_to_frag = _fragIdent.pkg();
-            pkg = static_cast<const Identification *>(raii_header_to_frag.header()->pkg);
+            Log::write(CATEGORY::WARNING, "Переполнение буфера менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            _fragIdent.erase(name);
+            return;
+        }
+        else if (fmi->second.error())
+        {
+            Log::write(CATEGORY::WARNING, "Ошибка менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            _fragIdent.erase(name);
+            return;
+        }
+        else if (fmi->second.isComplete())
+        {
+            raii_header = fmi->second.pkg();
+            pkg = static_cast<const Identification *>(raii_header.header()->pkg);
             if (pkg == nullptr)
                 return;
         }
@@ -626,9 +649,7 @@ void Client::responceIdentification(const RAII_Header &raii_header)
             return;
     }
 
-    QString name(QByteArray{pkg->name, pkg->nameSize});
-
-    iotv_obj_t *iot = createIotFromHeaderIdentification(raii_header_to_frag.header());
+    iotv_obj_t *iot = createIotFromHeaderIdentification(raii_header.header());
     RAII_iot raii_iot(iot);
     clear_iotv_obj(iot);
 
@@ -652,6 +673,7 @@ void Client::responceIdentification(const RAII_Header &raii_header)
     else
         _devices[name].update(raii_iot);
 
+    _fragIdent.erase(name);
 }
 
 void Client::responceState(const RAII_Header &raii_header)

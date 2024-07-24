@@ -27,7 +27,8 @@ SOURCES += \
         ../lib/Protocols/embedded/tech.c \
         ../lib/Protocols/embedded/host_broadcast.c  \
         ../lib/Protocols/embedded/log_data.c  \
-        ../lib/fragmentData/fragmentmanager_identification.cpp \
+        ../lib/fragmentData/fragmentcollector.cpp \
+        ../lib/fragmentData/fragmentcollector_identification.cpp \
         ../lib/raii/raii_header.cpp \
         ../lib/raii/raii_iot.cpp \
         client.cpp \
@@ -66,7 +67,8 @@ HEADERS += \
     ../lib/Protocols/embedded/tech.h \
     ../lib/Protocols/embedded/host_broadcast.h  \
     ../lib/Protocols/embedded/log_data.h  \
-    ../lib/fragmentData/fragmentmanager_identification.h \
+    ../lib/fragmentData/fragmentcollector.h \
+    ../lib/fragmentData/fragmentcollector_identification.h \
     ../lib/raii/raii_header.h \
     ../lib/raii/raii_iot.h \
     client.h \

@@ -16,7 +16,7 @@
 #include "device.h"
 #include "events/iotv_event.h"
 #include "iotv_event_manager.h"
-#include "fragmentmanager_identification.h"
+#include "fragmentcollector_identification.h"
 #include "raii_header.h"
 
 class Client : public QObject
@@ -110,7 +110,7 @@ private:
 
     std::unique_ptr<IOTV_Event_Manager> _eventManager;
 
-    FragmentManager_Identification _fragIdent;
+    std::map<QString, FragmentCollector_Identification> _fragIdent;
 
     void saveEventAction();
 
@@ -122,7 +122,7 @@ private:
     void queryPing();
     void queryTech(tech_type_t type, char *data, uint64_t dataSize);
 
-    void responceIdentification(const RAII_Header &raii_header);
+    void responceIdentification(RAII_Header raii_header);
     void responceState(const RAII_Header &raii_header);
     void responceRead(const RAII_Header &raii_header);
     void responceReadStream(const RAII_Header &raii_header);

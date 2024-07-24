@@ -66,7 +66,8 @@ add_executable(${PROJECT_NAME}
     ../lib/raii/raii_header.cpp                         ../lib/raii/raii_header.h
     ../lib/raii/raii_iot.cpp                            ../lib/raii/raii_iot.h
     ../lib/raw/raw.cpp                                  ../lib/raw/raw.h
-    ../lib/fragmentData/fragmentmanager_identification.cpp ../lib/fragmentData/fragmentmanager_identification.h
+    ../lib/fragmentData/fragmentcollector.cpp           ../lib/fragmentData/fragmentcollector.h
+    ../lib/fragmentData/fragmentcollector_identification.cpp ../lib/fragmentData/fragmentcollector_identification.h
     IOTV_Client/iotv_client.cpp                         IOTV_Client/iotv_client.h
     IOTV_Host/iotv_host.cpp                             IOTV_Host/iotv_host.h
     IOTV_Server/iotv_server.cpp                         IOTV_Server/iotv_server.h

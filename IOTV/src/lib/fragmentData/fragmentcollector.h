@@ -4,13 +4,13 @@
 
 #include "raii_header.h"
 
-class FragmentManager_Identification
+class Fragment_Collector
 {
 public:
-    FragmentManager_Identification(size_t max_buff_size);
+    explicit Fragment_Collector(size_t max_buff_size);
 
     void addPkg(RAII_Header pkg);
-    RAII_Header pkg();
+    virtual RAII_Header pkg() = 0;
 
     size_t size() const;
 
@@ -18,7 +18,7 @@ public:
     bool overflow() const;
     bool error() const;
 
-private:
+protected:
     void clear();
 
     std::vector<RAII_Header> _buff;
@@ -28,4 +28,3 @@ private:
     bool _err;      // ошибка фрагментов
     size_t _size;   // размер буфера в байтах
 };
-
