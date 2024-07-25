@@ -19,11 +19,14 @@ struct Read_Write
     char *name;
     char *data;
 };
+typedef struct Read_Write read_write_t;
 
-uint64_t readWriteCheckSum(const struct Read_Write *body);
-uint64_t readWriteSize(const struct Read_Write *body);
-uint64_t readWriteToData(const struct Read_Write *body, char *outData, uint64_t outDataSize);
-void clearReadWrite(struct Read_Write *readWrite);
+uint64_t readWriteCheckSum(const read_write_t *body);
+uint64_t readWriteSize(const read_write_t *body);
+uint64_t readWriteToData(const read_write_t *body, char *outData, uint64_t outDataSize);
+void clearReadWrite(read_write_t *readWrite);
+
+read_write_t *readWriteCopy(const read_write_t *readWrite_pkg);
 
 #ifdef __cplusplus
 }

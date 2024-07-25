@@ -1,32 +1,39 @@
 #include "state.h"
 #include "iotv_types.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
 
-uint64_t stateCheckSum(const struct State *body)
+uint64_t stateCheckSum(const state_pkg_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return  body->nameSize + body->state + body->flags + body->dataSize;
 }
 
-uint64_t stateSize(const struct State *body)
+uint64_t stateSize(const state_pkg_t *body)
 {
     if (body == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return STATE_SIZE + body->nameSize + body->dataSize;
 }
 
-uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSize)
+uint64_t stateToData(const state_pkg_t *body, char *outData, uint64_t outDataSize)
 {
-    if ( (body == NULL) || (outData == NULL) )
+    if ( (body == NULL) || (outData == NULL) || (outDataSize < stateSize(body)))
+    {
+        RETURN_WARNING;
         return 0;
-
-    if (outDataSize < stateSize(body))
-        return 0;
+    }
 
     outData[0] = body->nameSize;
     outData[1] = body->state;
@@ -44,7 +51,7 @@ uint64_t stateToData(const struct State *body, char *outData, uint64_t outDataSi
     return STATE_SIZE + body->nameSize + body->dataSize;
 }
 
-void clearState(struct State *state)
+void clearState(state_pkg_t *state)
 {
     if (state == NULL)
         return;
@@ -55,5 +62,37 @@ void clearState(struct State *state)
         free((void *)state->data);
 
     free(state);
-//    state = NULL;
+}
+
+state_pkg_t *stateCopy(const state_pkg_t *state_pkg)
+{
+    state_pkg_t *copy = NULL;
+
+    if (state_pkg == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(state_pkg_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, state_pkg, sizeof(state_pkg_t));
+
+    copy->name = NULL;
+    copy->data = NULL;
+
+    if (state_pkg->name != NULL && state_pkg->nameSize > 0)
+    {
+        copy->name = malloc(copy->nameSize);
+        if (copy->name != NULL)
+            memcpy(copy->name, state_pkg->name, copy->nameSize);
+    }
+
+    if (state_pkg->data != NULL && state_pkg->dataSize > 0)
+    {
+        copy->data = malloc(copy->dataSize);
+        if (copy->data != NULL)
+            memcpy(copy->data, state_pkg->data, copy->dataSize);
+    }
+
+    return copy;
 }

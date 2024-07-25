@@ -136,9 +136,9 @@ void iotv_data_recived(const char *data, int size, int sock)
 
 	while (realBufSize > 0)
 	{
-		uint64_t size = 0;
+//		uint64_t size = 0;
 
-		struct Header* header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expectedDataSize, &cutDataSize);
+		header_t *header = createPkgs((uint8_t *)recivedBuffer, realBufSize, &error, &expectedDataSize, &cutDataSize);
 
 		if (header == NULL)
 			printf("%s header == NULL\n", TAG);
@@ -159,15 +159,15 @@ void iotv_data_recived(const char *data, int size, int sock)
 		if (header->type == HEADER_TYPE_REQUEST)
 		{
 			if (header->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
-				size = responseIdentificationData(transmitBuffer, BUFSIZE, &iot, Identification_FLAGS_NONE);
+				/*size = */responseIdentificationData(transmitBuffer, BUFSIZE, &iot, iotv_write_func, (void *)&sock, Identification_FLAGS_NONE, HEADER_FLAGS_NONE);
 			else if(header->assignment == HEADER_ASSIGNMENT_READ)
 			{
 				responseReadData(transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
-				size = 0;
+//				size = 0;
 			}
 			else if (header->assignment == HEADER_ASSIGNMENT_WRITE)
 			{
-				size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
+				uint64_t size = responseWriteData((char *)transmitBuffer, BUFSIZE, &iot, header, iotv_write_func, (void *)&sock, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 
 				if (size > 0)
 				{
@@ -210,13 +210,13 @@ void iotv_data_recived(const char *data, int size, int sock)
 				}
 			}
 			else if(header->assignment == HEADER_ASSIGNMENT_PING_PONG)
-				size = responsePingData(transmitBuffer, BUFSIZE);
+				/*size = */responsePingData(transmitBuffer, BUFSIZE, iotv_write_func, (void *)&sock, HEADER_FLAGS_NONE);
 			else if(header->assignment == HEADER_ASSIGNMENT_STATE)
-				size = responseStateData(transmitBuffer, BUFSIZE, &iot);
+				/*size = */responseStateData(transmitBuffer, BUFSIZE, &iot, iotv_write_func, (void *)&sock, STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
 		}
 
-		if (size)
-			iotv_write_func((char *)transmitBuffer, size, (void *)&sock);
+//		if (size)
+//			iotv_write_func((char *)transmitBuffer, size, (void *)&sock);
 
 		memcpy(recivedBuffer, &recivedBuffer[cutDataSize], BUFSIZE - cutDataSize);
 		realBufSize -= cutDataSize;

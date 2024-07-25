@@ -9,40 +9,50 @@
 #include "log_data.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 uint64_t headerCheckSum(const header_t *header)
 {
     if (header == NULL)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     return  header->version + header->type + header->assignment + header->flags + header->fragment + header->fragments + header->dataSize;
 }
 
 uint64_t headerDataSize(const header_t *header)
 {
-    if (header == NULL || header->pkg == NULL)
-        return 0;
-
-    // Должно быть что-то одно.
-    switch (header->assignment)
+    if (header == NULL)
     {
-    case HEADER_ASSIGNMENT_IDENTIFICATION:
-        return identificationSize((const struct Identification *)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_STATE:
-        return stateSize((const struct State*)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_READ:
-    case HEADER_ASSIGNMENT_WRITE:
-        return readWriteSize((const struct Read_Write *)header->pkg);
-        break;
-    case HEADER_ASSIGNMENT_TECH:
-        return techSize((const struct Tech *)header->pkg);
-        break;
-    default:
-        break;
+        RETURN_WARNING;
+        return 0;
+    }
+
+    if (header->pkg != NULL)
+    {
+        // Должно быть что-то одно.
+        switch (header->assignment)
+        {
+        case HEADER_ASSIGNMENT_IDENTIFICATION:
+            return identificationSize((const struct Identification *)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_STATE:
+            return stateSize((const struct State*)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_READ:
+        case HEADER_ASSIGNMENT_WRITE:
+            return readWriteSize((const struct Read_Write *)header->pkg);
+            break;
+        case HEADER_ASSIGNMENT_TECH:
+            return techSize((const struct Tech *)header->pkg);
+            break;
+        default:
+            break;
+        }
     }
 
     return 0;
@@ -51,18 +61,20 @@ uint64_t headerDataSize(const header_t *header)
 uint64_t headerSize(const header_t *header)
 {
     if (header == NULL)
+    {
+        RETURN_WARNING;
         return 0;
-
+    }
     return HEADER_SIZE + headerDataSize(header);
 }
 
 uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize)
 {
-    if ( header == NULL || outData == NULL)
+    if (header == NULL || outData == NULL || (outDataSize < headerSize(header)))
+    {
+        RETURN_WARNING;
         return 0;
-
-    if (outDataSize < headerSize(header))
-        return 0;
+    }
 
     uint64_t result = HEADER_SIZE;
 
@@ -147,7 +159,10 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
     uint64_t maxDatainFrame = buffSize - offsetSize;
 
     if (maxDatainFrame == 0 || buffSize < offsetSize)
+    {
+        RETURN_WARNING;
         return 0;
+    }
 
     uint64_t result = sendDataSize / maxDatainFrame;
 
@@ -155,4 +170,39 @@ uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize)
         ++result;
 
     return result;
+}
+
+header_t *headerCopy(header_t *header)
+{
+    header_t *copy = NULL;
+
+    if (header == NULL)
+        return copy;
+
+    copy = calloc(1, sizeof(header_t));
+    if (copy == NULL)
+        return copy;
+
+    memcpy(copy, header, sizeof(header_t));
+
+    copy->pkg = NULL;
+
+
+    if (copy->assignment == HEADER_ASSIGNMENT_IDENTIFICATION)
+        copy->pkg = identificationCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_STATE)
+        copy->pkg = stateCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_READ || header->assignment == HEADER_ASSIGNMENT_WRITE)
+        copy->pkg = readWriteCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_TECH)
+        copy->pkg = techCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_HOST_BROADCAST)
+        copy->pkg = hostBroadCastCopy(header->pkg);
+    else if (header->assignment == HEADER_ASSIGNMENT_LOG_DATA)
+        copy->pkg = logDataCopy(header->pkg);
+    else
+        copy->pkg = NULL;
+
+
+    return copy;
 }

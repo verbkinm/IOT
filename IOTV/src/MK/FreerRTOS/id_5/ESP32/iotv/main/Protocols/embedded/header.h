@@ -30,6 +30,8 @@ uint64_t headerCheckSum(const header_t *header);
 uint64_t headerToData(const header_t *header, char *outData, uint64_t outDataSize);
 void clearHeader(header_t *header);
 
+header_t *headerCopy(header_t *header);
+
 uint64_t pkgCount(uint64_t sendDataSize, uint64_t buffSize, uint64_t offsetSize);
 
 #ifdef __cplusplus
