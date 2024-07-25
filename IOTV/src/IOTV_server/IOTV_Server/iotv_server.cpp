@@ -511,7 +511,7 @@ void IOTV_Server::slotClientToServerQueryWrite(RAII_Header raii_header)
     if (raii_header.header() == nullptr || raii_header.header()->pkg == nullptr)
         return;
 
-    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(raii_header.header()->pkg);
+    const read_write_t *pkg = static_cast<const read_write_t *>(raii_header.header()->pkg);
     if (pkg == nullptr)
         return;
 

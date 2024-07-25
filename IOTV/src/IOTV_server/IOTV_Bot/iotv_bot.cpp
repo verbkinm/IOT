@@ -154,7 +154,7 @@ void IOTV_Bot::slotTimer()
     }
     catch (...)
     {
-        std::cerr << "exeption\n";
+        std::cerr << "tgbot exeption\n";
     }
 
     _timer->start();

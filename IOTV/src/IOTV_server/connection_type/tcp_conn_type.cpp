@@ -21,7 +21,7 @@ TCP_conn_type::~TCP_conn_type()
 //    qDebug() << "destruct TCP_conn_type";
 }
 
-qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
+qint64 TCP_conn_type::write(const char *data, qint64 size)
 {
     if (_tcpSocket->state() != QAbstractSocket::ConnectedState)
         return 0;
@@ -36,14 +36,7 @@ qint64 TCP_conn_type::write(const QByteArray &data, qint64 size)
 //               Log::Write_Flag::FILE_STDOUT,
 //               ServerLog::DEFAULT_LOG_FILENAME);
 
-    if (size == -1)
-    {
-        auto s = _tcpSocket->write(data);
-        _tcpSocket->flush();
-        return s;
-    }
-
-    auto s = _tcpSocket->write(data.data(), size);
+    auto s = _tcpSocket->write(data, size);
     _tcpSocket->flush();
     return s;
 }
@@ -83,7 +76,7 @@ void TCP_conn_type::slotSocketDisconnected()
 {
     expectedDataSize = 0;
 
-    Log::write(CATEGORY::NET, _name + "disconnected from " + _tcpSocket->peerAddress().toString()
+    Log::write(CATEGORY::NET, _name + " disconnected from " + _tcpSocket->peerAddress().toString()
                    + ":" + QString::number(_tcpSocket->peerPort()),
                Log::Write_Flag::FILE_STDOUT,
                ServerLog::DEFAULT_LOG_FILENAME);

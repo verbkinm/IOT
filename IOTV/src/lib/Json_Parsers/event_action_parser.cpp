@@ -11,6 +11,7 @@
 #include "actions/iotv_action_data_tx.h"
 #include "actions/iotv_action_data_tx_ref.h"
 //#include "actions/iotv_action_msg.h"
+#include "log.h"
 
 //<Имя группы, <Имя события-действия, <Событие, Действие>>>
 std::pair<

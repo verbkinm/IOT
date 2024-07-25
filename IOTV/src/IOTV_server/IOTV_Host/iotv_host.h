@@ -11,6 +11,7 @@
 #include "raii_header.h"
 #include "raii_iot.h"
 #include "fragmentcollector_identification.h"
+#include "fragmentcollector_read.h"
 
 #include "connection_type/tcp_conn_type.h"
 #include "connection_type/tcp_reverse_conn_type.h"
@@ -66,6 +67,8 @@ public:
     }
 
 private:
+    static uint64_t writeFunc(char *data, uint64_t size, void *obj);
+
     void shareConstructor();
     qint64 read(uint8_t channelNumber, readwrite_flag_t flags = ReadWrite_FLAGS_NONE);
     qint64 readAll();
@@ -79,7 +82,7 @@ private:
     void responceWrite(RAII_iot raii_iot) const;
     void responcePingPong(RAII_iot raii_iot);
 
-    std::unique_ptr<Base_conn_type> _conn_type;
+    std::shared_ptr<Base_conn_type> _conn_type;
     QDir _logDir;
     QTimer _timerReRead, _timerState, _timerPing;
 
@@ -96,6 +99,7 @@ private:
 
     QByteArray _buff;
     FragmentCollector_Identification _fragIdent;
+    Fragment_Collector_Read _fragRead;
 
 public slots:
     void slotDisconnected();

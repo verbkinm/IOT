@@ -6,7 +6,7 @@ File_conn_type::File_conn_type(const QString &name, const QString& fileName, QOb
 //    connect(&_reconnectTimer, &QTimer::timeout, this, &File_conn_type::connectToHost);
 }
 
-qint64 File_conn_type::write(const QByteArray &data, qint64 size)
+qint64 File_conn_type::write(const char *data, qint64 size)
 {
     Q_UNUSED(data);
     Q_UNUSED(size);

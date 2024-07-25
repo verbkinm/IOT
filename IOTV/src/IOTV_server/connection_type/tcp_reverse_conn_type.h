@@ -11,7 +11,7 @@ public:
     ~TCP_REVERSE_conn_type();
 
 public:
-    virtual qint64 write(const QByteArray &data, qint64 size) override;
+    virtual qint64 write(const char *data, qint64 size) override;
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 

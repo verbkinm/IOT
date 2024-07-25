@@ -30,11 +30,11 @@ public:
     virtual bool event(QEvent *event) override;
 
 private:
+    static uint64_t writeFunc(char *data, uint64_t size, void *obj);
+
     void processQueryLogData(RAII_Header header, QString fileName, bool hostError, std::atomic_int &run);
 
     void write(const QByteArray &data, qint64 size = -1) const;
-
-    static uint64_t writeFunc(char *data, uint64_t size, void *obj);
 
     QTcpSocket *_socket;
 

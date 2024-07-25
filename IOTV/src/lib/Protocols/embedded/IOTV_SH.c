@@ -65,7 +65,7 @@ uint64_t responseIdentificationData(char *outData, uint64_t outDataSize, const i
         if (sizeLeft < rawDataPart)
             rawDataPart = sizeLeft;
 
-        struct Identification ident = {
+        identification_t ident = {
             .id = iot->id,
             .descriptionSize = rawDataPart,
             .nameSize = iot->nameSize,
@@ -131,7 +131,7 @@ uint64_t responseReadData(char *outData, uint64_t outDataSize, const iotv_obj_t 
         return 0;
     }
 
-    struct Read_Write *rwPkg = ((struct Read_Write *)head->pkg);
+    read_write_t *rwPkg = ((read_write_t *)head->pkg);
     uint64_t pkgsCount;
     uint64_t totalSendByte = 0;
 
@@ -170,7 +170,7 @@ uint64_t responseReadData(char *outData, uint64_t outDataSize, const iotv_obj_t 
         char *it = NULL;
         uint64_t dataReadSize = dataPart(&it, i, outDataSize - (HEADER_SIZE + READ_WRITE_SIZE + iot->nameSize), iot, rwPkg->channelNumber);
 
-        struct Read_Write readWrite = {
+        read_write_t readWrite = {
             .dataSize = dataReadSize,
             .nameSize = iot->nameSize,
             .channelNumber = rwPkg->channelNumber,
@@ -206,7 +206,7 @@ uint64_t responseWriteData(char *outData, uint64_t outDataSize, iotv_obj_t *iot,
         return 0;
     }
 
-    struct Read_Write *ptrReadWrite = ((struct Read_Write *)head->pkg);
+    read_write_t *ptrReadWrite = ((read_write_t *)head->pkg);
 
     if (iot->readChannel == NULL
         || iot->numberWriteChannel <= ptrReadWrite->channelNumber
@@ -259,7 +259,7 @@ uint64_t responseStateData(char *outData, uint64_t outDataSize, const iotv_obj_t
         return 0;
     }
 
-    struct State state = {
+    state_pkg_t state = {
         .nameSize = iot->nameSize,
         .state = iot->state,
         .flags = rw_flags,
@@ -283,7 +283,7 @@ uint64_t responseStateData(char *outData, uint64_t outDataSize, const iotv_obj_t
     return writeFunc(outData, resultSize, obj);
 }
 
-uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
+uint64_t queryIdentificationData(char *outData, uint64_t outDataSize, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, header_flag_t header_flags)
 {
     if (outData == NULL)
     {
@@ -295,17 +295,18 @@ uint64_t queryIdentificationData(char *outData, uint64_t dataSize)
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_IDENTIFICATION,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = 0,
         .pkg = NULL
     };
 
-    return headerToData(&header, outData, dataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
-uint64_t queryPingData(char *outData, uint64_t dataSize)
+uint64_t queryPingData(char *outData, uint64_t outDataSize, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, header_flag_t header_flags)
 {
     if (outData == NULL)
     {
@@ -317,17 +318,19 @@ uint64_t queryPingData(char *outData, uint64_t dataSize)
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_PING_PONG,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = 0,
         .pkg = NULL
     };
 
-    return headerToData(&header, outData, dataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
-uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize)
+uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, const char *dataToWrite, uint32_t dataWriteSize,
+                        uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, readwrite_flag_t readwrite_flag, header_flag_t header_flags)
 {
     if (outData == NULL || dataToWrite == NULL)
     {
@@ -335,11 +338,11 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
         return 0;
     }
 
-    struct Read_Write readWrite = {
+    read_write_t readWrite = {
         .dataSize = dataWriteSize,
         .nameSize = (uint8_t)strlen(name),
         .channelNumber = channelNumber,
-        .flags =ReadWrite_FLAGS_NONE,
+        .flags = readwrite_flag,
         .name = (char *)name,
         .data = (char *)dataToWrite
     };
@@ -348,17 +351,19 @@ uint64_t queryWriteData(char *outData, uint64_t outDataSize, const char *name, u
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_WRITE,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = readWriteSize(&readWrite),
         .pkg = &readWrite,
     };
 
-    return headerToData(&header, outData, outDataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
-uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber, uint8_t flags)
+uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, uint8_t channelNumber,
+                       uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, readwrite_flag_t readwrite_flag, header_flag_t header_flags)
 {
     if (outData == NULL)
     {
@@ -366,11 +371,11 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
         return 0;
     }
 
-    struct Read_Write readWrite = {
+    read_write_t readWrite = {
         .dataSize = 0,
         .nameSize = (uint8_t)strlen(name),
         .channelNumber = channelNumber,
-        .flags = flags,
+        .flags = readwrite_flag,
         .name = (char *)name,
         .data = NULL
     };
@@ -379,17 +384,19 @@ uint64_t queryReadData(char *outData, uint64_t outDataSize, const char *name, ui
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_READ,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = readWriteSize(&readWrite),
         .pkg = &readWrite,
     };
 
-    return headerToData(&header, outData, outDataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
-uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
+uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name,
+                        uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, state_flag_t state_flag, header_flag_t header_flags)
 {
     if (outData == NULL)
     {
@@ -397,10 +404,10 @@ uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
         return 0;
     }
 
-    struct State state = {
+    state_pkg_t state = {
         .nameSize = (uint8_t)strlen(name),
         .state = State_STATE_OFFLINE,
-        .flags = STATE_FLAGS_NONE,
+        .flags = state_flag,
         .dataSize = 0,
         .name = (char *)name,
         .data = NULL
@@ -410,22 +417,26 @@ uint64_t queryStateData(char *outData, uint64_t outDataSize, const char *name)
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_STATE,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = stateSize(&state),
         .pkg = &state
     };
 
-    return headerToData(&header, outData, outDataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
 iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
 {
     if (header == NULL || header->pkg == NULL)
+    {
+        RETURN_WARNING;
         return NULL;
+    }
 
-    struct Identification *ptrIdentification = ((struct Identification *)header->pkg);
+    identification_t *ptrIdentification = ((identification_t *)header->pkg);
 
     uint8_t nameSize = ptrIdentification->nameSize;
     uint16_t descriptionSize = ptrIdentification->descriptionSize;
@@ -435,7 +446,10 @@ iotv_obj_t *createIotFromHeaderIdentification(const header_t *header)
 
     iotv_obj_t *ptrIot = (iotv_obj_t *)malloc(sizeof(iotv_obj_t));
     if (ptrIot == NULL)
+    {
+        RETURN_WARNING;
         return NULL;
+    }
 
     iotv_obj_t iot = {
         .id = ptrIdentification->id,
@@ -500,7 +514,7 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *rawData, 
         return 0;
     }
 
-    const struct Tech *pkg = (const struct Tech *)(head->pkg);
+    const tech_t *pkg = (const tech_t *)(head->pkg);
     uint64_t pkgsCount;
     uint64_t totalSendByte = 0;
 
@@ -523,7 +537,7 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *rawData, 
         if (sizeLeft < rawDataPart)
             rawDataPart = sizeLeft;
 
-        struct Tech tech;
+        tech_t tech;
         memcpy(&tech, pkg, sizeof(tech));
         tech.dataSize = rawDataPart;
         tech.data = (uint8_t *)it;
@@ -549,7 +563,8 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *rawData, 
     return totalSendByte;
 }
 
-uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg, uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
+uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outData, uint64_t outDataSize, const struct Log_Data *pkg,
+                         uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj)
 {
     if (outData == NULL || outDataSize == 0 || pkg == NULL || writeFunc == NULL)
     {
@@ -560,7 +575,7 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
     // Пустые данные
     if (rawData == NULL || rawDataSize == 0)
     {
-        struct Log_Data logData;
+        log_data_t logData;
         memcpy(&logData, pkg, sizeof(logData));
         logData.dataSize = 0;
         logData.data = NULL;
@@ -602,7 +617,7 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
         if (sizeLeft < rawDataPart)
             rawDataPart = sizeLeft;
 
-        struct Log_Data logData;
+        log_data_t logData;
         memcpy(&logData, pkg, sizeof(logData));
         logData.dataSize = rawDataPart;
         logData.data = it;
@@ -627,7 +642,8 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
     return totalSendByte;
 }
 
-uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_t inDataSize, uint8_t type)
+uint64_t queryTech(char *outData, uint64_t outDataSize, const char *inData, uint64_t inDataSize, tech_type_t type,
+                   uint64_t (*writeFunc)(char *, uint64_t, void *), void *obj, tech_flag_t tech_flag, header_flag_t header_flags)
 {
     if (outData == NULL || (inData == NULL && inDataSize > 0))
     {
@@ -635,8 +651,8 @@ uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_
         return 0;
     }
 
-    struct Tech tech = {
-        .flags = Tech_FLAGS_NONE,
+    tech_t tech = {
+        .flags = tech_flag,
         .type = type,
         .dataSize = inDataSize,
         .data = (uint8_t *)inData
@@ -646,14 +662,15 @@ uint64_t queryTech(char *outData, uint64_t dataSize, const char *inData, uint64_
         .version = 2,
         .type = HEADER_TYPE_REQUEST,
         .assignment = HEADER_ASSIGNMENT_TECH,
-        .flags = HEADER_FLAGS_NONE,
+        .flags = header_flags,
         .fragment = 1,
         .fragments = 1,
         .dataSize = techSize(&tech),
         .pkg = &tech
     };
 
-    return headerToData(&header, outData, dataSize);
+    uint64_t resultSize = headerToData(&header, outData, outDataSize);
+    return writeFunc(outData, resultSize, obj);
 }
 
 static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t *iot, const header_t *header)
@@ -664,7 +681,7 @@ static uint64_t responceReadWritePkgCount(uint64_t dataOutSize, const iotv_obj_t
         return 0;
     }
 
-    struct Read_Write *ptrReadWrite = ((struct Read_Write *)header->pkg);
+    read_write_t *ptrReadWrite = ((read_write_t *)header->pkg);
     if (iot->numberReadChannel <= ptrReadWrite->channelNumber)
     {
         RETURN_WARNING;
@@ -684,7 +701,7 @@ uint64_t queryLogData(char *outData, uint64_t outDataSize, const char *name,
         return 0;
     }
 
-    struct Log_Data logData = {
+    log_data_t logData = {
         .startInterval = startInterval,
         .endInterval = endInterval,
         .interval = interval,

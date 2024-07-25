@@ -31,7 +31,7 @@ public:
 
     void setAddress(const QString &address);
 
-    virtual qint64 write(const QByteArray &data, qint64 size = -1) = 0;
+    virtual qint64 write(const char *data, qint64 size) = 0;
     virtual void connectToHost() = 0;
     virtual void disconnectFromHost() = 0;
 

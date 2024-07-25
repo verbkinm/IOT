@@ -22,7 +22,7 @@ public:
 
     void setSettingsPort(const SetingsPort &settingsPort);
 
-    virtual qint64 write(const QByteArray &data, qint64 size = -1) override;
+    virtual qint64 write(const char *data, qint64 size) override;
     virtual void connectToHost() override;
     virtual void disconnectFromHost() override;
 

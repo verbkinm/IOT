@@ -1,4 +1,5 @@
 #include "channel.h"
+#include "log.h"
 
 void Channel::addSubchannel(const Raw &data)
 {

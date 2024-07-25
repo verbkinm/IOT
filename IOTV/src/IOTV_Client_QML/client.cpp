@@ -30,7 +30,7 @@
 
 // На arm BUFSIZ = 1024
 #define BUFSIZ 8192
-#define FRAGMENTS_IDENTIFICATION_MAX_SIZE (BUFSIZ * 10)
+#define FRAGMENTS_BUF_SIZE (BUFSIZ * 10)
 
 Client::Client(QObject *parent): QObject{parent},
     _counterPing(0)
@@ -110,6 +110,16 @@ qint64 Client::write(const QByteArray &data)
     return _socket.write(data);
 }
 
+uint64_t Client::writeFunc(char *data, uint64_t size, void *obj)
+{
+    QTcpSocket *socket = static_cast<QTcpSocket *>(obj);
+
+    if (socket == nullptr || data == nullptr)
+        return 0;
+
+    return socket->write(data, size);
+}
+
 //QString Client::realName(const QString &devName) const
 //{
 //    if (_devices.contains(devName))
@@ -175,9 +185,7 @@ void Client::slotOpenReadStream(int channel)
         return;
 
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
-
-    write({outData, static_cast<int>(size)});
+    queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, writeFunc, &_socket, ReadWrite_FLAGS_OPEN_STREAM, HEADER_FLAGS_NONE);
 }
 
 void Client::slotCloseReadStream(int channel)
@@ -188,9 +196,7 @@ void Client::slotCloseReadStream(int channel)
         return;
 
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
-
-    write({outData, static_cast<int>(size)});
+    queryReadData(outData, BUFSIZ, dev->getName().toStdString().c_str(), channel, writeFunc, &_socket, ReadWrite_FLAGS_CLOSE_STREAM, HEADER_FLAGS_NONE);
 }
 
 QList<QString> Client::allHostAliasName() const
@@ -534,25 +540,19 @@ void Client::deleteObject(QObject *obj) const
 void Client::queryIdentification()
 {
     char outData[BUFSIZ];
-    auto size = queryIdentificationData(outData, BUFSIZ);
-
-    write({outData, static_cast<int>(size)});
+    queryIdentificationData(outData, BUFSIZ, writeFunc, &_socket, HEADER_FLAGS_NONE);
 }
 
 void Client::queryState(const QString &name)
 {
     char outData[BUFSIZ];
-    auto size = queryStateData(outData, BUFSIZ, name.toStdString().c_str());
-
-    write({outData, static_cast<int>(size)});
+    queryStateData(outData, BUFSIZ, name.toStdString().c_str(), writeFunc, &_socket, STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void Client::queryRead(const QString &name, uint8_t channelNumber)
 {
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber, ReadWrite_FLAGS_NONE);
-
-    write({outData, static_cast<int>(size)});
+    queryReadData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber, writeFunc, &_socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint64_t endInterval, uint32_t interval, uint8_t channelNumber, log_data_flag_t flags)
@@ -566,10 +566,8 @@ void Client::queryLogDataHost(const QString &name, uint64_t startInterval, uint6
 void Client::queryWrite(const QString &name, uint8_t channelNumber, const QByteArray &data)
 {
     char outData[BUFSIZ];
-    auto size = queryWriteData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber,
-                               data.data(), data.size());
-
-    write({outData, static_cast<int>(size)});
+    queryWriteData(outData, BUFSIZ, name.toStdString().c_str(), channelNumber, data.data(), data.size(),
+                               writeFunc, &_socket, ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void Client::queryPing()
@@ -577,9 +575,7 @@ void Client::queryPing()
     _counterPing++;
 
     char outData[BUFSIZ];
-    auto size = queryPingData(outData, BUFSIZ);
-
-    write({outData, static_cast<int>(size)});
+    queryPingData(outData, BUFSIZ, writeFunc, &_socket, HEADER_FLAGS_NONE);
 
 //    if (_counterPing > COUNTER_PING_COUNT)
 //    {
@@ -592,9 +588,7 @@ void Client::queryPing()
 void Client::queryTech(tech_type_t type, char *data, uint64_t dataSize)
 {
     char outData[BUFSIZ];
-    auto size = ::queryTech(outData, BUFSIZ, data, dataSize, type);
-
-    write({outData, static_cast<int>(size)});
+    ::queryTech(outData, BUFSIZ, data, dataSize, type, writeFunc, &_socket, Tech_FLAGS_NONE, HEADER_FLAGS_NONE);
 }
 
 void Client::responceIdentification(RAII_Header raii_header)
@@ -609,7 +603,7 @@ void Client::responceIdentification(RAII_Header raii_header)
         return;
     }
 
-    const Identification *pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+    const identification_t *pkg = static_cast<const identification_t *>(raii_header.header()->pkg);
     if (pkg == nullptr)
         return;
 
@@ -618,7 +612,7 @@ void Client::responceIdentification(RAII_Header raii_header)
     if (raii_header.header()->fragments > 1)
     {
         if (!_fragIdent.contains(name))
-            _fragIdent.emplace(name, FRAGMENTS_IDENTIFICATION_MAX_SIZE);
+            _fragIdent.emplace(name, FRAGMENTS_BUF_SIZE);
 
         auto fmi = _fragIdent.find(name);
         if (fmi == _fragIdent.end())
@@ -704,7 +698,7 @@ void Client::responceRead(const RAII_Header &raii_header)
     Q_ASSERT(header != NULL);
     Q_ASSERT(header->pkg != NULL);
 
-    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(header->pkg);
+    const read_write_t *pkg = static_cast<const read_write_t *>(header->pkg);
     if (pkg == nullptr)
         return;
 
@@ -768,6 +762,7 @@ void Client::responceReadStream(const RAII_Header &raii_header)
 
 void Client::responceWrite(const RAII_Header &raii_header) const
 {
+    Q_UNUSED(raii_header);
 //    Q_ASSERT(raii_header != NULL);
 //    Q_ASSERT(raii_header->pkg != NULL);
 
@@ -776,6 +771,7 @@ void Client::responceWrite(const RAII_Header &raii_header) const
 
 void Client::responcePingPoing(const RAII_Header &raii_header)
 {
+    Q_UNUSED(raii_header);
 //    Q_ASSERT(raii_header != NULL);
     _counterPing = 0;
 }
@@ -837,7 +833,7 @@ void Client::responceLogData(const RAII_Header &raii_header)
     if (pkg->dataSize > 0)
     {
 //        QApplication::processEvents(QEventLoop::AllEvents);
-        _devices[name].addDataLog(pkg->channelNumber, {pkg->data, pkg->dataSize});
+        _devices[name].addDataLog(pkg->channelNumber, {pkg->data, static_cast<qsizetype>(pkg->dataSize)});
     }
 
     if (header->fragment == header->fragments)
@@ -879,7 +875,6 @@ void Client::slotReciveData()
         if (error == true)
         {
             _recivedBuff.clear();
-            clearHeader(header);
             break;
         }
 

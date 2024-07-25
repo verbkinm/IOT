@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(iotv_server VERSION 0.23 LANGUAGES C CXX)
+project(iotv_server VERSION 0.24 LANGUAGES C CXX)
+project(iotv_server_${PROJECT_VERSION})
+
+message("PROJECT_NAME: " ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,6 +71,7 @@ add_executable(${PROJECT_NAME}
     ../lib/raw/raw.cpp                                  ../lib/raw/raw.h
     ../lib/fragmentData/fragmentcollector.cpp           ../lib/fragmentData/fragmentcollector.h
     ../lib/fragmentData/fragmentcollector_identification.cpp ../lib/fragmentData/fragmentcollector_identification.h
+    ../lib/fragmentData/fragmentcollector_read.cpp      ../lib/fragmentData/fragmentcollector_read.h
     IOTV_Client/iotv_client.cpp                         IOTV_Client/iotv_client.h
     IOTV_Host/iotv_host.cpp                             IOTV_Host/iotv_host.h
     IOTV_Server/iotv_server.cpp                         IOTV_Server/iotv_server.h

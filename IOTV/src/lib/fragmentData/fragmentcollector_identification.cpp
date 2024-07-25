@@ -71,8 +71,12 @@ RAII_Header FragmentCollector_Identification::pkg()
         }
 
         memcpy((result_ident_pkg->description + offset), ident_pkg->description, ident_pkg->descriptionSize);
+//        free(ident_pkg->description);
+//        ident_pkg->description = nullptr;
+//        ident_pkg->descriptionSize = 0;
         offset += ident_pkg->descriptionSize;
     }
+//    clear();
 
     result_raii_header.header()->dataSize = IDENTIFICATION_SIZE + totalDescriptionSize;
 

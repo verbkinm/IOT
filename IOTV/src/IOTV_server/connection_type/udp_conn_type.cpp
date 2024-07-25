@@ -34,7 +34,7 @@ Udp_conn_type::~Udp_conn_type()
 //    qDebug() << "udp conn type destruct";
 }
 
-qint64 Udp_conn_type::write(const QByteArray &data, qint64 size)
+qint64 Udp_conn_type::write(const char *data, qint64 size)
 {
     //    Log::write(_name +
     //               ": data transmit to " +
@@ -46,10 +46,7 @@ qint64 Udp_conn_type::write(const QByteArray &data, qint64 size)
     //               Log::Write_Flag::FILE_STDOUT,
     //               ServerLog::DEFAULT_LOG_FILENAME);
 
-    if (size == -1)
-        return _udpSocket->writeDatagram(data, QHostAddress(_address), _udpPort);
-
-    return _udpSocket->writeDatagram(data.data(), size, QHostAddress(_address), _udpPort);
+    return _udpSocket->writeDatagram(data, size, QHostAddress(_address), _udpPort);
 }
 
 void Udp_conn_type::connectToHost()

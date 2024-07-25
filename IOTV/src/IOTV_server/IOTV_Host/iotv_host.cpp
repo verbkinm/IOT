@@ -2,15 +2,16 @@
 #include "qthread.h"
 #include "raii_iot.h"
 
-
 #include <QFileInfo>
 #include <QDate>
+
+#define FRAGMENTS_BUF_SIZE (BUFSIZ * 10)
 
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)),
     _settingsData(settingsData),
     _counterState(0), _counterPing(0),
-    _fragIdent(BUFSIZ * 10)
+    _fragIdent(FRAGMENTS_BUF_SIZE), _fragRead(FRAGMENTS_BUF_SIZE)
 {
     shareConstructor();
     makeConnType();
@@ -19,7 +20,7 @@ IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, Q
 IOTV_Host::IOTV_Host(const std::unordered_map<QString, QString> &settingsData, QTcpSocket *reverse_socket, QObject* parent) : Base_Host(0, parent),
     _logDir(settingsData.at(hostField::logDir)), _settingsData(settingsData),
     _counterState(0), _counterPing(0),
-    _fragIdent(BUFSIZ * 10)
+    _fragIdent(FRAGMENTS_BUF_SIZE), _fragRead(FRAGMENTS_BUF_SIZE)
 {
     shareConstructor();
     _conn_type = std::make_unique<TCP_REVERSE_conn_type>(_settingsData[hostField::name], reverse_socket, this);
@@ -64,17 +65,27 @@ void IOTV_Host::responceIdentification(RAII_Header raii_header)
     if (raii_header.header() == nullptr || raii_header.header()->pkg == NULL)
         return;
 
-    const Identification *pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+    const identification_t *pkg = static_cast<const identification_t *>(raii_header.header()->pkg);
     if (pkg == nullptr)
         return;
 
     if (raii_header.header()->fragments > 1)
     {
         _fragIdent.addPkg(raii_header);
+        if (_fragIdent.overflow())
+        {
+            Log::write(CATEGORY::WARNING, "Переполнение буфера менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            return;
+        }
+        if (_fragIdent.error())
+        {
+            Log::write(CATEGORY::WARNING, "Ошибка менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            return;
+        }
         if (_fragIdent.isComplete())
         {
             raii_header = _fragIdent.pkg();
-            pkg = static_cast<const Identification *>(raii_header.header()->pkg);
+            pkg = static_cast<const identification_t *>(raii_header.header()->pkg);
             if (pkg == nullptr)
                 return;
         }
@@ -120,7 +131,7 @@ void IOTV_Host::responceRead(RAII_Header raii_header)
     if (raii_header.header() == nullptr || raii_header.header()->pkg == NULL)
         return;
 
-    const struct Read_Write *pkg = static_cast<const struct Read_Write *>(raii_header.header()->pkg);
+    const read_write_t *pkg = static_cast<const read_write_t *>(raii_header.header()->pkg);
     if (pkg == nullptr)
         return;
 
@@ -130,6 +141,30 @@ void IOTV_Host::responceRead(RAII_Header raii_header)
     {
         emit signalStreamRead(raii_header);
         return;
+    }
+
+    if (raii_header.header()->fragments > 1)
+    {
+        _fragRead.addPkg(raii_header);
+        if (_fragRead.overflow())
+        {
+            Log::write(CATEGORY::WARNING, "Переполнение буфера менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            return;
+        }
+        if (_fragRead.error())
+        {
+            Log::write(CATEGORY::WARNING, "Ошибка менеджера фрагментов пакета.", Log::Write_Flag::STDOUT, "");
+            return;
+        }
+        if (_fragRead.isComplete())
+        {
+            raii_header = _fragRead.pkg();
+            pkg = static_cast<const read_write_t *>(raii_header.header()->pkg);
+            if (pkg == nullptr)
+                return;
+        }
+        else
+            return;
     }
 
     QByteArray data(pkg->data, static_cast<qsizetype>(pkg->dataSize));
@@ -165,9 +200,15 @@ void IOTV_Host::responcePingPong(RAII_iot raii_iot)
 qint64 IOTV_Host::read(uint8_t channelNumber, readwrite_flag_t flags)
 {
     char outData[BUFSIZ];
-    auto size = queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, flags);
 
-    return writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    // Перехват любой отправки данных, если id ещё не установлен
+    if (getId() == 0)
+    {
+        queryIdentificationData(outData, BUFSIZ, writeFunc, _conn_type.get(), HEADER_FLAGS_NONE);
+        return -1;
+    }
+
+    return queryReadData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, writeFunc, _conn_type.get(), flags, HEADER_FLAGS_NONE);
 }
 
 qint64 IOTV_Host::readAll()
@@ -181,13 +222,12 @@ qint64 IOTV_Host::write(uint8_t channelNumber, QByteArray data)
         return -1;
 
     char outData[BUFSIZ];
-    auto size = queryWriteData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, data.data(), data.size());
-
-    auto resSize = writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    auto size = queryWriteData(outData, BUFSIZ, getName().toStdString().c_str(), channelNumber, data.data(), data.size(),
+                               writeFunc, _conn_type.get(), ReadWrite_FLAGS_NONE, HEADER_FLAGS_NONE);
 
     emit signalDataTX(channelNumber, data);
 
-    return resSize;
+    return size;
 }
 
 QByteArray IOTV_Host::readData(uint8_t channelNumber) const
@@ -201,8 +241,7 @@ qint64 IOTV_Host::writeToRemoteHost(const QByteArray &data, qint64 size)
     if (getId() == 0)
     {
         char outData[BUFSIZ];
-        auto sizeData = queryIdentificationData(outData, BUFSIZ);
-        return _conn_type->write({outData, static_cast<int>(sizeData)}, sizeData);
+        return queryIdentificationData(outData, BUFSIZ, writeFunc, _conn_type.get(), HEADER_FLAGS_NONE);
     }
 
     return _conn_type->write(data, size);
@@ -356,8 +395,7 @@ bool IOTV_Host::addStreamRead(uint8_t channel, const QString &client)
         _streamRead[channel] = {client};
         result = true;
 
-        auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_OPEN_STREAM);
-        writeToRemoteHost({outData, static_cast<int>(size)}, size);
+        queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, writeFunc, _conn_type.get(), ReadWrite_FLAGS_OPEN_STREAM, HEADER_FLAGS_NONE);
     }
     else
         result = _streamRead[channel].insert(client).second;
@@ -383,14 +421,19 @@ void IOTV_Host::removeStreamRead(uint8_t channel, const QString &client)
     if (_streamRead[channel].size() == 0)
     {
         _streamRead.erase(channel);
-        auto size = queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, ReadWrite_FLAGS_CLOSE_STREAM);
-        writeToRemoteHost({outData, static_cast<int>(size)}, size);
+        queryReadData(outData, BUFSIZ, this->getName().toStdString().c_str(), channel, writeFunc, _conn_type.get(), ReadWrite_FLAGS_CLOSE_STREAM, HEADER_FLAGS_NONE);
     }
 }
 
 QString IOTV_Host::getAddress() const
 {
     return _conn_type->getAddress();
+}
+
+uint64_t IOTV_Host::writeFunc(char *data, uint64_t size, void *obj)
+{
+    Base_conn_type *conn_type = static_cast<Base_conn_type *>(obj);
+    return conn_type->write(data, size);
 }
 
 //void IOTV_Host::removeStreamWrite(uint8_t channel)
@@ -409,8 +452,7 @@ void IOTV_Host::slotStateTimeOut()
     ++_counterState;
 
     char outData[BUFSIZ];
-    auto size = queryStateData(outData, BUFSIZ, getName().toStdString().c_str());
-    writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    queryStateData(outData, BUFSIZ, getName().toStdString().c_str(), writeFunc, _conn_type.get(), STATE_FLAGS_NONE, HEADER_FLAGS_NONE);
 
     if (_counterState > COUNTER_STATE_COUNT)
     {
@@ -425,8 +467,7 @@ void IOTV_Host::slotPingTimeOut()
     ++_counterPing;
 
     char outData[BUFSIZ];
-    auto size = queryPingData(outData, BUFSIZ);
-    writeToRemoteHost({outData, static_cast<int>(size)}, size);
+    queryPingData(outData, BUFSIZ, writeFunc, _conn_type.get(), HEADER_FLAGS_NONE);
 
     if (_counterPing > COUNTER_PING_COUNT)
     {

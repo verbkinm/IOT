@@ -1,6 +1,5 @@
 #include "producer.h"
-#include "qmediarecorder.h"
-
+//#include "qmediarecorder.h"
 
 Producer::Producer(QObject *parent):QObject(parent), _mirrored(false)
 {
@@ -193,6 +192,7 @@ void Producer::slotDataVideoFrame(int w, int h, const QByteArray &data)
 
 void Producer::slotDataAudioFrame(Wrap_QByteArray *data)
 {
+    Q_UNUSED(data);
     //    qDebug() << "write audio data";
     //    devOut->write(data->data());
 }

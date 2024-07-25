@@ -1,7 +1,6 @@
 #pragma once
 
 #include "raw.h"
-#include "log.h"
 
 class Channel
 {

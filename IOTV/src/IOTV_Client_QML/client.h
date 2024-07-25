@@ -133,6 +133,8 @@ private:
 
     qint64 write(const QByteArray &data);
 
+    static uint64_t writeFunc(char *data, uint64_t size, void *obj);
+
 public slots:
     void connectToHost(const QString &address, qint64 port);
     void disconnectFromHost();
