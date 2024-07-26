@@ -46,7 +46,7 @@ uint64_t responseIdentificationData(char *outData, uint64_t outDataSize, const i
     pkgsCount = pkgCount(rawDataSize, outDataSize, HEADER_SIZE + IDENTIFICATION_SIZE + iot->nameSize + iot->numberWriteChannel + iot->numberReadChannel);
 
     // Максимальное значение uint16_t = 0xFFFF. fragments в header не может привышать данное значение!
-    if (pkgsCount > (uint64_t)0xFFFF || pkgsCount == 0)
+    if (pkgsCount > (uint64_t)0xFFFF)
     {
         RETURN_WARNING;
         return 0;
@@ -148,9 +148,7 @@ uint64_t responseReadData(char *outData, uint64_t outDataSize, const iotv_obj_t 
     }
 
     if (rwPkg->flags != ReadWrite_FLAGS_OPEN_STREAM
-        && (iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_RAW
-            //					|| iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_STRING
-            || iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_NONE))
+        && (iot->readChannelType[rwPkg->channelNumber] == DATA_TYPE_RAW))
     {
         RETURN_WARNING;
         return 0;
@@ -159,7 +157,7 @@ uint64_t responseReadData(char *outData, uint64_t outDataSize, const iotv_obj_t 
     pkgsCount = responceReadWritePkgCount(outDataSize, iot, head);
 
     // Максимальное значение uint16_t = 0xFFFF. fragments в header не может привышать данное значение!
-    if (pkgsCount > (uint64_t)0xFFFF || pkgsCount == 0)
+    if (pkgsCount > (uint64_t)0xFFFF)
     {
         RETURN_WARNING;
         return 0;
@@ -524,7 +522,7 @@ uint64_t responseTech(char *outData, uint64_t outDataSize, const char *rawData, 
     pkgsCount = pkgCount(rawDataSize, outDataSize, HEADER_SIZE + TECH_SIZE);
 
     // Максимальное значение uint16_t = 0xFFFF. fragments в header не может привышать данное значение!
-    if (pkgsCount > (uint64_t)0xFFFF || pkgsCount == 0)
+    if (pkgsCount > (uint64_t)0xFFFF)
     {
         RETURN_WARNING;
         return 0;
@@ -604,7 +602,7 @@ uint64_t responseLogData(const char *rawData, uint64_t rawDataSize, char *outDat
     pkgsCount = pkgCount(rawDataSize, outDataSize, HEADER_SIZE + LOG_DATA_SIZE + pkg->nameSize);
 
     // Максимальное значение uint16_t = 0xFFFF. fragments в header не может привышать данное значение!
-    if (pkgsCount > (uint64_t)0xFFFF || pkgsCount == 0)
+    if (pkgsCount > (uint64_t)0xFFFF)
     {
         RETURN_WARNING;
         return 0;
