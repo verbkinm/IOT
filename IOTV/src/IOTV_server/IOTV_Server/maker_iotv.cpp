@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QFileInfo>
 #include <QDir>
+#include <QNetworkDatagram>
 
 void Maker_iotv::deleteReverseSocket(QAbstractSocket *reverse_socket)
 {

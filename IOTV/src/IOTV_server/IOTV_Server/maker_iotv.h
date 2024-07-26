@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QUdpSocket>
+
 #include "IOTV_Host/iotv_host.h"
 #include "IOTV_Client/iotv_client.h"
 #include "IOTV_Bot/iotv_bot.h"

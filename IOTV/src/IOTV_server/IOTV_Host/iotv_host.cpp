@@ -2,6 +2,13 @@
 #include "qthread.h"
 #include "raii_iot.h"
 
+#include "IOTV_SH.h"
+#include "connection_type/tcp_conn_type.h"
+#include "connection_type/tcp_reverse_conn_type.h"
+#include "connection_type/udp_conn_type.h"
+#include "connection_type/com_conn_type.h"
+#include "connection_type/file_conn_type.h"
+
 #include <QFileInfo>
 #include <QDate>
 
@@ -428,6 +435,26 @@ void IOTV_Host::removeStreamRead(uint8_t channel, const QString &client)
 QString IOTV_Host::getAddress() const
 {
     return _conn_type->getAddress();
+}
+
+#include <fstream>
+void IOTV_Host::debug() const
+{
+    std::ofstream file("file");
+    file << "Имя устройства: " << getName().toStdString() << '\n'
+         << "id: " << getId() <<'\n'
+         << "Описание: " << getDescription().toStdString() << '\n';
+
+    file << "Каналы чтения:\n";
+    for (uint8_t i = 0; i < getReadChannelLength(); ++i)
+    {
+        auto pair = getReadChannelDataRaw(i).strData();
+        file << i + 1 << ") " << pair.second.toStdString() << ": " << pair.first.toStdString() << '\n';
+    }
+
+    file << "Каналы записи:\n";
+    for (uint8_t i = 0; i < getWriteChannelLength(); ++i)
+        file << i + 1 << ") " << Raw::strType(getWriteChannelType(i)).toStdString() << '\n';
 }
 
 uint64_t IOTV_Host::writeFunc(char *data, uint64_t size, void *obj)

@@ -2,25 +2,22 @@
 
 #include <QDir>
 #include <QDate>
+#include <QTcpSocket>
+#include <QTimer>
 
 #include <memory>
 #include <mutex>
 #include <map>
 #include <set>
 
+#include "connection_type/base_conn_type.h"
+
 #include "raii_header.h"
 #include "raii_iot.h"
 #include "fragmentcollector_identification.h"
 #include "fragmentcollector_read.h"
 
-#include "connection_type/tcp_conn_type.h"
-#include "connection_type/tcp_reverse_conn_type.h"
-#include "connection_type/udp_conn_type.h"
-#include "connection_type/com_conn_type.h"
-#include "connection_type/file_conn_type.h"
-
 #include "base_host.h"
-#include "IOTV_SH.h"
 
 class IOTV_Host : public Base_Host
 {
@@ -45,6 +42,7 @@ public:
     void removeStreamWrite(uint8_t channel);
 
     QString getAddress() const;
+    void debug() const;
 
     inline QString logName(const QDate &date)
     {

@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(iotv_server VERSION 0.24 LANGUAGES C CXX)
-project(iotv_server_${PROJECT_VERSION})
+#set(PROJECT_NAME ${PROJECT_NAME}_${PROJECT_VERSION})
+#project(iotv_server_${PROJECT_VERSION})
 
-message("PROJECT_NAME: " ${PROJECT_NAME})
+#message("PROJECT_NAME: " ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/build/release)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
@@ -89,6 +90,8 @@ add_executable(${PROJECT_NAME}
     IOTV_Server/config_server.cpp                       IOTV_Server/config_server.h
     IOTV_Server/tg_bot_handler.cpp                      IOTV_Server/tg_bot_handler.h
 )
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}") #Что бы видел config.h
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ../lib/Base_Host

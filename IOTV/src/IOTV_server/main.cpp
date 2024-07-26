@@ -1,6 +1,6 @@
 #include <QCoreApplication>
-#include "config.h"
 
+#include "config.h"
 #include "wrapper.h"
 
 int main(int argc, char *argv[])

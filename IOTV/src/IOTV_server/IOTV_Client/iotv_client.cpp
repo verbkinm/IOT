@@ -1,10 +1,13 @@
 #include "iotv_client.h"
-#include "qthread.h"
+
+#include <QThread>
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <thread>
+
+#include "IOTV_SH.h"
 
 IOTV_Client::IOTV_Client(QTcpSocket *socket, QObject *parent) : QObject(parent),
     _socket(socket),
