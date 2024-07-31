@@ -42,7 +42,7 @@ public:
     void removeStreamWrite(uint8_t channel);
 
     QString getAddress() const;
-    void debug() const;
+    QString debug() const;
 
     inline QString logName(const QDate &date)
     {

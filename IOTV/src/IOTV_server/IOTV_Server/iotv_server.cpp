@@ -35,6 +35,9 @@ IOTV_Server::IOTV_Server(QObject *parent) : QObject(parent),
     readEventActionJson();
 
     connect(&_reconnectTimer, &QTimer::timeout, this, &IOTV_Server::startTCPServers);
+    connect(&_hosts_debug_timer, &QTimer::timeout, this, &IOTV_Server::slotHostsDebug);
+
+    _hosts_debug_timer.start(1000);
 }
 
 IOTV_Server::~IOTV_Server()
@@ -672,4 +675,25 @@ void IOTV_Server::slotBotRequest(int64_t id, QString request)
         tg_bot_handler::cmd_conf_server(_tg_bot, id, _settingsServer.fileName());
     else if (request == TG_BOT::CMD_CONFIG_HOSTS)
         tg_bot_handler::cmd_conf_hosts(_tg_bot, id, _settingsHosts.fileName());
+}
+
+void IOTV_Server::slotHostsDebug()
+{
+//    if (std::filesystem::create_directories("hosts_debug") == false)
+//    {
+//        Log::write(CATEGORY::ERROR, "невозможно создать каталог hosts_debug" , Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+////        disconnect(&_hosts_debug_timer, &QTimer::timeout, this, &IOTV_Server::slotHostsDebug);
+////        return;
+//    }
+
+    for (const auto &pair : _iot_hosts)
+    {
+        IOTV_Host *host = pair.first;
+        QFile file(host->getName() + ".debug");
+
+        if (!file.open(QIODevice::WriteOnly))
+            Log::write(CATEGORY::ERROR, "невозможно создать файл " + host->getName() + ".debug", Log::Write_Flag::FILE_STDERR, ServerLog::DEFAULT_LOG_FILENAME);
+
+        file.write(host->debug().toStdString().c_str());
+    }
 }

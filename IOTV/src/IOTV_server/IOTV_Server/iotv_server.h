@@ -53,7 +53,7 @@ private:
     QSettings _settingsServer, _settingsHosts;
     Config_Server _config;
 
-    QTimer _reconnectTimer;
+    QTimer _reconnectTimer, _hosts_debug_timer;
 
     std::shared_ptr<IOTV_Event_Manager> _eventManager;
 
@@ -91,4 +91,6 @@ private slots:
     void slotAction(QString group, QString name, QString type);
 
     void slotBotRequest(int64_t id, QString request);
+
+    void slotHostsDebug();
 };

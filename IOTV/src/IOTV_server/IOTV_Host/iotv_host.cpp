@@ -11,6 +11,7 @@
 
 #include <QFileInfo>
 #include <QDate>
+#include <QTextStream>
 
 #define FRAGMENTS_BUF_SIZE (BUFSIZ * 10)
 
@@ -437,24 +438,28 @@ QString IOTV_Host::getAddress() const
     return _conn_type->getAddress();
 }
 
-#include <fstream>
-void IOTV_Host::debug() const
+QString IOTV_Host::debug() const
 {
-    std::ofstream file("file");
-    file << "Имя устройства: " << getName().toStdString() << '\n'
-         << "id: " << getId() <<'\n'
-         << "Описание: " << getDescription().toStdString() << '\n';
+    QString str;
+    QTextStream stream(&str);
+    stream << "Имя устройства: " << getName() << '\n'
+             << "id: " << getId() <<'\n'
+             << "Описание: " << getDescription() << '\n'
+             << "Состояние: " << (state() == State_STATE_ONLINE ? "онлайн" : "офлайн") << '\n';
 
-    file << "Каналы чтения:\n";
+    stream << "Каналы чтения:\n";
     for (uint8_t i = 0; i < getReadChannelLength(); ++i)
     {
         auto pair = getReadChannelDataRaw(i).strData();
-        file << i + 1 << ") " << pair.second.toStdString() << ": " << pair.first.toStdString() << '\n';
+        stream << i + 1 << ") " << pair.second << ": " << pair.first << '\n';
     }
 
-    file << "Каналы записи:\n";
+    stream << "Каналы записи:\n";
     for (uint8_t i = 0; i < getWriteChannelLength(); ++i)
-        file << i + 1 << ") " << Raw::strType(getWriteChannelType(i)).toStdString() << '\n';
+        stream << i + 1 << ") " << Raw::strType(getWriteChannelType(i)) << "\n";
+
+    stream << '\n';
+    return str;
 }
 
 uint64_t IOTV_Host::writeFunc(char *data, uint64_t size, void *obj)

@@ -336,18 +336,6 @@ void IOTV_Event_Manager::deleteEvent(const QString &groupName, const QString &ev
             break;
         }
     }
-
-//    for (size_t i = 0; i < _events.size(); i++)
-//    {
-//        if (_events[i] != nullptr)
-//        {
-//            if (_events[i]->group() == groupName && _events[i]->name() == eventName)
-//            {
-//                _events.erase(_events.begin() + i);
-//                --i;
-//            }
-//        }
-//    }
 }
 
 void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &actionName)
@@ -363,29 +351,6 @@ void IOTV_Event_Manager::deleteAction(const QString &groupName, const QString &a
             break;
         }
     }
-
-//    for (size_t i = 0; i < _actions.size(); i++)
-//    {
-//        if (_actions[i] != nullptr)
-//        {
-//            if (_actions[i]->group() == groupName && _actions[i]->name() == actionName)
-//            {
-//                _actions.erase(_actions.begin() + i);
-//                --i;
-//            }
-//        }
-//    }
-
-//    for (auto &event : _events)
-//    {
-//        if (event == nullptr)
-//            continue;
-
-//        event->removeAction(groupName, actionName);
-//        event->actionMustBeenBinding[groupName].erase(actionName);
-//        if (event->actionMustBeenBinding[groupName].size() == 0)
-//            event->actionMustBeenBinding.erase(groupName);
-    //    }
 }
 
 void IOTV_Event_Manager::runEvent(const QString &groupName, const QString &eventName)
