@@ -1,15 +1,6 @@
-idf_component_register(SRCS "main.c"
-						"global_extern.c"
-						"wifi/wifi.c"
-						"web/web.c"
-						"ota/ota.c"
-						"lib/urldecode.c"
-						INCLUDE_DIRS "."
-						EMBED_FILES "web/favicon.ico" 
-									"web/html/index.html" 
-									"web/html/connecting.html" 
-									"web/html/ota.html"
-									"web/html/ota_downloaded.html"
-									"web/html/ota_downloading.html"
-									"web/html/ota_fail.html"
-									"web/html/error.html")
+# The following lines of boilerplate have to be in your project's CMakeLists
+# in this exact order for cmake to work correctly
+cmake_minimum_required(VERSION 3.16)
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(iotv_factory)
