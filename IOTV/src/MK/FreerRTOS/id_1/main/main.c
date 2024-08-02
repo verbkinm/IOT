@@ -1,12 +1,8 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "nvs_flash.h"
 
 #include "service/service.h"
 #include "I2C/i2c.h"
 #include "iotv.h"
-
-//static const char *TAG = "main";
 
 void app_main(void)
 {

@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "global/global_def.h"
+
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define AVG(a,b) (((a) + (b)) / 2)
@@ -32,19 +34,6 @@ char *url_decode(const char *str);
 
 double convert_range(double value, double From1, double From2, double To1, double To2);
 
-uint32_t glob_get_status_reg(void);
-void glob_set_status_reg(uint32_t reg);
-void glob_set_bits_status_reg(uint32_t bits);
-void glob_clear_bits_status_reg(uint32_t bits);
-
-uint32_t glob_get_status_err(void);
-void glob_set_status_err(uint32_t reg);
-void glob_set_bits_status_err(uint32_t bits);
-void glob_clear_bits_status_err(uint32_t bits);
-
-uint32_t glob_get_update_reg(void);
-void glob_set_update_reg(uint32_t reg);
-void glob_set_bits_update_reg(uint32_t bits);
-void glob_clear_bits_update_reg(uint32_t bits);
+void strcat_dynamic(char **str1, const char *str2);
 
 #endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H */

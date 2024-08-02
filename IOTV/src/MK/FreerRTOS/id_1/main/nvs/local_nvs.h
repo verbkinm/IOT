@@ -13,12 +13,18 @@
 #include <esp_err.h>
 #include <stdint.h>
 
-#include "Global_def.h"
+#include "global/global_def.h"
 
-//int16_t readBorderDistanceFromNVS(void);
-//void writeBorderDistanceToNVS(int16_t value);
-//
-//uint8_t readDisplayOrientationFromNVS(void);
-//void writeDisplayOrientationToNVS(uint8_t value);
+esp_err_t nvs_read_update_flag(uint8_t *out);
+esp_err_t nvs_read_update_url(char *out);
+
+esp_err_t nvs_read_wifi_sta_ssid(char *out);
+esp_err_t nvs_read_wifi_sta_pwd(char *out);
+
+esp_err_t nvs_write_update_flag(uint8_t value);
+esp_err_t nvs_write_update_url(const char *value);
+
+esp_err_t nvs_write_wifi_sta_ssid(const char *value);
+esp_err_t nvs_write_wifi_sta_pwd(const char *value);
 
 #endif /* MAIN_NVS_LOCAL_NVS_H_ */

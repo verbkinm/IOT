@@ -5,13 +5,12 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include <stdint.h>
+#include "global/global_def.h"
 
 #include "Protocols/embedded/iotv_types.h"
 #include "Protocols/embedded/creatorpkgs.h"
 #include "Protocols/embedded/IOTV_SH.h"
 #include "Protocols/embedded/iotv_server_embedded.h"
-#include "Global_def.h"
-
 #include "service/tcp/tcp.h"
 #include "nvs/local_nvs.h"
 

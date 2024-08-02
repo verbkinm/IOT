@@ -1,0 +1,44 @@
+body {
+  margin: 0;
+}
+
+.menu_1 {
+  padding: 15px 0;
+  display: inline-block;
+  width: 270px;
+  margin: auto;
+  padding: auto;
+  text-align: center;
+}
+
+.menu_1:hover {
+   background: #FF7F50;
+}
+
+.menu_1 a{
+  text-decoration: none;
+  color: #fff
+}
+
+.menu {
+  font-size: 28px;
+  font-weight: bold;
+  background: #4682B4;
+}
+.menu, .content{
+  width: 825px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black
+}
+
+.content form{
+  padding: 20px
+}
+
+.content xmp{
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+  font-size: 16px;
+}

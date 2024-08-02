@@ -7,8 +7,8 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
+#include "global/global_def.h"
 
-#include "Global_def.h"
 #include "iotv.h"
 #include "Local_Lib/local_lib.h"
 

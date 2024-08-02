@@ -9,86 +9,164 @@
 
 static const char *TAG = "local_nvs";
 
-//int16_t readBorderDistanceFromNVS(void)
-//{
-//	int16_t borderDistance = BORDER_DISTANCE_DEFAULT; // значение по умолчанию
-//
-//	// Open
-//	nvs_handle_t my_handle;
-//	if (nvs_open("VL6180X", NVS_READONLY, &my_handle) != ESP_OK)
-//	{
-//		ESP_LOGE(TAG, "Error nvs_open");
-//		return borderDistance;
-//	}
-//
-//	// Read
-//	if (nvs_get_i16(my_handle, "borderDistance", &borderDistance) != ESP_OK)
-//		ESP_LOGE(TAG, "Error nvs_get_i16");
-//
-//	nvs_close(my_handle);
-//	return borderDistance;
-//}
-//
-//void writeBorderDistanceToNVS(int16_t value)
-//{
-//	// Open
-//	nvs_handle_t my_handle;
-//	if (nvs_open("VL6180X", NVS_READWRITE, &my_handle) != ESP_OK)
-//	{
-//		ESP_LOGE(TAG, "BorderDistanceToNVS open failed");
-//		return;
-//	}
-//
-//	// Write
-//	if (nvs_set_i16(my_handle, "borderDistance", value) != ESP_OK)
-//		ESP_LOGE(TAG, "writeBorderDistanceToNVS write failed");
-//
-//	// Commit written value.
-//	if (nvs_commit(my_handle) != ESP_OK)
-//		ESP_LOGE(TAG, "writeBorderDistanceToNVS commit failed");
-//
-//	// Close
-//	nvs_close(my_handle);
-//}
-//
-//uint8_t readDisplayOrientationFromNVS(void)
-//{
-//	uint8_t displayOrientation = DISPLAY_ORIENTATION_DEFAULT; // значение по умолчанию
-//
-//	// Open
-//	nvs_handle_t my_handle;
-//	if (nvs_open("DISP", NVS_READONLY, &my_handle) != ESP_OK)
-//	{
-//		ESP_LOGE(TAG, "Error nvs_open");
-//		return displayOrientation;
-//	}
-//
-//	// Read
-//	if (nvs_get_u8(my_handle, "dispOrientation", &displayOrientation) != ESP_OK)
-//		ESP_LOGE(TAG, "Error nvs_get_u8");
-//
-//	nvs_close(my_handle);
-//	return displayOrientation;
-//}
-//
-//void writeDisplayOrientationToNVS(uint8_t value)
-//{
-//	// Open
-//	nvs_handle_t my_handle;
-//	if (nvs_open("DISP", NVS_READWRITE, &my_handle) != ESP_OK)
-//	{
-//		ESP_LOGE(TAG, "displayOrientation open failed");
-//		return;
-//	}
-//
-//	// Write
-//	if (nvs_set_u8(my_handle, "dispOrientation", value) != ESP_OK)
-//		ESP_LOGE(TAG, "displayOrientation write failed");
-//
-//	// Commit written value.
-//	if (nvs_commit(my_handle) != ESP_OK)
-//		ESP_LOGE(TAG, "displayOrientation commit failed");
-//
-//	// Close
-//	nvs_close(my_handle);
-//}
+static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t *out);
+static esp_err_t nvs_write_u8(const char *namespace, const char *key, uint8_t value);
+
+static esp_err_t nvs_read_string(const char *namespace, const char *key, char *out);
+static esp_err_t nvs_write_string(const char *namespace, const char *key, const char *value);
+
+static esp_err_t nvs_write_u8(const char *namespace, const char *key, uint8_t value)
+{
+	if (namespace == NULL || key == NULL)
+		return ESP_ERR_INVALID_ARG;
+
+	nvs_handle_t my_handle;
+	if (nvs_open(namespace, NVS_READWRITE, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "%s open nvs failed", namespace);
+		return ESP_FAIL;
+	}
+
+	if (nvs_set_u8(my_handle, key, value) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs_set_u8 failed");
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	if (nvs_commit(my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs commit %s %s failed", namespace, key);
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	nvs_close(my_handle);
+	return ESP_OK;
+}
+
+static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t *out)
+{
+	if (namespace == NULL || key == NULL || out == NULL)
+		return ESP_ERR_INVALID_ARG;
+
+	nvs_handle_t my_handle;
+	if (nvs_open(namespace, NVS_READONLY, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "%s open nvs failed", namespace);
+		return ESP_FAIL;
+	}
+
+	if (nvs_get_u8(my_handle, key, out) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs_get_u8 %s failed", key);
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	nvs_close(my_handle);
+	return ESP_OK;
+}
+
+static esp_err_t nvs_read_string(const char *namespace, const char *key, char *out)
+{
+	if (namespace == NULL || key == NULL)
+		return ESP_ERR_INVALID_ARG;
+
+	out = calloc(1, BUFSIZE);
+	if (out == NULL)
+	{
+		ESP_LOGE(TAG, "calloc failed");
+		return ESP_ERR_NO_MEM;
+	}
+
+	nvs_handle_t my_handle;
+	if (nvs_open(namespace, NVS_READONLY, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "%s open nvs failed", namespace);
+		free(out);
+		return ESP_FAIL;
+	}
+
+	size_t size = BUFSIZE - 1;
+	if (nvs_get_str(my_handle, key, out, &size) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs_get_str %s failed", key);
+		free(out);
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	nvs_close(my_handle);
+	return ESP_OK;
+}
+
+static esp_err_t nvs_write_string(const char *namespace, const char *key, const char *value)
+{
+	if (namespace == NULL || key == NULL || value)
+		return ESP_ERR_INVALID_ARG;
+
+	nvs_handle_t my_handle;
+	if (nvs_open(namespace, NVS_READWRITE, &my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "%s open nvs failed", namespace);
+		return ESP_FAIL;
+	}
+
+	if (nvs_set_str(my_handle, key, value) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs_set_str failed");
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	if (nvs_commit(my_handle) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "nvs commit %s %s failed", namespace, key);
+		nvs_close(my_handle);
+		return ESP_FAIL;
+	}
+
+	nvs_close(my_handle);
+	return ESP_OK;
+}
+
+esp_err_t nvs_read_update_flag(uint8_t *out)
+{
+	return nvs_read_u8(NVS_NAMESPACE_UPDATE, NVS_KEY_UPDATE_FLAG, out);
+}
+
+esp_err_t nvs_read_update_url(char *out)
+{
+	return nvs_read_string(NVS_NAMESPACE_UPDATE, NVS_KEY_UPDATE_URL, out);
+}
+
+esp_err_t nvs_write_update_flag(uint8_t value)
+{
+	return nvs_write_u8(NVS_NAMESPACE_UPDATE, NVS_KEY_UPDATE_FLAG, value);
+}
+
+esp_err_t nvs_write_update_url(const char *value)
+{
+	return nvs_write_string(NVS_NAMESPACE_UPDATE, NVS_KEY_UPDATE_URL, value);
+}
+
+esp_err_t nvs_read_wifi_sta_ssid(char *out)
+{
+	return nvs_read_string(NVS_NAMESPACE_WIFI, NVS_KEY_WIFI_STA_SSID, out);
+}
+
+esp_err_t nvs_write_wifi_sta_ssid(const char *value)
+{
+	return nvs_write_string(NVS_NAMESPACE_WIFI, NVS_KEY_WIFI_STA_SSID, value);
+}
+
+esp_err_t nvs_read_wifi_sta_pwd(char *out)
+{
+	return nvs_read_string(NVS_NAMESPACE_WIFI, NVS_KEY_WIFI_STA_PWD, out);
+}
+
+esp_err_t nvs_write_wifi_sta_pwd(const char *value)
+{
+	return nvs_write_string(NVS_NAMESPACE_WIFI, NVS_KEY_WIFI_STA_PWD, value);
+}

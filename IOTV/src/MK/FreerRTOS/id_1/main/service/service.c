@@ -11,6 +11,7 @@
 #include "tcp/tcp.h"
 #include "relay/buttons.h"
 #include "relay/relay.h"
+#include "factory_mode/factory_mode.h"
 
 void start_services(void)
 {
@@ -19,4 +20,5 @@ void start_services(void)
 	xTaskCreate(update_service_task, update_service_task_name(), 4096, 0, 10, 0);
 	xTaskCreate(buttons_service_task, buttons_service_task_name(), 4096, 0, 10, 0);
 	xTaskCreate(relay_service_task, relay_service_task_name(), 4096, 0, 10, 0);
+	xTaskCreate(factory_mode_service_task, factory_mode_service_task_name(), 4096, 0, 10, 0);
 }

@@ -7,10 +7,6 @@
 
 #include "local_lib.h"
 
-static uint32_t glob_status_reg = 0;
-static uint32_t glob_status_err = 0;
-static uint32_t glob_update_reg = 0;
-
 uint8_t bcdToDec(uint8_t val)
 {
 	return( (val / 16 * 10) + (val % 16) );
@@ -122,62 +118,28 @@ double convert_range(double value, double From1, double From2, double To1, doubl
 }
 
 
-uint32_t glob_get_status_reg(void)
+
+void strcat_dynamic(char **str1, const char *str2)
 {
-	return glob_status_reg;
+	if (str1 == NULL || str2 == NULL)
+		return;
+
+	if (*str1 == NULL)
+		*str1 = calloc(1, 1);
+
+	char *newStr = calloc(1, strlen(*str1) + strlen(str2) + 1); // +1 = '\0'
+
+	if (newStr == NULL)
+	{
+		printf("malloc error\n");
+		return;
+	}
+
+	strcat(newStr, *str1);
+	strcat(newStr, str2);
+
+	free(*str1);
+
+	*str1 = newStr;
 }
 
-void glob_set_status_reg(uint32_t reg)
-{
-	glob_status_reg = reg;
-}
-
-void glob_set_bits_status_reg(uint32_t bits)
-{
-	glob_status_reg |= bits;
-}
-
-void glob_clear_bits_status_reg(uint32_t bits)
-{
-	glob_status_reg &= ~bits;
-}
-
-uint32_t glob_get_status_err(void)
-{
-	return glob_status_err;
-}
-
-void glob_set_status_err(uint32_t reg)
-{
-	glob_status_err = reg;
-}
-
-void glob_set_bits_status_err(uint32_t bits)
-{
-	glob_status_err |= bits;
-}
-
-void glob_clear_bits_status_err(uint32_t bits)
-{
-	glob_status_err &= ~bits;
-}
-
-uint32_t glob_get_update_reg(void)
-{
-	return glob_update_reg;
-}
-
-void glob_set_update_reg(uint32_t reg)
-{
-	glob_update_reg = reg;
-}
-
-void glob_set_bits_update_reg(uint32_t bits)
-{
-	glob_update_reg |= bits;
-}
-
-void glob_clear_bits_update_reg(uint32_t bits)
-{
-	glob_update_reg &= ~bits;
-}

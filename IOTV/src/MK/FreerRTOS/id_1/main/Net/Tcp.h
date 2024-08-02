@@ -10,7 +10,7 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
-#include "Global_def.h"
+#include "../global_def.h"
 #include "iotv.h"
 
 void tcp_server_task(void *pvParameters);

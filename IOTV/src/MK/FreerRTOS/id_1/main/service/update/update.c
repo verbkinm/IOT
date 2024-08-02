@@ -6,7 +6,22 @@
  */
 
 
+#include "global/global_def.h"
 #include "update.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "esp_http_client.h"
+#include "esp_crt_bundle.h"
+#include "esp_tls.h"
+#include "cJSON.h"
+#include "esp_app_desc.h"
+#include "ota/ota.h"
+
+#include "global/registers.h"
+#include "Local_Lib/local_lib.h"
+#include "nvs/local_nvs.h"
 
 #define URL_MAX_LENGH	256
 
@@ -101,7 +116,13 @@ static void chek_update(void)
 	if (strcmp(available_version, esp_app->version) > 0)
 	{
 		printf("new version available - %s\n", available_version);
-		update();
+		if (nvs_write_update_flag(NVS_VALUE_UPDATE_YES) == ESP_OK
+				&& nvs_write_update_url(url_update) == ESP_OK)
+		{
+			update();
+		}
+		else
+			nvs_write_update_flag(NVS_VALUE_UPDATE_NO);
 	}
 }
 
@@ -117,12 +138,13 @@ static void update(void)
 			esp_restart();
 	}
 
-	esp_err_t ret = ota_firmware(url_update);
-
-	if (ret == ESP_OK)
+	if (ota_firmware(url_update) == ESP_OK)
 	{
-		printf("reboting...");
-		esp_restart();
+		if (nvs_write_update_flag(0) == ESP_OK)
+		{
+			printf("reboting...");
+			esp_restart();
+		}
 	}
 }
 
@@ -133,6 +155,7 @@ const char *update_service_task_name()
 
 void update_service_task(void *pvParameters)
 {
+	glob_set_bits_service_reg(SERVICE_UPDATE_ON);
 	printf("%s %s start\n", TAG, task_name);
 
 	strcpy(available_version, default_version);
@@ -142,6 +165,9 @@ void update_service_task(void *pvParameters)
 
 	for( ;; )
 	{
+		if (glob_get_status_err())
+			break;
+
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT))
 			goto for_end;
 
@@ -155,7 +181,7 @@ void update_service_task(void *pvParameters)
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
-
+	glob_clear_bits_service_reg(SERVICE_UPDATE_ON);
 	printf("%s %s stop\n", TAG, task_name);
 	vTaskDelete(NULL);
 }

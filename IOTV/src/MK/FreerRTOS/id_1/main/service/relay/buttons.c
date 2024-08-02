@@ -5,13 +5,14 @@
  *      Author: user
  */
 
+#include "global/global_def.h"
 #include "buttons.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-#include "Global_def.h"
+#include "global/registers.h"
 #include "Local_Lib/local_lib.h"
 #include "iotv.h"
 
@@ -42,6 +43,8 @@ const char *buttons_service_task_name()
 void buttons_service_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
+	glob_set_bits_service_reg(SERVICE_BUTTON_ON);
 	printf("%s %s start\n", TAG, task_name);
 	buttons_init();
 
@@ -75,6 +78,7 @@ void buttons_service_task(void *pvParameters)
 
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
-	vTaskDelete(NULL);
+	glob_clear_bits_service_reg(SERVICE_BUTTON_ON);
 	printf("%s %s stop\n", TAG, task_name);
+	vTaskDelete(NULL);
 }

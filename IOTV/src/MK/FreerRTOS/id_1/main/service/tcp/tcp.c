@@ -1,5 +1,7 @@
 #include "tcp.h"
 
+#include "global/registers.h"
+
 const static char *TAG = "TCP";
 const static char *task_name = "tcp_server_task";
 
@@ -30,6 +32,7 @@ const char *tcp_server_task_name()
 
 void tcp_server_task(void *pvParameters)
 {
+	glob_set_bits_service_reg(SERVICE_TCP_SERVER_ON);
 	printf("%s %s start\n", TAG, task_name);
 
 	while (true)
@@ -125,7 +128,7 @@ void tcp_server_task(void *pvParameters)
 		CLEAN_UP:
 		close(listen_sock);
 	}
-
+	glob_clear_bits_service_reg(SERVICE_TCP_SERVER_ON);
 	printf("%s %s stop\n", TAG, task_name);
 	vTaskDelete(NULL);
 }

@@ -3,14 +3,70 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link href="styles.css" rel="stylesheet">
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
-		<form action="/cmd" method="post">
-			<h1>Введите данные точки доступа:</h1>
-			<p>WIFI SSID: <input type="text" size="40" name="ssid" required=""></p>
-			<p>WIFI пароль: <input type="password" size="40" name="pass" required=""></p>
-			<p><input type="submit" value="Сохранить" style="width:150px;"></p>
-		</form>
+		<div class="menu">
+			<div class="menu_1"> <a href="">Информация</a></div>
+			<div class="menu_1"> <a href="">Сеть</a></div>
+			<div class="menu_1"> <a href="">Обновление</a></div>
+		</div>
+		<div class="content">
+			<xmp>
+Project:
+------------------------------------------------------------
+Build date: Aug  1 2024 13:23:33
+Name: hello_world
+Version: 0.1
+IDF: v5.1-rc2-dirty
+------------------------------------------------------------
+
+Chip Info:
+------------------------------------------------------------
+Model: ESP32
+Arch: xtensa
+Cores: 2
+Revision number: 300
+Features Bitmap: 00000000000000000000000000110010
+Embedded Flash: No
+Embedded PSRAM: No
+Wi-Fi 2.4GHz support: Yes
+IEEE 802.15.4 support: No
+Bluetooth Classic support: Yes
+Bluetooth LE (BLE) support: Yes
+CPU Clock Source: PLL
+Source Clock Frequency: 480 MHz
+Divider: 2
+Effective CPU Frequency: 240 MHz
+------------------------------------------------------------
+
+Memory Info:
+------------------------------------------------------------
+No PSRAM detected
+Total DRAM (internal memory): 403748 bytes
+Free DRAM (internal memory): 382736 bytes
+Largest free contiguous DRAM block: 172032 bytes
+------------------------------------------------------------
+
+Partition table:
+------------------------------------------------------------
+Label             Type ST     Offset     Length
+nvs                01  02 0x00009000 0x00004000
+otadata            01  00 0x0000d000 0x00002000
+phy_init           01  01 0x0000f000 0x00001000
+factory            00  00 0x00010000 0x00100000
+ota_0              00  16 0x00110000 0x00100000
+ota_1              00  17 0x00210000 0x00100000
+------------------------------------------------------------
+			</xmp>
+
+			<form action="/cmd" method="post">
+				<h1>Введите данные точки доступа:</h1>
+				<p>WIFI SSID: <input type="text" size="40" name="ssid" required=""></p>
+				<p>WIFI пароль: <input type="password" size="40" name="pass" required=""></p>
+				<p><input type="submit" value="Сохранить" style="width:150px;"></p>
+			</form>
+		</div>
 	</body>
 </html>
