@@ -13,8 +13,7 @@
 			<div class="menu_1"> <a href="ota.html">Обновление</a></div>
 		</div>
 		<div class="content">
-			<xmp>
-			</xmp>
-		</div>
-	</body>
-</html>
+			<h2>WIFI клиент:</h2>
+			<p>Состояние: подключён</p>
+			<form action="/net.html" method="post">
+				<label for="ssid">SSID:</label><input id="ssid"

@@ -16,6 +16,7 @@ char *get_freq_info(void);
 char *get_memory_info(void);
 char *get_partition_tabel(void);
 char *get_project_info(void);
+char *get_network_info(void);
 
 char *get_system_info(void);
 

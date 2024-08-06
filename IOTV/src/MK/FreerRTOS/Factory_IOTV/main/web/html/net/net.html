@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
-		<link href="/style.css" rel="stylesheet" type="text/css">
+		<link href="../style.css" rel="stylesheet" type="text/css">
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
@@ -24,7 +24,7 @@
 				Список доступных точек доступа WIFI:
 			</h3>
 			<form>
-				<select name="select" size="2">
+				<select name="select" size="2" onchange="OnSelectionChange (this)">
 					<option selected value="s1">Чебурашка</option>
 					<option value="s2">Крокодил Гена</option>
 					<option value="s3">Шапокляк</option>
@@ -37,3 +37,11 @@
 		</div>
 	</body>
 </html>
+
+    <script>
+        function OnSelectionChange (select) {
+			var selectedOption = select.options[select.selectedIndex];
+			var ssid = document.getElementById ("ssid");
+			ssid.value = selectedOption.textContent
+        }
+    </script>

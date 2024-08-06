@@ -30,6 +30,8 @@ const static char *task_name = "wifi_task";
 static esp_netif_t *netif_sta = NULL;
 static esp_netif_t *netif_at = NULL;
 
+static wifi_ap_record_t ap_info[AP_INFO_ARR_SIZE] = {};
+
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 static void wifi_service_base_init(void);
 
@@ -46,14 +48,14 @@ void wifi_service_only_sta_init(void)
 	esp_wifi_start();
 
 	char *sta_ssid = NULL;
-	if (nvs_read_wifi_sta_ssid(sta_ssid) == ESP_OK && sta_ssid != NULL)
+	if (nvs_read_wifi_sta_ssid(&sta_ssid) == ESP_OK && sta_ssid != NULL)
 	{
 		strcpy((char *)wifi_config.sta.ssid, sta_ssid);
 		free(sta_ssid);
 	}
 
 	char *sta_pwd = NULL;
-	if (nvs_read_wifi_sta_pwd(sta_pwd) == ESP_OK && sta_pwd != NULL)
+	if (nvs_read_wifi_sta_pwd(&sta_pwd) == ESP_OK && sta_pwd != NULL)
 	{
 		strcpy((char *)wifi_config.sta.password, sta_pwd);
 		free(sta_pwd);
@@ -81,26 +83,30 @@ void wifi_service_only_ap_init(void)
 	esp_wifi_start();
 
 	esp_netif_ip_info_t ip_info;
-	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
+	//	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
+	esp_netif_get_ip_info(netif_at, &ip_info);
 
-	char ip_addr[16];
+
+	char ip_addr[16], ip_mask[16], ip_gw[16];
 	inet_ntoa_r(ip_info.ip.addr, ip_addr, 16);
-	ESP_LOGI(TAG, "Set up softAP with IP: %s", ip_addr);
+	inet_ntoa_r(ip_info.netmask, ip_mask, 16);
+	inet_ntoa_r(ip_info.gw, ip_gw, 16);
+	ESP_LOGI(TAG, "Set up softAP with IP: %s, mask: %s, gw: %s\n", ip_addr, ip_mask, ip_gw);
 	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:'%s'", WIFI_SSID_AT);
 	ESP_LOGI(TAG, "wifi_init_sta finished.");
 }
 
 static void wifi_service_base_init(void)
 {
-//	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-//	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+	//	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	//	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 }
 
 void wifi_service_deinit(void)
 {
 	esp_wifi_disconnect();
 	esp_wifi_stop();
-//	esp_wifi_deinit();
+	//	esp_wifi_deinit();
 
 	esp_netif_destroy(netif_sta);
 	esp_netif_destroy(netif_at);
@@ -122,15 +128,15 @@ void wifi_service_apsta_init(void)
 			.ap = {
 					.ssid = WIFI_SSID_AT,
 					.ssid_len = strlen(WIFI_SSID_AT),
-					.max_connection = 1, //MAX_STA_CONN,
+					.max_connection = 2, //MAX_STA_CONN,
 					.authmode = WIFI_AUTH_OPEN
 			},
 	};
 
 	wifi_config_t wifi_config_sta = {
 			.sta = {
-					.ssid = "",
-					.password = "",
+					//					.ssid = "",
+					//					.password = "",
 					.threshold.authmode = WIFI_AUTH_WPA2_PSK,
 					.sae_pwe_h2e = WPA3_SAE_PWE_BOTH
 			},
@@ -138,14 +144,14 @@ void wifi_service_apsta_init(void)
 
 
 	char *sta_ssid = NULL;
-	if (nvs_read_wifi_sta_ssid(sta_ssid) != ESP_OK && sta_ssid != NULL)
+	if (nvs_read_wifi_sta_ssid(&sta_ssid) == ESP_OK && sta_ssid != NULL)
 	{
-		strcpy((char *)wifi_config_sta.sta.ssid, sta_ssid);
+		strcpy((char *)(wifi_config_sta.sta.ssid), sta_ssid);
 		free(sta_ssid);
 	}
 
 	char *sta_pwd = NULL;
-	if (nvs_read_wifi_sta_pwd(sta_pwd) == ESP_OK && sta_pwd != NULL)
+	if (nvs_read_wifi_sta_pwd(&sta_pwd) == ESP_OK && sta_pwd != NULL)
 	{
 		strcpy((char *)wifi_config_sta.sta.password, sta_pwd);
 		free(sta_pwd);
@@ -157,11 +163,14 @@ void wifi_service_apsta_init(void)
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	esp_netif_ip_info_t ip_info;
-	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
+	//	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
+	esp_netif_get_ip_info(netif_at, &ip_info);
 
-	char ip_addr[16];
+	char ip_addr[16], ip_mask[16], ip_gw[16];
 	inet_ntoa_r(ip_info.ip.addr, ip_addr, 16);
-	ESP_LOGI(TAG, "Set up softAP with IP: %s", ip_addr);
+	inet_ntoa_r(ip_info.netmask, ip_mask, 16);
+	inet_ntoa_r(ip_info.gw, ip_gw, 16);
+	ESP_LOGI(TAG, "Set up softAP with IP: %s, mask: %s, gw: %s\n", ip_addr, ip_mask, ip_gw);
 	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:'%s'", WIFI_SSID_AT);
 	ESP_LOGI(TAG, "wifi_init_sta finished.");
 }
@@ -170,7 +179,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 {
 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
 	{
-		printf("wifi sta start\n");
+		printf("%s %s sta start\n", TAG, task_name);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_START);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
@@ -178,7 +187,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_STOP)
 	{
-		printf("wifi sta stop\n");
+		printf("%s %s sta stop\n", TAG, task_name);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_START);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
@@ -186,7 +195,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
 	{
-		printf("wifi sta connected\n");
+		//		printf("%s %s wifi sta connected\n", TAG, task_name);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 
@@ -197,61 +206,112 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		char pwd_str[65] = {0};
 		char ssid_str[32] = {0};
 
-		sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
-				wifi_config.sta.bssid[0], wifi_config.sta.bssid[1], wifi_config.sta.bssid[2],
-				wifi_config.sta.bssid[3], wifi_config.sta.bssid[4], wifi_config.sta.bssid[5]);
+		sprintf(mac_str, MACSTR, MAC2STR(wifi_config.sta.bssid));
 		sprintf(pwd_str, "%s", wifi_config.sta.password);
 		sprintf(ssid_str, "%s", wifi_config.sta.ssid);
 
-		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
-		printf("ap_info->ssid %s\n", ap_info->ssid);
+		printf("%s %s connected to \"%s\" (%s) \"%s\"\n",
+				TAG, task_name,
+				ssid_str, mac_str, pwd_str);
+
+		//		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
+		//		printf("ssid %s\n", ap_info->ssid);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
 	{
-		printf("wifi sta disconnect\n");
+		printf("%s %s sta disconnect\n", TAG, task_name);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
+	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_SCAN_DONE)
+	{
+		printf("%s %s scan done\n", TAG, task_name);
+		glob_clear_bits_status_reg(STATUS_WIFI_SCANNING);
+		glob_set_bits_status_reg(STATUS_WIFI_SCAN_DONE);
+
+		uint16_t number = AP_INFO_ARR_SIZE;
+		uint16_t ap_count = 0;
+
+		esp_wifi_scan_get_ap_records(&number, ap_info);
+		esp_wifi_scan_get_ap_num(&ap_count);
+
+		ESP_LOGI(TAG, "Total APs scanned = %u", ap_count);
+		for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
+		{
+			char ssid[sizeof(ap_info[i].ssid) + 1] = {0};
+			memcpy(ssid, ap_info[i].ssid, sizeof(ap_info[i].ssid));
+
+			printf("%s %s SSID \"%s\" (" MACSTR ")\n", TAG, task_name, ssid, MAC2STR(ap_info[i].bssid));
+			printf("%s %s RSSI %d\n", TAG, task_name, ap_info[i].rssi);
+			//		if (ap_info[i].authmode != WIFI_AUTH_WEP)
+			//			print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
+			printf("%s %s Channel \t\t%d\n", TAG, task_name, ap_info[i].primary);
+		}
+	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
 		glob_set_bits_status_reg(STATUS_IP_GOT);
-		printf("wifi sta got ip\n");
+		printf("%s %s sta got ip\n", TAG, task_name);
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP)
 	{
-		printf("wifi sta ip lost\n");
+		printf("%s %s sta lost ip\n", TAG, task_name);
 		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_id == WIFI_EVENT_AP_START)
 	{
-		printf("wifi AP start\n");
+		printf("AP start\n");
 		glob_set_bits_status_reg(STATUS_WIFI_AP_START);
 	}
 	else if (event_id == WIFI_EVENT_AP_STOP)
 	{
-		printf("wifi AP stop\n");
+		printf("%s %s AP stop\n", TAG, task_name);
 		glob_clear_bits_status_reg(STATUS_WIFI_AP_START);
 	}
 	else if (event_id == WIFI_EVENT_AP_STACONNECTED)
 	{
+		printf("%s %s APSTA connected\n", TAG, task_name);
 		wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
 		ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event->mac), event->aid);
 	}
 	else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
 	{
+		printf("%s %s APSTA disconnected\n", TAG, task_name);
 		wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
 		ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event->mac), event->aid);
 	}
-
-
 	else if (event_base == WIFI_EVENT)
-		printf("wifi other event: %s %d\n", event_base, (int)event_id);
+		printf("%s %s other event: %s %d\n", TAG, task_name, event_base, (int)event_id);
 }
 
 const char *wifi_service_task_name()
 {
 	return task_name;
+}
+
+void wifi_service_scan_wifi(void)
+{
+	if (!(glob_get_status_reg() & STATUS_WIFI_STA_START) ||
+			(glob_get_status_reg() & STATUS_WIFI_SCANNING))
+		return;
+
+	printf("%s %s start scan\n", TAG, task_name);
+
+	memset(ap_info, 0, sizeof(ap_info));
+
+	if (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
+		esp_wifi_disconnect();
+
+	glob_set_bits_status_reg(STATUS_WIFI_SCANNING);
+	glob_clear_bits_status_reg(STATUS_WIFI_SCAN_DONE);
+
+	esp_wifi_scan_start(NULL, false);
+}
+
+const wifi_ap_record_t *wifi_service_last_scan(void)
+{
+	return ap_info;
 }
 
 void wifi_service_task(void *pvParameters)
@@ -282,11 +342,13 @@ void wifi_service_task(void *pvParameters)
 				&instance_any_id));
 	}
 
-//	wifi_service_only_sta_init();
+	//	wifi_service_only_sta_init();
 	//	wifi_service_only_ap_init();
-		wifi_service_apsta_init();
+	wifi_service_apsta_init();
 
-	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+	//	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+
+	int counter = 0;
 
 	for( ;; )
 	{
@@ -295,23 +357,26 @@ void wifi_service_task(void *pvParameters)
 
 		if ( !(glob_get_status_reg() & STATUS_WIFI_AUTOCONNECT)
 				|| !(glob_get_status_reg() & STATUS_WIFI_STA_START)
-				|| (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING) )
+				|| (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING)
+				|| (glob_get_status_reg() & STATUS_WIFI_SCANNING)
+				|| (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED))
 		{
 			goto for_end;
 		}
 
-		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
-		{
-			wifi_config_t wifi_config;
-			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+		wifi_config_t wifi_config;
+		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
-			glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
-			printf("Try connect to ssid = %s, pwd = %s\n", wifi_config.sta.ssid, wifi_config.sta.password);
-			esp_wifi_connect();
-		}
+		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
+		printf("%s %s Try connect to ssid = %s, pwd = %s\n", TAG, task_name, wifi_config.sta.ssid, wifi_config.sta.password);
+		esp_wifi_connect();
+
+		if (++counter > 5)
+			glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
 		for_end:
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		counter = 0;
+		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
 	glob_clear_bits_service_reg(SERVICE_WIFI_ON);
 	printf("%s %s stop\n", TAG, task_name);

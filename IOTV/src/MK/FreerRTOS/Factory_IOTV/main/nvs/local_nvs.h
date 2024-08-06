@@ -15,11 +15,11 @@
 
 #include "global/global_def.h"
 
-esp_err_t nvs_read_update_flag(uint8_t *out);
-esp_err_t nvs_read_update_url(char *out);
+esp_err_t nvs_read_update_flag(uint8_t **out);
+esp_err_t nvs_read_update_url(char **out);
 
-esp_err_t nvs_read_wifi_sta_ssid(char *out);
-esp_err_t nvs_read_wifi_sta_pwd(char *out);
+esp_err_t nvs_read_wifi_sta_ssid(char **out);
+esp_err_t nvs_read_wifi_sta_pwd(char **out);
 
 esp_err_t nvs_write_update_flag(uint8_t value);
 esp_err_t nvs_write_update_url(const char *value);

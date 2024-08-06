@@ -1,0 +1,8 @@
+type="text" name="pass"><br>
+				<label></label><input type="submit" value="Подключиться">
+			</form>
+			<h3>
+				Список доступных точек доступа WIFI:
+			</h3>
+			<form action="/scanning.html" method="get">
+				<select size="2" onchange="OnSelectionChange (this)">

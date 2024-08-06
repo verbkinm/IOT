@@ -1,0 +1,2 @@
+type="text" name="ssid"><br>
+				<label for="pwd">Пароль:</label><input id="pass"

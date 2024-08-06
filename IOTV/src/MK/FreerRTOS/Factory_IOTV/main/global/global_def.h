@@ -21,6 +21,10 @@
 //#define WIFI_SSID							"TP-Link_A6BE"
 //#define WIFI_PASSWORD						"41706831"
 
+#define AP_INFO_ARR_SIZE 					10
+#define WIFI_SSID_MAX_LENGH					32
+#define WIFI_PASS_MAX_LENGH					32
+
 // I2C
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_22				   /*!< GPIO number used for I2C master clock */
 #define I2C_MASTER_SDA_IO           		GPIO_NUM_21				   /*!< GPIO number used for I2C master data  */

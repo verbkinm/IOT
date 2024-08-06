@@ -36,4 +36,6 @@ double convert_range(double value, double From1, double From2, double To1, doubl
 
 void strcat_dynamic(char **str1, const char *str2);
 
+void delete_ptr(void **ptr);
+
 #endif /* MAIN_LOCAL_LIB_LOCAL_LIB_H */
