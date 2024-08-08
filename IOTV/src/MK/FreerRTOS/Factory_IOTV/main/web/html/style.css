@@ -6,7 +6,7 @@
 
 body {
   margin: 0;
-  padding: 25px 0;
+/*  padding: 25px 0;*/
 }
 
 .menu_1 {
@@ -32,6 +32,7 @@ body {
   font-weight: bold;
   background: #4682B4;
 }
+
 .menu, .content{
   width: 825px;
   margin-left: auto;
@@ -39,21 +40,21 @@ body {
   border: 1px solid black
 }
 
-.content form{
-  padding: 0 20px;
-}
-
-.content xmp, p, h2, h3{
+/*.content xmp, p, h2, h3{
   margin: 10px auto 10px auto;
   padding: 0 20px;
-}
+}*/
 
 .content xmp{
   font-size: 16px;
 }
 
-.content p{
+/*.content p{
   font-size: 16px;
+}*/
+
+.content_block {
+  padding: 20px
 }
 
 .center {
@@ -72,10 +73,19 @@ select {
 
 input[type="text"] {
   width: 200px;
-  height: 20px;
+  height: 30px;
 }
 
-input[type="submit"] {
+#url {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.btn {
+    text-align: right;
+}
+
+button {
   width: 200px;
   height: 30px;
 }
@@ -87,3 +97,42 @@ label {
   display: inline-block;
 }
 
+#modal {
+  display: none;
+}
+#modal_back, #modal_msg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+#modal_msg {
+  z-index: 1;
+  width: 800px;
+  height: 300px;
+  border: 1px solid #000;
+  border-radius: 10px;
+  background-color: #fff;
+  margin: auto;
+}
+
+
+#modal_msg p{
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+
+#modal_back {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  opacity: 0.5;
+  background-color: #ccc;
+}

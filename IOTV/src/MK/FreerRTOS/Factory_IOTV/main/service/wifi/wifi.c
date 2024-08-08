@@ -157,7 +157,6 @@ void wifi_service_apsta_init(void)
 		free(sta_pwd);
 	}
 
-
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_at));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta));
 	ESP_ERROR_CHECK(esp_wifi_start());
@@ -314,6 +313,24 @@ const wifi_ap_record_t *wifi_service_last_scan(void)
 	return ap_info;
 }
 
+void wifi_service_conntect_to_AP(const char *ssid, const char *pwd)
+{
+	if ( !(glob_get_status_reg() & STATUS_WIFI_STA_START) || ssid == NULL || pwd == NULL)
+		return;
+
+	esp_wifi_disconnect();
+
+	wifi_config_t wifi_config;
+	esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+
+	strcpy((char *)(wifi_config.sta.ssid), ssid);
+	strcpy((char *)(wifi_config.sta.password), pwd);
+
+	esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+
+	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+}
+
 void wifi_service_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
@@ -346,9 +363,10 @@ void wifi_service_task(void *pvParameters)
 	//	wifi_service_only_ap_init();
 	wifi_service_apsta_init();
 
-	//	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+//	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
-	int counter = 0;
+	uint8_t counter = 0;
+	const uint8_t COUNTER_MAX = 4;
 
 	for( ;; )
 	{
@@ -361,21 +379,25 @@ void wifi_service_task(void *pvParameters)
 				|| (glob_get_status_reg() & STATUS_WIFI_SCANNING)
 				|| (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED))
 		{
-			goto for_end;
+			goto for_end_clear_counter;
 		}
 
 		wifi_config_t wifi_config;
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
 		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
-		printf("%s %s Try connect to ssid = %s, pwd = %s\n", TAG, task_name, wifi_config.sta.ssid, wifi_config.sta.password);
+		printf("%s %s %d Try connect to ssid = %s, pwd = %s\n", TAG, task_name,
+				counter, wifi_config.sta.ssid, wifi_config.sta.password);
 		esp_wifi_connect();
 
-		if (++counter > 5)
+		if (++counter > COUNTER_MAX)
+		{
 			glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+			glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
+			for_end_clear_counter:
+			counter = 0;
+		}
 
-		for_end:
-		counter = 0;
 		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
 	glob_clear_bits_service_reg(SERVICE_WIFI_ON);

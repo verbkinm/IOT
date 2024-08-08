@@ -136,6 +136,7 @@ static char *network_info(const char *ifkey, esp_mac_type_t mac_type, const char
 	}
 
 	strcat_dynamic(&result, dash);
+
 	return result;
 }
 

@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
-		<link href="/style.css" rel="stylesheet" type="text/css">
+		<link href="style.css" rel="stylesheet" type="text/css">
+		<script defer src="js/js.js"></script>
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
@@ -12,28 +13,75 @@
 			<div class="menu_1"> <a href="net.html">Сеть</a></div>
 			<div class="menu_1"> <a href="ota.html">Обновление</a></div>
 		</div>
+
 		<div class="content">
-			<h2>WIFI клиент:</h2>
-			<p>Состояние: подключён</p>
-			<form action="/net" method="post">
-				<label for="ssid">SSID:</label><input id="ssid" type="text" name="ssid"><br>
-				<label for="pwd">Пароль:</label><input id="pass" type="text" name="pass"><br>
-				<label></label><input type="submit" value="Сохранить">
-			</form>
-			<h3>
-				Список доступных точек доступа WIFI:
-			</h3>
-			<form>
-				<select name="select" size="2">
-					<option selected value="s1">Чебурашка</option>
-					<option value="s2">Крокодил Гена</option>
-					<option value="s3">Шапокляк</option>
-					<option value="s4">Крыса Лариса</option>
-				</select>
-				<input type="submit" value="Подключиться">
-				<input type="submit" value="Обновить">
-			</form>
-			<hr>
+			<div class="content_block">
+				<h2>WIFI клиент:</h2>
+				<p id="sta_state"><br></p>
+
+				<label for="ssid">SSID:</label><input id="ssid" type="text" placeholder="Введите ssid"><br>
+				<label for="pwd">Пароль:</label><input id="pwd" type="text" placeholder="Введите пароль"><br>
+				<label></label><button onclick="connect_to();">Подключиться</button>
+
+				<h3>Список доступных точек доступа WIFI:</h3>
+				<select id="select" size="2" onchange="OnSelectionChange (this)"></select>
+				<div class="btn"><button onclick="scan();">Обновить</button></div>
+			</div>
 		</div>
+
+		<span id="modal">
+			<div id="modal_back"></div>
+			<div id="modal_msg"><p id="modal_text">Подождите...</p></div>
+		</span>
+
 	</body>
 </html>
+
+<script>
+	var msg = {
+        type: "sta_state",
+    };
+
+    var timerId;
+    clearInterval(timerId);
+
+	function OnSelectionChange (select) {
+		var selectedOption = select.options[select.selectedIndex];
+		var ssid = document.getElementById ("ssid");
+		ssid.value = selectedOption.value;
+	}
+
+    function connect_to(){
+		modal_msg("Подождите...")
+    	var conn_msg = {
+			type: "conn",
+			ssid: this.ssid.value,
+			pwd: this.pwd.value,
+		};
+
+		socket.send(JSON.stringify(conn_msg));
+		timerId = setInterval(updateTimeConn, 10000);
+	};
+
+	function scan() {
+		modal_msg("Подождите...")
+    	var scan_msg = {
+			type: "scan"
+		};
+
+		socket.send(JSON.stringify(scan_msg));
+		timerId = setInterval(updateTimeScan, 10000);
+	}
+
+	function updateTimeConn() {
+		socket.send(JSON.stringify(msg));
+	}
+
+	function updateTimeScan() {
+		clearInterval(timerId);
+		var scan_result_msg = {
+			type: "scan_result"
+		};
+		socket.send(JSON.stringify(scan_result_msg));
+	}
+</script>

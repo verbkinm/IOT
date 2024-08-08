@@ -1,18 +1,76 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        <title>IOTV ESP32 Заводской режим</title>
-    </head>
-    <body>
-        <form action="/ota" method="post">
-            <h1>Подключение к wifi установлено =)</h1>
-            <p>Введите адрес прошивки:</p>
-            <p><input value="https://" type="text" size="40" name="firmware" required=""></p>
-            <p><input type="submit" style="width:150px;"></p>
-        </form>
-    </body>
+	<head>
+		<meta charset="utf-8">
+		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+		<link href="style.css" rel="stylesheet" type="text/css">
+		<script defer src="js/js.js"></script>
+		<title>IOTV ESP32 Заводской режим</title>
+	</head>
+	<body>
+		<div class="menu">
+			<div class="menu_1"> <a href="index.html">Информация</a></div>
+			<div class="menu_1"> <a href="net.html">Сеть</a></div>
+			<div class="menu_1"> <a href="ota.html">Обновление</a></div>
+		</div>
+
+		<div class="content">
+			<div class="content_block">
+				<h2>Обновление по https:</h2>
+				<input id="url" type="text" placeholder="Введите url (https://)" value="https://"><br>
+				<div class="btn"><button onclick="ota_https();">Обновить</button></div>
+
+				<h2>Обновление из файла:</h2>
+				<div class="btn"><button onclick="">Загрузить</button></div>
+			</div>
+		</div>
+
+		<span id="modal">
+			<div id="modal_back"></div>
+			<div id="modal_msg"><p id="modal_text">Подождите...</p></div>
+		</span>
+
+	</body>
 </html>
 
+<script>
+	var msg = {
+        type: "ota",
+    };
 
+    var timerId;
+    clearInterval(timerId);
+
+    function ota_https() {
+		modal_msg_hide()
+    	var ota_msg = {
+			type: "ota",
+			url: document.getElementById("url").value,
+		};
+
+		socket.send(JSON.stringify(ota_msg));
+		// timerId = setInterval(updateTimeConn, 10000);
+	};
+
+	function scan() {
+		modal_msg_hide();
+    	var scan_msg = {
+			type: "scan"
+		};
+
+		socket.send(JSON.stringify(scan_msg));
+		timerId = setInterval(updateTimeScan, 10000);
+	}
+
+	function updateTimeConn() {
+		socket.send(JSON.stringify(msg));
+	}
+
+	function updateTimeScan() {
+		clearInterval(timerId);
+		var scan_result_msg = {
+			type: "scan_result"
+		};
+		socket.send(JSON.stringify(scan_result_msg));
+	}
+</script>

@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
 		<link href="/style.css" rel="stylesheet" type="text/css">
+		<script defer src="/js/js.js"></script>
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
@@ -13,8 +14,16 @@
 			<div class="menu_1"> <a href="ota.html">Обновление</a></div>
 		</div>
 		<div class="content">
-			<xmp>
-			</xmp>
+			<div class="content_block">
+				<xmp id="sysinf"></xmp>
+			</div>
 		</div>
 	</body>
 </html>
+
+<script>
+	var msg = {
+        type: "sysinf",
+    };
+</script>
+
