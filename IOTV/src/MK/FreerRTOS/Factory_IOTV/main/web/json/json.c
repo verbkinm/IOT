@@ -14,26 +14,37 @@
 #include "global/registers.h"
 #include "nvs/local_nvs.h"
 #include "service/wifi/wifi.h"
+#include "ota/ota.h"
+#include "service/update/update.h"
 
 #define TYPE_STR						"type"
-	#define TYPE_VALUE_STR				"sysinf"
+	#define TYPE_SYSINF_VALUE_STR		"sysinf"
 	#define TYPE_STA_STATE_VALUE_STR	"sta_state"
 	#define TYPE_SCAN_VALUE_STR			"scan"
 	#define TYPE_SCAN_RESULT_VALUE_STR	"scan_result"
 	#define TYPE_CONN_VALUE_STR			"conn"
 	#define TYPE_OTA_VALUE_STR			"ota"
+	#define TYPE_FIRMWARE_VALUE_STR		"firmware"
 
 #define TEXT_STR						"text"
 #define STA_SSID_STR					"ssid"
 #define STA_PWD_STR						"pwd"
 #define URL_STR							"url"
 #define RESULT_STR						"result"
+#define OK_STR							"ok"
+#define ERR_STR							"err"
 
 // CONN
 #define STA_STATE_STR					"state"
 	#define STA_STATE_ONLINE_VALUE_STR	"online"
 	#define STA_STATE_OFFLINE_VALUE_STR	"offline"
 	#define STA_STATE_CONNECTING_VALUE_STR	"connecting"
+
+//FIRMWARE
+#define DATA_STR						"data"
+#define SIZE_STR						"size"
+#define PKG_STR							"pkg"
+#define PKGS_STR						"pkgs"
 
 enum type {
 	SYSINFO,
@@ -42,15 +53,53 @@ enum type {
 	SCAN_RESULT,
 	CONN,
 	OTA,
+	FIRMWARE,
 	UNKNOW
 };
+
+struct pair {
+	char *first;
+	char *second;
+}typedef pair_t;
+
+static const char *TAG = "JSON";
+
+static char *parsePairs(const pair_t *arr, size_t size);
 
 static int type_str_to_int(const char *str);
 static char *sysinf_reply(void);
 static char *sta_state_reply(void);
 static char *conn_reply(const cJSON *root);
 static char *ota_reply(const cJSON *root);
+static char *firmware_reply(const cJSON *root);
 static char *scan_result_reply(void);
+
+static char *parsePairs(const pair_t *arr, size_t size)
+{
+	if (arr == NULL || size == 0)
+		return NULL;
+
+	char *result = NULL;
+
+	cJSON *root = cJSON_CreateObject();
+	if (root == NULL)
+		return result;
+
+
+	for (size_t i = 0; i < size; ++i)
+	{
+		cJSON *obj = cJSON_CreateString(arr[i].second);
+		if (obj == NULL)
+			goto end;
+		cJSON_AddItemToObject(root, arr[i].first, obj);
+	}
+
+	result = cJSON_Print(root);
+
+	end:
+	cJSON_Delete(root);
+	return result;
+}
 
 static char *scan_result_reply(void)
 {
@@ -116,35 +165,68 @@ static char *ota_reply(const cJSON *root)
 		if (url == NULL)
 			strcat_dynamic(&url, " ");
 
-		cJSON *reply_root = cJSON_CreateObject();
-		if (reply_root == NULL)
-		{
-			delete_ptr((void *)&url);
-			return NULL;
-		}
 
-		cJSON *reply_type_text = cJSON_CreateString(TYPE_OTA_VALUE_STR);
-		if (reply_type_text == NULL)
-			goto reply_end;
-		cJSON_AddItemToObject(reply_root, TYPE_STR, reply_type_text);
+		pair_t pairs[] = {
+				{TYPE_STR, TYPE_OTA_VALUE_STR},
+				{URL_STR, url}
+		};
 
-		cJSON *reply_url = cJSON_CreateString(url);
-		if (reply_url == NULL)
-			goto reply_end;
-		cJSON_AddItemToObject(reply_root, URL_STR, reply_url);
-
-		result = cJSON_Print(reply_root);
-
-		reply_end:
-		cJSON_Delete(reply_root);
+		result = parsePairs(pairs, 2);
 		delete_ptr((void *)&url);
 	}
 	else
 	{
-		nvs_write_update_url(cJSON_GetStringValue(jurl));
+		char *url = cJSON_GetStringValue(jurl);
+		nvs_write_update_url(url);
+		pair_t pairs[] = {
+				{TYPE_STR, TYPE_OTA_VALUE_STR},
+				{RESULT_STR, ERR_STR}
+		};
+		if (ota_firmware(url) == ESP_OK)
+			pairs[1].second = OK_STR;
+
+		result = parsePairs(pairs, 2);
 	}
 
 	return  result;
+}
+
+static char *firmware_reply(const cJSON *root)
+{
+	if (root == NULL)
+		return NULL;
+
+	cJSON *j_data = cJSON_GetObjectItemCaseSensitive(root, DATA_STR);
+	cJSON *j_size = cJSON_GetObjectItemCaseSensitive(root, SIZE_STR);
+	cJSON *j_pkg = cJSON_GetObjectItemCaseSensitive(root, PKG_STR);
+	cJSON *j_pkgs = cJSON_GetObjectItemCaseSensitive(root, PKGS_STR);
+
+	if (j_data == NULL || j_size == NULL || j_pkg == NULL || j_pkgs == NULL)
+		return NULL;
+
+	size_t dataSize = cJSON_GetNumberValue(j_size);
+	char *data = malloc(dataSize);
+	size_t pkg = cJSON_GetNumberValue(j_pkg);
+	size_t pkgs = cJSON_GetNumberValue(j_pkgs);
+
+	if (data == NULL || dataSize == 0 || dataSize > BUFSIZE || pkg > pkgs)
+	{
+		printf("%s firmware_reply error\n", TAG);
+		return NULL;
+	}
+
+	size_t i = 0;
+	cJSON *element;
+	cJSON_ArrayForEach(element, j_data)
+	{
+		data[i] = cJSON_GetNumberValue(element);
+	}
+
+	printf("%s pkg/pkgs = %u/%u,pkg size = %u\n", TAG, pkg, pkgs, dataSize);
+	update_service_write_firmware(data, dataSize, pkg, pkgs);
+	free(data);
+
+	return NULL;
 }
 
 static char *conn_reply(const cJSON *root)
@@ -173,34 +255,11 @@ static char *conn_reply(const cJSON *root)
 }
 static char *sta_state_reply(void)
 {
-	char *result = NULL;
-
-	cJSON *root = cJSON_CreateObject();
-	if (root == NULL)
-		return result;
-
-	cJSON *type_text = cJSON_CreateString(TYPE_STA_STATE_VALUE_STR);
-	if (type_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, TYPE_STR, type_text);
-
-	cJSON *state_text = cJSON_CreateString((glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) ? STA_STATE_ONLINE_VALUE_STR :
-			(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING) ? STA_STATE_CONNECTING_VALUE_STR :STA_STATE_OFFLINE_VALUE_STR);
-
-	if (state_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, STA_STATE_STR, state_text);
-
 	char *ssid = NULL;
 	nvs_read_wifi_sta_ssid(&ssid);
 	char *tmp_ssid = str_replace(ssid, "\"", "\\\"");
 	delete_ptr((void *)&ssid);
 	ssid = tmp_ssid;
-
-	cJSON *ssid_text = cJSON_CreateString(ssid);
-	if (ssid_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, STA_SSID_STR, ssid_text);
 
 	char *pwd = NULL;
 	nvs_read_wifi_sta_pwd(&pwd);
@@ -208,53 +267,39 @@ static char *sta_state_reply(void)
 	delete_ptr((void *)&pwd);
 	pwd = tmp_pwd;
 
-	cJSON *pwd_text = cJSON_CreateString(pwd);
-	if (pwd_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, STA_PWD_STR, pwd_text);
+	char *state = (glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) ? STA_STATE_ONLINE_VALUE_STR :
+			(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTING) ? STA_STATE_CONNECTING_VALUE_STR : STA_STATE_OFFLINE_VALUE_STR;
 
-	result = cJSON_Print(root);
+	pair_t pairs[] = {
+			{TYPE_STR, TYPE_STA_STATE_VALUE_STR},
+			{STA_STATE_STR, state},
+			{STA_SSID_STR, ssid},
+			{STA_PWD_STR, pwd}
+	};
 
-	end:
-	cJSON_Delete(root);
+	char *result = NULL;
+	result = parsePairs(pairs, 4);
+
 	delete_ptr((void *)&ssid);
 	delete_ptr((void *)&pwd);
+
 	return result;
 }
 
 static char *sysinf_reply(void)
 {
-	char *result = NULL;
-
 	char *tmp_str = get_system_info();
-	if (tmp_str == NULL)
-		goto bad_end;
-
 	char *tmp_str_repl = str_replace(tmp_str, "\"", "\\\"");
-	if (tmp_str_repl == NULL)
-		goto bad_end;
-
-	cJSON *root = cJSON_CreateObject();
-	if (root == NULL)
-		goto bad_end;
-
-	cJSON *type_text = cJSON_CreateString(TYPE_VALUE_STR);
-	if (type_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, TYPE_STR, type_text);
-
-	cJSON *text_text = cJSON_CreateString(tmp_str_repl);
-	if (text_text == NULL)
-		goto end;
-	cJSON_AddItemToObject(root, TEXT_STR, text_text);
-
-	result = cJSON_Print(root);
-
-	end:
-	cJSON_Delete(root);
-
-	bad_end:
 	delete_ptr((void *)&tmp_str);
+
+	pair_t pairs[] = {
+			{TYPE_STR, TYPE_SYSINF_VALUE_STR},
+			{TEXT_STR, tmp_str_repl}
+	};
+
+	char *result = NULL;
+	result = parsePairs(pairs, 2);
+
 	delete_ptr((void *)&tmp_str_repl);
 
 	return result;
@@ -265,7 +310,7 @@ static int type_str_to_int(const char *str)
 	if(str == NULL)
 		return UNKNOW;
 
-	if(strcmp(str, TYPE_VALUE_STR) == 0)
+	if(strcmp(str, TYPE_SYSINF_VALUE_STR) == 0)
 		return SYSINFO;
 	if(strcmp(str, TYPE_STA_STATE_VALUE_STR) == 0)
 		return STA_STATE;
@@ -277,6 +322,8 @@ static int type_str_to_int(const char *str)
 		return CONN;
 	if(strcmp(str, TYPE_OTA_VALUE_STR) == 0)
 		return OTA;
+	if(strcmp(str, TYPE_FIRMWARE_VALUE_STR) == 0)
+		return FIRMWARE;
 
 	return UNKNOW;
 }
@@ -315,8 +362,12 @@ char *parse_request(const char *content)
 	case OTA:
 		result = ota_reply(root);
 		break;
+	case FIRMWARE:
+		result = firmware_reply(root);
+		break;
 	case UNKNOW:
 	default:
+		printf("%s unknow request", TAG);
 		goto end;
 	}
 

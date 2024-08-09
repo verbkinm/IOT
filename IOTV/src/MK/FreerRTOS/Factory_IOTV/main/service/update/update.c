@@ -153,6 +153,37 @@ const char *update_service_task_name()
 	return task_name;
 }
 
+esp_err_t update_service_write_firmware(const char *data, size_t dataSize, size_t pkgNumber, size_t pkgTotal)
+{
+	const esp_partition_t *part = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
+
+	if (data == NULL || dataSize == 0 || part == NULL)
+		return ESP_FAIL;
+
+	if (pkgNumber == 1)
+		esp_partition_erase_range(part, 0, part->size);
+
+	if (esp_partition_write(part, pkgNumber - 1 * BUFSIZE, data, dataSize) != ESP_OK)
+	{
+		ESP_LOGE(TAG, "Error esp_partition_write.");
+		return ESP_FAIL;
+	}
+
+	if (pkgNumber == pkgTotal)
+	{
+		esp_err_t ret = esp_ota_set_boot_partition(part);
+		if (ret != ESP_OK)
+		{
+			ESP_LOGE(TAG, "Error esp_ota_set_boot_partition. %d", ret);
+			return ESP_FAIL;
+		}
+	}
+
+	ESP_LOGI(TAG, "Write firmware - SUCCESS");
+
+	return ESP_OK;
+}
+
 void update_service_task(void *pvParameters)
 {
 	glob_set_bits_service_reg(SERVICE_UPDATE_ON);

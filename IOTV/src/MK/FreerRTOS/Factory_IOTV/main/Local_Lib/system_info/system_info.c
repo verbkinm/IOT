@@ -10,6 +10,7 @@
 #include <inttypes.h>
 #include "esp_app_desc.h"
 #include "esp_partition.h"
+#include "esp_ota_ops.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
@@ -293,7 +294,7 @@ char *get_partition_tabel(void)
 	strcat_dynamic(&result, "\nPartition table:\n");
 	strcat_dynamic(&result, dash);
 
-	snprintf(buf, sizeof(buf), "%-17s Type ST %10s %10s\n", "Label", "Offset", "Length");
+	snprintf(buf, sizeof(buf), "%-18s Type ST %10s %10s\n", "Label", "Offset", "Length");
 	strcat_dynamic(&result, buf);
 
 	esp_partition_iterator_t it;
@@ -304,8 +305,11 @@ char *get_partition_tabel(void)
 	// label is found. Verify if its the same instance as the one found before.
 	for (; it != NULL; it = esp_partition_next(it))
 	{
+		char boot_label = ' ';
 		const esp_partition_t *part = esp_partition_get(it);
-		snprintf(buf, sizeof(buf), "%-17s  %02d  %02d %#010x %#010x\n", part->label, part->type, part->subtype, (int)part->address, (int)part->size);
+		if (part == esp_ota_get_boot_partition())
+			boot_label = '*';
+		snprintf(buf, sizeof(buf), "%c%-17s  %02d  %02d %#010x %#010x\n", boot_label, part->label, part->type, part->subtype, (int)part->address, (int)part->size);
 		strcat_dynamic(&result, buf);
 	}
 	// Release the partition iterator to release memory allocated for it

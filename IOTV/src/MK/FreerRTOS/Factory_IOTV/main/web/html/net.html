@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
-		<link href="style.css" rel="stylesheet" type="text/css">
-		<script defer src="js/js.js"></script>
+		<link href="/style.css" rel="stylesheet" type="text/css">
+		<script defer src="/js/js.js"></script>
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
@@ -31,7 +31,7 @@
 
 		<span id="modal">
 			<div id="modal_back"></div>
-			<div id="modal_msg"><p id="modal_text">Подождите...</p></div>
+			<div id="modal_msg"><p id="modal_text"></p></div>
 		</span>
 
 	</body>
@@ -52,7 +52,7 @@
 	}
 
     function connect_to(){
-		modal_msg("Подождите...")
+		modal_msg("Подключение...")
     	var conn_msg = {
 			type: "conn",
 			ssid: this.ssid.value,
@@ -64,7 +64,7 @@
 	};
 
 	function scan() {
-		modal_msg("Подождите...")
+		modal_msg("Сканирование сети...")
     	var scan_msg = {
 			type: "scan"
 		};

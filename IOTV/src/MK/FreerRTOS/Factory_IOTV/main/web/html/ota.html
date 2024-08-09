@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+		<link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
 		<link href="style.css" rel="stylesheet" type="text/css">
 		<script defer src="js/js.js"></script>
 		<title>IOTV ESP32 Заводской режим</title>
@@ -17,17 +17,17 @@
 		<div class="content">
 			<div class="content_block">
 				<h2>Обновление по https:</h2>
-				<input id="url" type="text" placeholder="Введите url (https://)" value="https://"><br>
+				<input id="url" type="text" placeholder="Введите url (https://)"><br>
 				<div class="btn"><button onclick="ota_https();">Обновить</button></div>
 
 				<h2>Обновление из файла:</h2>
-				<div class="btn"><button onclick="">Загрузить</button></div>
+				<div class="btn"><input type="file"  onchange="showFile(this)"><!--Загрузить</button></div>-->
 			</div>
 		</div>
 
 		<span id="modal">
 			<div id="modal_back"></div>
-			<div id="modal_msg"><p id="modal_text">Подождите...</p></div>
+			<div id="modal_msg"><p id="modal_text"></p></div>
 		</span>
 
 	</body>
@@ -49,8 +49,65 @@
 		};
 
 		socket.send(JSON.stringify(ota_msg));
-		// timerId = setInterval(updateTimeConn, 10000);
+
+		modal_msg("Обновление...");
 	};
+
+
+	function showFile(input) {
+		let file = input.files[0];
+
+		// console.log(file.size);
+
+
+		let reader = new FileReader();
+		reader.readAsArrayBuffer(file)
+
+		reader.onload = function() {
+		const SIZE = 2048
+			var arrayBuffer = reader.result;
+			var array = new Uint8Array(arrayBuffer);
+
+			// Display some information about the file
+			var fileSize = arrayBuffer.byteLength;
+			console.log("Пакетов: ", Math.ceil(fileSize / SIZE), fileSize);
+			var totalPkgs = Math.ceil(fileSize / SIZE)
+
+			for (var i = 0; i < totalPkgs; i++)
+			{
+				var bytes = [];
+				for (var j = 0; j < Math.min(fileSize - i * SIZE, SIZE); j++) {
+					bytes.push(array[i * SIZE + j]);
+				}
+				var firmware_msg = {
+					type: "firmware",
+					data: bytes,
+					size: bytes.length,
+					pkg: i + 1,
+					pkgs: totalPkgs
+				};
+
+				console.log(JSON.stringify(firmware_msg));
+				socket.send(JSON.stringify(firmware_msg));
+			}
+
+   //
+			// console.log(bytes);
+   //
+			// var firmware_msg = {
+			// 	type: "firmware",
+			// 	data: bytes,
+			// };
+   //
+			// console.log(JSON.stringify(firmware_msg));
+			// socket.send(JSON.stringify(firmware_msg));
+		};
+
+		reader.onerror = function() {
+		console.log(reader.error);
+		};
+	}
+
 
 	function scan() {
 		modal_msg_hide();

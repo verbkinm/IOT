@@ -79,9 +79,9 @@ esp_err_t ws_handler(httpd_req_t *req)
 			free(buf);
 			return ret;
 		}
-		ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+//		ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
 	}
-	ESP_LOGI(TAG, "Packet type: %d, data: %s", ws_pkt.type, ws_pkt.payload);
+//	ESP_LOGI(TAG, "Packet type: %d, data: %s", ws_pkt.type, ws_pkt.payload);
 	char *reply = parse_request((const char *)(ws_pkt.payload));
 	if (reply != NULL)
 	{

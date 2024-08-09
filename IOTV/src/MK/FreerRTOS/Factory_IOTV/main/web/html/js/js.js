@@ -50,7 +50,17 @@ socket.onmessage = function(event) {
         modal_msg_hide()
       break;
     case "ota":
-         document.getElementById("url").value = obj.url;
+        if (obj.url)
+            document.getElementById("url").value = obj.url;
+
+        if (obj.result)
+        {
+            if (obj.result == "ok")
+                modal_msg("Перезагрузите устройство.")
+            else if (obj.result == "err")
+                modal_msg("Ошибка обновления!", 3000);
+        }
+
     break;
   }
 
@@ -76,9 +86,12 @@ function replace_slash(str) {
     return str.replace(re, "\"");
 }
 
-function modal_msg(text) {
+function modal_msg(text, interval) {
     document.getElementById("modal").style.display = "block";
     document.getElementById("modal_text").innerHTML = text;
+
+    if (interval)
+        setTimeout(modal_msg_hide, interval);
 }
 
 function modal_msg_hide() {
