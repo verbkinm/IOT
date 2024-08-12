@@ -12,8 +12,8 @@
 
 void update_service_task(void *pvParameters);
 const char *update_service_task_name(void);
-char *update_service_get_available_version(void);
 
-esp_err_t update_service_write_firmware(const char *data, size_t dataSize, size_t pkgNumber, size_t pkgTotal);
+esp_err_t update_service_firmware(const char *data, size_t dataSize, size_t pkgNumber, size_t pkgTotal);
+esp_err_t update_service_backtofactory(void);
 
 #endif /* MAIN_SERVICE_UPDATE_UPDATE_H_ */

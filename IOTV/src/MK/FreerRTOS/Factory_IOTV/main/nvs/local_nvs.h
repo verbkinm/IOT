@@ -15,7 +15,7 @@
 
 #include "global/global_def.h"
 
-esp_err_t nvs_read_update_flag(uint8_t **out);
+esp_err_t nvs_read_update_flag(uint8_t *out);
 esp_err_t nvs_read_update_url(char **out);
 
 esp_err_t nvs_read_wifi_sta_ssid(char **out);

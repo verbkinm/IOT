@@ -9,7 +9,7 @@
 
 static const char *TAG = "local_nvs";
 
-static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t **out);
+static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t *out);
 static esp_err_t nvs_write_u8(const char *namespace, const char *key, uint8_t value);
 
 static esp_err_t nvs_read_string(const char *namespace, const char *key, char **out);
@@ -45,9 +45,9 @@ static esp_err_t nvs_write_u8(const char *namespace, const char *key, uint8_t va
 	return ESP_OK;
 }
 
-static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t **out)
+static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t *out)
 {
-	if (namespace == NULL || key == NULL || *out == NULL)
+	if (namespace == NULL || key == NULL || out == NULL)
 		return ESP_ERR_INVALID_ARG;
 
 	nvs_handle_t my_handle;
@@ -57,7 +57,7 @@ static esp_err_t nvs_read_u8(const char *namespace, const char *key, uint8_t **o
 		return ESP_FAIL;
 	}
 
-	if (nvs_get_u8(my_handle, key, *out) != ESP_OK)
+	if (nvs_get_u8(my_handle, key, out) != ESP_OK)
 	{
 		ESP_LOGE(TAG, "nvs_get_u8 %s failed", key);
 		nvs_close(my_handle);
@@ -131,7 +131,7 @@ static esp_err_t nvs_write_string(const char *namespace, const char *key, const 
 	return ESP_OK;
 }
 
-esp_err_t nvs_read_update_flag(uint8_t **out)
+esp_err_t nvs_read_update_flag(uint8_t *out)
 {
 	return nvs_read_u8(NVS_NAMESPACE_UPDATE, NVS_KEY_UPDATE_FLAG, out);
 }

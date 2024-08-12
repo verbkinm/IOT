@@ -61,7 +61,7 @@ esp_err_t ws_handler(httpd_req_t *req)
 		ESP_LOGE(TAG, "httpd_ws_recv_frame failed to get frame len with %d", ret);
 		return ret;
 	}
-	ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+//	ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
 	if (ws_pkt.len)
 	{
 		/* ws_pkt.len + 1 is for NULL termination as we are expecting a string */

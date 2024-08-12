@@ -8,11 +8,14 @@
 #include "global/global_def.h"
 #include "wifi.h"
 
+#ifdef DEBUG
+#include "esp_mac.h"
+#endif
+
 #include "esp_wifi.h"
-#include "esp_log.h"
 #include "esp_event.h"
 #include "esp_netif.h"
-#include "esp_mac.h"
+
 #include "esp_netif_types.h"
 #include "nvs_flash.h"
 #include "netif/etharp.h"
@@ -23,6 +26,7 @@
 #include "global/registers.h"
 #include "Local_Lib/local_lib.h"
 #include "nvs/local_nvs.h"
+#include "ota/ota.h"
 
 const static char *TAG = "WIFI";
 const static char *task_name = "wifi_task";
@@ -41,7 +45,7 @@ void wifi_service_only_sta_init(void)
 	wifi_service_base_init();
 
 	netif_sta = esp_netif_create_default_wifi_sta();
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+	esp_wifi_set_mode(WIFI_MODE_STA);
 
 	wifi_config_t wifi_config;
 	esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -68,7 +72,7 @@ void wifi_service_only_ap_init(void)
 	wifi_service_base_init();
 
 	netif_at = esp_netif_create_default_wifi_ap();
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+	esp_wifi_set_mode(WIFI_MODE_AP);
 
 	wifi_config_t wifi_config_at = {
 			.ap = {
@@ -79,14 +83,14 @@ void wifi_service_only_ap_init(void)
 			},
 	};
 
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_at) );
+	esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_at);
 	esp_wifi_start();
 
 	esp_netif_ip_info_t ip_info;
 	//	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
 	esp_netif_get_ip_info(netif_at, &ip_info);
 
-
+#ifdef DEBUG
 	char ip_addr[16], ip_mask[16], ip_gw[16];
 	inet_ntoa_r(ip_info.ip.addr, ip_addr, 16);
 	inet_ntoa_r(ip_info.netmask, ip_mask, 16);
@@ -94,6 +98,7 @@ void wifi_service_only_ap_init(void)
 	ESP_LOGI(TAG, "Set up softAP with IP: %s, mask: %s, gw: %s\n", ip_addr, ip_mask, ip_gw);
 	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:'%s'", WIFI_SSID_AT);
 	ESP_LOGI(TAG, "wifi_init_sta finished.");
+#endif
 }
 
 static void wifi_service_base_init(void)
@@ -122,7 +127,7 @@ void wifi_service_apsta_init(void)
 	netif_sta = esp_netif_create_default_wifi_sta();
 	netif_at = esp_netif_create_default_wifi_ap();
 
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+	esp_wifi_set_mode(WIFI_MODE_APSTA);
 
 	wifi_config_t wifi_config_at = {
 			.ap = {
@@ -157,14 +162,15 @@ void wifi_service_apsta_init(void)
 		free(sta_pwd);
 	}
 
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_at));
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta));
-	ESP_ERROR_CHECK(esp_wifi_start());
+	esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_at);
+	esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta);
+	esp_wifi_start();
 
 	esp_netif_ip_info_t ip_info;
 	//	esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"), &ip_info);
 	esp_netif_get_ip_info(netif_at, &ip_info);
 
+#ifdef DEBUG
 	char ip_addr[16], ip_mask[16], ip_gw[16];
 	inet_ntoa_r(ip_info.ip.addr, ip_addr, 16);
 	inet_ntoa_r(ip_info.netmask, ip_mask, 16);
@@ -172,6 +178,7 @@ void wifi_service_apsta_init(void)
 	ESP_LOGI(TAG, "Set up softAP with IP: %s, mask: %s, gw: %s\n", ip_addr, ip_mask, ip_gw);
 	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:'%s'", WIFI_SSID_AT);
 	ESP_LOGI(TAG, "wifi_init_sta finished.");
+#endif
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -194,10 +201,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
 	{
-		//		printf("%s %s wifi sta connected\n", TAG, task_name);
+		printf("%s %s wifi sta connected\n", TAG, task_name);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 
+#ifdef DEBUG
 		wifi_config_t wifi_config;
 		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
@@ -213,8 +221,9 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 				TAG, task_name,
 				ssid_str, mac_str, pwd_str);
 
-		//		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
-		//		printf("ssid %s\n", ap_info->ssid);
+		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
+		printf("ssid %s\n", ap_info->ssid);
+#endif
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
 	{
@@ -234,7 +243,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 
 		esp_wifi_scan_get_ap_records(&number, ap_info);
 		esp_wifi_scan_get_ap_num(&ap_count);
-
+#ifdef DEBUG
 		ESP_LOGI(TAG, "Total APs scanned = %u", ap_count);
 		for (int i = 0; (i < AP_INFO_ARR_SIZE) && (i < ap_count); i++)
 		{
@@ -247,6 +256,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 			//			print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
 			printf("%s %s Channel \t\t%d\n", TAG, task_name, ap_info[i].primary);
 		}
+#endif
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
@@ -271,14 +281,18 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	else if (event_id == WIFI_EVENT_AP_STACONNECTED)
 	{
 		printf("%s %s APSTA connected\n", TAG, task_name);
+#ifdef DEBUG
 		wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
 		ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event->mac), event->aid);
+#endif
 	}
 	else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
 	{
 		printf("%s %s APSTA disconnected\n", TAG, task_name);
+#ifdef DEBUG
 		wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
 		ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event->mac), event->aid);
+#endif
 	}
 	else if (event_base == WIFI_EVENT)
 		printf("%s %s other event: %s %d\n", TAG, task_name, event_base, (int)event_id);
@@ -340,23 +354,23 @@ void wifi_service_task(void *pvParameters)
 
 	{
 		// Должен вызываться один раз!!!
-		ESP_ERROR_CHECK(esp_netif_init());
+		esp_netif_init();
 
 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-		ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+		esp_wifi_init(&cfg);
 
 		esp_event_handler_instance_t instance_any_id;
-		ESP_ERROR_CHECK(esp_event_loop_create_default());
-		ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+		esp_event_loop_create_default();
+		esp_event_handler_instance_register(WIFI_EVENT,
 				ESP_EVENT_ANY_ID,
 				&event_handler,
 				NULL,
-				&instance_any_id));
-		ESP_ERROR_CHECK(esp_event_handler_instance_register (IP_EVENT,
+				&instance_any_id);
+		esp_event_handler_instance_register (IP_EVENT,
 				ESP_EVENT_ANY_ID,
 				&event_handler,
 				NULL,
-				&instance_any_id));
+				&instance_any_id);
 	}
 
 	//	wifi_service_only_sta_init();
@@ -366,7 +380,7 @@ void wifi_service_task(void *pvParameters)
 //	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
 	uint8_t counter = 0;
-	const uint8_t COUNTER_MAX = 4;
+	const uint8_t COUNTER_MAX = 10;
 
 	for( ;; )
 	{

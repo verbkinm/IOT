@@ -13,71 +13,62 @@
 			<div class="menu_1"> <a href="net.html">Сеть</a></div>
 			<div class="menu_1"> <a href="ota.html">Обновление</a></div>
 		</div>
-
 		<div class="content">
 			<div class="content_block">
 				<h2>Обновление по https:</h2>
 				<input id="url" type="text" placeholder="Введите url (https://)"><br>
-				<div class="btn"><button onclick="ota_https();">Обновить</button></div>
+				<div class="btn"><button onclick="ota_https()">Обновить</button></div>
 
 				<h2>Обновление из файла:</h2>
-				<div class="btn"><input type="file"  onchange="showFile(this)"><!--Загрузить</button></div>-->
+				<div class="btn"><input type="file" onchange="showFile(this)">
 			</div>
 		</div>
-
 		<span id="modal">
 			<div id="modal_back"></div>
-			<div id="modal_msg"><p id="modal_text"></p></div>
+			<div id="modal_msg"><p id="modal_text" onclick="modal_msg_hide()"></p></div>
 		</span>
-
 	</body>
 </html>
 
 <script>
 	var msg = {
-        type: "ota",
-    };
+        type: "ota"
+    }
 
-    var timerId;
-    clearInterval(timerId);
+    var timerId
+    clearInterval(timerId)
 
     function ota_https() {
 		modal_msg_hide()
     	var ota_msg = {
 			type: "ota",
-			url: document.getElementById("url").value,
-		};
+			url: document.getElementById("url").value
+		}
 
-		socket.send(JSON.stringify(ota_msg));
+		socket.send(JSON.stringify(ota_msg))
 
-		modal_msg("Обновление...");
-	};
+		modal_msg("Обновление...")
+	}
 
 
 	function showFile(input) {
-		let file = input.files[0];
-
-		// console.log(file.size);
-
-
-		let reader = new FileReader();
+		let file = input.files[0]
+		let reader = new FileReader()
 		reader.readAsArrayBuffer(file)
 
 		reader.onload = function() {
-		const SIZE = 2048
-			var arrayBuffer = reader.result;
-			var array = new Uint8Array(arrayBuffer);
+			const SIZE = 2048
+			var arrayBuffer = reader.result
+			var array = new Uint8Array(arrayBuffer)
 
-			// Display some information about the file
-			var fileSize = arrayBuffer.byteLength;
-			console.log("Пакетов: ", Math.ceil(fileSize / SIZE), fileSize);
+			var fileSize = arrayBuffer.byteLength
 			var totalPkgs = Math.ceil(fileSize / SIZE)
 
 			for (var i = 0; i < totalPkgs; i++)
 			{
-				var bytes = [];
+				var bytes = []
 				for (var j = 0; j < Math.min(fileSize - i * SIZE, SIZE); j++) {
-					bytes.push(array[i * SIZE + j]);
+					bytes.push(array[i * SIZE + j])
 				}
 				var firmware_msg = {
 					type: "firmware",
@@ -85,49 +76,35 @@
 					size: bytes.length,
 					pkg: i + 1,
 					pkgs: totalPkgs
-				};
-
-				console.log(JSON.stringify(firmware_msg));
-				socket.send(JSON.stringify(firmware_msg));
+				}
+				socket.send(JSON.stringify(firmware_msg))
 			}
-
-   //
-			// console.log(bytes);
-   //
-			// var firmware_msg = {
-			// 	type: "firmware",
-			// 	data: bytes,
-			// };
-   //
-			// console.log(JSON.stringify(firmware_msg));
-			// socket.send(JSON.stringify(firmware_msg));
-		};
+		}
 
 		reader.onerror = function() {
-		console.log(reader.error);
-		};
+			console.log(reader.error)
+		}
 	}
 
-
 	function scan() {
-		modal_msg_hide();
+		modal_msg_hide()
     	var scan_msg = {
 			type: "scan"
-		};
+		}
 
-		socket.send(JSON.stringify(scan_msg));
-		timerId = setInterval(updateTimeScan, 10000);
+		socket.send(JSON.stringify(scan_msg))
+		timerId = setInterval(updateTimeScan, 10000)
 	}
 
 	function updateTimeConn() {
-		socket.send(JSON.stringify(msg));
+		socket.send(JSON.stringify(msg))
 	}
 
 	function updateTimeScan() {
-		clearInterval(timerId);
+		clearInterval(timerId)
 		var scan_result_msg = {
 			type: "scan_result"
-		};
-		socket.send(JSON.stringify(scan_result_msg));
+		}
+		socket.send(JSON.stringify(scan_result_msg))
 	}
 </script>

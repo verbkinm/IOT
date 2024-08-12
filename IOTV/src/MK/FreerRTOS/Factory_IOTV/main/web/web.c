@@ -53,10 +53,9 @@ static esp_err_t favicon_get_handler(httpd_req_t *req);
 static esp_err_t css_get_handler(httpd_req_t *req);
 static esp_err_t js_get_handler(httpd_req_t *req);
 static esp_err_t ota_get_handler(httpd_req_t *req);
-//static esp_err_t cap_handler(httpd_req_t *req);
 static esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err);
 
-static char *parseUri(const char* uri, size_t *resultSize, const char *searchStr);
+//static char *parseUri(const char* uri, size_t *resultSize, const char *searchStr);
 
 // Приватные объекты использующие функции описанные выше
 static const httpd_uri_t root = {
@@ -103,29 +102,29 @@ static const httpd_uri_t ws = {
 		.is_websocket = true
 };
 
-//Реализация приватных функций
-static char *parseUri(const char* uri, size_t *resultSize, const char *searchStr)
-{
-	if (uri == NULL || searchStr == NULL || resultSize == NULL)
-		return NULL;
-
-	char *result = NULL;
-	*resultSize = 0;
-
-	char *start = strstr(uri, searchStr);
-	if (start == NULL)
-		return NULL;
-
-	start += strlen(searchStr);
-	char *stop = strstr(start, "&");
-	if (stop == NULL)
-		stop = (char *)uri + strlen(uri);
-
-	result = start;
-	*resultSize = stop - start;
-
-	return result;
-}
+// Парсинг аргументов
+//static char *parseUri(const char* uri, size_t *resultSize, const char *searchStr)
+//{
+//	if (uri == NULL || searchStr == NULL || resultSize == NULL)
+//		return NULL;
+//
+//	char *result = NULL;
+//	*resultSize = 0;
+//
+//	char *start = strstr(uri, searchStr);
+//	if (start == NULL)
+//		return NULL;
+//
+//	start += strlen(searchStr);
+//	char *stop = strstr(start, "&");
+//	if (stop == NULL)
+//		stop = (char *)uri + strlen(uri);
+//
+//	result = start;
+//	*resultSize = stop - start;
+//
+//	return result;
+//}
 
 // HTTP GET Handler
 static esp_err_t root_get_handler(httpd_req_t *req)
@@ -205,20 +204,15 @@ static esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 	return ESP_OK;
 }
 
-//static esp_err_t cap_handler(httpd_req_t *req)
-//{
-//	return http_404_error_handler(req, 0);
-//}
-
 //Реализация публичных функций
 httpd_handle_t start_webserver(void)
 {
 	while(!(glob_get_status_reg() & STATUS_WIFI_AP_START))
-		vTaskDelay(100 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 
 	httpd_handle_t server = NULL;
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-	config.max_open_sockets = 1;
+	config.max_open_sockets = 10;
 	config.lru_purge_enable = true;
 
 	// Start the httpd server

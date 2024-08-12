@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
-		<link href="/style.css" rel="stylesheet" type="text/css">
-		<script defer src="/js/js.js"></script>
+		<link href="style.css" rel="stylesheet" type="text/css">
+		<script defer src="js/js.js"></script>
 		<title>IOTV ESP32 Заводской режим</title>
 	</head>
 	<body>
@@ -21,11 +21,11 @@
 
 				<label for="ssid">SSID:</label><input id="ssid" type="text" placeholder="Введите ssid"><br>
 				<label for="pwd">Пароль:</label><input id="pwd" type="text" placeholder="Введите пароль"><br>
-				<label></label><button onclick="connect_to();">Подключиться</button>
+				<label></label><button onclick="connect_to()">Подключиться</button>
 
 				<h3>Список доступных точек доступа WIFI:</h3>
 				<select id="select" size="2" onchange="OnSelectionChange (this)"></select>
-				<div class="btn"><button onclick="scan();">Обновить</button></div>
+				<div class="btn"><button onclick="scan()">Обновить</button></div>
 			</div>
 		</div>
 
@@ -40,15 +40,15 @@
 <script>
 	var msg = {
         type: "sta_state",
-    };
+    }
 
-    var timerId;
-    clearInterval(timerId);
+    var timerId
+    clearInterval(timerId)
 
 	function OnSelectionChange (select) {
-		var selectedOption = select.options[select.selectedIndex];
-		var ssid = document.getElementById ("ssid");
-		ssid.value = selectedOption.value;
+		var selectedOption = select.options[select.selectedIndex]
+		var ssid = document.getElementById ("ssid")
+		ssid.value = selectedOption.value
 	}
 
     function connect_to(){
@@ -57,31 +57,31 @@
 			type: "conn",
 			ssid: this.ssid.value,
 			pwd: this.pwd.value,
-		};
+		}
 
-		socket.send(JSON.stringify(conn_msg));
-		timerId = setInterval(updateTimeConn, 10000);
-	};
+		socket.send(JSON.stringify(conn_msg))
+		timerId = setInterval(updateTimeConn, 10000)
+	}
 
 	function scan() {
 		modal_msg("Сканирование сети...")
     	var scan_msg = {
 			type: "scan"
-		};
+		}
 
-		socket.send(JSON.stringify(scan_msg));
-		timerId = setInterval(updateTimeScan, 10000);
+		socket.send(JSON.stringify(scan_msg))
+		timerId = setInterval(updateTimeScan, 10000)
 	}
 
 	function updateTimeConn() {
-		socket.send(JSON.stringify(msg));
+		socket.send(JSON.stringify(msg))
 	}
 
 	function updateTimeScan() {
-		clearInterval(timerId);
+		clearInterval(timerId)
 		var scan_result_msg = {
 			type: "scan_result"
-		};
-		socket.send(JSON.stringify(scan_result_msg));
+		}
+		socket.send(JSON.stringify(scan_result_msg))
 	}
 </script>

@@ -14,8 +14,8 @@
 #include "global/registers.h"
 #include "nvs/local_nvs.h"
 #include "service/wifi/wifi.h"
-#include "ota/ota.h"
 #include "service/update/update.h"
+#include "ota/ota.h"
 
 #define TYPE_STR						"type"
 	#define TYPE_SYSINF_VALUE_STR		"sysinf"
@@ -33,6 +33,7 @@
 #define RESULT_STR						"result"
 #define OK_STR							"ok"
 #define ERR_STR							"err"
+#define PER_STR							"per"
 
 // CONN
 #define STA_STATE_STR					"state"
@@ -165,7 +166,6 @@ static char *ota_reply(const cJSON *root)
 		if (url == NULL)
 			strcat_dynamic(&url, " ");
 
-
 		pair_t pairs[] = {
 				{TYPE_STR, TYPE_OTA_VALUE_STR},
 				{URL_STR, url}
@@ -193,8 +193,10 @@ static char *ota_reply(const cJSON *root)
 
 static char *firmware_reply(const cJSON *root)
 {
+	char *result = NULL;
+
 	if (root == NULL)
-		return NULL;
+		return result;
 
 	cJSON *j_data = cJSON_GetObjectItemCaseSensitive(root, DATA_STR);
 	cJSON *j_size = cJSON_GetObjectItemCaseSensitive(root, SIZE_STR);
@@ -202,31 +204,49 @@ static char *firmware_reply(const cJSON *root)
 	cJSON *j_pkgs = cJSON_GetObjectItemCaseSensitive(root, PKGS_STR);
 
 	if (j_data == NULL || j_size == NULL || j_pkg == NULL || j_pkgs == NULL)
-		return NULL;
+		return result;
 
 	size_t dataSize = cJSON_GetNumberValue(j_size);
 	char *data = malloc(dataSize);
 	size_t pkg = cJSON_GetNumberValue(j_pkg);
 	size_t pkgs = cJSON_GetNumberValue(j_pkgs);
 
-	if (data == NULL || dataSize == 0 || dataSize > BUFSIZE || pkg > pkgs)
-	{
-		printf("%s firmware_reply error\n", TAG);
-		return NULL;
-	}
-
 	size_t i = 0;
 	cJSON *element;
 	cJSON_ArrayForEach(element, j_data)
 	{
-		data[i] = cJSON_GetNumberValue(element);
+		data[i++] = cJSON_GetNumberValue(element);
 	}
 
-	printf("%s pkg/pkgs = %u/%u,pkg size = %u\n", TAG, pkg, pkgs, dataSize);
-	update_service_write_firmware(data, dataSize, pkg, pkgs);
-	free(data);
+	if (update_service_firmware(data, dataSize, pkg, pkgs) != ESP_OK)
+	{
+		pair_t pairs[] = {
+				{TYPE_STR, TYPE_OTA_VALUE_STR},
+				{RESULT_STR, ERR_STR}
+		};
+		result = parsePairs(pairs, 2);
+	}
+	else
+	{
+		pair_t pairs[] = {
+				{TYPE_STR, TYPE_OTA_VALUE_STR},
+				{PER_STR, "0"}
+		};
 
-	return NULL;
+        int totalPer = 100.0 * pkg / pkgs;
+        char digit[4] = {0};
+        snprintf(digit, sizeof(digit) - 1, "%d", totalPer);
+
+        if (pkg == pkgs)
+        	pairs[1].second = "100";
+        else
+        	pairs[1].second = digit;
+
+        result = parsePairs(pairs, 2);
+	}
+
+	free(data);
+	return result;
 }
 
 static char *conn_reply(const cJSON *root)

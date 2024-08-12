@@ -3,51 +3,21 @@
 
 #include <stdint.h>
 
-// Отложенный запуск сервисов
+// Сборка
+//#define DEBUG								1
 
+// Отложенный запуск сервисов
 #define DELAYED_LAUNCH						1000
 
-// TCP
-#define TCP_PORT                       		8888
-#define KEEPALIVE_IDLE              		5
-#define KEEPALIVE_INTERVAL          		5
-#define KEEPALIVE_COUNT             		3
+// Глобальный размер буфера
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
 // WIFI
 #define WIFI_SSID_AT						"ATS"
-#define WIFI_SSID_STA						"realme9Pro"
-#define WIFI_STA_PASSWORD					"01234567"
-//#define WIFI_SSID							"TP-Link_A6BE"
-//#define WIFI_PASSWORD						"41706831"
 
 #define AP_INFO_ARR_SIZE 					10
 #define WIFI_SSID_MAX_LENGH					32
 #define WIFI_PASS_MAX_LENGH					32
-
-// I2C
-#define I2C_MASTER_SCL_IO           		GPIO_NUM_22				   /*!< GPIO number used for I2C master clock */
-#define I2C_MASTER_SDA_IO           		GPIO_NUM_21				   /*!< GPIO number used for I2C master data  */
-#define I2C_MASTER_NUM              		0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
-#define I2C_MASTER_FREQ_HZ          		400000                     /*!< I2C master clock frequency */
-#define I2C_MASTER_TX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_TIMEOUT_MS      			1000
-
-// Адреса i2c устройств
-
-// IOTV
-#define IOTV_DEVICE_NAME					"ID_1"
-
-#define FACTORY_MODE_PIN					GPIO_NUM_0
-
-#define RELE_0_PIN 							GPIO_NUM_2 //s25
-#define RELE_1_PIN 							GPIO_NUM_32
-#define RELE_2_PIN 							GPIO_NUM_33
-
-#define BUTTON_0_PIN 						GPIO_NUM_12
-#define BUTTON_1_PIN 						GPIO_NUM_14
-#define BUTTON_2_PIN 						GPIO_NUM_27
 
 // NVS namespace
 #define NVS_NAMESPACE_WIFI					"WIFI"
