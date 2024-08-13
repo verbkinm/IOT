@@ -10,6 +10,11 @@
 #include <inttypes.h>
 #include "esp_app_desc.h"
 #include "esp_partition.h"
+#include "esp_ota_ops.h"
+#include "esp_netif.h"
+#include "esp_wifi.h"
+#include "esp_wifi_types.h"
+#include "esp_mac.h"
 
 #include "esp_heap_caps.h"
 #include "soc/rtc.h"	//real time clock
@@ -17,6 +22,8 @@
 #include "Local_Lib/local_lib.h"
 
 static const char *dash = "------------------------------------------------------------\n";
+
+static char *network_info(const char *ifkey, esp_mac_type_t mac_type, const char *title);
 
 char *get_project_info(void)
 {
@@ -40,6 +47,108 @@ char *get_project_info(void)
 	snprintf(buf, sizeof(buf), "IDF: %s\n", app->idf_ver);
 	strcat_dynamic(&result, buf);
 	strcat_dynamic(&result, dash);
+
+	return result;
+}
+
+static char *network_info(const char *ifkey, esp_mac_type_t mac_type, const char *title)
+{
+	esp_netif_t *netif = esp_netif_get_handle_from_ifkey(ifkey);
+
+	char ip[16] = {0};
+	char netmask[16] = {0};
+	char dns_server[16] = {0};
+	char gw[16] = {0};
+
+	esp_netif_ip_info_t ip_info;
+	esp_netif_get_ip_info(netif, &ip_info);
+
+	esp_netif_dns_info_t dns;
+	esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns);
+	esp_ip_addr_t ipaddr;
+	memcpy(&ipaddr.u_addr.ip4,  &dns.ip, 4);
+
+	esp_ip4addr_ntoa(&ip_info.ip, ip, 15);
+	esp_ip4addr_ntoa(&ip_info.netmask, netmask, 15);
+	esp_ip4addr_ntoa(&ipaddr.u_addr.ip4, dns_server, 15);
+	esp_ip4addr_ntoa(&ip_info.gw, gw, 15);
+
+	uint8_t mac[6];
+	esp_read_mac(mac, mac_type);
+
+	char mac_str[19] = {0};
+	snprintf(mac_str, sizeof(mac_str) - 1, MACSTR, MAC2STR(mac));
+
+	char *result = calloc(1, 1);
+	char buf[BUFSIZE];
+
+	strcat_dynamic(&result, title);
+	strcat_dynamic(&result, dash);
+
+	snprintf(buf, sizeof(buf),
+			"mac: %s\n"
+			"ip: %s\n"
+			"netmask: %s\n"
+			"dns: %s\n"
+			"gateway: %s\n",
+			mac_str, ip, netmask, dns_server, gw);
+
+	strcat_dynamic(&result, buf);
+
+	if (mac_type == ESP_MAC_WIFI_SOFTAP)
+	{
+		wifi_sta_list_t sta;
+		esp_wifi_ap_get_sta_list(&sta);
+
+		esp_netif_pair_mac_ip_t pair[sta.num];
+		for (int i = 0; i < sta.num; ++i)
+			memcpy(pair[i].mac, sta.sta[i].mac, 6);
+
+		strcat_dynamic(&result, "\nClients:\n");
+		for (int i = 0; i < sta.num; ++i)
+		{
+			esp_netif_dhcps_get_clients_by_mac(netif, sta.num, pair);
+
+			esp_ip4addr_ntoa(&(pair[i].ip), ip, 15);
+			snprintf(buf, sizeof(buf), "%d: "MACSTR" - %s\n", i + 1,
+					MAC2STR(sta.sta[i].mac), ip);
+			strcat_dynamic(&result, buf);
+		}
+	}
+	else if (mac_type == ESP_MAC_WIFI_STA)
+	{
+		wifi_config_t wifi_config;
+		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+
+		char mac_str[18] = {0};
+		char ssid_str[32] = {0};
+
+		sprintf(mac_str, MACSTR, MAC2STR(wifi_config.sta.bssid));
+		sprintf(ssid_str, "%s", wifi_config.sta.ssid);
+
+		strcat_dynamic(&result, "\nConnected to \"");
+		strcat_dynamic(&result, ssid_str);
+		strcat_dynamic(&result, "\" (");
+		strcat_dynamic(&result, mac_str);
+		strcat_dynamic(&result, ")\n");
+	}
+
+	strcat_dynamic(&result, dash);
+
+	return result;
+}
+
+char *get_network_info(void)
+{
+	char *result = calloc(1, 1);
+
+	char *netinf = network_info("WIFI_AP_DEF", ESP_MAC_WIFI_SOFTAP, "\nWIFI AP:\n");
+	strcat_dynamic(&result, netinf);
+	free(netinf);
+
+	netinf = network_info("WIFI_STA_DEF", ESP_MAC_WIFI_STA, "\nWIFI STA:\n");
+	strcat_dynamic(&result, netinf);
+	free(netinf);
 
 	return result;
 }
@@ -177,12 +286,12 @@ char *get_memory_info(void)
 char *get_partition_tabel(void)
 {
 	char *result = calloc(1, 1);
-	char buf[BUFSIZ];
+	char buf[BUFSIZE];
 
 	strcat_dynamic(&result, "\nPartition table:\n");
 	strcat_dynamic(&result, dash);
 
-	snprintf(buf, sizeof(buf), "%-17s Type ST %10s %10s\n", "Label", "Offset", "Length");
+	snprintf(buf, sizeof(buf), "%-18s Type ST %10s %10s\n", "Label", "Offset", "Length");
 	strcat_dynamic(&result, buf);
 
 	esp_partition_iterator_t it;
@@ -193,8 +302,11 @@ char *get_partition_tabel(void)
 	// label is found. Verify if its the same instance as the one found before.
 	for (; it != NULL; it = esp_partition_next(it))
 	{
+		char boot_label = ' ';
 		const esp_partition_t *part = esp_partition_get(it);
-		snprintf(buf, sizeof(buf), "%-17s  %02d  %02d %#010x %#010x\n", part->label, part->type, part->subtype, (int)part->address, (int)part->size);
+		if (part == esp_ota_get_boot_partition())
+			boot_label = '*';
+		snprintf(buf, sizeof(buf), "%c%-17s  %02d  %02d %#010x %#010x\n", boot_label, part->label, part->type, part->subtype, (int)part->address, (int)part->size);
 		strcat_dynamic(&result, buf);
 	}
 	// Release the partition iterator to release memory allocated for it
@@ -220,6 +332,10 @@ char *get_system_info(void)
 	free(str);
 
 	str = get_memory_info();
+	strcat_dynamic(&result, str);
+	free(str);
+
+	str = get_network_info();
 	strcat_dynamic(&result, str);
 	free(str);
 

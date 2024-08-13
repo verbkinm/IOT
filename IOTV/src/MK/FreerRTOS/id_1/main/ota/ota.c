@@ -11,29 +11,6 @@ static const char *TAG = "ota";
 
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
-esp_err_t backtofactory(void)
-{
-	const esp_partition_t* esp_ota_get_boot_partition();
-
-	esp_partition_iterator_t pi = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, "factory") ;
-	if (pi == NULL)
-	{
-		printf("%s Failed to find factory partition\n", TAG);
-		return ESP_FAIL;
-	}
-
-	const esp_partition_t *factory = esp_partition_get(pi);
-	esp_partition_iterator_release(pi);
-
-	if (esp_ota_set_boot_partition(factory) != ESP_OK)
-	{
-		printf("%s Failed to set boot partition\n", TAG);
-		return ESP_FAIL;
-	}
-
-	return ESP_OK;
-}
-
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
 //	switch (evt->event_id) {
@@ -78,7 +55,7 @@ esp_err_t ota_firmware(const char *url)
 	esp_http_client_config_t config = {
 			.url = url,
 			.crt_bundle_attach = esp_crt_bundle_attach,
-			.event_handler = _http_event_handler,
+//			.event_handler = _http_event_handler,
 			.keep_alive_enable = true,
 	};
 

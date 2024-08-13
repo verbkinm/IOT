@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
-// Отложенный запуск сервисов
+// Сборка
+//#define DEBUG								1
 
+// Отложенный запуск сервисов
 #define DELAYED_LAUNCH						1000
 
 // TCP
@@ -16,10 +18,10 @@
 
 // WIFI
 #define WIFI_SSID_AT						"ATS"
-#define WIFI_SSID_STA						"realme9Pro"
-#define WIFI_STA_PASSWORD					"01234567"
-//#define WIFI_SSID							"TP-Link_A6BE"
-//#define WIFI_PASSWORD						"41706831"
+
+#define AP_INFO_ARR_SIZE 					10
+#define WIFI_SSID_MAX_LENGH					32
+#define WIFI_PASS_MAX_LENGH					32
 
 // I2C
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_22				   /*!< GPIO number used for I2C master clock */

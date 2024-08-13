@@ -95,7 +95,6 @@ static char *network_info(const char *ifkey, esp_mac_type_t mac_type, const char
 
 	strcat_dynamic(&result, buf);
 
-
 	if (mac_type == ESP_MAC_WIFI_SOFTAP)
 	{
 		wifi_sta_list_t sta;
@@ -104,8 +103,6 @@ static char *network_info(const char *ifkey, esp_mac_type_t mac_type, const char
 		esp_netif_pair_mac_ip_t pair[sta.num];
 		for (int i = 0; i < sta.num; ++i)
 			memcpy(pair[i].mac, sta.sta[i].mac, 6);
-
-
 
 		strcat_dynamic(&result, "\nClients:\n");
 		for (int i = 0; i < sta.num; ++i)

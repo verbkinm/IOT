@@ -22,14 +22,16 @@
 #include "global/registers.h"
 #include "Local_Lib/local_lib.h"
 #include "service/wifi/wifi.h"
-#include "ota/ota.h"
+#include "service/update/update.h"
+#include "service/tcp/tcp.h"
 
 const static char *TAG = "FACTORY_MODE";
 const static char *task_name = "factory_mode_task";
 
 void factory_mode_service_task(void *pvParameters)
 {
-	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+//	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	glob_set_bits_service_reg(SERVICE_FACTORY_MODE_ON);
 	printf("%s %s start\n", TAG, task_name);
 
@@ -47,17 +49,16 @@ void factory_mode_service_task(void *pvParameters)
 			{
 				printf("%s boot\n", TAG);
 				glob_set_status_err(STATUS_ERROR_BREAK_ALL_SERVICE);
+				tcp_server_task_close_listen();
 
 				while(glob_get_service_reg() != SERVICE_FACTORY_MODE_ON)
 				{
-					printf("%s %s wait stop all service\n", TAG, task_name);
+					printf("%s %s wait stop all service - 0x%x\n", TAG, task_name, (int)glob_get_service_reg());
 					vTaskDelay(1000 / portTICK_PERIOD_MS);
 				}
 
-				if (backtofactory() == ESP_OK)
+				if (update_service_backtofactory() == ESP_OK)
 					esp_restart();
-
-				break;
 			}
 		}
 		vTaskDelay(100 / portTICK_PERIOD_MS);

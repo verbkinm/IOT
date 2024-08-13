@@ -13,7 +13,6 @@
 #include "esp_https_ota.h"
 #include "esp_crt_bundle.h"
 
-esp_err_t backtofactory(void);
 esp_err_t ota_firmware(const char *url);
 
 #endif /* MAIN_OTA_OTA_H_ */

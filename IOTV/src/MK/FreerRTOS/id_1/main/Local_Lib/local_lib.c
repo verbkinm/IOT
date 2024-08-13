@@ -40,54 +40,53 @@ double inRange(double val, double min, double max)
 
 void strmac_to_arr(const char *str, uint8_t mac[6])
 {
-    int arr[6];
-    sscanf(str, "%x:%x:%x:%x:%x:%x*c",
-           &arr[0], &arr[1], &arr[2],
-           &arr[3], &arr[4], &arr[5]);
+	int arr[6];
+	sscanf(str, "%x:%x:%x:%x:%x:%x*c",
+			&arr[0], &arr[1], &arr[2],
+			&arr[3], &arr[4], &arr[5]);
 
-    for (uint8_t i = 0; i < 6; ++i)
-        mac[i] = arr[i];
+	for (uint8_t i = 0; i < 6; ++i)
+		mac[i] = arr[i];
 }
 
 char *url_encode(const char *s)
 {
-    //char rfc3986[256] = {0};
-    //char html5[256] = {0};
+	//char rfc3986[256] = {0};
+	//char html5[256] = {0};
 
-    unsigned char *html5 = calloc(256, 1);
-    char *enc = calloc(strlen(s) * 3 + 1, 1);
-    char *enc_begin = enc;
+	unsigned char *html5 = calloc(256, 1);
+	char *enc = calloc(strlen(s) * 3 + 1, 1);
+	char *enc_begin = enc;
 
-    for (int i = 0; i < 256; i++)
-    {
-        //        rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
-        html5[i] = isalnum( i) || i == '*' || i == '-' || i == '.' || i == '_' ? i : (i == ' ') ? '+' : 0;
-    }
+	for (int i = 0; i < 256; i++)
+	{
+		//        rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
+		html5[i] = isalnum( i) || i == '*' || i == '-' || i == '.' || i == '_' ? i : (i == ' ') ? '+' : 0;
+	}
 
-    for (; *s; s++)
-    {
-        if (html5[(int)*s])
-            *enc = html5[(int)*s];
-        else
-            sprintf(enc, "%%%02X", (unsigned char)*s);
-        while (*++enc);
-    }
+	for (; *s; s++)
+	{
+		if (html5[(int)*s])
+			*enc = html5[(int)*s];
+		else
+			sprintf(enc, "%%%02X", (unsigned char)*s);
+		while (*++enc);
+	}
 
-    free(html5);
-    return(enc_begin);
+	free(html5);
+	return(enc_begin);
 }
 
 char *url_decode(const char *str)
 {
-	char *dStr = (char *) malloc(strlen(str) + 1);
-	memset(dStr, 0, strlen(str) + 1);
+	char *dStr = calloc(1, strlen(str) + 1);
 	char eStr[] = "00"; /* for a hex code */
 
 	strcpy(dStr, str);
 
 	int i;
 
-	for(i=0;i<strlen(dStr);++i)
+	for(i = 0; i < strlen(dStr); ++i)
 	{
 		if(dStr[i] == '%')
 		{
@@ -114,14 +113,12 @@ char *url_decode(const char *str)
 
 double convert_range(double value, double From1, double From2, double To1, double To2)
 {
-      return (value-From1)/(From2-From1)*(To2-To1)+To1;
+	return (value-From1)/(From2-From1)*(To2-To1)+To1;
 }
-
-
 
 void strcat_dynamic(char **str1, const char *str2)
 {
-	if (str1 == NULL || str2 == NULL)
+	if (*str1 == NULL || str2 == NULL)
 		return;
 
 	if (*str1 == NULL)
@@ -141,5 +138,57 @@ void strcat_dynamic(char **str1, const char *str2)
 	free(*str1);
 
 	*str1 = newStr;
+}
+
+void delete_ptr(void **ptr)
+{
+	if (ptr == NULL || *ptr == NULL)
+		return;
+
+	free(*ptr);
+	*ptr = NULL;
+}
+
+char *str_replace(char const *original, char const *pattern, char const *replacement)
+{
+    if (original == NULL || pattern == NULL || replacement == NULL)
+        return NULL;
+
+    const size_t replen = strlen(replacement);
+    const size_t patlen = strlen(pattern);
+    const size_t orilen = strlen(original);
+
+    size_t patcnt = 0;
+    const char *oriptr;
+    const char *patloc;
+
+    // find how many times the pattern occurs in the original string
+    for (oriptr = original; (patloc = strstr(oriptr, pattern)); oriptr = patloc + patlen)
+        patcnt++;
+
+    // allocate memory for the new string
+    size_t const retlen = orilen + patcnt * (replen - patlen);
+    char * const returned = (char *) malloc( sizeof(char) * (retlen + 1) );
+
+    if (returned != NULL)
+    {
+        // copy the original string,
+        // replacing all the instances of the pattern
+        char * retptr = returned;
+        for (oriptr = original; (patloc = strstr(oriptr, pattern)); oriptr = patloc + patlen)
+        {
+            size_t const skplen = patloc - oriptr;
+            // copy the section until the occurence of the pattern
+            strncpy(retptr, oriptr, skplen);
+            retptr += skplen;
+            // copy the replacement
+            strncpy(retptr, replacement, replen);
+            retptr += replen;
+        }
+        // copy the rest of the string.
+        strcpy(retptr, oriptr);
+    }
+
+    return returned;
 }
 

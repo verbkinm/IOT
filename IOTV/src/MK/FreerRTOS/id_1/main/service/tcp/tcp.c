@@ -5,6 +5,8 @@
 const static char *TAG = "TCP";
 const static char *task_name = "tcp_server_task";
 
+static int listen_sock;
+
 static void do_retransmit(const int sock)
 {
 	int len;
@@ -25,13 +27,21 @@ static void do_retransmit(const int sock)
 	} while (len > 0);
 }
 
-const char *tcp_server_task_name()
+void tcp_server_task_close_listen(void)
+{
+	shutdown(listen_sock, SHUT_RDWR); //0
+	close(listen_sock);
+}
+
+const char *tcp_server_task_name(void)
 {
 	return task_name;
 }
 
 void tcp_server_task(void *pvParameters)
 {
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+
 	glob_set_bits_service_reg(SERVICE_TCP_SERVER_ON);
 	printf("%s %s start\n", TAG, task_name);
 
@@ -64,7 +74,7 @@ void tcp_server_task(void *pvParameters)
 			ip_protocol = IPPROTO_IP;
 		}
 
-		int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
+		listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
 		if (listen_sock < 0)
 		{
 			printf("%s Unable to create socket: errno %d\n", TAG, errno);
@@ -121,12 +131,13 @@ void tcp_server_task(void *pvParameters)
 
 		shutdown(client_socket, SHUT_RDWR); //0
 		close(client_socket);
+
 		glob_clear_bits_status_reg(STATUS_TCP_CONNECTED);
 
 		iotv_clear_buf_data();
 
 		CLEAN_UP:
-		close(listen_sock);
+		tcp_server_task_close_listen();
 	}
 	glob_clear_bits_service_reg(SERVICE_TCP_SERVER_ON);
 	printf("%s %s stop\n", TAG, task_name);

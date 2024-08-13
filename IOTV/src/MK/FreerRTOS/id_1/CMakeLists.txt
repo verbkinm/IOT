@@ -5,6 +5,6 @@ cmake_minimum_required(VERSION 3.16)
 # (Not part of the boilerplate)
 # This example uses an extra component for common functions such as Wi-Fi and Ethernet connection.
 
-set (PROJECT_VER "0.1")
+set (PROJECT_VER "0.2")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(iotv_id-1)

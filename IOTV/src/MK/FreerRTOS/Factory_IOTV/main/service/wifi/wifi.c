@@ -377,7 +377,7 @@ void wifi_service_task(void *pvParameters)
 	//	wifi_service_only_ap_init();
 	wifi_service_apsta_init();
 
-//	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
+	glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
 	uint8_t counter = 0;
 	const uint8_t COUNTER_MAX = 10;
@@ -414,6 +414,7 @@ void wifi_service_task(void *pvParameters)
 
 		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
+	wifi_service_deinit();
 	glob_clear_bits_service_reg(SERVICE_WIFI_ON);
 	printf("%s %s stop\n", TAG, task_name);
 	vTaskDelete(NULL);

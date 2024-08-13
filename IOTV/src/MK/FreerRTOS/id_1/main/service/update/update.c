@@ -30,21 +30,18 @@ static const char *task_name = "update_service_task";
 
 static const char *url_update_info = "https://ota.verbkinm.ru/iotv/esp32/id1/update_info.json";
 static const char *default_version = "0.0";
-static const char *error_version = "Ошибка сервера обновлений!";
-
-static char *url_update = NULL;
+static const char *error_version = "Ошибка обновления";
 
 static char available_version[64];
 
 static void chek_update(void);
-static void update(void);
-static bool parse_http_response(const char* content);
+static esp_err_t parse_http_response(const char* content);
 
-static bool parse_http_response(const char* content)
+static esp_err_t parse_http_response(const char* content)
 {
 	cJSON *root = cJSON_Parse(content);
 	if (root == NULL)
-		return false;
+		return ESP_FAIL;
 
 	cJSON *firmware = cJSON_GetObjectItemCaseSensitive(root, "firmware");
 	if (firmware == NULL)
@@ -63,27 +60,22 @@ static bool parse_http_response(const char* content)
 	if (new_url == NULL || strlen(new_url) == 0)
 		goto bad_end;
 
-	if (strlen(new_url) > URL_MAX_LENGH)
+	if (strlen(new_url) >= URL_MAX_LENGH)
 		goto bad_end;
 
-	if (url_update != NULL)
-		free(url_update);
-
-	url_update = calloc(1, strlen(new_url) + 1);
-	if (url_update == NULL)
+	if (nvs_write_update_url(new_url) != ESP_OK)
 		goto bad_end;
 
-	strcpy(url_update, new_url);
 	strcpy(available_version, new_version_from_server);
 
 	cJSON_Delete(root);
-	return true;
+	return ESP_OK;
 
 	bad_end:
 	strcpy(available_version, error_version);
 
 	cJSON_Delete(root);
-	return false;
+	return ESP_FAIL;
 }
 
 static void chek_update(void)
@@ -100,52 +92,47 @@ static void chek_update(void)
 	esp_http_client_fetch_headers(client);
 
 	char *response_buffer = calloc(1, BUFSIZE);
-	esp_http_client_read(client, response_buffer, BUFSIZE);
+	esp_http_client_read(client, response_buffer, BUFSIZE - 1);
 
-	parse_http_response(response_buffer);
+	esp_err_t err = parse_http_response(response_buffer);
 
 	esp_http_client_cleanup(client);
-
-	//	glob_clear_bits_status_reg(STATUS_UPDATE_CHECK);
-
 	free(response_buffer);
+
+	if (err != ESP_OK)
+	{
+		printf("%s %s error parse update\n", TAG, task_name);
+		return;
+	}
 
 	const esp_app_desc_t *esp_app = esp_app_get_description();
 
-	printf("available_version - %s\n", available_version);
+	printf("%s %s available_version - %s\n", TAG, task_name, available_version);
 	if (strcmp(available_version, esp_app->version) > 0)
 	{
-		printf("new version available - %s\n", available_version);
-		if (nvs_write_update_flag(NVS_VALUE_UPDATE_YES) == ESP_OK
-				&& nvs_write_update_url(url_update) == ESP_OK)
+		printf("%s %s new version available - %s\n", TAG, task_name,available_version);
+
+		if (nvs_write_update_flag(NVS_VALUE_UPDATE_YES) == ESP_OK)
 		{
-			update();
+			if (update_service_backtofactory() == ESP_OK)
+				esp_restart();
 		}
 		else
 			nvs_write_update_flag(NVS_VALUE_UPDATE_NO);
 	}
 }
 
-static void update(void)
+esp_err_t update_service_backtofactory(void)
 {
-	const esp_partition_t* partition = esp_ota_get_boot_partition();
+	const esp_partition_t *part = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
 
-	printf("current partition label: %s\n", partition->label);
-
-	if (strcmp(partition->label, "factory") != 0)
+	if (esp_ota_set_boot_partition(part) != ESP_OK)
 	{
-		if (backtofactory() == ESP_OK)
-			esp_restart();
+		printf("%s Failed to set boot partition\n", TAG);
+		return ESP_FAIL;
 	}
 
-	if (ota_firmware(url_update) == ESP_OK)
-	{
-		if (nvs_write_update_flag(0) == ESP_OK)
-		{
-			printf("reboting...");
-			esp_restart();
-		}
-	}
+	return ESP_OK;
 }
 
 const char *update_service_task_name()

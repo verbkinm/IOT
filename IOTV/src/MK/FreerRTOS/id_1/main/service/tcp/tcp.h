@@ -15,4 +15,6 @@
 void tcp_server_task(void *pvParameters);
 const char *tcp_server_task_name(void);
 
+void tcp_server_task_close_listen(void);
+
 #endif /* MAIN_NET_TCP_H_ */

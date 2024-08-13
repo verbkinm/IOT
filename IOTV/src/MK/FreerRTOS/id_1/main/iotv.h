@@ -19,6 +19,6 @@ void iotv_data_recived(const char *data, int size, int sock);
 
 void iotv_clear_buf_data(void);
 
-iotv_obj_t*iotv_get(void);
+iotv_obj_t *iotv_get(void);
 
 #endif /* MAIN_IOTV_H_ */

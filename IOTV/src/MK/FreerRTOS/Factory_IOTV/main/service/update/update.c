@@ -30,8 +30,6 @@ static const char *task_name = "update_service_task";
 
 esp_err_t update_service_backtofactory(void)
 {
-	const esp_partition_t* esp_ota_get_boot_partition();
-
 	const esp_partition_t *part = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
 
 	if (esp_ota_set_boot_partition(part) != ESP_OK)
@@ -114,13 +112,11 @@ void update_service_task(void *pvParameters)
 			char *url = NULL;
 			if (nvs_read_update_url(&url) == ESP_OK && url != NULL)
 			{
+				nvs_write_update_flag(NVS_VALUE_UPDATE_NO);
 				if (ota_firmware(url) != ESP_OK)
 					update_service_backtofactory();
 				else
-				{
-					nvs_write_update_flag(0);
 					esp_restart();
-				}
 			}
 		}
 
